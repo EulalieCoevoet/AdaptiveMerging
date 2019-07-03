@@ -101,11 +101,17 @@ public class RigidBody {
     /** list of contacts present with this rigidbody,when both bodies aren't sleeping. cleared after every timestep**/
     public ArrayList<RigidBody> contact_list = new ArrayList<RigidBody>();
     
+    
+    /** list of springs attached to the body**/
+    public ArrayList<Spring> springs = new ArrayList<Spring>();
+    
     /** determines whether or not a body is bound by pendulum constraint*/
     public boolean pendulum_body;
     
     /** keeps track of the activity of the last N steps, if it is false, means that should be asleep, if true, should be awake */  
     public ArrayList<Boolean> active_past = new ArrayList<Boolean>(0);
+    
+    
     
     /**
      * Creates a new rigid body from a collection of blocks
@@ -454,6 +460,7 @@ public class RigidBody {
     int myListID = -1;
 
 	public boolean created = false;
+
     
     /**
      * Deletes all display lists.

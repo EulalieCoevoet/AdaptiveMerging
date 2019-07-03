@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+
 import javax.vecmath.Color3f;
 
 /**
@@ -31,6 +32,10 @@ public class ImageBlocker {
      * the bodies identified in the image
      */
     public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
+    /**
+     * the springs identified in the image
+     */
+    public ArrayList<Spring> springs = new ArrayList<Spring>();
 
     /**
      * Creates a set of rigid bodies form the given image
@@ -54,21 +59,62 @@ public class ImageBlocker {
                     visited[x][y] = true;
                     getColour( colour, x, y );
                     if ( isWhite( colour ) ) continue;
-                    // this is part of a new body!
-                    ArrayList<Block> blocks = new ArrayList<Block>();
-                    ArrayList<Block> boundaryBlocks = new ArrayList<Block>();
-                    searchConnected( x, y, blocks, boundaryBlocks );
-                    RigidBody body = new RigidBody( blocks, boundaryBlocks );
-                    bodies.add( body );
+                    if (!isRed(colour)) {
+	                // this is part of a new body!
+                    	ArrayList<Block> blocks = new ArrayList<Block>();
+	                	ArrayList<Block> boundaryBlocks = new ArrayList<Block>();
+	                	searchConnected( x, y, blocks, boundaryBlocks );
+	                	RigidBody body = new RigidBody( blocks, boundaryBlocks );
+	                	
+	                	bodies.add( body );
+                    }else { 
+                    	//we found a part of a string... find its endpoints to create a new spring. 
+                    	ArrayList<Block> blocks = new ArrayList<Block>();
+                    	searchSpring(x, y, blocks);
+                    	Spring spring = new Spring(blocks);
+                    	springs.add(spring);
+                    }
                 }
             }
         } catch ( Exception e ) {
             System.err.println("Problems processing image "+ filename );
             e.printStackTrace();
         }
+        
+        for (Spring s: springs) {
+        	s.findBodies(bodies);
+        }
     }
 
-    /** Helper class to keep track of coordinate locations */
+    private void searchSpring(int x, int y, ArrayList<Block> blocks) {
+    	 List<Coord> Q = new LinkedList<Coord>();
+         visited[x][y] = true;
+         Q.add( new Coord(x,y) );
+         Color3f colour = new Color3f();
+         int counter = 0;
+       
+         while ( ! Q.isEmpty() ) {            
+             Coord p = Q.remove(0);
+             x = p.x;
+             y = p.y;
+             getColour( colour, x, y );
+             if ( isWhite(colour)|| !isRed(colour) ) continue;
+   
+             Block b = new Block( y, x, colour );
+             blocks.add( b );
+             // search our 8 neighbours for connected components
+             for ( int i = -1; i < 2; i++ ) {
+                 for ( int j = -1; j < 2; j++ ) {
+                     if ( x+i >= 0 && x+i < width && y+j >= 0 && y+j < height && ! visited[x+i][y+j]) {       
+                         Q.add( new Coord(x+i, y+j) );  
+                         visited[x+i][y+j] = true;
+                     }
+                 }
+             }            
+         }        
+	}
+
+	/** Helper class to keep track of coordinate locations */
     class Coord {
         int x, y;
         Coord( int x, int y ) {
@@ -91,7 +137,8 @@ public class ImageBlocker {
             x = p.x;
             y = p.y;
             getColour( colour, x, y );
-            if ( isWhite(colour) ) continue;
+            if ( isWhite(colour) ||isRed(colour) ) continue;
+       
             Block b = new Block( y, x, colour );
             blocks.add( b );
             if ( isBoundary( x, y ) ) {
@@ -108,8 +155,14 @@ public class ImageBlocker {
             }            
         }        
     }
-    
-    /**
+
+
+	private boolean isRed(Color3f colour) {
+        final Color3f red= new Color3f(1,0,0);
+        return colour.epsilonEquals(red, epsilon );
+	}
+
+	/**
      * Checks if this block is on the boundary.  
      * Boundary blocks have at least one white neighbour. 
      * @param x
