@@ -95,11 +95,13 @@ public class RigidBody {
     public double rho;
     
 
-    /** list of contacts present with this rigidbody,when both bodies aren't sleeping. **/
-    public ArrayList<Contact> sleeping_contact_list = new ArrayList<Contact>();
 
-    /** list of contacts present with this rigidbody,when both bodies aren't sleeping. cleared after every timestep**/
-    public ArrayList<RigidBody> contact_list = new ArrayList<RigidBody>();
+    /** list of contacting bodies present with this rigidbody. cleared after every timestep, unless the contact was between two sleeping bodies**/
+    public ArrayList<Contact> contact_list = new ArrayList<Contact>();
+
+    
+    /** list of contacting bodies present with this rigidbody. cleared after every timestep, unless the contact was between two sleeping bodies**/
+    public ArrayList<BodyContact> contact_body_list = new ArrayList<BodyContact>();
     
     
     /** list of springs attached to the body**/
@@ -109,9 +111,17 @@ public class RigidBody {
     public boolean pendulum_body;
     
     /** keeps track of the activity of the last N steps, if it is false, means that should be asleep, if true, should be awake */  
-    public ArrayList<Boolean> active_past = new ArrayList<Boolean>(0);
+    public ArrayList<Boolean> active_past = new ArrayList<Boolean>();
+    
+    /** a list of the total contact forces acting on this body in the last N steps  before sleeping or merging   */
+    public ArrayList<Vector2d> contactForces = new ArrayList<Vector2d>();
+    
+    /** a list of the total contact torques acting on this body in the last N steps  before sleeping or merging   */
+    public ArrayList<Double> contactTorques = new ArrayList<Double>();
     
     
+    /** the total contact forces acting on it at this current time step, in world coordinates**/
+    public Vector2d contactForce = new Vector2d();
     
     /**
      * Creates a new rigid body from a collection of blocks
@@ -239,9 +249,10 @@ public class RigidBody {
         double epsilon_1 = CollisionProcessor.sleepingThreshold.getValue();
     	double epsilon_2 =  CollisionProcessor.wakingThreshold.getValue();
        // this.set_activity(epsilon_1, epsilon_2);
+    	
+    	
         if ( !pinned ) {          
-            // TODO: Objective 1: use torques to advance the angular state of the rigid body
-           
+
             
             double delta_vx =force.x * dt/massLinear;
             double delta_vy =force.x * dt/massLinear;
@@ -401,7 +412,7 @@ public class RigidBody {
     }
     
     public void set_activity_contact_graph(double sleeping_threshold) {
-    	double k = this.getKineticEnergy();
+    	double k = this.getMetric();
 //TODO: figure out this bug that makes everything slide into itself when the bodies are asleep. 
     	/*if (this.woekn) {
     		this.active = 0;
@@ -434,7 +445,11 @@ public class RigidBody {
     
     }
     
-    /**
+    private double getMetric() {
+    	return 0.5 *  v.lengthSquared() + 0.5 * omega*omega; 
+	}
+
+	/**
      * Resets this rigid body to its initial position and zero velocity, recomputes transforms
      */
     public void reset() {
@@ -447,8 +462,8 @@ public class RigidBody {
         transformB2W.set( theta, x );
         transformW2B.set( transformB2W );
         transformW2B.invert();
-        sleeping_contact_list.clear();
         contact_list.clear();
+        contact_body_list.clear();
         active = 0;
         active_past.clear();
     }

@@ -47,6 +47,21 @@ public class RigidBodySystem {
     
     DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
     
+    /**
+     * Stiffness of  spring
+     */
+    public DoubleParameter spring_k = new DoubleParameter("spring stiffness", 400, 1, 1e4 );
+    
+    /**
+     * Viscous damping coefficient for the  spring
+     */
+    public DoubleParameter spring_c= new DoubleParameter("spring damping", 0, 0, 1000 );
+    
+    /**
+     * Viscous damping coefficient for the  spring
+     */
+    public static IntParameter springLength= new IntParameter("spring rest length", 1, 1, 100 );
+    
     
     
     /**
@@ -73,7 +88,8 @@ public class RigidBodySystem {
             if ( b.pinned ) continue;
             b.omega += rand.nextDouble()*2-1;
             b.v.x += rand.nextDouble()*2-1;
-            b.v.y += rand.nextDouble()*2-1;                
+            b.v.y += rand.nextDouble()*2-1;    
+  
         }
     }
     
@@ -110,9 +126,20 @@ public class RigidBodySystem {
                 force.scale( b.massLinear * gravityAmount.getValue() );
                 // gravity goes directly into the accumulator!  no torque!
                 b.force.add( force );
+               
             }
         }
         
+        //deal with springs
+       for (RigidBody b: bodies){
+	        for (Spring s: b.springs) {
+	        	s.computeVelocities();
+	        	s.updateP2();
+	        	s.apply(spring_k.getValue(), spring_c.getValue());
+	        }
+       }
+       
+       
         
         
         if ( processCollisions.getValue() ) {
@@ -120,6 +147,53 @@ public class RigidBodySystem {
         	
             collisionProcessor.processCollisions( dt );
             
+        }
+        
+        
+        if (enableMerging.getValue()) {
+        	//add all contact forces to the contactForce field in each rigid Body
+        	for (RigidBody b: bodies) {
+            	//TODO: figure out how to add contact Forces to each other
+            	//contact normal goes from body 1 to body 2. 
+            	
+            	for (Contact c: b.contact_list) {
+            		Vector2d contactForce = new Vector2d(); //total accumulated contactForce of all contacts acting on this body
+            		double contactTorque = 0; //total accumulated contact Torque of all contacts acting on this body.
+            		Vector2d normalComp = new Vector2d(c.normal);
+            		if (b.index ==c.body2.index) {
+            			//b is body 2. normal goes from the other body to this body. 
+            			normalComp.scale(-c.lamdas[0]);
+            		}else {
+            			normalComp.scale(c.lamdas[0]);
+            		}
+            			
+        			Vector2d tangeantComp = new Vector2d(c.normal.y, -c.normal.x); tangeantComp.scale(c.lamdas[1]);
+        			Vector2d xAxis = new Vector2d(1, 0);
+        			Vector2d yAxis = new Vector2d(0, 1);
+        			
+        			Vector2d bContactForce = new Vector2d();
+        			double bContactTorque = 0;
+        			bContactForce.x = normalComp.dot(xAxis) + tangeantComp.dot(xAxis);
+        			bContactForce.y = normalComp.dot(yAxis) + tangeantComp.dot(yAxis);
+        			
+        			Vector2d r = new Vector2d(c.contactW);
+        			r.sub(b.x);
+        			Vector2d ortho_r = new Vector2d(r.y, - r.x);
+        			bContactTorque = bContactForce.dot(ortho_r);
+        			
+        			contactForce.add(bContactForce);
+        			contactTorque += bContactTorque;
+        		
+            		
+            		b.contactForces.add(contactForce);
+            		b.contactTorques.add(contactTorque);
+            		if (b.contactForces.size() > CollisionProcessor.sleep_accum.getValue()) {
+            			b.contactForces.remove(0);
+            			b.contactTorques.remove(0);
+            		}
+            	}
+        	}
+        
         }
         if (use_pendulum.getValue()) {
         	Point2d origin = new Point2d(Pendulum.origin_x.getValue(), Pendulum.origin_y.getValue());
@@ -225,8 +299,12 @@ public class RigidBodySystem {
         if ( drawBodies.getValue() ) {
             for ( RigidBody b : bodies ) {
                 b.display( drawable );
+                for (Spring s : b.springs) {
+                	s.displayConnection(drawable);
+                }
             }
         }
+        
         gl.glLineWidth(1);
         if ( drawBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {
@@ -246,8 +324,11 @@ public class RigidBodySystem {
         if ( drawContactGraph.getValue() ) {
         	if (CollisionProcessor.use_contact_graph.getValue()) {
 	            for (RigidBody b : bodies) {
-	            	for (RigidBody c: b.contact_list) {
+	            	/*for (RigidBody c: b.contact_body_list) {
 	            		b.displayConnection(drawable, c);
+	            	}*/
+	            	for (Contact c:b.contact_list) {
+	            		c.displayConnection(drawable);
 	            	}
 	            } 
         	} 
@@ -297,6 +378,7 @@ public class RigidBodySystem {
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
     private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", true );
     private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
+    public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true );
     public BooleanParameter use_pendulum = new BooleanParameter( "create pendulum", false );
     public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
@@ -328,12 +410,18 @@ public class RigidBodySystem {
         vfp.add( cp );
         
         vfp.add( processCollisions.getControls() );
+        vfp.add( enableMerging.getControls() );
         vfp.add( collisionProcessor.getControls() );
         
         vfp.add( use_pendulum.getControls() );
         vfp.add( useGravity.getControls() );
         vfp.add( gravityAmount.getSliderControls(false) );
         vfp.add( gravityAngle.getSliderControls(false) );
+        
+        vfp.add(spring_k.getSliderControls(false));
+        vfp.add(spring_c.getSliderControls(false));
+        vfp.add(springLength.getSliderControls());
+        
         
         VerticalFlowPanel vfpv_2 = new VerticalFlowPanel();
         vfpv_2.setBorder( new TitledBorder("New body creation controls") );

@@ -39,7 +39,7 @@ public class Contact {
     
     Block block2;
     
-    /** Contact normal in world coordinates */
+    /** Contact normal in world coordinates. GOES FROM BODY1 to BODY2*/
     Vector2d normal = new Vector2d();
     
     /** Position of contact point in world coordinates */
@@ -55,6 +55,11 @@ public class Contact {
     //vector points from body 2 to body 1, magnitude is the amount of overlap.
     double constraint_violation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
     
+    Double[] lamdas = new Double[2];
+    
+    Vector2d relativeVelocity = new Vector2d();
+    
+    double relativeAngularVelocity = 0;
     /**
      * Creates a new contact, and assigns it an index
      * @param body1
@@ -68,7 +73,7 @@ public class Contact {
         this.contactW.set( contactW );
         this.normal.set( normal );        
         index = nextContactIndex++;        
-        // TODO: Objective 3: you will want to add code here to compute and store the contact Jacobian
+      
         Vector2d contact_point = new Vector2d(contactW);
 		Vector2d radius_i_body_1 = new Vector2d(body1.x);
 		Vector2d radius_i_body_2 = new Vector2d(body2.x);
@@ -111,6 +116,14 @@ public class Contact {
 	    //direction.scale(magnitude);
 	  
 		constraint_violation = penetration;
+		
+		relativeVelocity.sub(body2.v, body1.v);
+		relativeAngularVelocity = body2.omega - body1.omega;
+    }
+    
+    public double getRelativeMetric() {
+    	double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
+    	return k;
     }
     
     

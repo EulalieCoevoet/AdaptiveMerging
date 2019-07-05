@@ -56,25 +56,35 @@ public class CollisionProcessor {
         contacts.clear();
         Contact.nextContactIndex = 0;
         //remember passive contacts
-        if (CollisionProcessor.use_contact_graph.getValue()) {
+        if (CollisionProcessor.use_contact_graph.getValue() || RigidBodySystem.enableMerging.getValue()) {
         	for(RigidBody b :bodies) {
-        		ArrayList<RigidBody> new_contact_list = new ArrayList<RigidBody>();
+        		ArrayList<BodyContact> new_contact_body_list = new ArrayList<BodyContact>();
         	//	if (b.active_past.size()  < sleep_accum.getValue() ) {
-        			b.visited = false;
-        			b.woken_up = false;
+        		b.visited = false;
+        		b.woken_up = false;
         	//	}
         		
-        		for (RigidBody c: b.contact_list) {
-        			c.visited = false;
+        		for (BodyContact c: b.contact_body_list) {
+        			c.otherBody.visited = false;
         			if (b.active == 2) {
-        				if (c.active == 2) {
-        					new_contact_list.add(c);
+        				if (c.otherBody.active == 2) {
+        					new_contact_body_list.add(c);
         				}
+        			}
+        		}
+        		b.contact_body_list.clear();
+        		b.contact_body_list.addAll(new_contact_body_list);
+        		
+        		//clear all contacts between two non sleeping bodies
+        		ArrayList<Contact> new_contact_list = new ArrayList<Contact>();
+        		for (Contact c: b.contact_list) {
+        			if (c.body1.active == 2 && c.body2.active==2) {
+        				new_contact_list.add(c);
+        				
         			}
         		}
         		b.contact_list.clear();
         		b.contact_list.addAll(new_contact_list);
-        		
         	}
         		
         }
@@ -331,6 +341,7 @@ public class CollisionProcessor {
         		lamda.set(2*contact_i.index,  lamda_i);
         		else
         		lamda.set(2*contact_i.index + 1, lamda_i);
+
         		
         		//Now we still need to do the velocity update.
         		// for that we must compute T = MinvJT TIMES deltaLamda
@@ -391,6 +402,19 @@ public class CollisionProcessor {
         	lamdas[0] = lamda.get(2*c.index);
         	lamdas[1] = lamda.get(2*c.index+1);
         	last_timestep_map.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), lamdas);
+        	
+        	c.lamdas = lamdas;
+        	/*Vector2d normal = new Vector2d(c.normal); normal.scale(lamdas[0]);
+        	Vector2d tangeant = new Vector2d(c.normal.y, -c.normal.x); tangeant.scale(lamdas[1]);
+        	
+        	
+        	        	
+        	Vector2d xAxis = new Vector2d(1, 0);
+        	Vector2d yAxis = new Vector2d(0, 1);
+        	
+        	c.contactForce = new Vector2d(normal.dot(xAxis), normal.dot(yAxis));
+        	c.contactTorque = c.contactForce*()
+        	*/
         }
       
        
@@ -758,9 +782,10 @@ public class CollisionProcessor {
 			hop--;
 			body1.visited = true;
 			body1.woken_up = true;
-			for (RigidBody c: body1.contact_list) {
-					if (!c.pinned)
-					wake_neighbors(c, hop);
+		//	body1.active_past.add(true); makes bodies oscillate between sleeping and waking
+			for (BodyContact c: body1.contact_body_list) {
+					if (!c.otherBody.pinned)
+					wake_neighbors(c.otherBody, hop);
 				
 				
 			}
@@ -831,12 +856,32 @@ public class CollisionProcessor {
             
             // simple option... add to contact list...
             contacts.add( contact );
-            if (!body1.contact_list.contains(body2)) {
-            	body1.contact_list.add(body2);
+            
+            
+            if (RigidBodySystem.enableMerging.getValue()) {
+	            BodyContact bc1 = new BodyContact(body2);
+	            BodyContact bc2 = new BodyContact(body1);
+	            
+	            if (bc1.alreadyExists(body1.contact_body_list)) {
+	            	body1.contact_body_list.add(bc1);
+	            	bc1.relativeVelHistory.add(contact.getRelativeMetric());
+	              	if (bc1.relativeVelHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+	            		bc1.relativeVelHistory.remove(0);
+	            	}
+	              	
+	            }
+	            if (bc2.alreadyExists(body2.contact_body_list)) {
+	            	body2.contact_body_list.add(bc2);
+	            	bc2.relativeVelHistory.add(contact.getRelativeMetric());
+	            	if (bc2.relativeVelHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+	            		bc2.relativeVelHistory.remove(0);
+	            	}
+	            }
+	            //autoMerge(bc1, bc2, body1, body2);
             }
-            if (!body2.contact_list.contains(body1)) {
-            	body2.contact_list.add(body1);
-            }
+            
+            body1.contact_list.add(contact);
+            body2.contact_list.add(contact);
             
             
             
@@ -868,7 +913,28 @@ public class CollisionProcessor {
         }
     }
    
-    /** Stiffness of the contact penalty spring */
+    private void autoMerge(BodyContact bc1, BodyContact bc2, RigidBody body1, RigidBody body2) {
+    	//goes through the Body Contact histories to determine if they should be merged or not.
+    	boolean count = true;
+    	for (Double velHist: bc1.relativeVelHistory) {
+    		if ( velHist < CollisionProcessor.sleepingThreshold.getValue()) {
+    			count = false;
+    		}
+    	}
+    	if (count = true) {
+    		// merge both bodies into a collection
+    		RigidCollection collection = new RigidCollection(body1);
+    		collection.addBody(body2);
+    		this.bodies.remove(body1);
+    		this.bodies.remove(body2);
+    		this.bodies.add(collection);
+    		
+    	}
+		// TODO Auto-generated method stub
+		
+	}
+
+	/** Stiffness of the contact penalty spring */
     private DoubleParameter contactSpringStiffness = new DoubleParameter("penalty contact stiffness", 1e3, 1, 1e5 );
     
 
@@ -915,7 +981,7 @@ public class CollisionProcessor {
     public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 15, 0, 30);
 
     
-    public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", true );
+    public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", false );
     
     public static DoubleParameter impulseTolerance = new DoubleParameter("impulse tolerance", 100, 0, 2000 );
     

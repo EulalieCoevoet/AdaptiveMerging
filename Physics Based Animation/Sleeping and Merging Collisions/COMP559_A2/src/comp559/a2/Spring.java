@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+
 
 public class Spring {
 
@@ -18,95 +22,50 @@ public class Spring {
     RigidBody b1;
     
     Point2d p2;
+    Point2d p2b; // coordinate of second spring in body frame
     Vector2d v2 = new Vector2d();
-    RigidBody b2;
-    /** Spring stiffness, sometimes written k_s in equations */
-    public static double k = 1;
-    /** Spring damping (along spring direction), sometimes written k_d in equations */
-    public static double c = 1;
-    /** Rest length of this spring */
-    double l0 = 0;
+
+    double l0 = 1;
+
+
     
-    public Spring(ArrayList<Block> blocks) {
+    public Spring(Point2d p, RigidBody body) {
+		// TODO Auto-generated constructor stub
+    	this.l0 = RigidBodySystem.springLength.getValue();
+    	this.p1 = new Point2d(p.x, p.y - l0);
+    	this.p2 = new Point2d(p);
+    	this.b1 = body;
+    	this.p2b = new Point2d(p);
+    	b1.transformW2B.transform(p2b);
     	
-    	//find outermost blocks
-    	this.blocks = blocks;
-    	findEndpoints(blocks);
-    	computeRestLength();
-    	
-    
-    	return;
+	}
+
+    public void updateP2() {
+    	this.p2 = new Point2d(this.p2b);
+    	this.l0 = RigidBodySystem.springLength.getValue();
+    	this.b1.transformB2W.transform(p2);
     }
-    
-    public void findBodies(ArrayList<RigidBody> bodies) {
-		// TODO Auto-generated method stub
-    	
-    	for (RigidBody b: bodies) {
-    		if (b.blocks.contains(block1)) {
-    			b1 = b;
-    		}else if(b.blocks.contains(block2)) {
-    			b2 = b;
-    		}
-    		
-    	}
-    	
-		
-	}
-
-	private void findEndpoints(ArrayList<Block> blocks) {
-		// TODO Auto-generated method stub
-		int minimum_row = 1000000000;//very large number
-		Block highest_block = null;//
-		
-		int maximum_row = 0;//very small number
-		Block lowest_block = null;//
-    	for (Block b: blocks) {
-			if (b.i < minimum_row) {
-				highest_block = b;
-				minimum_row = b.i;
-			}
-			if (b.i >  minimum_row) {
-				lowest_block = b;
-				maximum_row = b.i;
-			}
-		}
-    	block1 = highest_block; block2 = lowest_block;
-    	p1 = new Point2d(block1.j, block1.i);
-    	p2 = new Point2d(block2.j, block2.i);
-
-	}
 
     
-    private void computeVelocities() {
-		// TODO Auto-generated method stub
+    public void computeVelocities() {
+	
 		double r1 = p1.distance(b1.x);
-		double r2 = p2.distance(b2.x);
+
 		
 		double w1 = b1.omega;
-		double w2 = b2.omega;
-		
-		v1 = new Vector2d(b1.v);
-		Vector2d temp = new Vector2d(w1 * v1.y, -w1 * v1.x);
-		v1.add(temp);
-		
-		v2 = new Vector2d(b2.v);
-		temp = new Vector2d(w2 * v2.y, -w2 * v2.x);
+
+		v2 = new Vector2d(b1.v);
+		Vector2d temp = new Vector2d(w1 * v2.y, -w1 * v2.x);
 		v2.add(temp);
 		
 	}
 
-	/**
-     * Computes and sets the rest length based on the original position of the two particles 
-     */
-    public void computeRestLength() {
-        l0 = p1.distance( p2 );
-    }
-    
+
     
     /**
      * Applies the spring force by adding a force and a torque to both bodies
      */
-    public void apply() {
+    public void apply(double k, double c) {
 
     	
     	Vector2d displacement, velocity, spring_force;
@@ -119,20 +78,35 @@ public class Spring {
     	velocity.sub(v1,  v2);
     	
     	spring_force_scale = 
-    			- (k * (displacement.length() - l0) + 	c * (velocity.dot(displacement) / displacement.length())) 
+    			- (k * (displacement.length()  - l0) + 	c * (velocity.dot(displacement) / displacement.length())) 
     			/ displacement.length();
     	   	
     	spring_force = new Vector2d(displacement);	
     		
-    	spring_force.scale(spring_force_scale);
+    	spring_force.scale(-spring_force_scale);
     		
     	//adding the forces
-    	b1.applyContactForceW(p1, spring_force);
-    	spring_force.scale(-1);
-    	b2.applyContactForceW(p2, spring_force);
+    	b1.applyContactForceW(p2, spring_force);
+
     	
     	
-    	
+    }
+    
+    /**
+     * Draws the spring endpoints with a red line through them
+     * @param drawable
+     */
+    public void displayConnection( GLAutoDrawable drawable ) {
+        GL2 gl = drawable.getGL().getGL2();
+        // draw a line between the two bodies but only if they're both not pinned
+        
+            gl.glLineWidth(2);
+            gl.glColor4f(1, 0 ,0, 0.5f);
+            gl.glBegin( GL.GL_LINES );
+            gl.glVertex2d(p1.x, p1.y);
+            gl.glVertex2d(p2.x, p2.y);
+            gl.glEnd();
+       
     }
     
 }
