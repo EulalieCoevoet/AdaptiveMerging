@@ -101,7 +101,7 @@ public class RigidBody {
 
     
     /** list of contacting bodies present with this rigidbody. cleared after every timestep, unless the contact was between two sleeping bodies**/
-    public ArrayList<BodyContact> contact_body_list = new ArrayList<BodyContact>();
+    public ArrayList<BodyContact> body_contact_list = new ArrayList<BodyContact>();
     
     
     /** list of springs attached to the body**/
@@ -183,19 +183,20 @@ public class RigidBody {
      * @param body
      */
     public RigidBody( RigidBody body ) {
-        blocks = body.blocks;
-        boundaryBlocks = body.boundaryBlocks;
+        blocks = new ArrayList<Block>(body.blocks);
+        boundaryBlocks = new ArrayList<Block>(body.boundaryBlocks);
         massLinear = body.massLinear;
         massAngular = body.massAngular;
         x0.set( body.x0 );
         x.set( body.x );
+        v.set(body.v);
         theta = body.theta;
         omega = body.omega;
         // we can share the blocks and boundary blocks...
         // no need to update them as they are in the correct body coordinates already        
         updateTransformations();
         // We do need our own bounding volumes!  can't share!
-        root = new BVNode( boundaryBlocks, this );        
+        root = new BVNode( boundaryBlocks, body);        
         pinned = body.pinned;
         minv = body.minv;
         jinv = body.jinv;
@@ -374,14 +375,17 @@ public class RigidBody {
      * @return true if intersection
      */
     public boolean intersect( Point2d pW ) {
-        if ( root.boundingDisc.isInDisc( pW ) ) {
-            Point2d pB = new Point2d();
-            transformW2B.transform( pW, pB );
-            for ( Block b : blocks ) {
-                if ( b.pB.distanceSquared( pB ) < Block.radius * Block.radius ) return true;
-            }
-        }
+    	
+    		if (root.boundingDisc.isInDisc( pW ) ) {
+            	Point2d pB = new Point2d();
+            	transformW2B.transform( pW, pB );
+            	for ( Block b : blocks ) {
+                	if ( b.pB.distanceSquared( pB ) < Block.radius * Block.radius ) return true;
+            	}
+        	}
+    	
         return false;
+    	
     }
     
 /* Input is a threshold value that determines if the particle is active or not. Will need to input a second threshold value when introducing transitional states.
@@ -413,11 +417,7 @@ public class RigidBody {
     
     public void set_activity_contact_graph(double sleeping_threshold) {
     	double k = this.getMetric();
-//TODO: figure out this bug that makes everything slide into itself when the bodies are asleep. 
-    	/*if (this.woekn) {
-    		this.active = 0;
-    		return;
-    	} */ 
+
     	if (k < sleeping_threshold) {
     		//particle is inactive
     		this.active_past.add(false);
@@ -463,9 +463,10 @@ public class RigidBody {
         transformW2B.set( transformB2W );
         transformW2B.invert();
         contact_list.clear();
-        contact_body_list.clear();
+        body_contact_list.clear();
         active = 0;
         active_past.clear();
+        
     }
     
     /** Map to keep track of display list IDs for drawing our rigid bodies efficiently */
@@ -513,7 +514,7 @@ public class RigidBody {
                 myListID = ID;
                 gl.glCallList(myListID);
             }
-        } else {
+    }else {
             gl.glCallList(myListID);
         }
         gl.glPopMatrix();

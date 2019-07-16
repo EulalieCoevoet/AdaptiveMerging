@@ -102,8 +102,8 @@ public class Contact {
 		block1 = b1;
 		block2 = b2;
 		
-		bvn1 = body1.root;
-		bvn2 = body2.root;
+		//bvn1 = body1.root;
+		//bvn2 = body2.root;
 		
 		final Point2d b1_w = new Point2d();
 		final Point2d b2_w = new Point2d();

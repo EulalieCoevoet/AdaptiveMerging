@@ -50,7 +50,7 @@ public class RigidBodySystem {
     /**
      * Stiffness of  spring
      */
-    public DoubleParameter spring_k = new DoubleParameter("spring stiffness", 400, 1, 1e4 );
+    public DoubleParameter spring_k = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
     
     /**
      * Viscous damping coefficient for the  spring
@@ -133,9 +133,11 @@ public class RigidBodySystem {
         //deal with springs
        for (RigidBody b: bodies){
 	        for (Spring s: b.springs) {
-	        	s.computeVelocities();
 	        	s.updateP2();
+	        	s.computeVelocities();
+	        	
 	        	s.apply(spring_k.getValue(), spring_c.getValue());
+	        	s.updateP2();
 	        }
        }
        
@@ -148,10 +150,10 @@ public class RigidBodySystem {
             collisionProcessor.processCollisions( dt );
             
         }
-        
+
         
         if (enableMerging.getValue()) {
-        	//add all contact forces to the contactForce field in each rigid Body
+        	//add all contact forces to the contactForce field in each rigid Body (to wake up body)
         	for (RigidBody b: bodies) {
             	//TODO: figure out how to add contact Forces to each other
             	//contact normal goes from body 1 to body 2. 
@@ -201,6 +203,7 @@ public class RigidBodySystem {
         }
         
         
+        
         // advance the system by the given time step
         for ( RigidBody b : bodies ) {
 
@@ -211,6 +214,25 @@ public class RigidBodySystem {
     		generateBody();
     		this.generateBody = false;
     	}
+    	
+    	if (this.enableMerging.getValue()) {
+    		//loop through collections that were found in this timestep and add them to the bodies list. careful not to mess up the index of all the bodies. 
+    		while (!collisionProcessor.collections.isEmpty()) {
+    			
+    			RigidCollection col = collisionProcessor.collections.get(0);
+    		
+    			for (RigidBody b : col.collectionBodies) {
+    				if (b.index != col.index) {
+    					downIndex(b.index, bodies);
+    				}
+    				bodies.remove(b);
+    			}
+    			collisionProcessor.collections.remove(0);
+    			bodies.add(col);
+    		
+    		}
+    	
+    	}
         
 
         computeTime = (System.nanoTime() - now) / 1e9;
@@ -218,6 +240,18 @@ public class RigidBodySystem {
         totalAccumulatedComputeTime += computeTime;
     }
 
+    /*
+     * Method that shifts all the indeces of each body after i, down by 1. 
+     */
+
+	private void downIndex(double i, ArrayList<RigidBody> bodyList) {
+		for(RigidBody b: bodyList) {
+			if (b.index > i) {
+				b.index --;
+			}
+		}
+		
+	}
 
 	/**
      * Finds the body which has a block that intersects the provided point.
@@ -251,8 +285,15 @@ public class RigidBodySystem {
     	for (int i = 0; i < size; i++ ) {
         	RigidBody b = bodies.get(i);
         	if (!b.created) {
-
-        	b.reset();
+        		if (b instanceof RigidCollection) {
+        			collectionReset((RigidCollection) b);
+        			bodies.remove((RigidCollection) b );
+        		}else {
+        			b.reset();
+        		}
+        		for (Spring s: b.springs) {
+        			s.reset();
+        		}
         	}else {
         		counter = i;
         		break;
@@ -267,12 +308,43 @@ public class RigidBodySystem {
             
         	}
     	}
+    	
+    	
         simulationTime = 0;
         collisionProcessor.reset();
         totalAccumulatedComputeTime = 0;        
     }
     
-    /**
+    private void collectionReset(RigidCollection b) {
+    	//resets the state of the rigidBodies inside all collections in the scene. 
+    	//loops through them and takes careful care not to mess up the index
+    	
+    	
+		for (RigidBody subBody: b.collectionBodies) {
+			if (subBody instanceof RigidCollection) {
+				collectionReset((RigidCollection) subBody);
+			}
+		
+			upIndex(subBody.index, bodies);
+			subBody.reset();
+			
+			bodies.add(subBody);
+			
+		}
+	}
+    /*
+     * if there are bodies with the index i, ups the index of all bodies greater than i to leave room for the ne
+     * for the new body about to be "reintroduced" to the scene
+     */
+	private void upIndex(int i, ArrayList<RigidBody> bodies2) {
+		for(RigidBody b: bodies) {
+			if (b.index >= i) {
+				b.index++;
+			}
+		}
+	}
+
+	/**
      * Removes all bodies from the system
      */
     public void clear() {
@@ -298,7 +370,9 @@ public class RigidBodySystem {
         }        
         if ( drawBodies.getValue() ) {
             for ( RigidBody b : bodies ) {
-                b.display( drawable );
+          
+            	b.display( drawable );
+            	
                 for (Spring s : b.springs) {
                 	s.displayConnection(drawable);
                 }
@@ -308,17 +382,23 @@ public class RigidBodySystem {
         gl.glLineWidth(1);
         if ( drawBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {
-                b.root.boundingDisc.display(drawable);
+           
+            		b.root.boundingDisc.display(drawable);
+            	
             }
         }
         if ( drawAllBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {
-                b.root.display( drawable );
+            	
+            		b.root.display( drawable );
+            	
             }
         }        
         if ( drawBoundingVolumesUsed.getValue() ) {
             for ( RigidBody b : bodies ) {
-                b.root.displayVisitBoundary( drawable, collisionProcessor.visitID );
+            	
+            		b.root.displayVisitBoundary( drawable, collisionProcessor.visitID );
+            	
             }
         }
         if ( drawContactGraph.getValue() ) {
@@ -372,7 +452,7 @@ public class RigidBodySystem {
     private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
     private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
     private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
-    private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
+    private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", true );
     private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", false );
     private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", false );
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
@@ -501,9 +581,6 @@ public class RigidBodySystem {
 		if (!found) {
 			body = backup_body;
 		}
-		
-		
-		
 		
       
         Point2d position = new Point2d(origin_x.getValue(), origin_y.getValue());

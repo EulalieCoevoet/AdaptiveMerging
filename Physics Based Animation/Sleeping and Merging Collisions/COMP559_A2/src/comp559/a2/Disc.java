@@ -83,7 +83,7 @@ public class Disc {
      * @param drawable
      */
     public void display( GLAutoDrawable drawable ) {
-        body.transformB2W.transform(cB, cW);
+    	body.transformB2W.transform(cB, cW);
         GL2 gl = drawable.getGL().getGL2();
         gl.glPushMatrix();
         gl.glTranslated( cW.x, cW.y , 0 );

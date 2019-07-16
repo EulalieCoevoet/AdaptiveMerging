@@ -8,27 +8,47 @@ public class BodyContact {
 	
 	public RigidBody otherBody;
 
-	
-	
 	public ArrayList<Double> relativeVelHistory = new ArrayList<Double>();
 	
+	boolean updatedThisTimeStep = false;
 	
 	public BodyContact(RigidBody body) {
 		otherBody = body;
+		//updatedThisTimeStep = true;
 	}
+
+
 	
-	public boolean alreadyExists(ArrayList<BodyContact> list) {
-		//returns true if contact with the other body exists in this list.
-		boolean count = false;
+	public BodyContact alreadyExists(ArrayList<BodyContact> list) {
+		//returns the BodyContact in the list, if it exists already
+		
+	
 		for (BodyContact c : list) {
 			if (c.otherBody.equals(this.otherBody)){
-				count = true;
+				return c;
 			}
 			
 		}
-		return count;
+		return null;
+		
 		
 	}
+
+
+
+	public boolean isIn(ArrayList<BodyContact> body_contact_list) {
+		
+		for (BodyContact c : body_contact_list) {
+			if (c.otherBody.equals(this.otherBody)){
+				return true;
+			}
+			
+		}
+		return false;
+		
+	}
+	
+	
 	
 
 }

@@ -14,9 +14,7 @@ public class Spring {
 
 	ArrayList<Block> blocks;
 	
-	Block block1;
-	Block block2;
-	
+	RigidBody originalBody;
     Point2d p1;
     Vector2d v1 = new Vector2d();
     RigidBody b1;
@@ -26,6 +24,8 @@ public class Spring {
     Vector2d v2 = new Vector2d();
 
     double l0 = 1;
+    
+    Spring originalSpring;
 
 
     
@@ -35,17 +35,57 @@ public class Spring {
     	this.p1 = new Point2d(p.x, p.y - l0);
     	this.p2 = new Point2d(p);
     	this.b1 = body;
+    	this.originalBody = body;
     	this.p2b = new Point2d(p);
     	b1.transformW2B.transform(p2b);
-    	
+    	originalSpring = new Spring(this);
 	}
+    public Spring (Spring s) {   
+    	// TODO Auto-generated constructor stub
+    	this.l0 = s.l0;
+    	this.p1 = s.p1;
+    	this.v1 = s.v1;
+    	this.b1 = s.b1;
+    	
+    	this.p2 = s.p2;
+    	this.p2b = s.p2b;
+    	this.v2 = s.v2;
+    	this.originalSpring = s.originalSpring;
+    	this.originalBody = s.originalBody;
+    	
+    }
+    
+    //create the same spring attached to a new body
+ public Spring (Spring s, RigidBody newBody) {   
+	// TODO Auto-generated constructor stub
+	this.l0 = s.l0;
+	this.p1 = s.p1;
+	this.v1 = s.v1;
+	this.b1 = newBody;
+	
+	this.p2 = new Point2d(s.p2);
+	this.p2b = new Point2d(this.p2);
+	//NEED TO WATCH OUT WITH TRANSFORM
+	b1.transformW2B.transform(p2b);
+	this.v2 = s.v2;
+	this.originalSpring = s.originalSpring;
+	
+	
+	
+}
 
     public void updateP2() {
     	this.p2 = new Point2d(this.p2b);
     	this.l0 = RigidBodySystem.springLength.getValue();
     	this.b1.transformB2W.transform(p2);
     }
-
+/*
+ * changes the body associated with this spring. Can be useful for applying springs to collections 
+ */
+    public void changeBody(RigidBody b) {
+    	this.b1 = b;
+    	
+    }
     
     public void computeVelocities() {
 	
@@ -108,5 +148,19 @@ public class Spring {
             gl.glEnd();
        
     }
+
+
+	public void reset() {
+		// TODO Auto-generated constructor stub
+		this.l0 = originalSpring.l0;
+		this.p1 =  originalSpring.p1;
+		this.v1 = originalSpring.v1;
+		this.b1 =  originalSpring.b1;
+		
+		this.p2 =  originalSpring.p2;
+		this.p2b =  originalSpring.p2b;
+		this.v2 =  originalSpring.v2;
+
+	}
     
 }
