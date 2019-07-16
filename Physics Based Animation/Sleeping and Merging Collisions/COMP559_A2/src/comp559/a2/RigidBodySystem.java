@@ -218,14 +218,26 @@ public class RigidBodySystem {
     	if (this.enableMerging.getValue()) {
     		//loop through collections that were found in this timestep and add them to the bodies list. careful not to mess up the index of all the bodies. 
     		while (!collisionProcessor.collections.isEmpty()) {
-    			
+    			boolean add = true;
     			RigidCollection col = collisionProcessor.collections.get(0);
     		
     			for (RigidBody b : col.collectionBodies) {
+    				//make sure all bodies in this collection have not been merged with something else this timestep
+    				if (b.merged) add = false;
+    			}
+    			if (!add) {
+    				collisionProcessor.collections.remove(0);
+    				continue;
+    			}
+    			
+    			for (RigidBody b : col.collectionBodies) {
+    				//body was merged in this timestep
+    				b.merged = true;
     				if (b.index != col.index) {
     					downIndex(b.index, bodies);
     				}
     				bodies.remove(b);
+    				
     			}
     			collisionProcessor.collections.remove(0);
     			bodies.add(col);

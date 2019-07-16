@@ -123,6 +123,8 @@ public class RigidBody {
     /** the total contact forces acting on it at this current time step, in world coordinates**/
     public Vector2d contactForce = new Vector2d();
     
+    public boolean merged = false;
+    
     /**
      * Creates a new rigid body from a collection of blocks
      * @param blocks

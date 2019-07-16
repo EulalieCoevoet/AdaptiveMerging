@@ -36,6 +36,7 @@ public class RigidCollection extends RigidBody{
 		//
 		springs.clear();
 		addSprings();
+	
 
 	//	this.created = true;
 	
