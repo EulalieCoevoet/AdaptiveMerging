@@ -388,17 +388,18 @@ public class CollisionProcessor {
         	iteration--;
         	
         }
+   
    		for(RigidBody body:bodies) {
-		
+   			
 		
 	    	int index = body.index;
 	   
-	    	body.v.x += delta_V.get(3*index);
-	    	body.v.y += delta_V.get(3*index+1);
-	    	body.omega += delta_V.get(3*index+2);
+	    	body.v.x += delta_V.get(3*(index));
+	    	body.v.y += delta_V.get(3*(index)+1);
+	    	body.omega += delta_V.get(3*(index)+2);
 	    	//update particles activity o
 	    	//update particle momentum
-
+	    
 
     	}	
         //fill the new map
@@ -711,18 +712,42 @@ public class CollisionProcessor {
                 }
             }
         } else {
-        	
-        	
-        	this.findCollisions(body1.root, body2.root, body1, body2);
-        	
+        	if (body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
+        		this.narrowCollection(body1, body2);
+        	}
+        	else {
+        		this.findCollisions(body1.root, body2.root, body1, body2);
+        	}
 	        
 	  
             
         	
         }
     }
-    
-    //Recurses through all of body_1,then body_2
+    /*
+     * Recursive method that makes us check for collisions with each body in a rigidCollection
+     */
+    private void narrowCollection(RigidBody body1, RigidBody body2) {
+		boolean condition = false;
+    	if (body1 instanceof RigidCollection) {
+			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
+				narrowCollection(b, body2);
+			}
+			
+		}	else condition = true;
+		if (body2 instanceof RigidCollection) {
+			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
+				narrowCollection(body1, b);
+			}
+		}	else condition = condition&true;
+		
+		//if both bodies are not rigid collections
+		if (condition){
+			findCollisions(body1.root, body2.root, body1, body2);
+		}
+		
+	}
+	//Recurses through all of body_1,then body_2
     private void findCollisions(BVNode body_1, BVNode body_2, RigidBody body1, RigidBody body2) {
      	if(body_1.visitID != visitID) {
     		body_1.visitID = visitID;
@@ -849,6 +874,7 @@ public class CollisionProcessor {
         boolean useSpring = enableContactSpring.getValue();
         boolean useDamping = enableContactDamping.getValue();
         
+        // TODO: Note transforms being useed here!!!
         body1.transformB2W.transform( b1.pB, tmp1 );
         body2.transformB2W.transform( b2.pB, tmp2 );
         double distance = tmp1.distance(tmp2);

@@ -13,6 +13,7 @@ public class RigidTransform {
 
     /** homogeneous representation of 2D transformation */
     Matrix3d T = new Matrix3d();
+
     
     /** 
      * Creates a new identity transformation 
@@ -43,6 +44,29 @@ public class RigidTransform {
         T.m20 = 0; T.m21 =  0; T.m22 = 1;
     }
     
+    /*
+     * returns angle from transformation in radians
+     */
+    public double getTheta() {
+    	return Math.atan2(T.m10, T.m00);
+    }
+    
+    /*
+     * 
+     */
+    public void getTranslation(Tuple2d x) {
+    		x.set(T.m02, T.m12);
+    }
+
+    /**
+     * Sets this transform to A * this
+     * @param A
+     */
+    public void leftMult( RigidTransform A ) {
+    	T.mul(A.T, this.T);
+    }
+
+
     /**
      * Inverts this transformation
      */

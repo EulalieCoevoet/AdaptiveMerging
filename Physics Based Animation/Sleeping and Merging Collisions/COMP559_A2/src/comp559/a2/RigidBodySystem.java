@@ -147,7 +147,7 @@ public class RigidBodySystem {
         if ( processCollisions.getValue() ) {
             // process collisions, given the current time step
         	
-            collisionProcessor.processCollisions( dt );
+             collisionProcessor.processCollisions( dt );
             
         }
 
@@ -221,27 +221,28 @@ public class RigidBodySystem {
     			boolean add = true;
     			RigidCollection col = collisionProcessor.collections.get(0);
     		
-    			for (RigidBody b : col.collectionBodies) {
+    		//	for (RigidBody b : col.collectionBodies) {
     				//make sure all bodies in this collection have not been merged with something else this timestep
-    				if (b.merged) add = false;
-    			}
-    			if (!add) {
-    				collisionProcessor.collections.remove(0);
-    				continue;
-    			}
-    			
-    			for (RigidBody b : col.collectionBodies) {
-    				//body was merged in this timestep
-    				b.merged = true;
-    				if (b.index != col.index) {
-    					downIndex(b.index, bodies);
-    				}
-    				bodies.remove(b);
+    		//		if (b.merged) add = false;
+    		//	}
+    		//	if (!add) {
+    		//		collisionProcessor.collections.remove(0);
     				
-    			}
-    			collisionProcessor.collections.remove(0);
-    			bodies.add(col);
-    		
+    		//	}else {
+    				
+    				for (RigidBody b : col.collectionBodies) {
+    				//body was merged in this timestep
+    					b.merged = true;
+    					if (b.index != col.index) {
+    						downIndex(b.index, bodies);
+    					}
+    					bodies.remove(b);
+    				
+    				}
+    				collisionProcessor.collections.remove(0);
+    				
+    				bodies.add(col.index, col);
+    			//}
     		}
     	
     	}

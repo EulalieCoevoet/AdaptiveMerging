@@ -56,10 +56,22 @@ public class RigidBody {
      */
     RigidTransform transformB2W = new RigidTransform();
     
+
     /**
      * Transforms points in World coordinates to Body coordinates
      */
     RigidTransform transformW2B = new RigidTransform();
+
+    /*
+     * Transforms points in body coordinates to collection coordinates, if a collection exists
+     */
+    RigidTransform transformB2C = new RigidTransform();
+    
+    /*
+     * Transforms points in collection coordinates to body coordinates, if a collection exists
+     */
+    RigidTransform transformC2B = new RigidTransform();
+    
     
     /** linear velocity */
     public Vector2d v = new Vector2d();
@@ -516,7 +528,7 @@ public class RigidBody {
                 myListID = ID;
                 gl.glCallList(myListID);
             }
-    }else {
+        } else {
             gl.glCallList(myListID);
         }
         gl.glPopMatrix();

@@ -110,7 +110,11 @@ public class Disc {
      * This must be called before doing a call to intersects() if the body has moved
      */
     public void updatecW() {
+    	// todo, if body is in a merged collection, then you'll want to accss the collection.transformB2W too!
         body.transformB2W.transform( cB, cW );
+       // if ( body.inCollection ) {
+       // 	body.collection.transformB2W.transform( cW, cW );
+       // }
     }
     
     /**
