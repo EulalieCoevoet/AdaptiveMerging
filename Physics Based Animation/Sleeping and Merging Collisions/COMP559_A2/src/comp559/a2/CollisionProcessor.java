@@ -32,7 +32,7 @@ public class CollisionProcessor {
     /**
      * The current contacts that resulted in the last call to process collisions
      */
-    public static ArrayList<Contact> contacts = new ArrayList<Contact>();
+    public ArrayList<Contact> contacts = new ArrayList<Contact>();
     
     /**
      * Creates this collision processor with the provided set of bodies
@@ -63,19 +63,25 @@ public class CollisionProcessor {
         		b.visited = false;
         		b.woken_up = false;
         	//	}
-        		//keep contacts between two sleeping bodies
-        		for (BodyContact c: b.body_contact_list) {
-        			c.otherBody.visited = false;
-        			if (b.active == 2) {
-        				if (c.otherBody.active == 2) {
-        				new_body_contact_list.add(c);
-        				}
-        			}
-        			if(c.updatedThisTimeStep){
-        				new_body_contact_list.add(c);
-        				c.updatedThisTimeStep = false;
-        			}
+        		if (b instanceof RigidCollection)
+    				rememberChildrenBodyContacts((RigidCollection) b);
+        		else {
+	        		//keep contacts between two sleeping bodies
+	        		for (BodyContact c: b.body_contact_list) {
+	        			c.otherBody.visited = false;
+	        			if (b.active == 2) {
+	        				if (c.otherBody.active == 2) {
+	        				new_body_contact_list.add(c);
+	        				}
+	        			}
+	        			if(c.updatedThisTimeStep){
+	        				new_body_contact_list.add(c);
+	        				c.updatedThisTimeStep = false;
+	        				
+	        			}
+	        		}
         		}
+        		
         				
         				
         		//also keep contact between two bodies that have been in contact before.
@@ -87,6 +93,7 @@ public class CollisionProcessor {
         		for (Contact c: b.contact_list) {
         			if (c.body1.active == 2 && c.body2.active==2) {
         				new_contact_list.add(c);
+        				//must remember children's contacts if a rigidcollection
         				
         			}
         		}
@@ -100,6 +107,9 @@ public class CollisionProcessor {
         broadPhase();
         collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
         if (contacts.size() == 0)  last_timestep_map.clear();
+        
+        // Put your body merging stuff here?  
+        
         if ( contacts.size() > 0  && doLCP.getValue() ) {
             now = System.nanoTime();
       
@@ -108,18 +118,36 @@ public class CollisionProcessor {
         //	
             if (!warm_start.getValue())doPGS(dt, now);
             else {
-            	warm_start_PGS( dt,  now);
+             	warm_start_PGS( dt,  now);
             }
-            
           
-	        
-                
-            
-            
         }
+       
             	 
     }
-    public void warm_start_PGS(double dt, double now) {
+    /*
+     * remem
+     */
+    private void rememberChildrenBodyContacts(RigidCollection b) {
+		for (RigidBody body: b.collectionBodies){
+			ArrayList<BodyContact> new_body_contact_list = new ArrayList<BodyContact>();
+			for (BodyContact c: body.body_contact_list) {
+    			c.otherBody.visited = false;
+    		
+    			if(c.updatedThisTimeStep){
+    				new_body_contact_list.add(c);
+    				c.updatedThisTimeStep = false;
+    			}
+    		}
+			
+			//also keep contact between two bodies that have been in contact before.
+    		b.body_contact_list.clear();
+    		b.body_contact_list.addAll(new_body_contact_list);
+    		
+		}
+		
+	}
+	public void warm_start_PGS(double dt, double now) {
 
 		// TODO Auto-generated method stub
       
@@ -304,20 +332,13 @@ public class CollisionProcessor {
         		
         		//add the Bounce vector to the u's over here, but don't need to do that just yet
         		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
-        		
-        		
+        	
         		// calculate Baumgarte Feedback (overlap of the two bodies)
         		double c = this.feedback_stiffness.getValue();
         		double bf = c*contact_i.constraint_violation;
-        		/*
-        		double bf_n = bf.dot(contact_i.normal)*c;
-        		Vector2d tangeant = new Vector2d(-contact_i.normal.y, contact_i.normal.x);
-        		double bf_t = bf.dot(tangeant)*c;
-        		*/
-        		
-        		
+
         		//putting b together.
-        		double b = 0;
+          		double b = 0;
         		if (i%2 ==0) {
         			b = (u_1_x + u_2_x + u_1_y + u_2_y + u_1_omega + u_2_omega - restitution.getValue() + bf)/d_i;
         		}else{
@@ -413,17 +434,7 @@ public class CollisionProcessor {
         	last_timestep_map.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), lamdas);
         	
         	c.lamdas = lamdas;
-        	/*Vector2d normal = new Vector2d(c.normal); normal.scale(lamdas[0]);
-        	Vector2d tangeant = new Vector2d(c.normal.y, -c.normal.x); tangeant.scale(lamdas[1]);
-        	
-        	
-        	        	
-        	Vector2d xAxis = new Vector2d(1, 0);
-        	Vector2d yAxis = new Vector2d(0, 1);
-        	
-        	c.contactForce = new Vector2d(normal.dot(xAxis), normal.dot(yAxis));
-        	c.contactTorque = c.contactForce*()
-        	*/
+
         }
       
        
@@ -887,7 +898,7 @@ public class CollisionProcessor {
             normal.sub( tmp2, tmp1 );
             normal.normalize();
             // create the contact
-            Contact contact = new Contact( body1, body2, contactW, normal, b1, b2);
+            Contact contact = new Contact( body1, body2, contactW, normal, b1, b2, distance);
             
             // simple option... add to contact list...
             contacts.add( contact );
@@ -914,7 +925,7 @@ public class CollisionProcessor {
 		              	bc1.updatedThisTimeStep = true;
 	            	}
 	            }else {
-	            	if (!bc2.updatedThisTimeStep) {
+	            	if (!bc1.updatedThisTimeStep) {
 		            	// has this been updated this timestep
 		            	// if no:
 		            	if (!bc1.updatedThisTimeStep) {
@@ -987,20 +998,33 @@ public class CollisionProcessor {
     	//goes through the Body Contact histories to determine if they should be merged or not.	
     	boolean count = true;
     	//do not merge if we don't have enough sample points
-    	if (bc1.relativeVelHistory.size() != this.sleep_accum.getValue()) count = false;
+    	if (bc1.relativeVelHistory.size() != this.sleep_accum.getValue() &&
+    			bc2.relativeVelHistory.size() != this.sleep_accum.getValue()) count = false;
     	else {
     		for (Double velHist: bc1.relativeVelHistory) {
     			if ( velHist > CollisionProcessor.sleepingThreshold.getValue()) {
     				count = false;
     			}
     		}
+    		
     	}
     	if (count == true) {
     		// merge both bodies into a collection
-    		RigidCollection collection = new RigidCollection(body1);
-    		collection.addBody(body2);
+    		if (body1.parent ==null && body2.parent==null) {
+    			RigidCollection collection = new RigidCollection(body1);
+    			collection.addBody(body2);
     		//add to collection so that you don't modify bodies on the inside of this loop (Concurrent modification error)
-    		this.collections.add(collection);
+    			collections.add(collection);
+    		}else if (body1.parent != null && body2.parent != null) {
+    			body1.parent.bodyQueue.add(body2);
+    		}else if (body1.parent != null) {
+    			body1.parent.bodyQueue.add(body2);
+    		}else if (body2.parent != null) {
+    			body2.parent.bodyQueue.add(body1);
+    		}
+    		
+    		
+    		
     		
     		//make sure body indexes dont get messed up 
     		

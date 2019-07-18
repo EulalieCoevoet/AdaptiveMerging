@@ -35,47 +35,34 @@ public class RigidCollection extends RigidBody{
 		springs.clear();
 		addSprings();
 		
+		//body.parent = this;
+		
+		
+	}
+	public RigidCollection(RigidCollection body) {
+		
+		super(body); // this will copy the blocks, which is not exactly what we want... fine though.
+
+		blocks.clear();
+		boundaryBlocks.clear();
+		
+		
+		collectionBodies.add(body);
+		index = body.index;
+		active_past.clear();
+		contact_list.clear();
+		body_contact_list.clear();
+		contactForces.clear();
+		contactTorques.clear();
+		
+		springs.clear();
+		addSprings();
+		
+		//body.parent = this;
+		
 		
 	}
 	
-	@Override
-	public void advanceTime(double dt){
-    	
-		if (!pinned) {
-			v.x += force.x * dt/massLinear;
-	    	v.y += force.y * dt/massLinear;
-	    	omega += torque * dt/ massAngular;
-	    	
-	       	x.x += v.x * dt;
-	    	x.y += v.y * dt;
-	    	theta += omega*dt;
-	    	
-	    	updateTransformations();
-	    	updateMergedTransformationMatrices();
-	    	force.set(0, 0);
-	    	torque = 0;
-
-	  
-		}
-
-	}
-	
-	//applies springs on the body, to the collection
-	private void addSprings() {
-		ArrayList<Spring> newSprings = new ArrayList<Spring>();
-		
-		for (RigidBody body: collectionBodies) {
-			for (Spring s: body.springs) {
-				Spring newSpring = new Spring(s, this);
-				newSprings.add(newSpring);
-			
-			}
-		}
-	
-		this.springs.addAll(newSprings);
-		
-	}
-
 	/**
 	 * adds Body to the collection
 	 */
@@ -101,7 +88,53 @@ public class RigidCollection extends RigidBody{
 		springs.clear();
 		addSprings();
 		
+		body.v = v;
+		body.omega = omega;
+		body.index = index;
+		//body.parent = this;
 	}
+	
+	@Override
+	public void advanceTime(double dt){
+    	
+		if (!pinned) {
+			v.x += force.x * dt/massLinear;
+	    	v.y += force.y * dt/massLinear;
+	    	omega += torque * dt/ massAngular;
+	    	
+	       	x.x += v.x * dt;
+	    	x.y += v.y * dt;
+	    	theta += omega*dt;
+	    	
+	    	updateTransformations();
+	    	updateMergedTransformationMatrices();
+	    	force.set(0, 0);
+	    	torque = 0;
+	    	for (RigidBody b: collectionBodies ) {
+	    		b.v.set(v);
+	    		b.omega = omega;
+	    	}
+		}
+
+	}
+	
+	//applies springs on the body, to the collection
+	private void addSprings() {
+		ArrayList<Spring> newSprings = new ArrayList<Spring>();
+		
+		for (RigidBody body: collectionBodies) {
+			for (Spring s: body.springs) {
+				Spring newSpring = new Spring(s, this);
+				newSprings.add(newSpring);
+			
+			}
+		}
+	
+		this.springs.addAll(newSprings);
+		
+	}
+
+	
 	
 
 	@Override
@@ -119,7 +152,7 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody b: collectionBodies) {
 	       	b.transformB2W.set(b.transformB2C);
 	       	b.transformB2W.leftMult(transformB2W);
-	       	b.transformW2B.set(transformB2W); b.transformW2B.invert();
+	       	b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
 		}
 	}
     
@@ -233,6 +266,9 @@ public class RigidCollection extends RigidBody{
     
     /** display list ID for this rigid body */
     int myListID = -1;
+    
+    //list of bodies to be added to this collection in the next timestep
+	ArrayList<RigidBody> bodyQueue = new ArrayList<RigidBody>();
 
     
     /**

@@ -19,7 +19,11 @@ import javax.vecmath.Vector3d;
  * @author kry
  */
 public class RigidBody {
-
+	
+	/*
+	 * Pointer to the parent of this body if it is merged
+	 */
+	RigidCollection parent = null;
     /** Unique identifier for this body */
     public int index;
     
@@ -244,8 +248,11 @@ public class RigidBody {
    
         // holds r vector.
         Vector2d r = new Vector2d(contactPointW);
-        
-        r.sub(x);
+        Point2d tempX = new Point2d(x);
+        if (parent != null) {
+        	parent.transformB2W.transform(tempX);
+        }
+        r.sub(tempX);
         Vector2d ortho_r = new Vector2d(-r.y, r.x);
  
         torque += ortho_r.dot(contactForceW);
@@ -393,6 +400,7 @@ public class RigidBody {
     		if (root.boundingDisc.isInDisc( pW ) ) {
             	Point2d pB = new Point2d();
             	transformW2B.transform( pW, pB );
+            
             	for ( Block b : blocks ) {
                 	if ( b.pB.distanceSquared( pB ) < Block.radius * Block.radius ) return true;
             	}
@@ -471,15 +479,21 @@ public class RigidBody {
         theta = 0;
         v.set(0,0);
         omega = 0;
+        force.set(0, 0);
+        torque = 0;
         p_lin.set(0, 0);
         p_ang = 0;
         transformB2W.set( theta, x );
         transformW2B.set( transformB2W );
         transformW2B.invert();
+        
+        transformB2C.T.setIdentity();
+        transformC2B.T.setIdentity();
         contact_list.clear();
         body_contact_list.clear();
         active = 0;
         active_past.clear();
+        parent=null;
         
     }
     

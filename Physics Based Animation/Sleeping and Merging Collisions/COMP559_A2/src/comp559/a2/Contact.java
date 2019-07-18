@@ -60,6 +60,10 @@ public class Contact {
     Vector2d relativeVelocity = new Vector2d();
     
     double relativeAngularVelocity = 0;
+    
+    BodyContact b1;
+    
+    BodyContact b2;
     /**
      * Creates a new contact, and assigns it an index
      * @param body1
@@ -67,7 +71,7 @@ public class Contact {
      * @param contactW
      * @param normal
      */
-    public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2) {
+    public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2, double distance) {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW );
@@ -75,47 +79,44 @@ public class Contact {
         index = nextContactIndex++;        
       
         Vector2d contact_point = new Vector2d(contactW);
-		Vector2d radius_i_body_1 = new Vector2d(body1.x);
-		Vector2d radius_i_body_2 = new Vector2d(body2.x);
+   
+		Point2d radius_i_body_1 = new Point2d(body1.x);
+		Point2d radius_i_body_2 = new Point2d(body2.x);
+		//if body is a merged one, it's x is in the collection frame... must transform into world
+		if (body1.parent != null) {
+			body1.parent.transformB2W.transform(radius_i_body_1);
+			
+		}
+		if (body2.parent != null) {
+			body2.parent.transformB2W.transform(radius_i_body_2);
+		}
 		radius_i_body_1.sub(contact_point, radius_i_body_1);
 		radius_i_body_2.sub(contact_point, radius_i_body_2);
 		
 		Vector2d tangeant = new Vector2d(-normal.y, normal.x);
 		
-		radius_i_body_1 = new Vector2d(-radius_i_body_1.y, radius_i_body_1.x);
-		radius_i_body_2 = new Vector2d(-radius_i_body_2.y, radius_i_body_2.x);
+		Vector2d r1 = new Vector2d(-radius_i_body_1.y, radius_i_body_1.x);
+		Vector2d r2 = new Vector2d(-radius_i_body_2.y, radius_i_body_2.x);
 		j_1.set(0, -normal.x);
 		j_1.set(1, -normal.y);
-		j_1.set(2, - radius_i_body_1.dot(normal));
+		j_1.set(2, - r1.dot(normal));
 		j_1.set(3, normal.x);
 		j_1.set(4, normal.y);
-		j_1.set(5, radius_i_body_2.dot(normal));
+		j_1.set(5, r2.dot(normal));
 		
 		j_2.set(0, -tangeant.x);
 		j_2.set(1, -tangeant.y);
-		j_2.set(2, - radius_i_body_1.dot(tangeant));
+		j_2.set(2, - r1.dot(tangeant));
 		j_2.set(3, tangeant.x);
 		j_2.set(4, tangeant.y);
-		j_2.set(5, radius_i_body_2.dot(tangeant));
+		j_2.set(5, r2.dot(tangeant));
 		
 		
 		block1 = b1;
 		block2 = b2;
 		
-		//bvn1 = body1.root;
-		//bvn2 = body2.root;
-		
-		final Point2d b1_w = new Point2d();
-		final Point2d b2_w = new Point2d();
-		body1.transformB2W.transform( b1.pB, b1_w );
-	    body2.transformB2W.transform( b2.pB, b2_w );
-	    double penetration = b1_w.distance(b2_w) - 2*b1.radius;
-	 /*   Vector2d direction = new Vector2d();
-	    direction.sub(b1_w, b2_w);
-	    direction.normalize(); */
-	    //direction.scale(magnitude);
 	  
-		constraint_violation = penetration;
+		constraint_violation =  distance - 2*Block.radius;
 		
 		relativeVelocity.sub(body2.v, body1.v);
 		relativeAngularVelocity = body2.omega - body1.omega;
@@ -152,8 +153,12 @@ public class Contact {
             gl.glLineWidth(2);
             gl.glColor4f(0,.3f,0, 0.5f);
             gl.glBegin( GL.GL_LINES );
-            gl.glVertex2d(body1.x.x, body1.x.y);
-            gl.glVertex2d(body2.x.x, body2.x.y);
+            Point2d p1 = new Point2d(body1.x);
+            Point2d p2 = new Point2d(body2.x);
+            if (body1.parent!=null) body1.parent.transformB2W.transform(p1);
+           	if (body2.parent!=null) body2.parent.transformB2W.transform(p2);
+            gl.glVertex2d(p1.x, p1.y);
+            gl.glVertex2d(p2.x, p2.y);
             gl.glEnd();
         }
     }
