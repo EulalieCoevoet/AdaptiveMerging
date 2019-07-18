@@ -19,36 +19,25 @@ public class RigidCollection extends RigidBody{
 	public RigidCollection(RigidBody body) {
 		
 		super(body); // this will copy the blocks, which is not exactly what we want... fine though.
-	/*	body.x.set(0,0);
-		body.theta = 0;
-		body.updateTransformations(); */
+
+		blocks.clear();
+		boundaryBlocks.clear();
 		
-		this.blocks.clear();
-		this.boundaryBlocks.clear();
-		
-		addBlocks(body);
 		
 		collectionBodies.add(body);
-		this.index = body.index;
-		this.active_past.clear();
-		this.contact_list.clear();
-		this.body_contact_list.clear();
-		this.contactForces.clear();
-		this.contactTorques.clear();
+		index = body.index;
+		active_past.clear();
+		contact_list.clear();
+		body_contact_list.clear();
+		contactForces.clear();
+		contactTorques.clear();
 		
-		root = new BVNode(this.boundaryBlocks, this);
-		//
 		springs.clear();
 		addSprings();
-	
-
-	//	this.created = true;
-	
+		
 		
 	}
 	
-
-
 	@Override
 	public void advanceTime(double dt){
     	
@@ -62,28 +51,10 @@ public class RigidCollection extends RigidBody{
 	    	theta += omega*dt;
 	    	
 	    	updateTransformations();
+	    	updateMergedTransformationMatrices();
 	    	force.set(0, 0);
 	    	torque = 0;
-	    	
-	    
-	    	//advance time for each sub rigid bodies so the circles can move?
-	    	/*for (RigidBody b: collectionBodies) {
-	    		if (!b.pinned) {
-		    		//get radius between body COM and this COM to cross product with omega
-		    		Vector2d r = new Vector2d(-b.x.y + this.x.y, b.x.x - this.x.x );
-		    		r.scale(omega);
-		    		
-		    		b.v.x += v.x + r.x;
-		    		b.v.y += v.y +r.y;
-		    		b.omega += omega;
-		    		
-		    		b.x.x += b.v.x*dt;
-		    		b.x.y += b.v.y * dt;
-		        	b.theta += b.omega*dt;
-		        	b.updateTransformations();
-		        
-	    		}
-	    	} */
+
 	  
 		}
 
@@ -105,7 +76,7 @@ public class RigidCollection extends RigidBody{
 		
 	}
 
-	/*
+	/**
 	 * adds Body to the collection
 	 */
 	public void addBody(RigidBody body) {
@@ -113,25 +84,26 @@ public class RigidCollection extends RigidBody{
 		collectionBodies.add(body);
 		if (body.pinned) this.pinned = true;  // probably want to do something different for pinned.
 		
-		
 		this.calculateMass();
 		
 		this.calculateCOM();
 		
+		//addBlocks(body);
 		//from this new collection COM determine new transforms for each body in the collection
 		//set Transform B2C and C2B for each body
+		setMergedTransformationMatrices();
 		updateMergedTransformationMatrices();
-	
+		
+		//update BVNode roots for each body
 
 		calculateInertia();
 		
-		root = new BVNode(this.boundaryBlocks, this);
-		
-		this.springs.clear();
+		springs.clear();
 		addSprings();
 		
 	}
 	
+
 	@Override
     /**
      * Updates the B2W and W2B transformations
@@ -140,17 +112,21 @@ public class RigidCollection extends RigidBody{
         transformB2W.set( theta, x );
         transformW2B.set( theta, x );
         transformW2B.invert();
-        /*for(RigidBody b: collectionBodies) {
-        	b.transformB2W.set(b.transformB2C);
-        	b.transformB2W.leftMult(transformB2W);
-        	b.transformW2B.set(transformB2W); b.transformW2B.
-        }*/
+      
     }
+	
+	private void updateMergedTransformationMatrices() {
+		for (RigidBody b: collectionBodies) {
+	       	b.transformB2W.set(b.transformB2C);
+	       	b.transformB2W.leftMult(transformB2W);
+	       	b.transformW2B.set(transformB2W); b.transformW2B.invert();
+		}
+	}
     
 	/*For each body in collection, determine the transformations to go from body to collection
 	*But also, make each body's x, in collection and theta in collection, relative to this x and theta
 	*/
-	private void updateMergedTransformationMatrices() {
+	private void setMergedTransformationMatrices() {
 		RigidTransform temp = new RigidTransform();
 		for (RigidBody body: collectionBodies) {
 			body.transformB2C.set(body.transformB2W);
@@ -164,10 +140,11 @@ public class RigidCollection extends RigidBody{
 			temp.transform(body.x);
 			
 			body.theta = body.transformB2C.getTheta();
-			//body.theta = transformW2B.getTheta();
+		
 		}
 		
 	}
+	
 	@Override
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
@@ -182,41 +159,6 @@ public class RigidCollection extends RigidBody{
 	}
 
 
-	//Goes through each block and changes the position of block in body coordinates
-	private void changeBlockCoordinates() {
-		//blocks are in body frame. for them to be in the correct position/orientation, we need to rotate
-		//them in local frame first and THEN translate them.
-		for (RigidBody b: collectionBodies) {
-			
-			for (Block bl : b.blocks) {
-		
-				b.transformB2C.transform(bl.pB);
-				
-			
-			}
-		}
-	}
-
-	/*
-	@Override 
-	public void reset() {
-		for (RigidBody b: collectionBodies) {
-			//collectionBodies.remove(b);
-			
-			b.reset();
-			CollisionProcessor.bodies.add(b);
-			
-			
-		}
-		collectionBodies.clear();
-		CollisionProcessor.bodies.remove(this);
-	} */
-	private void addBlocks(RigidBody body) {
-		this.boundaryBlocks.addAll(body.boundaryBlocks);
-		this.blocks.addAll(body.blocks);
-		
-	}
-
 	public void calculateMass() {
 		double mass = 0;
 		for(RigidBody b: collectionBodies) {
@@ -228,8 +170,8 @@ public class RigidCollection extends RigidBody{
 	
 
 	
-	/*
-	 * Loops through all bodies in collectionBodies
+	/**
+	 * Loops through all bodies in collectionBodies and sets the transformation matrices for each
 	 */
 	public void calculateCOM() {
 		Vector2d com = new Vector2d();
@@ -241,10 +183,7 @@ public class RigidCollection extends RigidBody{
 			bCOM.scale(bRatio, b.x);
 			com.add(bCOM);
 		}
-		/*for (RigidBody b: collectionBodies) {
-			b.x.sub(com);
-			b.updateTransformations();
-		}*/
+	
 		
 		x.set(com);
 	    transformB2W.set( theta, x );
@@ -259,14 +198,11 @@ public class RigidCollection extends RigidBody{
 		double inertia = 0;
 		Point2d zero = new Point2d(0, 0);
 		for (RigidBody body: collectionBodies) {
-			   for ( Block b : blocks ) {
+			   for ( Block b : body.blocks ) {
 		            double mass = b.getColourMass();
 		            inertia += mass*b.pB.distanceSquared(zero);
 		        }
-			//double distance = body.x.distance(this.x);
-			//double mass = body.massLinear*distance*distance;
-			
-			
+		
 		}
 		this.massAngular = inertia;
 		this.jinv = 1/inertia;

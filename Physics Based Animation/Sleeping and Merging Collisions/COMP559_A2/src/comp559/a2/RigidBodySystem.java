@@ -220,22 +220,11 @@ public class RigidBodySystem {
     		while (!collisionProcessor.collections.isEmpty()) {
     			boolean add = true;
     			RigidCollection col = collisionProcessor.collections.get(0);
-    		
-    		//	for (RigidBody b : col.collectionBodies) {
-    				//make sure all bodies in this collection have not been merged with something else this timestep
-    		//		if (b.merged) add = false;
-    		//	}
-    		//	if (!add) {
-    		//		collisionProcessor.collections.remove(0);
-    				
-    		//	}else {
-    				
+    
     				for (RigidBody b : col.collectionBodies) {
     				//body was merged in this timestep
     					b.merged = true;
-    					if (b.index != col.index) {
-    						downIndex(b.index, bodies);
-    					}
+    			
     					bodies.remove(b);
     				
     				}
@@ -244,6 +233,7 @@ public class RigidBodySystem {
     				bodies.add(col.index, col);
     			//}
     		}
+    		checkIndex();
     	
     	}
         
@@ -275,12 +265,33 @@ public class RigidBodySystem {
         for ( RigidBody body : bodies ) {
             if ( body.intersect( p ) ) {
                 return body;
+            }else {
+            	//must also check if intersects a collection
+            	if(body instanceof RigidCollection) {
+            		if (collectionPick((RigidCollection)body, p)){
+            			return body;
+            		}
+            	}
             }
         }
         return null;
     }
-    
     /**
+     * recurses through a collection to check if this point intersects any body. returns true if it does
+     * @param body 
+     * @param p
+     */
+    private boolean collectionPick(RigidCollection body, Point2d p) {
+    
+		for (RigidBody b: body.collectionBodies ) {
+			if (b.intersect(p)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
      * Removes a rigid body from the system
      * @param body
      */
@@ -300,7 +311,7 @@ public class RigidBodySystem {
         	if (!b.created) {
         		if (b instanceof RigidCollection) {
         			collectionReset((RigidCollection) b);
-        			bodies.remove((RigidCollection) b );
+        			
         		}else {
         			b.reset();
         		}
@@ -332,28 +343,29 @@ public class RigidBodySystem {
     	//resets the state of the rigidBodies inside all collections in the scene. 
     	//loops through them and takes careful care not to mess up the index
     	
-    	
 		for (RigidBody subBody: b.collectionBodies) {
 			if (subBody instanceof RigidCollection) {
 				collectionReset((RigidCollection) subBody);
 			}
 		
-			upIndex(subBody.index, bodies);
+			
 			subBody.reset();
 			
 			bodies.add(subBody);
 			
 		}
+		bodies.remove(b );
+		checkIndex();
 	}
     /*
      * if there are bodies with the index i, ups the index of all bodies greater than i to leave room for the ne
      * for the new body about to be "reintroduced" to the scene
      */
-	private void upIndex(int i, ArrayList<RigidBody> bodies2) {
+	private void checkIndex() {
+		int i = 0;
 		for(RigidBody b: bodies) {
-			if (b.index >= i) {
-				b.index++;
-			}
+				b.index = i;
+				i++;
 		}
 	}
 
@@ -402,8 +414,11 @@ public class RigidBodySystem {
         }
         if ( drawAllBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {
-            	
+            		if (!(b instanceof RigidCollection))
             		b.root.display( drawable );
+            		else {
+            			displayCollectionBV((RigidCollection) b, drawable);
+            		}
             	
             }
         }        
@@ -461,7 +476,18 @@ public class RigidBodySystem {
     }
 
   
-    private DoubleParameter transparency = new DoubleParameter("body block transparency", .5, 0, 1 );
+    private void displayCollectionBV(RigidCollection b, GLAutoDrawable drawable) {
+		for (RigidBody body: b.collectionBodies) {
+			if (body instanceof RigidCollection) {
+				displayCollectionBV((RigidCollection) body, drawable);
+			}else {
+				body.root.display(drawable);
+			}
+		}
+		
+	}
+
+	private DoubleParameter transparency = new DoubleParameter("body block transparency", .5, 0, 1 );
     private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
     private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
     private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );

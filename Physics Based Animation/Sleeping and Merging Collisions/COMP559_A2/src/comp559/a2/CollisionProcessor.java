@@ -736,7 +736,7 @@ public class CollisionProcessor {
 			
 		}	else condition = true;
 		if (body2 instanceof RigidCollection) {
-			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
+			for (RigidBody b: ((RigidCollection) body2).collectionBodies) {
 				narrowCollection(body1, b);
 			}
 		}	else condition = condition&true;
