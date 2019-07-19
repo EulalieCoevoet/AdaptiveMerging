@@ -58,17 +58,17 @@ public class Spring {
     //create the same spring attached to a new body
  public Spring (Spring s, RigidBody newBody) {   
 	// TODO Auto-generated constructor stub
-	this.l0 = s.l0;
-	this.p1 = s.p1;
-	this.v1 = s.v1;
-	this.b1 = newBody;
+	l0 = s.l0;
+	p1 = s.p1;
+	v1 = s.v1;
+	b1 = newBody;
 	
-	this.p2 = new Point2d(s.p2);
-	this.p2b = new Point2d(this.p2);
+	p2 = new Point2d(s.p2);
+	p2b = new Point2d(this.p2);
 	//NEED TO WATCH OUT WITH TRANSFORM
 	b1.transformW2B.transform(p2b);
-	this.v2 = s.v2;
-	this.originalSpring = s.originalSpring;
+	v2 = s.v2;
+	originalSpring = s.originalSpring;
 	
 	
 	

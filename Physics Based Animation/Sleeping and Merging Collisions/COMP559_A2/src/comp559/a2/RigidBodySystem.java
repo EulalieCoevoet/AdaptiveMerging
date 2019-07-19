@@ -1,6 +1,8 @@
 package comp559.a2;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
 import com.jogamp.opengl.GL2;
@@ -152,9 +154,7 @@ public class RigidBodySystem {
             
         }
 
-        if (enableMerging.getValue()) {
-        	
-        }
+   
         
       /*  if (enableMerging.getValue()) {
         	//add all contact forces to the contactForce field in each rigid Body (to wake up body)
@@ -207,48 +207,18 @@ public class RigidBodySystem {
         }
         
         
-        
-       
-     
-    	
-    	if (this.enableMerging.getValue()) {
-    		//loop through collections that were found in this timestep and add them to the bodies list. careful not to mess up the index of all the bodies. 
-    		while (!collisionProcessor.collections.isEmpty()) {
-    			boolean add = true;
-    			RigidCollection col = collisionProcessor.collections.get(0);
-    
-    				for (RigidBody b : col.collectionBodies) {
-    				//body was merged in this timestep
-    					b.merged = true;
-    					b.parent = col;
-    					bodies.remove(b);
-    				
-    				}
-    				collisionProcessor.collections.remove(0);
-    				
-    				bodies.add(col.index, col);
-    			//}
-    		}
-    		int i = 0;
-    		while (true) {
-    			RigidBody b = bodies.get(i);
-    			if (b instanceof RigidCollection) {
-    				for (RigidBody queuedBody : ((RigidCollection) b).bodyQueue) {
-    					((RigidCollection) b).addBody(queuedBody);
-    				}
-    			}
-    			i++;
-    			if (i ==bodies.size()) break;
-    		}
-    		checkIndex();
-    	
-    	}
     	 // advance the system by the given time step
         for ( RigidBody b : bodies ) {
 
             b.advanceTime(dt);
         }
-
+        
+        if (enableMerging.getValue()) {
+        	// Put your body merging stuff here?  
+            mergeBodies();
+            
+        }
+       
         
     	if (this.generateBody) {
     		generateBody();
@@ -262,6 +232,54 @@ public class RigidBodySystem {
     /*
      * Method that shifts all the indeces of each body after i, down by 1. 
      */
+
+	    public void mergeBodies() {
+    	LinkedList<BodyContact> removalQueue = new LinkedList<BodyContact>();
+		for (BodyContact bc: collisionProcessor.bodyContacts) {
+			boolean mergeCondition = false;
+			if ((bc.relativeVelHistory.size() == CollisionProcessor.sleep_accum.getValue())) {
+				mergeCondition = true;
+				for (Double relVel : bc.relativeVelHistory) {
+					if (relVel > CollisionProcessor.sleepingThreshold.getValue()) {
+						mergeCondition = false;
+					}
+				}
+			}
+			if (mergeCondition) {
+				//if they are both not collections...make a new collection!
+				if(bc.thisBody.parent == null && bc.otherBody.parent == null) {
+					RigidCollection col = new RigidCollection(bc.thisBody, bc.otherBody);
+					col.addInternalContact(bc);
+					bodies.remove(bc.thisBody); bodies.remove(bc.otherBody);
+					bodies.add(col);
+				}else if (bc.thisBody.parent != null && bc.otherBody.parent != null) {
+					// if they are BOTH collections... think about what to do
+					//take all the bodies in the least massive one and add them to the collection of the most massive
+					if (bc.thisBody.parent.massLinear > bc.otherBody.parent.massLinear) {
+						bc.thisBody.parent.addCollection(bc.otherBody.parent);
+					}
+				}else if (bc.thisBody.parent != null) {
+					//thisBody is in a collection... otherBody isnt
+					bc.thisBody.parent.addBody(bc.otherBody);
+					bc.thisBody.parent.addInternalContact(bc);
+					bodies.remove(bc.otherBody);
+				}else if (bc.otherBody.parent != null) {
+					//otherBody is in a collection... thisBody isnt
+					bc.otherBody.parent.addBody(bc.thisBody);
+					bc.otherBody.parent.addInternalContact(bc);
+					bodies.remove(bc.thisBody);
+				}
+				removalQueue.add(bc);
+				checkIndex();
+				
+			}
+		
+			
+		}
+		for (BodyContact element : removalQueue) {
+			collisionProcessor.bodyContacts.remove(element);
+		}
+	}
 
 	private void downIndex(double i, ArrayList<RigidBody> bodyList) {
 		for(RigidBody b: bodyList) {
@@ -331,8 +349,7 @@ public class RigidBodySystem {
         	if (!b.created) {
         		if (b instanceof RigidCollection) {
         			collectionReset((RigidCollection) b);
-        			checkIndex();
-;        			continue;
+        			continue;
         		}else {
         			b.reset();
         		}
@@ -366,20 +383,12 @@ public class RigidBodySystem {
     private void collectionReset(RigidCollection b) {
     	//resets the state of the rigidBodies inside all collections in the scene. 
     	//loops through them and takes careful care not to mess up the index
-    	
-		for (RigidBody subBody: b.collectionBodies) {
-			if (subBody instanceof RigidCollection) {
-				collectionReset((RigidCollection) subBody);
-			}
-		
-			
+
+		for (RigidBody subBody : b.collectionBodies) {
 			subBody.reset();
-			
 			bodies.add(subBody);
-			
 		}
-		
-		bodies.remove(b );
+		bodies.remove(b);
 		checkIndex();
 	}
     /*
@@ -532,7 +541,7 @@ public class RigidBodySystem {
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
     private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", true );
     private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
-    public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true );
+    public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
     public BooleanParameter use_pendulum = new BooleanParameter( "create pendulum", false );
     public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 

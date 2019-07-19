@@ -14,57 +14,49 @@ public class RigidCollection extends RigidBody{
 
 	ArrayList<RigidBody> collectionBodies = new ArrayList<RigidBody>();
 	
-	ArrayList<Contact> inner_contacts = new ArrayList<Contact>();
+	//ArrayList<Contact> inner_contacts = new ArrayList<Contact>();
 	
-	public RigidCollection(RigidBody body) {
+	ArrayList<BodyContact> internalBodyContacts = new ArrayList<BodyContact>();
+	
+	public RigidCollection(RigidBody body1, RigidBody body2) {
 		
-		super(body); // this will copy the blocks, which is not exactly what we want... fine though.
+		super(body1); // this will copy the blocks, which is not exactly what we want... fine though.
+		
+		clearUselessJunk();
+		index = body1.index;
+		collectionBodies.add(body1);
+		collectionBodies.add(body2);
 
+		calculateMass();
+		calculateCOM();
+		setMergedTransformationMatrices();
+	//	updateMergedTransformationMatrices();
+		calculateInertia();
+		addSprings();
+		
+		body1.parent = this;
+		body2.parent = this;
+		
+		
+	}
+
+	
+	private void clearUselessJunk() {
 		blocks.clear();
 		boundaryBlocks.clear();
 		
-		
-		collectionBodies.add(body);
-		index = body.index;
 		active_past.clear();
 		contact_list.clear();
 		body_contact_list.clear();
 		contactForces.clear();
 		contactTorques.clear();
-		
 		springs.clear();
-		addSprings();
-		
-		//body.parent = this;
-		
-		
 	}
-	public RigidCollection(RigidCollection body) {
-		
-		super(body); // this will copy the blocks, which is not exactly what we want... fine though.
 
-		blocks.clear();
-		boundaryBlocks.clear();
-		
-		
-		collectionBodies.add(body);
-		index = body.index;
-		active_past.clear();
-		contact_list.clear();
-		body_contact_list.clear();
-		contactForces.clear();
-		contactTorques.clear();
-		
-		springs.clear();
-		addSprings();
-		
-		//body.parent = this;
-		
-		
-	}
-	
+
 	/**
 	 * adds Body to the collection
+	 * @param bc 
 	 */
 	public void addBody(RigidBody body) {
 		
@@ -79,7 +71,7 @@ public class RigidCollection extends RigidBody{
 		//from this new collection COM determine new transforms for each body in the collection
 		//set Transform B2C and C2B for each body
 		setMergedTransformationMatrices();
-		updateMergedTransformationMatrices();
+		//updateMergedTransformationMatrices();
 		
 		//update BVNode roots for each body
 
@@ -91,7 +83,25 @@ public class RigidCollection extends RigidBody{
 		body.v = v;
 		body.omega = omega;
 		body.index = index;
-		//body.parent = this;
+		body.parent = this;
+		
+	}
+	
+	public void addInternalContact(BodyContact bc) {
+		internalBodyContacts.add(bc);
+	}
+	//like addBody but with another collection...
+	public void addCollection(RigidCollection col) {
+		
+		for (RigidBody b : col.collectionBodies) {
+			//transform all the subBodies to their world coordinates... 
+			col.transformB2W.transform(b.x);
+			b.transformB2C.T.setIdentity();
+			b.transformC2B.T.setIdentity();
+			addBody(b);
+		}
+		internalBodyContacts.addAll(col.internalBodyContacts);
+		
 	}
 	
 	@Override
@@ -110,10 +120,7 @@ public class RigidCollection extends RigidBody{
 	    	updateMergedTransformationMatrices();
 	    	force.set(0, 0);
 	    	torque = 0;
-	    	for (RigidBody b: collectionBodies ) {
-	    		b.v.set(v);
-	    		b.omega = omega;
-	    	}
+	    
 		}
 
 	}
@@ -133,9 +140,6 @@ public class RigidCollection extends RigidBody{
 		this.springs.addAll(newSprings);
 		
 	}
-
-	
-	
 
 	@Override
     /**
@@ -159,8 +163,11 @@ public class RigidCollection extends RigidBody{
 	/*For each body in collection, determine the transformations to go from body to collection
 	*But also, make each body's x, in collection and theta in collection, relative to this x and theta
 	*/
+	
+	
 	private void setMergedTransformationMatrices() {
 		RigidTransform temp = new RigidTransform();
+		
 		for (RigidBody body: collectionBodies) {
 			body.transformB2C.set(body.transformB2W);
 			body.transformB2C.leftMult(transformW2B);
@@ -170,6 +177,7 @@ public class RigidCollection extends RigidBody{
 			temp.set(body.transformW2B);
 			temp.leftMult(body.transformB2C);
 			
+			//transforms from world coordinates to collection coordinates
 			temp.transform(body.x);
 			
 			body.theta = body.transformB2C.getTheta();
@@ -211,16 +219,21 @@ public class RigidCollection extends RigidBody{
 		Vector2d bCOM = new Vector2d();
 		double totalMass = massLinear;
 		com.set(0,0);
+		
 		for (RigidBody b: collectionBodies) {
 			double bRatio = b.massLinear/totalMass;
+			if (b.parent != null) {
+				//transform back to world
+				b.parent.transformB2W.transform(b.x);
+			}
 			bCOM.scale(bRatio, b.x);
 			com.add(bCOM);
 		}
 	
-		
+		theta = 0;
 		x.set(com);
 	    transformB2W.set( theta, x );
-	    transformW2B.set( theta, x );
+	    transformW2B.set( transformB2W);
 	    transformW2B.invert();
 	}
 	
@@ -299,4 +312,7 @@ public class RigidCollection extends RigidBody{
 
         
     }
+
+
+	
 }

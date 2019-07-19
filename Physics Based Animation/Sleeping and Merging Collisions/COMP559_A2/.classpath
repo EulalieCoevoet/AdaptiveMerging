@@ -8,7 +8,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="jars/mintools.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/vecmath.jar"/>
-	<classpathentry exported="true" kind="lib" path="jars/mtj.jar" sourcepath="C:/Users/otman/eclipse-workspace/COMP559_A2/jars/mtjsrc.zip"/>
+	<classpathentry exported="true" kind="lib" path="jars/mtj.jar" sourcepath="C:/Users/otmanb/Desktop/Projects/Physics Based Animation/Sleeping and Merging Collisions/COMP559_A2/jars/mtjsrc.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jogl"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

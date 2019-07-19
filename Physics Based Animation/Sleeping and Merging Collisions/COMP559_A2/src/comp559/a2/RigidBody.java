@@ -9,6 +9,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.viewer.EasyViewer;
+import no.uib.cipr.matrix.DenseVector;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -141,6 +142,8 @@ public class RigidBody {
     
     public boolean merged = false;
     
+    DenseVector delta_V = new DenseVector(3);
+    
     /**
      * Creates a new rigid body from a collection of blocks
      * @param blocks
@@ -194,6 +197,7 @@ public class RigidBody {
         pendulum_body = false;
         // set our index
         index = nextIndex++;
+        delta_V.zero();
     }
     
     /**
@@ -223,6 +227,7 @@ public class RigidBody {
         // set our index
         pendulum_body = false;
         index = nextIndex++;
+        delta_V.zero();
     
     }
     
