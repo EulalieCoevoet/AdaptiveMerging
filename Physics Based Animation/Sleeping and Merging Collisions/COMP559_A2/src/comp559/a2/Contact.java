@@ -49,6 +49,7 @@ public class Contact {
     //for tangential
     DenseVector j_2 = new DenseVector(6);
     
+    Vector2d lamda = new Vector2d();
     BVNode bvn1;
     
     BVNode bvn2;

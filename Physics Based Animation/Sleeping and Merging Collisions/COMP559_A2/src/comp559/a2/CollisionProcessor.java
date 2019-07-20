@@ -61,8 +61,6 @@ public class CollisionProcessor {
         //remember passive contacts
         if (CollisionProcessor.use_contact_graph.getValue() || RigidBodySystem.enableMerging.getValue()) {
         	
-      
-        	
         	for(RigidBody b :bodies) {
         		//remember BodyContacts at each body
         		ArrayList<BodyContact> new_body_contact_list = new ArrayList<BodyContact>();
@@ -120,7 +118,6 @@ public class CollisionProcessor {
         if ( contacts.size() > 0  && doLCP.getValue() ) {
             now = System.nanoTime();
       
-          
             PGS( dt,  now);
         }
        
@@ -166,14 +163,13 @@ public class CollisionProcessor {
 
 		// TODO Auto-generated method stub
       
-        double mu = friction.getValue();
+
+		double mu = friction.getValue();
        DenseVector lamda = new DenseVector(2*contacts.size());
        lamda.zero();
-       int iteration = iterations.getValue();
-       int i = 0;
-       organize();
-	   if(shuffle.getValue())knuth_shuffle();
-	   	
+ 
+     
+       /*
 	   if (warm_start.getValue()) {
 		   for (Contact contact_i : contacts) {
 		        	
@@ -245,202 +241,205 @@ public class CollisionProcessor {
 						contact_i.body2.delta_V.zero();
 					}
 		   	}
-	    }
-	       while(iteration > 0) {
-	        	//shuffle for stability
-	        	
-	        	 for (i = 0; i < 2*contacts.size(); i++) {
-	        		
-	        		//if we are looking at a normal component of lamda
-	        		double lamda_i = lamda.get(i);
-	        		
-	        		
-	        		Contact contact_i = contacts.get(i/2);
-	        		DenseVector j_1 = new DenseVector(contact_i.j_1);
-	        		DenseVector j_2 = new DenseVector(contact_i.j_2);
-	        		//
-	        		
-	        		double m1inv = contact_i.body1.minv; 
-					double m2inv = contact_i.body2.minv;
-					double j1inv =contact_i.body1.jinv;
-					double j2inv = contact_i.body2.jinv;
-					if (contact_i.body1.parent != null) {
-						m1inv = contact_i.body1.parent.minv;
-						j1inv = contact_i.body1.parent.jinv;
-					}
-					if (contact_i.body2.parent != null) {
-						m2inv = contact_i.body2.parent.minv;
-						j2inv = contact_i.body2.parent.jinv;
-					}
-	        		//calculate D_i_i 
-	        		double d_i = 0;
+	    } */
+		//shuffle for stability
+   	//	int iteration = iterations.getValue();
+    // calculate Baumgarte Feedback (overlap of the two bodies)
+		double c = this.feedback_stiffness.getValue();
+		//int iteration = iterations.getValue();
+		
+ 		organize();
+	   	if(shuffle.getValue())knuth_shuffle();
+	   	for (Contact contact_i : contacts){
+
+		   int iteration = iterations.getValue();
+	   
+	  
+			while(iteration > 0) {
+			  	DenseVector j_1 = new DenseVector(contact_i.j_1);
+	    		DenseVector j_2 = new DenseVector(contact_i.j_2);
+	    	
+	    		double m1inv = contact_i.body1.minv; 
+				double m2inv = contact_i.body2.minv;
+				double j1inv =contact_i.body1.jinv;
+				double j2inv = contact_i.body2.jinv;
+				if (contact_i.body1.parent != null) {
+					m1inv = contact_i.body1.parent.minv;
+					j1inv = contact_i.body1.parent.jinv;
+				}
+				if (contact_i.body2.parent != null) {
+					m2inv = contact_i.body2.parent.minv;
+					j2inv = contact_i.body2.parent.jinv;
+				}
+				
+        		double u_1_x_stored = contact_i.body1.v.x + contact_i.body1.force.x * m1inv*dt;;
+        		double u_1_y_stored = contact_i.body1.v.y + contact_i.body1.force.y * m1inv*dt;;
+        		double u_1_omega_stored = contact_i.body1.omega + contact_i.body1.torque * j1inv*dt;;
+        		
+        		double u_2_x_stored = contact_i.body2.v.x + contact_i.body2.force.x*m2inv*dt;
+        		double u_2_y_stored = contact_i.body2.v.y + contact_i.body2.force.y*m2inv*dt;
+        		double u_2_omega_stored = contact_i.body2.omega + contact_i.body2.torque*j2inv*dt;;
+        		
+        		
+        		double u_1_x_n = u_1_x_stored *( j_1.get(0));
+        		double u_1_y_n = u_1_y_stored * (j_1.get(1));
+        		double u_1_omega_n = u_1_omega_stored * (j_1.get(2));
+        		
+        		double u_2_x_n = u_2_x_stored *j_1.get(3);
+        		double u_2_y_n =   u_2_y_stored * j_1.get(4);
+        		double u_2_omega_n =  u_2_omega_stored *j_1.get(5);
+        		
+        		//relativevelocities in tangential direction
+        		double u_1_x_t = u_1_x_stored *(j_2.get(0));
+        		double u_1_y_t = u_1_y_stored * j_2.get(1);
+        		double u_1_omega_t = u_1_omega_stored * j_2.get(2);
+        		
+        		double u_2_x_t =  u_2_x_stored *j_2.get(3);
+        		double u_2_y_t =  u_2_y_stored *j_2.get(4);
+        		double u_2_omega_t =  u_2_omega_stored * j_2.get(5);
+        		
+        		double bf = c*contact_i.constraint_violation;
+
+        		//calculate D_i_n 
+      			double d_i_n = 0;
+    		
+    			//calculate Di
+        		d_i_n+= Math.pow(j_1.get(0), 2) * m1inv;
+        		d_i_n+= Math.pow(j_1.get(1), 2) * m1inv;
+        		d_i_n+= Math.pow(j_1.get(2), 2) * j1inv;
+        		//second body component
+        		d_i_n+= Math.pow(j_1.get(3), 2) * m2inv;
+        		d_i_n+= Math.pow(j_1.get(4), 2) * m2inv;
+        		d_i_n+= Math.pow(j_1.get(5), 2) * j2inv;
+        		
+        		
+        		//tangential component
+        		//calculate D_i_i 
+        		double d_i_t = 0;
+    			//first body componenent
+    			d_i_t+= Math.pow(j_2.get(0), 2) * m1inv;
+        		d_i_t+= Math.pow(j_2.get(1), 2) * m1inv;
+        		d_i_t+= Math.pow(j_2.get(2), 2) * j1inv; 
+        		//second body component
+        		d_i_t+= Math.pow(j_2.get(3), 2) * m2inv;
+        		d_i_t+= Math.pow(j_2.get(4), 2) * m2inv;
+        		d_i_t+= Math.pow(j_2.get(5), 2) * j2inv;
+        		
+        		double b_n = (u_1_x_n + u_2_x_n + u_1_y_n + u_2_y_n + u_1_omega_n + u_2_omega_n - restitution.getValue() + bf)/d_i_n;
+        		//assemble b vector
+        		double b_t = (u_1_x_t + u_2_x_t + u_1_y_t + u_2_y_t + u_1_omega_t + u_2_omega_t)/d_i_t;
+    		
+
+			 	DenseVector dV1 = contact_i.body1.delta_V; 
+			 	DenseVector dV2 = contact_i.body2.delta_V; 
+			 
 	        		//first body component
-	        		if (i%2 == 0) {
-	            		d_i+= Math.pow(j_1.get(0), 2) * m1inv;
-	            		d_i+= Math.pow(j_1.get(1), 2) * m1inv;
-	            		d_i+= Math.pow(j_1.get(2), 2) * j1inv;
-	            		//second body component
-	            		d_i+= Math.pow(j_1.get(3), 2) * m2inv;
-	            		d_i+= Math.pow(j_1.get(4), 2) * m2inv;
-	            		d_i+= Math.pow(j_1.get(5), 2) * j2inv;
-	        		}else { //tangential component
-	        			//first body componenent
-	        			d_i+= Math.pow(j_2.get(0), 2) * m1inv;
-	            		d_i+= Math.pow(j_2.get(1), 2) * m1inv;
-	            		d_i+= Math.pow(j_2.get(2), 2) * j1inv; 
-	            		//second body component
-	            		d_i+= Math.pow(j_2.get(3), 2) * m2inv;
-	            		d_i+= Math.pow(j_2.get(4), 2) * m2inv;
-	            		d_i+= Math.pow(j_2.get(5), 2) * j2inv;
-	        		}
 	        		
-	        		//get J Row i Delta V term first
-	        		//multiply the 6 J values with the appropriate delta V values
-	        	
-	        		DenseVector dV1 = contact_i.body1.delta_V; 
-	        		DenseVector dV2 = contact_i.body2.delta_V; 
-	        		double j_row_i_delta_V = 0;
-	        		
-	        		if (i%2 == 0) {
-	        			//first body
-	            		j_row_i_delta_V += j_1.get(0) * dV1.get(0);
-	            		j_row_i_delta_V += j_1.get(1) * dV1.get(1);
-	            		j_row_i_delta_V += j_1.get(2) * dV1.get(2);
-	        	
+	            		double j_n_delta_V = 0;
+	            		//first body
+	            		j_n_delta_V += j_1.get(0) * dV1.get(0);
+	            		j_n_delta_V += j_1.get(1) * dV1.get(1);
+	            		j_n_delta_V += j_1.get(2) * dV1.get(2);
+	            		
 		            	//second body
-	            		j_row_i_delta_V +=  j_1.get(3) * dV2.get(0);
-	            		j_row_i_delta_V +=  j_1.get(4) * dV2.get(1);
-	            		j_row_i_delta_V +=  j_1.get(5) * dV2.get(2);
+	            		j_n_delta_V +=  j_1.get(3) * dV2.get(0);
+	            		j_n_delta_V +=  j_1.get(4) * dV2.get(1);
+	            		j_n_delta_V +=  j_1.get(5) * dV2.get(2);
 	            		
-	        		}else {
-	        			j_row_i_delta_V += j_2.get(0) * dV1.get(0);
-	            		j_row_i_delta_V += j_2.get(1) * dV1.get(1);
-	            		j_row_i_delta_V += j_2.get(2) * dV1.get(2);
+	            		j_n_delta_V /= d_i_n;
+		        		
+	            		//putting b together.
 	        	
-		            	//second body
-	            		j_row_i_delta_V += j_2.get(3)* dV2.get(0);
-	            		j_row_i_delta_V += j_2.get(4) * dV2.get(1);
-	            		j_row_i_delta_V += j_2.get(5) * dV2.get(2);
-	           
-	        		}
-	        		j_row_i_delta_V /= d_i;
-	        		
-	        		//now take care of assembling b
-	        		// find all relevant values of u.
-	        		double u_1_x = contact_i.body1.v.x;
-	        		double u_1_y = contact_i.body1.v.y;
-	        		double u_1_omega = contact_i.body1.omega;
-	        		
-	        		double u_2_x = contact_i.body2.v.x;
-	        		double u_2_y = contact_i.body2.v.y;
-	        		double u_2_omega = contact_i.body2.omega;
-	        		
-	        		//add all relevant values of f, multiplied by appropriate minv to u_1_x etc
-	        		u_1_x += contact_i.body1.force.x * m1inv*dt;
-	        		u_1_y += contact_i.body1.force.y * m1inv*dt;
-	        		u_1_omega += contact_i.body1.torque * j1inv*dt;
-	        		
-	        		u_2_x += contact_i.body2.force.x*m2inv*dt;
-	        		u_2_y += contact_i.body2.force.y*m2inv*dt;
-	        		u_2_omega += contact_i.body2.torque*j2inv*dt;
-	        		
-	        		//multiply all the u values by the appropriate J values.
-	        		if (i%2 == 0) {
-	            		u_1_x = u_1_x *( j_1.get(0));
-	            		u_1_y = u_1_y * (j_1.get(1));
-	            		u_1_omega = u_1_omega * (j_1.get(2));
+	            		double lamda_n = contact_i.lamda.x;
 	            		
-	            		u_2_x = u_2_x *j_1.get(3);
-	            		u_2_y =   u_2_y * j_1.get(4);
-	            		u_2_omega =  u_2_omega *j_1.get(5);
-	        		}else {
-	        			u_1_x = u_1_x *(j_2.get(0));
-	            		u_1_y = u_1_y * j_2.get(1);
-	            		u_1_omega = u_1_omega * j_2.get(2);
-	            		
-	            		u_2_x =  u_2_x *j_2.get(3);
-	            		u_2_y =  u_2_y *j_2.get(4);
-	            		u_2_omega =  u_2_omega * j_2.get(5);
-	        		}
-	        		
-	        		//add the Bounce vector to the u's over here, but don't need to do that just yet
-	        		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
-	        	
-	        		// calculate Baumgarte Feedback (overlap of the two bodies)
-	        		double c = this.feedback_stiffness.getValue();
-	        		double bf = c*contact_i.constraint_violation;
-	
-	        		//putting b together.
-	          		double b = 0;
-	        		if (i%2 ==0) {
-	        			b = (u_1_x + u_2_x + u_1_y + u_2_y + u_1_omega + u_2_omega - restitution.getValue() + bf)/d_i;
-	        		}else{
-	        			b = (u_1_x + u_2_x + u_1_y + u_2_y + u_1_omega + u_2_omega)/d_i;
-	        		}
-	        		
-	        		double prev_lamda = lamda_i;
-	        		//putting everything  for lamda together
-	        		lamda_i= prev_lamda-b - j_row_i_delta_V;
-	      
-	    			
-	        		if (i%2 == 0) {
-	        			lamda_i = Math.max(0, lamda_i);
-	        		}
-	        		else {
-	        			//tangential lamda, constrained by mu* normal lamda
-	        			//get previous normal value for lamda
-	        			double normal_lamda = lamda.get(i - 1);
-	        			lamda_i = Math.max(lamda_i, -mu * normal_lamda);
-	        			lamda_i = Math.min(lamda_i, mu*normal_lamda);
-	        			
-	        		}
-	        		double delta_lamda = lamda_i - prev_lamda;
-	        		//update the force on each body to account for the collision
-	        		
-	
-	        		//updating lamda vector
-	        		if (i%2 ==0)
-	        		lamda.set(2*contact_i.index,  lamda_i);
-	        		else
-	        		lamda.set(2*contact_i.index + 1, lamda_i);
-	
-	        		
-	        		//Now we still need to do the velocity update.
-	        		// for that we must compute T = MinvJT TIMES deltaLamda
-	        		double t_1_x, t_1_y, t_1_omega, t_2_x, t_2_y, t_2_omega = 0;
-	        		if (i%2 == 0) {
-	        			//first body
+		        		double delta_lamda = -b_n - j_n_delta_V;
+		        		
+		        		double next_lamda_n = lamda_n + delta_lamda;
+		        		
+		        		next_lamda_n = Math.max(0, next_lamda_n);
+		        		
+		        		delta_lamda = next_lamda_n - lamda_n;
+		        		
+		        		contact_i.lamda.x= next_lamda_n;
+		        		//Now we still need to do the velocity update.
+		        		// for that we must compute T = MinvJT TIMES deltaLamda
+		        		double t_1_x, t_1_y, t_1_omega,  t_2_x, t_2_y, t_2_omega;
+		        		
+		        		//first body
 	        			t_1_x = j_1.get(0) * m1inv*delta_lamda;
 	        			t_1_y = j_1.get(1)* m1inv*delta_lamda;
 	        			t_1_omega = j_1.get(2)* j1inv*delta_lamda;
-	        			//second body
-	        			t_2_x = j_1.get(3) * m2inv*delta_lamda;
-	        			t_2_y = j_1.get(4) * m2inv*delta_lamda;
-	        			t_2_omega = j_1.get(5) * j2inv*delta_lamda;
-	        		}else {
-	        			//first body
+	        			
+	        			t_2_x =  j_1.get(3)  * m2inv*delta_lamda;
+	        			t_2_y =  j_1.get(4)  * m2inv*delta_lamda;
+	        			t_2_omega =  j_1.get(5) * j2inv*delta_lamda;
+	        			
+	        			//update delta V;
+		        		dV1.set( 0, dV1.get(0) + t_1_x );
+		        		dV1.set( 1, dV1.get(1) + t_1_y );
+		        		dV1.set( 2, dV1.get(2) + t_1_omega );
+		        		
+		        		dV2.set( 0, dV2.get(0) + t_2_x );
+		        		dV2.set( 1, dV2.get(1) + t_2_y );
+		        		dV2.set( 2, dV2.get(2) + t_2_omega );
+	        			
+	        	
+	            		double j_t_delta_V = 0;
+	            		
+	            		j_t_delta_V += j_2.get(0) * dV1.get(0);
+	            		j_t_delta_V += j_2.get(1) * dV1.get(1);
+	            		j_t_delta_V += j_2.get(2) * dV1.get(2);
+	        	
+		            	//second body
+	            		j_t_delta_V += j_2.get(3)* dV2.get(0);
+	            		j_t_delta_V += j_2.get(4) * dV2.get(1);
+	            		j_t_delta_V += j_2.get(5) * dV2.get(2);
+	            		
+	            		//get J Row i Delta V term first
+		        		//multiply the 6 J values with the appropriate delta V values
+		        		j_t_delta_V /= d_i_t;
+		        		
+	            		//multiply all the u values by the appropriate J values.
+	    	        	
+	            		//tangential lamda, 
+	        			//get current value of lamda
+	            		double tangential_lamda = contact_i.lamda.y;
+	        				        			
+		        		delta_lamda = -b_t - j_t_delta_V;
+		        		//get lamda at next iteration
+		        		double next_tangential_lamda = tangential_lamda+delta_lamda;
+		        		
+		        		//project , constrained by mu* normal lamda
+		        		double normal_lamda = contact_i.lamda.x;
+	        			next_tangential_lamda = Math.max(next_tangential_lamda, -mu * normal_lamda);
+	        			next_tangential_lamda = Math.min(next_tangential_lamda, mu*normal_lamda);
+	        			
+		        		contact_i.lamda.y = next_tangential_lamda;
+		        		
+		        		delta_lamda = next_tangential_lamda - tangential_lamda;
+		        		//first body
 	        			t_1_x = j_2.get(0) * m1inv*delta_lamda;
-	        			t_1_y =  j_2.get(1) * m1inv*delta_lamda;
-	        			t_1_omega =  j_2.get(2)  * j1inv*delta_lamda;
+	        			t_1_y = j_2.get(1)* m1inv*delta_lamda;
+	        			t_1_omega = j_2.get(2)* j1inv*delta_lamda;
 	        			//second body
+		        		
 	        			t_2_x =  j_2.get(3)  * m2inv*delta_lamda;
 	        			t_2_y =  j_2.get(4)  * m2inv*delta_lamda;
 	        			t_2_omega =  j_2.get(5) * j2inv*delta_lamda;
-	        		}
-	        		
-	        		//update delta V;
-	        		dV1.set( 0, dV1.get(0) + t_1_x );
-	        		dV1.set( 1, dV1.get(1) + t_1_y );
-	        		dV1.set( 2, dV1.get(2) + t_1_omega );
-	        		
-	        		//update delta V;
-	        		dV2.set( 0, dV2.get(0) + t_2_x );
-	        		dV2.set( 1, dV2.get(1) + t_2_y );
-	        		dV2.set( 2, dV2.get(2) + t_2_omega );
-	        		
+	        			
+		        		//update delta V;
+		        		dV1.set( 0, dV1.get(0) + t_1_x );
+		        		dV1.set( 1, dV1.get(1) + t_1_y );
+		        		dV1.set( 2, dV1.get(2) + t_1_omega );
+		        		
+	        			//update delta V;
+		        		dV2.set( 0, dV2.get(0) + t_2_x );
+		        		dV2.set( 1, dV2.get(1) + t_2_y );
+		        		dV2.set( 2, dV2.get(2) + t_2_omega );
+		      
+		        		
 	        	}
-	        	iteration--;
-	        	
+			
 	        }
 	   
 	   		for(RigidBody body:bodies) {
@@ -459,7 +458,7 @@ public class CollisionProcessor {
 		    	//update particle momentum
 	    	}	
 	        //fill the new map
-	        last_timestep_map.clear();
+	     /*   last_timestep_map.clear();
 	        for (Contact c : contacts) {
 	        	Block block1 = c.block1;
 	        	Block block2 = c.block2;
@@ -470,9 +469,8 @@ public class CollisionProcessor {
 	        	
 	        	c.lamdas = lamdas;
 	
-	        }
+	        } */
 	      
-	       
         
         collisionSolveTime = (System.nanoTime() - now) * 1e-9;
     }
@@ -737,59 +735,7 @@ public class CollisionProcessor {
             		bc.updatedThisTimeStep = true;
             		bodyContacts.add(bc);
             	}
-	           /* BodyContact bc1 = new BodyContact(body1, body2);
-	            BodyContact bc2 = new BodyContact(body2, body1);
-	            
-	            BodyContact existsOne = bc1.alreadyExists(body1.body_contact_list);
-	            BodyContact existsTwo = bc2.alreadyExists(body2.body_contact_list);
-	 
-	            
-	            //if this body contact exists already, add to the list of accumulated relative velocities
-	            if (existsOne != null ) {
-	            	bc1 = existsOne;
-	            	if (!bc1.updatedThisTimeStep) {
-		            	
-		            	
-		            	bc1.relativeVelHistory.add(contact.getRelativeMetric());
-		              	if (bc1.relativeVelHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
-		            		bc1.relativeVelHistory.remove(0);
-		            	 }
-		              	bc1.updatedThisTimeStep = true;
-	            	}
-	            }else {
-	            	if (!bc1.updatedThisTimeStep) {
-		            	// has this been updated this timestep
-		            	// if no:
-		            	if (!bc1.updatedThisTimeStep) {
-		            		bc1.relativeVelHistory.add(contact.getRelativeMetric());
-		            		body1.body_contact_list.add(bc1);
-		            		bc1.updatedThisTimeStep = true;
-		            	}
-	            	}
-	            }
-	            if (existsTwo != null) {
-	            	bc2 = existsTwo;
-	            	if (!bc2.updatedThisTimeStep) {
-	            		bc2.relativeVelHistory.add(contact.getRelativeMetric());
-		            	if (bc2.relativeVelHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
-		            		bc2.relativeVelHistory.remove(0);
-		            	}
-		            	bc2.updatedThisTimeStep = true;
-		            	autoMerge(bc1, bc2, body1, body2);
-	            	}
-	            }else {
-	            	if (!bc2.updatedThisTimeStep) {
-	            		bc2.relativeVelHistory.add(contact.getRelativeMetric());
-	            		body2.body_contact_list.add(bc2);
-	            		bc2.updatedThisTimeStep = true;
-	            	}
-	            	autoMerge(bc1, bc2, body1, body2);
-	            
-            }		
-	            */
-	            
-	            
-            
+	       
             
 	            body1.contact_list.add(contact);
 	            body2.contact_list.add(contact);
@@ -859,7 +805,7 @@ public class CollisionProcessor {
     /** Flag for using shuffle */
     private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
     /** Flag for using shuffle */
-    private BooleanParameter warm_start = new BooleanParameter( "warm start", true );
+    private BooleanParameter warm_start = new BooleanParameter( "warm start", false );
     
     /** Flag for enabling the use of hierarchical collision detection for body pairs */
     private BooleanParameter useBVTree = new BooleanParameter( "use BVTree", true);

@@ -541,7 +541,7 @@ public class RigidBodySystem {
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
     private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", true );
     private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
-    public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
+    public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", false);
     public BooleanParameter use_pendulum = new BooleanParameter( "create pendulum", false );
     public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
