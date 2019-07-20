@@ -132,7 +132,7 @@ public class RigidBodySystem {
             }
         }
         
-        //deal with springs
+        //deal with zero length springs
        for (RigidBody b: bodies){
 	        for (Spring s: b.springs) {
 	        	s.updateP2();
@@ -145,8 +145,6 @@ public class RigidBodySystem {
        }
        
        
-        
-        
         if ( processCollisions.getValue() ) {
             // process collisions, given the current time step
         	
@@ -155,52 +153,6 @@ public class RigidBodySystem {
         }
 
    
-        
-      /*  if (enableMerging.getValue()) {
-        	//add all contact forces to the contactForce field in each rigid Body (to wake up body)
-        	for (RigidBody b: bodies) {
-            	//TODO: figure out how to add contact Forces to each other
-            	//contact normal goes from body 1 to body 2. 
-            	
-            	for (Contact c: b.contact_list) {
-            		Vector2d contactForce = new Vector2d(); //total accumulated contactForce of all contacts acting on this body
-            		double contactTorque = 0; //total accumulated contact Torque of all contacts acting on this body.
-            		Vector2d normalComp = new Vector2d(c.normal);
-            		if (b.index ==c.body2.index) {
-            			//b is body 2. normal goes from the other body to this body. 
-            			normalComp.scale(-c.lamdas[0]);
-            		}else {
-            			normalComp.scale(c.lamdas[0]);
-            		}
-            			
-        			Vector2d tangeantComp = new Vector2d(c.normal.y, -c.normal.x); tangeantComp.scale(c.lamdas[1]);
-        			Vector2d xAxis = new Vector2d(1, 0);
-        			Vector2d yAxis = new Vector2d(0, 1);
-        			
-        			Vector2d bContactForce = new Vector2d();
-        			double bContactTorque = 0;
-        			bContactForce.x = normalComp.dot(xAxis) + tangeantComp.dot(xAxis);
-        			bContactForce.y = normalComp.dot(yAxis) + tangeantComp.dot(yAxis);
-        			
-        			Vector2d r = new Vector2d(c.contactW);
-        			r.sub(b.x);
-        			Vector2d ortho_r = new Vector2d(r.y, - r.x);
-        			bContactTorque = bContactForce.dot(ortho_r);
-        			
-        			contactForce.add(bContactForce);
-        			contactTorque += bContactTorque;
-        		
-            		
-            		b.contactForces.add(contactForce);
-            		b.contactTorques.add(contactTorque);
-            		if (b.contactForces.size() > CollisionProcessor.sleep_accum.getValue()) {
-            			b.contactForces.remove(0);
-            			b.contactTorques.remove(0);
-            		}
-            	}
-        	} 
-        
-        }*/
         if (use_pendulum.getValue()) {
         	Point2d origin = new Point2d(Pendulum.origin_x.getValue(), Pendulum.origin_y.getValue());
         	pendulumProcessor.processPendulum(dt, origin, Pendulum.pendulum_length.getValue());
@@ -245,6 +197,7 @@ public class RigidBodySystem {
 					}
 				}
 			}
+			if (bc.thisBody.pinned || bc.thisBody.pinned) mergeCondition = false;
 			if (mergeCondition) {
 				//if they are both not collections...make a new collection!
 				if(bc.thisBody.parent == null && bc.otherBody.parent == null) {
@@ -491,6 +444,7 @@ public class RigidBodySystem {
         if ( drawContacts.getValue() ) {
             for ( Contact c : collisionProcessor.contacts ) {
                 c.display(drawable);
+                c.drawContactForce(drawable);
             }
         }
         if ( drawCOMs.getValue() ) {
@@ -541,7 +495,7 @@ public class RigidBodySystem {
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
     private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", true );
     private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
-    public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", false);
+    public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
     public BooleanParameter use_pendulum = new BooleanParameter( "create pendulum", false );
     public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 

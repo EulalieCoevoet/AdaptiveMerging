@@ -30,7 +30,7 @@ public class RigidCollection extends RigidBody{
 		calculateMass();
 		calculateCOM();
 		setMergedTransformationMatrices();
-	//	updateMergedTransformationMatrices();
+		updateMergedTransformationMatrices();
 		calculateInertia();
 		addSprings();
 		
@@ -108,6 +108,19 @@ public class RigidCollection extends RigidBody{
 	public void advanceTime(double dt){
     	
 		if (!pinned) {
+			
+   			for (RigidBody b : collectionBodies) {
+   				delta_V.add(b.delta_V);
+   				delta_V.zero();
+   				}
+   			
+	    	v.x += delta_V.get(0);
+	    	v.y += delta_V.get(1);
+	    	omega += delta_V.get(2);
+	    	
+	    	delta_V.zero();
+	    	//update particles activity o
+	    	//update particle momentum
 			v.x += force.x * dt/massLinear;
 	    	v.y += force.y * dt/massLinear;
 	    	omega += torque * dt/ massAngular;
@@ -173,14 +186,11 @@ public class RigidCollection extends RigidBody{
 			body.transformB2C.leftMult(transformW2B);
 			body.transformC2B.set(body.transformB2C); body.transformC2B.invert();
 			
-			//set x and theta
-			temp.set(body.transformW2B);
-			temp.leftMult(body.transformB2C);
 			
 			//transforms from world coordinates to collection coordinates
-			temp.transform(body.x);
+			transformW2B.transform(body.x);
 			
-			body.theta = body.transformB2C.getTheta();
+			body.theta = transformW2B.getTheta();
 		
 		}
 		
@@ -230,7 +240,7 @@ public class RigidCollection extends RigidBody{
 			com.add(bCOM);
 		}
 	
-		theta = 0;
+	//	theta = 0;
 		x.set(com);
 	    transformB2W.set( theta, x );
 	    transformW2B.set( transformB2W);

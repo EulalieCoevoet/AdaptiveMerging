@@ -72,7 +72,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
      */
     public LCPApp() {
         system.mouseSpring = mouseSpring;
-        loadSystem("datalcp/lcp.png"); // good default scene
+        loadSystem("datalcp/simple12.png"); // good default scene
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(540,480), new Dimension(640,480) );
         ev.addInteractor(this);        

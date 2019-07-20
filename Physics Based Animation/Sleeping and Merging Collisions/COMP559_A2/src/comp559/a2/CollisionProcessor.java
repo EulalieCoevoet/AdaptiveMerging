@@ -26,7 +26,7 @@ public class CollisionProcessor {
 
     public List<RigidBody> bodies;
     
-    private HashMap<String, Double[]> last_timestep_map = new HashMap<String, Double[]>();
+    private HashMap<String, Contact> last_timestep_map = new HashMap<String, Contact>();
     
     public ArrayList<RigidCollection> collections = new ArrayList<RigidCollection>();
     /**
@@ -169,7 +169,7 @@ public class CollisionProcessor {
        lamda.zero();
  
      
-       /*
+       
 	   if (warm_start.getValue()) {
 		   for (Contact contact_i : contacts) {
 		        	
@@ -184,17 +184,17 @@ public class CollisionProcessor {
 						double j1inv = contact_i.body1.jinv;
 						double j2inv = contact_i.body2.jinv;
 						if (contact_i.body1.parent != null) {
-							m1inv = contact_i.body1.parent.minv;
-							j1inv = contact_i.body1.parent.jinv;
+							//m1inv = contact_i.body1.parent.minv;
+							//j1inv = contact_i.body1.parent.jinv;
 						}
 						if (contact_i.body2.parent != null) {
-							m2inv = contact_i.body2.parent.minv;
-							j2inv = contact_i.body2.parent.jinv;
+							//m2inv = contact_i.body2.parent.minv;
+							//j2inv = contact_i.body2.parent.jinv;
 						}
 						//if the old map contains this key, then get the lamda of the old map
-						double old_lamda_n = last_timestep_map.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()))[0] ;
-						double old_lamda_t = last_timestep_map.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()))[1] ;
-						
+						Contact c = last_timestep_map.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
+						double old_lamda_n = c.lamda.x;
+						double old_lamda_t = c.lamda.y;
 						double old_delta_lamda_n = old_lamda_n;
 						double old_delta_lamda_t = old_lamda_t;
 						//set this lamda to the old lamda
@@ -241,21 +241,23 @@ public class CollisionProcessor {
 						contact_i.body2.delta_V.zero();
 					}
 		   	}
-	    } */
+	    } 
 		//shuffle for stability
    	//	int iteration = iterations.getValue();
     // calculate Baumgarte Feedback (overlap of the two bodies)
 		double c = this.feedback_stiffness.getValue();
 		//int iteration = iterations.getValue();
 		
- 		organize();
-	   	if(shuffle.getValue())knuth_shuffle();
-	   	for (Contact contact_i : contacts){
-
+ 		
 		   int iteration = iterations.getValue();
 	   
 	  
 			while(iteration > 0) {
+				organize();
+			   	if(shuffle.getValue())knuth_shuffle();
+			   	
+				for (Contact contact_i : contacts){
+
 			  	DenseVector j_1 = new DenseVector(contact_i.j_1);
 	    		DenseVector j_2 = new DenseVector(contact_i.j_2);
 	    	
@@ -437,9 +439,9 @@ public class CollisionProcessor {
 		        		dV2.set( 1, dV2.get(1) + t_2_y );
 		        		dV2.set( 2, dV2.get(2) + t_2_omega );
 		      
-		        		
 	        	}
-			
+
+        		iteration --;
 	        }
 	   
 	   		for(RigidBody body:bodies) {
@@ -458,18 +460,15 @@ public class CollisionProcessor {
 		    	//update particle momentum
 	    	}	
 	        //fill the new map
-	     /*   last_timestep_map.clear();
-	        for (Contact c : contacts) {
-	        	Block block1 = c.block1;
-	        	Block block2 = c.block2;
-	        	Double [] lamdas = new Double[2];
-	        	lamdas[0] = lamda.get(2*c.index);
-	        	lamdas[1] = lamda.get(2*c.index+1);
-	        	last_timestep_map.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), lamdas);
+	       last_timestep_map.clear();
+	        for (Contact co : contacts) {
+	        	Block block1 = co.block1;
+	        	Block block2 = co.block2;
+	        
+	        	last_timestep_map.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), co);
 	        	
-	        	c.lamdas = lamdas;
 	
-	        } */
+	        } 
 	      
         
         collisionSolveTime = (System.nanoTime() - now) * 1e-9;
@@ -716,7 +715,7 @@ public class CollisionProcessor {
             contacts.add( contact );
            
                  
-            if (RigidBodySystem.enableMerging.getValue()) {
+            if (RigidBodySystem.enableMerging.getValue()&&  (!body1.pinned || !body2.pinned)) {
             	
             	//check if this body contact exists already
             	BodyContact bc = BodyContact.checkExists(body1, body2, bodyContacts);

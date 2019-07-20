@@ -168,6 +168,32 @@ public class Contact {
         }
     }
     
+    /**
+     * Draws the connections between bodies to visualize the 
+     * the adjacency structure of the matrix as a graph.
+     * @param drawable
+     */
+    public void drawContactForce( GLAutoDrawable drawable ) {
+        GL2 gl = drawable.getGL().getGL2();
+        // draw a line between the two bodies but only if they're both not pinned
+        Point2d p1 = new Point2d(block1.pB);
+        Point2d p2 = new Point2d(block2.pB);
+        body1.transformB2W.transform(p1);
+        body2.transformB2W.transform(p2);
+        
+            gl.glLineWidth(2);
+            gl.glColor4f(1, 0, 0, 1);
+            gl.glBegin( GL.GL_LINES );
+
+            gl.glVertex2d(p1.x, p1.y);
+            double scale = 3;
+            Vector2d normal2 = new Vector2d(normal);
+            normal2.scale(scale*lamda.length());
+            gl.glVertex2d(p1.x + normal2.x, p1.y+normal2.y);
+            gl.glEnd();
+  
+    }
+    
 
     
 }
