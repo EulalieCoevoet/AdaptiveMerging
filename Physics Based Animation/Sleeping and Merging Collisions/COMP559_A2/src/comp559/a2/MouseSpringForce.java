@@ -77,7 +77,7 @@ public class MouseSpringForce {
     /**
      * Stiffness of mouse spring
      */
-    public DoubleParameter stiffness = new DoubleParameter("mouse stiffness", 400, 1, 1e4 );
+    public DoubleParameter stiffness = new DoubleParameter("mouse stiffness", 10, 1, 1e4 );
     
     /**
      * Viscous damping coefficient for the mouse spring

@@ -118,7 +118,7 @@ public class CollisionProcessor {
         if ( contacts.size() > 0  && doLCP.getValue() ) {
             now = System.nanoTime();
       
-            PGS( dt,  now);
+           PGS( dt,  now);
         }
        
             	 
@@ -266,6 +266,8 @@ public class CollisionProcessor {
 				double j1inv =contact_i.body1.jinv;
 				double j2inv = contact_i.body2.jinv;
 				if (contact_i.body1.parent != null) {
+					//set to parent's mass, as we are
+					//now dealing with a contact with the entire colelction
 					m1inv = contact_i.body1.parent.minv;
 					j1inv = contact_i.body1.parent.jinv;
 				}
@@ -444,21 +446,7 @@ public class CollisionProcessor {
         		iteration --;
 	        }
 	   
-	   		for(RigidBody body:bodies) {
-	   			if (body instanceof RigidCollection) {
-	   				for (RigidBody b : ((RigidCollection) body).collectionBodies) {
-	   					body.delta_V.add(b.delta_V);
-	   					b.delta_V.zero();
-	   				}
-	   			}
-		    	body.v.x += body.delta_V.get(0);
-		    	body.v.y += body.delta_V.get(1);
-		    	body.omega += body.delta_V.get(2);
-		    	
-		    	body.delta_V.zero();
-		    	//update particles activity o
-		    	//update particle momentum
-	    	}	
+	   		
 	        //fill the new map
 	       last_timestep_map.clear();
 	        for (Contact co : contacts) {

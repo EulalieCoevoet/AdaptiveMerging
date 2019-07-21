@@ -63,8 +63,11 @@ public class Spring {
 	v1 = s.v1;
 	b1 = newBody;
 	
-	p2 = new Point2d(s.p2);
-	p2b = new Point2d(this.p2);
+	
+	
+	p2 = new Point2d(s.p2b);
+	s.b1.transformB2W.transform(p2);
+	p2b = new Point2d(p2);
 	//NEED TO WATCH OUT WITH TRANSFORM
 	b1.transformW2B.transform(p2b);
 	v2 = s.v2;

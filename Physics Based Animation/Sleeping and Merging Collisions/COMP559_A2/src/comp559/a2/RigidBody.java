@@ -280,15 +280,13 @@ public class RigidBody {
     	
         if ( !pinned ) {          
 
-            
-            double delta_vx =force.x * dt/massLinear;
-            double delta_vy =force.x * dt/massLinear;
-            double delta_omega =force.x * dt/massLinear;
+     
             
         	// non ARPS
-        	v.x += force.x * dt/massLinear;
-        	v.y += force.y * dt/massLinear;
-        	omega += torque * dt/ massAngular;
+        	v.x += force.x * dt/massLinear + delta_V.get(0);
+        	v.y += force.y * dt/massLinear + delta_V.get(1);
+        	omega += torque * dt/ massAngular + delta_V.get(2);
+        	delta_V.zero();
         	double k = this.getKineticEnergy();
          
             if (CollisionProcessor.useAdaptiveHamiltonian.getValue()) {

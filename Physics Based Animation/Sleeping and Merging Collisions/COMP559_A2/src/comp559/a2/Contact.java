@@ -53,11 +53,10 @@ public class Contact {
     BVNode bvn1;
     
     BVNode bvn2;
+    
     //vector points from body 2 to body 1, magnitude is the amount of overlap.
     double constraint_violation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
-    
-    Double[] lamdas = new Double[2];
-    
+ 
     Vector2d relativeVelocity = new Vector2d();
     
     double relativeAngularVelocity = 0;
@@ -85,11 +84,13 @@ public class Contact {
 		Point2d radius_i_body_2 = new Point2d(body2.x);
 		//if body is a merged one, it's x is in the collection frame... must transform into world
 		if (body1.parent != null) {
-			radius_i_body_1.set(body1.parent.x);//body1.parent.transformB2W.transform(radius_i_body_1);
+			radius_i_body_1.set(body1.parent.x);
+		//	body1.parent.transformB2W.transform(radius_i_body_1);
 			
 		}
 		if (body2.parent != null) {
-			radius_i_body_2.set(body2.parent.x);//body2.parent.transformB2W.transform(radius_i_body_2);
+			radius_i_body_2.set(body2.parent.x);
+			//body2.parent.transformB2W.transform(radius_i_body_2);
 		}
 		radius_i_body_1.sub(contact_point, radius_i_body_1);
 		radius_i_body_2.sub(contact_point, radius_i_body_2);
@@ -98,7 +99,7 @@ public class Contact {
 		
 		Vector2d r1 = new Vector2d(-radius_i_body_1.y, radius_i_body_1.x);
 		Vector2d r2 = new Vector2d(-radius_i_body_2.y, radius_i_body_2.x);
-		j_1.set(0, -normal.x);
+		j_1.set(0, -normal.x); 
 		j_1.set(1, -normal.y);
 		j_1.set(2, - r1.dot(normal));
 		j_1.set(3, normal.x);
@@ -112,11 +113,9 @@ public class Contact {
 		j_2.set(4, tangeant.y);
 		j_2.set(5, r2.dot(tangeant));
 		
-		
 		block1 = b1;
 		block2 = b2;
 		
-	  
 		constraint_violation =  distance - 2*Block.radius;
 		
 		relativeVelocity.sub(body2.v, body1.v);
