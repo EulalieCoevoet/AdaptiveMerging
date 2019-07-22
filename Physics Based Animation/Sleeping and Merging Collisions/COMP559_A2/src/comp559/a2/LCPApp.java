@@ -67,12 +67,15 @@ public class LCPApp implements SceneGraphNode, Interactor {
         new LCPApp();        
     }
     
+    String systemDir;
     /**
      * Creates the application / scene instance
      */
     public LCPApp() {
         system.mouseSpring = mouseSpring;
-        loadSystem("datalcp/simple12.png"); // good default scene
+        systemDir = "datalcp/simple8.png";
+        loadSystem(systemDir); 
+        // good default scene
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(540,480), new Dimension(640,480) );
         ev.addInteractor(this);        
@@ -261,6 +264,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 File f = FileSelect.select("png", "image", "load", "datalcp/", true );
                 if ( f != null ) {
                     loadSystem( f.getPath() );
+                    systemDir = f.getPath();
                 }
             }
         });
@@ -476,7 +480,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     }
                     stepped = true;
                 } else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
-                    systemReset(); 
+                    //systemReset(); 
+                	loadSystem(systemDir);
                 } else if ( e.getKeyCode() == KeyEvent.VK_A ) {
                 	scale.setValue( imageWidth / windowWidth );
                 } else if ( e.getKeyCode() == KeyEvent.VK_C ) {                   

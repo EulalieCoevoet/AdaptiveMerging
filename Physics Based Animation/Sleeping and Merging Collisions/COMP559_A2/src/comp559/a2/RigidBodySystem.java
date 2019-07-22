@@ -110,7 +110,7 @@ public class RigidBodySystem {
      * @param dt time step
      */
     public void advanceTime( double dt ) {
-    	
+    	 
     
     	long now = System.nanoTime();        
 
@@ -210,6 +210,7 @@ public class RigidBodySystem {
 					//take all the bodies in the least massive one and add them to the collection of the most massive
 					if (bc.thisBody.parent.massLinear > bc.otherBody.parent.massLinear) {
 						bc.thisBody.parent.addCollection(bc.otherBody.parent);
+						bodies.remove(bc.otherBody.parent);
 					}
 				}else if (bc.thisBody.parent != null) {
 					//thisBody is in a collection... otherBody isnt
@@ -296,16 +297,22 @@ public class RigidBodySystem {
         int counter = 0;
         boolean done = false;
         int i = 0;
-    	while(!done) {
+    	while(true) {
     		if (bodies.size() == 0) break;
         	RigidBody b = bodies.get(i);
         	if (!b.created) {
+        		
         		if (b instanceof RigidCollection) {
-        			collectionReset((RigidCollection) b);
-        			continue;
-        		}else {
-        			b.reset();
+        			for (RigidBody subBody: ((RigidCollection) b).collectionBodies) {
+        				bodies.add(subBody);
+        			}
+        			bodies.remove(b);
+        		
+        			b = bodies.get(i);
         		}
+        		b.reset();
+        		
+        		
         		for (Spring s: b.springs) {
         			s.reset();
         		}
@@ -315,8 +322,8 @@ public class RigidBodySystem {
         	}
         
         i++;
-        if (i == bodies.size()) done = true;
-        }
+        if (i >= bodies.size()) break;
+    	}
     	
     	int iter = size - counter;
     	if ( counter > 0) {

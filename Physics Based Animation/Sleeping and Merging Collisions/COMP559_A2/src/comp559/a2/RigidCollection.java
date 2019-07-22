@@ -85,6 +85,8 @@ public class RigidCollection extends RigidBody{
 		
 	}
 	
+	
+	
 	public void addInternalContact(BodyContact bc) {
 		internalBodyContacts.add(bc);
 	}
@@ -132,7 +134,7 @@ public class RigidCollection extends RigidBody{
 	    		bxW.set(b.x);
 	    		transformB2W.transform(bxW);
 	    		thetaW = transformB2W.getTheta();
-	    		b.v = v;
+	    		b.v.set(v);
 	    		b.omega = omega;
 	    		
 	    		bxW.x += v.x*dt;
