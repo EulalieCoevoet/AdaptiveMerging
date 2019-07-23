@@ -212,6 +212,9 @@ public class RigidBodySystem {
 					if (bc.thisBody.parent.massLinear > bc.otherBody.parent.massLinear) {
 						bc.thisBody.parent.addCollection(bc.otherBody.parent);
 						bodies.remove(bc.otherBody.parent);
+					}else {
+						bc.otherBody.parent.addCollection(bc.thisBody.parent);
+						bodies.remove(bc.thisBody.parent);
 					}
 				}else if (bc.thisBody.parent != null) {
 					//thisBody is in a collection... otherBody isnt

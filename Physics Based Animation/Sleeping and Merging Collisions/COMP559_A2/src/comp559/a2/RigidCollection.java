@@ -98,10 +98,14 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody b : col.collectionBodies) {
 			//transform all the subBodies to their world coordinates... 
 			col.transformB2W.transform(b.x);
-			//col.theta = col.transformB2W.getTheta();
+			b.theta = transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
 			b.transformC2B.T.setIdentity();
 			b.parent = null;
+			
+		}
+		
+		for (RigidBody b : col.collectionBodies) {
 			addBody(b);
 		}
 		internalBodyContacts.addAll(col.internalBodyContacts);
