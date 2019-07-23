@@ -85,12 +85,10 @@ public class Contact {
 		//if body is a merged one, it's x is in the collection frame... must transform into world
 		if (body1.parent != null) {
 			radius_i_body_1.set(body1.parent.x);
-		//	body1.parent.transformB2W.transform(radius_i_body_1);
-			
+		
 		}
 		if (body2.parent != null) {
 			radius_i_body_2.set(body2.parent.x);
-			//body2.parent.transformB2W.transform(radius_i_body_2);
 		}
 		radius_i_body_1.sub(contact_point, radius_i_body_1);
 		radius_i_body_2.sub(contact_point, radius_i_body_2);

@@ -184,12 +184,12 @@ public class CollisionProcessor {
 						double j1inv = contact_i.body1.jinv;
 						double j2inv = contact_i.body2.jinv;
 						if (contact_i.body1.parent != null) {
-							//m1inv = contact_i.body1.parent.minv;
-							//j1inv = contact_i.body1.parent.jinv;
+							m1inv = contact_i.body1.parent.minv;
+							j1inv = contact_i.body1.parent.jinv;
 						}
 						if (contact_i.body2.parent != null) {
-							//m2inv = contact_i.body2.parent.minv;
-							//j2inv = contact_i.body2.parent.jinv;
+							m2inv = contact_i.body2.parent.minv;
+							j2inv = contact_i.body2.parent.jinv;
 						}
 						//if the old map contains this key, then get the lamda of the old map
 						Contact c = last_timestep_map.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
@@ -265,24 +265,32 @@ public class CollisionProcessor {
 				double m2inv = contact_i.body2.minv;
 				double j1inv =contact_i.body1.jinv;
 				double j2inv = contact_i.body2.jinv;
+				Vector2d f1 = contact_i.body1.force;
+				double t1 = contact_i.body1.torque;
+				Vector2d f2 = contact_i.body2.contactForce;
+				double t2 = contact_i.body2.torque;
 				if (contact_i.body1.parent != null) {
 					//set to parent's mass, as we are
 					//now dealing with a contact with the entire colelction
 					m1inv = contact_i.body1.parent.minv;
 					j1inv = contact_i.body1.parent.jinv;
+					f1 = contact_i.body1.parent.force;
+					t1 = contact_i.body1.parent.torque;
 				}
 				if (contact_i.body2.parent != null) {
 					m2inv = contact_i.body2.parent.minv;
 					j2inv = contact_i.body2.parent.jinv;
+					f2 = contact_i.body2.parent.force;
+					t2 = contact_i.body2.parent.torque;
 				}
-				
-        		double u_1_x_stored = contact_i.body1.v.x + contact_i.body1.force.x * m1inv*dt;;
-        		double u_1_y_stored = contact_i.body1.v.y + contact_i.body1.force.y * m1inv*dt;;
-        		double u_1_omega_stored = contact_i.body1.omega + contact_i.body1.torque * j1inv*dt;;
+				 
+        		double u_1_x_stored = contact_i.body1.v.x + f1.x * m1inv*dt;
+        		double u_1_y_stored = contact_i.body1.v.y + f2.y * m1inv*dt;
+        		double u_1_omega_stored = contact_i.body1.omega + t1 * j1inv*dt;
         		
-        		double u_2_x_stored = contact_i.body2.v.x + contact_i.body2.force.x*m2inv*dt;
-        		double u_2_y_stored = contact_i.body2.v.y + contact_i.body2.force.y*m2inv*dt;
-        		double u_2_omega_stored = contact_i.body2.omega + contact_i.body2.torque*j2inv*dt;;
+        		double u_2_x_stored = contact_i.body2.v.x + f2.x*m2inv*dt;
+        		double u_2_y_stored = contact_i.body2.v.y + f2.y*m2inv*dt;
+        		double u_2_omega_stored = contact_i.body2.omega + t2*j2inv*dt;
         		
         		
         		double u_1_x_n = u_1_x_stored *( j_1.get(0));

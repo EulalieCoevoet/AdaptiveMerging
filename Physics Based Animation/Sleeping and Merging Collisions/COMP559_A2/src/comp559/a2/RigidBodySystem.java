@@ -128,7 +128,7 @@ public class RigidBodySystem {
                 force.scale( b.massLinear * gravityAmount.getValue() );
                 // gravity goes directly into the accumulator!  no torque!
                 b.force.add( force );
-               
+                
             }
         }
         
@@ -147,7 +147,8 @@ public class RigidBodySystem {
        
         if ( processCollisions.getValue() ) {
             // process collisions, given the current time step
-        	
+        	//apply all forces present on collecitonbodies first:
+     
              collisionProcessor.processCollisions( dt );
             
         }

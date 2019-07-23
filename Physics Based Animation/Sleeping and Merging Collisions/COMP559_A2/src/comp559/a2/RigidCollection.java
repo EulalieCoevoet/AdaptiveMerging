@@ -23,6 +23,7 @@ public class RigidCollection extends RigidBody{
 		super(body1); // this will copy the blocks, which is not exactly what we want... fine though.
 		
 		clearUselessJunk();
+		
 		index = body1.index;
 		collectionBodies.add(body1);
 		collectionBodies.add(body2);
@@ -31,7 +32,8 @@ public class RigidCollection extends RigidBody{
 		calculateCOM();
 		
 		setMergedTransformationMatrices();
-		updateCollectionBodyTransformations();
+		transformToCollectionCoords();
+		
 		calculateInertia();
 		
 		addSprings();
@@ -74,7 +76,8 @@ public class RigidCollection extends RigidBody{
 		//from this new collection COM determine new transforms for each body in the collection
 		//set Transform B2C and C2B for each body
 		setMergedTransformationMatrices();
-		updateCollectionBodyTransformations();
+		transformToCollectionCoords();
+		
 		calculateInertia();
 		//update BVNode roots for each body
 
@@ -95,8 +98,10 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody b : col.collectionBodies) {
 			//transform all the subBodies to their world coordinates... 
 			col.transformB2W.transform(b.x);
+			//col.theta = col.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
 			b.transformC2B.T.setIdentity();
+			b.parent = null;
 			addBody(b);
 		}
 		internalBodyContacts.addAll(col.internalBodyContacts);
@@ -110,48 +115,27 @@ public class RigidCollection extends RigidBody{
    			for (RigidBody b : collectionBodies) {
    				delta_V.add(b.delta_V);
    				b.delta_V.zero();
+   				b.force.set(0, 0);
+   				b.torque = 0;
    			}
-   			
-	    	v.x += delta_V.get(0);
-	    	v.y += delta_V.get(1);
-	    	omega += delta_V.get(2);
-	    	
-	    	delta_V.zero();
+   	
+	    	//delta_V.zero();
 	    	//update particles activity o
 	    	//update particle momentum
-			v.x += force.x * dt/massLinear;
-	    	v.y += force.y * dt/massLinear;
-	    	omega += torque * dt/ massAngular;
+			v.x += force.x * dt/massLinear + delta_V.get(0);
+	    	v.y += force.y * dt/massLinear + delta_V.get(1);
+	    	omega += torque * dt/ massAngular + delta_V.get(2);
 	    	
 	       	x.x += v.x * dt;
 	    	x.y += v.y * dt;
 	    	theta += omega*dt;
 	    	
-	    	//now update each collectionBody's v and x appropriately
-	    	Point2d bxW = new Point2d();
-	    	double thetaW = 0;
-	    	for (RigidBody b: collectionBodies) {
-	    		bxW.set(b.x);
-	    		transformB2W.transform(bxW);
-	    		thetaW = transformB2W.getTheta();
-	    		b.v.set(v);
-	    		b.omega = omega;
-	    		
-	    		bxW.x += v.x*dt;
-	    		bxW.y += v.y*dt;
-	    		thetaW += omega*dt;
-	    		
-	    		b.transformB2W.set(thetaW, bxW);
-	    		b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
-	    		
-	    		
-	    	}
-	    	
 	    	updateTransformations();
-	    	updateCollectionBodyTransformations();
+	    	updateCollectionBodyTransformations(dt);
+	    	
 	    	force.set(0, 0);
 	    	torque = 0;
-	    
+	    	delta_V.zero();	    
 		}
 
 	}
@@ -183,12 +167,35 @@ public class RigidCollection extends RigidBody{
       
     }
 	
-	private void updateCollectionBodyTransformations() {
-	//	for (RigidBody b: collectionBodies) {
-	 //      	b.transformB2W.set(b.transformB2C);
-	 //      	b.transformB2W.leftMult(transformB2W);
-	 //      	b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
-	//	}
+	private void updateCollectionBodyTransformations(double dt) {
+		//WHY doesn't this work!
+		for (RigidBody b: collectionBodies) {
+	       	b.transformB2W.set(b.transformB2C);
+	       	b.transformB2W.leftMult(transformB2W);
+	       	b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
+		}
+		//now update each collectionBody's v and x appropriately
+		//workaround... i think something might be wrong with each collectionBodies B2C
+		/*Point2d bxW = new Point2d();
+    	double thetaW = 0;
+
+    	for (RigidBody b: collectionBodies) {
+    		bxW.set(b.x);
+    		thetaW = b.transformC2B.getTheta();
+    		transformB2W.transform(bxW);
+    		b.v.set(v);
+    		b.omega = omega;
+    		
+    		bxW.x += v.x*dt;
+    		bxW.y += v.y*dt;
+    		thetaW += omega*dt;
+    		
+    		b.transformB2W.set(thetaW, bxW);
+    		b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
+    		
+    		
+    	} */
+    	
 	}
     
 	/*For each body in collection, determine the transformations to go from body to collection
@@ -196,30 +203,39 @@ public class RigidCollection extends RigidBody{
 	*/
 	
 	private void setMergedTransformationMatrices() {
-		RigidTransform temp = new RigidTransform();
-		
+				
 		for (RigidBody body: collectionBodies) {
 			body.transformB2C.set(body.transformB2W);
 			body.transformB2C.leftMult(transformW2B);
 			body.transformC2B.set(body.transformB2C); body.transformC2B.invert();
-		
-			//transforms from world coordinates to collection coordinates
-			//remember how i said it was temporary in CalculateCOM???! 
-			temp.set(body.transformW2B);
-			temp.leftMult(body.transformB2C);
-			
-			//transforms from world coordinates to collection coordinates
-			temp.transform(body.x);
-			
-			body.theta = body.transformB2C.getTheta();
-		
+	
 		}
+
 		
+		
+	}
+	
+	/*
+	 * transforms body x's and thetas in world coordinates into collection cooridnates
+	 */
+	private void transformToCollectionCoords(){
+		RigidTransform temp = new RigidTransform();
+		for (RigidBody b : collectionBodies) {
+			//transforms from world coordinates to collection coordinates
+			//remember how i said it was temporary in CalculateCOM()???! 
+			//temp.set(b.transformW2B);
+			//temp.leftMult(b.transformB2C);
+			
+			//transforms from world coordinates to collection coordinates
+			transformW2B.transform(b.x);
+			
+		 	b.theta =  b.transformB2C.getTheta();
+		}
 	}
 	
 	@Override
     public void display( GLAutoDrawable drawable ) {
-        GL2 gl = drawable.getGL().getGL2();
+		GL2 gl = drawable.getGL().getGL2();
         gl.glPushMatrix();
         gl.glTranslated( x.x, x.y, 0 );
         gl.glRotated(theta*180/Math.PI, 0,0,1);
@@ -250,6 +266,7 @@ public class RigidCollection extends RigidBody{
 		Vector2d bCOM = new Vector2d();
 		double totalMass = massLinear;
 		com.set(0,0);
+	
 		
 		for (RigidBody b: collectionBodies) {
 			double bRatio = b.massLinear/totalMass;
@@ -260,6 +277,9 @@ public class RigidCollection extends RigidBody{
 			}
 			bCOM.scale(bRatio, b.x);
 			com.add(bCOM);
+			
+			
+		
 		}
 		
 	
@@ -276,11 +296,16 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void calculateInertia() {
 		double inertia = 0;
+		Point2d bpB = new Point2d(0, 0);
 		Point2d zero = new Point2d(0, 0);
 		for (RigidBody body: collectionBodies) {
 			   for ( Block b : body.blocks ) {
 		            double mass = b.getColourMass();
-		            inertia += mass*b.pB.distanceSquared(zero);
+		            bpB.set(b.pB);
+		            body.transformB2C.transform(bpB);
+		            //b.pb is in c
+		            inertia += mass*bpB.distanceSquared(zero);
+		            
 		        }
 		
 		}
