@@ -82,14 +82,7 @@ public class Contact {
    
 		Point2d radius_i_body_1 = new Point2d(body1.x);
 		Point2d radius_i_body_2 = new Point2d(body2.x);
-		//if body is a merged one, it's x is in the collection frame... must transform into world
-		if (body1.parent != null) {
-			radius_i_body_1.set(body1.parent.x);
-		
-		}
-		if (body2.parent != null) {
-			radius_i_body_2.set(body2.parent.x);
-		}
+	
 		radius_i_body_1.sub(contact_point, radius_i_body_1);
 		radius_i_body_2.sub(contact_point, radius_i_body_2);
 		

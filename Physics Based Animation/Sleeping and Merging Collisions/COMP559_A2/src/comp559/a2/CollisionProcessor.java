@@ -183,14 +183,7 @@ public class CollisionProcessor {
 						double m2inv = contact_i.body2.minv;
 						double j1inv = contact_i.body1.jinv;
 						double j2inv = contact_i.body2.jinv;
-						if (contact_i.body1.parent != null) {
-							m1inv = contact_i.body1.parent.minv;
-							j1inv = contact_i.body1.parent.jinv;
-						}
-						if (contact_i.body2.parent != null) {
-							m2inv = contact_i.body2.parent.minv;
-							j2inv = contact_i.body2.parent.jinv;
-						}
+			
 						//if the old map contains this key, then get the lamda of the old map
 						Contact c = last_timestep_map.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
 						double old_lamda_n = c.lamda.x;
@@ -269,20 +262,7 @@ public class CollisionProcessor {
 				double t1 = contact_i.body1.torque;
 				Vector2d f2 = contact_i.body2.contactForce;
 				double t2 = contact_i.body2.torque;
-				if (contact_i.body1.parent != null) {
-					//set to parent's mass, as we are
-					//now dealing with a contact with the entire colelction
-					m1inv = contact_i.body1.parent.minv;
-					j1inv = contact_i.body1.parent.jinv;
-					f1 = contact_i.body1.parent.force;
-					t1 = contact_i.body1.parent.torque;
-				}
-				if (contact_i.body2.parent != null) {
-					m2inv = contact_i.body2.parent.minv;
-					j2inv = contact_i.body2.parent.jinv;
-					f2 = contact_i.body2.parent.force;
-					t2 = contact_i.body2.parent.torque;
-				}
+	
 				 
         		double u_1_x_stored = contact_i.body1.v.x + f1.x * m1inv*dt;
         		double u_1_y_stored = contact_i.body1.v.y + f2.y * m1inv*dt;
@@ -705,8 +685,18 @@ public class CollisionProcessor {
             normal.sub( tmp2, tmp1 );
             normal.normalize();
             // create the contact
-            Contact contact = new Contact( body1, body2, contactW, normal, b1, b2, distance);
+            Contact contact = null;
             
+            if (body1.parent != null && body2.parent != null) {
+            	contact = new Contact( body1.parent, body2.parent, contactW, normal, b1, b2, distance);
+            }
+            else if (body1.parent != null) {
+               contact = new Contact( body1.parent, body2, contactW, normal, b1, b2, distance);
+            }else if (body2.parent != null) {
+            	contact = new Contact( body1, body2.parent, contactW, normal, b1, b2, distance);
+            }else {
+            	contact = new Contact( body1, body2, contactW, normal, b1, b2, distance);
+            }
             // simple option... add to contact list...
             contacts.add( contact );
            
