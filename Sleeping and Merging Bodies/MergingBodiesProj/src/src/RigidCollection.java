@@ -191,19 +191,19 @@ public class RigidCollection extends RigidBody{
 	
 	private void updateCollectionBodyTransformations(double dt) {
 		//WHY doesn't this work!
-		for (RigidBody b: collectionBodies) {
+		/*for (RigidBody b: collectionBodies) {
 	       	b.transformB2W.set(b.transformB2C);
 	       	b.transformB2W.leftMult(transformB2W);
 	       	b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
-		}
+		}*/
 		//now update each collectionBody's v and x appropriately
 		//workaround... i think something might be wrong with each collectionBodies B2C
-		/*Point2d bxW = new Point2d();
+		Point2d bxW = new Point2d();
     	double thetaW = 0;
 
     	for (RigidBody b: collectionBodies) {
     		bxW.set(b.x);
-    		thetaW = b.transformC2B.getTheta();
+    		thetaW = b.transformB2W.getTheta();
     		transformB2W.transform(bxW);
     		b.v.set(v);
     		b.omega = omega;
@@ -216,7 +216,7 @@ public class RigidCollection extends RigidBody{
     		b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
     		
     		
-    	} */
+    	} 
     	
 	}
     

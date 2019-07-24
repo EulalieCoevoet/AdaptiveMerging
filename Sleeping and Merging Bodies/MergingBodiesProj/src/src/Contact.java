@@ -146,7 +146,10 @@ public class Contact {
             gl.glBegin( GL.GL_LINES );
             Point2d p1 = new Point2d(body1.x);
             Point2d p2 = new Point2d(body2.x);
-   
+            if (body1.parent != null) body1.parent.transformB2W.transform(p1);
+            // advance the system by the given time step
+            if (body2.parent != null) body2.parent.transformB2W.transform(p2);
+            
      
             gl.glVertex2d(p1.x, p1.y);
             gl.glVertex2d(p2.x, p2.y);

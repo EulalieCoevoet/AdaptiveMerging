@@ -159,17 +159,19 @@ public class RigidBodySystem {
         	pendulumProcessor.processPendulum(dt, origin, Pendulum.pendulum_length.getValue());
         }
         
-        if (enableMerging.getValue()) {
-        	// Put your body merging stuff here?  
-            mergeBodies();
-            
-        }
-    	 // advance the system by the given time step
+        // advance the system by the given time step
         for ( RigidBody b : bodies ) {
 
             b.advanceTime(dt);
         }
         
+        
+        if (enableMerging.getValue()) {
+        	// Put your body merging stuff here?  
+            mergeBodies();
+            
+        }
+    	
       
        
         

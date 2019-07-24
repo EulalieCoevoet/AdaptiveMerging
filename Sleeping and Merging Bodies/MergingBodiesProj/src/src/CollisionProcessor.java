@@ -60,8 +60,9 @@ public class CollisionProcessor {
         Contact.nextContactIndex = 0;
         //remember passive contacts
         if (CollisionProcessor.use_contact_graph.getValue() || RigidBodySystem.enableMerging.getValue()) {
-        	
+        	/*may not be important -->
         	for(RigidBody b :bodies) {
+        		
         		//remember BodyContacts at each body
         		ArrayList<BodyContact> new_body_contact_list = new ArrayList<BodyContact>();
         	
@@ -83,11 +84,12 @@ public class CollisionProcessor {
 	        			}
 	        		}
         		}
-        		
         		b.body_contact_list.clear();
         		b.body_contact_list.addAll(new_body_contact_list);
-        			
-        		
+        		<--
+        		*/	
+        		/*
+        		//only important for sleeping/waking bodies, not merging/unmerging 
         		//remember contacts between two sleeping bodies
         		ArrayList<Contact> new_contact_list = new ArrayList<Contact>();
         		for (Contact c: b.contact_list) {
@@ -99,7 +101,8 @@ public class CollisionProcessor {
         		}
         		b.contact_list.clear();
         		b.contact_list.addAll(new_contact_list);
-        	}
+        		
+        	}*/
         		
         }
         
@@ -112,7 +115,6 @@ public class CollisionProcessor {
         broadPhase();
         collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
         if (contacts.size() == 0)  last_timestep_map.clear();
-        
         
         
         if ( contacts.size() > 0  && doLCP.getValue() ) {
@@ -511,10 +513,10 @@ public class CollisionProcessor {
             }
         } else {
         	if (body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
-        		this.narrowCollection(body1, body2);
+        		narrowCollection(body1, body2);
         	}
         	else {
-        		this.findCollisions(body1.root, body2.root, body1, body2);
+        		findCollisions(body1.root, body2.root, body1, body2);
         	}
 	        
 	  
@@ -526,23 +528,25 @@ public class CollisionProcessor {
      * Recursive method that makes us check for collisions with each body in a rigidCollection
      */
     private void narrowCollection(RigidBody body1, RigidBody body2) {
-		boolean condition = false;
-    	if (body1 instanceof RigidCollection) {
+		if (body1 instanceof RigidCollection && body2 instanceof RigidCollection) {
 			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
 				narrowCollection(b, body2);
 			}
-			
-		}	else condition = true;
-		if (body2 instanceof RigidCollection) {
-			for (RigidBody b: ((RigidCollection) body2).collectionBodies) {
-				narrowCollection(body1, b);
+		}
+			else if (body1 instanceof RigidCollection) {
+				for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
+					findCollisions(b.root, body2.root, b, body2);
+				}
+				
+			}	else if (body2 instanceof RigidCollection) {
+				for (RigidBody b: ((RigidCollection) body2).collectionBodies) {
+					findCollisions(body1.root, b.root, body1, b);
+				}
 			}
-		}	else condition = condition&true;
+		
 		
 		//if both bodies are not rigid collections
-		if (condition){
-			findCollisions(body1.root, body2.root, body1, body2);
-		}
+		
 		
 	}
 	//Recurses through all of body_1,then body_2
@@ -687,6 +691,12 @@ public class CollisionProcessor {
             // create the contact
             Contact contact = null;
             
+            
+            /*
+             *  very important here... the Contact will contain information on contact location, 
+             *  where if any of the bodies involved are parts of a collection, then the contact 
+             *  will list the collection as one of its bodies... not the actual contacting subbody
+            */
             if (body1.parent != null && body2.parent != null) {
             	contact = new Contact( body1.parent, body2.parent, contactW, normal, b1, b2, distance);
             }
@@ -701,6 +711,9 @@ public class CollisionProcessor {
             contacts.add( contact );
            
                  
+            //that being said... the BODYCONTACTS bodies will only ever be subBodies or 
+            // unmerged normal rigid bodies... they will never be a collection.
+            
             if (RigidBodySystem.enableMerging.getValue()&&  (!body1.pinned || !body2.pinned)) {
             	
             	//check if this body contact exists already
