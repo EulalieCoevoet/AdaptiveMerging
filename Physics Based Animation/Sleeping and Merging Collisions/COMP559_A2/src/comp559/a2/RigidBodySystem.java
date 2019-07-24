@@ -159,18 +159,18 @@ public class RigidBodySystem {
         	pendulumProcessor.processPendulum(dt, origin, Pendulum.pendulum_length.getValue());
         }
         
-        
+        if (enableMerging.getValue()) {
+        	// Put your body merging stuff here?  
+            mergeBodies();
+            
+        }
     	 // advance the system by the given time step
         for ( RigidBody b : bodies ) {
 
             b.advanceTime(dt);
         }
         
-        if (enableMerging.getValue()) {
-        	// Put your body merging stuff here?  
-            mergeBodies();
-            
-        }
+      
        
         
     	if (this.generateBody) {
@@ -202,30 +202,34 @@ public class RigidBodySystem {
 			if (mergeCondition) {
 				//if they are both not collections...make a new collection!
 				if(bc.thisBody.parent == null && bc.otherBody.parent == null) {
+					bodies.remove(bc.thisBody); bodies.remove(bc.otherBody);
 					RigidCollection col = new RigidCollection(bc.thisBody, bc.otherBody);
 					col.addInternalContact(bc);
-					bodies.remove(bc.thisBody); bodies.remove(bc.otherBody);
 					bodies.add(col);
 				}else if (bc.thisBody.parent != null && bc.otherBody.parent != null) {
 					// if they are BOTH collections... think about what to do
 					//take all the bodies in the least massive one and add them to the collection of the most massive
 					if (bc.thisBody.parent.massLinear > bc.otherBody.parent.massLinear) {
-						bc.thisBody.parent.addCollection(bc.otherBody.parent);
 						bodies.remove(bc.otherBody.parent);
+						bc.thisBody.parent.addCollection(bc.otherBody.parent);
+						
 					}else {
-						bc.otherBody.parent.addCollection(bc.thisBody.parent);
 						bodies.remove(bc.thisBody.parent);
+						bc.otherBody.parent.addCollection(bc.thisBody.parent);
+						
 					}
 				}else if (bc.thisBody.parent != null) {
 					//thisBody is in a collection... otherBody isnt
+					bodies.remove(bc.otherBody);
 					bc.thisBody.parent.addBody(bc.otherBody);
 					bc.thisBody.parent.addInternalContact(bc);
-					bodies.remove(bc.otherBody);
+					
 				}else if (bc.otherBody.parent != null) {
 					//otherBody is in a collection... thisBody isnt
+					bodies.remove(bc.thisBody);
 					bc.otherBody.parent.addBody(bc.thisBody);
 					bc.otherBody.parent.addInternalContact(bc);
-					bodies.remove(bc.thisBody);
+					
 				}
 				removalQueue.add(bc);
 				checkIndex();

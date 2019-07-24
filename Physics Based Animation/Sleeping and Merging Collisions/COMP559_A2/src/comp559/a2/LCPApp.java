@@ -481,7 +481,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     stepped = true;
                 } else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
                     //systemReset(); 
-                	loadSystem(systemDir);
+                	loadSystem(system.name);
                 } else if ( e.getKeyCode() == KeyEvent.VK_A ) {
                 	scale.setValue( imageWidth / windowWidth );
                 } else if ( e.getKeyCode() == KeyEvent.VK_C ) {                   

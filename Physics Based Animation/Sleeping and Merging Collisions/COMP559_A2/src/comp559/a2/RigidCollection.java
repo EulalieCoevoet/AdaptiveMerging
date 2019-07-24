@@ -98,16 +98,34 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody b : col.collectionBodies) {
 			//transform all the subBodies to their world coordinates... 
 			col.transformB2W.transform(b.x);
-			b.theta = transformB2W.getTheta();
+			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
 			b.transformC2B.T.setIdentity();
 			b.parent = null;
+			collectionBodies.add(b);
 			
 		}
+		col.collectionBodies.clear();
 		
-		for (RigidBody b : col.collectionBodies) {
-			addBody(b);
-		}
+		calculateMass();
+		
+		calculateCOM();
+		
+
+		//addBlocks(body);
+		//from this new collection COM determine new transforms for each body in the collection
+		//set Transform B2C and C2B for each body
+		setMergedTransformationMatrices();
+		transformToCollectionCoords();
+		
+		calculateInertia();
+		//update BVNode roots for each body
+
+		springs.clear();
+		addSprings();
+		
+		
+		
 		internalBodyContacts.addAll(col.internalBodyContacts);
 	}
 	
@@ -213,6 +231,7 @@ public class RigidCollection extends RigidBody{
 			body.transformB2C.leftMult(transformW2B);
 			body.transformC2B.set(body.transformB2C); body.transformC2B.invert();
 	
+	
 		}
 
 		
@@ -311,6 +330,7 @@ public class RigidCollection extends RigidBody{
 		            inertia += mass*bpB.distanceSquared(zero);
 		            
 		        }
+			   body.parent = this;
 		
 		}
 		this.massAngular = inertia;
