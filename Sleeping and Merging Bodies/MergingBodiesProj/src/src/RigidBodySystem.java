@@ -250,7 +250,7 @@ public class RigidBodySystem {
 	    			
 	    		
 	    		}
-	    		*/
+	    		
 	    	}
 			
 			for (RigidBody b: additionQueue) {
@@ -259,6 +259,7 @@ public class RigidBodySystem {
 			for (RigidBody b : removalQueue) {
 				bodies.remove(b);
 			}
+			*/
 		
 	}
 
