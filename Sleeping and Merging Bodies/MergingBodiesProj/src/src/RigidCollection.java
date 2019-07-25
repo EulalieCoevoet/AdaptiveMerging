@@ -53,7 +53,7 @@ public class RigidCollection extends RigidBody{
 		contact_list.clear();
 		body_contact_list.clear();
 		contactForces.clear();
-		contactTorques.clear();
+		contactTorques = 0;
 		springs.clear();
 	}
 
@@ -129,21 +129,39 @@ public class RigidCollection extends RigidBody{
 		internalBodyContacts.addAll(col.internalBodyContacts);
 	}
 	
+	/** 
+	 * seperates each collectionBody from its parent so the bodies are ready to be added back to the system individually
+	 * x positions now need to be in world coordinates etc.
+	 */
+	public void unmergeAllBodies() {
+		internalBodyContacts.clear();
+		for (RigidBody b: collectionBodies) {
+			b.body_contact_list.clear();
+			b.contact_list.clear();
+			transformB2W.transform(b.x);
+			b.theta = b.transformB2W.getTheta();
+			b.transformB2C.T.setIdentity();
+			b.transformC2B.T.setIdentity();
+			b.parent = null;
+		}
+		
+	}
+	
 	@Override
 	public void advanceTime(double dt){
     	
 		if (!pinned) {
 			
+		
+			/*
    			for (RigidBody b : collectionBodies) {
    				delta_V.add(b.delta_V);
    				b.delta_V.zero();
    				b.force.set(0, 0);
    				b.torque = 0;
-   			}
+   			} */
    	
-	    	//delta_V.zero();
-	    	//update particles activity o
-	    	//update particle momentum
+	    	
 			v.x += force.x * dt/massLinear + delta_V.get(0);
 	    	v.y += force.y * dt/massLinear + delta_V.get(1);
 	    	omega += torque * dt/ massAngular + delta_V.get(2);
@@ -155,9 +173,7 @@ public class RigidCollection extends RigidBody{
 	    	updateTransformations();
 	    	updateCollectionBodyTransformations(dt);
 	    	
-	    	force.set(0, 0);
-	    	torque = 0;
-	    	delta_V.zero();	    
+	    		    
 		}
 
 	}
@@ -191,11 +207,11 @@ public class RigidCollection extends RigidBody{
 	
 	private void updateCollectionBodyTransformations(double dt) {
 		//WHY doesn't this work!
-		/*for (RigidBody b: collectionBodies) {
+		for (RigidBody b: collectionBodies) {
 	       	b.transformB2W.set(b.transformB2C);
 	       	b.transformB2W.leftMult(transformB2W);
 	       	b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
-		}*/
+		}/*
 		//now update each collectionBody's v and x appropriately
 		//workaround... i think something might be wrong with each collectionBodies B2C
 		Point2d bxW = new Point2d();
@@ -216,7 +232,7 @@ public class RigidCollection extends RigidBody{
     		b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
     		
     		
-    	} 
+    	} */
     	
 	}
     
@@ -244,12 +260,7 @@ public class RigidCollection extends RigidBody{
 	private void transformToCollectionCoords(){
 		RigidTransform temp = new RigidTransform();
 		for (RigidBody b : collectionBodies) {
-			//transforms from world coordinates to collection coordinates
-			//remember how i said it was temporary in CalculateCOM()???! 
-			//temp.set(b.transformW2B);
-			//temp.leftMult(b.transformB2C);
 			
-			//transforms from world coordinates to collection coordinates
 			transformW2B.transform(b.x);
 			
 		 	b.theta =  b.transformB2C.getTheta();

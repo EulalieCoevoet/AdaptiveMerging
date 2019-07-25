@@ -113,16 +113,20 @@ public class RigidBodySystem {
     	 
     
     	long now = System.nanoTime();        
-
-        mouseSpring.apply();
-        // apply gravity to all bodies
+    	
+    	
+    	
+  
+        // apply gravity to all bodies... also take this opportunity to clear all forces at the start of the timestep
         if ( useGravity.getValue() ) {
             Vector2d force = new Vector2d();
             for ( RigidBody b : bodies ) {
             	//fully active, regular stepping
-            	/*if (CollisionProcessor.use_contact_graph.getValue()) {
-            		b.set_activity_contact_graph(CollisionProcessor.sleepingThreshold.getValue());
-            	}*/
+            	b.contactForce.set(0, 0);
+            	b.contactTorques = 0;
+            	b.force.set(0, 0);
+            	b.torque = 0;
+            	b.delta_V.zero();
                 double theta = gravityAngle.getValue() / 180.0 * Math.PI;
                 force.set( Math.cos( theta ), Math.sin(theta) );
                 force.scale( b.massLinear * gravityAmount.getValue() );
@@ -131,6 +135,8 @@ public class RigidBodySystem {
                 
             }
         }
+        
+        mouseSpring.apply();
         
         //deal with zero length springs
        for (RigidBody b: bodies){
@@ -148,15 +154,24 @@ public class RigidBodySystem {
         if ( processCollisions.getValue() ) {
             // process collisions, given the current time step
         	//apply all forces present on collecitonbodies first:
-     
              collisionProcessor.processCollisions( dt );
             
+        }
+        
+        if (enableMerging.getValue()) {
+        	applyContactForces();
         }
 
    
         if (use_pendulum.getValue()) {
         	Point2d origin = new Point2d(Pendulum.origin_x.getValue(), Pendulum.origin_y.getValue());
         	pendulumProcessor.processPendulum(dt, origin, Pendulum.pendulum_length.getValue());
+        }
+     
+        if (enableMerging.getValue()) {
+        	// Put your body merging stuff here?  
+            mergeBodies();
+            
         }
         
         // advance the system by the given time step
@@ -165,12 +180,12 @@ public class RigidBodySystem {
             b.advanceTime(dt);
         }
         
-        
         if (enableMerging.getValue()) {
-        	// Put your body merging stuff here?  
-            mergeBodies();
-            
+        	unmergeBodies();
         }
+        
+        
+     
     	
       
        
@@ -184,11 +199,77 @@ public class RigidBodySystem {
         totalAccumulatedComputeTime += computeTime;
     }
 
-    /*
-     * Method that shifts all the indeces of each body after i, down by 1. 
-     */
+   /**
+    * goes through each contact, now with their appropriate lamda values, and adds the contact forces+torque 
+    * to each rigidBody.
+    */
+	    private void applyContactForces() {
 
-	    public void mergeBodies() {
+		Vector2d cForce = new Vector2d();
+		double cTorque= 0;
+	    for (Contact c: collisionProcessor.contacts) {
+	    	cForce.set(c.lamda.x*c.j_1.get(0) + c.lamda.y*c.j_2.get(0),c.lamda.x*c.j_1.get(1) + c.lamda.y*c.j_2.get(1) );
+	    	cTorque = c.lamda.x*c.j_1.get(2) + c.lamda.y*c.j_2.get(2);
+	    	c.body1.contactForce.add(cForce);
+	    	c.body1.contactTorques += cTorque;
+	    	
+	    	
+	    	cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
+	    	cTorque = c.lamda.x*c.j_1.get(5) + c.lamda.y*c.j_2.get(5);
+	    	c.body2.contactForce.add(cForce);
+	    	c.body2.contactTorques += cTorque;
+		}
+	    
+	}
+
+	    
+	    /*
+	     * self explanatory... goes through bodies and sees if any collection should be unmerged
+	     */
+		private void unmergeBodies() {
+	
+			/*
+			LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
+			LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
+	    	Vector2d totalForce = new Vector2d();
+	    	double totalTorque = 0;
+			for(RigidBody b : bodies) {
+	    		//check if force on Collection is high enough. If it is... unmerge the entire rigidCollection
+	    		if (b instanceof RigidCollection) {
+	    	
+	    			totalForce.set(b.force);
+	    			totalForce.add(b.contactForce);
+	    			totalTorque = b.torque + b.contactTorques;
+	    			
+	    			double forceMetric = Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2) + Math.pow(totalTorque, 2);
+	    			if (forceMetric > 1000000000*CollisionProcessor.impulseTolerance.getValue()) {
+	    				((RigidCollection) b).unmergeAllBodies();
+	    				additionQueue.addAll(((RigidCollection) b).collectionBodies);
+	    				removalQueue.add(b);
+	    			}
+	    			
+	    		
+	    		}
+	    		*/
+	    	}
+			
+			for (RigidBody b: additionQueue) {
+				bodies.add(b);
+			}
+			for (RigidBody b : removalQueue) {
+				bodies.remove(b);
+			}
+		
+	}
+
+	    /**
+	     * Merges all rigidBodies in the system that fit the appropriate criteria: 
+	     * 1. They have been in contact for 50 timesteps
+	     * 2. The relative velocities of the two bodies in contact has been below the CollisionProcessor.sleep_accum
+	     * 		value for the ENTIRETY of the contact.
+	     * 
+	     */
+		public void mergeBodies() {
     	LinkedList<BodyContact> removalQueue = new LinkedList<BodyContact>();
 		for (BodyContact bc: collisionProcessor.bodyContacts) {
 			boolean mergeCondition = false;

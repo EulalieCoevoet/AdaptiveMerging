@@ -134,7 +134,7 @@ public class RigidBody {
     public ArrayList<Vector2d> contactForces = new ArrayList<Vector2d>();
     
     /** a list of the total contact torques acting on this body in the last N steps  before sleeping or merging   */
-    public ArrayList<Double> contactTorques = new ArrayList<Double>();
+    public double contactTorques = 0;
     
     
     /** the total contact forces acting on it at this current time step, in world coordinates**/
