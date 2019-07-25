@@ -809,7 +809,7 @@ public class CollisionProcessor {
     private BooleanParameter useBVTree = new BooleanParameter( "use BVTree", true);
    
     
-    public static DoubleParameter feedback_stiffness = new DoubleParameter("feedback coefficient", 0.3, 0,50  );
+    public static DoubleParameter feedback_stiffness = new DoubleParameter("feedback coefficient", 2, 0,50  );
    
     /** toggle on or off adaptive hamiltonian*/
     public static BooleanParameter  useAdaptiveHamiltonian = new BooleanParameter("enable use of adaptive hamiltonian", false );
@@ -821,7 +821,7 @@ public class CollisionProcessor {
     
     public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", false );
     
-    public static DoubleParameter impulseTolerance = new DoubleParameter("impulse tolerance", 1000, 0, 2000 );
+    public static DoubleParameter impulseTolerance = new DoubleParameter("impulse tolerance", 10000, 0, 100000 );
     
     public static IntParameter collision_wake = new IntParameter("wake n neighbors", 2, 0, 10 );
     

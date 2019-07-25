@@ -52,7 +52,6 @@ public class MouseSpringForce {
      */
     public void apply() {
         if ( picked == null ) return;
-        
         Point2d grabPointW = new Point2d();
         Vector2d grabPointV = new Vector2d();
         picked.transformB2W.transform( grabPointB, grabPointW );
@@ -66,12 +65,24 @@ public class MouseSpringForce {
         if ( direction.lengthSquared() < 1e-3 ) return;
         direction.normalize();
         force.scale( distance * k, direction );
-        picked.applyContactForceW( grabPointW, force );
         
-        // spring damping forces
-        picked.getSpatialVelocity( grabPointW, grabPointV );
-        force.scale( - grabPointV.dot( direction ) * c, direction );
-        picked.applyContactForceW( grabPointW, force );        
+        
+        if (picked.parent == null) {
+	        picked.applyContactForceW( grabPointW, force );
+	        
+	        // spring damping forces
+	        picked.getSpatialVelocity( grabPointW, grabPointV );
+	        force.scale( - grabPointV.dot( direction ) * c, direction );
+	        picked.applyContactForceW( grabPointW, force ); 
+        }else {
+        	//apply the spring force on the parent
+        	picked.parent.applyContactForceW( grabPointW, force );
+	        
+	        // spring damping forces
+	        picked.parent.getSpatialVelocity( grabPointW, grabPointV );
+	        force.scale( - grabPointV.dot( direction ) * c, direction );
+	        picked.parent.applyContactForceW( grabPointW, force ); 
+        }
     }
     
     /**

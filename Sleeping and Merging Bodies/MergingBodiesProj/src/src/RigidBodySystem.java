@@ -171,6 +171,7 @@ public class RigidBodySystem {
         if (enableMerging.getValue()) {
         	// Put your body merging stuff here?  
             mergeBodies();
+            checkIndex();
             
         }
         
@@ -182,18 +183,14 @@ public class RigidBodySystem {
         
         if (enableMerging.getValue()) {
         	unmergeBodies();
+        	checkIndex();
         }
-        
-        
-     
-    	
-      
-       
         
     	if (this.generateBody) {
     		generateBody();
     		this.generateBody = false;
     	}
+    	
         computeTime = (System.nanoTime() - now) / 1e9;
         simulationTime += dt;
         totalAccumulatedComputeTime += computeTime;
@@ -228,7 +225,7 @@ public class RigidBodySystem {
 	     */
 		private void unmergeBodies() {
 	
-			/*
+			
 			LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 			LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 	    	Vector2d totalForce = new Vector2d();
@@ -241,8 +238,8 @@ public class RigidBodySystem {
 	    			totalForce.add(b.contactForce);
 	    			totalTorque = b.torque + b.contactTorques;
 	    			
-	    			double forceMetric = Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2) + Math.pow(totalTorque, 2);
-	    			if (forceMetric > 1000000000*CollisionProcessor.impulseTolerance.getValue()) {
+	    			double forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2) + Math.pow(totalTorque, 2));
+	    			if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
 	    				((RigidCollection) b).unmergeAllBodies();
 	    				additionQueue.addAll(((RigidCollection) b).collectionBodies);
 	    				removalQueue.add(b);
@@ -259,7 +256,7 @@ public class RigidBodySystem {
 			for (RigidBody b : removalQueue) {
 				bodies.remove(b);
 			}
-			*/
+			
 		
 	}
 
@@ -343,15 +340,13 @@ public class RigidBodySystem {
      */
     public RigidBody pickBody( Point2d p ) {
         for ( RigidBody body : bodies ) {
-            if ( body.intersect( p ) ) {
+        	//must also check if intersects a collection
+        	if(body instanceof RigidCollection) {
+        		RigidBody b = collectionPick((RigidCollection) body, p);
+        		if (b!= null) return b;
+        	}
+        	else if ( body.intersect( p ) ) {
                 return body;
-            }else {
-            	//must also check if intersects a collection
-            	if(body instanceof RigidCollection) {
-            		if (collectionPick((RigidCollection)body, p)){
-            			return body;
-            		}
-            	}
             }
         }
         return null;
@@ -361,15 +356,14 @@ public class RigidBodySystem {
      * @param body 
      * @param p
      */
-    private boolean collectionPick(RigidCollection body, Point2d p) {
-    
+    private RigidBody collectionPick(RigidCollection body, Point2d p) {
 		for (RigidBody b: body.collectionBodies ) {
 			
 			if (b.intersect(p)) {
-				return true;
+				return b;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	/**
@@ -588,9 +582,9 @@ public class RigidBodySystem {
     private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
     private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
     private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
-    private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", true );
+    private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
     private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", false );
-    private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", true);
+    private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", false);
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
     private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", true );
     private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );

@@ -2,6 +2,7 @@ package src;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -95,15 +96,22 @@ public class RigidCollection extends RigidBody{
 	}
 	//like addBody but with another collection...
 	public void addCollection(RigidCollection col) {
+		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 		for (RigidBody b : col.collectionBodies) {
 			//transform all the subBodies to their world coordinates... 
+		
 			col.transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
 			b.transformC2B.T.setIdentity();
 			b.parent = null;
-			collectionBodies.add(b);
+			additionQueue.add(b);
 			
+			
+		}
+		
+		for (RigidBody b: additionQueue) {
+			collectionBodies.add(b);
 		}
 		col.collectionBodies.clear();
 		
@@ -142,6 +150,8 @@ public class RigidCollection extends RigidBody{
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
 			b.transformC2B.T.setIdentity();
+			b.v.set(v);
+			b.omega = omega;
 			b.parent = null;
 		}
 		
