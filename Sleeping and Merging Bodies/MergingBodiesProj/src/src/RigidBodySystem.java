@@ -122,6 +122,8 @@ public class RigidBodySystem {
             Vector2d force = new Vector2d();
             for ( RigidBody b : bodies ) {
             	//fully active, regular stepping
+            	b.bodyContactList.clear();
+            	b.contactList.clear();
             	b.contactForce.set(0, 0);
             	b.contactTorques = 0;
             	b.force.set(0, 0);
@@ -221,12 +223,36 @@ public class RigidBodySystem {
 
 	    
 	    /*
-	     * self explanatory... goes through bodies and sees if any collection should be unmerged
+	     * method that deals with unmerging rigidBodies... because we will explore different solutions to
+	     * this problem, it will call different methods for each unmerging solution.
+	     * 
 	     */
 		private void unmergeBodies() {
-	
+			generalHeuristic();
 			
-			LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
+			forceClosureMethod();
+		}
+		
+		/**
+		 * The idea is to check at every timestep, the force acting on the system including:
+		 * Gravity, Spring, Collision Lamdas, etc.
+		 * 
+		 * We then go through each body in the collection, and for each body we go through each
+		 * contact and see if the new applied force at that contact location lies 
+		 * outside of the friction cone. If yes, then unmerge that body... (may need to recurse)
+		 * if no, then dont unmerge
+		 */
+		private void forceClosureMethod() {
+			// TODO Fill this method out		
+		}
+
+		/**goes through bodies and sees if any collection should be unmerged, and then
+		 * unmerges ALLL bodies in that collecion with no discrimination
+		 * 
+		 */
+		
+	    private void generalHeuristic() {
+	    	LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 			LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 	    	Vector2d totalForce = new Vector2d();
 	    	double totalTorque = 0;
@@ -256,11 +282,9 @@ public class RigidBodySystem {
 			for (RigidBody b : removalQueue) {
 				bodies.remove(b);
 			}
-			
-		
-	}
+		}
 
-	    /**
+		/**
 	     * Merges all rigidBodies in the system that fit the appropriate criteria: 
 	     * 1. They have been in contact for 50 timesteps
 	     * 2. The relative velocities of the two bodies in contact has been below the CollisionProcessor.sleep_accum
@@ -515,7 +539,7 @@ public class RigidBodySystem {
 	            	/*for (RigidBody c: b.contact_body_list) {
 	            		b.displayConnection(drawable, c);
 	            	}*/
-	            	for (Contact c:b.contact_list) {
+	            	for (Contact c:b.contactList) {
 	            		c.displayConnection(drawable);
 	            	}
 	            } 

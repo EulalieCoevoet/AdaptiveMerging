@@ -77,7 +77,6 @@ public class RigidBody {
      */
     RigidTransform transformC2B = new RigidTransform();
     
-    
     /** linear velocity */
     public Vector2d v = new Vector2d();
     
@@ -111,14 +110,12 @@ public class RigidBody {
     /**rho vvalue, 0 if active, 1 if inactive, function of Kinetic energy when in transition**/
     public double rho;
     
-
-
     /** list of contacting bodies present with this rigidbody. cleared after every timestep, unless the contact was between two sleeping bodies**/
-    public ArrayList<Contact> contact_list = new ArrayList<Contact>();
+    public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
     
     /** list of contacting bodies present with this rigidbody. cleared after every timestep, unless the contact was between two sleeping bodies**/
-    public ArrayList<BodyContact> body_contact_list = new ArrayList<BodyContact>();
+    public ArrayList<BodyContact> bodyContactList = new ArrayList<BodyContact>();
     
     
     /** list of springs attached to the body**/
@@ -492,8 +489,8 @@ public class RigidBody {
         
         transformB2C.T.setIdentity();
         transformC2B.T.setIdentity();
-        contact_list.clear();
-        body_contact_list.clear();
+        contactList.clear();
+        bodyContactList.clear();
         active = 0;
         active_past.clear();
         parent=null;

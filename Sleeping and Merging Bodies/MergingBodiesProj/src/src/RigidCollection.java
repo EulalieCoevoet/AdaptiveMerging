@@ -51,8 +51,8 @@ public class RigidCollection extends RigidBody{
 		boundaryBlocks.clear();
 		
 		active_past.clear();
-		contact_list.clear();
-		body_contact_list.clear();
+		contactList.clear();
+		bodyContactList.clear();
 		contactForces.clear();
 		contactTorques = 0;
 		springs.clear();
@@ -144,8 +144,8 @@ public class RigidCollection extends RigidBody{
 	public void unmergeAllBodies() {
 		internalBodyContacts.clear();
 		for (RigidBody b: collectionBodies) {
-			b.body_contact_list.clear();
-			b.contact_list.clear();
+			b.bodyContactList.clear();
+			b.contactList.clear();
 			transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();

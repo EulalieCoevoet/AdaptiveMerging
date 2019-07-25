@@ -61,9 +61,8 @@ public class Contact {
     
     double relativeAngularVelocity = 0;
     
-    BodyContact b1;
-    
-    BodyContact b2;
+    //Pointer to the BodyContact this contact is a part of. 
+    BodyContact bc;
     /**
      * Creates a new contact, and assigns it an index
      * @param body1

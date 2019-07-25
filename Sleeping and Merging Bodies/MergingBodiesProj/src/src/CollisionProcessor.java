@@ -103,11 +103,11 @@ public class CollisionProcessor {
         		b.contact_list.addAll(new_contact_list);
         		
         	}*/
-        		
+         	//remember Body Contacts
+            rememberBodyContacts();
         }
         
-      	//remember Body Contacts
-        rememberBodyContacts();
+     
      
 		//the rest of the collisionProcessor
         contacts.clear();
@@ -129,6 +129,8 @@ public class CollisionProcessor {
 	private void rememberBodyContacts() {
     	ArrayList<BodyContact> savedBodyContacts = new ArrayList<BodyContact>();
    		for (BodyContact bc : bodyContacts) {
+   			
+   			bc.contactList.clear();
            	if (bc.updatedThisTimeStep) {
            		savedBodyContacts.add(bc);
            		bc.updatedThisTimeStep = false;
@@ -145,7 +147,7 @@ public class CollisionProcessor {
     private void rememberChildrenBodyContacts(RigidCollection b) {
 		for (RigidBody body: b.collectionBodies){
 			ArrayList<BodyContact> new_body_contact_list = new ArrayList<BodyContact>();
-			for (BodyContact c: body.body_contact_list) {
+			for (BodyContact c: body.bodyContactList) {
     			c.otherBody.visited = false;
     		
     			if(c.updatedThisTimeStep){
@@ -155,8 +157,8 @@ public class CollisionProcessor {
     		}
 			
 			//also keep contact between two bodies that have been in contact before.
-    		b.body_contact_list.clear();
-    		b.body_contact_list.addAll(new_body_contact_list);
+    		b.bodyContactList.clear();
+    		b.bodyContactList.addAll(new_body_contact_list);
     		
 		}
 		
@@ -617,7 +619,7 @@ public class CollisionProcessor {
 			body1.visited = true;
 			body1.woken_up = true;
 		//	body1.active_past.add(true); makes bodies oscillate between sleeping and waking
-			for (BodyContact c: body1.body_contact_list) {
+			for (BodyContact c: body1.bodyContactList) {
 					if (!c.otherBody.pinned)
 					wake_neighbors(c.otherBody, hop);
 				
@@ -725,6 +727,8 @@ public class CollisionProcessor {
 		            		bc.relativeVelHistory.remove(0);
 		            	 }
                			bc.updatedThisTimeStep = true;
+               			body1.bodyContactList.add(bc);
+        	            body2.bodyContactList.add(bc);
                		}
             	}else {
             		//body contact did not exist in previous list
@@ -732,11 +736,17 @@ public class CollisionProcessor {
             		bc.relativeVelHistory.add(contact.getRelativeMetric());
             		bc.updatedThisTimeStep = true;
             		bodyContacts.add(bc);
+            		
+            		body1.bodyContactList.add(bc);
+    	            body2.bodyContactList.add(bc);
             	}
-	       
+            	contact.bc = bc;
+            	bc.contactList.add(contact);
             
-	            body1.contact_list.add(contact);
-	            body2.contact_list.add(contact);
+	            body1.contactList.add(contact);
+	            body2.contactList.add(contact);
+	            
+	            
             
             }
             

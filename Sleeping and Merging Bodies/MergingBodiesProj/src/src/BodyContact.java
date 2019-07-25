@@ -9,6 +9,8 @@ public class BodyContact {
 	public RigidBody thisBody; 
 	
 	public RigidBody otherBody;
+	
+	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
 	public ArrayList<Double> relativeVelHistory = new ArrayList<Double>();
 	
