@@ -12,6 +12,8 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 public class RigidCollection extends RigidBody{
+	
+	public LinkedList<RigidBody> colRemovalQueue = new LinkedList<RigidBody>();
 
 	ArrayList<RigidBody> collectionBodies = new ArrayList<RigidBody>();
 	
@@ -28,16 +30,8 @@ public class RigidCollection extends RigidBody{
 		index = body1.index;
 		collectionBodies.add(body1);
 		collectionBodies.add(body2);
-
-		calculateMass();
-		calculateCOM();
 		
-		setMergedTransformationMatrices();
-		transformToCollectionCoords();
-		
-		calculateInertia();
-		
-		addSprings();
+		setupCollection();
 		
 		body1.parent = this;
 		body2.parent = this;
@@ -66,24 +60,7 @@ public class RigidCollection extends RigidBody{
 	public void addBody(RigidBody body) {
 		
 		collectionBodies.add(body);
-		
-		
-		calculateMass();
-		
-		calculateCOM();
-		
-
-		//addBlocks(body);
-		//from this new collection COM determine new transforms for each body in the collection
-		//set Transform B2C and C2B for each body
-		setMergedTransformationMatrices();
-		transformToCollectionCoords();
-		
-		calculateInertia();
-		//update BVNode roots for each body
-
-		springs.clear();
-		addSprings();
+		setupCollection();
 		
 		body.parent = this;
 		
@@ -161,17 +138,7 @@ public class RigidCollection extends RigidBody{
 	public void advanceTime(double dt){
     	
 		if (!pinned) {
-			
-		
-			/*
-   			for (RigidBody b : collectionBodies) {
-   				delta_V.add(b.delta_V);
-   				b.delta_V.zero();
-   				b.force.set(0, 0);
-   				b.torque = 0;
-   			} */
-   	
-	    	
+				    	
 			v.x += force.x * dt/massLinear + delta_V.get(0);
 	    	v.y += force.y * dt/massLinear + delta_V.get(1);
 	    	omega += torque * dt/ massAngular + delta_V.get(2);
@@ -182,7 +149,6 @@ public class RigidCollection extends RigidBody{
 	    	
 	    	updateTransformations();
 	    	updateCollectionBodyTransformations(dt);
-	    	
 	    		    
 		}
 
@@ -221,28 +187,8 @@ public class RigidCollection extends RigidBody{
 	       	b.transformB2W.set(b.transformB2C);
 	       	b.transformB2W.leftMult(transformB2W);
 	       	b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
-		}/*
-		//now update each collectionBody's v and x appropriately
-		//workaround... i think something might be wrong with each collectionBodies B2C
-		Point2d bxW = new Point2d();
-    	double thetaW = 0;
+		}
 
-    	for (RigidBody b: collectionBodies) {
-    		bxW.set(b.x);
-    		thetaW = b.transformB2W.getTheta();
-    		transformB2W.transform(bxW);
-    		b.v.set(v);
-    		b.omega = omega;
-    		
-    		bxW.x += v.x*dt;
-    		bxW.y += v.y*dt;
-    		thetaW += omega*dt;
-    		
-    		b.transformB2W.set(thetaW, bxW);
-    		b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
-    		
-    		
-    	} */
     	
 	}
     
@@ -416,6 +362,64 @@ public class RigidCollection extends RigidBody{
 
         
     }
+
+/**
+ * Removes a body from the current collection, without changing the other Bodies
+ */
+	public void unmergeSelectBodies() {
+		// TODO Auto-generated method stub
+		for (RigidBody b : colRemovalQueue) {
+			b.bodyContactList.clear();
+			b.contactList.clear();
+			transformB2W.transform(b.x);
+			b.theta = b.transformB2W.getTheta();
+			b.transformB2C.T.setIdentity();
+			b.transformC2B.T.setIdentity();
+			b.v.set(v);
+			b.omega = omega;
+			b.parent = null;
+			collectionBodies.remove(b);
+			/*int i = 0;
+			while (true) {
+				BodyContact bc = bodyContactList.get(i);
+				if (bc.thisBody == b || bc.otherBody== b) {
+					bodyContactList.remove(bc);
+					if (i >= bodyContactList.size()) break;
+					continue;
+				}
+				i++;
+				if (i >= bodyContactList.size()) break;
+			}*/
+		}
+		
+		//reset up the collection
+		setupCollection();
+
+		
+	}
+
+/*basic setup of the collection... calculates transforms, COM, inertia , etc.
+ * 
+ */
+	private void setupCollection() {
+		calculateMass();
+	
+		calculateCOM();
+		//addBlocks(body);
+		//from this new collection COM determine new transforms for each body in the collection
+		//set Transform B2C and C2B for each body
+		setMergedTransformationMatrices();
+		transformToCollectionCoords();
+	
+		calculateInertia();
+		//update BVNode roots for each body
+
+		springs.clear();
+		addSprings();
+}
+	
+
+
 
 
 	

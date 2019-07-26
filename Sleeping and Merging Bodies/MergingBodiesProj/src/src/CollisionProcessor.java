@@ -677,8 +677,7 @@ public class CollisionProcessor {
         double threshold = separationVelocityThreshold.getValue();
         boolean useSpring = enableContactSpring.getValue();
         boolean useDamping = enableContactDamping.getValue();
-        
-        // TODO: Note transforms being useed here!!!
+
         body1.transformB2W.transform( b1.pB, tmp1 );
         body2.transformB2W.transform( b2.pB, tmp2 );
         double distance = tmp1.distance(tmp2);
@@ -831,7 +830,7 @@ public class CollisionProcessor {
     
     public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", false );
     
-    public static DoubleParameter impulseTolerance = new DoubleParameter("impulse tolerance", 10000, 0, 100000 );
+    public static DoubleParameter impulseTolerance = new DoubleParameter("impulse tolerance", 10, 0, 100 );
     
     public static IntParameter collision_wake = new IntParameter("wake n neighbors", 2, 0, 10 );
     

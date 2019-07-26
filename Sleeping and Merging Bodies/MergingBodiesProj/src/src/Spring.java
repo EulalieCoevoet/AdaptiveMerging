@@ -70,7 +70,7 @@ public class Spring {
 	p2b = new Point2d(p2);
 	//NEED TO WATCH OUT WITH TRANSFORM
 	b1.transformW2B.transform(p2b);
-	v2 = s.v2;
+	v2.set(s.v2);
 	originalSpring = s.originalSpring;
 	
 	
