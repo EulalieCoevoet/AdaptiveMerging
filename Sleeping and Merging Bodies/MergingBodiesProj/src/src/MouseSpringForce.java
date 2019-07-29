@@ -77,18 +77,13 @@ public class MouseSpringForce {
         }else {
         	//apply the spring force on the parent
         	picked.parent.applyContactForceW( grabPointW, force );
-	        
+        	  //also apply it on the child
+	        picked.applyContactForceW( grabPointW, force );
+    
 	        // spring damping forces
 	        picked.parent.getSpatialVelocity( grabPointW, grabPointV );
 	        force.scale( - grabPointV.dot( direction ) * c, direction );
 	        picked.parent.applyContactForceW( grabPointW, force ); 
-	        
-	        //also apply it on the child
-	        picked.applyContactForceW( grabPointW, force );
-    
-	        // spring damping forces
-	        picked.getSpatialVelocity( grabPointW, grabPointV );
-	        force.scale( - grabPointV.dot( direction ) * c, direction );
 	        picked.applyContactForceW( grabPointW, force ); 
         }
     }

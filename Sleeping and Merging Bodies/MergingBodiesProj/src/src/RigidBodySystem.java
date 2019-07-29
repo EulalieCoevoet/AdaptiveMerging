@@ -130,7 +130,9 @@ public class RigidBodySystem {
                 b.force.add( force );
                 //apply force of gravity to all children as well
                 if( b instanceof RigidCollection) {
+                
                 	for (RigidBody sB : ((RigidCollection) b).collectionBodies) {
+                		
                 		clearJunkAtStartOfTimestep(sB);
                         force.set( Math.cos( theta ), Math.sin(theta) );
                         force.scale( sB.massLinear * gravityAmount.getValue() );
@@ -217,7 +219,7 @@ public class RigidBodySystem {
 
     
    private void clearJunkAtStartOfTimestep(RigidBody b) {
-		
+		b.merged = false;
     	b.force.set(0, 0);
     	b.torque = 0;
     	b.delta_V.zero();
@@ -466,10 +468,12 @@ private void applyExternalForces() {
 					}
 				}
 			}
-			if (bc.thisBody.pinned || bc.thisBody.pinned) mergeCondition = false;
+			if (bc.thisBody.pinned || bc.otherBody.pinned) mergeCondition = false;
+			if (bc.thisBody.merged || bc.otherBody.merged) mergeCondition = false;
 			if (mergeCondition) {
 				//if they are both not collections...make a new collection!
 				if(bc.thisBody.parent == null && bc.otherBody.parent == null) {
+					
 					bodies.remove(bc.thisBody); bodies.remove(bc.otherBody);
 					RigidCollection col = new RigidCollection(bc.thisBody, bc.otherBody);
 					col.addInternalContact(bc);

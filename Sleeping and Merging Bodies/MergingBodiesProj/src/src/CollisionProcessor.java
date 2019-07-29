@@ -830,7 +830,7 @@ public class CollisionProcessor {
     
     public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", false );
     
-    public static DoubleParameter impulseTolerance = new DoubleParameter("impulse tolerance", 10, 0, 100 );
+    public static DoubleParameter impulseTolerance = new DoubleParameter("impulse tolerance", 2.5, 0, 15);
     
     public static IntParameter collision_wake = new IntParameter("wake n neighbors", 2, 0, 10 );
     

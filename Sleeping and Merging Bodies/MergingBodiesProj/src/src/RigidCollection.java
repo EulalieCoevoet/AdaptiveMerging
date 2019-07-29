@@ -21,6 +21,8 @@ public class RigidCollection extends RigidBody{
 	
 	ArrayList<BodyContact> internalBodyContacts = new ArrayList<BodyContact>();
 	
+
+	
 	public RigidCollection(RigidBody body1, RigidBody body2) {
 		
 		super(body1); // this will copy the blocks, which is not exactly what we want... fine though.
@@ -35,7 +37,8 @@ public class RigidCollection extends RigidBody{
 		
 		body1.parent = this;
 		body2.parent = this;
-		
+		body1.merged = true;
+		body2.merged = true;
 		
 	}
 
@@ -63,6 +66,7 @@ public class RigidCollection extends RigidBody{
 		setupCollection();
 		
 		body.parent = this;
+		body.merged = true;
 		
 	}
 	
@@ -76,7 +80,7 @@ public class RigidCollection extends RigidBody{
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 		for (RigidBody b : col.collectionBodies) {
 			//transform all the subBodies to their world coordinates... 
-		
+			b.merged = true;
 			col.transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
@@ -379,6 +383,7 @@ public class RigidCollection extends RigidBody{
 			b.omega = omega;
 			b.parent = null;
 			collectionBodies.remove(b);
+			
 			/*int i = 0;
 			while (true) {
 				BodyContact bc = bodyContactList.get(i);
@@ -391,7 +396,7 @@ public class RigidCollection extends RigidBody{
 				if (i >= bodyContactList.size()) break;
 			}*/
 		}
-		
+		colRemovalQueue.clear();
 		//reset up the collection
 		setupCollection();
 
