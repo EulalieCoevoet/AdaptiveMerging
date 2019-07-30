@@ -21,6 +21,7 @@ public class RigidCollection extends RigidBody{
 	
 	ArrayList<BodyContact> internalBodyContacts = new ArrayList<BodyContact>();
 	
+	boolean unMergedThisTimestep = false;
 
 	
 	public RigidCollection(RigidBody body1, RigidBody body2) {
@@ -372,6 +373,7 @@ public class RigidCollection extends RigidBody{
  */
 	public void unmergeSelectBodies() {
 		// TODO Auto-generated method stub
+
 		for (RigidBody b : colRemovalQueue) {
 			b.bodyContactList.clear();
 			b.contactList.clear();

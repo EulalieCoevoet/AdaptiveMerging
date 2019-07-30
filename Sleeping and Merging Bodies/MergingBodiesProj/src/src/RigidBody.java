@@ -10,6 +10,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.viewer.EasyViewer;
 import no.uib.cipr.matrix.DenseVector;
+import no.uib.cipr.matrix.Vector;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -274,11 +275,11 @@ public class RigidBody {
     	double epsilon_2 =  CollisionProcessor.wakingThreshold.getValue();
        // this.set_activity(epsilon_1, epsilon_2);
     	
-    	
+    	contactForce.set(delta_V.get(0), delta_V.get(1));
+    	contactForce.scale(massLinear/dt);
+    	contactTorques = delta_V.get(2)*massAngular/dt;
         if ( !pinned ) {          
 
-     
-            
         	// non ARPS
         	v.x += force.x * dt/massLinear + delta_V.get(0);
         	v.y += force.y * dt/massLinear + delta_V.get(1);
