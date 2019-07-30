@@ -221,15 +221,22 @@ public class RigidBodySystem {
 		b.merged = false;
     	b.force.set(0, 0);
     	b.torque = 0;
-    	b.delta_V.zero();
+   
     	if (b.parent == null) {
-    		b.contactForce.set(0, 0);
-    		b.contactTorques = 0;
-    		b.contactList.clear();
-    		b.bodyContactList.clear();
+	    	b.delta_V.zero();
+	    	b.contactForce.set(0, 0);
+	    	b.contactTorques = 0;
+	    	b.contactList.clear();
+	    	b.bodyContactList.clear();
+	        for ( BodyContact bc : b.bodyContactList) {
+	    
+	        	bc.clearForces();
+	        }
     	}
+    	
     	if (b instanceof RigidCollection) 
     		((RigidCollection) b).unMergedThisTimestep = false;
+
     	
 	}
 
@@ -245,25 +252,26 @@ public class RigidBodySystem {
 		double cTorque= 0;
 	    for (Contact c: collisionProcessor.contacts) {
 
-	    
 		    	cForce.set(c.lamda.x*c.j_1.get(0) + c.lamda.y*c.j_2.get(0),c.lamda.x*c.j_1.get(1) + c.lamda.y*c.j_2.get(1) );
 		    	cTorque = c.lamda.x*c.j_1.get(2) + c.lamda.y*c.j_2.get(2);
 		    	if (!c.body1.pinned && !c.body2.pinned) {
 		    		c.body1.contactForce.add(cForce);
 		    		c.body1.contactTorques += cTorque;
+		    		c.bc.thisBody.force.add(cForce);
+		    		c.bc.contactForceThisBody.add(cForce);
 		    	}
 	    		//if Body1 is a parent, also apply the contact force to the appropriate subBody
 		    	if (c.body1 instanceof RigidCollection) {
 		    		applyContactForceToSubBody(c, (RigidCollection) c.body1, cForce);
 		    	}
 	    	
-	    
-	   
 	    		cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
 		    	cTorque = c.lamda.x*c.j_1.get(5) + c.lamda.y*c.j_2.get(5);
 		    	if (!c.body1.pinned && !c.body2.pinned) {
 		    		c.body2.contactForce.add(cForce);
 		    		c.body2.contactTorques += cTorque;
+		    		c.bc.otherBody.force.add(cForce);
+		    		c.bc.contactForceOtherBody.add(cForce);
 		    	}
 	    	 	//if Body2 is a parent, also apply the contact force to the appropriate subBody
 		    	if (c.body2 instanceof RigidCollection) {
@@ -296,7 +304,7 @@ public class RigidBodySystem {
 	    		//add to force in subBodies because we need to remember the 
 	    		//contact forces, but not the ones modified... otherwise itll keep accumulating
 	    		c.bc.thisBody.force.add(cForce);
-	    		
+	    		c.bc.contactForceThisBody.add(cForce);
 	    		double jn_omega, jt_omega;
 	    		
 	    		Point2d radius_i = new Point2d(c.bc.thisBody.x);
@@ -318,11 +326,12 @@ public class RigidBodySystem {
 	    		
 	    		cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
 	    		c.bc.thisBody.torque += cTorque;
+	    		c.bc.contactTorqueThisBody += cTorque;
 	    		
 	    	}
 	    	if (c.bc.otherBody.parent == body) {
 	    		c.bc.otherBody.force.add(cForce);
-	    		
+	    		c.bc.contactForceOtherBody.add(cForce);
 	    		double jn_omega, jt_omega;
 	    		
 	    		Point2d radius_i = new Point2d(c.bc.otherBody.x);
@@ -344,7 +353,7 @@ public class RigidBodySystem {
 	    		
 	    		cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
 	    		c.bc.otherBody.torque += cTorque;
-	    		
+	    		c.bc.contactTorqueOtherBody += cTorque;
 	    	}
 
 	    }
@@ -482,6 +491,7 @@ public class RigidBodySystem {
 			if (bc.thisBody.pinned || bc.otherBody.pinned) mergeCondition = false;
 			if (bc.thisBody.merged || bc.otherBody.merged) mergeCondition = false;
 			if (mergeCondition) {
+				bc.merged = true;
 				//if they are both not collections...make a new collection!
 				if(bc.thisBody.parent == null && bc.otherBody.parent == null) {
 					
