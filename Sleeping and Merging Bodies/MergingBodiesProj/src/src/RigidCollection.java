@@ -368,6 +368,24 @@ public class RigidCollection extends RigidBody{
         
     }
 
+    
+    /*
+     * goes through each body in collection and sees if it should be unmerged. Fill the removal queue with the bodies that need to be unmerged
+     */
+    public void fillRemovalQueue(Vector2d totalForce, double totalTorque, double forceMetric){
+    	for (RigidBody sB : collectionBodies) {
+			totalForce.set(sB.force);
+			sB.transformB2W.transform(sB.contactForce);
+			totalForce.add(sB.contactForce);
+			sB.transformW2B.transform(sB.contactForce);
+			totalTorque = sB.torque + sB.contactTorques;
+			forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
+			
+			if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
+				colRemovalQueue.add(sB);
+			}
+		}
+    }
 /**
  * Removes a body from the current collection, without changing the other Bodies
  */

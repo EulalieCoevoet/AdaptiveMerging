@@ -245,12 +245,13 @@ public class RigidBodySystem {
 		double cTorque= 0;
 	    for (Contact c: collisionProcessor.contacts) {
 
-	    	if (!c.body1.pinned && !c.body2.pinned) {
+	    
 		    	cForce.set(c.lamda.x*c.j_1.get(0) + c.lamda.y*c.j_2.get(0),c.lamda.x*c.j_1.get(1) + c.lamda.y*c.j_2.get(1) );
 		    	cTorque = c.lamda.x*c.j_1.get(2) + c.lamda.y*c.j_2.get(2);
-	    		c.body1.contactForce.add(cForce);
-	    		c.body1.contactTorques += cTorque;
-	    		
+		    	if (!c.body1.pinned && !c.body2.pinned) {
+		    		c.body1.contactForce.add(cForce);
+		    		c.body1.contactTorques += cTorque;
+		    	}
 	    		//if Body1 is a parent, also apply the contact force to the appropriate subBody
 		    	if (c.body1 instanceof RigidCollection) {
 		    		applyContactForceToSubBody(c, (RigidCollection) c.body1, cForce);
@@ -260,13 +261,15 @@ public class RigidBodySystem {
 	   
 	    		cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
 		    	cTorque = c.lamda.x*c.j_1.get(5) + c.lamda.y*c.j_2.get(5);
-	    		c.body2.contactForce.add(cForce);
-	    		c.body2.contactTorques += cTorque;
+		    	if (!c.body1.pinned && !c.body2.pinned) {
+		    		c.body2.contactForce.add(cForce);
+		    		c.body2.contactTorques += cTorque;
+		    	}
 	    	 	//if Body2 is a parent, also apply the contact force to the appropriate subBody
 		    	if (c.body2 instanceof RigidCollection) {
 		    		applyContactForceToSubBody(c, (RigidCollection) c.body2, cForce);
 		    	}
-	    	}
+	    	
 	    	
 	   
 	    	
@@ -374,18 +377,9 @@ public class RigidBodySystem {
 	    		//check if force on Collection is high enough. If it is... unmerge the entire rigidCollection
 	    		if (b instanceof RigidCollection) {
 	    			if (!((RigidCollection) b).unMergedThisTimestep) {
-		    			for (RigidBody sB : ((RigidCollection) b).collectionBodies) {
-		    				totalForce.set(sB.force);
-		    				sB.transformB2W.transform(sB.contactForce);
-		    				totalForce.add(sB.contactForce);
-		    				sB.transformW2B.transform(sB.contactForce);
-		    				totalTorque = sB.torque + sB.contactTorques;
-		    				forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
-		    				
-		    				if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
-			    				((RigidCollection) b).colRemovalQueue.add(sB);
-			    			}
-		    			}
+	    				
+	    				((RigidCollection) b).fillRemovalQueue(totalForce, totalTorque, forceMetric);
+		    		
 		    			if (!((RigidCollection) b).colRemovalQueue.isEmpty()) {
 		    				additionQueue.addAll(((RigidCollection) b).colRemovalQueue);
 		    				((RigidCollection) b).unmergeSelectBodies();
