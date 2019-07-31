@@ -16,6 +16,14 @@ public class BodyContact {
 	
 	boolean updatedThisTimeStep = false;
 	
+	Vector2d thisBodyContactForce = new Vector2d();
+	
+	Vector2d otherBodyContactForce = new Vector2d();
+	
+	double thisBodyContactTorque = 0;
+	
+	double otherBodyContactTorque = 0;
+	
 	public BodyContact(RigidBody thisBody, RigidBody otherBody) {
 		this.thisBody = thisBody;
 		this.otherBody = otherBody;
@@ -61,7 +69,14 @@ public class BodyContact {
 		
 	}
 	
-	
+
+	public void clearForces() {
+		thisBodyContactForce.set(0, 0);
+		otherBodyContactForce.set(0, 0);
+		thisBodyContactTorque =0 ;
+		otherBodyContactTorque = 0;
+
+	}
 	
 
 }

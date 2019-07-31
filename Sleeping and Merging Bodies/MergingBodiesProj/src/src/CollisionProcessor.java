@@ -726,8 +726,7 @@ public class CollisionProcessor {
 		            		bc.relativeVelHistory.remove(0);
 		            	 }
                			bc.updatedThisTimeStep = true;
-               			body1.bodyContactList.add(bc);
-        	            body2.bodyContactList.add(bc);
+               	
                		}
             	}else {
             		//body contact did not exist in previous list

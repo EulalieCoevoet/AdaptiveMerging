@@ -75,6 +75,7 @@ public class RigidCollection extends RigidBody{
 	
 	public void addInternalContact(BodyContact bc) {
 		internalBodyContacts.add(bc);
+
 	}
 	//like addBody but with another collection...
 	public void addCollection(RigidCollection col) {
