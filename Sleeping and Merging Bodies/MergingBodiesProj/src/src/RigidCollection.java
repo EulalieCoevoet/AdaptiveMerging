@@ -98,23 +98,7 @@ public class RigidCollection extends RigidBody{
 		}
 		col.collectionBodies.clear();
 		
-		calculateMass();
-		
-		calculateCOM();
-		
-
-		//addBlocks(body);
-		//from this new collection COM determine new transforms for each body in the collection
-		//set Transform B2C and C2B for each body
-		setMergedTransformationMatrices();
-		transformToCollectionCoords();
-		
-		calculateInertia();
-		//update BVNode roots for each body
-
-		springs.clear();
-		addSprings();
-		
+		setupCollection();
 		
 		
 		internalBodyContacts.addAll(col.internalBodyContacts);
@@ -375,18 +359,48 @@ public class RigidCollection extends RigidBody{
      */
     public void fillRemovalQueue(Vector2d totalForce, double totalTorque, double forceMetric){
     	for (RigidBody sB : collectionBodies) {
-			totalForce.set(sB.force);
-			sB.transformB2W.transform(sB.contactForce);
-			totalForce.add(sB.contactForce);
-			sB.transformW2B.transform(sB.contactForce);
-			totalTorque = sB.torque + sB.contactTorques;
-			forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
+    		checkMetric(sB, totalForce, totalTorque, forceMetric);
 			
-			if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
-				colRemovalQueue.add(sB);
-			}
 		}
     }
+    
+    
+    /*c
+     * checks if body sB is going to unmerge by comparing the acceleration vector magnitude with a threshold
+     */
+    
+    private void checkMetric(RigidBody sB, Vector2d totalForce, double totalTorque, double forceMetric) {
+    	totalForce.set(sB.force);
+		sB.transformB2W.transform(sB.contactForce);
+		totalForce.add(sB.contactForce);
+		sB.transformW2B.transform(sB.contactForce);
+		totalTorque = sB.torque + sB.contactTorques;
+		forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
+		
+		if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
+			colRemovalQueue.add(sB);
+			checkSubBodyNeighbors(sB, totalForce, totalTorque, forceMetric);
+		}
+	}
+
+
+/*
+     * for each neighbor of sB, check whether or not that neighbor is still awake by applying the previous contact forces.
+     */
+private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double totalTorque, double forceMetric) {
+		for (BodyContact bc : sB.bodyContactList) {
+			if (!bc.merged) continue;
+			
+			if (sB.equals(bc.thisBody)) {
+				checkMetric(bc.otherBody, totalForce, totalTorque, forceMetric);
+			}else {
+				checkMetric(bc.thisBody, totalForce, totalTorque, forceMetric);
+			}
+		}
+		
+	}
+
+
 /**
  * Removes a body from the current collection, without changing the other Bodies
  */

@@ -24,6 +24,8 @@ public class BodyContact {
 	
 	double otherBodyContactTorque = 0;
 	
+	boolean merged = true;
+	
 	public BodyContact(RigidBody thisBody, RigidBody otherBody) {
 		this.thisBody = thisBody;
 		this.otherBody = otherBody;
