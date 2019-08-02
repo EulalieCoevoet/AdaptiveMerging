@@ -642,6 +642,16 @@ public class RigidBody {
               
     }
 
+public void unmergeBodyContacts() {
+	
+	for (BodyContact bc: bodyContactList) {
+		RigidBody otherBody = bc.getOtherBody(this);
+		otherBody.bodyContactList.remove(bc);
+	}
+	bodyContactList.clear();
+	
+}
+
     
 	/*public void scale(Double value) {
 		// TODO Auto-generated method stub

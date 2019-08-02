@@ -49,8 +49,9 @@ public class RigidCollection extends RigidBody{
 		boundaryBlocks.clear();
 		
 		active_past.clear();
+		//no longer relevant
 		contactList.clear();
-		bodyContactList.clear();
+	
 		contactForces.clear();
 		contactTorques = 0;
 		springs.clear();
@@ -75,6 +76,12 @@ public class RigidCollection extends RigidBody{
 	
 	public void addInternalContact(BodyContact bc) {
 		internalBodyContacts.add(bc);
+		if (!bc.thisBody.bodyContactList.contains(bc)) {
+			bc.thisBody.bodyContactList.add(bc);
+		}
+		if (!bc.otherBody.bodyContactList.contains(bc)) {
+			bc.otherBody.bodyContactList.add(bc);
+		}
 
 	}
 	//like addBody but with another collection...
@@ -111,8 +118,6 @@ public class RigidCollection extends RigidBody{
 	public void unmergeAllBodies() {
 		internalBodyContacts.clear();
 		for (RigidBody b: collectionBodies) {
-			b.bodyContactList.clear();
-			b.contactList.clear();
 			transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
@@ -369,19 +374,110 @@ public class RigidCollection extends RigidBody{
      * checks if body sB is going to unmerge by comparing the acceleration vector magnitude with a threshold
      */
     
-    private void checkMetric(RigidBody sB, Vector2d totalForce, double totalTorque, double forceMetric) {
+  public void checkMetric(RigidBody sB, Vector2d totalForce, double totalTorque, double forceMetric) {
     	totalForce.set(sB.force);
 		sB.transformB2W.transform(sB.contactForce);
+	
+		
 		totalForce.add(sB.contactForce);
+
 		sB.transformW2B.transform(sB.contactForce);
-		totalTorque = sB.torque + sB.contactTorques;
+	//	totalTorque = sB.torque + sB.contactTorques;
 		forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
 		
 		if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
-			colRemovalQueue.add(sB);
-			checkSubBodyNeighbors(sB, totalForce, totalTorque, forceMetric);
+			//colRemovalQueue.add(sB);
+			handledBodies.add(sB);
+			newRigidBodies.add(sB);
+			unmergeSingleBody(sB);
+			dealWithNeighbors(sB);
+			sB.unmergeBodyContacts();
+			//checkSubBodyNeighbors(sB, totalForce, totalTorque, forceMetric);
 		}
 	}
+
+    private void unmergeSingleBody(RigidBody sB) {
+		if (sB.parent == null) return;
+		else {
+			sB.parent.transformB2W.transform(sB.x);
+			sB.theta = sB.transformB2W.getTheta();
+			sB.transformB2C.T.setIdentity();
+			sB.transformC2B.T.setIdentity();
+			sB.v.set(sB.parent.v);
+			sB.omega = sB.parent.omega;
+			sB.parent = null;
+		}
+	
+}
+//contains all the new RigidBodies that result after this unmerging
+ArrayList<RigidBody> newRigidBodies = new ArrayList<RigidBody>();
+
+//the bodies here have been handled in this unmerging step...
+ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
+/*
+ * loops through the current unmerged body's neighbors. each one becomes the source of a new RigidCollection surrounding the body
+ */
+private void dealWithNeighbors(RigidBody sB) {
+		for (BodyContact bc : sB.bodyContactList ) {
+			if (bc.merged = true) {
+				
+				RigidBody otherBody = bc.getOtherBody(sB);
+				handledBodies.add(otherBody);
+				neighborCollection.add(otherBody);
+				makeNeighborCollection(otherBody);
+				if (neighborCollection.size() >= 2) {
+					//make a new collection
+					RigidCollection newCollection = new RigidCollection(neighborCollection.remove(0), neighborCollection.remove(0));
+					newCollection.addBodies(neighborCollection);
+					newRigidBodies.add(newCollection);
+					
+					
+				}
+				
+			}
+		}
+	}
+
+private void addBodies(ArrayList<RigidBody> bodyList) {
+	LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
+	for (RigidBody b : bodyList) {
+		//transform all the subBodies to their world coordinates... 
+		b.merged = true;
+		if (b.parent != null) b.parent.transformB2W.transform(b.x);
+		b.theta = b.transformB2W.getTheta();
+		b.transformB2C.T.setIdentity();
+		b.transformC2B.T.setIdentity();
+		b.parent = null;
+		additionQueue.add(b);
+		
+		
+	}
+	
+	for (RigidBody b: additionQueue) {
+		collectionBodies.add(b);
+	}
+	
+	setupCollection();
+	
+}
+/*
+ * given input body, finds all the bodies this body is connected to and makes them into a single rigidCollection
+ */
+ArrayList<RigidBody> neighborCollection = new ArrayList<RigidBody>();
+
+private void makeNeighborCollection(RigidBody body) {
+		for (BodyContact bc : body.bodyContactList) {
+			if( !bc.merged) continue;
+			RigidBody otherBody = bc.getOtherBody(body);
+			if (handledBodies.contains(otherBody) ) continue;
+			else {
+				neighborCollection.add(otherBody);
+				handledBodies.add(otherBody);
+				makeNeighborCollection(otherBody);
+			}
+		}
+	
+}
 
 
 /*
@@ -417,7 +513,7 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 			b.v.set(v);
 			b.omega = omega;
 			b.parent = null;
-			collectionBodies.remove(b);
+			
 			
 			/*int i = 0;
 			while (true) {
@@ -432,6 +528,40 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 			}*/
 		}
 		colRemovalQueue.clear();
+		//reset up the collection
+		setupCollection();
+
+		
+	}
+	
+	public void unmergeSelectBodies(ArrayList<RigidBody> bodies) {
+		// TODO Auto-generated method stub
+
+		for (RigidBody b : bodies) {
+			b.bodyContactList.clear();
+			b.contactList.clear();
+			transformB2W.transform(b.x);
+			b.theta = b.transformB2W.getTheta();
+			b.transformB2C.T.setIdentity();
+			b.transformC2B.T.setIdentity();
+			b.v.set(v);
+			b.omega = omega;
+			b.parent = null;
+			
+			
+			/*int i = 0;
+			while (true) {
+				BodyContact bc = bodyContactList.get(i);
+				if (bc.thisBody == b || bc.otherBody== b) {
+					bodyContactList.remove(bc);
+					if (i >= bodyContactList.size()) break;
+					continue;
+				}
+				i++;
+				if (i >= bodyContactList.size()) break;
+			}*/
+		}
+		//bodies.clear();
 		//reset up the collection
 		setupCollection();
 

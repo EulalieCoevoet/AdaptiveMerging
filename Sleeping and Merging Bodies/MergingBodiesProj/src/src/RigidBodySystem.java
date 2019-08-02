@@ -31,6 +31,11 @@ public class RigidBodySystem {
     public double simulationTime = 0;
     
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
+	//includes ALL body contacts in the scene, including internal ones in rigidCollections
+	public ArrayList<BodyContact> allBodyContacts = new ArrayList<BodyContact>();
+	
+	//only includes body contacts that arent between merged bodies. essentially just a pointer to collisionProcessor.bodyContacts
+	public ArrayList<BodyContact> externalBodyContacts;
 	
 	public ArrayList<RigidBody> originalBodies = new ArrayList<RigidBody>();
     
@@ -114,15 +119,16 @@ public class RigidBodySystem {
     
     	long now = System.nanoTime();        
     	
-    	
+       	externalBodyContacts = collisionProcessor.bodyContacts;
+    	clearJunkAtStartOfTimestep();
+   
   
         // apply gravity to all bodies... also take this opportunity to clear all forces at the start of the timestep
         if ( useGravity.getValue() ) {
             Vector2d force = new Vector2d();
             for ( RigidBody b : bodies ) {
             	//fully active, regular stepping
-            	
-            	clearJunkAtStartOfTimestep(b);
+ 
                 double theta = gravityAngle.getValue() / 180.0 * Math.PI;
                 force.set( Math.cos( theta ), Math.sin(theta) );
                 force.scale( b.massLinear * gravityAmount.getValue() );
@@ -130,10 +136,7 @@ public class RigidBodySystem {
                 b.force.add( force );
                 //apply force of gravity to all children as well
                 if( b instanceof RigidCollection) {
-                
                 	for (RigidBody sB : ((RigidCollection) b).collectionBodies) {
-                		
-                		clearJunkAtStartOfTimestep(sB);
                         force.set( Math.cos( theta ), Math.sin(theta) );
                         force.scale( sB.massLinear * gravityAmount.getValue() );
                         sB.force.add( force );
@@ -179,8 +182,10 @@ public class RigidBodySystem {
         }
         
         if (enableMerging.getValue()) {
-        	applyContactForces(dt);
+        //	applyExternalContactForces(dt);
+        //	applyInternalContactForces();
         }
+        
 
    
         if (use_pendulum.getValue()) {
@@ -217,94 +222,147 @@ public class RigidBodySystem {
     }
 
     
-   private void clearJunkAtStartOfTimestep(RigidBody b) {
-		b.merged = false;
-    	b.force.set(0, 0);
-    	b.torque = 0;
-    	b.delta_V.zero();
-    	if (b.parent == null) {
-    		b.contactForce.set(0, 0);
-    		b.contactTorques = 0;
-    		b.contactList.clear();
-    		for ( BodyContact bc : b.bodyContactList) {
-
-   	        	bc.clearForces();
-   	        }
-    		
-    	}
-    	if (b instanceof RigidCollection) 
-    		((RigidCollection) b).unMergedThisTimestep = false;
-    	
-	}
-
-
-
-/**
-    * goes through each contact, now with their appropriate lamda values, and adds the contact forces+torque 
-    * to each rigidBody.
-    */
-	    private void applyContactForces(double dt) {
-
-
-			Vector2d cForce = new Vector2d();
-			double cTorque= 0;
-		    for (Contact c: collisionProcessor.contacts) {
-
-		    
-			    	cForce.set(c.lamda.x*c.j_1.get(0) + c.lamda.y*c.j_2.get(0),c.lamda.x*c.j_1.get(1) + c.lamda.y*c.j_2.get(1) );
-			    	cTorque = c.lamda.x*c.j_1.get(2) + c.lamda.y*c.j_2.get(2);
-		
-			    	if (!c.body1.pinned && !c.body2.pinned) {
-			    		c.body1.contactForce.add(cForce);
-			    		c.body1.contactTorques += cTorque;
-			    	}
-		    		//if Body1 is a parent, also apply the contact force to the appropriate subBody
-			    	if (c.body1 instanceof RigidCollection) {
-			    		applyContactForceToSubBody(c, (RigidCollection) c.body1, cForce);
-			    	}
-		    	
-		    
-		   
-		    		cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
-			    	cTorque = c.lamda.x*c.j_1.get(5) + c.lamda.y*c.j_2.get(5);
-			    	
-			    	if (!c.body1.pinned && !c.body2.pinned) {
-			    		c.body2.contactForce.add(cForce);
-			    		c.body2.contactTorques += cTorque;
-			    	}
-		    	 	//if Body2 is a parent, also apply the contact force to the appropriate subBody
-			    	if (c.body2 instanceof RigidCollection) {
-			    		applyContactForceToSubBody(c, (RigidCollection) c.body2, cForce);
-			    	}
-		    	
-		    	
-		   
-		    	
+   private void applyInternalContactForces() {
+		for (RigidBody b: bodies) {
+			if (b instanceof RigidCollection) {
+				for (BodyContact bc : ((RigidCollection) b).internalBodyContacts) {
+					bc.thisBody.contactForce.add(bc.thisBodyContactForce);
+					bc.thisBody.contactTorques += bc.thisBodyContactTorque;
+					bc.otherBody.contactForce.add(bc.otherBodyContactForce);
+					bc.otherBody.contactTorques += bc.otherBodyContactTorque;
+				}
 			}
-		    
-		    for (RigidBody b: bodies) {
-		    	b.contactForce.scale(1/dt);
-		    	b.contactTorques /= dt;
-		    	b.transformW2B.transform(b.contactForce);
-		    }
-	    
+		}
 	}
+
+private void clearJunkAtStartOfTimestep() {
+	for (RigidBody b: bodies) {
+			b.merged = false;
+	    	b.force.set(0, 0);
+	    	b.torque = 0;
+	    	b.delta_V.zero();
+	    
+	    	b.contactForce.set(0, 0);
+	    	b.contactTorques = 0;
+	    	b.contactList.clear();
+	    	b.bodyContactList.clear();
+	    
+	    	
+	    	if (b instanceof RigidCollection) {
+	    		((RigidCollection) b).unMergedThisTimestep = false;
+	    		for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
+	    	    	sB.contactForce.set(0, 0);
+	    	    	sB.contactTorques = 0;
+	    	    	sB.contactList.clear();
+	    	    	sB.force.set(0, 0);
+	    	    	sB.torque = 0;
+	    	    	sB.merged = false;
+	    		}
+	    	}
+    	}
+	 	for (BodyContact bc : externalBodyContacts) {
+			bc.clearForces();
+		}
+	}
+
+   /* 
+    * applies contact forces/torques to the body contacts
+    */
+   private void applyExternalContactForces(double dt) {
+
+	   Vector2d cForce = new Vector2d();
+	   double cTorque= 0;
+	   for (Contact c : collisionProcessor.contacts) {
+		   cForce.set(c.lamda.x*c.j_1.get(0) + c.lamda.y*c.j_2.get(0),c.lamda.x*c.j_1.get(1) + c.lamda.y*c.j_2.get(1) );
+		   //need to recalculate torque on subBody, as the rotational components of jacobian will now be wrong
+		   if (c.body1 instanceof RigidCollection) getSubBodyTorque(c, c.body1, cTorque);
+		   else
+		   cTorque = c.lamda.x*c.j_1.get(2) + c.lamda.y*c.j_2.get(2);
+		   applyToBodyContact(c, c.body1, cForce, cTorque, dt);
+		   
+		   cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
+		 //need to recalculate torque on subBody, as the rotational components of jacobian are now wrong (previously calculated jacobian assuming contact with 
+		  if (c.body2 instanceof RigidCollection) getSubBodyTorque(c, c.body2, cTorque);
+		   else 
+			   cTorque = c.lamda.x*c.j_1.get(5) + c.lamda.y*c.j_2.get(5);
+		   applyToBodyContact(c, c.body2, cForce, cTorque, dt);
+		   
+	   }
+	   
+	   
+	   
+	   for (BodyContact bc : collisionProcessor.bodyContacts) {
+		  
+	 		   bc.thisBodyContactForce.scale(1/dt); bc.otherBodyContactForce.scale(1/dt);
+			   bc.thisBodyContactTorque/=dt; bc.otherBodyContactTorque/=dt;
+			   //transform to body coordinates
+			   bc.thisBody.transformW2B.transform(bc.thisBodyContactForce);
+			   bc.otherBody.transformW2B.transform(bc.otherBodyContactForce);
+			   
+			   //take this opportunity to add the contactForce to each body
+			   bc.thisBody.contactForce.add(bc.thisBodyContactForce);
+			   bc.otherBody.contactForce.add(bc.otherBodyContactForce);
+		
+	   } 
+   }
+
+private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
+
+	if (c.bc.thisBody.parent == (body)) {
+		double jn_omega, jt_omega;
+		
+		Point2d radius_i = new Point2d(c.bc.thisBody.x);
+		body.transformB2W.transform(radius_i);
+		
+		radius_i.sub(c.contactW, radius_i);
+		
+		Vector2d tangeant = new Vector2d(-c.normal.y, c.normal.x);
+			
+		Vector2d r1 = new Vector2d(-radius_i.y, radius_i.x);
+		
+		jn_omega = - r1.dot(c.normal);
+		jt_omega = - r1.dot(tangeant);
+		if (body == c.body2) {
+			jn_omega *= -1;
+			jt_omega *= -1;
+			
+		}
+		
+		cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
+		
+		
+	}
+	if (c.bc.otherBody.parent == body) {
+		double jn_omega, jt_omega;
+		Point2d radius_i = new Point2d(c.bc.otherBody.x);
+		body.transformB2W.transform(radius_i);
+		radius_i.sub(c.contactW, radius_i);
+		Vector2d tangeant = new Vector2d(-c.normal.y, c.normal.x);
+		Vector2d r1 = new Vector2d(-radius_i.y, radius_i.x);
+		jn_omega = - r1.dot(c.normal);
+		jt_omega = - r1.dot(tangeant);
+		if (body == c.body2) { //contact normal may be in the wrong direction based on which body in Contact it is
+			jn_omega *= -1;
+			jt_omega *= -1;
+			
+		}
+		cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
+
+	}
+	
+}
+
 
 	    /*
 	     * applies contact force to body contacts so we know how much force each body contact exhudes
 	     */
 	    private void applyToBodyContact(Contact c, RigidBody body, Vector2d cForce, double cTorque, double dt) {
-	    	cForce.scale(1/dt);
-	    	cTorque /= dt;
-	    	if (c.bc.thisBody.equals(body)) {
-	    		
+	    	if (c.bc.thisBody.equals(body)|| c.bc.thisBody.parent == body) {
 	    		c.bc.thisBodyContactForce.add(cForce);
-	    	
 	    		c.bc.thisBodyContactTorque += cTorque;
 	    		
-	    	}else if (c.bc.otherBody.equals(body)) {
+	    	}else if (c.bc.otherBody.equals(body) || c.bc.otherBody.parent == body) {
 	    		c.bc.otherBodyContactForce.add(cForce);
-	    
 	    		c.bc.otherBodyContactTorque += cTorque;
 	    	}
 	
@@ -410,22 +468,34 @@ public class RigidBodySystem {
 			for(RigidBody b : bodies) {
 	    		//check if force on Collection is high enough. If it is... unmerge the entire rigidCollection
 	    		if (b instanceof RigidCollection) {
-	    			if (!((RigidCollection) b).unMergedThisTimestep) {
+	    			RigidCollection colB = (RigidCollection) b;
+	    			if (!colB.unMergedThisTimestep) {
 	    				
-	    				((RigidCollection) b).fillRemovalQueue(totalForce, totalTorque, forceMetric);
-		    		
-		    			if (!((RigidCollection) b).colRemovalQueue.isEmpty()) {
-		    				additionQueue.addAll(((RigidCollection) b).colRemovalQueue);
-		    				((RigidCollection) b).unmergeSelectBodies();
+	    				//colB.fillRemovalQueue(totalForce, totalTorque, forceMetric);
+	    				for (RigidBody sB: colB.collectionBodies) {
+	    					colB.checkMetric(sB, totalForce, totalTorque, forceMetric);
+	    				}
+	    			
+		    			
+	    				/*if (!colB.colRemovalQueue.isEmpty()) {
+		    				additionQueue.addAll(colB.colRemovalQueue);
+		    				colB.unmergeSelectBodies();
 		    				
-		    				if (((RigidCollection) b).collectionBodies.size() <= 1) {
+		    				if (colB.collectionBodies.size() <= 1) {
 			    				//only one body left in collection... time to unmerge everything
-			    				removalQueue.add(b);
-			    				additionQueue.addAll(((RigidCollection) b).collectionBodies);
-			    				((RigidCollection) b).unmergeAllBodies();
+			    				removalQueue.add(colB);
+			    				additionQueue.addAll(colB.collectionBodies);
+			    				colB.unmergeAllBodies();
 			    				
 			    				
 			    			}
+		    			}*/
+		    			if (!colB.newRigidBodies.isEmpty()) {
+		    				for (RigidBody bd: colB.newRigidBodies) {
+		    					additionQueue.add(bd);
+		    					
+		    				}
+		    				removalQueue.add(colB);
 		    			}
 		    	
 		    			
@@ -503,7 +573,7 @@ public class RigidBodySystem {
 	     */
 		public void mergeBodies() {
     	LinkedList<BodyContact> removalQueue = new LinkedList<BodyContact>();
-		for (BodyContact bc: collisionProcessor.bodyContacts) {
+		for (BodyContact bc: externalBodyContacts) {
 			boolean mergeCondition = false;
 			if ((bc.relativeVelHistory.size() == CollisionProcessor.sleep_accum.getValue())) {
 				mergeCondition = true;
@@ -517,6 +587,7 @@ public class RigidBodySystem {
 			if (bc.thisBody.merged || bc.otherBody.merged) mergeCondition = false;
 			if (mergeCondition) {
 				//if they are both not collections...make a new collection!
+				bc.merged = true;
 				if(bc.thisBody.parent == null && bc.otherBody.parent == null) {
 					
 					bodies.remove(bc.thisBody); bodies.remove(bc.otherBody);

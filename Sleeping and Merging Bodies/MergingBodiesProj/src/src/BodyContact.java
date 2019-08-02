@@ -24,7 +24,7 @@ public class BodyContact {
 	
 	double otherBodyContactTorque = 0;
 	
-	boolean merged = true;
+	boolean merged = false;
 	
 	public BodyContact(RigidBody thisBody, RigidBody otherBody) {
 		this.thisBody = thisBody;
@@ -78,6 +78,30 @@ public class BodyContact {
 		thisBodyContactTorque =0 ;
 		otherBodyContactTorque = 0;
 
+	}
+	
+	/* 
+	 * given a body sB in a body contact, return the same body in the body contact
+	 */
+
+	public RigidBody getThisBody(RigidBody sB) {
+		// TODO Auto-generated method stub
+		if (thisBody == sB) return thisBody;
+		else if (otherBody == sB) return otherBody;
+		else return null;
+	
+	}
+	
+	/* 
+	 * given a body sB in a body contact, return the adjacent body in the body contact
+	 */
+
+	public RigidBody getOtherBody(RigidBody sB) {
+		// TODO Auto-generated method stub
+		if (thisBody == sB) return otherBody;
+		else if (otherBody == sB) return thisBody;
+		else return null;
+	
 	}
 	
 
