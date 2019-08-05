@@ -103,6 +103,11 @@ public class BodyContact {
 		else return null;
 	
 	}
+
+	public void clearFromBodies() {
+		thisBody.bodyContactList.remove(this);
+		otherBody.bodyContactList.remove(this);
+	}
 	
 
 }

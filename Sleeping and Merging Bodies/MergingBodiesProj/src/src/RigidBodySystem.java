@@ -182,8 +182,8 @@ public class RigidBodySystem {
         }
         
         if (enableMerging.getValue()) {
-        //	applyExternalContactForces(dt);
-        //	applyInternalContactForces();
+        	//applyExternalContactForces(dt);
+        	//applyInternalContactForces();
         }
         
 
@@ -447,7 +447,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	     * 
 	     */
 		private void unmergeBodies() {
-		//	generalHeuristic();
+			//generalHeuristic();
 			generalOneBodyAtATime();
 			
 			
@@ -476,20 +476,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	    					colB.checkMetric(sB, totalForce, totalTorque, forceMetric);
 	    				}
 	    			
-		    			
-	    				/*if (!colB.colRemovalQueue.isEmpty()) {
-		    				additionQueue.addAll(colB.colRemovalQueue);
-		    				colB.unmergeSelectBodies();
-		    				
-		    				if (colB.collectionBodies.size() <= 1) {
-			    				//only one body left in collection... time to unmerge everything
-			    				removalQueue.add(colB);
-			    				additionQueue.addAll(colB.collectionBodies);
-			    				colB.unmergeAllBodies();
-			    				
-			    				
-			    			}
-		    			}*/
+		
 		    			if (!colB.newRigidBodies.isEmpty()) {
 		    				for (RigidBody bd: colB.newRigidBodies) {
 		    					additionQueue.add(bd);
@@ -600,11 +587,11 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 					if (bc.thisBody.parent.massLinear > bc.otherBody.parent.massLinear) {
 						bodies.remove(bc.otherBody.parent);
 						bc.thisBody.parent.addCollection(bc.otherBody.parent);
-						
+						bc.thisBody.parent.addInternalContact(bc);
 					}else {
 						bodies.remove(bc.thisBody.parent);
 						bc.otherBody.parent.addCollection(bc.thisBody.parent);
-						
+						bc.otherBody.parent.addInternalContact(bc);
 					}
 				}else if (bc.thisBody.parent != null) {
 					//thisBody is in a collection... otherBody isnt
@@ -825,12 +812,20 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	            	for (Contact c:b.contactList) {
 	            		c.displayConnection(drawable);
 	            	}
+	            
 	            } 
+	      
         	} 
         	else {
         		for ( Contact c : collisionProcessor.contacts ) {
                     c.displayConnection(drawable);
         		}
+        	  
+        	}
+        	for (RigidBody b : bodies) {
+	        	if (b instanceof RigidCollection) {
+	        		((RigidCollection)b).displayCollection(drawable);
+	        	}
         	}
 
         }

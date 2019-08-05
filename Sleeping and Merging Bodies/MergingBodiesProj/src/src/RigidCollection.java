@@ -337,22 +337,24 @@ public class RigidCollection extends RigidBody{
     
     public void displayCollection( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
-        ArrayList<String> connections = new ArrayList<String>();
+        
         // draw a line between the two bodies but only if they're both not pinned
-        for (RigidBody b1: collectionBodies) {
-        	for (RigidBody b2: collectionBodies) {
-        		String option1 = Integer.toString(b1.index) + "_" + Integer.toString(b2.index);
-        		String option2 = Integer.toString(b2.index) + "_" + Integer.toString(b1.index);
-        		if (!b1.equals(b2) && (!(connections.contains(option1)||connections.contains(option2)))) {
-        			gl.glLineWidth(1);
-        			gl.glColor4f(1, 0,0, 0.5f);
-        			gl.glBegin( GL.GL_LINES );
-        			gl.glVertex2d(b1.x.x, b1.x.y);
-        			gl.glVertex2d(b2.x.x, b2.x.y);
-        			gl.glEnd();
-        			connections.add(Integer.toString(b1.index) + "_" + Integer.toString(b2.index));
-        		}
-        	}
+        Point2d p1 = new Point2d();
+        Point2d p2 = new Point2d();
+        for (BodyContact bc: internalBodyContacts) {
+        	gl.glLineWidth(5);
+			gl.glColor4f(1, 0,0, 1.0f);
+			gl.glBegin( GL.GL_LINES );
+			p1.set(bc.thisBody.x);
+			p2.set(bc.otherBody.x);
+			if (bc.thisBody.parent !=null)
+			bc.thisBody.parent.transformB2W.transform(p1);
+			if (bc.otherBody.parent != null)
+			bc.otherBody.parent.transformB2W.transform(p2);
+			gl.glVertex2d(p1.x, p1.y);
+			gl.glVertex2d(p2.x, p2.y);
+			gl.glEnd();
+
         }
 
         
@@ -382,16 +384,17 @@ public class RigidCollection extends RigidBody{
 		totalForce.add(sB.contactForce);
 
 		sB.transformW2B.transform(sB.contactForce);
-	//	totalTorque = sB.torque + sB.contactTorques;
+		//totalTorque = sB.torque + sB.contactTorques;
 		forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
 		
 		if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
-			//colRemovalQueue.add(sB);
 			handledBodies.add(sB);
 			newRigidBodies.add(sB);
 			unmergeSingleBody(sB);
+			
 			dealWithNeighbors(sB);
-			sB.unmergeBodyContacts();
+			
+			//sB.unmergeBodyContacts();
 			//checkSubBodyNeighbors(sB, totalForce, totalTorque, forceMetric);
 		}
 	}
@@ -406,9 +409,14 @@ public class RigidCollection extends RigidBody{
 			sB.v.set(sB.parent.v);
 			sB.omega = sB.parent.omega;
 			sB.parent = null;
+		
+			
 		}
 	
 }
+private void removeBodyContact(BodyContact bc) {
+		internalBodyContacts.remove(bc);
+	}
 //contains all the new RigidBodies that result after this unmerging
 ArrayList<RigidBody> newRigidBodies = new ArrayList<RigidBody>();
 
@@ -419,8 +427,8 @@ ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
  */
 private void dealWithNeighbors(RigidBody sB) {
 		for (BodyContact bc : sB.bodyContactList ) {
-			if (bc.merged = true) {
-				
+			if (bc.merged) {
+				bc.merged = false;
 				RigidBody otherBody = bc.getOtherBody(sB);
 				handledBodies.add(otherBody);
 				neighborCollection.add(otherBody);
@@ -429,15 +437,38 @@ private void dealWithNeighbors(RigidBody sB) {
 					//make a new collection
 					RigidCollection newCollection = new RigidCollection(neighborCollection.remove(0), neighborCollection.remove(0));
 					newCollection.addBodies(neighborCollection);
+					newCollection.fillInternalBodyContacts();
+					newCollection.v.set(v);
+					newCollection.omega = omega;
 					newRigidBodies.add(newCollection);
-					
-					
+					neighborCollection.clear();
+				}
+				else if ( neighborCollection.size() == 1){
+					unmergeSingleBody(neighborCollection.get(0));
+					newRigidBodies.add(neighborCollection.remove(0));
 				}
 				
 			}
 		}
 	}
 
+/*
+ * Go through all bodies and makes sure all the body contacts of each body is in the collection
+ */
+private void fillInternalBodyContacts() {
+	for (RigidBody b: collectionBodies) {
+		for (BodyContact bc: b.bodyContactList) {
+			if (!internalBodyContacts.contains(bc) && bc.merged == true) {
+				internalBodyContacts.add(bc);
+			}
+		}
+	}
+}
+
+
+/*
+ * Add list of bodies to rigidCollection
+ */
 private void addBodies(ArrayList<RigidBody> bodyList) {
 	LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 	for (RigidBody b : bodyList) {
@@ -463,7 +494,7 @@ private void addBodies(ArrayList<RigidBody> bodyList) {
 /*
  * given input body, finds all the bodies this body is connected to and makes them into a single rigidCollection
  */
-ArrayList<RigidBody> neighborCollection = new ArrayList<RigidBody>();
+public ArrayList<RigidBody> neighborCollection = new ArrayList<RigidBody>();
 
 private void makeNeighborCollection(RigidBody body) {
 		for (BodyContact bc : body.bodyContactList) {
