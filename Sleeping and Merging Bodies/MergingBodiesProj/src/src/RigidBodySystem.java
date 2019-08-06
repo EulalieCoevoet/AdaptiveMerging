@@ -182,8 +182,8 @@ public class RigidBodySystem {
         }
         
         if (enableMerging.getValue()) {
-        	//applyExternalContactForces(dt);
-        	//applyInternalContactForces();
+        	applyExternalContactForces(dt);
+        	applyInternalContactForces();
         }
         
 
@@ -251,8 +251,8 @@ private void clearJunkAtStartOfTimestep() {
 	    	if (b instanceof RigidCollection) {
 	    		((RigidCollection) b).unMergedThisTimestep = false;
 	    		for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
-	    	    	sB.contactForce.set(0, 0);
-	    	    	sB.contactTorques = 0;
+	    	    	//sB.contactForce.set(0, 0);
+	    	    //	sB.contactTorques = 0;
 	    	    	sB.contactList.clear();
 	    	    	sB.force.set(0, 0);
 	    	    	sB.torque = 0;
@@ -269,7 +269,38 @@ private void clearJunkAtStartOfTimestep() {
     * applies contact forces/torques to the body contacts
     */
    private void applyExternalContactForces(double dt) {
+		Vector2d cForce = new Vector2d();
+		double cTorque= 0;
+	    for (Contact c: collisionProcessor.contacts) {
+	    	cForce.set(c.lamda.x*c.j_1.get(0) + c.lamda.y*c.j_2.get(0),c.lamda.x*c.j_1.get(1) + c.lamda.y*c.j_2.get(1) );
+	    	cTorque = c.lamda.x*c.j_1.get(2) + c.lamda.y*c.j_2.get(2);
+	    	c.body1.contactForce.add(cForce);
+	    	c.body1.contactTorques += cTorque;
+	    	
+	    	//if Body1 is a parent, also apply the contact force to the appropriate subBody
+	    	if (c.body1 instanceof RigidCollection) {
+	    		applyContactForceToSubBody(c, (RigidCollection) c.body1, cForce);
+	    	}
+	    	
+	    	cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
+	    	cTorque = c.lamda.x*c.j_1.get(5) + c.lamda.y*c.j_2.get(5);
+	    	c.body2.contactForce.add(cForce);
+	    	c.body2.contactTorques += cTorque;
+	    	
+	    	if (c.body2 instanceof RigidCollection) {
+	    		applyContactForceToSubBody(c, (RigidCollection) c.body2, cForce);
+	    	}
+	    	
+	    	//if Body2 is a parent, also apply the contact force to the appropriate subBody
+		}
+	    
 
+   	 for (RigidBody b: bodies) {
+ 	    	b.contactForce.scale(1/dt);
+ 	    	b.contactTorques /= dt;
+ 	    	b.transformW2B.transform(b.contactForce);
+ 	    }
+/*
 	   Vector2d cForce = new Vector2d();
 	   double cTorque= 0;
 	   for (Contact c : collisionProcessor.contacts) {
@@ -303,7 +334,7 @@ private void clearJunkAtStartOfTimestep() {
 			   bc.thisBody.contactForce.add(bc.thisBodyContactForce);
 			   bc.otherBody.contactForce.add(bc.otherBodyContactForce);
 		
-	   } 
+	   } */
    }
 
 private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {

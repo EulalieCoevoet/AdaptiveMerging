@@ -384,7 +384,7 @@ public class RigidCollection extends RigidBody{
 		totalForce.add(sB.contactForce);
 
 		sB.transformW2B.transform(sB.contactForce);
-		//totalTorque = sB.torque + sB.contactTorques;
+		totalTorque = sB.torque + sB.contactTorques;
 		forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
 		
 		if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
@@ -459,6 +459,8 @@ private void fillInternalBodyContacts() {
 	for (RigidBody b: collectionBodies) {
 		for (BodyContact bc: b.bodyContactList) {
 			if (!internalBodyContacts.contains(bc) && bc.merged == true) {
+				RigidBody otherBody = bc.getOtherBody(b);
+				if (collectionBodies.contains(otherBody))
 				internalBodyContacts.add(bc);
 			}
 		}

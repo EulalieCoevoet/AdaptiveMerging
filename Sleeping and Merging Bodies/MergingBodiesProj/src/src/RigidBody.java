@@ -275,9 +275,7 @@ public class RigidBody {
     	double epsilon_2 =  CollisionProcessor.wakingThreshold.getValue();
        // this.set_activity(epsilon_1, epsilon_2);
     	
-    	contactForce.set(delta_V.get(0), delta_V.get(1));
-    	contactForce.scale(massLinear/dt);
-    	contactTorques = delta_V.get(2)*massAngular/dt;
+
         if ( !pinned ) {          
 
         	// non ARPS
