@@ -22,6 +22,8 @@ public class RigidCollection extends RigidBody{
 	ArrayList<BodyContact> internalBodyContacts = new ArrayList<BodyContact>();
 	
 	boolean unMergedThisTimestep = false;
+	
+	boolean updatedThisTimeStep = false;
 
 	
 	public RigidCollection(RigidBody body1, RigidBody body2) {
@@ -364,14 +366,46 @@ public class RigidCollection extends RigidBody{
     /*
      * goes through each body in collection and sees if it should be unmerged. Fill the removal queue with the bodies that need to be unmerged
      */
-    public void fillRemovalQueue(Vector2d totalForce, double totalTorque, double forceMetric){
-    	for (RigidBody sB : collectionBodies) {
-    		checkMetric(sB, totalForce, totalTorque, forceMetric);
+    public void fillNewBodiesQueue(Vector2d totalForce, double totalTorque, double forceMetric){
+    	LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
+    	LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
+    	
+    	for (RigidBody sB: collectionBodies) {
 			
+			checkMetric(sB, totalForce, totalTorque, forceMetric);
+			if (!newRigidBodies.isEmpty()) 
+				for(RigidBody b : newRigidBodies) {
+					if (b instanceof RigidCollection) {
+						RigidCollection colB = (RigidCollection) b;
+						colB.fillNewBodiesQueue(totalForce, totalTorque, forceMetric);
+						if (!colB.newRigidBodies.isEmpty()) {
+							additionQueue.addAll(colB.newRigidBodies);
+							removalQueue.add(b);
+						}
+					}
+				}
+			break;
 		}
+    	
+    	newRigidBodies.addAll(additionQueue);
+    	for (RigidBody element : removalQueue)
+    	newRigidBodies.remove(element);
+    	
+
     }
     
-    
+ public double  metricCheck(RigidBody sB , Vector2d totalForce, double totalTorque) {
+	 	totalForce.set(sB.force);
+		sB.transformB2W.transform(sB.contactForce);
+	
+		
+		totalForce.add(sB.contactForce);
+
+		sB.transformW2B.transform(sB.contactForce);
+		totalTorque = sB.torque + sB.contactTorques;
+		double forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
+		return forceMetric;
+ }
     /*c
      * checks if body sB is going to unmerge by comparing the acceleration vector magnitude with a threshold
      */
@@ -399,7 +433,7 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 
-    private void unmergeSingleBody(RigidBody sB) {
+    public void unmergeSingleBody(RigidBody sB) {
 		if (sB.parent == null) return;
 		else {
 			sB.parent.transformB2W.transform(sB.x);
@@ -455,12 +489,12 @@ private void dealWithNeighbors(RigidBody sB) {
 /*
  * Go through all bodies and makes sure all the body contacts of each body is in the collection
  */
-private void fillInternalBodyContacts() {
+public void fillInternalBodyContacts() {
 	for (RigidBody b: collectionBodies) {
 		for (BodyContact bc: b.bodyContactList) {
 			if (!internalBodyContacts.contains(bc) && bc.merged == true) {
 				RigidBody otherBody = bc.getOtherBody(b);
-				if (collectionBodies.contains(otherBody))
+				if (b.parent.collectionBodies.contains(otherBody))
 				internalBodyContacts.add(bc);
 			}
 		}
@@ -471,7 +505,7 @@ private void fillInternalBodyContacts() {
 /*
  * Add list of bodies to rigidCollection
  */
-private void addBodies(ArrayList<RigidBody> bodyList) {
+public void addBodies(ArrayList<RigidBody> bodyList) {
 	LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 	for (RigidBody b : bodyList) {
 		//transform all the subBodies to their world coordinates... 
