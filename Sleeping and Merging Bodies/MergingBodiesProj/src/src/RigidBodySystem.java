@@ -245,7 +245,7 @@ private void clearJunkAtStartOfTimestep() {
 	    	b.contactForce.set(0, 0);
 	    	b.contactTorques = 0;
 	    	b.contactList.clear();
-	    	b.bodyContactList.clear();
+	    	//b.bodyContactList.clear();
 	    
 	    	
 	    	if (b instanceof RigidCollection) {
@@ -254,15 +254,15 @@ private void clearJunkAtStartOfTimestep() {
 	    		for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
 	    	    	//sB.contactForce.set(0, 0);
 	    	    //	sB.contactTorques = 0;
-	    	    	sB.contactList.clear();
+	    	    //	sB.contactList.clear();
 	    	    	sB.force.set(0, 0);
 	    	    	sB.torque = 0;
 	    	    	sB.merged = false;
 	    	    	ArrayList<BodyContact> newBodyContactList = new ArrayList<BodyContact>();
-	    	    	for (BodyContact bc : sB.bodyContactList) 
+	    	    	/*for (BodyContact bc : sB.bodyContactList) 
 	    	    		if (bc.merged) newBodyContactList.add(bc);
 	    	    	sB.bodyContactList.clear();
-	    	    	sB.bodyContactList.addAll(newBodyContactList);
+	    	    	sB.bodyContactList.addAll(newBodyContactList);*/
 	    		}
 	    	}
     	}
@@ -686,6 +686,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 					}
 				}
 			}
+			if (!bc.updatedThisTimeStep) mergeCondition = false;
 			if (bc.thisBody.pinned || bc.otherBody.pinned) mergeCondition = false;
 			if (bc.thisBody.merged || bc.otherBody.merged) mergeCondition = false;
 			if (mergeCondition) {
@@ -702,13 +703,15 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 					//take all the bodies in the least massive one and add them to the collection of the most massive
 					if (bc.thisBody.parent.massLinear > bc.otherBody.parent.massLinear) {
 						bodies.remove(bc.otherBody.parent);
-						bc.thisBody.parent.addInternalContact(bc);
+						bc.thisBody.merged=true;
 						bc.thisBody.parent.addCollection(bc.otherBody.parent);
+						bc.thisBody.parent.addInternalContact(bc);
 						
 					}else {
+						bc.otherBody.merged = true;
 						bodies.remove(bc.thisBody.parent);
-						bc.otherBody.parent.addInternalContact(bc);
 						bc.otherBody.parent.addCollection(bc.thisBody.parent);
+						bc.otherBody.parent.addInternalContact(bc);
 						
 					}
 				}else if (bc.thisBody.parent != null) {
@@ -722,14 +725,13 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 					bodies.remove(bc.thisBody);
 					bc.otherBody.parent.addBody(bc.thisBody);
 					bc.otherBody.parent.addInternalContact(bc);
+					int x = 0;
 					
 				}
 				removalQueue.add(bc);
 				
-				
 			}
 		
-			
 		}
 		for (BodyContact element : removalQueue) {
 			collisionProcessor.bodyContacts.remove(element);
@@ -930,20 +932,28 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	            	for (Contact c:b.contactList) {
 	            		c.displayConnection(drawable);
 	            	}
+	        
 	            
 	            } 
 	      
         	} 
         	else {
         		for ( Contact c : collisionProcessor.contacts ) {
+        			
                     c.displayConnection(drawable);
         		}
         	  
         	}
         	for (RigidBody b : bodies) {
 	        	if (b instanceof RigidCollection) {
+	        		
 	        		((RigidCollection)b).displayCollection(drawable);
+	        		((RigidCollection) b).drawInternalContacts(drawable);
+	        		
 	        	}
+	        
+            		
+            	
         	}
 
         }
@@ -957,7 +967,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
         if ( drawContacts.getValue() ) {
             for ( Contact c : collisionProcessor.contacts ) {
                 c.display(drawable);
-                c.drawContactForce(drawable);
+             //   c.drawContactForce(drawable);
             }
         }
         if ( drawCOMs.getValue() ) {
@@ -1004,7 +1014,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
     private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
     private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
     private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", false );
-    private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", false);
+    private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", true);
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
     private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", true );
     private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );

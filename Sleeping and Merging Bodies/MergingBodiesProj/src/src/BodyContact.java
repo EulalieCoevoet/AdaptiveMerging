@@ -100,14 +100,30 @@ public class BodyContact {
 		// TODO Auto-generated method stub
 		if (thisBody == sB) return otherBody;
 		else if (otherBody == sB) return thisBody;
-		else return null;
-	
+		else {
+		return null;
+		}	
 	}
 
 	public void clearFromBodies() {
 		thisBody.bodyContactList.remove(this);
 		otherBody.bodyContactList.remove(this);
 	}
+
+	public RigidBody getOtherSubBodyFromParent(RigidCollection body) {
+		if (body.collectionBodies.contains(thisBody)) return otherBody;
+		else if (body.collectionBodies.contains(otherBody)) return thisBody;
+		else {
+			return null;
+		}
+	}
+	
+	public RigidBody getThisSubBodyFromParent(RigidCollection body) {
+		if (thisBody.parent == body) return thisBody;
+		if (otherBody.parent == body) return otherBody;
+		return null;
+	}
+	
 	
 
 }

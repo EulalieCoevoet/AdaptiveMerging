@@ -166,22 +166,96 @@ public class Contact {
         // draw a line between the two bodies but only if they're both not pinned
         Point2d p1 = new Point2d(block1.pB);
         Point2d p2 = new Point2d(block2.pB);
+      
+        
+        if (body1 instanceof RigidCollection) {
+        	RigidBody sB = bc.getThisSubBodyFromParent((RigidCollection) body1);
+        			if (sB == null) {
+                		int x = 0;
+                	}else {
+                		sB.transformB2W.transform(p1);
+                	}
+        }else  body1.transformB2W.transform(p1);
+        if (body2 instanceof RigidCollection) {
+        	RigidBody sB = bc.getThisSubBodyFromParent((RigidCollection) body2);
+        	if (sB == null) {
+        		int x = 0;
+        	}else {
+        		sB.transformB2W.transform(p2);
+        	}
+        } else body2.transformB2W.transform(p2);
+        
+            gl.glLineWidth(2);
+            gl.glColor4f(0, 1, 0, 1);
+            gl.glBegin( GL.GL_LINES );
+
+            gl.glVertex2d(p2.x, p2.y);
+            double scale = 2;
+            Vector2d normal2 = new Vector2d(normal);
+            normal2.scale(scale*lamda.length());
+            gl.glVertex2d(p2.x + normal2.x, p2.y+normal2.y);
+            gl.glEnd();
+            
+         //   drawArrowHeads(gl, p2, normal2);
+            
+            gl.glLineWidth(2);
+            gl.glColor4f(0 , 1, 0, 1);
+            gl.glBegin( GL.GL_LINES );
+
+            gl.glVertex2d(p1.x, p1.y);
+    
+            normal2.scale(-1);
+      
+            gl.glVertex2d(p1.x + normal2.x, p1.y+normal2.y);
+            gl.glEnd();
+            
+          //  drawArrowHeads(gl, p2, normal2);
+  
+    }
+
+    
+    /**
+     * Draws the connections between bodies to visualize the 
+     * the adjacency structure of the matrix as a graph.
+     * @param drawable
+     */
+    public void drawInternalContactForce( GLAutoDrawable drawable ) {
+        GL2 gl = drawable.getGL().getGL2();
+        // draw a line between the two bodies but only if they're both not pinned
+        Point2d p1 = new Point2d(block1.pB);
+        Point2d p2 = new Point2d(block2.pB);
+      
+        
         body1.transformB2W.transform(p1);
         body2.transformB2W.transform(p2);
         
             gl.glLineWidth(2);
-            gl.glColor4f(1, 0, 0, 1);
+            gl.glColor4f(0, 0, 1, 1);
+            gl.glBegin( GL.GL_LINES );
+
+            gl.glVertex2d(p2.x, p2.y);
+            double scale = 2;
+            Vector2d normal2 = new Vector2d(normal);
+            normal2.scale(scale*lamda.length());
+            gl.glVertex2d(p2.x + normal2.x, p2.y+normal2.y);
+            gl.glEnd();
+            
+         //   drawArrowHeads(gl, p2, normal2);
+            
+            gl.glLineWidth(2);
+            gl.glColor4f(0, 0, 1, 1);
             gl.glBegin( GL.GL_LINES );
 
             gl.glVertex2d(p1.x, p1.y);
-            double scale = 3;
-            Vector2d normal2 = new Vector2d(normal);
-            normal2.scale(scale*lamda.length());
+    
+            normal2.scale(-1);
+      
             gl.glVertex2d(p1.x + normal2.x, p1.y+normal2.y);
             gl.glEnd();
+            
+          //  drawArrowHeads(gl, p2, normal2);
   
     }
-    
 
     
 }

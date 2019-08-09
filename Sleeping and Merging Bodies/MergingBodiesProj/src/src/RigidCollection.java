@@ -20,6 +20,7 @@ public class RigidCollection extends RigidBody{
 	//ArrayList<Contact> inner_contacts = new ArrayList<Contact>();
 	
 	ArrayList<BodyContact> internalBodyContacts = new ArrayList<BodyContact>();
+	ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 	
 	boolean unMergedThisTimestep = false;
 	
@@ -84,6 +85,23 @@ public class RigidCollection extends RigidBody{
 		if (!bc.otherBody.bodyContactList.contains(bc)) {
 			bc.otherBody.bodyContactList.add(bc);
 		}
+		
+		//convert the ontacts to collections coordinates. 
+		internalContacts.addAll(bc.contactList);
+		int x = 0;
+		for (Contact c : internalContacts) {
+			transformW2B.transform(c.contactW);
+			transformW2B.transform(c.normal);
+			
+			if (c.body1 instanceof RigidCollection) {
+				c.body1 = bc.getOtherSubBodyFromParent(((RigidCollection ) c.body1));
+			}
+			if (c.body2 instanceof RigidCollection) {
+				c.body2 = bc.getOtherSubBodyFromParent(((RigidCollection ) c.body2));
+			}
+			x = 1;
+		}
+	
 
 	}
 	//like addBody but with another collection...
@@ -105,12 +123,19 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody b: additionQueue) {
 			collectionBodies.add(b);
 		}
-		col.collectionBodies.clear();
+		//col.collectionBodies.clear();
 		
 		setupCollection();
 		
-		
+		// handle the internal contacts of col... they no longer beloogn
 		internalBodyContacts.addAll(col.internalBodyContacts);
+		
+		for (Contact c: col.internalContacts) {
+			
+			internalContacts.add(c);
+			col.transformB2W.transform(c.contactW);
+			col.transformB2W.transform(c.normal);
+		}
 	}
 	
 	/** 
@@ -345,7 +370,7 @@ public class RigidCollection extends RigidBody{
         Point2d p2 = new Point2d();
         for (BodyContact bc: internalBodyContacts) {
         	gl.glLineWidth(5);
-			gl.glColor4f(1, 0,0, 1.0f);
+			gl.glColor4f(0, 1,0, 1.0f);
 			gl.glBegin( GL.GL_LINES );
 			p1.set(bc.thisBody.x);
 			p2.set(bc.otherBody.x);
@@ -425,7 +450,7 @@ public class RigidCollection extends RigidBody{
 			handledBodies.add(sB);
 			newRigidBodies.add(sB);
 			unmergeSingleBody(sB);
-			
+			contactsToWorld();
 			dealWithNeighbors(sB);
 			
 			//sB.unmergeBodyContacts();
@@ -433,6 +458,10 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 
+  /*
+   * makes body ready to be used by system... converts everything to world coordinates and makes body independant of collection
+   * ... does not do anything to the collection itself.
+   */
     public void unmergeSingleBody(RigidBody sB) {
 		if (sB.parent == null) return;
 		else {
@@ -472,6 +501,7 @@ private void dealWithNeighbors(RigidBody sB) {
 					RigidCollection newCollection = new RigidCollection(neighborCollection.remove(0), neighborCollection.remove(0));
 					newCollection.addBodies(neighborCollection);
 					newCollection.fillInternalBodyContacts();
+					contactsToBody();
 					newCollection.v.set(v);
 					newCollection.omega = omega;
 					newRigidBodies.add(newCollection);
@@ -480,11 +510,21 @@ private void dealWithNeighbors(RigidBody sB) {
 				else if ( neighborCollection.size() == 1){
 					unmergeSingleBody(neighborCollection.get(0));
 					newRigidBodies.add(neighborCollection.remove(0));
+					contactsToBody();
 				}
 				
 			}
 		}
 	}
+
+private void contactsToBody() {
+	for (Contact c: internalContacts) {
+		transformW2B.transform(c.contactW);
+		transformW2B.transform(c.normal);
+		
+	}
+}
+
 
 /*
  * Go through all bodies and makes sure all the body contacts of each body is in the collection
@@ -496,7 +536,13 @@ public void fillInternalBodyContacts() {
 				RigidBody otherBody = bc.getOtherBody(b);
 				if (b.parent.collectionBodies.contains(otherBody))
 				internalBodyContacts.add(bc);
+				for (Contact c : bc.contactList) {
+					if (!internalContacts.contains(c)) {
+						internalContacts.add(c);
+					}
+				}
 			}
+			
 		}
 	}
 }
@@ -639,6 +685,7 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
  * 
  */
 	private void setupCollection() {
+		contactsToWorld();
 		calculateMass();
 	
 		calculateCOM();
@@ -656,7 +703,26 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 }
 	
 
+	private void contactsToWorld() {
+		for (Contact c: internalContacts) {
+			transformB2W.transform(c.contactW);
+			transformB2W.transform(c.normal);
+			
+		}
+	}
 
+
+	public void drawInternalContacts(GLAutoDrawable drawable) {
+		for (Contact c: internalContacts) {
+				transformB2W.transform(c.contactW);
+				transformB2W.transform(c.normal);
+				//c.display(drawable);
+				c.drawInternalContactForce(drawable);
+				transformW2B.transform(c.contactW);
+				transformW2B.transform(c.normal);
+			
+		}
+	}
 
 
 	

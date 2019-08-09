@@ -65,7 +65,6 @@ public class CollisionProcessor {
         }
         
      
-     
 		//the rest of the collisionProcessor
         contacts.clear();
         long now = System.nanoTime();
@@ -129,7 +128,6 @@ public class CollisionProcessor {
        DenseVector lamda = new DenseVector(2*contacts.size());
        lamda.zero();
  
-     
        
 	   if (warm_start.getValue()) {
 		   for (Contact contact_i : contacts) {
@@ -139,14 +137,17 @@ public class CollisionProcessor {
 		    		Block block1 = contact_i.block1;
 		    		Block block2 = contact_i.block2;
 		    		
-					if(last_timestep_map.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))) {
+					if(last_timestep_map.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))|| last_timestep_map.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
 						double m1inv = contact_i.body1.minv; 
 						double m2inv = contact_i.body2.minv;
 						double j1inv = contact_i.body1.jinv;
 						double j2inv = contact_i.body2.jinv;
 			
-						//if the old map contains this key, then get the lamda of the old map
 						Contact c = last_timestep_map.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
+						if(last_timestep_map.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
+						c = last_timestep_map.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
+						//if the old map contains this key, then get the lamda of the old map
+						
 						double old_lamda_n = c.lamda.x;
 						double old_lamda_t = c.lamda.y;
 						double old_delta_lamda_n = old_lamda_n;
@@ -190,9 +191,6 @@ public class CollisionProcessor {
 			    		dV2.set(0, dV2.get(0) + t_2_x_n + t_2_x_t);
 			    		dV2.set(1, dV2.get(1) + t_2_y_n + t_2_y_t );
 			    		dV2.set(2, dV2.get(2) + t_2_omega_n + t_2_omega_t );
-					}else {
-						contact_i.body1.delta_V.zero();
-						contact_i.body2.delta_V.zero();
 					}
 		   	}
 	    } 
@@ -428,6 +426,72 @@ public class CollisionProcessor {
    organize();
    if(shuffle.getValue())knuth_shuffle();
 
+   if (warm_start.getValue()) {
+	   for (Contact contact_i : contacts) {
+	        	
+	        	DenseVector j_1 = new DenseVector(contact_i.j_1);
+	    		DenseVector j_2 = new DenseVector(contact_i.j_2);
+	    		Block block1 = contact_i.block1;
+	    		Block block2 = contact_i.block2;
+	    		
+				if(last_timestep_map.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))|| last_timestep_map.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
+					double m1inv = contact_i.body1.minv; 
+					double m2inv = contact_i.body2.minv;
+					double j1inv = contact_i.body1.jinv;
+					double j2inv = contact_i.body2.jinv;
+		
+					Contact c = last_timestep_map.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
+					if(last_timestep_map.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
+					c = last_timestep_map.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
+					//if the old map contains this key, then get the lamda of the old map
+					
+					double old_lamda_n = c.lamda.x;
+					double old_lamda_t = c.lamda.y;
+					double old_delta_lamda_n = old_lamda_n;
+					double old_delta_lamda_t = old_lamda_t;
+					//set this lamda to the old lamda
+					lamda.set(2*contact_i.index, old_lamda_n);
+					lamda.set(2*contact_i.index + 1, old_lamda_t);
+					//recompute Delta V's
+					
+					//first recompute t.
+					
+					double t_1_x_n = 0, t_1_y_n =0 , t_1_omega_n=0, t_2_x_n=0, t_2_y_n=0, t_2_omega_n = 0;
+					double t_1_x_t=0, t_1_y_t=0, t_1_omega_t=0, t_2_x_t=0, t_2_y_t=0, t_2_omega_t = 0;
+					        			//first body
+		    		t_1_x_n = j_1.get(0) * m1inv*old_delta_lamda_n;
+		    		t_1_y_n = j_1.get(1)* m1inv*old_delta_lamda_n;
+		    		t_1_omega_n = j_1.get(2)* j1inv*old_delta_lamda_n;
+		    			//second body
+		    		t_2_x_n = j_1.get(3) * m2inv*old_delta_lamda_n;
+		    		t_2_y_n = j_1.get(4) * m2inv*old_delta_lamda_n;
+		    		t_2_omega_n = j_1.get(5) * j2inv*old_delta_lamda_n;
+		    		
+		    			//first body
+		    		t_1_x_t = j_2.get(0) * m1inv*old_delta_lamda_t;
+		    		t_1_y_t =  j_2.get(1) * m1inv*old_delta_lamda_t;
+		    		t_1_omega_t =  j_2.get(2)  * j1inv*old_delta_lamda_t;
+		    			//second body
+		    		t_2_x_t =  j_2.get(3)  * m2inv*old_delta_lamda_t;
+		    		t_2_y_t =  j_2.get(4)  * m2inv*old_delta_lamda_t;
+		    		t_2_omega_t =  j_2.get(5) * j2inv* old_delta_lamda_t;
+		    		
+		    		//update delta V;
+		    	
+		    		DenseVector dV1 = contact_i.body1.delta_V; 
+		    		DenseVector dV2 = contact_i.body2.delta_V; 
+		    		dV1.set( 0, dV1.get( 0) + t_1_x_n  + t_1_x_t);
+		    		dV1.set( 1, dV1.get( 1) + t_1_y_n + t_1_y_t );
+		    		dV1.set(2, dV1.get(2) +  t_1_omega_n + t_1_omega_t);
+		    		
+		    		//update delta V;
+		    		dV2.set(0, dV2.get(0) + t_2_x_n + t_2_x_t);
+		    		dV2.set(1, dV2.get(1) + t_2_y_n + t_2_y_t );
+		    		dV2.set(2, dV2.get(2) + t_2_omega_n + t_2_omega_t );
+				}
+	   	}
+    } 
+  
        while(iteration > 0) {
         	//shuffle for stability
         	
@@ -627,7 +691,16 @@ public class CollisionProcessor {
         	
         }
    
+       //fill the new map
+       last_timestep_map.clear();
+        for (Contact co : contacts) {
+        	Block block1 = co.block1;
+        	Block block2 = co.block2;
+        
+        	last_timestep_map.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), co);
+        	
 
+        } 
 
       
        
@@ -983,13 +1056,13 @@ public class CollisionProcessor {
     /** Flag for using shuffle */
     private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
     /** Flag for using shuffle */
-    private BooleanParameter warm_start = new BooleanParameter( "warm start", false );
+    private BooleanParameter warm_start = new BooleanParameter( "warm start", true);
     
     /** Flag for enabling the use of hierarchical collision detection for body pairs */
     private BooleanParameter useBVTree = new BooleanParameter( "use BVTree", true);
    
     
-    public static DoubleParameter feedback_stiffness = new DoubleParameter("feedback coefficient", 2, 0,50  );
+    public static DoubleParameter feedback_stiffness = new DoubleParameter("feedback coefficient", 0, 0,50  );
    
     /** toggle on or off adaptive hamiltonian*/
     public static BooleanParameter  useAdaptiveHamiltonian = new BooleanParameter("enable use of adaptive hamiltonian", false );
