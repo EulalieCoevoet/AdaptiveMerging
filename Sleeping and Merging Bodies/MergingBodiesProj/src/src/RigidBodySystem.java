@@ -259,10 +259,10 @@ private void clearJunkAtStartOfTimestep() {
 	    	    	sB.torque = 0;
 	    	    	sB.merged = false;
 	    	    	ArrayList<BodyContact> newBodyContactList = new ArrayList<BodyContact>();
-	    	    	/*for (BodyContact bc : sB.bodyContactList) 
-	    	    		if (bc.merged) newBodyContactList.add(bc);
+	    	    	for (BodyContact bc : sB.bodyContactList) 
+	    	    		if (bc.merged || bc.updatedThisTimeStep) newBodyContactList.add(bc);
 	    	    	sB.bodyContactList.clear();
-	    	    	sB.bodyContactList.addAll(newBodyContactList);*/
+	    	    	sB.bodyContactList.addAll(newBodyContactList);
 	    		}
 	    	}
     	}
@@ -508,7 +508,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	    			RigidCollection colB = (RigidCollection) b;
 	    			if (!colB.unMergedThisTimestep) {
 	    				
-	    				/*ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
+	    				ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 	    				for (RigidBody sB: colB.collectionBodies) {
 	    					forceMetric = colB.metricCheck(sB, totalForce, totalTorque);
 	    					if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
@@ -518,17 +518,17 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	    				ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
 	    				if (!unmergingBodies.isEmpty()) {
 	    					unmergeSelectBodies(colB, unmergingBodies, newBodies);				
-	    				}*/
+	    				}
 	    	
 	    				//colB.fillNewBodiesQueue(totalForce, totalTorque, forceMetric);
 	    		
-	    				for (RigidBody sB: colB.collectionBodies) {
+	    	/*			for (RigidBody sB: colB.collectionBodies) {
 	    					
 	    						colB.checkMetric(sB, totalForce, totalTorque, forceMetric);
 	    						if (colB.newRigidBodies.size()>0) break;// only unmerge one at a time
 	    					}
 	    			
-		/*
+		*/
 	    					if (!newBodies.isEmpty()) {
 	    						for (RigidBody bd: newBodies) {
 	    							additionQueue.add(bd);
@@ -536,8 +536,9 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	    						}
 	    						removalQueue.add(colB);
 	    						newBodies.clear();
+	    						int x = 0;
 	    					}
-*/
+/*
 	    					if (!colB.newRigidBodies.isEmpty()) {
 	    						for (RigidBody bd: colB.newRigidBodies) {
 	    							additionQueue.add(bd);
@@ -545,7 +546,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	    						}
 	    						removalQueue.add(colB);
 	    						colB.newRigidBodies.clear();
-	    					}
+	    					}*/
 		    	
 		    			
 		    		}
@@ -564,12 +565,13 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 
 		private void unmergeSelectBodies(RigidCollection colB, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies) {
 			ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
-			
+ 			
 			handledBodies.addAll((unmergingBodies));
 			for (RigidBody b: unmergingBodies) {
 				
 				colB.unmergeSingleBody(b);
 				newBodies.add(b);
+				colB.contactsToWorld();
 			}
 			for (RigidBody b: unmergingBodies) {
 				ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
@@ -577,9 +579,12 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 				for (BodyContact bc : b.bodyContactList) {
 					RigidBody otherBody = bc.getOtherBody(b);
 					 
-					if (bc.merged && !handledBodies.contains(otherBody)) {
-						subBodies.add(otherBody);
+					if (bc.merged) {
 						bc.merged = false;
+						if(!handledBodies.contains(otherBody)) {
+					
+						subBodies.add(otherBody);
+						
 						handledBodies.add(otherBody);
 						buildNeighborBody(otherBody, subBodies, handledBodies);
 						
@@ -590,6 +595,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 							newCollection.fillInternalBodyContacts();
 							newCollection.v.set(colB.v);
 							newCollection.omega = colB.omega;
+							newCollection.contactsToBody();
 							newBodies.add(newCollection);
 							subBodies.clear();
 						}	else if ( subBodies.size() == 1){
@@ -598,7 +604,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 							subBodies.clear();
 						}
 					}
-					
+					}
 				}
 			}
 		}
@@ -607,6 +613,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 		
 			for (BodyContact bc : b.bodyContactList) {
 				if (!bc.merged) continue;
+				
 				RigidBody otherBody = bc.getOtherBody(b);
 				if (!handledBodies.contains(otherBody)) {
 					handledBodies.add(otherBody);
@@ -948,7 +955,7 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	        	if (b instanceof RigidCollection) {
 	        		
 	        		((RigidCollection)b).displayCollection(drawable);
-	        		((RigidCollection) b).drawInternalContacts(drawable);
+	        		//((RigidCollection) b).drawInternalContacts(drawable);
 	        		
 	        	}
 	        

@@ -250,7 +250,8 @@ public class CollisionProcessor {
         		double u_2_omega_t =  u_2_omega_stored * j_2.get(5);
         		
         		double bf = c*contact_i.constraint_violation;
-
+        		double epsilon = 0.001;
+        		bf -= c*0.5; bf = Math.max(0, bf);
         		//calculate D_i_n 
       			double d_i_n = 0;
     		

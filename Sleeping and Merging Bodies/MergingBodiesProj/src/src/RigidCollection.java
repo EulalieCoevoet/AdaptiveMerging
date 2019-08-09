@@ -517,7 +517,7 @@ private void dealWithNeighbors(RigidBody sB) {
 		}
 	}
 
-private void contactsToBody() {
+public void contactsToBody() {
 	for (Contact c: internalContacts) {
 		transformW2B.transform(c.contactW);
 		transformW2B.transform(c.normal);
@@ -703,7 +703,7 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 }
 	
 
-	private void contactsToWorld() {
+	public void contactsToWorld() {
 		for (Contact c: internalContacts) {
 			transformB2W.transform(c.contactW);
 			transformB2W.transform(c.normal);
