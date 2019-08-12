@@ -34,6 +34,12 @@ public class Contact {
     /** Second RigidBody in contact */
     RigidBody body2;
     
+    /** First RigidBody in contact, only relevant if body1 is a parent. this is the child of that parent that is doing the real collision */
+    RigidBody subBody1;
+    
+    /** Second RigidBody in contact, only relevant if body1 is a parent. this is the child of that parent that is doing the real collision */
+    RigidBody subBody2;
+    
     //The two blocks within the bodies that caused the collision
     Block block1;
     
@@ -41,6 +47,13 @@ public class Contact {
     
     /** Contact normal in world coordinates. GOES FROM BODY1 to BODY2*/
     Vector2d normal = new Vector2d();
+    
+    
+    /** Contact normal in Body1 coordinates. GOES FROM BODY1 to BODY2*/
+    Vector2d normalB1 = new Vector2d();
+    
+    /** Contact normal in Body2 coordinates. GOES FROM BODY1 to BODY2*/
+    Vector2d normalB2 = new Vector2d();
     
     /** Position of contact point in world coordinates */
     Point2d contactW = new Point2d();
@@ -70,7 +83,7 @@ public class Contact {
      * @param contactW
      * @param normal
      */
-    public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2, double distance) {
+    public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2, double distance,  RigidBody sBody1, RigidBody sBody2 ) {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW );
@@ -110,6 +123,8 @@ public class Contact {
 		
 		relativeVelocity.sub(body2.v, body1.v);
 		relativeAngularVelocity = body2.omega - body1.omega;
+		subBody1 = sBody1;
+		subBody2 = sBody2;
     }
     
     public double getRelativeMetric() {
@@ -167,23 +182,9 @@ public class Contact {
         Point2d p1 = new Point2d(block1.pB);
         Point2d p2 = new Point2d(block2.pB);
       
-        
-        if (body1 instanceof RigidCollection) {
-        	RigidBody sB = bc.getThisSubBodyFromParent((RigidCollection) body1);
-        			if (sB == null) {
-                		int x = 0;
-                	}else {
-                		sB.transformB2W.transform(p1);
-                	}
-        }else  body1.transformB2W.transform(p1);
-        if (body2 instanceof RigidCollection) {
-        	RigidBody sB = bc.getThisSubBodyFromParent((RigidCollection) body2);
-        	if (sB == null) {
-        		int x = 0;
-        	}else {
-        		sB.transformB2W.transform(p2);
-        	}
-        } else body2.transformB2W.transform(p2);
+        subBody1.transformB2W.transform(p1); 
+        subBody2.transformB2W.transform(p2);
+
         
             gl.glLineWidth(2);
             gl.glColor4f(0, 1, 0, 1);
@@ -225,19 +226,20 @@ public class Contact {
         Point2d p1 = new Point2d(block1.pB);
         Point2d p2 = new Point2d(block2.pB);
       
-        
-        body1.transformB2W.transform(p1);
-        body2.transformB2W.transform(p2);
-        
+        subBody1.transformB2W.transform(p1); 
+        subBody2.transformB2W.transform(p2);
+        subBody1.transformB2W.transform(normalB1); 
+        subBody2.transformB2W.transform(normalB2);
+
             gl.glLineWidth(2);
             gl.glColor4f(0, 0, 1, 1);
             gl.glBegin( GL.GL_LINES );
 
             gl.glVertex2d(p2.x, p2.y);
-            double scale = 2;
-            Vector2d normal2 = new Vector2d(normal);
-            normal2.scale(scale*lamda.length());
-            gl.glVertex2d(p2.x + normal2.x, p2.y+normal2.y);
+            double scale = 2*lamda.length();
+     
+         
+            gl.glVertex2d(p2.x + scale*normalB1.x, p2.y+scale*normalB1.y);
             gl.glEnd();
             
          //   drawArrowHeads(gl, p2, normal2);
@@ -248,11 +250,13 @@ public class Contact {
 
             gl.glVertex2d(p1.x, p1.y);
     
-            normal2.scale(-1);
+          
       
-            gl.glVertex2d(p1.x + normal2.x, p1.y+normal2.y);
+            gl.glVertex2d(p1.x + scale*normalB2.x, p1.y+scale*normalB2.y);
             gl.glEnd();
             
+            subBody1.transformW2B.transform(normalB1); 
+            subBody2.transformW2B.transform(normalB2);
           //  drawArrowHeads(gl, p2, normal2);
   
     }

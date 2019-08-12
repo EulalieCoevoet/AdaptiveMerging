@@ -513,6 +513,8 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	    					forceMetric = colB.metricCheck(sB, totalForce, totalTorque);
 	    					if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
 	    						unmergingBodies.add(sB);
+	    		
+	    	    	
 	    					}
 	    				}
 	    				ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
@@ -573,12 +575,13 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 				newBodies.add(b);
 				colB.contactsToWorld();
 			}
+			ArrayList<BodyContact> clearedBodyContacts = new ArrayList<BodyContact>();
 			for (RigidBody b: unmergingBodies) {
 				ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 			
 				for (BodyContact bc : b.bodyContactList) {
 					RigidBody otherBody = bc.getOtherBody(b);
-					 
+					clearedBodyContacts.add(bc);
 					if (bc.merged) {
 						bc.merged = false;
 						if(!handledBodies.contains(otherBody)) {
@@ -588,23 +591,29 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 						handledBodies.add(otherBody);
 						buildNeighborBody(otherBody, subBodies, handledBodies);
 						
-						if (subBodies.size() > 1) {
-							//make a new collection
-							RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
-							newCollection.addBodies(subBodies);
-							newCollection.fillInternalBodyContacts();
-							newCollection.v.set(colB.v);
-							newCollection.omega = colB.omega;
-							newCollection.contactsToBody();
-							newBodies.add(newCollection);
-							subBodies.clear();
-						}	else if ( subBodies.size() == 1){
-							colB.unmergeSingleBody(subBodies.get(0));
-							newBodies.add(subBodies.remove(0));
-							subBodies.clear();
+							if (subBodies.size() > 1) {
+								//make a new collection
+								RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
+								newCollection.addBodies(subBodies);
+								newCollection.fillInternalBodyContacts();
+								newCollection.v.set(colB.v);
+								newCollection.omega = colB.omega;
+								newCollection.contactsToBody();
+								newBodies.add(newCollection);
+								subBodies.clear();
+								}	else if ( subBodies.size() == 1){
+								colB.unmergeSingleBody(subBodies.get(0));
+								newBodies.add(subBodies.remove(0));
+								subBodies.clear();
+							}
 						}
+						
 					}
-					}
+					
+				}
+				for (BodyContact bc: clearedBodyContacts) {
+					bc.thisBody.bodyContactList.remove(bc);
+					bc.otherBody.bodyContactList.remove(bc);
 				}
 			}
 		}
@@ -713,12 +722,14 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 						bc.thisBody.merged=true;
 						bc.thisBody.parent.addCollection(bc.otherBody.parent);
 						bc.thisBody.parent.addInternalContact(bc);
+						bc.thisBody.parent.addIncompleteCollectionContacts(bc.otherBody.parent);
 						
 					}else {
 						bc.otherBody.merged = true;
 						bodies.remove(bc.thisBody.parent);
 						bc.otherBody.parent.addCollection(bc.thisBody.parent);
 						bc.otherBody.parent.addInternalContact(bc);
+						bc.thisBody.parent.addIncompleteCollectionContacts(bc.otherBody.parent);
 						
 					}
 				}else if (bc.thisBody.parent != null) {
@@ -726,13 +737,14 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 					bodies.remove(bc.otherBody);
 					bc.thisBody.parent.addBody(bc.otherBody);
 					bc.thisBody.parent.addInternalContact(bc);
+					bc.thisBody.parent.addIncompleteContacts(bc.otherBody);
 					
 				}else if (bc.otherBody.parent != null) {
 					//otherBody is in a collection... thisBody isnt
 					bodies.remove(bc.thisBody);
 					bc.otherBody.parent.addBody(bc.thisBody);
 					bc.otherBody.parent.addInternalContact(bc);
-					int x = 0;
+					bc.otherBody.parent.addIncompleteContacts(bc.thisBody);
 					
 				}
 				removalQueue.add(bc);
@@ -955,7 +967,9 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 	        	if (b instanceof RigidCollection) {
 	        		
 	        		((RigidCollection)b).displayCollection(drawable);
-	        		//((RigidCollection) b).drawInternalContacts(drawable);
+	        		
+	        	if(drawInternalContactForces.getValue())
+	        		((RigidCollection) b).drawInternalContacts(drawable);
 	        		
 	        	}
 	        
@@ -974,7 +988,8 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
         if ( drawContacts.getValue() ) {
             for ( Contact c : collisionProcessor.contacts ) {
                 c.display(drawable);
-             //   c.drawContactForce(drawable);
+                if(drawExternalContactForces.getValue())
+                c.drawContactForce(drawable);
             }
         }
         if ( drawCOMs.getValue() ) {
@@ -1020,6 +1035,9 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
     private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
     private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
     private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
+    private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces", false);
+    private BooleanParameter drawExternalContactForces = new BooleanParameter("draw External Forces", false);
+    
     private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", false );
     private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", true);
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
@@ -1045,6 +1063,9 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
         vfpv.add( drawBoundingVolumes.getControls() );
         vfpv.add( drawAllBoundingVolumes.getControls() );
         vfpv.add( drawBoundingVolumesUsed.getControls() );
+        vfpv.add( drawInternalContactForces.getControls() );
+        vfpv.add( drawExternalContactForces.getControls() );
+       
         vfpv.add( drawCOMs.getControls() );
         vfpv.add( drawContacts.getControls() );
         vfpv.add( drawContactGraph.getControls() );

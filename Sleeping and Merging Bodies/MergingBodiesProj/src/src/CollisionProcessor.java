@@ -85,8 +85,7 @@ public class CollisionProcessor {
 	private void rememberBodyContacts() {
     	ArrayList<BodyContact> savedBodyContacts = new ArrayList<BodyContact>();
    		for (BodyContact bc : bodyContacts) {
-   			
-   			bc.contactList.clear();
+   			if (!bc.merged)bc.contactList.clear();
            	if (bc.updatedThisTimeStep) {
            		savedBodyContacts.add(bc);
            		bc.updatedThisTimeStep = false;
@@ -945,15 +944,24 @@ public class CollisionProcessor {
              *  will list the collection as one of its bodies... not the actual contacting subbody
             */
             if (body1.parent != null && body2.parent != null) {
-            	contact = new Contact( body1.parent, body2.parent, contactW, normal, b1, b2, distance);
+            	contact = new Contact( body1.parent, body2.parent, contactW, normal, b1, b2, distance, body1, body2);
             }
             else if (body1.parent != null) {
-               contact = new Contact( body1.parent, body2, contactW, normal, b1, b2, distance);
+               contact = new Contact( body1.parent, body2, contactW, normal, b1, b2, distance,  body1, body2);
             }else if (body2.parent != null) {
-            	contact = new Contact( body1, body2.parent, contactW, normal, b1, b2, distance);
+            	contact = new Contact( body1, body2.parent, contactW, normal, b1, b2, distance,  body1, body2);
             }else {
-            	contact = new Contact( body1, body2, contactW, normal, b1, b2, distance);
+            	contact = new Contact( body1, body2, contactW, normal, b1, b2, distance,  body1, body2);
             }
+            
+            //set normals in body coordinates
+            contact.normalB1.set(normal);
+            contact.normalB2.set(normal);
+            body1.transformW2B.transform(contact.normalB1);
+            
+            body2.transformW2B.transform(contact.normalB2);
+            contact.normalB2.scale(-1);
+            
             // simple option... add to contact list...
             contacts.add( contact );
            

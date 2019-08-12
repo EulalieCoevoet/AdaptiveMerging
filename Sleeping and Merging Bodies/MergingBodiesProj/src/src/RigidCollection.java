@@ -89,19 +89,8 @@ public class RigidCollection extends RigidBody{
 		//convert the ontacts to collections coordinates. 
 		internalContacts.addAll(bc.contactList);
 		int x = 0;
-		for (Contact c : internalContacts) {
-			transformW2B.transform(c.contactW);
-			transformW2B.transform(c.normal);
-			
-			if (c.body1 instanceof RigidCollection) {
-				c.body1 = bc.getOtherSubBodyFromParent(((RigidCollection ) c.body1));
-			}
-			if (c.body2 instanceof RigidCollection) {
-				c.body2 = bc.getOtherSubBodyFromParent(((RigidCollection ) c.body2));
-			}
-			x = 1;
-		}
-	
+		
+		
 
 	}
 	//like addBody but with another collection...
@@ -661,21 +650,8 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 			b.omega = omega;
 			b.parent = null;
 			
-			
-			/*int i = 0;
-			while (true) {
-				BodyContact bc = bodyContactList.get(i);
-				if (bc.thisBody == b || bc.otherBody== b) {
-					bodyContactList.remove(bc);
-					if (i >= bodyContactList.size()) break;
-					continue;
-				}
-				i++;
-				if (i >= bodyContactList.size()) break;
-			}*/
 		}
-		//bodies.clear();
-		//reset up the collection
+		
 		setupCollection();
 
 		
@@ -713,15 +689,42 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 
 
 	public void drawInternalContacts(GLAutoDrawable drawable) {
-		for (Contact c: internalContacts) {
-				transformB2W.transform(c.contactW);
-				transformB2W.transform(c.normal);
-				//c.display(drawable);
-				c.drawInternalContactForce(drawable);
-				transformW2B.transform(c.contactW);
-				transformW2B.transform(c.normal);
+	
+		for (BodyContact bc: internalBodyContacts) {
+			if (!bc.merged) continue;
+				for (Contact c: bc.contactList) {
+					//c.display(drawable);
+					
+					c.drawInternalContactForce(drawable);
+					
+				}
+		
+			
 			
 		}
+	}
+
+/* 
+ * input parameter is a body being merged. We need to also add the other contacts that body has with the collection it's being merged with
+		//Must also add the bodycontacts around the body that didn't reach 50 timesteps but are still part of the same parents.
+		
+ */
+	public void addIncompleteContacts(RigidBody body) {
+		for (BodyContact bc: body.bodyContactList) {
+			if (bc.thisBody.parent == bc.otherBody.parent) {
+				bc.merged = true;
+				body.parent.addInternalContact(bc);
+			}
+		}
+	}
+
+	//input parameter is a collection being merged . we must add also all the incomplete contacts this parent has with other collections.
+
+	public void addIncompleteCollectionContacts(RigidCollection parent) {
+		for (RigidBody b: parent.collectionBodies) {
+			addIncompleteContacts(b);
+		}
+			
 	}
 
 
