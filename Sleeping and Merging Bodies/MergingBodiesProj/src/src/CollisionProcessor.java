@@ -435,6 +435,7 @@ public class CollisionProcessor {
 		    		Block block2 = contact_i.block2;
 		    		
 					if(last_timestep_map.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))|| last_timestep_map.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
+						
 						double m1inv = contact_i.body1.minv; 
 						double m2inv = contact_i.body2.minv;
 						double j1inv = contact_i.body1.jinv;
@@ -445,6 +446,9 @@ public class CollisionProcessor {
 						c = last_timestep_map.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
 						//if the old map contains this key, then get the lamda of the old map
 						
+						if (c.body1 != contact_i.body1 || c.body2 != contact_i.body2) {
+							continue;
+						}
 						double old_lamda_n = c.lamda.x;
 						double old_lamda_t = c.lamda.y;
 						double old_delta_lamda_n = old_lamda_n;
@@ -510,14 +514,7 @@ public class CollisionProcessor {
 					double m2inv = contact_i.body2.minv;
 					double j1inv =contact_i.body1.jinv;
 					double j2inv = contact_i.body2.jinv;
-					if (contact_i.body1.parent != null) {
-						m1inv = contact_i.body1.parent.minv;
-						j1inv = contact_i.body1.parent.jinv;
-					}
-					if (contact_i.body2.parent != null) {
-						m2inv = contact_i.body2.parent.minv;
-						j2inv = contact_i.body2.parent.jinv;
-					}
+		
 	        		//calculate D_i_i 
 	        		double d_i = 0;
 	        		//first body component
@@ -1024,9 +1021,7 @@ public class CollisionProcessor {
             	contact.bc = bc;
             	bc.contactList.add(contact);
             
-	            body1.contactList.add(contact);
-	            body2.contactList.add(contact);
-	            
+	    
 	            
             
             }

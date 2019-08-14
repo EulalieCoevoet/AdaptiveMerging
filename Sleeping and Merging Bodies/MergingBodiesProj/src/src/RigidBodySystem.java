@@ -137,6 +137,7 @@ public class RigidBodySystem {
         if (enableMerging.getValue()) {
         	applyExternalContactForces(dt);
         	applyInternalContactForces(dt);
+        	int x = 0;
         }
         
         if (enableMerging.getValue()) {
@@ -664,6 +665,7 @@ public void mergeBodies() {
 			if (!bc.updatedThisTimeStep) mergeCondition = false;
 			if (bc.thisBody.pinned || bc.otherBody.pinned) mergeCondition = false;
 			if (bc.thisBody.merged || bc.otherBody.merged) mergeCondition = false;
+			
 			if (mergeCondition) {
 				//if they are both not collections...make a new collection!
 				bc.merged = true;

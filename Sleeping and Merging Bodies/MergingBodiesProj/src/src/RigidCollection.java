@@ -78,7 +78,8 @@ public class RigidCollection extends RigidBody{
 	
 	
 	public void addInternalContact(BodyContact bc) {
-		internalBodyContacts.add(bc);
+		if (!internalBodyContacts.contains(bc))
+			internalBodyContacts.add(bc);
 		if (!bc.thisBody.bodyContactList.contains(bc)) {
 			bc.thisBody.bodyContactList.add(bc);
 		}
@@ -711,7 +712,7 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
  */
 	public void addIncompleteContacts(RigidBody body) {
 		for (BodyContact bc: body.bodyContactList) {
-			if (bc.thisBody.parent == bc.otherBody.parent) {
+			if (bc.thisBody.parent == bc.otherBody.parent && bc.relativeVelHistory.size() < CollisionProcessor.sleep_accum.getValue()) {
 				bc.merged = true;
 				body.parent.addInternalContact(bc);
 			}
