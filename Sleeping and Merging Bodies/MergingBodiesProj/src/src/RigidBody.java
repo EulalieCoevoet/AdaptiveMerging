@@ -131,9 +131,18 @@ public class RigidBody {
     /** a list of the total contact torques acting on this body in the last N steps  before sleeping or merging   */
     public double contactTorques = 0;
     
+    /** a list of the total contact torques acting on this body in the last N steps  before sleeping or merging   */
+    public double currentContactTorques = 0;
     
-    /** the total contact forces acting on it at this current time step, in world coordinates**/
-    public Vector2d contactForce = new Vector2d();
+    /** the total contact forces acting on it at this current time step, in world coordinates. Does not get updated when a body
+     * is part of a collection, unless a new body joins that collection.
+     * **/
+    public Vector2d savedContactForce = new Vector2d();
+    
+    /** the total contact forces acting on it at this current time step, in world coordinates. Gets updated
+     * only if there are new BodyContacts that were not seen prior to merging.
+     * **/
+    public Vector2d currentContactForce = new Vector2d();
     
     public boolean merged = false;
     

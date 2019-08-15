@@ -55,7 +55,7 @@ public class RigidCollection extends RigidBody{
 		//no longer relevant
 		contactList.clear();
 	
-		contactForce.set(0, 0);
+		savedContactForce.set(0, 0);
 		contactTorques = 0;
 		springs.clear();
 	}
@@ -312,8 +312,8 @@ public class RigidCollection extends RigidBody{
 			   body.parent = this;
 		
 		}
-		this.massAngular = inertia;
-		this.jinv = 1/inertia;
+		massAngular = inertia;
+		jinv = 1/inertia;
 		
 	}
 
@@ -411,13 +411,13 @@ public class RigidCollection extends RigidBody{
     
  public double  metricCheck(RigidBody sB , Vector2d totalForce, double totalTorque) {
 	 	totalForce.set(sB.force);
-		sB.transformB2W.transform(sB.contactForce);
+		sB.transformB2W.transform(sB.currentContactForce);
 	
 		
-		totalForce.add(sB.contactForce);
+		totalForce.add(sB.currentContactForce);
 
-		sB.transformW2B.transform(sB.contactForce);
-		totalTorque = sB.torque + sB.contactTorques;
+		sB.transformW2B.transform(sB.currentContactForce);
+		totalTorque = sB.torque + sB.currentContactTorques;
 		double forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
 		return forceMetric;
  }
@@ -427,12 +427,12 @@ public class RigidCollection extends RigidBody{
     
   public void checkMetric(RigidBody sB, Vector2d totalForce, double totalTorque, double forceMetric) {
     	totalForce.set(sB.force);
-		sB.transformB2W.transform(sB.contactForce);
+		sB.transformB2W.transform(sB.savedContactForce);
 	
 		
-		totalForce.add(sB.contactForce);
+		totalForce.add(sB.savedContactForce);
 
-		sB.transformW2B.transform(sB.contactForce);
+		sB.transformW2B.transform(sB.savedContactForce);
 		totalTorque = sB.torque + sB.contactTorques;
 		forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
 		

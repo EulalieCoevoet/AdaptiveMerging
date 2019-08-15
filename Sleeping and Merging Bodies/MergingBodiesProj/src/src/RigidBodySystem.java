@@ -137,7 +137,7 @@ public class RigidBodySystem {
         if (enableMerging.getValue()) {
         	applyExternalContactForces(dt);
         	applyInternalContactForces(dt);
-        	int x = 0;
+        
         }
         
         if (enableMerging.getValue()) {
@@ -222,17 +222,17 @@ private void applyGravitySubBodies(RigidCollection b, Vector2d force, double the
 	}
 
 private void applyInternalContactForces(double dt) {
-		for (RigidBody b: bodies) {
+		/*for (RigidBody b: bodies) {
 			if (b instanceof RigidCollection) {
 				for (Contact c : ((RigidCollection) b).internalContacts) {
-					  c.body1.contactForce.add(c.contactForceB1);
-					  c.body1.contactTorques += (c.contactTorqueB1);
-					  c.body2.contactForce.add(c.contactForceB2);
-					  c.body2.contactTorques += (c.contactTorqueB2);
+					  c.subBody1.contactForce.add(c.contactForceB1);
+					  c.subBody1.contactTorques += (c.contactTorqueB1);
+					  c.subBody2.contactForce.add(c.contactForceB2);
+					  c.subBody2.contactTorques += (c.contactTorqueB2);
 				}
 			
 			}
-		}
+		}*/
 	}
 
 private void clearJunkAtStartOfTimestep() {
@@ -242,8 +242,11 @@ private void clearJunkAtStartOfTimestep() {
 	    	b.torque = 0;
 	    	b.delta_V.zero();
 	    
-	    	b.contactForce.set(0, 0);
+	    	b.savedContactForce.set(0, 0);
+	    	
+	    	b.currentContactForce.set(0, 0);
 	    	b.contactTorques = 0;
+	    	b.currentContactTorques = 0;
 	    	b.contactList.clear();
 	    	//b.bodyContactList.clear();
 	    
@@ -252,8 +255,10 @@ private void clearJunkAtStartOfTimestep() {
 	    		((RigidCollection) b).unMergedThisTimestep = false;
 	    		((RigidCollection) b).updatedThisTimeStep = false; 
 	    		for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
-	    	    	sB.contactForce.set(0, 0);
-	    	    	sB.contactTorques = 0;
+	    	    	//sB.contactForce.set(0, 0);
+	    	    	//sB.contactTorques = 0;
+	    			sB.currentContactForce.set(sB.savedContactForce);
+	    			sB.currentContactTorques = sB.contactTorques;
 	    	    //	sB.contactList.clear();
 	    	    	sB.force.set(0, 0);
 	    	    	sB.torque = 0;
@@ -277,42 +282,26 @@ private void clearJunkAtStartOfTimestep() {
    private void applyExternalContactForces(double dt) {
 	   for (BodyContact bc : collisionProcessor.bodyContacts) {
 		   for (Contact c: bc.contactList) {
-			  // if (c.body1 == bc.thisBody) {
-				   c.subBody1.contactForce.add(c.contactForceB1);
-				   c.subBody1.contactTorques += (c.contactTorqueB1);
-				   c.subBody2.contactForce.add(c.contactForceB2);
-				   c.subBody2.contactTorques += (c.contactTorqueB2);
-				   /*
-				   
-				   bc.thisBodyContactForce.add(c.contactForceB1);
-				   bc.thisBodyContactTorque+=(c.contactTorqueB1);
-				   bc.otherBodyContactForce.add(c.contactForceB2);
-				   bc.otherBodyContactTorque+=(c.contactTorqueB2);
-				   
-			   }else if (c.body1 == bc.otherBody) {
-				   c.body1.contactForce.add(c.contactForceB1);
+			  
+				   c.body1.savedContactForce.add(c.contactForceB1);
 				   c.body1.contactTorques += (c.contactTorqueB1);
-				   c.body2.contactForce.add(c.contactForceB2);
+				   if (c.body1 instanceof RigidCollection) {
+					   if (c.bc.relativeVelHistory.size() <= 1) {
+						   c.subBody1.currentContactForce.add(c.contactForceB1);
+						   c.subBody1.currentContactTorques += c.contactTorqueB1;
+					   }
+				   }
+				   c.body2.savedContactForce.add(c.contactForceB2);
 				   c.body2.contactTorques += (c.contactTorqueB2);
-				   
-				   bc.otherBodyContactForce.add(c.contactForceB1);
-				   bc.otherBodyContactTorque+=(c.contactTorqueB1);
-				   bc.thisBodyContactForce.add(c.contactForceB2);
-				   bc.thisBodyContactTorque+=(c.contactTorqueB2);
-				   
-			   }*/
+				   if (c.body2 instanceof RigidCollection) {
+					   if (c.bc.relativeVelHistory.size() <= 1) {
+						   c.subBody2.currentContactForce.add(c.contactForceB2);
+						   c.subBody2.currentContactTorques += c.contactTorqueB2;
+					   }
+				   }
 		   }
 		 
-		   /*
-		   bc.thisBodyContactForce.scale(1/dt); bc.otherBodyContactForce.scale(1/dt);
-		   bc.thisBodyContactTorque/=dt; bc.otherBodyContactTorque/=dt;
-		   //transform to body coordinates
-		   bc.thisBody.transformW2B.transform(bc.thisBodyContactForce);
-		   bc.otherBody.transformW2B.transform(bc.otherBodyContactForce);
-		   
-		   //take this opportunity to add the contactForce to each body
-		   bc.thisBody.contactForce.add(bc.thisBodyContactForce);
-		   bc.otherBody.contactForce.add(bc.otherBodyContactForce);*/
+	
 	   }
 
 	   
@@ -483,6 +472,7 @@ private void generalOneBodyAtATime() {
 	    					forceMetric = colB.metricCheck(sB, totalForce, totalTorque);
 	    					if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
 	    						unmergingBodies.add(sB);
+	    						int x = 0;
 	    		
 	    	    	
 	    					}
@@ -612,7 +602,7 @@ private void generalHeuristic() {
 	    		if (b instanceof RigidCollection) {
 	    	
 	    			totalForce.set(b.force);
-	    			totalForce.add(b.contactForce);
+	    			totalForce.add(b.savedContactForce);
 	    			totalTorque = b.torque + b.contactTorques;
 	    			
 	    			double forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/b.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/b.massAngular;
