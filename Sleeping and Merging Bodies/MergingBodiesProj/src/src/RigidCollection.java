@@ -37,6 +37,9 @@ public class RigidCollection extends RigidBody{
 		collectionBodies.add(body1);
 		collectionBodies.add(body2);
 		
+		body1.bodyContactListPreMerging.addAll(body1.bodyContactList);
+		body2.bodyContactListPreMerging.addAll(body2.bodyContactList);
+		
 		setupCollection();
 		
 		body1.parent = this;
@@ -66,7 +69,7 @@ public class RigidCollection extends RigidBody{
 	 * @param bc 
 	 */
 	public void addBody(RigidBody body) {
-		
+		body.bodyContactListPreMerging.addAll(body.bodyContactList);
 		collectionBodies.add(body);
 		setupCollection();
 		
@@ -111,6 +114,7 @@ public class RigidCollection extends RigidBody{
 		}
 		
 		for (RigidBody b: additionQueue) {
+			b.bodyContactListPreMerging.addAll(b.bodyContactList);
 			collectionBodies.add(b);
 		}
 		//col.collectionBodies.clear();

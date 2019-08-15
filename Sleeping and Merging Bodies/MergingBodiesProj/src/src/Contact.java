@@ -197,6 +197,9 @@ public class Contact {
       
         subBody1.transformB2W.transform(p1); 
         subBody2.transformB2W.transform(p2);
+        
+        subBody1.transformB2W.transform(contactForceB1);
+        subBody2.transformB2W.transform(contactForceB2);
 
             double scale = 0.05;
  
@@ -225,6 +228,10 @@ public class Contact {
             gl.glVertex2d(p1.x + scale*contactForceB1.x, p1.y+scale*contactForceB1.y);
             gl.glEnd();
             
+            subBody1.transformW2B.transform(contactForceB1);
+            subBody2.transformW2B.transform(contactForceB2);
+
+            
     }
 
     
@@ -241,8 +248,8 @@ public class Contact {
       
         subBody1.transformB2W.transform(p1); 
         subBody2.transformB2W.transform(p2);
-        subBody1.transformB2W.transform(normalB1); 
-        subBody2.transformB2W.transform(normalB2);
+        subBody1.transformB2W.transform(contactForceB1);
+        subBody2.transformB2W.transform(contactForceB2);
 
             gl.glLineWidth(2);
             gl.glColor4f(0, 0, 1, 1);
@@ -268,9 +275,11 @@ public class Contact {
             gl.glVertex2d(p1.x + scale*contactForceB1.x, p1.y+scale*contactForceB1.y);
             gl.glEnd();
             
-            subBody1.transformW2B.transform(normalB1); 
-            subBody2.transformW2B.transform(normalB2);
+            subBody1.transformW2B.transform(contactForceB1);
+            subBody2.transformW2B.transform(contactForceB2);
+
           //  drawArrowHeads(gl, p2, normal2);
+            
   
     }
 

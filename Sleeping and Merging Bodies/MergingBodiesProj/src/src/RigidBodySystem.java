@@ -286,7 +286,7 @@ private void clearJunkAtStartOfTimestep() {
 				   c.body1.savedContactForce.add(c.contactForceB1);
 				   c.body1.contactTorques += (c.contactTorqueB1);
 				   if (c.body1 instanceof RigidCollection) {
-					   if (c.bc.relativeVelHistory.size() <= 1) {
+					   if (!c.subBody1.bodyContactListPreMerging.contains(bc)) {
 						   c.subBody1.currentContactForce.add(c.contactForceB1);
 						   c.subBody1.currentContactTorques += c.contactTorqueB1;
 					   }
@@ -294,7 +294,7 @@ private void clearJunkAtStartOfTimestep() {
 				   c.body2.savedContactForce.add(c.contactForceB2);
 				   c.body2.contactTorques += (c.contactTorqueB2);
 				   if (c.body2 instanceof RigidCollection) {
-					   if (c.bc.relativeVelHistory.size() <= 1) {
+					   if (!c.subBody2.bodyContactListPreMerging.contains(bc)) {
 						   c.subBody2.currentContactForce.add(c.contactForceB2);
 						   c.subBody2.currentContactTorques += c.contactTorqueB2;
 					   }
