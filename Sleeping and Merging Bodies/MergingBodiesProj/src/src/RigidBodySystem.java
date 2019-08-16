@@ -119,8 +119,7 @@ public class RigidBodySystem {
     	
        	externalBodyContacts = collisionProcessor.bodyContacts;
     	clearJunkAtStartOfTimestep();
-   
-  
+    	
         // apply gravity to all bodies... also take this opportunity to clear all forces at the start of the timestep
         if ( useGravity.getValue() ) {
         	applyGravityForce();
@@ -553,6 +552,7 @@ private void unmergeSelectBodies(RigidCollection colB, ArrayList<RigidBody> unme
 					}
 					
 				}
+				b.bodyContactList.clear();
 				for (BodyContact bc: clearedBodyContacts) {
 					bc.thisBody.bodyContactList.remove(bc);
 					bc.otherBody.bodyContactList.remove(bc);

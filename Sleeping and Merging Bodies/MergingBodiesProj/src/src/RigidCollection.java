@@ -459,6 +459,7 @@ public class RigidCollection extends RigidBody{
     public void unmergeSingleBody(RigidBody sB) {
 		if (sB.parent == null) return;
 		else {
+	
 			sB.parent.transformB2W.transform(sB.x);
 			sB.theta = sB.transformB2W.getTheta();
 			sB.transformB2C.T.setIdentity();
@@ -466,7 +467,7 @@ public class RigidCollection extends RigidBody{
 			sB.v.set(sB.parent.v);
 			sB.omega = sB.parent.omega;
 			sB.parent = null;
-		
+			
 			
 		}
 	
@@ -716,7 +717,7 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
  */
 	public void addIncompleteContacts(RigidBody body) {
 		for (BodyContact bc: body.bodyContactList) {
-			if (bc.thisBody.parent == bc.otherBody.parent && bc.relativeVelHistory.size() < CollisionProcessor.sleep_accum.getValue()) {
+			if (bc.thisBody.parent == bc.otherBody.parent && bc.relativeVelHistory.size() <= CollisionProcessor.sleep_accum.getValue()) {
 				bc.merged = true;
 				body.parent.addInternalContact(bc);
 			}

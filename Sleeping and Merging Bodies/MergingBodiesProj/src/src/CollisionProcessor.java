@@ -93,7 +93,7 @@ public class CollisionProcessor {
            }
    		bodyContacts.clear();
    		bodyContacts.addAll(savedBodyContacts);
-       	
+   		      	
    		
 	}
 	/*
@@ -726,7 +726,9 @@ public class CollisionProcessor {
             		bc.updatedThisTimeStep = true;
             		bodyContacts.add(bc);
             		
+            		if (!body1.bodyContactList.contains(bc))
             		body1.bodyContactList.add(bc);
+            		if (!body2.bodyContactList.contains(bc))
     	            body2.bodyContactList.add(bc);
             	}
             	contact.bc = bc;
