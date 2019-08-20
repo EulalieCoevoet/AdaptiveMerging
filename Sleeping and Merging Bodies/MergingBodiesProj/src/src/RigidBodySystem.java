@@ -123,7 +123,7 @@ public class RigidBodySystem {
         // apply gravity to all bodies... also take this opportunity to clear all forces at the start of the timestep
         if ( useGravity.getValue() ) {
         	applyGravityForce();
-        }
+        }  
         mouseSpring.apply();
         //deal with zero length springs
         applySpringForces();
@@ -135,7 +135,7 @@ public class RigidBodySystem {
         
         if (enableMerging.getValue()) {
         	applyExternalContactForces(dt);
-        	applyInternalContactForces(dt);
+        	//applyInternalContactForces(dt);
         
         }
         
@@ -248,7 +248,11 @@ private void clearJunkAtStartOfTimestep() {
 	    	b.currentContactTorques = 0;
 	    	b.contactList.clear();
 	    	//b.bodyContactList.clear();
-	    
+   	    	ArrayList<BodyContact> newBodyContactList = new ArrayList<BodyContact>();
+	    	for (BodyContact bc : b.bodyContactList) 
+	    		if (bc.updatedThisTimeStep) newBodyContactList.add(bc);
+	    	b.bodyContactList.clear();
+	    	b.bodyContactList.addAll(newBodyContactList);
 	    	
 	    	if (b instanceof RigidCollection) {
 	    		((RigidCollection) b).unMergedThisTimestep = false;
@@ -262,7 +266,7 @@ private void clearJunkAtStartOfTimestep() {
 	    	    	sB.force.set(0, 0);
 	    	    	sB.torque = 0;
 	    	    	sB.merged = false;
-	    	    	ArrayList<BodyContact> newBodyContactList = new ArrayList<BodyContact>();
+	    	    	newBodyContactList.clear();
 	    	    	for (BodyContact bc : sB.bodyContactList) 
 	    	    		if (bc.merged || bc.updatedThisTimeStep) newBodyContactList.add(bc);
 	    	    	sB.bodyContactList.clear();
@@ -285,19 +289,25 @@ private void clearJunkAtStartOfTimestep() {
 				   c.body1.savedContactForce.add(c.contactForceB1);
 				   c.body1.contactTorques += (c.contactTorqueB1);
 				   if (c.body1 instanceof RigidCollection) {
+					   double cTorque = getSubBodyTorque(c, c.subBody1);
+					 
 					   if (!c.subBody1.bodyContactListPreMerging.contains(bc)) {
 						   c.subBody1.currentContactForce.add(c.contactForceB1);
-						   c.subBody1.currentContactTorques += c.contactTorqueB1;
+						   c.subBody1.currentContactTorques += cTorque;
 					   }
-				   }
+					   applyToBodyContact(c, c.subBody1, c.contactForceB1, cTorque);
+				   } else applyToBodyContact(c, c.body1, c.contactForceB1, c.contactTorqueB1);
 				   c.body2.savedContactForce.add(c.contactForceB2);
 				   c.body2.contactTorques += (c.contactTorqueB2);
 				   if (c.body2 instanceof RigidCollection) {
+					   double cTorque = getSubBodyTorque(c, c.subBody2);
+					   
 					   if (!c.subBody2.bodyContactListPreMerging.contains(bc)) {
 						   c.subBody2.currentContactForce.add(c.contactForceB2);
-						   c.subBody2.currentContactTorques += c.contactTorqueB2;
+						   c.subBody2.currentContactTorques += cTorque;
 					   }
-				   }
+					   applyToBodyContact(c, c.subBody2, c.contactForceB2, cTorque);
+				   }else applyToBodyContact(c, c.body2, c.contactForceB2, c.contactTorqueB2);
 		   }
 		 
 	
@@ -307,9 +317,9 @@ private void clearJunkAtStartOfTimestep() {
 	
    }
 
-private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
-
-	if (c.bc.thisBody.parent == (body)) {
+private double getSubBodyTorque(Contact c, RigidBody body) {
+	double cTorque = 0;
+	if (c.bc.thisBody == body) {
 		double jn_omega, jt_omega;
 		
 		Point2d radius_i = new Point2d(c.bc.thisBody.x);
@@ -330,10 +340,10 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 		}
 		
 		cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
-		
+		return cTorque;
 		
 	}
-	if (c.bc.otherBody.parent == body) {
+	else {
 		double jn_omega, jt_omega;
 		Point2d radius_i = new Point2d(c.bc.otherBody.x);
 		body.transformB2W.transform(radius_i);
@@ -348,21 +358,21 @@ private void getSubBodyTorque(Contact c, RigidBody body, double cTorque) {
 			
 		}
 		cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
-
+		return cTorque;
 	}
-	
+
 }
 
 
 	    /*
 	     * applies contact force to body contacts so we know how much force each body contact exhudes
 	     */
-private void applyToBodyContact(Contact c, RigidBody body, Vector2d cForce, double cTorque, double dt) {
-	    	if (c.bc.thisBody.equals(body)|| c.bc.thisBody.parent == body) {
+private void applyToBodyContact(Contact c, RigidBody body, Vector2d cForce, double cTorque) {
+	    	if (c.bc.thisBody == body) {
 	    		c.bc.thisBodyContactForce.add(cForce);
 	    		c.bc.thisBodyContactTorque += cTorque;
 	    		
-	    	}else if (c.bc.otherBody.equals(body) || c.bc.otherBody.parent == body) {
+	    	}else if (c.bc.otherBody == body) {
 	    		c.bc.otherBodyContactForce.add(cForce);
 	    		c.bc.otherBodyContactTorque += cTorque;
 	    	}
@@ -553,9 +563,12 @@ private void unmergeSelectBodies(RigidCollection colB, ArrayList<RigidBody> unme
 					
 				}
 				b.bodyContactList.clear();
+				b.bodyContactListPreMerging.clear();
 				for (BodyContact bc: clearedBodyContacts) {
 					bc.thisBody.bodyContactList.remove(bc);
 					bc.otherBody.bodyContactList.remove(bc);
+					bc.thisBody.bodyContactListPreMerging.remove(bc);
+					bc.otherBody.bodyContactListPreMerging.remove(bc);
 				}
 			}
 		}
@@ -673,14 +686,14 @@ public void mergeBodies() {
 						bc.thisBody.merged=true;
 						bc.thisBody.parent.addCollection(bc.otherBody.parent);
 						bc.thisBody.parent.addInternalContact(bc);
-						bc.thisBody.parent.addIncompleteCollectionContacts(bc.otherBody.parent);
+					bc.thisBody.parent.addIncompleteCollectionContacts(bc.otherBody.parent, removalQueue);
 						
 					}else {
 						bc.otherBody.merged = true;
 						bodies.remove(bc.thisBody.parent);
 						bc.otherBody.parent.addCollection(bc.thisBody.parent);
 						bc.otherBody.parent.addInternalContact(bc);
-						bc.thisBody.parent.addIncompleteCollectionContacts(bc.otherBody.parent);
+						bc.thisBody.parent.addIncompleteCollectionContacts(bc.otherBody.parent, removalQueue);
 						
 					}
 				}else if (bc.thisBody.parent != null) {
@@ -688,14 +701,14 @@ public void mergeBodies() {
 					bodies.remove(bc.otherBody);
 					bc.thisBody.parent.addBody(bc.otherBody);
 					bc.thisBody.parent.addInternalContact(bc);
-					bc.thisBody.parent.addIncompleteContacts(bc.otherBody);
+					bc.thisBody.parent.addIncompleteContacts(bc.otherBody, removalQueue);
 					
 				}else if (bc.otherBody.parent != null) {
 					//otherBody is in a collection... thisBody isnt
 					bodies.remove(bc.thisBody);
 					bc.otherBody.parent.addBody(bc.thisBody);
 					bc.otherBody.parent.addInternalContact(bc);
-					bc.otherBody.parent.addIncompleteContacts(bc.thisBody);
+					bc.otherBody.parent.addIncompleteContacts(bc.thisBody, removalQueue);
 					
 				}
 				removalQueue.add(bc);

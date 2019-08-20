@@ -36,7 +36,8 @@ public class RigidCollection extends RigidBody{
 		index = body1.index;
 		collectionBodies.add(body1);
 		collectionBodies.add(body2);
-		
+		body1.bodyContactListPreMerging.clear();
+		body2.bodyContactListPreMerging.clear();
 		body1.bodyContactListPreMerging.addAll(body1.bodyContactList);
 		body2.bodyContactListPreMerging.addAll(body2.bodyContactList);
 		
@@ -61,6 +62,8 @@ public class RigidCollection extends RigidBody{
 		savedContactForce.set(0, 0);
 		contactTorques = 0;
 		springs.clear();
+		
+		
 	}
 
 
@@ -529,13 +532,18 @@ public void fillInternalBodyContacts() {
 		for (BodyContact bc: b.bodyContactList) {
 			if (!internalBodyContacts.contains(bc) && bc.merged == true) {
 				RigidBody otherBody = bc.getOtherBody(b);
-				if (b.parent.collectionBodies.contains(otherBody))
-				internalBodyContacts.add(bc);
-				for (Contact c : bc.contactList) {
-					if (!internalContacts.contains(c)) {
-						internalContacts.add(c);
+				if (b.parent.collectionBodies.contains(otherBody)) {
+					internalBodyContacts.add(bc);
+					for (Contact c : bc.contactList) {
+						if (!internalContacts.contains(c)) {
+							internalContacts.add(c);
+						}
 					}
+					
+					
 				}
+				
+				
 			}
 			
 		}
@@ -549,6 +557,7 @@ public void fillInternalBodyContacts() {
 public void addBodies(ArrayList<RigidBody> bodyList) {
 	LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 	for (RigidBody b : bodyList) {
+		b.bodyContactListPreMerging.clear();
 		//transform all the subBodies to their world coordinates... 
 		b.merged = true;
 		if (b.parent != null) b.parent.transformB2W.transform(b.x);
@@ -557,7 +566,7 @@ public void addBodies(ArrayList<RigidBody> bodyList) {
 		b.transformC2B.T.setIdentity();
 		b.parent = null;
 		additionQueue.add(b);
-		
+		b.bodyContactListPreMerging.addAll(b.bodyContactList);
 		
 	}
 	
@@ -715,20 +724,21 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 		//Must also add the bodycontacts around the body that didn't reach 50 timesteps but are still part of the same parents.
 		
  */
-	public void addIncompleteContacts(RigidBody body) {
+	public void addIncompleteContacts(RigidBody body, LinkedList<BodyContact> removalQueue) {
 		for (BodyContact bc: body.bodyContactList) {
-			if (bc.thisBody.parent == bc.otherBody.parent && bc.relativeVelHistory.size() <= CollisionProcessor.sleep_accum.getValue()) {
+			if (bc.thisBody.parent == bc.otherBody.parent && bc.relativeVelHistory.size() <= CollisionProcessor.sleep_accum.getValue() && !bc.merged) {
 				bc.merged = true;
 				body.parent.addInternalContact(bc);
+				removalQueue.add(bc);
 			}
 		}
 	}
 
 	//input parameter is a collection being merged . we must add also all the incomplete contacts this parent has with other collections.
 
-	public void addIncompleteCollectionContacts(RigidCollection parent) {
+	public void addIncompleteCollectionContacts(RigidCollection parent, LinkedList<BodyContact> removalQueue) {
 		for (RigidBody b: parent.collectionBodies) {
-			addIncompleteContacts(b);
+			addIncompleteContacts(b, removalQueue);
 		}
 			
 	}
