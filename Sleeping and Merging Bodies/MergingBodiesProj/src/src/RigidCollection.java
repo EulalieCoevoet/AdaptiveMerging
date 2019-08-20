@@ -86,11 +86,11 @@ public class RigidCollection extends RigidBody{
 	public void addInternalContact(BodyContact bc) {
 		if (!internalBodyContacts.contains(bc))
 			internalBodyContacts.add(bc);
-		if (!bc.thisBody.bodyContactList.contains(bc)) {
-			bc.thisBody.bodyContactList.add(bc);
+		if (!bc.body1.bodyContactList.contains(bc)) {
+			bc.body1.bodyContactList.add(bc);
 		}
-		if (!bc.otherBody.bodyContactList.contains(bc)) {
-			bc.otherBody.bodyContactList.add(bc);
+		if (!bc.body2.bodyContactList.contains(bc)) {
+			bc.body2.bodyContactList.add(bc);
 		}
 		
 		//convert the ontacts to collections coordinates. 
@@ -369,12 +369,12 @@ public class RigidCollection extends RigidBody{
         	gl.glLineWidth(5);
 			gl.glColor4f(0, 1,0, 1.0f);
 			gl.glBegin( GL.GL_LINES );
-			p1.set(bc.thisBody.x);
-			p2.set(bc.otherBody.x);
-			if (bc.thisBody.parent !=null)
-			bc.thisBody.parent.transformB2W.transform(p1);
-			if (bc.otherBody.parent != null)
-			bc.otherBody.parent.transformB2W.transform(p2);
+			p1.set(bc.body1.x);
+			p2.set(bc.body2.x);
+			if (bc.body1.parent !=null)
+			bc.body1.parent.transformB2W.transform(p1);
+			if (bc.body2.parent != null)
+			bc.body2.parent.transformB2W.transform(p2);
 			gl.glVertex2d(p1.x, p1.y);
 			gl.glVertex2d(p2.x, p2.y);
 			gl.glEnd();
@@ -416,7 +416,7 @@ public class RigidCollection extends RigidBody{
 
     }
     
- public double  metricCheck(RigidBody sB , Vector2d totalForce, double totalTorque) {
+ public boolean  metricCheck(RigidBody sB , Vector2d totalForce, double totalTorque) {
 	 	totalForce.set(sB.force);
 		sB.transformB2W.transform(sB.currentContactForce);
 	
@@ -424,9 +424,15 @@ public class RigidCollection extends RigidBody{
 		totalForce.add(sB.currentContactForce);
 
 		sB.transformW2B.transform(sB.currentContactForce);
+		sB.deltaF.set(totalForce);
 		totalTorque = sB.torque + sB.currentContactTorques;
-		double forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
-		return forceMetric;
+		double threshold = CollisionProcessor.impulseTolerance.getValue();
+		double forceMetric = totalForce.x/sB.massLinear;
+		double forceMetric2 = totalForce.y/sB.massLinear;
+		double forceMetric3 = totalTorque/sB.massAngular;
+		if (forceMetric > threshold || forceMetric2 > threshold || forceMetric3 > threshold) 
+		return true;
+		else return false;
  }
     /*c
      * checks if body sB is going to unmerge by comparing the acceleration vector magnitude with a threshold
@@ -490,10 +496,10 @@ private void dealWithNeighbors(RigidBody sB) {
 		for (BodyContact bc : sB.bodyContactList ) {
 			if (bc.merged) {
 				bc.merged = false;
-				RigidBody otherBody = bc.getOtherBody(sB);
-				handledBodies.add(otherBody);
-				neighborCollection.add(otherBody);
-				makeNeighborCollection(otherBody);
+				RigidBody body2 = bc.getOtherBody(sB);
+				handledBodies.add(body2);
+				neighborCollection.add(body2);
+				makeNeighborCollection(body2);
 				if (neighborCollection.size() >= 2) {
 					//make a new collection
 					RigidCollection newCollection = new RigidCollection(neighborCollection.remove(0), neighborCollection.remove(0));
@@ -531,8 +537,8 @@ public void fillInternalBodyContacts() {
 	for (RigidBody b: collectionBodies) {
 		for (BodyContact bc: b.bodyContactList) {
 			if (!internalBodyContacts.contains(bc) && bc.merged == true) {
-				RigidBody otherBody = bc.getOtherBody(b);
-				if (b.parent.collectionBodies.contains(otherBody)) {
+				RigidBody body2 = bc.getOtherBody(b);
+				if (b.parent.collectionBodies.contains(body2)) {
 					internalBodyContacts.add(bc);
 					for (Contact c : bc.contactList) {
 						if (!internalContacts.contains(c)) {
@@ -585,12 +591,12 @@ public ArrayList<RigidBody> neighborCollection = new ArrayList<RigidBody>();
 private void makeNeighborCollection(RigidBody body) {
 		for (BodyContact bc : body.bodyContactList) {
 			if( !bc.merged) continue;
-			RigidBody otherBody = bc.getOtherBody(body);
-			if (handledBodies.contains(otherBody) ) continue;
+			RigidBody body2 = bc.getOtherBody(body);
+			if (handledBodies.contains(body2) ) continue;
 			else {
-				neighborCollection.add(otherBody);
-				handledBodies.add(otherBody);
-				makeNeighborCollection(otherBody);
+				neighborCollection.add(body2);
+				handledBodies.add(body2);
+				makeNeighborCollection(body2);
 			}
 		}
 	
@@ -604,10 +610,10 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 		for (BodyContact bc : sB.bodyContactList) {
 			if (!bc.merged) continue;
 			
-			if (sB.equals(bc.thisBody)) {
-				checkMetric(bc.otherBody, totalForce, totalTorque, forceMetric);
+			if (sB.equals(bc.body1)) {
+				checkMetric(bc.body2, totalForce, totalTorque, forceMetric);
 			}else {
-				checkMetric(bc.thisBody, totalForce, totalTorque, forceMetric);
+				checkMetric(bc.body1, totalForce, totalTorque, forceMetric);
 			}
 		}
 		
@@ -635,7 +641,7 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 			/*int i = 0;
 			while (true) {
 				BodyContact bc = bodyContactList.get(i);
-				if (bc.thisBody == b || bc.otherBody== b) {
+				if (bc.body1 == b || bc.body2== b) {
 					bodyContactList.remove(bc);
 					if (i >= bodyContactList.size()) break;
 					continue;
@@ -726,7 +732,7 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
  */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyContact> removalQueue) {
 		for (BodyContact bc: body.bodyContactList) {
-			if (bc.thisBody.parent == bc.otherBody.parent && bc.relativeVelHistory.size() <= CollisionProcessor.sleep_accum.getValue() && !bc.merged) {
+			if (bc.body1.parent == bc.body2.parent && bc.relativeVelHistory.size() <= CollisionProcessor.sleep_accum.getValue() && !bc.merged) {
 				bc.merged = true;
 				body.parent.addInternalContact(bc);
 				removalQueue.add(bc);
@@ -741,6 +747,20 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 			addIncompleteContacts(b, removalQueue);
 		}
 			
+	}
+
+
+	public void drawInternalDeltas(GLAutoDrawable drawable) {
+		for (RigidBody b: collectionBodies) {
+			b.drawDeltaF(drawable);
+		}
+	}
+
+
+	public void drawInternalHistory(GLAutoDrawable drawable) {
+		for (Contact c: internalContacts) {
+			c.drawInternalContactHistory(drawable);;
+		}
 	}
 
 

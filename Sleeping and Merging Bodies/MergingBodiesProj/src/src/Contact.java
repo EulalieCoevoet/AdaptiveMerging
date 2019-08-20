@@ -6,6 +6,8 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 import no.uib.cipr.matrix.DenseVector;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -61,7 +63,6 @@ public class Contact {
     /**contact torque being applied by this contact on body1*/
     double contactTorqueB1 = 0;
     
-   
     /** Contact force being applied by this contact on body2*/
     Vector2d contactForceB2 = new Vector2d();
    
@@ -89,6 +90,16 @@ public class Contact {
     
     //Pointer to the BodyContact this contact is a part of. 
     BodyContact bc;
+    
+    //history of the last (max N) timesteps for this contact.
+    public ArrayList<Vector2d> body1ContactForceHistory = new ArrayList<Vector2d>();
+	public ArrayList<Double> body1ContactTorqueHistory = new ArrayList<Double>();
+	
+	public ArrayList<Vector2d> body2ContactForceHistory = new ArrayList<Vector2d>();
+	public ArrayList<Double> body2ContactTorqueHistory = new ArrayList<Double>();
+	
+	
+	
     /**
      * Creates a new contact, and assigns it an index
      * @param body1
@@ -282,6 +293,115 @@ public class Contact {
             
   
     }
+    
+    /**
+     * Draws the connections between bodies to visualize the 
+     * the adjacency structure of the matrix as a graph.
+     * @param drawable
+     */
+    public void drawInternalContactHistory( GLAutoDrawable drawable ) {
+    	
+    	// start with body1.
+    	Vector2d body1Force= getAverageContactForce(body1ContactForceHistory);
+    //	double body1Torque = getAverageContactTorque(body1ContactTorqueHistory);
+    	Vector2d body1ForceVar= getContactForceVar(body1ContactForceHistory, body1Force);
+    	//double body1TorqueVar = getContactTorqueVar(body1ContactTorqueHistory, body1Torque);
+    	
+    	//get average body2.
+    	Vector2d body2Force= getAverageContactForce(body2ContactForceHistory);
+    //	double body2Torque = getAverageContactTorque(body2ContactTorqueHistory);
+    	Vector2d body2ForceVar= getContactForceVar(body2ContactForceHistory, body2Force);
+    //	double body2TorqueVar = getContactTorqueVar(body2ContactTorqueHistory,body2Torque);
+    	
+        GL2 gl = drawable.getGL().getGL2();
+        // draw a line between the two bodies but only if they're both not pinned
+        Point2d p1 = new Point2d(block1.pB);
+        Point2d p2 = new Point2d(block2.pB);
+      
+        subBody1.transformB2W.transform(p1); 
+        subBody2.transformB2W.transform(p2);
+        subBody1.transformB2W.transform(body1Force);
+        subBody2.transformB2W.transform(body2Force);
 
+
+            
+            double scale = 0.05;
+
+            gl.glLineWidth(1);
+            gl.glColor4f(0, 1, 1, 1);
+            gl.glBegin( GL.GL_LINES );
+            gl.glVertex2d(p2.x + scale*body2Force.x + body2ForceVar.x, p2.y+scale*body2Force.y);
+            gl.glVertex2d(p2.x + scale*body2Force.x - body2ForceVar.x, p2.y+ scale*body2Force.y);
+            gl.glEnd();
+         
+            gl.glBegin( GL.GL_LINES );
+            gl.glVertex2d(p2.x + scale*body2Force.x, p2.y+scale*body2Force.y + body2ForceVar.y);
+            gl.glVertex2d(p2.x + scale*body2Force.x, p2.y+scale*body2Force.y -  body2ForceVar.y);
+            gl.glEnd();
+            
+            gl.glBegin( GL.GL_LINES );
+            gl.glVertex2d(p1.x + scale*body1Force.x + body1ForceVar.x, p1.y+scale*body1Force.y);
+            gl.glVertex2d(p1.x + scale*body1Force.x - body1ForceVar.x, p1.y+scale*body1Force.y);
+            gl.glEnd();
+         
+      
+            gl.glBegin( GL.GL_LINES );
+            gl.glVertex2d(p1.x + scale*body1Force.x, p1.y+scale*body1Force.y + body1ForceVar.y);
+            gl.glVertex2d(p1.x + scale*body1Force.x, p1.y+scale*body1Force.y -  body1ForceVar.y);
+            gl.glEnd();
+            
+          //  subBody1.transformW2B.transform(contactForceB1);
+           // subBody2.transformW2B.transform(contactForceB2);
+
+          //  drawArrowHeads(gl, p2, normal2);
+            
+  
+    }
+
+	private double getContactTorqueVar(ArrayList<Double> list, double avg) {
+		double sum = 0;
+		for (Double dub : list) {
+			sum+= (dub -avg)*(dub -avg);
+		}
+		sum/=(list.size() - 1);
+		
+		return sum;
+	}
+
+	private Vector2d getContactForceVar(ArrayList<Vector2d> list, Vector2d avg) {
+	
+		double sum1 = 0;
+		double sum2 = 0;
+		for (Vector2d vec : list) {
+			sum1+= (vec.x - avg.x)*(vec.x - avg.x);
+			sum2+= (vec.y - avg.y)*(vec.y - avg.y);
+		}
+		sum1/=(list.size() - 1);
+		sum2 /= (list.size() - 1);
+		
+		return new Vector2d(sum1, sum2);
+	}
+
+	private double getAverageContactTorque(ArrayList<Double> list) {
+		double x = 0;
+		for (Double dub: list) {
+			x += dub;
+		}
+		x/=list.size();
+		return  x;
+		
+	}
+
+	private Vector2d getAverageContactForce(ArrayList<Vector2d> list) {
+			double x = 0;
+			double y = 0;
+			for (Vector2d vec: list) {
+				x += vec.x;
+				y += vec.y;
+			}
+			x/=list.size();
+			y/= list.size();
+			return new Vector2d(x, y);
+	}
     
 }

@@ -150,6 +150,8 @@ public class RigidBody {
     
     DenseVector delta_V = new DenseVector(3);
     
+    Vector2d deltaF = new Vector2d();
+    
     /**
      * Creates a new rigid body from a collection of blocks
      * @param blocks
@@ -656,6 +658,55 @@ public void unmergeBodyContacts() {
 	}
 	bodyContactList.clear();
 	
+}
+
+public void drawDeltaF(GLAutoDrawable drawable) {
+	// TODO Auto-generated method stub
+	  GL2 gl = drawable.getGL().getGL2();
+	  double k = this.v.length() + this.omega;
+	
+	 
+	  gl.glLineWidth(3);
+	  gl.glColor3f(1, 0, 1);
+	  gl.glBegin( GL.GL_LINES);
+	  Point2d p = new Point2d(x);
+	  if (parent != null) {
+		  parent.transformB2W.transform(p);
+	  }
+	  double scale = 2/massLinear;
+	  gl.glVertex2d(p.x, p.y);
+	  gl.glVertex2d(p.x + scale*deltaF.x, p.y + scale*deltaF.y);
+	
+	  gl.glEnd();
+	  
+	  double max = CollisionProcessor.impulseTolerance.getValue();
+	  if (deltaF.length() > 0.5) {
+			gl.glLineWidth(1);
+		  gl.glBegin( GL.GL_LINES);
+	
+	  	gl.glColor3f(0, 0, 0);
+	  	gl.glVertex2d(p.x, p.y);
+	  	deltaF.normalize();
+	  	if (Math.abs(deltaF.y) >= Math.abs(deltaF.x)) {
+	  		double scaling = deltaF.y/max;
+		  	double newX = deltaF.x/scaling;
+		  	if (deltaF.y < 0)
+		  	gl.glVertex2d(p.x - 2*newX, p.y - 2*max);
+		  	else
+		  	gl.glVertex2d(p.x + 2*newX, p.y + 2*max);
+			  
+	  	}else {
+	  		double scaling = deltaF.x/max;
+		  	double newY = deltaF.y/scaling;
+		  	if (deltaF.x < 0)
+			  	gl.glVertex2d(p.x - 2*max, p.y - 2*newY);
+			  	else
+			  	gl.glVertex2d(p.x + 2*max, p.y + 2*newY);
+	  	}
+	  		
+	
+	  	gl.glEnd();
+	  }
 }
 
 

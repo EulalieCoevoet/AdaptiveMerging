@@ -103,7 +103,7 @@ public class CollisionProcessor {
 		for (RigidBody body: b.collectionBodies){
 			ArrayList<BodyContact> new_body_contact_list = new ArrayList<BodyContact>();
 			for (BodyContact c: body.bodyContactList) {
-    			c.otherBody.visited = false;
+    			c.body2.visited = false;
     		
     			if(c.updatedThisTimeStep){
     				new_body_contact_list.add(c);
@@ -410,7 +410,20 @@ public class CollisionProcessor {
 		    	c.contactForceB1.set(cForce);
 		    
 		    	c.contactTorqueB1 = cTorque/dt;
-
+		    	
+		    	c.body1ContactForceHistory.add(c.contactForceB1);
+		    	c.body1ContactTorqueHistory.add(c.contactTorqueB1);
+		    	if (c.body1ContactForceHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+		    		c.body1ContactForceHistory.remove(0);
+		    		c.body1ContactTorqueHistory.remove(0);
+		    	}
+		    	
+		    	c.body2ContactForceHistory.add(c.contactForceB2);
+		    	c.body2ContactTorqueHistory.add(c.contactTorqueB2);
+		    	if (c.body2ContactForceHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+		    		c.body2ContactForceHistory.remove(0);
+		    		c.body2ContactTorqueHistory.remove(0);
+		    	}
 		    	
 		    	//if Body1 is a parent, also apply the contact force to the appropriate subBody
 		 
@@ -602,8 +615,8 @@ public class CollisionProcessor {
 			body1.woken_up = true;
 		//	body1.active_past.add(true); makes bodies oscillate between sleeping and waking
 			for (BodyContact c: body1.bodyContactList) {
-					if (!c.otherBody.pinned)
-					wake_neighbors(c.otherBody, hop);
+					if (!c.body2.pinned)
+					wake_neighbors(c.body2, hop);
 				
 				
 			}

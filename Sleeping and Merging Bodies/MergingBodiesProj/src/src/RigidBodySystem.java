@@ -319,10 +319,10 @@ private void clearJunkAtStartOfTimestep() {
 
 private double getSubBodyTorque(Contact c, RigidBody body) {
 	double cTorque = 0;
-	if (c.bc.thisBody == body) {
+	if (c.bc.body1 == body) {
 		double jn_omega, jt_omega;
 		
-		Point2d radius_i = new Point2d(c.bc.thisBody.x);
+		Point2d radius_i = new Point2d(c.bc.body1.x);
 		body.transformB2W.transform(radius_i);
 		
 		radius_i.sub(c.contactW, radius_i);
@@ -345,7 +345,7 @@ private double getSubBodyTorque(Contact c, RigidBody body) {
 	}
 	else {
 		double jn_omega, jt_omega;
-		Point2d radius_i = new Point2d(c.bc.otherBody.x);
+		Point2d radius_i = new Point2d(c.bc.body2.x);
 		body.transformB2W.transform(radius_i);
 		radius_i.sub(c.contactW, radius_i);
 		Vector2d tangeant = new Vector2d(-c.normal.y, c.normal.x);
@@ -368,13 +368,13 @@ private double getSubBodyTorque(Contact c, RigidBody body) {
 	     * applies contact force to body contacts so we know how much force each body contact exhudes
 	     */
 private void applyToBodyContact(Contact c, RigidBody body, Vector2d cForce, double cTorque) {
-	    	if (c.bc.thisBody == body) {
-	    		c.bc.thisBodyContactForce.add(cForce);
-	    		c.bc.thisBodyContactTorque += cTorque;
+	    	if (c.bc.body1 == body) {
+	    		c.bc.body1ContactForce.add(cForce);
+	    		c.bc.body1ContactTorque += cTorque;
 	    		
-	    	}else if (c.bc.otherBody == body) {
-	    		c.bc.otherBodyContactForce.add(cForce);
-	    		c.bc.otherBodyContactTorque += cTorque;
+	    	}else if (c.bc.body2 == body) {
+	    		c.bc.body2ContactForce.add(cForce);
+	    		c.bc.body2ContactTorque += cTorque;
 	    	}
 	
 }
@@ -388,12 +388,12 @@ private void applyToBodyContact(Contact c, RigidBody body, Vector2d cForce, doub
 private void applyContactForceToSubBody(Contact c, RigidCollection body, Vector2d cForce) {
 
 			double cTorque= 0;
-	    	if (c.bc.thisBody.parent == (body)) {
+	    	if (c.bc.body1.parent == (body)) {
 	    
 	    		
 	    		double jn_omega, jt_omega;
 	    		
-	    		Point2d radius_i = new Point2d(c.bc.thisBody.x);
+	    		Point2d radius_i = new Point2d(c.bc.body1.x);
 	    		body.transformB2W.transform(radius_i);
 	    		
 	    		radius_i.sub(c.contactW, radius_i);
@@ -414,16 +414,16 @@ private void applyContactForceToSubBody(Contact c, RigidCollection body, Vector2
 	    		
 	    		//add to force in subBodies because we need to remember the 
 	    		//contact forces, but not the ones modified... otherwise itll keep accumulating
-	    		c.bc.thisBody.force.add(cForce);
-	    		c.bc.thisBody.torque += cTorque;
+	    		c.bc.body1.force.add(cForce);
+	    		c.bc.body1.torque += cTorque;
 	    	
 	    	}
-	    	if (c.bc.otherBody.parent == body) {
-	    		c.bc.otherBody.force.add(cForce);
+	    	if (c.bc.body2.parent == body) {
+	    		c.bc.body2.force.add(cForce);
 	    		
 	    		double jn_omega, jt_omega;
 	    		
-	    		Point2d radius_i = new Point2d(c.bc.otherBody.x);
+	    		Point2d radius_i = new Point2d(c.bc.body2.x);
 	    		body.transformB2W.transform(radius_i);
 	    		
 	    		radius_i.sub(c.contactW, radius_i);
@@ -441,7 +441,7 @@ private void applyContactForceToSubBody(Contact c, RigidCollection body, Vector2
 	    		}
 	    		
 	    		cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
-	    		c.bc.otherBody.torque += cTorque;
+	    		c.bc.body2.torque += cTorque;
 	    
 	    	}
 	    	
@@ -469,7 +469,7 @@ private void generalOneBodyAtATime() {
 			LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
  	    	Vector2d totalForce = new Vector2d();
 	    	double totalTorque = 0;
-	    	double forceMetric = 0;
+	    	boolean forceMetric = false;
 			for(RigidBody b : bodies) {
 	    		//check if force on Collection is high enough. If it is... unmerge the entire rigidCollection
 	    		if (b instanceof RigidCollection) {
@@ -479,7 +479,7 @@ private void generalOneBodyAtATime() {
 	    				ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 	    				for (RigidBody sB: colB.collectionBodies) {
 	    					forceMetric = colB.metricCheck(sB, totalForce, totalTorque);
-	    					if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
+	    					if (forceMetric) {
 	    						unmergingBodies.add(sB);
 	    						int x = 0;
 	    		
@@ -531,16 +531,16 @@ private void unmergeSelectBodies(RigidCollection colB, ArrayList<RigidBody> unme
 				ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 			
 				for (BodyContact bc : b.bodyContactList) {
-					RigidBody otherBody = bc.getOtherBody(b);
+					RigidBody body2 = bc.getOtherBody(b);
 					clearedBodyContacts.add(bc);
 					if (bc.merged) {
 						bc.merged = false;
-						if(!handledBodies.contains(otherBody)) {
+						if(!handledBodies.contains(body2)) {
 					
-						subBodies.add(otherBody);
+						subBodies.add(body2);
 						
-						handledBodies.add(otherBody);
-						buildNeighborBody(otherBody, subBodies, handledBodies);
+						handledBodies.add(body2);
+						buildNeighborBody(body2, subBodies, handledBodies);
 						
 							if (subBodies.size() > 1) {
 								//make a new collection
@@ -565,10 +565,10 @@ private void unmergeSelectBodies(RigidCollection colB, ArrayList<RigidBody> unme
 				b.bodyContactList.clear();
 				b.bodyContactListPreMerging.clear();
 				for (BodyContact bc: clearedBodyContacts) {
-					bc.thisBody.bodyContactList.remove(bc);
-					bc.otherBody.bodyContactList.remove(bc);
-					bc.thisBody.bodyContactListPreMerging.remove(bc);
-					bc.otherBody.bodyContactListPreMerging.remove(bc);
+					bc.body1.bodyContactList.remove(bc);
+					bc.body2.bodyContactList.remove(bc);
+					bc.body1.bodyContactListPreMerging.remove(bc);
+					bc.body2.bodyContactListPreMerging.remove(bc);
 				}
 			}
 		}
@@ -578,11 +578,11 @@ private void buildNeighborBody(RigidBody b, ArrayList<RigidBody> subBodies, Arra
 			for (BodyContact bc : b.bodyContactList) {
 				if (!bc.merged) continue;
 				
-				RigidBody otherBody = bc.getOtherBody(b);
-				if (!handledBodies.contains(otherBody)) {
-					handledBodies.add(otherBody);
-					subBodies.add(otherBody);
-					buildNeighborBody(otherBody, subBodies, handledBodies);
+				RigidBody body2 = bc.getOtherBody(b);
+				if (!handledBodies.contains(body2)) {
+					handledBodies.add(body2);
+					subBodies.add(body2);
+					buildNeighborBody(body2, subBodies, handledBodies);
 				}
 			}
 		}
@@ -666,49 +666,49 @@ public void mergeBodies() {
 			
 			}
 			if (!bc.updatedThisTimeStep) mergeCondition = false;
-			if (bc.thisBody.pinned || bc.otherBody.pinned) mergeCondition = false;
-			if (bc.thisBody.merged || bc.otherBody.merged) mergeCondition = false;
+			if (bc.body1.pinned || bc.body2.pinned) mergeCondition = false;
+			if (bc.body1.merged || bc.body2.merged) mergeCondition = false;
 			
 			if (mergeCondition) {
 				//if they are both not collections...make a new collection!
 				bc.merged = true;
-				if(bc.thisBody.parent == null && bc.otherBody.parent == null) {
+				if(bc.body1.parent == null && bc.body2.parent == null) {
 					
-					bodies.remove(bc.thisBody); bodies.remove(bc.otherBody);
-					RigidCollection col = new RigidCollection(bc.thisBody, bc.otherBody);
+					bodies.remove(bc.body1); bodies.remove(bc.body2);
+					RigidCollection col = new RigidCollection(bc.body1, bc.body2);
 					col.addInternalContact(bc);
 					bodies.add(col);
-				}else if (bc.thisBody.parent != null && bc.otherBody.parent != null) {
+				}else if (bc.body1.parent != null && bc.body2.parent != null) {
 					// if they are BOTH collections... think about what to do
 					//take all the bodies in the least massive one and add them to the collection of the most massive
-					if (bc.thisBody.parent.massLinear > bc.otherBody.parent.massLinear) {
-						bodies.remove(bc.otherBody.parent);
-						bc.thisBody.merged=true;
-						bc.thisBody.parent.addCollection(bc.otherBody.parent);
-						bc.thisBody.parent.addInternalContact(bc);
-					bc.thisBody.parent.addIncompleteCollectionContacts(bc.otherBody.parent, removalQueue);
+					if (bc.body1.parent.massLinear > bc.body2.parent.massLinear) {
+						bodies.remove(bc.body2.parent);
+						bc.body1.merged=true;
+						bc.body1.parent.addCollection(bc.body2.parent);
+						bc.body1.parent.addInternalContact(bc);
+					bc.body1.parent.addIncompleteCollectionContacts(bc.body2.parent, removalQueue);
 						
 					}else {
-						bc.otherBody.merged = true;
-						bodies.remove(bc.thisBody.parent);
-						bc.otherBody.parent.addCollection(bc.thisBody.parent);
-						bc.otherBody.parent.addInternalContact(bc);
-						bc.thisBody.parent.addIncompleteCollectionContacts(bc.otherBody.parent, removalQueue);
+						bc.body2.merged = true;
+						bodies.remove(bc.body1.parent);
+						bc.body2.parent.addCollection(bc.body1.parent);
+						bc.body2.parent.addInternalContact(bc);
+						bc.body1.parent.addIncompleteCollectionContacts(bc.body2.parent, removalQueue);
 						
 					}
-				}else if (bc.thisBody.parent != null) {
-					//thisBody is in a collection... otherBody isnt
-					bodies.remove(bc.otherBody);
-					bc.thisBody.parent.addBody(bc.otherBody);
-					bc.thisBody.parent.addInternalContact(bc);
-					bc.thisBody.parent.addIncompleteContacts(bc.otherBody, removalQueue);
+				}else if (bc.body1.parent != null) {
+					//body1 is in a collection... body2 isnt
+					bodies.remove(bc.body2);
+					bc.body1.parent.addBody(bc.body2);
+					bc.body1.parent.addInternalContact(bc);
+					bc.body1.parent.addIncompleteContacts(bc.body2, removalQueue);
 					
-				}else if (bc.otherBody.parent != null) {
-					//otherBody is in a collection... thisBody isnt
-					bodies.remove(bc.thisBody);
-					bc.otherBody.parent.addBody(bc.thisBody);
-					bc.otherBody.parent.addInternalContact(bc);
-					bc.otherBody.parent.addIncompleteContacts(bc.thisBody, removalQueue);
+				}else if (bc.body2.parent != null) {
+					//body2 is in a collection... body1 isnt
+					bodies.remove(bc.body1);
+					bc.body2.parent.addBody(bc.body1);
+					bc.body2.parent.addInternalContact(bc);
+					bc.body2.parent.addIncompleteContacts(bc.body1, removalQueue);
 					
 				}
 				removalQueue.add(bc);
@@ -934,9 +934,16 @@ public void display( GLAutoDrawable drawable ) {
 	        		
 	        	if(drawInternalContactForces.getValue())
 	        		((RigidCollection) b).drawInternalContacts(drawable);
+	        	
+	        	if(drawInternalContactDeltas.getValue())
+	        		((RigidCollection) b).drawInternalDeltas(drawable);
+	        	if(drawInternalHistories.getValue())
+	        		((RigidCollection) b).drawInternalHistory(drawable);
 	        		
+	        	
 	        	}
-	        
+	        	
+	        	
             		
             	
         	}
@@ -999,8 +1006,10 @@ private void displayCollectionBV(RigidCollection b, GLAutoDrawable drawable) {
     private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
     private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
     private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
-    private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces", true);
+    private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces", false);
     private BooleanParameter drawExternalContactForces = new BooleanParameter("draw External Forces", true);
+    private BooleanParameter drawInternalContactDeltas = new BooleanParameter("draw Internal Deltas", true);
+    private BooleanParameter drawInternalHistories = new BooleanParameter("draw Internal Histories", true);
     
     private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", false );
     private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", true);

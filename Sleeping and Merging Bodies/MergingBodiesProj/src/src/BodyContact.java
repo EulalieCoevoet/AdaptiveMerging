@@ -6,9 +6,9 @@ import javax.vecmath.Vector2d;
 
 public class BodyContact {
 	
-	public RigidBody thisBody; 
+	public RigidBody body1; 
 	
-	public RigidBody otherBody;
+	public RigidBody body2;
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
@@ -16,26 +16,35 @@ public class BodyContact {
 	
 	boolean updatedThisTimeStep = false;
 	
-	Vector2d thisBodyContactForce = new Vector2d();
+	public ArrayList<Vector2d> body1ContactForceHistory = new ArrayList<Vector2d>();
+	public ArrayList<Double> body1ContactTorqueHistory = new ArrayList<Double>();
 	
-	Vector2d otherBodyContactForce = new Vector2d();
+	public ArrayList<Vector2d> body2ContactForceHistory = new ArrayList<Vector2d>();
+	public ArrayList<Double> body2ContactTorqueHistory = new ArrayList<Double>();
 	
-	double thisBodyContactTorque = 0;
 	
-	double otherBodyContactTorque = 0;
+	
+	
+	Vector2d body1ContactForce = new Vector2d();
+	
+	Vector2d body2ContactForce = new Vector2d();
+	
+	double body1ContactTorque = 0;
+	
+	double body2ContactTorque = 0;
 	
 	boolean merged = false;
 	
-	public BodyContact(RigidBody thisBody, RigidBody otherBody) {
-		this.thisBody = thisBody;
-		this.otherBody = otherBody;
+	public BodyContact(RigidBody body1, RigidBody body2) {
+		this.body1 = body1;
+		this.body2 = body2;
 		//updatedThisTimeStep = true;
 	}
 
 	public static BodyContact checkExists(RigidBody body1, RigidBody body2, ArrayList<BodyContact> list) {
 		for (BodyContact c: list) {
-			if ((c.thisBody.equals(body1) && c.otherBody.equals(body2))
-				|| (c.thisBody.equals(body2) && c.otherBody.equals(body1))) {
+			if ((c.body1.equals(body1) && c.body2.equals(body2))
+				|| (c.body1.equals(body2) && c.body2.equals(body1))) {
 				return c;
 			}
 		}
@@ -47,7 +56,7 @@ public class BodyContact {
 		//returns the BodyContact in the list, if it exists already
 		//otherwise returns null
 		for (BodyContact c : list) {
-			if (c.thisBody.equals(bc.thisBody) && c.otherBody.equals(bc.otherBody)){
+			if (c.body1.equals(bc.body1) && c.body2.equals(bc.body2)){
 				return c;
 			}
 			
@@ -62,7 +71,7 @@ public class BodyContact {
 	public boolean isIn(ArrayList<BodyContact> body_contact_list) {
 		
 		for (BodyContact c : body_contact_list) {
-			if (c.otherBody.equals(this.otherBody)){
+			if (c.body2.equals(this.body2)){
 				return true;
 			}
 			
@@ -73,10 +82,10 @@ public class BodyContact {
 	
 
 	public void clearForces() {
-		thisBodyContactForce.set(0, 0);
-		otherBodyContactForce.set(0, 0);
-		thisBodyContactTorque =0 ;
-		otherBodyContactTorque = 0;
+		body1ContactForce.set(0, 0);
+		body2ContactForce.set(0, 0);
+		body1ContactTorque =0 ;
+		body2ContactTorque = 0;
 
 	}
 	
@@ -86,8 +95,8 @@ public class BodyContact {
 
 	public RigidBody getThisBody(RigidBody sB) {
 		// TODO Auto-generated method stub
-		if (thisBody == sB) return thisBody;
-		else if (otherBody == sB) return otherBody;
+		if (body1 == sB) return body1;
+		else if (body2 == sB) return body2;
 		else return null;
 	
 	}
@@ -98,29 +107,29 @@ public class BodyContact {
 
 	public RigidBody getOtherBody(RigidBody sB) {
 		// TODO Auto-generated method stub
-		if (thisBody == sB) return otherBody;
-		else if (otherBody == sB) return thisBody;
+		if (body1 == sB) return body2;
+		else if (body2 == sB) return body1;
 		else {
 		return null;
 		}	
 	}
 
 	public void clearFromBodies() {
-		thisBody.bodyContactList.remove(this);
-		otherBody.bodyContactList.remove(this);
+		body1.bodyContactList.remove(this);
+		body2.bodyContactList.remove(this);
 	}
 
 	public RigidBody getOtherSubBodyFromParent(RigidCollection body) {
-		if (body.collectionBodies.contains(thisBody)) return otherBody;
-		else if (body.collectionBodies.contains(otherBody)) return thisBody;
+		if (body.collectionBodies.contains(body1)) return body2;
+		else if (body.collectionBodies.contains(body2)) return body1;
 		else {
 			return null;
 		}
 	}
 	
 	public RigidBody getThisSubBodyFromParent(RigidCollection body) {
-		if (thisBody.parent == body) return thisBody;
-		if (otherBody.parent == body) return otherBody;
+		if (body1.parent == body) return body1;
+		if (body2.parent == body) return body2;
 		return null;
 	}
 	
