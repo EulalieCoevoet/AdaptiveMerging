@@ -294,25 +294,72 @@ public class Contact {
   
     }
     
+    /*
+     * Variables that help with measuring the variance and average contact force
+     */
+    Vector2d body1Force = new Vector2d();
+    Vector2d body1ForceVar = new Vector2d();
+    Vector2d body2Force = new Vector2d();
+    Vector2d body2ForceVar = new Vector2d();
+    
+    Point2d max_x_1 = new Point2d();
+    Point2d max_y_1 = new Point2d();
+    Point2d min_x_1 = new Point2d();
+    Point2d min_y_1= new Point2d();
+    
+    Point2d max_x_2 = new Point2d();
+    Point2d max_y_2 = new Point2d();
+    Point2d min_x_2 = new Point2d();
+    Point2d min_y_2= new Point2d();
+    
+    
+    public void getHistoryStatistics(){
+    	// start with body1.
+    	body1Force= getAverageContactForce(body1ContactForceHistory);
+    //	double body1Torque = getAverageContactTorque(body1ContactTorqueHistory);
+    	body1ForceVar= getContactForceVar(body1ContactForceHistory, body1Force);
+    	//double body1TorqueVar = getContactTorqueVar(body1ContactTorqueHistory, body1Torque);
+    	//convert variance to stdev
+    	body1ForceVar.set(Math.sqrt(body1ForceVar.x), Math.sqrt(body1ForceVar.y));
+    	//for confidence interval must scale
+    	body1ForceVar.scale(1/Math.sqrt((body1ContactForceHistory.size())));
+
+    	//get average body2.
+    	body2Force= getAverageContactForce(body2ContactForceHistory);
+    //	double body2Torque = getAverageContactTorque(body2ContactTorqueHistory);
+    	 body2ForceVar= getContactForceVar(body2ContactForceHistory, body2Force);
+    //	double body2TorqueVar = getContactTorqueVar(body2ContactTorqueHistory,body2Torque);
+    	body2ForceVar.set(Math.sqrt(body2ForceVar.x), Math.sqrt(body2ForceVar.y));
+    	body2ForceVar.scale(1/Math.sqrt((body2ContactForceHistory.size())));
+    	
+    	//for 96 percent confidence interval, scale the stdev by two
+    	body1ForceVar.scale(2);
+    	body2ForceVar.scale(2);
+    	
+    	Point2d p1 = new Point2d(block1.pB);
+        Point2d p2 = new Point2d(block2.pB);
+       
+  
+    	double scale = 0.05;
+        max_x_1.set(p1.x + scale*body1Force.x + scale*body1ForceVar.x, p1.y + scale*body1Force.y );
+        min_x_1.set(p1.x + scale*body1Force.x - scale*body1ForceVar.x, p1.y + scale*body1Force.y);
+        max_y_1.set(p1.x + scale*body1Force.x, p1.y + scale*body1Force.y + scale*body1ForceVar.y);
+        min_y_1.set(p1.x + scale*body1Force.x, p1.y + scale*body1Force.y - scale*body1ForceVar.y);
+        
+        max_x_2.set(p2.x + scale*body2Force.x + scale*body2ForceVar.x, p2.y + scale*body2Force.y );
+        min_x_2.set(p2.x + scale*body2Force.x - scale*body2ForceVar.x, p2.y + scale*body2Force.y );
+        max_y_2.set(p2.x + scale*body2Force.x, p2.y + scale*body2Force.y + scale*body2ForceVar.y);
+        min_y_2.set(p2.x + scale*body2Force.x, p2.y + scale*body2Force.y - scale*body2ForceVar.y);
+        
+
+    }
     /**
      * Draws the connections between bodies to visualize the 
      * the adjacency structure of the matrix as a graph.
      * @param drawable
      */
     public void drawInternalContactHistory( GLAutoDrawable drawable ) {
-    	
-    	// start with body1.
-    	Vector2d body1Force= getAverageContactForce(body1ContactForceHistory);
-    //	double body1Torque = getAverageContactTorque(body1ContactTorqueHistory);
-    	Vector2d body1ForceVar= getContactForceVar(body1ContactForceHistory, body1Force);
-    	//double body1TorqueVar = getContactTorqueVar(body1ContactTorqueHistory, body1Torque);
-    	
-    	//get average body2.
-    	Vector2d body2Force= getAverageContactForce(body2ContactForceHistory);
-    //	double body2Torque = getAverageContactTorque(body2ContactTorqueHistory);
-    	Vector2d body2ForceVar= getContactForceVar(body2ContactForceHistory, body2Force);
-    //	double body2TorqueVar = getContactTorqueVar(body2ContactTorqueHistory,body2Torque);
-    	
+    
         GL2 gl = drawable.getGL().getGL2();
         // draw a line between the two bodies but only if they're both not pinned
         Point2d p1 = new Point2d(block1.pB);
@@ -323,38 +370,68 @@ public class Contact {
         subBody1.transformB2W.transform(body1Force);
         subBody2.transformB2W.transform(body2Force);
 
+        subBody1.transformB2W.transform(min_x_1);
+        subBody1.transformB2W.transform(min_y_1);
+        subBody1.transformB2W.transform(max_x_1);
+        subBody1.transformB2W.transform(max_y_1);
+        subBody2.transformB2W.transform(min_x_2);
+        subBody2.transformB2W.transform(min_y_2);
+        subBody2.transformB2W.transform(max_x_2);
+        subBody2.transformB2W.transform(max_y_2);
 
             
             double scale = 0.05;
-
+            //draw average 	
+            gl.glLineWidth(1);
+            gl.glColor4f(0,0 , 1, 1);
+            gl.glBegin( GL.GL_LINES );
+            gl.glVertex2d(p2.x, p2.y );
+            gl.glVertex2d(p2.x + scale*body2Force.x, p2.y+ scale*body2Force.y);
+            gl.glEnd();
+            gl.glBegin( GL.GL_LINES );
+            gl.glVertex2d(p1.x, p1.y );
+            gl.glVertex2d(p1.x + scale*body1Force.x, p1.y+ scale*body1Force.y);
+            gl.glEnd();
+            
+            
+            //draw variance error margins
             gl.glLineWidth(1);
             gl.glColor4f(0, 1, 1, 1);
             gl.glBegin( GL.GL_LINES );
-            gl.glVertex2d(p2.x + scale*body2Force.x + body2ForceVar.x, p2.y+scale*body2Force.y);
-            gl.glVertex2d(p2.x + scale*body2Force.x - body2ForceVar.x, p2.y+ scale*body2Force.y);
+            gl.glVertex2d(min_x_2.x, min_x_2.y);
+            gl.glVertex2d(max_x_2.x, max_x_2.y);
             gl.glEnd();
          
             gl.glBegin( GL.GL_LINES );
-            gl.glVertex2d(p2.x + scale*body2Force.x, p2.y+scale*body2Force.y + body2ForceVar.y);
-            gl.glVertex2d(p2.x + scale*body2Force.x, p2.y+scale*body2Force.y -  body2ForceVar.y);
+            gl.glVertex2d(min_y_2.x, min_y_2.y);
+            gl.glVertex2d(max_y_2.x, max_y_2.y);
             gl.glEnd();
             
             gl.glBegin( GL.GL_LINES );
-            gl.glVertex2d(p1.x + scale*body1Force.x + body1ForceVar.x, p1.y+scale*body1Force.y);
-            gl.glVertex2d(p1.x + scale*body1Force.x - body1ForceVar.x, p1.y+scale*body1Force.y);
+            gl.glVertex2d(min_x_1.x, min_x_1.y);
+            gl.glVertex2d(max_x_1.x, max_x_1.y);
             gl.glEnd();
          
       
             gl.glBegin( GL.GL_LINES );
-            gl.glVertex2d(p1.x + scale*body1Force.x, p1.y+scale*body1Force.y + body1ForceVar.y);
-            gl.glVertex2d(p1.x + scale*body1Force.x, p1.y+scale*body1Force.y -  body1ForceVar.y);
+            gl.glVertex2d(min_y_1.x, min_y_1.y);
+            gl.glVertex2d(max_y_1.x, max_y_1.y);
             gl.glEnd();
             
-          //  subBody1.transformW2B.transform(contactForceB1);
-           // subBody2.transformW2B.transform(contactForceB2);
+            subBody1.transformW2B.transform(body1Force);
+            subBody2.transformW2B.transform(body2Force);
 
-          //  drawArrowHeads(gl, p2, normal2);
+            subBody1.transformW2B.transform(min_x_1);
+            subBody1.transformW2B.transform(min_y_1);
+            subBody1.transformW2B.transform(max_x_1);
+            subBody1.transformW2B.transform(max_y_1);
+            subBody2.transformW2B.transform(min_x_2);
+            subBody2.transformW2B.transform(min_y_2);
+            subBody2.transformW2B.transform(max_x_2);
+            subBody2.transformW2B.transform(max_y_2);
             
+
+
   
     }
 
@@ -363,7 +440,8 @@ public class Contact {
 		for (Double dub : list) {
 			sum+= (dub -avg)*(dub -avg);
 		}
-		sum/=(list.size() - 1);
+		if (list.size()>1)
+			sum/=(list.size() - 1);
 		
 		return sum;
 	}
@@ -376,9 +454,10 @@ public class Contact {
 			sum1+= (vec.x - avg.x)*(vec.x - avg.x);
 			sum2+= (vec.y - avg.y)*(vec.y - avg.y);
 		}
-		sum1/=(list.size() - 1);
-		sum2 /= (list.size() - 1);
-		
+		if (list.size()>1) {
+			sum1/=(list.size() - 1);
+			sum2 /= (list.size() - 1);
+		}
 		return new Vector2d(sum1, sum2);
 	}
 

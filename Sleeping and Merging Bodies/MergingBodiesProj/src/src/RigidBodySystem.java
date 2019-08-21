@@ -481,7 +481,7 @@ private void generalOneBodyAtATime() {
 	    					forceMetric = colB.metricCheck(sB, totalForce, totalTorque);
 	    					if (forceMetric) {
 	    						unmergingBodies.add(sB);
-	    						int x = 0;
+	    						
 	    		
 	    	    	
 	    					}
@@ -686,7 +686,7 @@ public void mergeBodies() {
 						bc.body1.merged=true;
 						bc.body1.parent.addCollection(bc.body2.parent);
 						bc.body1.parent.addInternalContact(bc);
-					bc.body1.parent.addIncompleteCollectionContacts(bc.body2.parent, removalQueue);
+						bc.body1.parent.addIncompleteCollectionContacts(bc.body2.parent, removalQueue);
 						
 					}else {
 						bc.body2.merged = true;
@@ -929,23 +929,15 @@ public void display( GLAutoDrawable drawable ) {
         	}
         	for (RigidBody b : bodies) {
 	        	if (b instanceof RigidCollection) {
-	        		
 	        		((RigidCollection)b).displayCollection(drawable);
-	        		
 	        	if(drawInternalContactForces.getValue())
 	        		((RigidCollection) b).drawInternalContacts(drawable);
-	        	
 	        	if(drawInternalContactDeltas.getValue())
 	        		((RigidCollection) b).drawInternalDeltas(drawable);
 	        	if(drawInternalHistories.getValue())
 	        		((RigidCollection) b).drawInternalHistory(drawable);
-	        		
-	        	
 	        	}
 	        	
-	        	
-            		
-            	
         	}
 
         }
@@ -1038,6 +1030,8 @@ private void displayCollectionBV(RigidCollection b, GLAutoDrawable drawable) {
         vfpv.add( drawBoundingVolumesUsed.getControls() );
         vfpv.add( drawInternalContactForces.getControls() );
         vfpv.add( drawExternalContactForces.getControls() );
+        vfpv.add( drawInternalHistories.getControls() );
+        vfpv.add( drawInternalContactDeltas.getControls() );
        
         vfpv.add( drawCOMs.getControls() );
         vfpv.add( drawContacts.getControls() );

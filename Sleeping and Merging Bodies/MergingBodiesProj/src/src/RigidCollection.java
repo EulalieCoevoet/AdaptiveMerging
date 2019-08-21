@@ -94,9 +94,11 @@ public class RigidCollection extends RigidBody{
 		}
 		
 		//convert the ontacts to collections coordinates. 
-		internalContacts.addAll(bc.contactList);
-		int x = 0;
+		for (Contact c: bc.contactList)c.getHistoryStatistics();
 		
+		internalContacts.addAll(bc.contactList);
+	
+	
 		
 
 	}
@@ -430,7 +432,7 @@ public class RigidCollection extends RigidBody{
 		double forceMetric = totalForce.x/sB.massLinear;
 		double forceMetric2 = totalForce.y/sB.massLinear;
 		double forceMetric3 = totalTorque/sB.massAngular;
-		if (forceMetric > threshold || forceMetric2 > threshold || forceMetric3 > threshold) 
+		if (Math.abs(forceMetric) > threshold || Math.abs(forceMetric2) > threshold || Math.abs(forceMetric3) > threshold) 
 		return true;
 		else return false;
  }
@@ -720,8 +722,6 @@ private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double tot
 					
 				}
 		
-			
-			
 		}
 	}
 

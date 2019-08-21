@@ -160,6 +160,7 @@ public class CollisionProcessor {
 						if (c.body1 != contact_i.body1 || c.body2 != contact_i.body2) {
 							continue;
 						}
+						
 						double old_lamda_n = c.lamda.x;
 						double old_lamda_t = c.lamda.y;
 						double old_delta_lamda_n = old_lamda_n;
@@ -193,8 +194,8 @@ public class CollisionProcessor {
 			    		
 			    		//update delta V;
 			    	
-			    		DenseVector dV1 = contact_i.body1.delta_V; 
-			    		DenseVector dV2 = contact_i.body2.delta_V; 
+			    		DenseVector dV1 = c.body1.delta_V; 
+			    		DenseVector dV2 = c.body2.delta_V; 
 			    		dV1.set( 0, dV1.get( 0) + t_1_x_n  + t_1_x_t);
 			    		dV1.set( 1, dV1.get( 1) + t_1_y_n + t_1_y_t );
 			    		dV1.set(2, dV1.get(2) +  t_1_omega_n + t_1_omega_t);
@@ -203,6 +204,10 @@ public class CollisionProcessor {
 			    		dV2.set(0, dV2.get(0) + t_2_x_n + t_2_x_t);
 			    		dV2.set(1, dV2.get(1) + t_2_y_n + t_2_y_t );
 			    		dV2.set(2, dV2.get(2) + t_2_omega_n + t_2_omega_t );
+			    		contact_i.body1ContactForceHistory.addAll(c.body1ContactForceHistory);
+			    		contact_i.body1ContactTorqueHistory.addAll(c.body1ContactTorqueHistory);
+			    		contact_i.body2ContactForceHistory.addAll(c.body2ContactForceHistory);
+			    		contact_i.body2ContactTorqueHistory.addAll(c.body2ContactTorqueHistory);
 					}
 		   	}
 	    } 
@@ -732,18 +737,20 @@ public class CollisionProcessor {
                			bc.updatedThisTimeStep = true;
                	
                		}
+               	
             	}else {
             		//body contact did not exist in previous list
             		bc = new BodyContact(body1, body2);
             		bc.relativeVelHistory.add(contact.getRelativeMetric());
             		bc.updatedThisTimeStep = true;
             		bodyContacts.add(bc);
-            		
-            		if (!body1.bodyContactList.contains(bc))
-            		body1.bodyContactList.add(bc);
-            		if (!body2.bodyContactList.contains(bc))
-    	            body2.bodyContactList.add(bc);
+            	
             	}
+            	
+        		if (!body1.bodyContactList.contains(bc))
+        			body1.bodyContactList.add(bc);
+        		if (!body2.bodyContactList.contains(bc))
+        			body2.bodyContactList.add(bc);
             	contact.bc = bc;
             	bc.contactList.add(contact);
             

@@ -664,8 +664,6 @@ public void drawDeltaF(GLAutoDrawable drawable) {
 	// TODO Auto-generated method stub
 	  GL2 gl = drawable.getGL().getGL2();
 	  double k = this.v.length() + this.omega;
-	
-	 
 	  gl.glLineWidth(3);
 	  gl.glColor3f(1, 0, 1);
 	  gl.glBegin( GL.GL_LINES);
@@ -679,26 +677,34 @@ public void drawDeltaF(GLAutoDrawable drawable) {
 	
 	  gl.glEnd();
 	  
+	  
 	  double max = CollisionProcessor.impulseTolerance.getValue();
-	  if (deltaF.length() > 0.5) {
+	  if (deltaF.length()/massLinear > 0.05*max) {
 			gl.glLineWidth(1);
 		  gl.glBegin( GL.GL_LINES);
 	
 	  	gl.glColor3f(0, 0, 0);
 	  	gl.glVertex2d(p.x, p.y);
-	  	deltaF.normalize();
-	  	if (Math.abs(deltaF.y) >= Math.abs(deltaF.x)) {
-	  		double scaling = deltaF.y/max;
-		  	double newX = deltaF.x/scaling;
-		  	if (deltaF.y < 0)
+	  	Vector2d deltaF2 = new Vector2d(deltaF);
+	  	deltaF2.normalize();
+	  	
+	  	//drawing the max force here... think of this being a line starting at the body
+	  	// COM, that goes, in the direction of the new applied contact forces, towards a point
+	  	//that indicates the MAX applied contact force before unmerging. 
+	  	//so you need to find a point on a square defined by the max force applied in x and y directions before it unmerges.
+	  	//use similar triangles
+	  	if (Math.abs(deltaF2.y) >= Math.abs(deltaF2.x)) {
+	  		double scaling = deltaF2.y/max;
+		  	double newX = deltaF2.x/scaling;
+		  	if (deltaF2.y < 0)
 		  	gl.glVertex2d(p.x - 2*newX, p.y - 2*max);
 		  	else
 		  	gl.glVertex2d(p.x + 2*newX, p.y + 2*max);
 			  
 	  	}else {
-	  		double scaling = deltaF.x/max;
-		  	double newY = deltaF.y/scaling;
-		  	if (deltaF.x < 0)
+	  		double scaling = deltaF2.x/max;
+		  	double newY = deltaF2.y/scaling;
+		  	if (deltaF2.x < 0)
 			  	gl.glVertex2d(p.x - 2*max, p.y - 2*newY);
 			  	else
 			  	gl.glVertex2d(p.x + 2*max, p.y + 2*newY);
