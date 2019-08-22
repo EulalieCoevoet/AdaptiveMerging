@@ -88,8 +88,11 @@ public class Factory {
             createBodyRequest = false;
             generateBody();
         }
+        
         if ( ! run.getValue() ) return;
-        elapsed += dt;        
+        
+        elapsed += dt;       
+        
         if ( elapsed >= interval.getValue() ) {
             elapsed = 0;
             generateBody();

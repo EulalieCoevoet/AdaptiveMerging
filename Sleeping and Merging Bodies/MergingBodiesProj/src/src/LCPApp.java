@@ -68,9 +68,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     }
     
     String systemDir;
-    /**
-     * Creates the application / scene instance
-     */
+    /** Creates the application / scene instance */
     public LCPApp() {
         system.mouseSpring = mouseSpring;
         systemDir = "datalcp/simple18.png";
@@ -140,7 +138,6 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         system.display( drawable );
         //clears bodies when using contact graph heuristics
-
         
         if ( picked != null ) {
             // draw a line from the mouse to the body point
@@ -159,7 +156,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
 
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         gl.glColor4f(0,0,0,1);
-        String text = "YOUR NAME HERE\n" + system.name + "\n";
+        String text = "filename = " + system.name + "\n";
         text += "bodies = " + system.bodies.size() + "\n";        
         text += "contacts = " + system.collisionProcessor.contacts.size() + "\n";
         text += formatter.format( new Date() ) + "\n";
@@ -224,14 +221,12 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private NumberFormat format = new DecimalFormat("00000");
 
     private BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", false );
-    private BooleanParameter drawGraphs = new BooleanParameter("draw performance graphs", false );
+    private BooleanParameter drawGraphs = new BooleanParameter( "draw performance graphs", false );
     private BooleanParameter run = new BooleanParameter( "simulate", false );
     private DoubleParameter stepsize = new DoubleParameter( "step size", 0.05, 1e-5, 1 );
     private IntParameter substeps = new IntParameter( "sub steps (integer)", 1, 1, 100);
     
-    /**
-     * Creates a control panel for changing visualization and simulation parameters
-     */
+    /** Creates a control panel for changing visualization and simulation parameters */
     @Override
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
@@ -322,13 +317,13 @@ public class LCPApp implements SceneGraphNode, Interactor {
     DoubleParameter whiteEpsilon = new DoubleParameter( "white epsilon", 0.05, 0, 1 );
         
     // parameters and variables for for scaling and translating the window
-    private DoubleParameter scale = new DoubleParameter("scale scene",.9, 0.1, 10);
-    private DoubleParameter posx = new DoubleParameter("x translation", 0, -1000, 1000 );
-    private DoubleParameter posy = new DoubleParameter("y translation", 0, -1000, 1000 );
+    private DoubleParameter scale = new DoubleParameter( "scale scene", 0.9, 0.1, 10 );
+    private DoubleParameter posx = new DoubleParameter( "x translation", 0, -1000, 1000 );
+    private DoubleParameter posy = new DoubleParameter( "y translation", 0, -1000, 1000 );
     private double windowWidth = 1.0;
     private double windowHeight= 1.0;
     private double imageWidth = 1.0;
-    private double imageHeight = 1.0;
+    private double imageHeight= 1.0;
     private Point prevMousePoint = new Point();
 
     // variables and objects for picking rigid body with the mouse
@@ -350,7 +345,6 @@ public class LCPApp implements SceneGraphNode, Interactor {
         imageHeight= blocker.height;
         system.bodies.addAll(blocker.bodies);
         system.originalBodies = system.bodies;
-       // system.original_bodies.addAll(blocker.bodies);
     }
     
     /**
@@ -368,6 +362,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         factory.use = true;
         factory.reset();        
     }
+    
     /**
      * Loads the specified image as a pendulum, clearing the old system, and resets viewing parameters.
      * @param filename
@@ -383,6 +378,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         pendulum.use = true;
         pendulum.reset();        
     }
+    
     /**
      * Resets the rigid body system, and factory if it is currently being used.  
      * When the factory is reset, all non pinned rigid bodies are removed from the system.
@@ -417,9 +413,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     /** current index in the files list */
     private int whichFile = 0;
     
-    /**
-     * Attaches mouse and keyboard listeners to the canvas.
-     */
+    /** Attaches mouse and keyboard listeners to the canvas. */
     @Override
     public void attach(Component component) {
     
@@ -448,6 +442,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 prevMousePoint.setLocation( e.getPoint() );
             }           
         } );
+        
         component.addMouseListener( new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {       
@@ -467,82 +462,100 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 mouseSpring.setPicked( picked, grabPointB );
             }
         } );
+        
         component.addKeyListener( new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
                     run.setValue( ! run.getValue() ); 
-                } else if ( e.getKeyCode() == KeyEvent.VK_S ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_S ) {
                     double dt = stepsize.getValue() / (int)substeps.getValue();
                     for ( int i = 0; i < substeps.getValue(); i++ ) {
                         if ( factory.use ) factory.advanceTime( dt );
                         system.advanceTime( dt );                
                     }
                     stepped = true;
-                } else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
                     //systemReset(); 
                 	loadSystem(system.name);
-                } else if ( e.getKeyCode() == KeyEvent.VK_A ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_A ) {
                 	scale.setValue( imageWidth / windowWidth );
-                } else if ( e.getKeyCode() == KeyEvent.VK_C ) {                   
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_C ) {                   
                     systemClear();
                     factory.use = false;
-                } else if ( e.getKeyCode() == KeyEvent.VK_J ) {                   
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_J ) {                   
                     system.jiggle();                                        
-                } else if ( e.getKeyCode() == KeyEvent.VK_G ) {                   
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_G ) {                   
                     File f = FileSelect.select("png", "image for factory", "load", "datalcp/", true );
                     if ( f != null ) {
                         loadFactorySystem( f.getPath() );
                     }   
-                } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
                     loadFactorySystem( "datalcp/tetrisTube.png" );
                     factory.spread.setValue(30);
                     factory.interval.setValue(0.4);
                     factory.downVelocity.setValue(10.0);
                     factory.angularVelocityScale.setValue(0.5);
                     factory.linearVelocityScale.setValue(2.5);
-                } else if ( e.getKeyCode() == KeyEvent.VK_PERIOD ) {                                       
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_PERIOD ) {                                       
                     factory.run.setValue ( ! factory.run.getValue() );
-                } else if ( e.getKeyCode() == KeyEvent.VK_COMMA ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_COMMA ) {
                     factory.createBodyRequest = true;
-                } else if ( e.getKeyCode() == KeyEvent.VK_P) {                   
-                 
-                        loadPendulumSystem( "datalcp/pendulum.png" );
-                        system.use_pendulum.setValue(true);
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_P) {   
+                    loadPendulumSystem( "datalcp/pendulum.png" );
+                    system.use_pendulum.setValue(true);
                 }
                 else if ( e.getKeyCode() == KeyEvent.VK_N) {                   
                     if ( pendulum.use ) {
                         pendulum.generateBody();
-                    }   else {
+                    }   
+                    else {
                     	system.generateBody= true;
                     }
-                }else if (  e.getKeyCode() == KeyEvent.VK_L ) {                    
+                }
+                else if (  e.getKeyCode() == KeyEvent.VK_L ) {                    
                     File f = FileSelect.select("png", "image", "load", "datalcp/", true );
                     if ( f != null ) {
                         loadSystem( f.getPath() );
                     }
-                } else if ( e.getKeyCode() == KeyEvent.VK_LEFT) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_LEFT) {
                     if ( files != null && files.length >= 0 ) {
                         whichFile --;
                         if ( whichFile < 0 ) whichFile = files.length-1;
                         loadSystem( files[whichFile].getPath() );                        
                     }
-                } else if ( e.getKeyCode() == KeyEvent.VK_RIGHT ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_RIGHT ) {
                     if ( files != null && files.length >= 0 ) {
                         whichFile ++;
                         if ( whichFile >= files.length ) whichFile = 0;
                         loadSystem( files[whichFile].getPath() );
                     }
-                } else if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
                     ev.stop();
-                } else if ( e.getKeyCode() == KeyEvent.VK_ENTER ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_ENTER ) {
                     record.setValue( ! record.getValue() );
-                } else if ( e.getKeyCode() == KeyEvent.VK_UP ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_UP ) {
                     int ss = substeps.getValue();
                     if ( ss == substeps.getMaximum() ) return;
                     substeps.setValue( ss + 1 );
                     stepsize.setValue( stepsize.getValue() * (ss+1)/ss );
-                } else if ( e.getKeyCode() == KeyEvent.VK_DOWN ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_DOWN ) {
                     int ss = substeps.getValue();
                     if ( ss == substeps.getMinimum() ) return;
                     substeps.setValue( ss - 1 );
