@@ -124,11 +124,8 @@ public class RigidBody {
     /** list of springs attached to the body**/
     public ArrayList<Spring> springs = new ArrayList<Spring>();
     
-    /** determines whether or not a body is bound by pendulum constraint*/
-    public boolean pendulum_body;
-    
     /** keeps track of the activity of the last N steps, if it is false, means that should be asleep, if true, should be awake */  
-    public ArrayList<Boolean> active_past = new ArrayList<Boolean>();
+    public ArrayList<Double> velHistory = new ArrayList<Double>();
 
     /** a list of the total contact torques acting on this body in the last N steps  before sleeping or merging   */
     public double contactTorques = 0;
@@ -202,7 +199,7 @@ public class RigidBody {
             minv = 1/massLinear;
             jinv = 1/massAngular;
         }
-        pendulum_body = false;
+     
         // set our index
         index = nextIndex++;
         delta_V.zero();
@@ -233,7 +230,7 @@ public class RigidBody {
         active=0;
         rho = 0;
         // set our index
-        pendulum_body = false;
+       
         index = nextIndex++;
         delta_V.zero();
     
@@ -282,9 +279,9 @@ public class RigidBody {
     public void advanceTime( double dt ) {
         //update particles activity or sleepiness.
         double epsilon_1 = CollisionProcessor.sleepingThreshold.getValue();
-    	double epsilon_2 =  CollisionProcessor.wakingThreshold.getValue();
-       // this.set_activity(epsilon_1, epsilon_2);
-    	
+
+       	//fully active, regular stepping
+    	this.set_activity_contact_graph(epsilon_1);
 
         if ( !pinned ) {          
 
@@ -293,65 +290,20 @@ public class RigidBody {
         	v.y += force.y * dt/massLinear + delta_V.get(1);
         	omega += torque * dt/ massAngular + delta_V.get(2);
         	delta_V.zero();
-        	double k = this.getKineticEnergy();
-         
-            if (CollisionProcessor.useAdaptiveHamiltonian.getValue()) {
-            	this.set_activity_hamiltonian(epsilon_1, epsilon_2);
-           	 	p_lin.x = v.x * massLinear;
-           	 	p_lin.y = v.y * massLinear ;
-           	 	p_ang = omega * massAngular ;
-	            if(this.active==0) {
-	
-	            	//fully active, regular stepping
-	            	x.x += p_lin.x /massLinear* dt;
-	            	x.y += p_lin.y/massLinear * dt;
-	            	theta += p_ang/massAngular *dt;
-
-	            }else if (this.active==2) {
-	            //	v.set(0, 0);
-	            //	this.omega = 0;
-	            	
-	            	x.x += 0;
-	            	x.y += 0;
-	            	theta += 0;
-	            }
-	            else {
-	            	//restrained motion
-	            	double rho = ( k - epsilon_2)/(epsilon_1 - epsilon_2);
-	            	Vector2d drhodp_lin = new Vector2d();
-	            	drhodp_lin.scale(minv/(epsilon_1 - epsilon_2), p_lin);
-	            	double drhodp_ang = p_ang * jinv/(epsilon_1 - epsilon_2);
-	            	x.x += dt * ((1 - rho)*p_lin.x*minv - k*drhodp_lin.x);
-	            	x.y +=  dt * ((1 - rho)*p_lin.y*minv - k*drhodp_lin.y);
-	            	theta += dt * ((1 - rho)*p_ang*jinv - k*drhodp_ang);
-	            }
-            }else if(CollisionProcessor.use_contact_graph.getValue() ) {
-            	//fully active, regular stepping
-            	this.set_activity_contact_graph(epsilon_1);
-            	if (active == 0 ) {
-	            	x.x += v.x * dt;
-	            	x.y += v.y * dt;
-	            	theta += omega*dt;
-            	}else{
-            		v.set(0,0);
-            		omega = 0;
-            	}
-
-            }
-            else {
-               	//fully active, regular stepping
-             	this.set_activity_regular(epsilon_1);
-            	x.x += v.x * dt;
-            	x.y += v.y * dt;
-            	theta += omega*dt;
+       
+            if (active == 0 ) {
+	            x.x += v.x * dt;
+	           	x.y += v.y * dt;
+	           	theta += omega*dt;
+            }else{
+            	v.set(0,0);
+            	omega = 0;
             }
             
             updateTransformations();
-            
+
         }   
         
-        force.set(0,0);
-        torque = 0;
     }
     
     private void set_activity_regular(double epsilon_1) {
@@ -447,36 +399,11 @@ public class RigidBody {
     }
     
     public void set_activity_contact_graph(double sleeping_threshold) {
-    	double k = this.getMetric();
-
-    	if (k < sleeping_threshold) {
-    		//particle is inactive
-    		this.active_past.add(false);
-    	}else {
-    		//particle is active
-    		this.active_past.add(true);
-    	}
-    	if(this.active_past.size() > CollisionProcessor.sleep_accum.getValue()) {
-    		//if we have too much data, remove the oldest one.
-    		this.active_past.remove(0);
-    	}else if(active_past.size() < CollisionProcessor.sleep_accum.getValue()) {
-    		//without enough data, particle is active as we wait for more
-    		this.active = 0;
-    		return;
-    	}
-
     	
-    	this.active = 2;
-    	for (Boolean a : active_past) {
-    		if (a == true) this.active = 0;
-    	}
-    	if (force.length() > CollisionProcessor.impulseTolerance.getValue()) {
-    		this.active = 0;
-    	} 
     
     }
     
-    private double getMetric() {
+    public double getMetric() {
     	return 0.5 *  v.lengthSquared() + 0.5 * omega*omega; 
 	}
 
@@ -501,7 +428,7 @@ public class RigidBody {
         contactList.clear();
         bodyContactList.clear();
         active = 0;
-        active_past.clear();
+        velHistory.clear();
         parent=null;
         
     }
@@ -678,7 +605,7 @@ public void drawDeltaF(GLAutoDrawable drawable) {
 	  gl.glEnd();
 	  
 	  
-	  double max = CollisionProcessor.impulseTolerance.getValue();
+	  double max = CollisionProcessor.forceMetricTolerance.getValue();
 	  if (deltaF.length()/massLinear > 0.05*max) {
 			gl.glLineWidth(1);
 		  gl.glBegin( GL.GL_LINES);

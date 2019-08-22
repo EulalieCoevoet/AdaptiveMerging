@@ -97,7 +97,7 @@ public class Pendulum {
         body.v.x = 0;
         body.v.y = 0;
         body.updateTransformations();
-        body.pendulum_body = true;
+
         system.add( body );
     }
     

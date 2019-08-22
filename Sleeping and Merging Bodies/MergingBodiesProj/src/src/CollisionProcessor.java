@@ -59,7 +59,7 @@ public class CollisionProcessor {
     	
         Contact.nextContactIndex = 0;
         //remember passive contacts
-        if (CollisionProcessor.use_contact_graph.getValue() || RigidBodySystem.enableMerging.getValue()) {
+        if (RigidBodySystem.enableSleeping.getValue() || RigidBodySystem.enableMerging.getValue()) {
 
             rememberBodyContacts();
         }
@@ -86,7 +86,7 @@ public class CollisionProcessor {
     	ArrayList<BodyContact> savedBodyContacts = new ArrayList<BodyContact>();
    		for (BodyContact bc : bodyContacts) {
    			if (!bc.merged)bc.contactList.clear();
-           	if (bc.updatedThisTimeStep) {
+           	if (bc.updatedThisTimeStep || bc.body1.active == 2 || bc.body2.active == 2) {
            		savedBodyContacts.add(bc);
            		bc.updatedThisTimeStep = false;
            	}
@@ -423,12 +423,7 @@ public class CollisionProcessor {
 		    		c.body1ContactTorqueHistory.remove(0);
 		    	}
 		    	
-		    	c.body2ContactForceHistory.add(c.contactForceB2);
-		    	c.body2ContactTorqueHistory.add(c.contactTorqueB2);
-		    	if (c.body2ContactForceHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
-		    		c.body2ContactForceHistory.remove(0);
-		    		c.body2ContactTorqueHistory.remove(0);
-		    	}
+	
 		    	
 		    	//if Body1 is a parent, also apply the contact force to the appropriate subBody
 		 
@@ -440,6 +435,12 @@ public class CollisionProcessor {
 		    	
 		    	c.contactTorqueB2 = cTorque/dt;
 		    
+		    	c.body2ContactForceHistory.add(c.contactForceB2);
+		    	c.body2ContactTorqueHistory.add(c.contactTorqueB2);
+		    	if (c.body2ContactForceHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+		    		c.body2ContactForceHistory.remove(0);
+		    		c.body2ContactTorqueHistory.remove(0);
+		    	}
 		    	
 		    	//if Body2 is a parent, also apply the contact force to the appropriate subBody
 			}
@@ -501,12 +502,12 @@ public class CollisionProcessor {
      * @param body2
      */
     private void narrowPhase( RigidBody body1, RigidBody body2 ) {
-    	if(CollisionProcessor.useAdaptiveHamiltonian.getValue() || CollisionProcessor.use_contact_graph.getValue()) {
         	//if both bodies are inactive, they do not collide
-        	if ((body1.active==2 && body2.active==2)) {
+        	
+    	if ((body1.active==2 && body2.active==2)) {
         		return;
         	}
-    	}
+    	
         if ( ! useBVTree.getValue() ) {
             for ( Block b1 : body1.blocks ) {
                 for ( Block b2 : body2.blocks ) {
@@ -520,9 +521,6 @@ public class CollisionProcessor {
         	else {
         		findCollisions(body1.root, body2.root, body1, body2);
         	}
-	        
-	  
-            
         	
         }
     }
@@ -546,8 +544,6 @@ public class CollisionProcessor {
 				}
 			}
 		
-		
-		//if both bodies are not rigid collections
 		
 		
 	}
@@ -724,7 +720,7 @@ public class CollisionProcessor {
             //that being said... the BODYCONTACTS bodies will only ever be subBodies or 
             // unmerged normal rigid bodies... they will never be a collection.
             
-            if (RigidBodySystem.enableMerging.getValue()&&  (!body1.pinned || !body2.pinned)) {
+            if ((RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue()) &&  (!body1.pinned || !body2.pinned)) {
             	
             	//check if this body contact exists already
             	BodyContact bc = BodyContact.checkExists(body1, body2, bodyContacts);
@@ -754,11 +750,8 @@ public class CollisionProcessor {
             	contact.bc = bc;
             	bc.contactList.add(contact);
             
-	    
-	            
-            
             }
-            
+           
             
             if ( !doLCP.getValue() ) {
                 // compute relative body velocity at contact point
@@ -840,7 +833,7 @@ public class CollisionProcessor {
     
     public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", false );
     
-    public static DoubleParameter impulseTolerance = new DoubleParameter("force metric tolerance", 2.5, 0, 15);
+    public static DoubleParameter forceMetricTolerance = new DoubleParameter("force metric tolerance", 2.5, 0, 15);
     
     public static IntParameter collision_wake = new IntParameter("wake n neighbors", 2, 0, 10 );
     
@@ -868,7 +861,7 @@ public class CollisionProcessor {
         vfp.add( wakingThreshold.getSliderControls(false) );
         
         vfp.add( use_contact_graph.getControls() );
-        vfp.add( impulseTolerance.getSliderControls(false) );
+        vfp.add( forceMetricTolerance.getSliderControls(false) );
         vfp.add(collision_wake.getSliderControls());
         vfp.add(sleep_accum.getSliderControls());
         VerticalFlowPanel vfp2 = new VerticalFlowPanel();

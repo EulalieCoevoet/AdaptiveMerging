@@ -40,10 +40,10 @@ public class PendulumProcessor {
 	private void find_constraints(Point2d pendulum_origin, double pendulum_length) {
 		//every rigid body in the system has a constraint
 		for (RigidBody b: bodies) {
-			if (b.pendulum_body){
+			//if (b.pendulum_body){
 				Constraint c = new Constraint(b, b.x, pendulum_origin, pendulum_length );
 				constraints.add(c);
-			}
+			//}
 		}
 	}
 

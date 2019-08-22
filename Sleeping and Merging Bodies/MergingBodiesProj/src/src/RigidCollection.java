@@ -55,7 +55,7 @@ public class RigidCollection extends RigidBody{
 		blocks.clear();
 		boundaryBlocks.clear();
 		
-		active_past.clear();
+		velHistory.clear();
 		//no longer relevant
 		contactList.clear();
 	
@@ -333,16 +333,29 @@ public class RigidCollection extends RigidBody{
     public void displayCOM( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
           
-	    gl.glPointSize(8);
-	    gl.glColor3f(0,0,0.7f);
-	    gl.glBegin( GL.GL_POINTS );
-	    gl.glVertex2d(x.x, x.y);
-	    gl.glEnd();
-	    gl.glPointSize(4);
-	    gl.glColor3f(1,1,1);
-	    gl.glBegin( GL.GL_POINTS );
-	    gl.glVertex2d(x.x, x.y);
-	    gl.glEnd();
+        if ( this.active==0 || this.woken_up) {
+            gl.glPointSize(8);
+            gl.glColor3f(0,0,0.7f);
+            gl.glBegin( GL.GL_POINTS );
+            gl.glVertex2d(x.x, x.y);
+            gl.glEnd();
+            gl.glPointSize(4);
+            gl.glColor3f(1,1,1);
+            gl.glBegin( GL.GL_POINTS );
+            gl.glVertex2d(x.x, x.y);
+            gl.glEnd();
+        }else {
+            gl.glPointSize(8);
+            gl.glColor3f(0,0,0.7f);
+            gl.glBegin( GL.GL_POINTS );
+            gl.glVertex2d(x.x, x.y);
+            gl.glEnd();
+            gl.glPointSize(4);
+            gl.glColor3f(0,0,1);
+            gl.glBegin( GL.GL_POINTS );
+            gl.glVertex2d(x.x, x.y);
+            gl.glEnd();
+        }
 
     }
     /** Map to keep track of display list IDs for drawing our rigid bodies efficiently */
@@ -428,7 +441,7 @@ public class RigidCollection extends RigidBody{
 		sB.transformW2B.transform(sB.currentContactForce);
 		sB.deltaF.set(totalForce);
 		totalTorque = sB.torque + sB.currentContactTorques;
-		double threshold = CollisionProcessor.impulseTolerance.getValue();
+		double threshold = CollisionProcessor.forceMetricTolerance.getValue();
 		double forceMetric = totalForce.x/sB.massLinear;
 		double forceMetric2 = totalForce.y/sB.massLinear;
 		double forceMetric3 = totalTorque/sB.massAngular;
@@ -451,7 +464,7 @@ public class RigidCollection extends RigidBody{
 		totalTorque = sB.torque + sB.contactTorques;
 		forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
 		
-		if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
+		if (forceMetric > CollisionProcessor.forceMetricTolerance.getValue()) {
 			handledBodies.add(sB);
 			newRigidBodies.add(sB);
 			unmergeSingleBody(sB);

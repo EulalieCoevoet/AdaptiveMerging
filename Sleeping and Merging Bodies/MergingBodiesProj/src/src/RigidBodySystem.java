@@ -119,6 +119,7 @@ public class RigidBodySystem {
     	
        	externalBodyContacts = collisionProcessor.bodyContacts;
     	clearJunkAtStartOfTimestep();
+    
     	
         // apply gravity to all bodies... also take this opportunity to clear all forces at the start of the timestep
         if ( useGravity.getValue() ) {
@@ -133,7 +134,7 @@ public class RigidBodySystem {
              collisionProcessor.processCollisions( dt );
         }
         
-        if (enableMerging.getValue()) {
+        if (enableMerging.getValue()||enableSleeping.getValue()) {
         	applyExternalContactForces(dt);
         	//applyInternalContactForces(dt);
         
@@ -144,7 +145,14 @@ public class RigidBodySystem {
             mergeBodies();
             checkIndex();
             
+            
         }
+        
+        if (enableSleeping.getValue()) {
+        	sleep();
+    }
+        
+
         
         // advance the system by the given time step
         for ( RigidBody b : bodies ) {
@@ -152,11 +160,18 @@ public class RigidBodySystem {
             b.advanceTime(dt);
         }
         
+     	
+        if (enableSleeping.getValue()) {
+        	wake();
+        }
+        
         if (enableMerging.getValue()) {
         	unmergeBodies();
         	checkIndex();
         }
         
+   
+       
     	if (this.generateBody) {
     		generateBody();
     		this.generateBody = false;
@@ -168,6 +183,71 @@ public class RigidBodySystem {
     }
 
     
+    /*
+     * checks if we should put these bodies to sleep.
+     * Conditions for sleeping are:
+     * 	All velcoities in velocity history are below threshold.
+     * 	Velocities in history are monotonically decreasing
+     */
+private void sleep() {
+	double sleepingThreshold = CollisionProcessor.sleepingThreshold.getValue();
+	for (RigidBody b : bodies) {
+		if (b.pinned || b.active == 2) continue;
+		double vel = b.getMetric();
+		b.velHistory.add(vel);
+		if (b.velHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+			b.velHistory.remove(0);	
+		}
+		boolean sleep = true;
+		double previousV = 1000000;//arbitrary super high number
+		double epsilon = 0.00005;
+		if (b.velHistory.size() < CollisionProcessor.sleep_accum.getValue()) {
+			sleep = false;
+		}
+		else {
+    		for (Double v : b.velHistory) {
+    			if (v  > previousV+epsilon ) {
+    				sleep = false;
+    				break;
+    			}
+    			if (v > sleepingThreshold) {
+    				sleep = false;
+    				break;
+    			}
+    			previousV = v;
+    			
+    		}
+		}
+		if (sleep) {
+			b.active = 2;
+		}
+}
+	}
+
+/*
+ * Checks if a body should wake up
+ * conditions for waking:
+ * If total force metric acting on body is above the forceMetric threshold.
+ * total Force metric = totalForce^2/Mass
+ * total Force = sum of all forces (including contact forces)
+ * 
+ */
+private void wake() {
+	double threshold = CollisionProcessor.forceMetricTolerance.getValue();
+	for (RigidBody b: bodies) {
+		if (b.active == 0 || b.pinned)continue;
+		b.transformB2W.transform(b.savedContactForce);
+		double forceMetric1 = Math.pow((b.force.x+b.savedContactForce.x), 2)*b.minv;
+		double forceMetric2 = Math.pow((b.force.y+b.savedContactForce.y), 2)*b.minv;
+		double forceMetric3 =  Math.pow((b.torque+b.contactTorques), 2) *b.jinv;
+		b.transformW2B.transform(b.savedContactForce);
+		if (b.active == 2 &&(forceMetric1  > threshold || forceMetric2 > threshold || forceMetric3 > threshold)) {
+			b.velHistory.clear();
+			b.active = 0;
+		}
+	}
+}
+
 private void applyGravityForce() {
        Vector2d force = new Vector2d();
        for ( RigidBody b : bodies ) {
@@ -280,7 +360,7 @@ private void clearJunkAtStartOfTimestep() {
 	}
 
    /* 
-    * applies contact forces/torques to the body contacts
+    * applies contact forces/torques to the body contacts of awake and collection bodies... not sleeping bodies
     */
    private void applyExternalContactForces(double dt) {
 	   for (BodyContact bc : collisionProcessor.bodyContacts) {
@@ -475,15 +555,11 @@ private void generalOneBodyAtATime() {
 	    		if (b instanceof RigidCollection) {
 	    			RigidCollection colB = (RigidCollection) b;
 	    			if (!colB.unMergedThisTimestep) {
-	    				
 	    				ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 	    				for (RigidBody sB: colB.collectionBodies) {
 	    					forceMetric = colB.metricCheck(sB, totalForce, totalTorque);
 	    					if (forceMetric) {
 	    						unmergingBodies.add(sB);
-	    						
-	    		
-	    	    	
 	    					}
 	    				}
 	    				ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
@@ -494,19 +570,15 @@ private void generalOneBodyAtATime() {
 	    					if (!newBodies.isEmpty()) {
 	    						for (RigidBody bd: newBodies) {
 	    							additionQueue.add(bd);
-		    					
 	    						}
 	    						removalQueue.add(colB);
 	    						newBodies.clear();
 	    						int x = 0;
 	    					}
 
-		    			
 		    		}
 	    		}
-	    		
 	    	}
-			
 			for (RigidBody b: additionQueue) {
 				bodies.add(b);
 			}
@@ -619,7 +691,7 @@ private void generalHeuristic() {
 	    			totalTorque = b.torque + b.contactTorques;
 	    			
 	    			double forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/b.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/b.massAngular;
-	    			if (forceMetric > CollisionProcessor.impulseTolerance.getValue()) {
+	    			if (forceMetric > CollisionProcessor.forceMetricTolerance.getValue()) {
 	    				((RigidCollection) b).unmergeAllBodies();
 	    				additionQueue.addAll(((RigidCollection) b).collectionBodies);
 	    				removalQueue.add(b);
@@ -1003,12 +1075,13 @@ private void displayCollectionBV(RigidCollection b, GLAutoDrawable drawable) {
     private BooleanParameter drawInternalContactDeltas = new BooleanParameter("draw Internal Deltas", true);
     private BooleanParameter drawInternalHistories = new BooleanParameter("draw Internal Histories", true);
     
-    private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", false );
+    private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", true );
     private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", true);
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
-    private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", true );
+    private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", false );
     private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
     public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
+    public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", true);
     public BooleanParameter use_pendulum = new BooleanParameter( "create pendulum", false );
     public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
@@ -1046,6 +1119,7 @@ private void displayCollectionBV(RigidCollection b, GLAutoDrawable drawable) {
         
         vfp.add( processCollisions.getControls() );
         vfp.add( enableMerging.getControls() );
+        vfp.add( enableSleeping.getControls() );
         vfp.add( collisionProcessor.getControls() );
         
         vfp.add( use_pendulum.getControls() );
