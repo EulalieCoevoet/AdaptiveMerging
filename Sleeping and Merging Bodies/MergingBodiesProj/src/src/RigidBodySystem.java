@@ -140,8 +140,6 @@ public class RigidBodySystem {
 			// Put your body merging stuff here?  
 			mergeBodies();
 			checkIndex();
-
-
 		}
 
 		if (enableSleeping.getValue()) {
@@ -152,7 +150,6 @@ public class RigidBodySystem {
 
 		// advance the system by the given time step
 		for ( RigidBody b : bodies ) {
-
 			b.advanceTime(dt);
 		}
 
@@ -182,8 +179,8 @@ public class RigidBodySystem {
 	/**
 	 * checks if we should put these bodies to sleep.
 	 * Conditions for sleeping are:
-	 * 	All velcoities in velocity history are below threshold.
-	 * 	Velocities in history are monotonically decreasing
+	 * 	1. All velcoities in velocity history are below threshold.
+	 * 	2. Velocities in history are monotonically decreasing
 	 */
 	private void sleep() {
 		double sleepingThreshold = CollisionProcessor.sleepingThreshold.getValue();
@@ -195,7 +192,7 @@ public class RigidBodySystem {
 				b.velHistory.remove(0);	
 			}
 			boolean sleep = true;
-			double previousV = 1000000;//arbitrary super high number
+			double previousV = 10000000;//arbitrary super high number
 			double epsilon = 0.00005;
 			if (b.velHistory.size() < CollisionProcessor.sleep_accum.getValue()) {
 				sleep = false;
@@ -216,6 +213,8 @@ public class RigidBodySystem {
 			}
 			if (sleep) {
 				b.active = 2;
+				b.forcePreSleep.set(b.force);
+				b.torquePreSleep = b.torque;
 			}
 		}
 	}
@@ -233,9 +232,9 @@ public class RigidBodySystem {
 		for (RigidBody b: bodies) {
 			if (b.active == 0 || b.pinned)continue;
 			b.transformB2W.transform(b.savedContactForce);
-			double forceMetric1 = Math.pow((b.force.x+b.savedContactForce.x), 2)*b.minv;
-			double forceMetric2 = Math.pow((b.force.y+b.savedContactForce.y), 2)*b.minv;
-			double forceMetric3 =  Math.pow((b.torque+b.contactTorques), 2) *b.jinv;
+			double forceMetric1 = (b.force.x-b.forcePreSleep.x)*b.minv;
+			double forceMetric2 = (b.force.y-b.forcePreSleep.y)*b.minv;
+			double forceMetric3 = (b.torque-b.torquePreSleep) *b.jinv;
 			b.transformW2B.transform(b.savedContactForce);
 			if (b.active == 2 &&(forceMetric1  > threshold || forceMetric2 > threshold || forceMetric3 > threshold)) {
 				b.velHistory.clear();

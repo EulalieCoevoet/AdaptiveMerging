@@ -59,18 +59,25 @@ public class CollisionProcessor {
 
 		Contact.nextContactIndex = 0;
 		//remember passive contacts
+		contacts.clear();
 		if (RigidBodySystem.enableSleeping.getValue() || RigidBodySystem.enableMerging.getValue()) {
 
 			rememberBodyContacts();
 		}
 
 		//the rest of the collisionProcessor
-		contacts.clear();
+		
+		
 		long now = System.nanoTime();
 		broadPhase();
+	/*	for (BodyContact bc : bodyContacts) {
+			for (Contact c: bc.contactList) {
+				if (!contacts.contains(c)) contacts.add(c);
+			}
+		}*/
 		collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
 		if (contacts.size() == 0)  last_timestep_map.clear();
-
+		int x = 0;
 
 		if ( contacts.size() > 0  && doLCP.getValue() ) {
 			now = System.nanoTime();
@@ -82,8 +89,14 @@ public class CollisionProcessor {
 	private void rememberBodyContacts() {
 		ArrayList<BodyContact> savedBodyContacts = new ArrayList<BodyContact>();
 		for (BodyContact bc : bodyContacts) {
-			if (!bc.merged)bc.contactList.clear();
+			if (!bc.merged && ( bc.body1.active == 0 || bc.body2.active ==0 ))bc.contactList.clear();
+			
+			
 			if (bc.updatedThisTimeStep || bc.body1.active == 2 || bc.body2.active == 2) {
+				if ( bc.body1.active == 2 || bc.body2.active == 2) {
+					contacts.addAll(bc.contactList);
+					
+				}
 				savedBodyContacts.add(bc);
 				bc.updatedThisTimeStep = false;
 			}
@@ -194,10 +207,16 @@ public class CollisionProcessor {
 					dV2.set(0, dV2.get(0) + t_2_x_n + t_2_x_t);
 					dV2.set(1, dV2.get(1) + t_2_y_n + t_2_y_t );
 					dV2.set(2, dV2.get(2) + t_2_omega_n + t_2_omega_t );
+					
+					contact_i.body1ContactForceHistory.clear();
+					contact_i.body1ContactTorqueHistory.clear();
+					contact_i.body2ContactForceHistory.clear();
+					contact_i.body2ContactTorqueHistory.clear();
 					contact_i.body1ContactForceHistory.addAll(c.body1ContactForceHistory);
 					contact_i.body1ContactTorqueHistory.addAll(c.body1ContactTorqueHistory);
 					contact_i.body2ContactForceHistory.addAll(c.body2ContactForceHistory);
 					contact_i.body2ContactTorqueHistory.addAll(c.body2ContactTorqueHistory);
+				
 				}
 			}
 		} 

@@ -149,6 +149,9 @@ public class RigidBody {
     
     Vector2d deltaF = new Vector2d();
     
+    public Vector2d forcePreSleep = new Vector2d();
+    public double torquePreSleep = 0;
+    
     /**
      * Creates a new rigid body from a collection of blocks
      * @param blocks
