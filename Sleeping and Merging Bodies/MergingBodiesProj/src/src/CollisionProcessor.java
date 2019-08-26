@@ -674,6 +674,7 @@ public class CollisionProcessor {
 
 		}
 
+		/*
 		//calculatecontactForce
 		Vector2d cForce = new Vector2d();
 		double cTorque= 0;
@@ -701,6 +702,7 @@ public class CollisionProcessor {
 			//if Body2 is a parent, also apply the contact force to the appropriate subBody
 		}
 		collisionSolveTime = (System.nanoTime()) * 1e-9;
+		*/
 	}
 
 
