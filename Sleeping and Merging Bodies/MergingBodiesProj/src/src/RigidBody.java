@@ -105,7 +105,7 @@ public class RigidBody {
     /** angular momentum of this body  **/
     public double p_ang;
     
-    /**is this body active(0), restrained(1) or sleeping (2)  **/
+    /**is this body active(0), restrained(1) or sleeping(2)  **/
     public int active;
   
     /**rho vvalue, 0 if active, 1 if inactive, function of Kinetic energy when in transition**/
@@ -269,8 +269,6 @@ public class RigidBody {
         Vector2d ortho_r = new Vector2d(-r.y, r.x);
  
         torque += ortho_r.dot(contactForceW);
-        
-  
     }
     
     /**
@@ -304,9 +302,7 @@ public class RigidBody {
             }
             
             updateTransformations();
-
         }   
-        
     }
     
     private void set_activity_regular(double epsilon_1) {
@@ -317,7 +313,6 @@ public class RigidBody {
 		else {
 			active = 0;
 		}
-		
 	}
 
 	/**
@@ -407,7 +402,7 @@ public class RigidBody {
     }
     
     public double getMetric() {
-    	return 0.5 *  v.lengthSquared() + 0.5 * omega*omega; 
+    	return 0.5*v.lengthSquared() + 0.5*omega*omega; 
 	}
 
 	/**

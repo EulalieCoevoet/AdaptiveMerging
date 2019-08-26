@@ -22,7 +22,7 @@ public class RigidCollection extends RigidBody{
 	ArrayList<BodyContact> internalBodyContacts = new ArrayList<BodyContact>();
 	ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 
-	boolean unMergedThisTimestep = false;
+	boolean unmergedThisTimeStep = false;
 
 	boolean updatedThisTimeStep = false;
 
@@ -429,8 +429,11 @@ public class RigidCollection extends RigidBody{
 			newRigidBodies.remove(element);
 	}
 	
-
-	public boolean  metricCheck(RigidBody sB , Vector2d totalForce, double totalTorque) {
+	/**
+	 * Checks if body sB is going to unmerge by comparing forces acting on the object with a threshold.
+	 * Returns true if should unmerge.
+	 */
+	public boolean metricCheck(RigidBody sB , Vector2d totalForce, double totalTorque) {
 		totalForce.set(sB.force);
 		sB.transformB2W.transform(sB.currentContactForce);
 
@@ -449,7 +452,7 @@ public class RigidCollection extends RigidBody{
 	}
 	
 	/**
-	 * checks if body sB is going to unmerge by comparing the acceleration vector magnitude with a threshold
+	 * Checks if body sB is going to unmerge by comparing the acceleration vector magnitude with a threshold
 	 */
 	public void checkMetric(RigidBody sB, Vector2d totalForce, double totalTorque, double forceMetric) {
 		totalForce.set(sB.force);
@@ -475,7 +478,7 @@ public class RigidCollection extends RigidBody{
 	}
 
 	/**
-	 * makes body ready to be used by system... converts everything to world coordinates and makes body independant of collection
+	 * Makes body ready to be used by system... converts everything to world coordinates and makes body independant of collection
 	 * ... does not do anything to the collection itself.
 	 */
 	public void unmergeSingleBody(RigidBody sB) {
@@ -732,7 +735,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyContact> removalQueue) {
 		for (BodyContact bc: body.bodyContactList) {
-			if (bc.body1.parent == bc.body2.parent && bc.relativeVelHistory.size() <= CollisionProcessor.sleep_accum.getValue() && !bc.merged) {
+			if (bc.body1.parent == bc.body2.parent && bc.relativeVelHistory.size() <= CollisionProcessor.sleepAccum.getValue() && !bc.merged) {
 				bc.merged = true;
 				body.parent.addInternalContact(bc);
 				removalQueue.add(bc);

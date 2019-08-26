@@ -116,28 +116,25 @@ public class RigidBodySystem {
 		externalBodyContacts = collisionProcessor.bodyContacts;
 		clearJunkAtStartOfTimestep();
 
-
-		// apply gravity to all bodies... also take this opportunity to clear all forces at the start of the timestep
+		// apply gravity to all bodies... also take this opportunity to clear all forces at the start of the time step
 		if ( useGravity.getValue() ) {
 			applyGravityForce();
 		}  
+		
 		mouseSpring.apply();
-		//deal with zero length springs
+		// deal with zero length springs
 		applySpringForces();
 
 		if ( processCollisions.getValue() ) {
-			// process collisions, given the current time step
 			collisionProcessor.processCollisions( dt );
 		}
 
 		if (enableMerging.getValue()||enableSleeping.getValue()) {
 			applyExternalContactForces(dt);
 			//applyInternalContactForces(dt);
-
 		}
 
 		if (enableMerging.getValue()) {
-			// Put your body merging stuff here?  
 			mergeBodies();
 			checkIndex();
 		}
@@ -146,13 +143,10 @@ public class RigidBodySystem {
 			sleep();
 		}
 
-
-
-		// advance the system by the given time step
-		for ( RigidBody b : bodies ) {
-			b.advanceTime(dt);
+		// advance the system by the given time step (update position and velocities of each body)
+		for (RigidBody b : bodies) {
+			b.advanceTime(dt); 
 		}
-
 
 		if (enableSleeping.getValue()) {
 			wake();
@@ -162,8 +156,6 @@ public class RigidBodySystem {
 			unmergeBodies();
 			checkIndex();
 		}
-
-
 
 		if (this.generateBody) {
 			generateBody();
@@ -177,9 +169,9 @@ public class RigidBodySystem {
 
 
 	/**
-	 * checks if we should put these bodies to sleep.
+	 * Checks if we should put these bodies to sleep.
 	 * Conditions for sleeping are:
-	 * 	1. All velcoities in velocity history are below threshold.
+	 * 	1. All velocities in velocity history are below threshold.
 	 * 	2. Velocities in history are monotonically decreasing
 	 */
 	private void sleep() {
@@ -188,18 +180,18 @@ public class RigidBodySystem {
 			if (b.pinned || b.active == 2) continue;
 			double vel = b.getMetric();
 			b.velHistory.add(vel);
-			if (b.velHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+			if (b.velHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
 				b.velHistory.remove(0);	
 			}
 			boolean sleep = true;
-			double previousV = 10000000;//arbitrary super high number
+			double previousV = Double.MAX_VALUE; 
 			double epsilon = 0.00005;
-			if (b.velHistory.size() < CollisionProcessor.sleep_accum.getValue()) {
+			if (b.velHistory.size() < CollisionProcessor.sleepAccum.getValue()) {
 				sleep = false;
 			}
 			else {
 				for (Double v : b.velHistory) {
-					if (v  > previousV+epsilon ) {
+					if (v > previousV+epsilon) {
 						sleep = false;
 						break;
 					}
@@ -208,7 +200,6 @@ public class RigidBodySystem {
 						break;
 					}
 					previousV = v;
-
 				}
 			}
 			if (sleep) {
@@ -225,18 +216,17 @@ public class RigidBodySystem {
 	 * If total force metric acting on body is above the forceMetric threshold.
 	 * total Force metric = totalForce^2/Mass
 	 * total Force = sum of all forces (including contact forces)
-	 * 
 	 */
 	private void wake() {
 		double threshold = CollisionProcessor.forceMetricTolerance.getValue();
 		for (RigidBody b: bodies) {
-			if (b.active == 0 || b.pinned)continue;
+			if (b.active == 0 || b.pinned) continue;
 			b.transformB2W.transform(b.savedContactForce);
 			double forceMetric1 = (b.force.x-b.forcePreSleep.x)*b.minv;
 			double forceMetric2 = (b.force.y-b.forcePreSleep.y)*b.minv;
-			double forceMetric3 = (b.torque-b.torquePreSleep) *b.jinv;
+			double forceMetric3 = (b.torque-b.torquePreSleep)*b.jinv;
 			b.transformW2B.transform(b.savedContactForce);
-			if (b.active == 2 &&(forceMetric1  > threshold || forceMetric2 > threshold || forceMetric3 > threshold)) {
+			if (b.active == 2 && (forceMetric1 > threshold || forceMetric2 > threshold || forceMetric3 > threshold)) {
 				b.velHistory.clear();
 				b.active = 0;
 			}
@@ -330,7 +320,7 @@ public class RigidBodySystem {
 			b.bodyContactList.addAll(newBodyContactList);
 
 			if (b instanceof RigidCollection) {
-				((RigidCollection) b).unMergedThisTimestep = false;
+				((RigidCollection) b).unmergedThisTimeStep = false;
 				((RigidCollection) b).updatedThisTimeStep = false; 
 				for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
 					//sB.contactForce.set(0, 0);
@@ -384,12 +374,7 @@ public class RigidBodySystem {
 					applyToBodyContact(c, c.subBody2, c.contactForceB2, cTorque);
 				}else applyToBodyContact(c, c.body2, c.contactForceB2, c.contactTorqueB2);
 			}
-
-
 		}
-
-
-
 	}
 
 	private double getSubBodyTorque(Contact c, RigidBody body) {
@@ -411,7 +396,6 @@ public class RigidBodySystem {
 			if (body == c.body2) {
 				jn_omega *= -1;
 				jt_omega *= -1;
-
 			}
 
 			cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
@@ -430,12 +414,10 @@ public class RigidBodySystem {
 			if (body == c.body2) { //contact normal may be in the wrong direction based on which body in Contact it is
 				jn_omega *= -1;
 				jt_omega *= -1;
-
 			}
 			cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
 			return cTorque;
 		}
-
 	}
 
 
@@ -512,21 +494,16 @@ public class RigidBodySystem {
 			if (body == c.body2) { //contact normal may be in the wrong direction based on which body in Contact it is
 				jn_omega *= -1;
 				jt_omega *= -1;
-
 			}
 
 			cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
 			c.bc.body2.torque += cTorque;
-
 		}
-
-
 	}
 
 	/**
-	 * method that deals with unmerging rigidBodies... because we will explore different solutions to
+	 * Method that deals with unmerging rigidBodies... because we will explore different solutions to
 	 * this problem, it will call different methods for each unmerging solution.
-	 * 
 	 */
 	private void unmergeBodies() {
 		//generalHeuristic();
@@ -535,28 +512,29 @@ public class RigidBodySystem {
 	}
 
 	/**
-	 *	 goes through all bodies in each collection. 
-			If a body has enough force acting on it (over a threshold), seperate just that body
-			from the rest of the collection. 
+	 * Goes through all bodies in each collection. 
+		If a body has enough force acting on it (over a threshold), seperate just that body
+		from the rest of the collection. 
 	 */
 	private void generalOneBodyAtATime() {
 		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 		Vector2d totalForce = new Vector2d();
 		double totalTorque = 0;
-		boolean forceMetric = false;
+		boolean unmerge = false;
 		for(RigidBody b : bodies) {
 			//check if force on Collection is high enough. If it is... unmerge the entire rigidCollection
 			if (b instanceof RigidCollection) {
 				RigidCollection colB = (RigidCollection) b;
-				if (!colB.unMergedThisTimestep) {
+				if (!colB.unmergedThisTimeStep) {
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 					for (RigidBody sB: colB.collectionBodies) {
-						forceMetric = colB.metricCheck(sB, totalForce, totalTorque);
-						if (forceMetric) {
+						unmerge = colB.metricCheck(sB, totalForce, totalTorque);
+						if (unmerge) {
 							unmergingBodies.add(sB);
 						}
 					}
+					
 					ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
 					if (!unmergingBodies.isEmpty()) {
 						unmergeSelectBodies(colB, unmergingBodies, newBodies);				
@@ -570,17 +548,15 @@ public class RigidBodySystem {
 						newBodies.clear();
 						int x = 0;
 					}
-
 				}
 			}
 		}
 		for (RigidBody b: additionQueue) {
 			bodies.add(b);
 		}
-		for (RigidBody b : removalQueue) {
+		for (RigidBody b: removalQueue) {
 			bodies.remove(b);
 		}
-
 	}
 
 	private void unmergeSelectBodies(RigidCollection colB, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies) {
@@ -713,7 +689,7 @@ public class RigidBodySystem {
 			boolean mergeCondition = false;
 			double threshold = CollisionProcessor.sleepingThreshold.getValue();
 			double epsilon = 0.001;
-			if ((bc.relativeVelHistory.size() == CollisionProcessor.sleep_accum.getValue())) {
+			if ((bc.relativeVelHistory.size() == CollisionProcessor.sleepAccum.getValue())) {
 				mergeCondition = true;
 				double prevValue = 0; double currentValue = 0;
 				for (Double relVel : bc.relativeVelHistory) {

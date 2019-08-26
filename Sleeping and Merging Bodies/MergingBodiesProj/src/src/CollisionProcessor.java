@@ -430,7 +430,7 @@ public class CollisionProcessor {
 
 			c.body1ContactForceHistory.add(c.contactForceB1);
 			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
-			if (c.body1ContactForceHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+			if (c.body1ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
 				c.body1ContactForceHistory.remove(0);
 				c.body1ContactTorqueHistory.remove(0);
 			}
@@ -449,7 +449,7 @@ public class CollisionProcessor {
 
 			c.body2ContactForceHistory.add(c.contactForceB2);
 			c.body2ContactTorqueHistory.add(c.contactTorqueB2);
-			if (c.body2ContactForceHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+			if (c.body2ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
 				c.body2ContactForceHistory.remove(0);
 				c.body2ContactTorqueHistory.remove(0);
 			}
@@ -729,7 +729,7 @@ public class CollisionProcessor {
 				if (bc != null) { //if it exists
 					if (!bc.updatedThisTimeStep) {//only once per timestep
 						bc.relativeVelHistory.add(contact.getRelativeMetric());
-						if (bc.relativeVelHistory.size() > CollisionProcessor.sleep_accum.getValue()) {
+						if (bc.relativeVelHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
 							bc.relativeVelHistory.remove(0);
 						}
 						bc.updatedThisTimeStep = true;
@@ -837,7 +837,7 @@ public class CollisionProcessor {
 
 	public static IntParameter collision_wake = new IntParameter("wake n neighbors", 2, 0, 10 );
 
-	public static IntParameter sleep_accum = new IntParameter("accumulate N sleep querie", 50, 0, 200 );
+	public static IntParameter sleepAccum = new IntParameter("accumulate N sleep querie", 50, 0, 200 );
 
 
 	/**
@@ -863,7 +863,7 @@ public class CollisionProcessor {
 		vfp.add( use_contact_graph.getControls() );
 		vfp.add( forceMetricTolerance.getSliderControls(false) );
 		vfp.add(collision_wake.getSliderControls());
-		vfp.add(sleep_accum.getSliderControls());
+		vfp.add(sleepAccum.getSliderControls());
 		VerticalFlowPanel vfp2 = new VerticalFlowPanel();
 		vfp2.setBorder( new TitledBorder("penalty method controls") );
 
