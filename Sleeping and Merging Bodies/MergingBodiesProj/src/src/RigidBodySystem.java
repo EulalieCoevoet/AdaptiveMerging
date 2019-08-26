@@ -129,6 +129,10 @@ public class RigidBodySystem {
 			collisionProcessor.processCollisions( dt );
 		}
 
+		if (enableMerging.getValue()) {
+			// Put your body merging stuff here?  
+			updateInternalCollectionForces(dt);
+		}
 		if (enableMerging.getValue()||enableSleeping.getValue()) {
 			applyExternalContactForces(dt);
 			//applyInternalContactForces(dt);
@@ -167,6 +171,21 @@ public class RigidBodySystem {
 		totalAccumulatedComputeTime += computeTime;
 	}
 
+/*
+ * Goes through bodies. if it's a collection, does a GAUSS seidel iteration to update contact forces
+ * 
+ */
+	private void updateInternalCollectionForces(double dt) {
+		for (RigidBody b: bodies) {
+			if (b instanceof RigidCollection) {
+				double now = 0;
+				RigidCollection colB = (RigidCollection) b;
+				colB.collisionProcessor.contacts.addAll(colB.internalContacts);
+				colB.collisionProcessor.forcePGS(dt);
+				colB.collisionProcessor.contacts.clear();
+			}
+		}
+	}
 
 	/**
 	 * Checks if we should put these bodies to sleep.
@@ -184,9 +203,11 @@ public class RigidBodySystem {
 				b.velHistory.remove(0);	
 			}
 			boolean sleep = true;
+
 			double previousV = Double.MAX_VALUE; 
 			double epsilon = 0.00005;
 			if (b.velHistory.size() < CollisionProcessor.sleepAccum.getValue()) {
+
 				sleep = false;
 			}
 			else {
@@ -688,8 +709,10 @@ public class RigidBodySystem {
 		for (BodyContact bc:collisionProcessor.bodyContacts) {
 			boolean mergeCondition = false;
 			double threshold = CollisionProcessor.sleepingThreshold.getValue();
-			double epsilon = 0.001;
+
+			double epsilon = 0.0005;
 			if ((bc.relativeVelHistory.size() == CollisionProcessor.sleepAccum.getValue())) {
+
 				mergeCondition = true;
 				double prevValue = 0; double currentValue = 0;
 				for (Double relVel : bc.relativeVelHistory) {
@@ -970,17 +993,38 @@ public class RigidBodySystem {
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
 					((RigidCollection)b).displayCollection(drawable);
-					if(drawInternalContactForces.getValue())
-						((RigidCollection) b).drawInternalContacts(drawable);
-					if(drawInternalContactDeltas.getValue())
-						((RigidCollection) b).drawInternalDeltas(drawable);
-					if(drawInternalHistories.getValue())
-						((RigidCollection) b).drawInternalHistory(drawable);
+				
+					
 				}
 
 			}
 
 		}
+		
+		if(drawInternalContactForces.getValue()) {
+			for (RigidBody b : bodies) {
+				if (b instanceof RigidCollection) {
+						((RigidCollection) b).drawInternalContacts(drawable);
+				}
+			}
+		}
+		
+		if(drawInternalContactDeltas.getValue()) {
+			for (RigidBody b : bodies) {
+				if (b instanceof RigidCollection) {
+						((RigidCollection) b).drawInternalDeltas(drawable);
+				}
+			}
+		}
+		
+		if(drawInternalHistories.getValue()) {
+			for (RigidBody b : bodies) {
+				if (b instanceof RigidCollection) {
+						((RigidCollection) b).drawInternalHistory(drawable);
+				}
+			}
+		}
+		
 		if ( drawSpeedCOM.getValue() ) {
 			for (RigidBody b: bodies) {
 				b.drawSpeedCOM(drawable);

@@ -26,6 +26,7 @@ public class RigidCollection extends RigidBody{
 
 	boolean updatedThisTimeStep = false;
 
+	CollisionProcessor collisionProcessor = new CollisionProcessor(collectionBodies);
 
 	public RigidCollection(RigidBody body1, RigidBody body2) {
 
