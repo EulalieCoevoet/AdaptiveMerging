@@ -729,6 +729,7 @@ public class RigidBodySystem {
 			if (!bc.updatedThisTimeStep) mergeCondition = false;
 			if (bc.body1.pinned || bc.body2.pinned) mergeCondition = false;
 			if (bc.body1.merged || bc.body2.merged) mergeCondition = false;
+			if(bc.body1.active==2 && bc.body2.active ==2) mergeCondition = true;
 
 			if (mergeCondition) {
 				//if they are both not collections...make a new collection!

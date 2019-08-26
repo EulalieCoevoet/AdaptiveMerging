@@ -103,6 +103,9 @@ public class CollisionProcessor {
 		}
 		bodyContacts.clear();
 		bodyContacts.addAll(savedBodyContacts);
+		for (BodyContact bc: bodyContacts) {
+			bc.addToBodyLists();
+		}
 	}
 	
 	private void rememberChildrenBodyContacts(RigidCollection b) {

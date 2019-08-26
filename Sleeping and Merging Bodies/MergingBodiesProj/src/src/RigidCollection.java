@@ -163,11 +163,11 @@ public class RigidCollection extends RigidBody{
 			v.x += force.x * dt/massLinear + delta_V.get(0);
 			v.y += force.y * dt/massLinear + delta_V.get(1);
 			omega += torque * dt/ massAngular + delta_V.get(2);
-
-			x.x += v.x * dt;
-			x.y += v.y * dt;
-			theta += omega*dt;
-
+			if (active == 0) {
+				x.x += v.x * dt;
+				x.y += v.y * dt;
+				theta += omega*dt;
+			}
 			updateTransformations();
 			updateCollectionBodyTransformations(dt);
 

@@ -132,6 +132,17 @@ public class BodyContact {
 		if (body2.parent == body) return body2;
 		return null;
 	}
+
+	public void addToBodyLists() {
+		if (!body1.bodyContactList.contains(this)) {
+			body1.bodyContactList.add(this);
+			
+		}
+		if (!body2.bodyContactList.contains(this)) {
+			body2.bodyContactList.add(this);
+			
+		}
+	}
 	
 	
 
