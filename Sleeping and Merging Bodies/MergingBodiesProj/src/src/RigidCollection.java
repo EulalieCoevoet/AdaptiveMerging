@@ -133,7 +133,7 @@ public class RigidCollection extends RigidBody{
 		for (Contact c: col.internalContacts) {
 
 			internalContacts.add(c);
-			col.transformB2W.transform(c.contactW);
+			//col.transformB2W.transform(c.contactW);
 			col.transformB2W.transform(c.normal);
 		}
 	}
@@ -541,7 +541,7 @@ public class RigidCollection extends RigidBody{
 
 	public void contactsToBody() {
 		for (Contact c: internalContacts) {
-			transformW2B.transform(c.contactW);
+		//	transformW2B.transform(c.contactW);
 			transformW2B.transform(c.normal);
 		}
 	}
@@ -710,7 +710,7 @@ public class RigidCollection extends RigidBody{
 
 	public void contactsToWorld() {
 		for (Contact c: internalContacts) {
-			transformB2W.transform(c.contactW);
+			//transformB2W.transform(c.contactW);
 			transformB2W.transform(c.normal);
 
 		}

@@ -83,7 +83,7 @@ public class PendulumProcessor {
         	double constraint_violation = constraint_i.constraint_violation;
         	
         	// create b' vector  ( will not change through iteration i)
-        	double b = (u_x + u_y + u_theta + CollisionProcessor.feedback_stiffness.getValue() *constraint_violation)/d_i;
+        	double b = (u_x + u_y + u_theta + CollisionProcessor.feedbackStiffness.getValue() *constraint_violation)/d_i;
         	
         	
         	// DenseVector J'

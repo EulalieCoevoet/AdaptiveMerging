@@ -121,7 +121,7 @@ public class RigidBodySystem {
 			applyGravityForce();
 		}  
 		
-		mouseSpring.apply();
+		mouseSpring.apply(); 
 		// deal with zero length springs
 		applySpringForces();
 
@@ -1087,7 +1087,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces", false);
 	private BooleanParameter drawExternalContactForces = new BooleanParameter("draw External Forces", true);
 	private BooleanParameter drawInternalContactDeltas = new BooleanParameter("draw Internal Deltas", true);
-	private BooleanParameter drawInternalHistories = new BooleanParameter("draw Internal Histories", true);
+	private BooleanParameter drawInternalHistories = new BooleanParameter("draw Internal Histories", false );
 
 	private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", true );
 	private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", true);
@@ -1095,7 +1095,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", false );
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
 	public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
-	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", true);
+	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", false);
 	public BooleanParameter use_pendulum = new BooleanParameter( "create pendulum", false );
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 

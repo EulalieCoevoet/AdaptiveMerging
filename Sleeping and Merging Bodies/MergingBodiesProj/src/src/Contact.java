@@ -71,6 +71,12 @@ public class Contact {
 
 	/** Position of contact point in world coordinates */
 	Point2d contactW = new Point2d();
+	
+	/** Position of contact point in subBody1 coordinates */
+	Point2d contactB1  = new Point2d();
+	
+	/** Position of contact point in subBody2 coordinates */
+	Point2d contactB2  = new Point2d();
 	// for normal
 	DenseVector j_1 = new DenseVector(6);
 	//for tangential
@@ -148,6 +154,10 @@ public class Contact {
 		relativeAngularVelocity = body2.omega - body1.omega;
 		subBody1 = sBody1;
 		subBody2 = sBody2;
+		contactB1.set(contactW);
+		contactB2.set(contactW);
+		subBody1.transformW2B.transform(contactB1);
+		subBody2.transformW2B.transform(contactB2);
 	}
 
 	public double getRelativeMetric() {
@@ -202,11 +212,11 @@ public class Contact {
 	public void drawContactForce( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
 		// draw a line between the two bodies but only if they're both not pinned
-		Point2d p1 = new Point2d(block1.pB);
-		Point2d p2 = new Point2d(block2.pB);
+		Point2d p1 = new Point2d(contactW);
+		Point2d p2 = new Point2d(contactW);
 
-		subBody1.transformB2W.transform(p1); 
-		subBody2.transformB2W.transform(p2);
+	//	subBody1.transformB2W.transform(p1); 
+	//	subBody2.transformB2W.transform(p2);
 
 		subBody1.transformB2W.transform(contactForceB1);
 		subBody2.transformB2W.transform(contactForceB2);
@@ -248,10 +258,11 @@ public class Contact {
 	public void drawInternalContactForce( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
 		// draw a line between the two bodies but only if they're both not pinned
-		Point2d p1 = new Point2d(block1.pB);
-		Point2d p2 = new Point2d(block2.pB);
-
+		Point2d p1 = new Point2d(contactB1);
+		Point2d p2 = new Point2d(contactB2);
+		
 		subBody1.transformB2W.transform(p1); 
+		
 		subBody2.transformB2W.transform(p2);
 		subBody1.transformB2W.transform(contactForceB1);
 		subBody2.transformB2W.transform(contactForceB2);
@@ -327,8 +338,8 @@ public class Contact {
 		body1ForceVar.scale(2);
 		body2ForceVar.scale(2);
 
-		Point2d p1 = new Point2d(block1.pB);
-		Point2d p2 = new Point2d(block2.pB);
+		Point2d p1 = new Point2d(contactB1);
+		Point2d p2 = new Point2d(contactB2);
 
 
 		double scale = 0.05;
@@ -353,8 +364,8 @@ public class Contact {
 
 		GL2 gl = drawable.getGL().getGL2();
 		// draw a line between the two bodies but only if they're both not pinned
-		Point2d p1 = new Point2d(block1.pB);
-		Point2d p2 = new Point2d(block2.pB);
+		Point2d p1 = new Point2d(contactB1);
+		Point2d p2 = new Point2d(contactB2);
 
 		subBody1.transformB2W.transform(p1); 
 		subBody2.transformB2W.transform(p2);
@@ -420,6 +431,13 @@ public class Contact {
 		subBody2.transformW2B.transform(min_y_2);
 		subBody2.transformW2B.transform(max_x_2);
 		subBody2.transformW2B.transform(max_y_2);
+		
+		
+		gl.glPointSize(3);
+		gl.glColor3f(0,0,0.7f);
+		gl.glBegin( GL.GL_POINTS );
+		gl.glVertex2d(p1.x, p1.y);
+		gl.glEnd();
 	}
 	
 

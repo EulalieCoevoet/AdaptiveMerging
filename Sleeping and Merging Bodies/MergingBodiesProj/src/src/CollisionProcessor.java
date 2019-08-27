@@ -7,16 +7,15 @@ import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.*;
-import no.uib.cipr.matrix.*;
-
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
-import no.uib.cipr.matrix.Matrices;
+import no.uib.cipr.matrix.DenseVector;
 
 /**
  * Class for detecting and resolving collisions.  Currently this class uses penalty forces between rigid bodies.
@@ -33,6 +32,9 @@ public class CollisionProcessor {
 	 * The current contacts that resulted in the last call to process collisions
 	 */
 	public ArrayList<Contact> contacts = new ArrayList<Contact>();
+	
+	/** body-body contacts for pruning */
+	ArrayList<Contact> tmpBodyBodyContacts = new ArrayList<Contact>();
 
 	/**
 	 * Creates this collision processor with the provided set of bodies
@@ -143,7 +145,7 @@ public class CollisionProcessor {
 		organize();
 		if(shuffle.getValue())knuth_shuffle();
 
-		if (warm_start.getValue()) {
+		if (warmStart.getValue()) {
 			for (Contact contact_i : contacts) {
 
 				DenseVector j_1 = new DenseVector(contact_i.j_1);
@@ -338,7 +340,7 @@ public class CollisionProcessor {
 				// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
 
 				// calculate Baumgarte Feedback (overlap of the two bodies)
-				double c = this.feedback_stiffness.getValue();
+				double c = this.feedbackStiffness.getValue();
 				double bf = c*contact_i.constraint_violation;
 
 				//putting b together.
@@ -474,11 +476,16 @@ public class CollisionProcessor {
 		double mu = friction.getValue();
 		DenseVector lamda = new DenseVector(2*contacts.size());
 		lamda.zero();
-		int iteration = 1;//iterations.getValue();
+		int iteration = 10;//iterations.getValue();
 		int i = 0;
 		organize();
 		if(shuffle.getValue())knuth_shuffle();
-
+		
+		for(int j = 0; j < contacts.size(); j++) {
+			int index = 2*j;
+			lamda.set(index, contacts.get(j).lamda.x);
+			lamda.set(index + 1, contacts.get(j).lamda.y);
+		}
 
 			//contacts are already warm started with lamdas and DVs from previous timestep
 			
@@ -495,11 +502,12 @@ public class CollisionProcessor {
 				DenseVector j_1 = new DenseVector(contact_i.j_1);
 				DenseVector j_2 = new DenseVector(contact_i.j_2);
 				//
-
-				double m1inv = contact_i.body1.minv; 
-				double m2inv = contact_i.body2.minv;
-				double j1inv =contact_i.body1.jinv;
-				double j2inv = contact_i.body2.jinv;
+				//contact handling inside the collection should only be subBody to subBody
+				//never to collection, like in the external contact handling
+				double m1inv = contact_i.subBody1.minv; 
+				double m2inv = contact_i.subBody2.minv;
+				double j1inv =contact_i.subBody1.jinv;
+				double j2inv = contact_i.subBody2.jinv;
 
 				//calculate D_i_i 
 				double d_i = 0;
@@ -526,8 +534,8 @@ public class CollisionProcessor {
 				//get J Row i Delta V term first
 				//multiply the 6 J values with the appropriate delta V values
 
-				DenseVector dV1 = contact_i.body1.delta_V; 
-				DenseVector dV2 = contact_i.body2.delta_V; 
+				DenseVector dV1 = contact_i.subBody1.delta_V; 
+				DenseVector dV2 = contact_i.subBody2.delta_V; 
 				double j_row_i_delta_V = 0;
 
 				if (i%2 == 0) {
@@ -556,22 +564,17 @@ public class CollisionProcessor {
 
 				//now take care of assembling b
 				// find all relevant values of u.
-				double u_1_x = contact_i.body1.v.x;
-				double u_1_y = contact_i.body1.v.y;
-				double u_1_omega = contact_i.body1.omega;
-
-				double u_2_x = contact_i.body2.v.x;
-				double u_2_y = contact_i.body2.v.y;
-				double u_2_omega = contact_i.body2.omega;
-
+				//velocities are the same as the collection, so using body1 instead of subbody1 is safe here
+				
+			
 				//add all relevant values of f, multiplied by appropriate minv to u_1_x etc
-				u_1_x += contact_i.body1.force.x * m1inv*dt;
-				u_1_y += contact_i.body1.force.y * m1inv*dt;
-				u_1_omega += contact_i.body1.torque * j1inv*dt;
+				double u_1_x = contact_i.subBody1.force.x * m1inv*dt;
+				double u_1_y = contact_i.subBody1.force.y * m1inv*dt;
+				double u_1_omega = contact_i.subBody1.torque * j1inv*dt;
 
-				u_2_x += contact_i.body2.force.x*m2inv*dt;
-				u_2_y += contact_i.body2.force.y*m2inv*dt;
-				u_2_omega += contact_i.body2.torque*j2inv*dt;
+				double u_2_x = contact_i.subBody2.force.x*m2inv*dt;
+				double u_2_y = contact_i.subBody2.force.y*m2inv*dt;
+				double u_2_omega = contact_i.subBody2.torque*j2inv*dt;
 
 				//multiply all the u values by the appropriate J values.
 				if (i%2 == 0) {
@@ -596,14 +599,14 @@ public class CollisionProcessor {
 				// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
 
 				// calculate Baumgarte Feedback (overlap of the two bodies)
-				double c = this.feedback_stiffness.getValue();
+				double c = feedbackStiffness.getValue();
 				double bf = c*contact_i.constraint_violation;
 
 				//putting b together.
 				double b = 0;
 				if (i%2 ==0) {
 					b = (u_1_x + u_2_x + u_1_y + u_2_y + u_1_omega + u_2_omega - restitution.getValue() + bf)/d_i;
-				}else{
+				} else {
 					b = (u_1_x + u_2_x + u_1_y + u_2_y + u_1_omega + u_2_omega)/d_i;
 				}
 
@@ -614,8 +617,7 @@ public class CollisionProcessor {
 
 				if (i%2 == 0) {
 					lamda_i = Math.max(0, lamda_i);
-				}
-				else {
+				} else {
 					//tangential lamda, constrained by mu* normal lamda
 					//get previous normal value for lamda
 					double normal_lamda = lamda.get(i - 1);
@@ -629,7 +631,6 @@ public class CollisionProcessor {
 
 				//updating lamda vector
 				if (i%2 ==0) {
-
 					lamda.set(2*contact_i.index,  lamda_i);
 					contact_i.lamda.set(lamda_i, contact_i.lamda.y);
 				}else {
@@ -731,8 +732,65 @@ public class CollisionProcessor {
 		for ( RigidBody b1 : bodies ) {
 			for ( RigidBody b2 : bodies ) { // not so inefficient given the continue on the next line
 				if ( b1.index >= b2.index ) continue;
-				if ( b1.pinned && b2.pinned ) continue;                
-				narrowPhase( b1, b2 );                
+				if ( b1.pinned && b2.pinned ) continue; 
+				tmpBodyBodyContacts.clear();
+				narrowPhase( b1, b2 );
+				// if no pruning, then add them!
+				if ( ! pruneContacts.getValue() ) {
+					contacts.addAll( tmpBodyBodyContacts );
+				} else {
+					// TODO: pruning stuff here
+					if ( tmpBodyBodyContacts.size() < 3 ) {
+						contacts.addAll( tmpBodyBodyContacts );
+					} else {
+						ArrayList<Point2d> points = new ArrayList<Point2d>();
+						Point2d meanPos = new Point2d();
+						Vector2d v = new Vector2d();
+						int N = tmpBodyBodyContacts.size();
+						for ( Contact c : tmpBodyBodyContacts ) {
+							points.add( c.contactW );
+							meanPos.add( c.contactW );						
+						}
+						meanPos.scale( 1.0 / N );
+						Matrix2d covariance = new Matrix2d();
+						for ( Contact c : tmpBodyBodyContacts ) {
+							v.sub( c.contactW, meanPos );						
+							covariance.rank1( 1.0 / N, v );
+						}
+						covariance.evd();
+						double eps = 1e-4;
+						if ( covariance.ev1 > eps && covariance.ev2 > eps ) {
+							// not a flat region... could do convex hull
+							contacts.addAll( tmpBodyBodyContacts );
+							continue;
+						}
+						Vector2d dir = null;
+						if ( covariance.ev1 <= eps ) {
+							dir = covariance.v2;
+						} else {
+							dir = covariance.v1;
+						}
+						// now search for the farthest contacts in this direction!
+						double minDot = Double.MAX_VALUE;
+						double maxDot = Double.MIN_VALUE;
+						Contact cmin = null;
+						Contact cmax = null;
+						for ( Contact c : tmpBodyBodyContacts ) {
+							v.sub( c.contactW, meanPos );
+							double dot = v.dot( dir );
+							if ( dot > maxDot ) {
+								maxDot = dot;
+								cmax = c;
+							}
+							if ( dot < minDot ) {
+								minDot = dot;
+								cmin = c;
+							}
+						}
+						contacts.add( cmax );
+						contacts.add( cmin );
+					}
+				}
 			}
 		}        
 	}
@@ -810,11 +868,11 @@ public class CollisionProcessor {
 				if ( RigidBodySystem.enableSleeping.getValue()){
 					if (!body1.woken_up && body1.active == 0 && !body1.pinned && body2.active == 2) {
 
-						wakeNeighbors(body2, collision_wake.getValue());
+						wakeNeighbors(body2, collisionWake.getValue());
 					}
 					else if (!body2.woken_up && body2.active == 0 && !body2.pinned && body1.active ==2) {
 
-						wakeNeighbors(body1, collision_wake.getValue());
+						wakeNeighbors(body1, collisionWake.getValue());
 					}
 
 
@@ -953,7 +1011,8 @@ public class CollisionProcessor {
 			contact.normalB2.scale(-1);
 
 			// simple option... add to contact list...
-			contacts.add( contact );
+			//TODO: put into a preliminary list that will be filtered in BroadPhase
+			tmpBodyBodyContacts.add( contact );
 
 
 			//that being said... the BODYCONTACTS bodies will only ever be subBodies or 
@@ -1044,7 +1103,7 @@ public class CollisionProcessor {
 	public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.33, 0, 2 );
 
 	/** Number of iterations to use in projected Gauss Seidel solve */
-	public IntParameter iterations = new IntParameter("iterations for GS solve", 70, 1, 500);
+	public IntParameter iterations = new IntParameter("iterations for GS solve", 200, 1, 500);
 
 	/** Flag for switching between penalty based contact and contact constraints */
 	private BooleanParameter doLCP = new BooleanParameter( "do LCP solve", true );
@@ -1052,13 +1111,13 @@ public class CollisionProcessor {
 	/** Flag for using shuffle */
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	/** Flag for using shuffle */
-	private BooleanParameter warm_start = new BooleanParameter( "warm start", true);
+	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 
 	/** Flag for enabling the use of hierarchical collision detection for body pairs */
 	private BooleanParameter useBVTree = new BooleanParameter( "use BVTree", true);
 
 
-	public static DoubleParameter feedback_stiffness = new DoubleParameter("feedback coefficient", 0, 0,50  );
+	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0, 0,50  );
 
 	/** toggle on or off adaptive hamiltonian*/
 	public static BooleanParameter  useAdaptiveHamiltonian = new BooleanParameter("enable use of adaptive hamiltonian", false );
@@ -1072,10 +1131,11 @@ public class CollisionProcessor {
 
 	public static DoubleParameter forceMetricTolerance = new DoubleParameter("force metric tolerance", 2.5, 0, 15);
 
-	public static IntParameter collision_wake = new IntParameter("wake n neighbors", 2, 0, 10 );
+	public static IntParameter collisionWake = new IntParameter("wake n neighbors", 2, 0, 10 );
 
-	public static IntParameter sleepAccum = new IntParameter("accumulate N sleep querie", 50, 0, 200 );
+	public static IntParameter sleepAccum = new IntParameter("accumulate N sleep queries", 50, 0, 200 );
 
+	public BooleanParameter pruneContacts = new BooleanParameter( "prune contacts", false );
 
 	/**
 	 * @return controls for the collision processor
@@ -1086,11 +1146,12 @@ public class CollisionProcessor {
 		vfp.add( useBVTree.getControls() );
 		vfp.add( doLCP.getControls() );
 		vfp.add( shuffle.getControls() );
-		vfp.add( warm_start.getControls() );
+		vfp.add( pruneContacts.getControls() );
+		vfp.add( warmStart.getControls() );
 		vfp.add( iterations.getSliderControls() );
 		vfp.add( restitution.getSliderControls(false) );
 		vfp.add( friction.getSliderControls(false) );
-		vfp.add( feedback_stiffness.getSliderControls(false) );
+		vfp.add( feedbackStiffness.getSliderControls(false) );
 
 		vfp.add( sleepingThreshold.getSliderControls(false) );
 		vfp.add( useAdaptiveHamiltonian.getControls() );
@@ -1099,8 +1160,8 @@ public class CollisionProcessor {
 
 		vfp.add( use_contact_graph.getControls() );
 		vfp.add( forceMetricTolerance.getSliderControls(false) );
-		vfp.add(collision_wake.getSliderControls());
-		vfp.add(sleepAccum.getSliderControls());
+		vfp.add( collisionWake.getSliderControls());
+		vfp.add( sleepAccum.getSliderControls());
 		VerticalFlowPanel vfp2 = new VerticalFlowPanel();
 		vfp2.setBorder( new TitledBorder("penalty method controls") );
 
