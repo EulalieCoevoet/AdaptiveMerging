@@ -18,14 +18,14 @@ import mintools.swing.VerticalFlowPanel;
 import no.uib.cipr.matrix.DenseVector;
 
 /**
- * Class for detecting and resolving collisions.  Currently this class uses penalty forces between rigid bodies.
+ * Class for detecting and resolving collisions. Currently this class uses penalty forces between rigid bodies.
  * @author kry
  */
 public class CollisionProcessor {
 
 	public List<RigidBody> bodies;
 
-	private HashMap<String, Contact> last_timestep_map = new HashMap<String, Contact>();
+	private HashMap<String, Contact> lastTimeStepMap = new HashMap<String, Contact>();
 
 	public ArrayList<RigidCollection> collections = new ArrayList<RigidCollection>();
 	/**
@@ -63,13 +63,10 @@ public class CollisionProcessor {
 		//remember passive contacts
 		contacts.clear();
 		if (RigidBodySystem.enableSleeping.getValue() || RigidBodySystem.enableMerging.getValue()) {
-
 			rememberBodyContacts();
 		}
 
 		//the rest of the collisionProcessor
-		
-		
 		long now = System.nanoTime();
 		broadPhase();
 	/*	for (BodyContact bc : bodyContacts) {
@@ -78,26 +75,32 @@ public class CollisionProcessor {
 			}
 		}*/
 		collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
-		if (contacts.size() == 0)  last_timestep_map.clear();
-		int x = 0;
+		if (contacts.size() == 0)  
+			lastTimeStepMap.clear();
 
-		if ( contacts.size() > 0  && doLCP.getValue() ) {
+		if (contacts.size() > 0  && doLCP.getValue()) {
 			now = System.nanoTime();
-
 			PGS( dt,  now);
 		}
 	}
 
+	/**
+	 * Remember body contacts if:
+	 * <p><ul>
+	 * <li> merged or not active
+	 * <li> 
+	 * </ul><p>
+	 */
 	private void rememberBodyContacts() {
 		ArrayList<BodyContact> savedBodyContacts = new ArrayList<BodyContact>();
+		
 		for (BodyContact bc : bodyContacts) {
-			if (!bc.merged && ( bc.body1.active == 0 || bc.body2.active ==0 ))bc.contactList.clear();
-			
+			if (!bc.merged && ( bc.body1.active == 0 || bc.body2.active == 0 ))
+				bc.contactList.clear();
 			
 			if (bc.updatedThisTimeStep || bc.body1.active == 2 || bc.body2.active == 2) {
 				if ( bc.body1.active == 2 || bc.body2.active == 2) {
 					contacts.addAll(bc.contactList);
-					
 				}
 				savedBodyContacts.add(bc);
 				bc.updatedThisTimeStep = false;
@@ -143,7 +146,7 @@ public class CollisionProcessor {
 		int iteration = iterations.getValue();
 		int i = 0;
 		organize();
-		if(shuffle.getValue())knuth_shuffle();
+		if(shuffle.getValue()) knuth_shuffle();
 
 		if (warmStart.getValue()) {
 			for (Contact contact_i : contacts) {
@@ -153,16 +156,16 @@ public class CollisionProcessor {
 				Block block1 = contact_i.block1;
 				Block block2 = contact_i.block2;
 
-				if(last_timestep_map.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))|| last_timestep_map.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
+				if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))|| lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
 
 					double m1inv = contact_i.body1.minv; 
 					double m2inv = contact_i.body2.minv;
 					double j1inv = contact_i.body1.jinv;
 					double j2inv = contact_i.body2.jinv;
 
-					Contact c = last_timestep_map.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
-					if(last_timestep_map.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
-						c = last_timestep_map.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
+					Contact c = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
+					if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
+						c = lastTimeStepMap.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
 					//if the old map contains this key, then get the lamda of the old map
 
 					if (c.body1 != contact_i.body1 || c.body2 != contact_i.body2) {
@@ -234,11 +237,9 @@ public class CollisionProcessor {
 				//if we are looking at a normal component of lamda
 				double lamda_i = lamda.get(i);
 
-
 				Contact contact_i = contacts.get(i/2);
 				DenseVector j_1 = new DenseVector(contact_i.j_1);
 				DenseVector j_2 = new DenseVector(contact_i.j_2);
-				//
 
 				double m1inv = contact_i.body1.minv; 
 				double m2inv = contact_i.body2.minv;
@@ -247,8 +248,8 @@ public class CollisionProcessor {
 
 				//calculate D_i_i 
 				double d_i = 0;
-				//first body component
-				if (i%2 == 0) {
+				if (i%2 == 0) { //normal component
+					//first body component
 					d_i+= Math.pow(j_1.get(0), 2) * m1inv;
 					d_i+= Math.pow(j_1.get(1), 2) * m1inv;
 					d_i+= Math.pow(j_1.get(2), 2) * j1inv;
@@ -256,7 +257,8 @@ public class CollisionProcessor {
 					d_i+= Math.pow(j_1.get(3), 2) * m2inv;
 					d_i+= Math.pow(j_1.get(4), 2) * m2inv;
 					d_i+= Math.pow(j_1.get(5), 2) * j2inv;
-				}else { //tangential component
+				}
+				else { //tangential component
 					//first body componenent
 					d_i+= Math.pow(j_2.get(0), 2) * m1inv;
 					d_i+= Math.pow(j_2.get(1), 2) * m1inv;
@@ -274,27 +276,25 @@ public class CollisionProcessor {
 				DenseVector dV2 = contact_i.body2.delta_V; 
 				double j_row_i_delta_V = 0;
 
-				if (i%2 == 0) {
+				if (i%2 == 0) { //normal component
 					//first body
 					j_row_i_delta_V += j_1.get(0) * dV1.get(0);
 					j_row_i_delta_V += j_1.get(1) * dV1.get(1);
 					j_row_i_delta_V += j_1.get(2) * dV1.get(2);
-
 					//second body
 					j_row_i_delta_V +=  j_1.get(3) * dV2.get(0);
 					j_row_i_delta_V +=  j_1.get(4) * dV2.get(1);
 					j_row_i_delta_V +=  j_1.get(5) * dV2.get(2);
-
-				}else {
+				}
+				else { //tangential component
+					//first body
 					j_row_i_delta_V += j_2.get(0) * dV1.get(0);
 					j_row_i_delta_V += j_2.get(1) * dV1.get(1);
 					j_row_i_delta_V += j_2.get(2) * dV1.get(2);
-
 					//second body
 					j_row_i_delta_V += j_2.get(3)* dV2.get(0);
 					j_row_i_delta_V += j_2.get(4) * dV2.get(1);
 					j_row_i_delta_V += j_2.get(5) * dV2.get(2);
-
 				}
 				j_row_i_delta_V /= d_i;
 
@@ -326,7 +326,8 @@ public class CollisionProcessor {
 					u_2_x = u_2_x *j_1.get(3);
 					u_2_y =   u_2_y * j_1.get(4);
 					u_2_omega =  u_2_omega *j_1.get(5);
-				}else {
+				}
+				else {
 					u_1_x = u_1_x *(j_2.get(0));
 					u_1_y = u_1_y * j_2.get(1);
 					u_1_omega = u_1_omega * j_2.get(2);
@@ -340,14 +341,15 @@ public class CollisionProcessor {
 				// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
 
 				// calculate Baumgarte Feedback (overlap of the two bodies)
-				double c = this.feedbackStiffness.getValue();
-				double bf = c*contact_i.constraint_violation;
+				double c = feedbackStiffness.getValue();
+				double bf = c*contact_i.constraintViolation;
 
 				//putting b together.
 				double b = 0;
 				if (i%2 ==0) {
 					b = (u_1_x + u_2_x + u_1_y + u_2_y + u_1_omega + u_2_omega - restitution.getValue() + bf)/d_i;
-				}else{
+				}
+				else{
 					b = (u_1_x + u_2_x + u_1_y + u_2_y + u_1_omega + u_2_omega)/d_i;
 				}
 
@@ -373,7 +375,6 @@ public class CollisionProcessor {
 
 				//updating lamda vector
 				if (i%2 ==0) {
-
 					lamda.set(2*contact_i.index,  lamda_i);
 					contact_i.lamda.set(lamda_i, contact_i.lamda.y);
 				}else {
@@ -415,7 +416,6 @@ public class CollisionProcessor {
 
 			}
 			iteration--;
-
 		}
 
 		//calculatecontactForce
@@ -437,8 +437,6 @@ public class CollisionProcessor {
 				c.body1ContactTorqueHistory.remove(0);
 			}
 
-
-
 			//if Body1 is a parent, also apply the contact force to the appropriate subBody
 
 			cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
@@ -459,14 +457,13 @@ public class CollisionProcessor {
 			//if Body2 is a parent, also apply the contact force to the appropriate subBody
 		}
 
-
 		//fill the new map
-		last_timestep_map.clear();
+		lastTimeStepMap.clear();
 		for (Contact co : contacts) {
 			Block block1 = co.block1;
 			Block block2 = co.block2;
 
-			last_timestep_map.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), co);
+			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), co);
 		} 
 		collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 	}
@@ -474,34 +471,32 @@ public class CollisionProcessor {
 	//does the same thing as regular PGS, but focuses on lamda as the end product, not v.
 	public void forcePGS(double dt) {
 		double mu = friction.getValue();
-		DenseVector lamda = new DenseVector(2*contacts.size());
-		lamda.zero();
+		DenseVector lamdas = new DenseVector(2*contacts.size());
+		lamdas.zero();
 		int iteration = 10;//iterations.getValue();
 		int i = 0;
 		organize();
-		if(shuffle.getValue())knuth_shuffle();
+		if(shuffle.getValue()) knuth_shuffle();
 		
+		//warm start with lamdas and DVs from previous timestep
 		for(int j = 0; j < contacts.size(); j++) {
 			int index = 2*j;
-			lamda.set(index, contacts.get(j).lamda.x);
-			lamda.set(index + 1, contacts.get(j).lamda.y);
+			lamdas.set(index, contacts.get(j).lamda.x);
+			lamdas.set(index + 1, contacts.get(j).lamda.y);
 		}
 
-			//contacts are already warm started with lamdas and DVs from previous timestep
-			
 		while(iteration > 0) {
 			//shuffle for stability
 
 			for (i = 0; i < 2*contacts.size(); i++) {
 
 				//if we are looking at a normal component of lamda
-				double lamda_i = lamda.get(i);
-
+				double lamda_i = lamdas.get(i);
 
 				Contact contact_i = contacts.get(i/2);
 				DenseVector j_1 = new DenseVector(contact_i.j_1);
 				DenseVector j_2 = new DenseVector(contact_i.j_2);
-				//
+				
 				//contact handling inside the collection should only be subBody to subBody
 				//never to collection, like in the external contact handling
 				double m1inv = contact_i.subBody1.minv; 
@@ -566,7 +561,6 @@ public class CollisionProcessor {
 				// find all relevant values of u.
 				//velocities are the same as the collection, so using body1 instead of subbody1 is safe here
 				
-			
 				//add all relevant values of f, multiplied by appropriate minv to u_1_x etc
 				double u_1_x = contact_i.subBody1.force.x * m1inv*dt;
 				double u_1_y = contact_i.subBody1.force.y * m1inv*dt;
@@ -600,7 +594,7 @@ public class CollisionProcessor {
 
 				// calculate Baumgarte Feedback (overlap of the two bodies)
 				double c = feedbackStiffness.getValue();
-				double bf = c*contact_i.constraint_violation;
+				double bf = c*contact_i.constraintViolation;
 
 				//putting b together.
 				double b = 0;
@@ -620,7 +614,7 @@ public class CollisionProcessor {
 				} else {
 					//tangential lamda, constrained by mu* normal lamda
 					//get previous normal value for lamda
-					double normal_lamda = lamda.get(i - 1);
+					double normal_lamda = lamdas.get(i - 1);
 					lamda_i = Math.max(lamda_i, -mu * normal_lamda);
 					lamda_i = Math.min(lamda_i, mu*normal_lamda);
 
@@ -631,10 +625,10 @@ public class CollisionProcessor {
 
 				//updating lamda vector
 				if (i%2 ==0) {
-					lamda.set(2*contact_i.index,  lamda_i);
+					lamdas.set(2*contact_i.index,  lamda_i);
 					contact_i.lamda.set(lamda_i, contact_i.lamda.y);
 				}else {
-					lamda.set(2*contact_i.index + 1, lamda_i);
+					lamdas.set(2*contact_i.index + 1, lamda_i);
 					contact_i.lamda.set(contact_i.lamda.x, lamda_i);
 				}
 				//Now we still need to do the velocity update.
@@ -672,7 +666,6 @@ public class CollisionProcessor {
 
 			}
 			iteration--;
-
 		}
 
 		/*
@@ -718,7 +711,6 @@ public class CollisionProcessor {
 		for (Contact c : contacts) {
 			c.index = contacts.indexOf(c);
 		}
-
 	}
 
 	/**
@@ -775,16 +767,21 @@ public class CollisionProcessor {
 						double maxDot = Double.MIN_VALUE;
 						Contact cmin = null;
 						Contact cmax = null;
+						double minDotViolation = Double.MAX_VALUE;
+						double maxDotViolation = Double.MAX_VALUE;
+						eps = 1e-2;
 						for ( Contact c : tmpBodyBodyContacts ) {
 							v.sub( c.contactW, meanPos );
-							double dot = v.dot( dir );
-							if ( dot > maxDot ) {
+							double dot = v.dot( dir ); 
+							if ( dot > maxDot & c.constraintViolation <= maxDotViolation + eps) {
 								maxDot = dot;
 								cmax = c;
+								maxDotViolation = c.constraintViolation;
 							}
-							if ( dot < minDot ) {
+							if ( dot < minDot & c.constraintViolation <= minDotViolation + eps) {
 								minDot = dot;
 								cmin = c;
+								minDotViolation = c.constraintViolation;
 							}
 						}
 						contacts.add( cmax );
@@ -822,7 +819,6 @@ public class CollisionProcessor {
 			else {
 				findCollisions(body1.root, body2.root, body1, body2);
 			}
-
 		}
 	}
 	/*
@@ -838,7 +834,6 @@ public class CollisionProcessor {
 			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
 				findCollisions(b.root, body2.root, b, body2);
 			}
-
 		}	
 		else if (body2 instanceof RigidCollection) {
 			for (RigidBody b: ((RigidCollection) body2).collectionBodies) {
@@ -864,7 +859,6 @@ public class CollisionProcessor {
 
 				processCollision(body1, leafBlock_1, body2, leafBlock_2);
 
-
 				if ( RigidBodySystem.enableSleeping.getValue()){
 					if (!body1.woken_up && body1.active == 0 && !body1.pinned && body2.active == 2) {
 
@@ -874,8 +868,6 @@ public class CollisionProcessor {
 
 						wakeNeighbors(body1, collisionWake.getValue());
 					}
-
-
 				}
 
 			}
@@ -884,7 +876,6 @@ public class CollisionProcessor {
 
 				findCollisions(body_1, body_2.child1, body1, body2);
 				findCollisions(body_1, body_2.child2, body1, body2);
-
 			}
 			else if(body_2.isLeaf() || body_2.boundingDisc.r <= body_1.boundingDisc.r) {
 				//if they overlap, and body 2 is either a leaf or smaller than body_1, break down body_1
@@ -956,7 +947,7 @@ public class CollisionProcessor {
 
 	/**
 	 * Processes a collision between two bodies for two given blocks that are colliding.
-	 * Currently this implements a penalty force
+	 * Currently this implements a penalty force.
 	 * @param body1
 	 * @param b1
 	 * @param body2
@@ -1045,7 +1036,6 @@ public class CollisionProcessor {
 					body2.bodyContactList.add(bc);
 				contact.bc = bc;
 				bc.contactList.add(contact);
-
 			}
 
 
@@ -1074,10 +1064,7 @@ public class CollisionProcessor {
 				}
 			}
 		}
-
 	}
-
-
 
 
 	/** Stiffness of the contact penalty spring */
@@ -1100,7 +1087,7 @@ public class CollisionProcessor {
 	public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
 
 	/** Coulomb friction coefficient for contact constraint */
-	public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.33, 0, 2 );
+	public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.3, 0, 2 );
 
 	/** Number of iterations to use in projected Gauss Seidel solve */
 	public IntParameter iterations = new IntParameter("iterations for GS solve", 200, 1, 500);
