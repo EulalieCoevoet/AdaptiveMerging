@@ -88,7 +88,7 @@ public class Contact {
 	BVNode bvn2;
 
 	//vector points from body 2 to body 1, magnitude is the amount of overlap.
-	double constraint_violation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
+double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
 
 	Vector2d relativeVelocity = new Vector2d();
 
@@ -148,7 +148,7 @@ public class Contact {
 		block1 = b1;
 		block2 = b2;
 
-		constraint_violation =  distance - 2*Block.radius;
+		constraintViolation =  distance - 2*Block.radius;
 
 		relativeVelocity.sub(body2.v, body1.v);
 		relativeAngularVelocity = body2.omega - body1.omega;
@@ -158,6 +158,18 @@ public class Contact {
 		contactB2.set(contactW);
 		subBody1.transformW2B.transform(contactB1);
 		subBody2.transformW2B.transform(contactB2);
+		
+		addContactToBodies();
+		
+	}
+
+	private void addContactToBodies() {
+		if (!body1.contactList.contains(this)) {
+			body1.contactList.add(this);
+		}
+		if (!body2.bodyContactList.contains(this)) {
+			body2.contactList.add(this);
+		}
 	}
 
 	public double getRelativeMetric() {

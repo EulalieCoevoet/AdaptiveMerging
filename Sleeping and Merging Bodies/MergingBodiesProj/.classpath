@@ -10,6 +10,6 @@
 	<classpathentry kind="lib" path="jars/mtjsrc.zip"/>
 	<classpathentry kind="lib" path="jars/vecmath.jar"/>
 	<classpathentry kind="lib" path="jars/mtj.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JOGL"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jogl"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

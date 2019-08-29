@@ -81,6 +81,51 @@ public class CollisionProcessor {
 		if (contacts.size() > 0  && doLCP.getValue()) {
 			now = System.nanoTime();
 			PGS( dt,  now);
+			//calculatecontactForce
+			Vector2d cForce = new Vector2d();
+			double cTorque= 0;
+			calculateContactForce(dt);
+			
+		}
+	}
+
+	private void calculateContactForce(double dt) {
+		Vector2d cForce = new Vector2d();
+		double cTorque = 0;
+		for (Contact c: contacts) {
+			cForce.set(c.lamda.x*c.j_1.get(0) + c.lamda.y*c.j_2.get(0),c.lamda.x*c.j_1.get(1) + c.lamda.y*c.j_2.get(1) );
+			cTorque = c.lamda.x*c.j_1.get(2) + c.lamda.y*c.j_2.get(2);
+			cForce.scale(1/dt);
+			c.subBody1.transformW2B.transform(cForce);
+			c.contactForceB1.set(cForce);
+
+			c.contactTorqueB1 = cTorque/dt;
+
+			c.body1ContactForceHistory.add(c.contactForceB1);
+			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
+			if (c.body1ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
+				c.body1ContactForceHistory.remove(0);
+				c.body1ContactTorqueHistory.remove(0);
+			}
+
+			//if Body1 is a parent, also apply the contact force to the appropriate subBody
+
+			cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
+			cTorque = c.lamda.x*c.j_1.get(5) + c.lamda.y*c.j_2.get(5);
+			cForce.scale(1/dt);
+			c.subBody2.transformW2B.transform(cForce);
+			c.contactForceB2.set(cForce);
+
+			c.contactTorqueB2 = cTorque/dt;
+
+			c.body2ContactForceHistory.add(c.contactForceB2);
+			c.body2ContactTorqueHistory.add(c.contactTorqueB2);
+			if (c.body2ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
+				c.body2ContactForceHistory.remove(0);
+				c.body2ContactTorqueHistory.remove(0);
+			}
+
+			//if Body2 is a parent, also apply the contact force to the appropriate subBody
 		}
 	}
 
@@ -147,7 +192,7 @@ public class CollisionProcessor {
 		int i = 0;
 		organize();
 		if(shuffle.getValue()) knuth_shuffle();
-
+		
 		if (warmStart.getValue()) {
 			for (Contact contact_i : contacts) {
 
@@ -418,44 +463,7 @@ public class CollisionProcessor {
 			iteration--;
 		}
 
-		//calculatecontactForce
-		Vector2d cForce = new Vector2d();
-		double cTorque= 0;
-		for (Contact c: contacts) {
-			cForce.set(c.lamda.x*c.j_1.get(0) + c.lamda.y*c.j_2.get(0),c.lamda.x*c.j_1.get(1) + c.lamda.y*c.j_2.get(1) );
-			cTorque = c.lamda.x*c.j_1.get(2) + c.lamda.y*c.j_2.get(2);
-			cForce.scale(1/dt);
-			c.subBody1.transformW2B.transform(cForce);
-			c.contactForceB1.set(cForce);
-
-			c.contactTorqueB1 = cTorque/dt;
-
-			c.body1ContactForceHistory.add(c.contactForceB1);
-			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
-			if (c.body1ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
-				c.body1ContactForceHistory.remove(0);
-				c.body1ContactTorqueHistory.remove(0);
-			}
-
-			//if Body1 is a parent, also apply the contact force to the appropriate subBody
-
-			cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
-			cTorque = c.lamda.x*c.j_1.get(5) + c.lamda.y*c.j_2.get(5);
-			cForce.scale(1/dt);
-			c.subBody2.transformW2B.transform(cForce);
-			c.contactForceB2.set(cForce);
-
-			c.contactTorqueB2 = cTorque/dt;
-
-			c.body2ContactForceHistory.add(c.contactForceB2);
-			c.body2ContactTorqueHistory.add(c.contactTorqueB2);
-			if (c.body2ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
-				c.body2ContactForceHistory.remove(0);
-				c.body2ContactTorqueHistory.remove(0);
-			}
-
-			//if Body2 is a parent, also apply the contact force to the appropriate subBody
-		}
+		
 
 		//fill the new map
 		lastTimeStepMap.clear();

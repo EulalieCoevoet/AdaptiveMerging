@@ -181,7 +181,8 @@ public class RigidBodySystem {
 				double now = 0;
 				RigidCollection colB = (RigidCollection) b;
 				colB.collisionProcessor.contacts.addAll(colB.internalContacts);
-				colB.collisionProcessor.forcePGS(dt);
+				colB.collisionProcessor.contacts.addAll(colB.contactList);
+				colB.collisionProcessor.PGS(dt, now);
 				colB.collisionProcessor.contacts.clear();
 			}
 		}
@@ -346,6 +347,7 @@ public class RigidBodySystem {
 				for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
 					//sB.contactForce.set(0, 0);
 					//sB.contactTorques = 0;
+					sB.delta_V.zero();
 					sB.currentContactForce.set(sB.savedContactForce);
 					sB.currentContactTorques = sB.contactTorques;
 					//	sB.contactList.clear();
