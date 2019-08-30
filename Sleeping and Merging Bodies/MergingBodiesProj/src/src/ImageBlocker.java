@@ -62,7 +62,7 @@ public class ImageBlocker {
                 	ArrayList<Block> blocks = new ArrayList<Block>();
                 	ArrayList<Block> boundaryBlocks = new ArrayList<Block>();
                 	ArrayList<Point2d> springEndpoints = new ArrayList<Point2d>();
-                	searchConnected( x, y, blocks, boundaryBlocks , springEndpoints);
+                	searchConnected( x, y, blocks, boundaryBlocks, springEndpoints );
                 	RigidBody body = new RigidBody( blocks, boundaryBlocks );
                 	
                 	for (Point2d p: springEndpoints) {

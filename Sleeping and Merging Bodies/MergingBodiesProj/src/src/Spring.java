@@ -130,9 +130,6 @@ public class Spring {
     		
     	//adding the forces
     	b1.applyContactForceW(p2, spring_force);
-
-    	
-    	
     }
     
     /**

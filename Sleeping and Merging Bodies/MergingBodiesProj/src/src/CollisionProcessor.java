@@ -405,8 +405,7 @@ public class CollisionProcessor {
 
 				if (i%2 == 0) {
 					lamda_i = Math.max(0, lamda_i);
-				}
-				else {
+				} else {
 					//tangential lamda, constrained by mu* normal lamda
 					//get previous normal value for lamda
 					double normal_lamda = lamda.get(i - 1);
@@ -422,7 +421,7 @@ public class CollisionProcessor {
 				if (i%2 ==0) {
 					lamda.set(2*contact_i.index,  lamda_i);
 					contact_i.lamda.set(lamda_i, contact_i.lamda.y);
-				}else {
+				} else {
 					lamda.set(2*contact_i.index + 1, lamda_i);
 					contact_i.lamda.set(contact_i.lamda.x, lamda_i);
 				}
@@ -916,8 +915,6 @@ public class CollisionProcessor {
 					wakeNeighbors(c.body2, hop);
 			}
 		}
-
-
 	}
 
 	/** 

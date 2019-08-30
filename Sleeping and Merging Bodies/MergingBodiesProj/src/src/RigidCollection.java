@@ -29,9 +29,9 @@ public class RigidCollection extends RigidBody{
 	CollisionProcessor collisionProcessor = new CollisionProcessor(collectionBodies);
 
 	public RigidCollection(RigidBody body1, RigidBody body2) {
-
+		
 		super(body1); // this will copy the blocks, which is not exactly what we want... fine though.
-
+		
 		clearUselessJunk();
 
 		index = body1.index;
@@ -48,7 +48,6 @@ public class RigidCollection extends RigidBody{
 		body2.parent = this;
 		body1.merged = true;
 		body2.merged = true;
-
 	}
 
 
@@ -63,14 +62,12 @@ public class RigidCollection extends RigidBody{
 		savedContactForce.set(0, 0);
 		contactTorques = 0;
 		springs.clear();
-
-
 	}
 
 
 	/**
-	 * adds Body to the collection
-	 * @param bc 
+	 * Adds a body to the collection
+	 * @param body body to add 
 	 */
 	public void addBody(RigidBody body) {
 		body.bodyContactListPreMerging.addAll(body.bodyContactList);
@@ -79,9 +76,7 @@ public class RigidCollection extends RigidBody{
 
 		body.parent = this;
 		body.merged = true;
-
 	}
-
 
 
 	public void addInternalContact(BodyContact bc) {
@@ -94,16 +89,17 @@ public class RigidCollection extends RigidBody{
 			bc.body2.bodyContactList.add(bc);
 		}
 
-		//convert the ontacts to collections coordinates. 
+		//convert the contacts to collections coordinates. 
 		for (Contact c: bc.contactList)c.getHistoryStatistics();
 
 		internalContacts.addAll(bc.contactList);
-
-
-
-
 	}
-	//like addBody but with another collection...
+	
+	
+	/**
+	 * Adds a collection to the collection
+	 * @param col collection to add 
+	 */
 	public void addCollection(RigidCollection col) {
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 		for (RigidBody b : col.collectionBodies) {
@@ -115,8 +111,6 @@ public class RigidCollection extends RigidBody{
 			b.transformC2B.T.setIdentity();
 			b.parent = null;
 			additionQueue.add(b);
-
-
 		}
 
 		for (RigidBody b: additionQueue) {
@@ -139,7 +133,7 @@ public class RigidCollection extends RigidBody{
 	}
 
 	/** 
-	 * seperates each collectionBody from its parent so the bodies are ready to be added back to the system individually
+	 * Separates each collectionBody from its parent so the bodies are ready to be added back to the system individually.
 	 * x positions now need to be in world coordinates etc.
 	 */
 	public void unmergeAllBodies() {
@@ -153,14 +147,11 @@ public class RigidCollection extends RigidBody{
 			b.omega = omega;
 			b.parent = null;
 		}
-
 	}
 
 	@Override
 	public void advanceTime(double dt){
-
 		if (!pinned) {
-
 			v.x += force.x * dt/massLinear + delta_V.get(0);
 			v.y += force.y * dt/massLinear + delta_V.get(1);
 			omega += torque * dt/ massAngular + delta_V.get(2);
@@ -171,12 +162,10 @@ public class RigidCollection extends RigidBody{
 			}
 			updateTransformations();
 			updateCollectionBodyTransformations(dt);
-
 		}
-
 	}
 
-	//applies springs on the body, to the collection
+	/** applies springs on the body, to the collection */
 	private void addSprings() {
 		ArrayList<Spring> newSprings = new ArrayList<Spring>();
 
@@ -184,12 +173,9 @@ public class RigidCollection extends RigidBody{
 			for (Spring s: body.springs) {
 				Spring newSpring = new Spring(s, this);
 				newSprings.add(newSpring);
-
 			}
 		}
-
 		this.springs.addAll(newSprings);
-
 	}
 
 	@Override
@@ -200,7 +186,6 @@ public class RigidCollection extends RigidBody{
 		transformB2W.set( theta, x );
 		transformW2B.set(transformB2W);
 		transformW2B.invert();
-
 	}
 
 	private void updateCollectionBodyTransformations(double dt) {
@@ -210,29 +195,24 @@ public class RigidCollection extends RigidBody{
 			b.transformB2W.leftMult(transformB2W);
 			b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
 		}
-
-
 	}
+	
 
-	/*For each body in collection, determine the transformations to go from body to collection
-	 *But also, make each body's x, in collection and theta in collection, relative to this x and theta
+	/** 
+	 * For each body in collection, determine the transformations to go from body to collection
+	 * But also, make each body's x, in collection and theta in collection, relative to this x and theta
 	 */
-
 	private void setMergedTransformationMatrices() {
 
 		for (RigidBody body: collectionBodies) {
 			body.transformB2C.set(body.transformB2W);
 			body.transformB2C.leftMult(transformW2B);
 			body.transformC2B.set(body.transformB2C); body.transformC2B.invert();
-
-
 		}
-
-
-
 	}
 
-	/*
+	
+	/**
 	 * transforms body x's and thetas in world coordinates into collection cooridnates
 	 */
 	private void transformToCollectionCoords(){
@@ -269,7 +249,6 @@ public class RigidCollection extends RigidBody{
 	}
 
 
-
 	/**
 	 * Loops through all bodies in collectionBodies and sets the transformation matrices for each
 	 */
@@ -285,15 +264,10 @@ public class RigidCollection extends RigidBody{
 			if (b.parent != null) {
 				//transform back to world if the body is in collection coordinates... dont worry, very temporary
 				b.parent.transformB2W.transform(b.x);
-
 			}
 			bCOM.scale(bRatio, b.x);
 			com.add(bCOM);
-
-
-
 		}
-
 
 		//	set collections new transformations...
 		x.set(com);
@@ -324,7 +298,6 @@ public class RigidCollection extends RigidBody{
 		}
 		massAngular = inertia;
 		jinv = 1/inertia;
-
 	}
 
 	/**
@@ -359,6 +332,8 @@ public class RigidCollection extends RigidBody{
 		}
 
 	}
+	
+	
 	/** Map to keep track of display list IDs for drawing our rigid bodies efficiently */
 	static private HashMap<ArrayList<Block>,Integer> mapBlocksToDisplayList = new HashMap<ArrayList<Block>,Integer>();
 
@@ -374,7 +349,6 @@ public class RigidCollection extends RigidBody{
 	 * Uses a string arrayList to check if a connection has already been drawn.
 	 * @param drawable
 	 */
-
 	public void displayCollection( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
 
@@ -394,15 +368,12 @@ public class RigidCollection extends RigidBody{
 			gl.glVertex2d(p1.x, p1.y);
 			gl.glVertex2d(p2.x, p2.y);
 			gl.glEnd();
-
 		}
-
-
 	}
 
 
 	/**
-	 * goes through each body in collection and sees if it should be unmerged. Fill the removal queue with the bodies that need to be unmerged
+	 * Goes through each body in collection and sees if it should be unmerged. Fill the removal queue with the bodies that need to be unmerged
 	 */
 	public void fillNewBodiesQueue(Vector2d totalForce, double totalTorque, double forceMetric){
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
@@ -430,9 +401,13 @@ public class RigidCollection extends RigidBody{
 			newRigidBodies.remove(element);
 	}
 	
+	
 	/**
 	 * Checks if body sB is going to unmerge by comparing forces acting on the object with a threshold.
-	 * Returns true if should unmerge.
+	 * @param sB rigid body to check
+	 * @param totalForce output total force applied on the body
+	 * @param totalTorque output total torque applied on the body
+	 * @return true if should unmerge
 	 */
 	public boolean metricCheck(RigidBody sB , Vector2d totalForce, double totalTorque) {
 		totalForce.set(sB.force);
@@ -458,7 +433,6 @@ public class RigidCollection extends RigidBody{
 	public void checkMetric(RigidBody sB, Vector2d totalForce, double totalTorque, double forceMetric) {
 		totalForce.set(sB.force);
 		sB.transformB2W.transform(sB.savedContactForce);
-
 
 		totalForce.add(sB.savedContactForce);
 
@@ -629,7 +603,6 @@ public class RigidCollection extends RigidBody{
 				checkMetric(bc.body1, totalForce, totalTorque, forceMetric);
 			}
 		}
-
 	}
 
 
@@ -665,9 +638,8 @@ public class RigidCollection extends RigidBody{
 		colRemovalQueue.clear();
 		//reset up the collection
 		setupCollection();
-
-
 	}
+	
 
 	public void unmergeSelectBodies(ArrayList<RigidBody> bodies) {
 		// TODO Auto-generated method stub
@@ -712,7 +684,6 @@ public class RigidCollection extends RigidBody{
 		for (Contact c: internalContacts) {
 			//transformB2W.transform(c.contactW);
 			transformB2W.transform(c.normal);
-
 		}
 	}
 

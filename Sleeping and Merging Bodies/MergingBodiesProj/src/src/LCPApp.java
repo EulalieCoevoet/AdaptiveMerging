@@ -71,7 +71,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     /** Creates the application / scene instance */
     public LCPApp() {
         system.mouseSpring = mouseSpring;
-        systemDir = "datalcp/simple19.png";
+        systemDir = "datalcp/stack.png";
         loadSystem(systemDir); 
         // good default scene
         T.getBackingMatrix().setIdentity();

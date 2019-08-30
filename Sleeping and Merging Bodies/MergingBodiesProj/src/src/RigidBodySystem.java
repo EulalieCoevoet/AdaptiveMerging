@@ -87,11 +87,10 @@ public class RigidBodySystem {
 	public void jiggle() {
 		final Random rand = new Random();
 		for ( RigidBody b : bodies ) {
-			if ( b.pinned ) continue;
+			if ( b.pinned || b.temporaryPinned ) continue;
 			b.omega += rand.nextDouble()*2-1;
 			b.v.x += rand.nextDouble()*2-1;
 			b.v.y += rand.nextDouble()*2-1;    
-
 		}
 	}
 
@@ -129,13 +128,12 @@ public class RigidBodySystem {
 			collisionProcessor.processCollisions( dt );
 		}
 
-		if (enableMerging.getValue()) {
-			// Put your body merging stuff here?  
+		if (enableMerging.getValue()) { 
 			updateInternalCollectionForces(dt);
 		}
+		
 		if (enableMerging.getValue()||enableSleeping.getValue()) {
 			applyExternalContactForces(dt);
-			//applyInternalContactForces(dt);
 		}
 
 		if (enableMerging.getValue()) {
@@ -191,13 +189,15 @@ public class RigidBodySystem {
 	/**
 	 * Checks if we should put these bodies to sleep.
 	 * Conditions for sleeping are:
-	 * 	1. All velocities in velocity history are below threshold.
-	 * 	2. Velocities in history are monotonically decreasing
+	 * <p><p><ul>
+	 * <li>1. All velocities in velocity history are below threshold. 
+	 * <li>2. Velocities in history are monotonically decreasing. 
+	 * </ul><p>
 	 */
 	private void sleep() {
 		double sleepingThreshold = CollisionProcessor.sleepingThreshold.getValue();
 		for (RigidBody b : bodies) {
-			if (b.pinned || b.active == 2) continue;
+			if (b.pinned || b.temporaryPinned || b.active == 2) continue;
 			double vel = b.getMetric();
 			b.velHistory.add(vel);
 			if (b.velHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
@@ -242,7 +242,7 @@ public class RigidBodySystem {
 	private void wake() {
 		double threshold = CollisionProcessor.forceMetricTolerance.getValue();
 		for (RigidBody b: bodies) {
-			if (b.active == 0 || b.pinned) continue;
+			if (b.active == 0 || b.pinned || b.temporaryPinned) continue;
 			b.transformB2W.transform(b.savedContactForce);
 			double forceMetric1 = (b.force.x-b.forcePreSleep.x)*b.minv;
 			double forceMetric2 = (b.force.y-b.forcePreSleep.y)*b.minv;
@@ -268,9 +268,7 @@ public class RigidBodySystem {
 			//apply force of gravity to all children as well
 			if( b instanceof RigidCollection) {
 				applyGravitySubBodies((RigidCollection) b, force, theta);
-
 			}
-
 		}
 	}
 
@@ -316,7 +314,6 @@ public class RigidBodySystem {
 					  c.subBody2.contactForce.add(c.contactForceB2);
 					  c.subBody2.contactTorques += (c.contactTorqueB2);
 				}
-
 			}
 		}*/
 	}
@@ -549,7 +546,7 @@ public class RigidBodySystem {
 			//check if force on Collection is high enough. If it is... unmerge the entire rigidCollection
 			if (b instanceof RigidCollection) {
 				RigidCollection colB = (RigidCollection) b;
-				if (!colB.unmergedThisTimeStep) {
+				if (!colB.unmergedThisTimeStep && !colB.temporaryPinned) {
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 					for (RigidBody sB: colB.collectionBodies) {
 						unmerge = colB.metricCheck(sB, totalForce, totalTorque);
@@ -701,10 +698,11 @@ public class RigidBodySystem {
 
 	/**
 	 * Merges all rigidBodies in the system that fit the appropriate criteria: 
-	 * 1. They have been in contact for 50 timesteps
-	 * 2. The relative velocities of the two bodies in contact has been below the CollisionProcessor.sleep_accum
-	 * 		value for the ENTIRETY of the contact.
-	 * 
+	 * <p><ul>
+	 * <li> 1. They have been in contact for 50 timesteps
+	 * <li> 2. The relative velocities of the two bodies in contact has been below the CollisionProcessor.sleep_accum
+	 * 	  value for the ENTIRETY of the contact.
+	 * </ul><p>
 	 */
 	public void mergeBodies() {
 		LinkedList<BodyContact> removalQueue = new LinkedList<BodyContact>();
@@ -719,8 +717,7 @@ public class RigidBodySystem {
 				double prevValue = 0; double currentValue = 0;
 				for (Double relVel : bc.relativeVelHistory) {
 					currentValue = relVel;
-					if (relVel > threshold||
-							currentValue > prevValue + epsilon ) {
+					if (relVel > threshold || currentValue > prevValue + epsilon ) {
 						mergeCondition = false; break;
 					}
 					prevValue = relVel;
@@ -751,7 +748,6 @@ public class RigidBodySystem {
 						bc.body1.parent.addCollection(bc.body2.parent);
 						bc.body1.parent.addInternalContact(bc);
 						bc.body1.parent.addIncompleteCollectionContacts(bc.body2.parent, removalQueue);
-
 					}
 					else {
 						bc.body2.merged = true;
@@ -759,7 +755,6 @@ public class RigidBodySystem {
 						bc.body2.parent.addCollection(bc.body1.parent);
 						bc.body2.parent.addInternalContact(bc);
 						bc.body1.parent.addIncompleteCollectionContacts(bc.body2.parent, removalQueue);
-
 					}
 				}
 				else if (bc.body1.parent != null) {
@@ -768,7 +763,6 @@ public class RigidBodySystem {
 					bc.body1.parent.addBody(bc.body2);
 					bc.body1.parent.addInternalContact(bc);
 					bc.body1.parent.addIncompleteContacts(bc.body2, removalQueue);
-
 				}
 				else if (bc.body2.parent != null) {
 					//body2 is in a collection... body1 isnt
@@ -778,9 +772,7 @@ public class RigidBodySystem {
 					bc.body2.parent.addIncompleteContacts(bc.body1, removalQueue);
 				}
 				removalQueue.add(bc);
-
 			}
-
 		}
 		for (BodyContact element : removalQueue) {
 			collisionProcessor.bodyContacts.remove(element);
@@ -879,7 +871,6 @@ public class RigidBodySystem {
 			while(iter > 0) {
 				this.bodies.remove(bodies.size() - 1);
 				iter--;
-
 			}
 		}
 
@@ -949,9 +940,7 @@ public class RigidBodySystem {
 		gl.glLineWidth(1);
 		if ( drawBoundingVolumes.getValue() ) {
 			for ( RigidBody b : bodies ) {
-
 				b.root.boundingDisc.display(drawable);
-
 			}
 		}
 		if ( drawAllBoundingVolumes.getValue() ) {
@@ -961,7 +950,6 @@ public class RigidBodySystem {
 				else {
 					displayCollectionBV((RigidCollection) b, drawable);
 				}
-
 			}
 		}        
 		if ( drawBoundingVolumesUsed.getValue() ) {
@@ -980,10 +968,7 @@ public class RigidBodySystem {
 					for (Contact c:b.contactList) {
 						c.displayConnection(drawable);
 					}
-
-
 				} 
-
 			} 
 			else {
 				for ( Contact c : collisionProcessor.contacts ) {
@@ -1057,7 +1042,6 @@ public class RigidBodySystem {
 		}
 	}
 
-
 	private void displayVisitBoundaryCollection(RigidCollection b, GLAutoDrawable drawable) {
 		for (RigidBody body: b.collectionBodies) {
 			if (body instanceof RigidCollection) {
@@ -1102,7 +1086,6 @@ public class RigidBodySystem {
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
 
-
 	/**
 	 * @return control panel for the system
 	 */
@@ -1128,7 +1111,6 @@ public class RigidBodySystem {
 		vfpv.add( drawSpeedCOM.getControls() );
 		vfpv.add( drawIndex.getControls() );
 
-
 		CollapsiblePanel cp = new CollapsiblePanel(vfpv.getPanel());
 		cp.collapse();
 		vfp.add( cp );
@@ -1147,10 +1129,8 @@ public class RigidBodySystem {
 		vfp.add(spring_c.getSliderControls(false));
 		vfp.add(springLength.getSliderControls());
 
-
 		VerticalFlowPanel vfpv_2 = new VerticalFlowPanel();
 		vfpv_2.setBorder( new TitledBorder("New body creation controls") );
-
 
 		vfpv_2.add( origin_x.getSliderControls(false) );
 		vfpv_2.add( origin_y.getSliderControls(false) );
@@ -1166,9 +1146,7 @@ public class RigidBodySystem {
 		vfp.add(cp_2);
 		return vfp.getPanel();
 	}
-
-
-
+	
 
 	/** x value of origin of pendulum */
 	public static DoubleParameter origin_x = new DoubleParameter("x position new body", 100, -100, 200 );
@@ -1191,11 +1169,7 @@ public class RigidBodySystem {
 	/** omega value of origin of pendulum */
 	private IntParameter index = new IntParameter("body index", 61, 0, 200);
 
-
 	public boolean generateBody = false;
-
-
-
 
 	public void generateBody() {
 		//get an unpinned random rigidbody

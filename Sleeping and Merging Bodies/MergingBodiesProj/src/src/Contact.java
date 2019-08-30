@@ -77,18 +77,19 @@ public class Contact {
 	
 	/** Position of contact point in subBody2 coordinates */
 	Point2d contactB2  = new Point2d();
-	// for normal
+	//for normal
 	DenseVector j_1 = new DenseVector(6);
 	//for tangential
 	DenseVector j_2 = new DenseVector(6);
 
+	//lagrange multiplier for contact, Vector2d(normal, tangent)
 	Vector2d lamda = new Vector2d();
 	BVNode bvn1;
 
 	BVNode bvn2;
 
 	//vector points from body 2 to body 1, magnitude is the amount of overlap.
-double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
+	double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
 
 	Vector2d relativeVelocity = new Vector2d();
 
@@ -184,7 +185,7 @@ double constraintViolation; // in this case the constraint violation is the amou
 	 */
 	public void display( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
-		gl.glPointSize(3);
+		gl.glPointSize(5);
 		gl.glColor3f(.7f,0,0);
 		gl.glBegin( GL.GL_POINTS );
 		gl.glVertex2d(contactW.x, contactW.y);
@@ -208,7 +209,6 @@ double constraintViolation; // in this case the constraint violation is the amou
 			if (body1.parent != null) body1.parent.transformB2W.transform(p1);
 			// advance the system by the given time step
 			if (body2.parent != null) body2.parent.transformB2W.transform(p2);
-
 
 			gl.glVertex2d(p1.x, p1.y);
 			gl.glVertex2d(p2.x, p2.y);
