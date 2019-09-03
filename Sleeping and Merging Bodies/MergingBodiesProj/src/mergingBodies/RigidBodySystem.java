@@ -127,6 +127,7 @@ public class RigidBodySystem {
 			collisionProcessor.processCollisions( dt );
 		}
 
+		// eulalie: weird behavior with boat examples
 		if (enableMerging.getValue()) { 
 			updateInternalCollectionForces(dt);
 		}
@@ -177,10 +178,11 @@ public class RigidBodySystem {
 			if (b instanceof RigidCollection) {
 				double now = 0;
 				RigidCollection colB = (RigidCollection) b;
-				colB.collisionProcessor.iterations.setValue(10);
-				colB.collisionProcessor.contacts.addAll(colB.internalContacts);
-				colB.collisionProcessor.contacts.addAll(colB.contactList);
+				colB.collisionProcessor.iterations.setValue(1);
+				colB.collisionProcessor.contacts.addAll(colB.internalContacts); // eulalie: This list hasn't been pruned...
+				colB.collisionProcessor.contacts.addAll(colB.contactList); // eulalie: This list hasn't been pruned...
 				colB.collisionProcessor.PGS(dt, now);
+				//colB.collisionProcessor.calculateContactForce(dt); // eulalie: Why not updating contact forces?
 				colB.collisionProcessor.contacts.clear();
 			}
 		}

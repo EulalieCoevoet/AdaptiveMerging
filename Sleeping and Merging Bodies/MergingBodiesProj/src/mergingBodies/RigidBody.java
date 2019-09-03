@@ -33,7 +33,7 @@ public class RigidBody {
 	/** Variable to keep track of identifiers that can be given to rigid bodies */
 	static public int nextIndex = 0;
 
-	public boolean woken_up = false;
+	public boolean wokenUp = false;
 
 	/** visitID of this contact at this timestep. */
 	boolean visited = false;
@@ -548,7 +548,7 @@ public class RigidBody {
 	public void displayCOM(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 		if (!this.pinned) {
-			if (this.active == 0 || this.woken_up) {
+			if (this.active == 0 || this.wokenUp) {
 				gl.glPointSize(8);
 				gl.glColor3f(0, 0, 0.7f);
 				gl.glBegin(GL.GL_POINTS);
@@ -570,7 +570,7 @@ public class RigidBody {
 				gl.glBegin(GL.GL_POINTS);
 				gl.glVertex2d(x.x, x.y);
 				gl.glEnd();
-			} else if (this.active == 2 && !this.woken_up) {
+			} else if (this.active == 2 && !this.wokenUp) {
 				gl.glPointSize(8);
 				gl.glColor3f(0, 0, 0.7f);
 				gl.glBegin(GL.GL_POINTS);

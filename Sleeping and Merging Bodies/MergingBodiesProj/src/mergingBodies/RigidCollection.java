@@ -328,7 +328,7 @@ public class RigidCollection extends RigidBody{
 	public void displayCOM( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
 
-		if ( this.active==0 || this.woken_up) {
+		if ( this.active==0 || this.wokenUp) {
 			gl.glPointSize(8);
 			gl.glColor3f(0,0,0.7f);
 			gl.glBegin( GL.GL_POINTS );
@@ -545,7 +545,7 @@ public class RigidCollection extends RigidBody{
 
 
 	/**
-	 * Go through all bodies and makes sure all the body contacts of each body is in the collection
+	 * Go through all bodies and makes sure all the BodyContacts of each body is in the collection
 	 */
 	public void fillInternalBodyContacts() {
 		for (RigidBody b: collectionBodies) {
@@ -582,7 +582,6 @@ public class RigidCollection extends RigidBody{
 			b.parent = null;
 			additionQueue.add(b);
 			b.bodyContactListPreMerging.addAll(b.bodyContactList);
-
 		}
 
 		for (RigidBody b: additionQueue) {

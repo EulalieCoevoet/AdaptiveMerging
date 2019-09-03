@@ -160,18 +160,17 @@ public class Contact {
 		subBody1.transformW2B.transform(contactB1);
 		subBody2.transformW2B.transform(contactB2);
 		
-		addContactToBodies();
-		
+		//addContactToBodies();
 	}
 
-	private void addContactToBodies() {
-		if (!body1.contactList.contains(this)) {
-			body1.contactList.add(this);
-		}
-		if (!body2.bodyContactList.contains(this)) {
-			body2.contactList.add(this);
-		}
-	}
+//	private void addContactToBodies() {
+//		if (!body1.contactList.contains(this)) {
+//			body1.contactList.add(this);
+//		}
+//		if (!body2.contactList.contains(this)) {
+//			body2.contactList.add(this);
+//		}
+//	}
 
 	public double getRelativeMetric() {
 		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
@@ -285,7 +284,6 @@ public class Contact {
 
 		gl.glVertex2d(p2.x, p2.y);
 		double scale = 0.05;
-
 
 		gl.glVertex2d(p2.x + scale*contactForceB2.x, p2.y+scale*contactForceB2.y);
 		gl.glEnd();
