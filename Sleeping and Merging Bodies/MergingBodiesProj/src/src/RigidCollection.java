@@ -11,30 +11,39 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import java.util.Random;
+
 public class RigidCollection extends RigidBody{
 
 	public LinkedList<RigidBody> colRemovalQueue = new LinkedList<RigidBody>();
 
+	/** List of RigidBody of the collection */
 	ArrayList<RigidBody> collectionBodies = new ArrayList<RigidBody>();
-
-	//ArrayList<Contact> inner_contacts = new ArrayList<Contact>();
-
+	/** List of BodyContact in the collection: BodyContact between RigidBody of the collection */
 	ArrayList<BodyContact> internalBodyContacts = new ArrayList<BodyContact>();
+	/** List of Contact in the collection: Contact between RigidBody of the collection */
 	ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 
 	boolean unmergedThisTimeStep = false;
-
 	boolean updatedThisTimeStep = false;
 
 	CollisionProcessor collisionProcessor = new CollisionProcessor(collectionBodies);
 
+	/**
+	 * Create a RigidCollection from two RigidBody: 
+	 * <p><ul>
+	 * <il> Copy body1, and add body1 and body2 to collectionBodies
+	 * <il> Saved bodyContactList of RigidBody in bodyContactListPreMerging
+	 * <il> Update temporarilyPinned option, transfer to RigidCollection, removed from RigidBody
+	 * </ul><p>
+	 * @param body1
+	 * @param body2
+	 */
 	public RigidCollection(RigidBody body1, RigidBody body2) {
 		
 		super(body1); // this will copy the blocks, which is not exactly what we want... fine though.
-		
-		clearUselessJunk();
+		clearUselessJunk(); // clear blocks and other things...
 
-		index = body1.index;
 		collectionBodies.add(body1);
 		collectionBodies.add(body2);
 		body1.bodyContactListPreMerging.clear();
@@ -48,6 +57,12 @@ public class RigidCollection extends RigidBody{
 		body2.parent = this;
 		body1.merged = true;
 		body2.merged = true;
+		
+		temporarilyPinned = (body1.temporarilyPinned || body2.temporarilyPinned);
+		steps = Math.max(body1.steps, body2.steps);
+		
+		body1.temporarilyPinned = false;
+		body2.temporarilyPinned = false;
 	}
 
 
@@ -79,6 +94,10 @@ public class RigidCollection extends RigidBody{
 	}
 
 
+	/**
+	 * Add given BodyContact to internalBodyContacts, and BodyContact's contactList to internalContacts
+	 * @param bc
+	 */
 	public void addInternalContact(BodyContact bc) {
 		if (!internalBodyContacts.contains(bc))
 			internalBodyContacts.add(bc);
@@ -90,7 +109,8 @@ public class RigidCollection extends RigidBody{
 		}
 
 		//convert the contacts to collections coordinates. 
-		for (Contact c: bc.contactList)c.getHistoryStatistics();
+		for (Contact c: bc.contactList)
+			c.getHistoryStatistics();
 
 		internalContacts.addAll(bc.contactList);
 	}
@@ -151,7 +171,12 @@ public class RigidCollection extends RigidBody{
 
 	@Override
 	public void advanceTime(double dt){
-		if (!pinned) {
+		
+		// check for temporary pinned condition
+		if(temporarilyPinned && ++steps>=200)
+			temporarilyPinned=!temporarilyPinned; 
+		
+		if (!pinned && !temporarilyPinned) {
 			v.x += force.x * dt/massLinear + delta_V.get(0);
 			v.y += force.y * dt/massLinear + delta_V.get(1);
 			omega += torque * dt/ massAngular + delta_V.get(2);
@@ -159,10 +184,10 @@ public class RigidCollection extends RigidBody{
 				x.x += v.x * dt;
 				x.y += v.y * dt;
 				theta += omega*dt;
-			}
+			} 
 			updateTransformations();
 			updateCollectionBodyTransformations(dt);
-		}
+		} 
 	}
 
 	/** applies springs on the body, to the collection */
@@ -349,15 +374,17 @@ public class RigidCollection extends RigidBody{
 	 * Uses a string arrayList to check if a connection has already been drawn.
 	 * @param drawable
 	 */
-	public void displayCollection( GLAutoDrawable drawable ) {
+	public void displayCollection( GLAutoDrawable drawable , int nbBodies) {
 		GL2 gl = drawable.getGL().getGL2();
-
+		
 		// draw a line between the two bodies but only if they're both not pinned
 		Point2d p1 = new Point2d();
 		Point2d p2 = new Point2d();
+		float greenShade = index/(float)nbBodies;
+		float blueShade = 1 - index/(float)nbBodies;
 		for (BodyContact bc: internalBodyContacts) {
 			gl.glLineWidth(5);
-			gl.glColor4f(0, 1,0, 1.0f);
+			gl.glColor4f(0, greenShade, blueShade, 1.0f);
 			gl.glBegin( GL.GL_LINES );
 			p1.set(bc.body1.x);
 			p2.set(bc.body2.x);
@@ -586,7 +613,6 @@ public class RigidCollection extends RigidBody{
 				makeNeighborCollection(body2);
 			}
 		}
-
 	}
 
 
@@ -599,7 +625,7 @@ public class RigidCollection extends RigidBody{
 
 			if (sB.equals(bc.body1)) {
 				checkMetric(bc.body2, totalForce, totalTorque, forceMetric);
-			}else {
+			} else {
 				checkMetric(bc.body1, totalForce, totalTorque, forceMetric);
 			}
 		}
@@ -622,19 +648,8 @@ public class RigidCollection extends RigidBody{
 			b.v.set(v);
 			b.omega = omega;
 			b.parent = null;
-
-			/*int i = 0;
-			while (true) {
-				BodyContact bc = bodyContactList.get(i);
-				if (bc.body1 == b || bc.body2== b) {
-					bodyContactList.remove(bc);
-					if (i >= bodyContactList.size()) break;
-					continue;
-				}
-				i++;
-				if (i >= bodyContactList.size()) break;
-			}*/
 		}
+		
 		colRemovalQueue.clear();
 		//reset up the collection
 		setupCollection();
@@ -659,14 +674,12 @@ public class RigidCollection extends RigidBody{
 	}
 
 	/**
-	 * basic setup of the collection... calculates transforms, COM, inertia , etc.
+	 * Basic setup of the collection... calculates transforms, COM, mass, inertia, etc.
 	 */
 	private void setupCollection() {
 		contactsToWorld();
 		calculateMass();
-
 		calculateCOM();
-		//addBlocks(body);
 		//from this new collection COM determine new transforms for each body in the collection
 		//set Transform B2C and C2B for each body
 		setMergedTransformationMatrices();
@@ -681,21 +694,18 @@ public class RigidCollection extends RigidBody{
 
 
 	public void contactsToWorld() {
-		for (Contact c: internalContacts) {
-			//transformB2W.transform(c.contactW);
+		for (Contact c: internalContacts)
 			transformB2W.transform(c.normal);
-		}
 	}
 
 
 	public void drawInternalContacts(GLAutoDrawable drawable) {
 
 		for (BodyContact bc: internalBodyContacts) {
-			if (!bc.merged) continue;
-			for (Contact c: bc.contactList) {
-				//c.display(drawable);
+			if (!bc.merged) 
+				continue;
+			for (Contact c: bc.contactList) 
 				c.drawInternalContactForce(drawable);
-			}
 		}
 	}
 

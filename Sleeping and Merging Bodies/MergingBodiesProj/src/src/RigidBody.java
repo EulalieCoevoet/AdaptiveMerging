@@ -57,7 +57,8 @@ public class RigidBody {
 	double massLinear;
 
 	public boolean pinned;
-	public boolean temporaryPinned;
+	/** option used to pinned object for a fixed amount of step */
+	public boolean temporarilyPinned;
 	
 	double steps;
 
@@ -71,13 +72,13 @@ public class RigidBody {
 	 */
 	RigidTransform transformW2B = new RigidTransform();
 
-	/*
+	/**
 	 * Transforms points in body coordinates to collection coordinates, if a
 	 * collection exists
 	 */
 	RigidTransform transformB2C = new RigidTransform();
 
-	/*
+	/**
 	 * Transforms points in collection coordinates to body coordinates, if a
 	 * collection exists
 	 */
@@ -221,9 +222,9 @@ public class RigidBody {
 		root = new BVNode(boundaryBlocks, this);
 
 		pinned = isAllBlueBlocks();
-		temporaryPinned = hasGreenBlocks();
+		temporarilyPinned = hasGreenBlocks();
 
-		if (pinned || temporaryPinned) {
+		if (pinned) {
 			minv = 0;
 			jinv = 0;
 		} else {
@@ -257,7 +258,8 @@ public class RigidBody {
 		// We do need our own bounding volumes! can't share!
 		root = new BVNode(boundaryBlocks, body);
 		pinned = body.pinned;
-		temporaryPinned = body.temporaryPinned;
+		temporarilyPinned = body.temporarilyPinned;
+		steps = body.steps;
 		minv = body.minv;
 		jinv = body.jinv;
 		active = 0;
@@ -309,22 +311,16 @@ public class RigidBody {
 	public void advanceTime(double dt) {
 		
 		// check for temporary pinned condition
-		if(temporaryPinned)
-		{
-			if(++steps>=200) {
-				temporaryPinned=!temporaryPinned; 
-				minv = 1 / massLinear;
-				jinv = 1 / massAngular;
-			}
-		}
-		
+		if(temporarilyPinned && ++steps>=200)
+			temporarilyPinned=!temporarilyPinned; 
+
 		// update particles activity or sleepiness.
 		double epsilon_1 = CollisionProcessor.sleepingThreshold.getValue();
 
 		// fully active, regular stepping
-		this.set_activity_contact_graph(epsilon_1);
+		this.setActivityContactGraph(epsilon_1);
 
-		if (!pinned && !temporaryPinned) {
+		if (!pinned && !temporarilyPinned) {
 
 			// non ARPS
 			v.x += force.x * dt / massLinear + delta_V.get(0);
@@ -345,7 +341,7 @@ public class RigidBody {
 		}
 	}
 
-	private void set_activity_regular(double epsilon_1) {
+	private void setActivityRegular(double epsilon_1) {
 		double k = getKineticEnergy();
 		if (k < epsilon_1) {
 			active = 2;
@@ -422,12 +418,10 @@ public class RigidBody {
 					return true;
 			}
 		}
-
 		return false;
-
 	}
 
-	/*
+	/**
 	 * Input is a threshold value that determines if the particle is active or not.
 	 * Will need to input a second threshold value when introducing transitional
 	 * states.
@@ -436,9 +430,8 @@ public class RigidBody {
 	 * required, and returns rho: rho =1 when the particle is inactive rho = 0 when
 	 * the particle is active rho = f(k) a function of the kinetic energy if the
 	 * particle is in a transition state (Not implemented yet)
-	 * 
 	 */
-	public double set_activity_hamiltonian(double sleeping_threshold, double waking_threshold) {
+	public double setActivityHamiltonian(double sleeping_threshold, double waking_threshold) {
 		double k = this.getKineticEnergy();
 
 		if (k < sleeping_threshold) {
@@ -457,7 +450,7 @@ public class RigidBody {
 		return rho;
 	}
 
-	public void set_activity_contact_graph(double sleeping_threshold) {
+	public void setActivityContactGraph(double sleeping_threshold) {
 
 	}
 
@@ -632,7 +625,6 @@ public class RigidBody {
 		gl.glRasterPos2d(this.x.x, this.x.y);
 
 		EasyViewer.glut.glutBitmapString(font, Integer.toString(this.index));
-
 	}
 
 	public void unmergeBodyContacts() {
@@ -642,7 +634,6 @@ public class RigidBody {
 			otherBody.bodyContactList.remove(bc);
 		}
 		bodyContactList.clear();
-
 	}
 
 	public void drawDeltaF(GLAutoDrawable drawable) {
@@ -706,5 +697,4 @@ public class RigidBody {
 	 * 
 	 * }
 	 */
-
 }

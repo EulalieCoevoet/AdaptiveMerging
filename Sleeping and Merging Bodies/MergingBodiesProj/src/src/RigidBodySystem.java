@@ -87,7 +87,7 @@ public class RigidBodySystem {
 	public void jiggle() {
 		final Random rand = new Random();
 		for ( RigidBody b : bodies ) {
-			if ( b.pinned || b.temporaryPinned ) continue;
+			if ( b.pinned || b.temporarilyPinned ) continue;
 			b.omega += rand.nextDouble()*2-1;
 			b.v.x += rand.nextDouble()*2-1;
 			b.v.y += rand.nextDouble()*2-1;    
@@ -169,15 +169,16 @@ public class RigidBodySystem {
 		totalAccumulatedComputeTime += computeTime;
 	}
 
-/*
- * Goes through bodies. if it's a collection, does a GAUSS seidel iteration to update contact forces
- * 
- */
+	
+	/**
+	 * Goes through bodies. If it's a collection, does a GAUSS Seidel iteration to update contact forces
+	 */
 	private void updateInternalCollectionForces(double dt) {
 		for (RigidBody b: bodies) {
 			if (b instanceof RigidCollection) {
 				double now = 0;
 				RigidCollection colB = (RigidCollection) b;
+				colB.collisionProcessor.iterations.setValue(10);
 				colB.collisionProcessor.contacts.addAll(colB.internalContacts);
 				colB.collisionProcessor.contacts.addAll(colB.contactList);
 				colB.collisionProcessor.PGS(dt, now);
@@ -197,7 +198,7 @@ public class RigidBodySystem {
 	private void sleep() {
 		double sleepingThreshold = CollisionProcessor.sleepingThreshold.getValue();
 		for (RigidBody b : bodies) {
-			if (b.pinned || b.temporaryPinned || b.active == 2) continue;
+			if (b.pinned || b.temporarilyPinned || b.active == 2) continue;
 			double vel = b.getMetric();
 			b.velHistory.add(vel);
 			if (b.velHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
@@ -242,7 +243,7 @@ public class RigidBodySystem {
 	private void wake() {
 		double threshold = CollisionProcessor.forceMetricTolerance.getValue();
 		for (RigidBody b: bodies) {
-			if (b.active == 0 || b.pinned || b.temporaryPinned) continue;
+			if (b.active == 0 || b.pinned || b.temporarilyPinned) continue;
 			b.transformB2W.transform(b.savedContactForce);
 			double forceMetric1 = (b.force.x-b.forcePreSleep.x)*b.minv;
 			double forceMetric2 = (b.force.y-b.forcePreSleep.y)*b.minv;
@@ -420,7 +421,6 @@ public class RigidBodySystem {
 
 			cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
 			return cTorque;
-
 		}
 		else {
 			double jn_omega, jt_omega;
@@ -460,7 +460,6 @@ public class RigidBodySystem {
 	 * takes the collection, applies the appropriate contact force to the subBody
 	 * the normal and tangential contact force components will be the same...
 	 * but the rotational ones will be different. 
-	 * 
 	 */
 	private void applyContactForceToSubBody(Contact c, RigidCollection body, Vector2d cForce) {
 
@@ -546,13 +545,12 @@ public class RigidBodySystem {
 			//check if force on Collection is high enough. If it is... unmerge the entire rigidCollection
 			if (b instanceof RigidCollection) {
 				RigidCollection colB = (RigidCollection) b;
-				if (!colB.unmergedThisTimeStep && !colB.temporaryPinned) {
+				if (!colB.unmergedThisTimeStep) {
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 					for (RigidBody sB: colB.collectionBodies) {
 						unmerge = colB.metricCheck(sB, totalForce, totalTorque);
-						if (unmerge) {
+						if (unmerge)
 							unmergingBodies.add(sB);
-						}
 					}
 					
 					ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
@@ -699,7 +697,7 @@ public class RigidBodySystem {
 	/**
 	 * Merges all rigidBodies in the system that fit the appropriate criteria: 
 	 * <p><ul>
-	 * <li> 1. They have been in contact for 50 timesteps
+	 * <li> 1. They have been in contact for 50 time steps
 	 * <li> 2. The relative velocities of the two bodies in contact has been below the CollisionProcessor.sleep_accum
 	 * 	  value for the ENTIRETY of the contact.
 	 * </ul><p>
@@ -730,8 +728,8 @@ public class RigidBodySystem {
 			if(bc.body1.active==2 && bc.body2.active ==2) mergeCondition = true;
 
 			if (mergeCondition) {
-				//if they are both not collections...make a new collection!
 				bc.merged = true;
+				//if they are both not collections...make a new collection!
 				if(bc.body1.parent == null && bc.body2.parent == null) {
 
 					bodies.remove(bc.body1); bodies.remove(bc.body2);
@@ -743,8 +741,8 @@ public class RigidBodySystem {
 					// if they are BOTH collections... think about what to do
 					//take all the bodies in the least massive one and add them to the collection of the most massive
 					if (bc.body1.parent.massLinear > bc.body2.parent.massLinear) {
-						bodies.remove(bc.body2.parent);
 						bc.body1.merged=true;
+						bodies.remove(bc.body2.parent);
 						bc.body1.parent.addCollection(bc.body2.parent);
 						bc.body1.parent.addInternalContact(bc);
 						bc.body1.parent.addIncompleteCollectionContacts(bc.body2.parent, removalQueue);
@@ -805,6 +803,7 @@ public class RigidBodySystem {
 		}
 		return null;
 	}
+	
 	/**
 	 * recurses through a collection to check if this point intersects any body. returns true if it does
 	 * @param body 
@@ -890,7 +889,8 @@ public class RigidBodySystem {
 		bodies.remove(b);
 		checkIndex();
 	}
-	/*
+	
+	/**
 	 * if there are bodies with the index i, ups the index of all bodies greater than i to leave room for the ne
 	 * for the new body about to be "reintroduced" to the scene
 	 */
@@ -962,9 +962,6 @@ public class RigidBodySystem {
 		if ( drawContactGraph.getValue() ) {
 			if (CollisionProcessor.use_contact_graph.getValue()) {
 				for (RigidBody b : bodies) {
-					/*for (RigidBody c: b.contact_body_list) {
-	            		b.displayConnection(drawable, c);
-	            	}*/
 					for (Contact c:b.contactList) {
 						c.displayConnection(drawable);
 					}
@@ -972,20 +969,14 @@ public class RigidBodySystem {
 			} 
 			else {
 				for ( Contact c : collisionProcessor.contacts ) {
-
 					c.displayConnection(drawable);
 				}
-
 			}
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
-					((RigidCollection)b).displayCollection(drawable);
-				
-					
+					((RigidCollection)b).displayCollection(drawable, bodies.size());
 				}
-
 			}
-
 		}
 		
 		if(drawInternalContactForces.getValue()) {
@@ -1016,7 +1007,6 @@ public class RigidBodySystem {
 			for (RigidBody b: bodies) {
 				b.drawSpeedCOM(drawable);
 			}
-
 		}
 
 		if ( drawContacts.getValue() ) {
@@ -1026,11 +1016,13 @@ public class RigidBodySystem {
 					c.drawContactForce(drawable);
 			}
 		}
+		
 		if ( drawCOMs.getValue() ) {
 			for ( RigidBody b : bodies ) {
 				b.displayCOM(drawable);
 			}
-		}        
+		}
+		
 		if ( this.use_pendulum.getValue() ) {
 			pendulum.displayOrigin(drawable);
 		}    
@@ -1070,7 +1062,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
 	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
-	private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces", false);
+	private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces", true);
 	private BooleanParameter drawExternalContactForces = new BooleanParameter("draw External Forces", true);
 	private BooleanParameter drawInternalContactDeltas = new BooleanParameter("draw Internal Deltas", true);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw Internal Histories", false );
@@ -1172,8 +1164,8 @@ public class RigidBodySystem {
 	public boolean generateBody = false;
 
 	public void generateBody() {
+		
 		//get an unpinned random rigidbody
-
 		RigidBody body = new RigidBody(bodies.get(0));
 		RigidBody backup_body = new RigidBody(bodies.get(0));
 
@@ -1210,7 +1202,6 @@ public class RigidBodySystem {
 		body.index = bodies.size();
 		body.created = true;
 		this.add(body);
-		// collisionProcessor.bodies.add(body);
 	}
 }
 

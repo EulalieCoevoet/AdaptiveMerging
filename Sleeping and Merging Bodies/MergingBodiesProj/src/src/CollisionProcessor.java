@@ -203,10 +203,10 @@ public class CollisionProcessor {
 
 				if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))|| lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
 
-					double m1inv = contact_i.body1.minv; 
-					double m2inv = contact_i.body2.minv;
-					double j1inv = contact_i.body1.jinv;
-					double j2inv = contact_i.body2.jinv;
+					double m1inv = (contact_i.body1.temporarilyPinned)? 0: contact_i.body1.minv; 
+					double m2inv = (contact_i.body2.temporarilyPinned)? 0: contact_i.body2.minv;
+					double j1inv = (contact_i.body1.temporarilyPinned)? 0: contact_i.body1.jinv;
+					double j2inv = (contact_i.body2.temporarilyPinned)? 0: contact_i.body2.jinv;
 
 					Contact c = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
 					if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
@@ -286,10 +286,10 @@ public class CollisionProcessor {
 				DenseVector j_1 = new DenseVector(contact_i.j_1);
 				DenseVector j_2 = new DenseVector(contact_i.j_2);
 
-				double m1inv = contact_i.body1.minv; 
-				double m2inv = contact_i.body2.minv;
-				double j1inv =contact_i.body1.jinv;
-				double j2inv = contact_i.body2.jinv;
+				double m1inv = (contact_i.body1.temporarilyPinned)? 0: contact_i.body1.minv; 
+				double m2inv = (contact_i.body2.temporarilyPinned)? 0: contact_i.body2.minv;
+				double j1inv = (contact_i.body1.temporarilyPinned)? 0: contact_i.body1.jinv;
+				double j2inv = (contact_i.body2.temporarilyPinned)? 0: contact_i.body2.jinv;
 
 				//calculate D_i_i 
 				double d_i = 0;
