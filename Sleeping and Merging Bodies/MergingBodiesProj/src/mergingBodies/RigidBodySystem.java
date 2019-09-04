@@ -41,10 +41,6 @@ public class RigidBodySystem {
 
 	public CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
 
-	public PendulumProcessor pendulumProcessor = new PendulumProcessor(bodies);
-
-	public Pendulum pendulum = new Pendulum(this);
-
 	public MouseSpringForce mouseSpring;
 
 	BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
@@ -131,9 +127,9 @@ public class RigidBodySystem {
 		}
 
 		// eulalie: weird behavior with boat examples
-		if (enableMerging.getValue()) { 
-			updateInternalCollectionForces(dt);
-		}
+//		if (enableMerging.getValue()) { 
+//			updateInternalCollectionForces(dt);
+//		}
 		
 		if (enableMerging.getValue()||enableSleeping.getValue()) {
 			applyExternalContactForces(dt);
@@ -663,7 +659,6 @@ public class RigidBodySystem {
 		// TODO Fill this method out		
 	}
 
-	
 	/**goes through bodies and sees if any collection should be unmerged, and then
 	 * unmerges ALLL bodies in that collecion with no discrimination
 	 * 
@@ -697,6 +692,7 @@ public class RigidBodySystem {
 			bodies.remove(b);
 		}
 	}
+	
 
 	/**
 	 * Merges all rigidBodies in the system that fit the appropriate criteria: 
@@ -894,7 +890,7 @@ public class RigidBodySystem {
 	}
 	
 	/**
-	 * if there are bodies with the index i, ups the index of all bodies greater than i to leave room for the ne
+	 * if there are bodies with the index i, ups the index of all bodies greater than i to leave room 
 	 * for the new body about to be "reintroduced" to the scene
 	 */
 	private void checkIndex() {
@@ -1064,10 +1060,6 @@ public class RigidBodySystem {
 			}
 		}
 		
-		if ( this.use_pendulum.getValue() ) {
-			pendulum.displayOrigin(drawable);
-		}    
-
 		if ( drawIndex.getValue()) {
 			for (RigidBody b : bodies) {
 				b.printIndex(drawable, GLUT.BITMAP_8_BY_13);

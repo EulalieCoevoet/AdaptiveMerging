@@ -132,7 +132,7 @@ public class RigidCollection extends RigidBody{
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
 			b.transformC2B.T.setIdentity();
-			b.parent = null;
+			b.parent = null; // eulalie : why not this?
 			additionQueue.add(b);
 		}
 
@@ -357,40 +357,6 @@ public class RigidCollection extends RigidBody{
 		massAngular = inertia;
 		jinv = 1/inertia;
 	}
-
-	/**
-	 * Draws the center of mass position with a circle.  
-	 * @param drawable
-	 */
-	public void displayCOM( GLAutoDrawable drawable ) {
-		GL2 gl = drawable.getGL().getGL2();
-
-		if ( this.active==0 || this.wokenUp) {
-			gl.glPointSize(8);
-			gl.glColor3f(0,0,0.7f);
-			gl.glBegin( GL.GL_POINTS );
-			gl.glVertex2d(x.x, x.y);
-			gl.glEnd();
-			gl.glPointSize(4);
-			gl.glColor3f(1,1,1);
-			gl.glBegin( GL.GL_POINTS );
-			gl.glVertex2d(x.x, x.y);
-			gl.glEnd();
-		}else {
-			gl.glPointSize(8);
-			gl.glColor3f(0,0,0.7f);
-			gl.glBegin( GL.GL_POINTS );
-			gl.glVertex2d(x.x, x.y);
-			gl.glEnd();
-			gl.glPointSize(4);
-			gl.glColor3f(0,0,1);
-			gl.glBegin( GL.GL_POINTS );
-			gl.glVertex2d(x.x, x.y);
-			gl.glEnd();
-		}
-
-	}
-	
 	
 	/** Map to keep track of display list IDs for drawing our rigid bodies efficiently */
 	static private HashMap<ArrayList<Block>,Integer> mapBlocksToDisplayList = new HashMap<ArrayList<Block>,Integer>();
@@ -585,7 +551,7 @@ public class RigidCollection extends RigidBody{
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
 			b.transformC2B.T.setIdentity();
-			b.parent = null;
+			b.parent = null; // eulalie : why not this?
 			additionQueue.add(b);
 			b.bodyContactListPreMerging.addAll(b.bodyContactList);
 		}

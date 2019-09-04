@@ -72,7 +72,7 @@ public class CollisionProcessor {
 		if (contacts.size() == 0)  
 			lastTimeStepMap.clear();
 
-		if (contacts.size() > 0  && doLCP.getValue()) {
+		if ( contacts.size() > 0) {
 			now = System.nanoTime();
 			PGS( dt,  now);
 			calculateContactForce(dt);	
@@ -146,27 +146,6 @@ public class CollisionProcessor {
 			bc.addToBodyLists();
 		}
 	}
-	
-	
-	private void rememberChildrenBodyContacts(RigidCollection b) {
-		
-		for (RigidBody body: b.collectionBodies){
-			ArrayList<BodyContact> newBodyContactList = new ArrayList<BodyContact>();
-			for (BodyContact c: body.bodyContactList) {
-				c.body2.visited = false;
-
-				if(c.updatedThisTimeStep){
-					newBodyContactList.add(c);
-					c.updatedThisTimeStep = false;
-				}
-			}
-
-			//also keep contact between two bodies that have been in contact before.
-			b.bodyContactList.clear();
-			b.bodyContactList.addAll(newBodyContactList);
-		}
-	}
-
 
 	private void organize() {
 		for (Contact c : contacts) {
@@ -519,8 +498,7 @@ public class CollisionProcessor {
 						Vector2d dir = null;
 						if ( covariance.ev1 <= eps ) {
 							dir = covariance.v2;
-						} 
-						else {
+						} else {
 							dir = covariance.v1;
 						}
 						
@@ -554,9 +532,11 @@ public class CollisionProcessor {
 					}
 				} // end prune
 				
-//				if ( (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue()) && (!b1.pinned || !b2.pinned) ) 
-//					for (Contact contact : tmpBodyBodyContacts) 
-//						storeContactInBodies(b1, b2, contact);
+//				for (Contact contact : tmpBodyBodyContacts) { 
+//					if ( (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue()) && (!contact.body1.pinned || !contact.body2.pinned) ) {
+//						storeContactInBodies(contact);
+//					}
+//				}
 				
 				contacts.addAll(tmpBodyBodyContacts);
 			}
@@ -569,7 +549,55 @@ public class CollisionProcessor {
 	 * @param body1
 	 * @param body2
 	 */
+	private void storeContactInBodies(Contact contact) {
+		
+		if (!contact.body1.contactList.contains(contact)) {
+			contact.body1.contactList.add(contact);
+		}
+		if (!contact.body2.contactList.contains(contact)) {
+			contact.body2.contactList.add(contact);
+		}
+		
+		// check if this body contact exists already
+		BodyContact bc = BodyContact.checkExists(contact.body1, contact.body2, bodyContacts);
+
+		if (bc != null) { // if it exists
+			if (!bc.updatedThisTimeStep) { // only once per timestep
+				bc.relativeVelHistory.add(contact.getRelativeMetric());
+				if (bc.relativeVelHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
+					bc.relativeVelHistory.remove(0);
+				}
+				bc.updatedThisTimeStep = true;
+			}
+		} else { // body contact did not exist in previous list
+			bc = new BodyContact(contact.body1, contact.body2);
+			bc.relativeVelHistory.add(contact.getRelativeMetric());
+			bc.updatedThisTimeStep = true;
+			bodyContacts.add(bc);
+		}
+
+		if (!contact.body1.bodyContactList.contains(bc))
+			contact.body1.bodyContactList.add(bc);
+		if (!contact.body2.bodyContactList.contains(bc))
+			contact.body2.bodyContactList.add(bc);
+		
+		contact.bc = bc;
+		bc.contactList.add(contact);
+	}
+	
+	/**
+	 * Store contact in bodyContacts and bodies.contactList list, and update relative velocity history.
+	 * @param body1
+	 * @param body2
+	 */
 	private void storeContactInBodies(RigidBody body1, RigidBody body2, Contact contact) {
+		
+		if (!contact.body1.contactList.contains(contact)) {
+			contact.body1.contactList.add(contact);
+		}
+		if (!contact.body2.contactList.contains(contact)) {
+			contact.body2.contactList.add(contact);
+		}
 		
 		// check if this body contact exists already
 		BodyContact bc = BodyContact.checkExists(body1, body2, bodyContacts);
@@ -582,8 +610,7 @@ public class CollisionProcessor {
 				}
 				bc.updatedThisTimeStep = true;
 			}
-		}
-		else { // body contact did not exist in previous list
+		} else { // body contact did not exist in previous list
 			bc = new BodyContact(body1, body2);
 			bc.relativeVelHistory.add(contact.getRelativeMetric());
 			bc.updatedThisTimeStep = true;
@@ -597,19 +624,12 @@ public class CollisionProcessor {
 		
 		contact.bc = bc;
 		bc.contactList.add(contact);
-		
-		if (!contact.body1.contactList.contains(contact)) {
-			contact.body1.contactList.add(contact);
-		}
-		if (!contact.body2.contactList.contains(contact)) {
-			contact.body2.contactList.add(contact);
-		}
 	}
+	
 	
 
 	/**
 	 * Checks for collision between boundary blocks on two rigid bodies.
-	 * TODO: Objective 2: This needs to be improved as the n-squared block test is too slow!
 	 * @param body1
 	 * @param body2
 	 */
@@ -620,22 +640,10 @@ public class CollisionProcessor {
 			return;
 		}
 
-		if ( !useBVTree.getValue() ) {
-			for ( Block b1 : body1.blocks ) {
-				for ( Block b2 : body2.blocks ) {
-					processCollision( body1, b1, body2, b2 );
-				}
-			}
-		} 
-		else {
-			if (body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
-				// eulalie: why do we recompute internal contacts at each time step? 
-				// what's the point of having body merged then...?
-				narrowCollection(body1, body2);
-			}
-			else {
-				findCollisions(body1.root, body2.root, body1, body2);
-			}
+		if (body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
+			narrowCollection(body1, body2);
+		} else {
+			findCollisions(body1.root, body2.root, body1, body2);
 		}
 	}
 	
@@ -760,10 +768,6 @@ public class CollisionProcessor {
 	private Point2d tmp1 = new Point2d();
 	private Point2d tmp2 = new Point2d();
 	private Point2d contactW = new Point2d();
-	private Vector2d force = new Vector2d();
-	private Vector2d contactV1 = new Vector2d();
-	private Vector2d contactV2 = new Vector2d();
-	private Vector2d relativeVelocity = new Vector2d();
 	private Vector2d normal = new Vector2d();
 
 
@@ -776,12 +780,6 @@ public class CollisionProcessor {
 	 * @param b2
 	 */
 	private void processCollision( RigidBody body1, Block b1, RigidBody body2, Block b2 ) {        
-		
-		double k = contactSpringStiffness.getValue();
-		double c1 = contactSpringDamping.getValue();
-		double threshold = separationVelocityThreshold.getValue();
-		boolean useSpring = enableContactSpring.getValue();
-		boolean useDamping = enableContactDamping.getValue();
 
 		body1.transformB2W.transform( b1.pB, tmp1 );
 		body2.transformB2W.transform( b2.pB, tmp2 );
@@ -833,49 +831,8 @@ public class CollisionProcessor {
 			if ( (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue()) && (!body1.pinned || !body2.pinned) ) 
 				storeContactInBodies(body1, body2, contact);
 
-			if ( !doLCP.getValue() ) {
-				// compute relative body velocity at contact point
-				body1.getSpatialVelocity( contactW, contactV1 );
-				body2.getSpatialVelocity( contactW, contactV2 );
-				relativeVelocity.sub( contactV1, contactV2 );
-				if ( -relativeVelocity.dot( normal ) < threshold ) {
-					if ( useSpring ) {
-						// spring force
-						double interpenetration =  Block.radius * 2 - distance; // a negative quantity
-						force.scale( interpenetration * k, normal );
-						body2.applyContactForceW(contactW, force);
-						force.scale(-1);
-						body1.applyContactForceW(contactW, force);
-					}
-					if ( useDamping ) {
-						// spring damping forces!
-						// vertical
-						force.scale( relativeVelocity.dot(normal) * c1, normal );                    
-						body2.applyContactForceW( contactW, force );
-						force.scale(-1);
-						body1.applyContactForceW( contactW, force );
-					}
-				}
-			}
 		}
 	}
-
-
-	/** Stiffness of the contact penalty spring */
-	private DoubleParameter contactSpringStiffness = new DoubleParameter("penalty contact stiffness", 1e3, 1, 1e5 );
-
-
-	/** Viscous damping coefficient for the contact penalty spring */
-	private DoubleParameter contactSpringDamping = new DoubleParameter("penalty contact damping", 10, 1, 1e4 );
-
-	/** Threshold for the relative velocity in the normal direction, for determining if spring force will be applied. */
-	private DoubleParameter separationVelocityThreshold = new DoubleParameter( "penalty separation velocity threshold (controls bounce)", 1e-9, 1e-9, 1e3 );
-
-	/** Enables the contact penalty spring */
-	private BooleanParameter enableContactSpring = new BooleanParameter("enable penalty contact spring", true );
-
-	/** Enables damping of the contact penalty spring */
-	private BooleanParameter enableContactDamping = new BooleanParameter("enable penalty contact damping", true );
 
 	/** Restitution parameter for contact constraints */
 	public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
@@ -886,27 +843,16 @@ public class CollisionProcessor {
 	/** Number of iterations to use in projected Gauss Seidel solve */
 	public IntParameter iterations = new IntParameter("iterations for GS solve", 200, 1, 500);
 
-	/** Flag for switching between penalty based contact and contact constraints */
-	private BooleanParameter doLCP = new BooleanParameter( "do LCP solve", true );
-
 	/** Flag for using shuffle */
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	/** Flag for using shuffle */
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 
-	/** Flag for enabling the use of hierarchical collision detection for body pairs */
-	private BooleanParameter useBVTree = new BooleanParameter( "use BVTree", true);
-
-
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0, 0,50  );
-
-	/** toggle on or off adaptive hamiltonian*/
-	public static BooleanParameter  useAdaptiveHamiltonian = new BooleanParameter("enable use of adaptive hamiltonian", false );
 
 	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1.0, 0, 10 );
 
 	public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 15, 0, 30);
-
 
 	public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", false );
 
@@ -924,8 +870,6 @@ public class CollisionProcessor {
 	public JPanel getControls() {
 		VerticalFlowPanel vfp = new VerticalFlowPanel();
 		vfp.setBorder( new TitledBorder("Collision Processing Controls") );
-		vfp.add( useBVTree.getControls() );
-		vfp.add( doLCP.getControls() );
 		vfp.add( shuffle.getControls() );
 		vfp.add( pruneContacts.getControls() );
 		vfp.add( warmStart.getControls() );
@@ -935,8 +879,7 @@ public class CollisionProcessor {
 		vfp.add( feedbackStiffness.getSliderControls(false) );
 
 		vfp.add( sleepingThreshold.getSliderControls(false) );
-		vfp.add( useAdaptiveHamiltonian.getControls() );
-
+		
 		vfp.add( wakingThreshold.getSliderControls(false) );
 
 		vfp.add( use_contact_graph.getControls() );
@@ -945,12 +888,6 @@ public class CollisionProcessor {
 		vfp.add( sleepAccum.getSliderControls());
 		VerticalFlowPanel vfp2 = new VerticalFlowPanel();
 		vfp2.setBorder( new TitledBorder("penalty method controls") );
-
-		vfp2.add( contactSpringStiffness.getSliderControls(true) );
-		vfp2.add( contactSpringDamping.getSliderControls(true) );
-		vfp2.add( separationVelocityThreshold.getSliderControls( true ) );
-		vfp2.add( enableContactDamping.getControls() );
-		vfp2.add( enableContactSpring.getControls() );
 
 		CollapsiblePanel cp = new CollapsiblePanel(vfp2.getPanel());
 		cp.collapse();

@@ -54,9 +54,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private RigidBodySystem system = new RigidBodySystem();
     
     private Factory factory = new Factory( system );
-    
-    private Pendulum pendulum = new Pendulum( system );
-
+   
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
     
     /**
@@ -309,7 +307,6 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         vfp.add( whiteEpsilon.getSliderControls(false) );
         vfp.add( factory.getControls() );
-        vfp.add( pendulum.getControls() );
         
         return vfp.getPanel();
     }
@@ -366,31 +363,13 @@ public class LCPApp implements SceneGraphNode, Interactor {
     }
     
     /**
-     * Loads the specified image as a pendulum, clearing the old system, and resets viewing parameters.
-     * @param filename
-     */
-    private void loadPendulumSystem( String filename ) {              
-    	pendulum.use = false;
-        systemClear();
-        system.name = filename + " pendulum";
-        ImageBlocker blocker = new ImageBlocker( filename, (float) (double) whiteEpsilon.getValue() );
-        imageWidth = blocker.width;
-        imageHeight= blocker.height;
-        pendulum.setImageBlocker(blocker);
-        pendulum.use = true;
-        pendulum.reset();        
-    }
-    
-    /**
      * Resets the rigid body system, and factory if it is currently being used.  
      * When the factory is reset, all non pinned rigid bodies are removed from the system.
      */
     private void systemReset() {
         if ( factory.use ) {
             factory.reset();
-        } else if (pendulum.use){
-        	pendulum.reset();
-        }else{
+        } else {
             system.reset();
         }
     }
@@ -513,18 +492,9 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_COMMA ) {
                     factory.createBodyRequest = true;
-                } 
-                else if ( e.getKeyCode() == KeyEvent.VK_P) {   
-                    loadPendulumSystem( "datalcp/pendulum.png" );
-                    system.use_pendulum.setValue(true);
                 }
                 else if ( e.getKeyCode() == KeyEvent.VK_N) {                   
-                    if ( pendulum.use ) {
-                        pendulum.generateBody();
-                    }   
-                    else {
                     	system.generateBody= true;
-                    }
                 }
                 else if (  e.getKeyCode() == KeyEvent.VK_L ) {                    
                     File f = FileSelect.select("png", "image", "load", "datalcp/", true );

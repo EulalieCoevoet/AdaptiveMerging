@@ -12,6 +12,12 @@ public class BodyContact {
 	
 	public RigidBody body1; 
 	public RigidBody body2;
+
+	@Override
+	public boolean equals(Object obj) {
+		BodyContact c = (BodyContact) obj;
+		return ((c.body1.equals(body1) && c.body2.equals(body2)) || (c.body1.equals(body2) && c.body2.equals(body1)));
+	}
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 

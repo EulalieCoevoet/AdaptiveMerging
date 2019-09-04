@@ -115,6 +115,8 @@ public class RigidBody {
 	/** is this body active(0), restrained(1) or sleeping(2) **/
 	public int active;
 
+	public static enum ActiveState { ACTIVE, RESTRAINED, SLEEPING };
+	
 	/**
 	 * rho vvalue, 0 if active, 1 if inactive, function of Kinetic energy when in
 	 * transition
@@ -342,14 +344,6 @@ public class RigidBody {
 		}
 	}
 
-	private void setActivityRegular(double epsilon_1) {
-		double k = getKineticEnergy();
-		if (k < epsilon_1) {
-			active = 2;
-		} else {
-			active = 0;
-		}
-	}
 
 	/**
 	 * Computes the total kinetic energy of the body.
@@ -420,35 +414,6 @@ public class RigidBody {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Input is a threshold value that determines if the particle is active or not.
-	 * Will need to input a second threshold value when introducing transitional
-	 * states.
-	 *
-	 * Checks what state the particle is in, changes the state of the particle if
-	 * required, and returns rho: rho =1 when the particle is inactive rho = 0 when
-	 * the particle is active rho = f(k) a function of the kinetic energy if the
-	 * particle is in a transition state (Not implemented yet)
-	 */
-	public double setActivityHamiltonian(double sleeping_threshold, double waking_threshold) {
-		double k = this.getKineticEnergy();
-
-		if (k < sleeping_threshold) {
-			// particle is inactive
-			this.active = 2;
-			rho = 1;
-		} else if (k < waking_threshold && k > sleeping_threshold) {
-			// particle is in restrained motion
-			this.active = 1;
-			rho = (k - waking_threshold) / (sleeping_threshold - waking_threshold);
-		} else if (k > waking_threshold) {
-			// particle is fully active
-			this.active = 0;
-			rho = 0;
-		}
-		return rho;
 	}
 
 	public void setActivityContactGraph(double sleeping_threshold) {
@@ -555,8 +520,8 @@ public class RigidBody {
 	 */
 	public void displayCOM(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
-		if (!this.pinned) {
-			if (this.active == 0 || this.wokenUp) {
+		if (!pinned) {
+			if (active == 0 || wokenUp) {
 				gl.glPointSize(8);
 				gl.glColor3f(0, 0, 0.7f);
 				gl.glBegin(GL.GL_POINTS);
@@ -567,18 +532,7 @@ public class RigidBody {
 				gl.glBegin(GL.GL_POINTS);
 				gl.glVertex2d(x.x, x.y);
 				gl.glEnd();
-			} else if (this.active == 1) {
-				gl.glPointSize(8);
-				gl.glColor3f(0, 0, 0.7f);
-				gl.glBegin(GL.GL_POINTS);
-				gl.glVertex2d(x.x, x.y);
-				gl.glEnd();
-				gl.glPointSize(4);
-				gl.glColor3f(1, 0, 0);
-				gl.glBegin(GL.GL_POINTS);
-				gl.glVertex2d(x.x, x.y);
-				gl.glEnd();
-			} else if (this.active == 2 && !this.wokenUp) {
+			} else if (active == 2 && !wokenUp) {
 				gl.glPointSize(8);
 				gl.glColor3f(0, 0, 0.7f);
 				gl.glBegin(GL.GL_POINTS);
