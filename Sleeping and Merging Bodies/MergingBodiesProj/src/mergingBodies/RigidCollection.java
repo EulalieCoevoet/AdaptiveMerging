@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -56,6 +57,8 @@ public class RigidCollection extends RigidBody{
 		body1.merged = true;
 		body2.merged = true;
 		
+		updateColor = true;
+		
 		temporarilyPinned = (body1.temporarilyPinned || body2.temporarilyPinned);
 		steps = Math.max(body1.steps, body2.steps);
 		
@@ -89,6 +92,7 @@ public class RigidCollection extends RigidBody{
 
 		body.parent = this;
 		body.merged = true;
+		updateColor = true;
 	}
 
 
@@ -123,6 +127,7 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody b : col.collectionBodies) {
 			//transform all the subBodies to their world coordinates... 
 			b.merged = true;
+			updateColor = true;
 			col.transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
@@ -246,19 +251,23 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 
-	@Override
-	public void display( GLAutoDrawable drawable ) {
+	/**
+	 * displays the Body Collection in different color.
+	 * @param drawable
+	 */
+	public void displayCollection( GLAutoDrawable drawable, Color3f color ) {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glPushMatrix();
 		gl.glTranslated( x.x, x.y, 0 );
 		gl.glRotated(theta*180/Math.PI, 0,0,1);
 
 		for (RigidBody b: collectionBodies) {
-			b.display(drawable);
+			if(color!=null)
+				b.updateColor = true;
+			b.display(drawable, color);
 		}
 		gl.glPopMatrix();
 	}
-
 
 	public void calculateMass() {
 		double mass = 0;
@@ -268,6 +277,34 @@ public class RigidCollection extends RigidBody{
 		massLinear = mass;
 		minv = 1/mass;
 	}
+
+	/**
+	 * displays the Body Collection as lines between the center of masses of each rigid body to the other. 
+	 * Uses a string arrayList to check if a connection has already been drawn.
+	 * @param drawable
+	 */
+	public void displayConnection( GLAutoDrawable drawable) {
+		GL2 gl = drawable.getGL().getGL2();
+
+		// draw a line between the two bodies but only if they're both not pinned
+		Point2d p1 = new Point2d();
+		Point2d p2 = new Point2d();
+		for (BodyContact bc: internalBodyContacts) {
+			gl.glLineWidth(5);
+			gl.glColor4f(0.f, 0.f, 0.f, 1.0f);
+			gl.glBegin( GL.GL_LINES );
+			p1.set(bc.body1.x);
+			p2.set(bc.body2.x);
+			if (bc.body1.parent !=null)
+				bc.body1.parent.transformB2W.transform(p1);
+			if (bc.body2.parent != null)
+				bc.body2.parent.transformB2W.transform(p2);
+			gl.glVertex2d(p1.x, p1.y);
+			gl.glVertex2d(p2.x, p2.y);
+			gl.glEnd();
+		}
+	}
+
 
 
 	/**
@@ -364,37 +401,6 @@ public class RigidCollection extends RigidBody{
 	//list of bodies to be added to this collection in the next timestep
 	ArrayList<RigidBody> bodyQueue = new ArrayList<RigidBody>();
 
-
-	/**
-	 * displays the Body Collection as lines between the center of masses of each rigid body to the other. 
-	 * Uses a string arrayList to check if a connection has already been drawn.
-	 * @param drawable
-	 */
-	public void displayCollection( GLAutoDrawable drawable , int nbBodies) {
-		GL2 gl = drawable.getGL().getGL2();
-		
-		// draw a line between the two bodies but only if they're both not pinned
-		Point2d p1 = new Point2d();
-		Point2d p2 = new Point2d();
-		float greenShade = index/(float)nbBodies;
-		float blueShade = 1 - index/(float)nbBodies;
-		for (BodyContact bc: internalBodyContacts) {
-			gl.glLineWidth(5);
-			gl.glColor4f(0, greenShade, blueShade, 1.0f);
-			gl.glBegin( GL.GL_LINES );
-			p1.set(bc.body1.x);
-			p2.set(bc.body2.x);
-			if (bc.body1.parent !=null)
-				bc.body1.parent.transformB2W.transform(p1);
-			if (bc.body2.parent != null)
-				bc.body2.parent.transformB2W.transform(p2);
-			gl.glVertex2d(p1.x, p1.y);
-			gl.glVertex2d(p2.x, p2.y);
-			gl.glEnd();
-		}
-	}
-
-
 	/**
 	 * Goes through each body in collection and sees if it should be unmerged. Fill the removal queue with the bodies that need to be unmerged
 	 */
@@ -482,7 +488,6 @@ public class RigidCollection extends RigidBody{
 	public void unmergeSingleBody(RigidBody sB) {
 		if (sB.parent == null) return;
 		else {
-
 			sB.parent.transformB2W.transform(sB.x);
 			sB.theta = sB.transformB2W.getTheta();
 			sB.transformB2C.T.setIdentity();
@@ -490,6 +495,7 @@ public class RigidCollection extends RigidBody{
 			sB.v.set(sB.parent.v);
 			sB.omega = sB.parent.omega;
 			sB.parent = null;
+			sB.updateColor = true;
 		}
 	}
 	

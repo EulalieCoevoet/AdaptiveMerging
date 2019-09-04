@@ -12,6 +12,7 @@ import mintools.viewer.EasyViewer;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
 
+import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
@@ -492,6 +493,7 @@ public class RigidBody {
 
 	/** display list ID for this rigid body */
 	int myListID = -1;
+	boolean updateColor = false;
 
 	public boolean created = false;
 
@@ -515,17 +517,23 @@ public class RigidBody {
 	 * @param drawable
 	 */
 	public void display(GLAutoDrawable drawable) {
+		display(drawable, null);
+	}
+
+	public void display(GLAutoDrawable drawable, Color3f color) {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glPushMatrix();
 		gl.glTranslated(x.x, x.y, 0);
 		gl.glRotated(theta * 180 / Math.PI, 0, 0, 1);
-		if (myListID == -1) {
+		
+		if (myListID == -1 || updateColor) {
 			Integer ID = mapBlocksToDisplayList.get(blocks);
-			if (ID == null) {
+			if (ID == null || updateColor) {
+				updateColor = false;
 				myListID = gl.glGenLists(1);
 				gl.glNewList(myListID, GL2.GL_COMPILE_AND_EXECUTE);
 				for (Block b : blocks) {
-					b.display(drawable);
+					b.display(drawable, color);
 				}
 				gl.glEndList();
 				mapBlocksToDisplayList.put(blocks, myListID);

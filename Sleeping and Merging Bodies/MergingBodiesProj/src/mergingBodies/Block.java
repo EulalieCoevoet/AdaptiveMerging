@@ -55,9 +55,13 @@ public class Block {
      * Draws the block in its body coordinates.
      * @param drawable
      */
-    public void display( GLAutoDrawable drawable ) {
+    
+    public void display( GLAutoDrawable drawable, Color3f color ) {
         GL2 gl = drawable.getGL().getGL2();
-        gl.glColor4f( c.x, c.y, c.z, alpha );
+        if(color!=null)
+        	gl.glColor4f( color.x, color.y, color.z, alpha );
+        else
+        	gl.glColor4f( c.x, c.y, c.z, alpha );
         gl.glBegin(GL.GL_TRIANGLE_STRIP);
         double h = 0.5;
         gl.glVertex2d( pB.x - h, pB.y - h );

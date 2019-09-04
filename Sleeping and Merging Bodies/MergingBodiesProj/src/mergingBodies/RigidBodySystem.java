@@ -6,6 +6,7 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -14,6 +15,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import mintools.parameters.BooleanParameter;
+import mintools.parameters.ParameterListener;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.CollapsiblePanel;
@@ -30,6 +32,7 @@ public class RigidBodySystem {
 	public double simulationTime = 0;
 
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
+	public int nbCollections = 0;
 
 	//only includes body contacts that arent between merged bodies. essentially just a pointer to collisionProcessor.bodyContacts
 	public ArrayList<BodyContact> externalBodyContacts;
@@ -732,7 +735,6 @@ public class RigidBodySystem {
 				bc.merged = true;
 				//if they are both not collections...make a new collection!
 				if(bc.body1.parent == null && bc.body2.parent == null) {
-
 					bodies.remove(bc.body1); bodies.remove(bc.body2);
 					RigidCollection col = new RigidCollection(bc.body1, bc.body2);
 					col.addInternalContact(bc);
@@ -897,9 +899,12 @@ public class RigidBodySystem {
 	 */
 	private void checkIndex() {
 		int i = 0;
+		nbCollections = 0;
 		for(RigidBody b: bodies) {
 			b.index = i;
 			i++;
+			if(b instanceof RigidCollection)
+				nbCollections++;
 		}
 	}
 
@@ -917,20 +922,49 @@ public class RigidBodySystem {
 	 * @param drawable
 	 */
 	public void display( GLAutoDrawable drawable ) {
+		
+		boolean updateCollectionColor = false;
+		
 		GL2 gl = drawable.getGL().getGL2();
 		if ( Block.alpha != (float) (double) transparency.getValue()) {
 			Block.alpha = (float) (double) transparency.getValue();
 			// gross... need to rebuild display lists for the currently set transparency
 			// which is potentially slow and bad news (memory thrashing) for openGL if we do this excessively!
 			RigidBody.clearDisplayLists( gl );
+			updateCollectionColor = true;
 			for ( RigidBody b : bodies ) {
 				b.myListID = -1;
 			}
-		}        
+		}  
+		
 		if ( drawBodies.getValue() ) {
+			int collectionId = 0;
+			
+			// Check if collections color should be updated
+			// Can be removed if we build a consistent track of the collections id 
 			for ( RigidBody b : bodies ) {
-
-				b.display( drawable );
+				if ( b instanceof RigidCollection && b.updateColor == true) {
+					b.updateColor = false;
+					updateCollectionColor = true;
+				}	
+			}
+			
+			for ( RigidBody b : bodies ) {
+				if ( b instanceof RigidCollection) {
+					RigidCollection collection = (RigidCollection)b;
+					Color3f color = null;
+					collectionId++;
+					// Can be changed if we build a consistent track of the collections id 
+					if(drawCollections.getValue() && updateCollectionColor) {
+						float greenShade = collectionId/(float)nbCollections;
+						float blueShade = 1 - collectionId/(float)nbCollections;
+						color = new Color3f(0.f, greenShade, blueShade);
+					}
+					collection.displayCollection(drawable, color);
+				}
+				else {
+					b.display(drawable);
+				}
 
 				for (Spring s : b.springs) {
 					s.displayConnection(drawable);
@@ -944,6 +978,7 @@ public class RigidBodySystem {
 				b.root.boundingDisc.display(drawable);
 			}
 		}
+		
 		if ( drawAllBoundingVolumes.getValue() ) {
 			for ( RigidBody b : bodies ) {
 				if (!(b instanceof RigidCollection))
@@ -952,7 +987,8 @@ public class RigidBodySystem {
 					displayCollectionBV((RigidCollection) b, drawable);
 				}
 			}
-		}        
+		}      
+		
 		if ( drawBoundingVolumesUsed.getValue() ) {
 			for ( RigidBody b : bodies ) {
 				if (!(b instanceof RigidCollection))
@@ -960,6 +996,7 @@ public class RigidBodySystem {
 				else displayVisitBoundaryCollection((RigidCollection) b, drawable);
 			}
 		}
+		
 		if ( drawContactGraph.getValue() ) {
 			if (CollisionProcessor.use_contact_graph.getValue()) {
 				for (RigidBody b : bodies) {
@@ -973,9 +1010,12 @@ public class RigidBodySystem {
 					c.displayConnection(drawable);
 				}
 			}
+		}
+		
+		if (drawConnections.getValue()) {
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
-					((RigidCollection)b).displayCollection(drawable, bodies.size());
+					((RigidCollection)b).displayConnection(drawable);
 				}
 			}
 		}
@@ -1060,6 +1100,8 @@ public class RigidBodySystem {
 
 	private DoubleParameter transparency = new DoubleParameter("body block transparency", .5, 0, 1 );
 	private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
+	private BooleanParameter drawCollections = new BooleanParameter( "draw collections", true );
+	private BooleanParameter drawConnections = new BooleanParameter( "draw connections", false );
 	private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
 	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
@@ -1089,6 +1131,8 @@ public class RigidBodySystem {
 		VerticalFlowPanel vfpv = new VerticalFlowPanel();
 		vfpv.setBorder( new TitledBorder("viewing controls") );
 		vfpv.add( drawBodies.getControls() );
+		vfpv.add( drawCollections.getControls() );
+		vfpv.add( drawConnections.getControls() );
 		vfpv.add( transparency.getSliderControls(false));
 		vfpv.add( drawBoundingVolumes.getControls() );
 		vfpv.add( drawAllBoundingVolumes.getControls() );
