@@ -532,11 +532,10 @@ public class CollisionProcessor {
 					}
 				} // end prune
 				
-//				for (Contact contact : tmpBodyBodyContacts) { 
-//					if ( (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue()) && (!contact.body1.pinned || !contact.body2.pinned) ) {
-//						storeContactInBodies(contact);
-//					}
-//				}
+				if (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue())
+					for (Contact contact : tmpBodyBodyContacts) 
+						if (!contact.body1.pinned || !contact.body2.pinned)
+							storeContactInBodies(contact);
 				
 				contacts.addAll(tmpBodyBodyContacts);
 			}
@@ -546,8 +545,7 @@ public class CollisionProcessor {
 	
 	/**
 	 * Store contact in bodyContacts and bodies.contactList list, and update relative velocity history.
-	 * @param body1
-	 * @param body2
+	 * @param contact
 	 */
 	private void storeContactInBodies(Contact contact) {
 		
@@ -559,10 +557,10 @@ public class CollisionProcessor {
 		}
 		
 		// check if this body contact exists already
-		BodyContact bc = BodyContact.checkExists(contact.body1, contact.body2, bodyContacts);
+		BodyContact bc = BodyContact.checkExists(contact.subBody1, contact.subBody2, bodyContacts);
 
 		if (bc != null) { // if it exists
-			if (!bc.updatedThisTimeStep) { // only once per timestep
+			if (!bc.updatedThisTimeStep) { // only once per time step
 				bc.relativeVelHistory.add(contact.getRelativeMetric());
 				if (bc.relativeVelHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
 					bc.relativeVelHistory.remove(0);
@@ -570,63 +568,21 @@ public class CollisionProcessor {
 				bc.updatedThisTimeStep = true;
 			}
 		} else { // body contact did not exist in previous list
-			bc = new BodyContact(contact.body1, contact.body2);
+			bc = new BodyContact(contact.subBody1, contact.subBody2);
 			bc.relativeVelHistory.add(contact.getRelativeMetric());
 			bc.updatedThisTimeStep = true;
 			bodyContacts.add(bc);
 		}
 
-		if (!contact.body1.bodyContactList.contains(bc))
-			contact.body1.bodyContactList.add(bc);
-		if (!contact.body2.bodyContactList.contains(bc))
-			contact.body2.bodyContactList.add(bc);
+		if (!contact.subBody1.bodyContactList.contains(bc))
+			contact.subBody1.bodyContactList.add(bc);
+		if (!contact.subBody2.bodyContactList.contains(bc))
+			contact.subBody2.bodyContactList.add(bc);
 		
 		contact.bc = bc;
 		bc.contactList.add(contact);
 	}
-	
-	/**
-	 * Store contact in bodyContacts and bodies.contactList list, and update relative velocity history.
-	 * @param body1
-	 * @param body2
-	 */
-	private void storeContactInBodies(RigidBody body1, RigidBody body2, Contact contact) {
 		
-		if (!contact.body1.contactList.contains(contact)) {
-			contact.body1.contactList.add(contact);
-		}
-		if (!contact.body2.contactList.contains(contact)) {
-			contact.body2.contactList.add(contact);
-		}
-		
-		// check if this body contact exists already
-		BodyContact bc = BodyContact.checkExists(body1, body2, bodyContacts);
-
-		if (bc != null) { // if it exists
-			if (!bc.updatedThisTimeStep) { // only once per timestep
-				bc.relativeVelHistory.add(contact.getRelativeMetric());
-				if (bc.relativeVelHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
-					bc.relativeVelHistory.remove(0);
-				}
-				bc.updatedThisTimeStep = true;
-			}
-		} else { // body contact did not exist in previous list
-			bc = new BodyContact(body1, body2);
-			bc.relativeVelHistory.add(contact.getRelativeMetric());
-			bc.updatedThisTimeStep = true;
-			bodyContacts.add(bc);
-		}
-
-		if (!body1.bodyContactList.contains(bc))
-			body1.bodyContactList.add(bc);
-		if (!body2.bodyContactList.contains(bc))
-			body2.bodyContactList.add(bc);
-		
-		contact.bc = bc;
-		bc.contactList.add(contact);
-	}
-	
-	
 
 	/**
 	 * Checks for collision between boundary blocks on two rigid bodies.
@@ -822,15 +778,6 @@ public class CollisionProcessor {
 
 			// put contact into a preliminary list that will be filtered in BroadPhase
 			tmpBodyBodyContacts.add( contact );
-
-			// that being said... the BODYCONTACTS bodies will only ever be subBodies or 
-			// unmerged normal rigid bodies... they will never be a collection.
-			// eulalie : I would like to remove this from processCollision and move it to broadPhase instead.
-			//           It will allow to take the prune into account.
-			//           Cannot figure out why it doesn't work though...
-			if ( (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue()) && (!body1.pinned || !body2.pinned) ) 
-				storeContactInBodies(body1, body2, contact);
-
 		}
 	}
 
