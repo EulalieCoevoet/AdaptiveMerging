@@ -12,8 +12,6 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import mergingBodies.RigidBody.ObjectState;
-
 public class RigidCollection extends RigidBody{
 
 	public LinkedList<RigidBody> colRemovalQueue = new LinkedList<RigidBody>();

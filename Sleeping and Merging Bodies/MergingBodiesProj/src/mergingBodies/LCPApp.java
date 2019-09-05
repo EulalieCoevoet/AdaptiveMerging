@@ -68,13 +68,17 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private String systemDir;
     /** Creates the application / scene instance */
     public LCPApp() {
+    	setUp();
+    }
+    
+    public void setUp() {
         system.mouseSpring = mouseSpring;
         systemDir = "datalcp/twoStacks.png";
         loadSystem(systemDir); 
         // good default scene
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(540,480), new Dimension(640,480) );
-        ev.addInteractor(this);        
+        ev.addInteractor(this); 
     }
     
     @Override
@@ -161,6 +165,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         text += "simulation time = " + system.simulationTime + "\n";
         text += "total compute time = " + system.totalAccumulatedComputeTime + "\n";
         text += "compute time = " + system.computeTime + "\n";
+        text += "total steps = " + system.totalSteps + "\n";
         text += "collision detection = " + system.collisionProcessor.collisionDetectTime + "\n";
         text += "collision processing = " + system.collisionProcessor.collisionSolveTime + "\n";
         text += "h = " + stepsize.getValue() + " (with " + substeps.getValue() + " substeps)\n";

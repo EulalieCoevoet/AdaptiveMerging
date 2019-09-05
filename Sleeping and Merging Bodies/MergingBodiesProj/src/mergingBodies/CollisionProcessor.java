@@ -38,6 +38,13 @@ public class CollisionProcessor {
 	ArrayList<Contact> tmpBodyBodyContacts = new ArrayList<Contact>();
 
 	/**
+	 * Default constructor
+	 */
+	public CollisionProcessor() {
+		bodies = null;
+	}
+	
+	/**
 	 * Creates this collision processor with the provided set of bodies
 	 * @param bodies
 	 */
@@ -603,6 +610,7 @@ public class CollisionProcessor {
 			findCollisions(body1.root, body2.root, body1, body2);
 		}
 	}
+	
 	
 	/**
 	 * Recursive method that makes us check for collisions with each body in a rigidCollection

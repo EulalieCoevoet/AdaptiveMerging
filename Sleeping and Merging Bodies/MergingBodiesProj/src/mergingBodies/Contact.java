@@ -31,10 +31,10 @@ public class Contact {
 
 	boolean precomputer = false;
 	/** First RigidBody in contact */
-	RigidBody body1;
+	public RigidBody body1;
 
 	/** Second RigidBody in contact */
-	RigidBody body2;
+	public RigidBody body2;
 
 	/** First RigidBody in contact, only relevant if body1 is a parent. this is the child of that parent that is doing the real collision */
 	RigidBody subBody1;
@@ -159,18 +159,7 @@ public class Contact {
 		contactB2.set(contactW);
 		subBody1.transformW2B.transform(contactB1);
 		subBody2.transformW2B.transform(contactB2);
-		
-		//addContactToBodies();
 	}
-
-//	private void addContactToBodies() {
-//		if (!body1.contactList.contains(this)) {
-//			body1.contactList.add(this);
-//		}
-//		if (!body2.contactList.contains(this)) {
-//			body2.contactList.add(this);
-//		}
-//	}
 
 	public double getRelativeMetric() {
 		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;

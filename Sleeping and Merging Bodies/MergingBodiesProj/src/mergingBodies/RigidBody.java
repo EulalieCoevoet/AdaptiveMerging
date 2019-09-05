@@ -57,7 +57,6 @@ public class RigidBody {
 	public boolean pinned;
 	/** option used to pinned object for a fixed amount of step */
 	public boolean temporarilyPinned;
-	
 	double steps;
 
 	/**

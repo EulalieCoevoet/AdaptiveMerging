@@ -16,7 +16,6 @@ import com.jogamp.opengl.util.gl2.GLUT;
 
 import mergingBodies.RigidBody.ObjectState;
 import mintools.parameters.BooleanParameter;
-import mintools.parameters.ParameterListener;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.CollapsiblePanel;
@@ -35,7 +34,7 @@ public class RigidBodySystem {
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 	public int nbCollections = 0;
 
-	//only includes body contacts that arent between merged bodies. essentially just a pointer to collisionProcessor.bodyContacts
+	//only includes body contacts that are not between merged bodies. essentially just a pointer to collisionProcessor.bodyContacts
 	public ArrayList<BodyContact> externalBodyContacts;
 
 	public ArrayList<RigidBody> originalBodies = new ArrayList<RigidBody>();
@@ -103,13 +102,19 @@ public class RigidBodySystem {
 	 */
 	public double totalAccumulatedComputeTime;
 
+	/** 
+	 * Total number of steps performed
+	 */
+	public int totalSteps = 0;
+	
 	/**
 	 * Advances the state of all rigid bodies
 	 * @param dt time step
 	 */
 	public void advanceTime( double dt ) {
 
-		long now = System.nanoTime();        
+		long now = System.nanoTime();  
+		totalSteps++;
 
 		externalBodyContacts = collisionProcessor.bodyContacts;
 		clearJunkAtStartOfTimestep();
