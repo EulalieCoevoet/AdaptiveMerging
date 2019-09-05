@@ -2,7 +2,6 @@ package mergingBodies;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.StringTokenizer;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
@@ -10,12 +9,10 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.viewer.EasyViewer;
 import no.uib.cipr.matrix.DenseVector;
-import no.uib.cipr.matrix.Vector;
 
 import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
 
 /**
  * Simple 2D rigid body based on image samples
@@ -36,7 +33,7 @@ public class RigidBody {
 
 	public boolean wokenUp = false;
 
-	/** visitID of this contact at this timestep. */
+	/** visitID of this contact at this time step. */
 	boolean visited = false;
 
 	/** Block approximation of geometry */
@@ -112,20 +109,19 @@ public class RigidBody {
 	/** angular momentum of this body **/
 	public double p_ang;
 
-	/** is this body active(0), restrained(1) or sleeping(2) **/
-	public int active;
+	public ObjectState state = ObjectState.ACTIVE;
 
-	public static enum ActiveState { ACTIVE, RESTRAINED, SLEEPING };
+	public enum ObjectState { ACTIVE, SLEEPING };
 	
 	/**
-	 * rho vvalue, 0 if active, 1 if inactive, function of Kinetic energy when in
+	 * rho value, 0 if active, 1 if inactive, function of kinetic energy when in
 	 * transition
 	 **/
 	public double rho;
 
 	/**
 	 * list of contacting bodies present with this rigidbody. cleared after every
-	 * timestep, unless the contact was between two sleeping bodies
+	 * time step, unless the contact was between two sleeping bodies
 	 **/
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
@@ -265,7 +261,7 @@ public class RigidBody {
 		steps = body.steps;
 		minv = body.minv;
 		jinv = body.jinv;
-		active = 0;
+		state = ObjectState.ACTIVE;
 		rho = 0;
 		// set our index
 
@@ -331,7 +327,7 @@ public class RigidBody {
 			omega += torque * dt / massAngular + delta_V.get(2);
 			delta_V.zero();
 
-			if (active == 0) {
+			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;
 				x.y += v.y * dt;
 				theta += omega * dt;
@@ -445,7 +441,7 @@ public class RigidBody {
 		transformC2B.T.setIdentity();
 		contactList.clear();
 		bodyContactList.clear();
-		active = 0;
+		state = ObjectState.ACTIVE;
 		velHistory.clear();
 		parent = null;
 	}
@@ -521,7 +517,7 @@ public class RigidBody {
 	public void displayCOM(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 		if (!pinned) {
-			if (active == 0 || wokenUp) {
+			if (state == ObjectState.ACTIVE || wokenUp) {
 				gl.glPointSize(8);
 				gl.glColor3f(0, 0, 0.7f);
 				gl.glBegin(GL.GL_POINTS);
@@ -532,7 +528,7 @@ public class RigidBody {
 				gl.glBegin(GL.GL_POINTS);
 				gl.glVertex2d(x.x, x.y);
 				gl.glEnd();
-			} else if (active == 2 && !wokenUp) {
+			} else if (state == ObjectState.SLEEPING && !wokenUp) {
 				gl.glPointSize(8);
 				gl.glColor3f(0, 0, 0.7f);
 				gl.glBegin(GL.GL_POINTS);
@@ -601,7 +597,6 @@ public class RigidBody {
 	public void drawDeltaF(GLAutoDrawable drawable) {
 		// TODO Auto-generated method stub
 		GL2 gl = drawable.getGL().getGL2();
-		double k = this.v.length() + this.omega;
 		gl.glLineWidth(3);
 		gl.glColor3f(1, 0, 1);
 		gl.glBegin(GL.GL_LINES);

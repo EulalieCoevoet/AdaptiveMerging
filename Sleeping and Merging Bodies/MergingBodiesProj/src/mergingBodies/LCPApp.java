@@ -51,7 +51,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
 
     private EasyViewer ev;
 
-    private RigidBodySystem system = new RigidBodySystem();
+    protected RigidBodySystem system = new RigidBodySystem();
     
     private Factory factory = new Factory( system );
    
@@ -65,7 +65,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         new LCPApp();        
     }
     
-    String systemDir;
+    private String systemDir;
     /** Creates the application / scene instance */
     public LCPApp() {
         system.mouseSpring = mouseSpring;
@@ -76,7 +76,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(540,480), new Dimension(640,480) );
         ev.addInteractor(this);        
     }
-     
+    
     @Override
     public void init(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
@@ -311,7 +311,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         return vfp.getPanel();
     }
     
-    DoubleParameter whiteEpsilon = new DoubleParameter( "white epsilon", 0.05, 0, 1 );
+    protected DoubleParameter whiteEpsilon = new DoubleParameter( "white epsilon", 0.05, 0, 1 );
         
     // parameters and variables for for scaling and translating the window
     private DoubleParameter scale = new DoubleParameter( "scale scene", 0.9, 0.1, 10 );
@@ -333,7 +333,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
      * Loads the specified image, clearing the old system, and resets viewing parameters.
      * @param filename
      */
-    private void loadSystem( String filename ) {
+    protected void loadSystem( String filename ) {
         factory.use = false;        
         systemClear();
         system.name = filename;
@@ -380,7 +380,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
      * Clears the system, and ensures that any display lists that were created
      * to draw the various rigid bodies are cleaned up on the next display call.
      */
-    private void systemClear() {
+    protected void systemClear() {
         posx.setValue(0.0);
         posy.setValue(0.0);
         scale.setValue(0.9);

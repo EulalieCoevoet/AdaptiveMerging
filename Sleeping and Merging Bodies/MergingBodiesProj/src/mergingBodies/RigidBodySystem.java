@@ -14,6 +14,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.gl2.GLUT;
 
+import mergingBodies.RigidBody.ObjectState;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.ParameterListener;
 import mintools.parameters.DoubleParameter;
@@ -117,11 +118,13 @@ public class RigidBodySystem {
 		if ( useGravity.getValue() ) {
 			applyGravityForce();
 		}  
-		
-		mouseSpring.apply(); 
-		// deal with zero length springs
-		applySpringForces();
 
+		if(mouseSpring != null) {
+			mouseSpring.apply(); 
+			// deal with zero length springs
+			applySpringForces();
+		}
+		
 		if ( processCollisions.getValue() ) {
 			collisionProcessor.processCollisions( dt );
 		}
@@ -168,24 +171,6 @@ public class RigidBodySystem {
 		totalAccumulatedComputeTime += computeTime;
 	}
 
-	
-	/**
-	 * Goes through bodies. If it's a collection, does a GAUSS Seidel iteration to update contact forces
-	 */
-	private void updateInternalCollectionForces(double dt) {
-		for (RigidBody b: bodies) {
-			if (b instanceof RigidCollection) {
-				double now = 0;
-				RigidCollection colB = (RigidCollection) b;
-				colB.collisionProcessor.iterations.setValue(1);
-				colB.collisionProcessor.contacts.addAll(colB.internalContacts); // eulalie: This list hasn't been pruned...
-				colB.collisionProcessor.contacts.addAll(colB.contactList); // eulalie: This list hasn't been pruned...
-				colB.collisionProcessor.PGS(dt, now);
-				//colB.collisionProcessor.calculateContactForce(dt); // eulalie: Why not updating contact forces?
-				colB.collisionProcessor.contacts.clear();
-			}
-		}
-	}
 
 	/**
 	 * Checks if we should put these bodies to sleep.
@@ -198,7 +183,7 @@ public class RigidBodySystem {
 	private void sleep() {
 		double sleepingThreshold = CollisionProcessor.sleepingThreshold.getValue();
 		for (RigidBody b : bodies) {
-			if (b.pinned || b.temporarilyPinned || b.active == 2) continue;
+			if (b.pinned || b.temporarilyPinned || b.state == ObjectState.SLEEPING) continue;
 			double vel = b.getMetric();
 			b.velHistory.add(vel);
 			if (b.velHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
@@ -226,7 +211,7 @@ public class RigidBodySystem {
 				}
 			}
 			if (sleep) {
-				b.active = 2;
+				b.state = ObjectState.SLEEPING;
 				b.forcePreSleep.set(b.force);
 				b.torquePreSleep = b.torque;
 			}
@@ -243,15 +228,15 @@ public class RigidBodySystem {
 	private void wake() {
 		double threshold = CollisionProcessor.forceMetricTolerance.getValue();
 		for (RigidBody b: bodies) {
-			if (b.active == 0 || b.pinned || b.temporarilyPinned) continue;
+			if (b.state == ObjectState.ACTIVE || b.pinned || b.temporarilyPinned) continue;
 			b.transformB2W.transform(b.savedContactForce);
 			double forceMetric1 = (b.force.x-b.forcePreSleep.x)*b.minv;
 			double forceMetric2 = (b.force.y-b.forcePreSleep.y)*b.minv;
 			double forceMetric3 = (b.torque-b.torquePreSleep)*b.jinv;
 			b.transformW2B.transform(b.savedContactForce);
-			if (b.active == 2 && (forceMetric1 > threshold || forceMetric2 > threshold || forceMetric3 > threshold)) {
+			if (b.state == ObjectState.SLEEPING && (forceMetric1 > threshold || forceMetric2 > threshold || forceMetric3 > threshold)) {
 				b.velHistory.clear();
-				b.active = 0;
+				b.state = ObjectState.ACTIVE;
 			}
 		}
 	}
@@ -725,7 +710,7 @@ public class RigidBodySystem {
 			if (!bc.updatedThisTimeStep) mergeCondition = false;
 			if (bc.body1.pinned || bc.body2.pinned) mergeCondition = false;
 			if (bc.body1.merged || bc.body2.merged) mergeCondition = false;
-			if(bc.body1.active==2 && bc.body2.active ==2) mergeCondition = true;
+			if(bc.body1.state == ObjectState.SLEEPING && bc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 
 			if (mergeCondition) {
 				bc.merged = true;

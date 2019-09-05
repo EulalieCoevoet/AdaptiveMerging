@@ -13,9 +13,10 @@ import javax.vecmath.Vector2d;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
-import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 import no.uib.cipr.matrix.DenseVector;
+
+import mergingBodies.RigidBody.ObjectState;
 
 /**
  * Class for detecting and resolving collisions. Currently this class uses penalty forces between rigid bodies.
@@ -129,11 +130,11 @@ public class CollisionProcessor {
 		ArrayList<BodyContact> savedBodyContacts = new ArrayList<BodyContact>();
 		
 		for (BodyContact bc : bodyContacts) {
-			if (!bc.merged && ( bc.body1.active == 0 || bc.body2.active == 0 ))
+			if (!bc.merged && ( bc.body1.state == ObjectState.ACTIVE || bc.body2.state == ObjectState.ACTIVE ))
 				bc.contactList.clear();
 			
-			if (bc.updatedThisTimeStep || bc.body1.active == 2 || bc.body2.active == 2) {
-				if ( bc.body1.active == 2 || bc.body2.active == 2) 
+			if (bc.updatedThisTimeStep || bc.body1.state == ObjectState.SLEEPING || bc.body2.state == ObjectState.SLEEPING) {
+				if ( bc.body1.state == ObjectState.SLEEPING || bc.body2.state == ObjectState.SLEEPING) 
 					contacts.addAll(bc.contactList);
 
 				savedBodyContacts.add(bc);
@@ -592,7 +593,7 @@ public class CollisionProcessor {
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
 		//if both bodies are inactive, they do not collide
 
-		if ((body1.active==2 && body2.active==2)) {
+		if ((body1.state==ObjectState.SLEEPING && body2.state==ObjectState.SLEEPING)) {
 			return;
 		}
 
@@ -611,13 +612,11 @@ public class CollisionProcessor {
 			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
 				narrowCollection(b, body2);
 			}
-		}
-		else if (body1 instanceof RigidCollection) {
+		} else if (body1 instanceof RigidCollection) {
 			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
 				findCollisions(b.root, body2.root, b, body2);
 			}
-		}	
-		else if (body2 instanceof RigidCollection) {
+		} else if (body2 instanceof RigidCollection) {
 			for (RigidBody b: ((RigidCollection) body2).collectionBodies) {
 				findCollisions(body1.root, b.root, body1, b);
 			}
@@ -653,21 +652,18 @@ public class CollisionProcessor {
 				// Wake neighbors, and update wokenUp boolean for display
 				// eulalie: shouldn't we do that in processCollision when an actual contact is detected?
 				if (RigidBodySystem.enableSleeping.getValue()){
-					if (!body1.wokenUp && body1.active == 0 && !body1.pinned && body2.active == 2) {
+					if (!body1.wokenUp && body1.state == ObjectState.ACTIVE && !body1.pinned && body2.state == ObjectState.SLEEPING) {
 						wakeNeighbors(body2, collisionWake.getValue());
-					}
-					else if (!body2.wokenUp && body2.active == 0 && !body2.pinned && body1.active ==2) {
+					} else if (!body2.wokenUp && body2.state == ObjectState.ACTIVE && !body2.pinned && body1.state == ObjectState.SLEEPING) {
 						wakeNeighbors(body1, collisionWake.getValue());
 					}
 				}
-			}
-			else if(node1.isLeaf()|| node1.boundingDisc.r <= node2.boundingDisc.r){
+			} else if(node1.isLeaf()|| node1.boundingDisc.r <= node2.boundingDisc.r){
 				//if theys overlap, and body 1 is either a leaf or smaller than body_2, break down body_2
 
 				findCollisions(node1, node2.child1, body1, body2);
 				findCollisions(node1, node2.child2, body1, body2);
-			}
-			else if(node2.isLeaf() || node2.boundingDisc.r <= node1.boundingDisc.r) {
+			} else if(node2.isLeaf() || node2.boundingDisc.r <= node1.boundingDisc.r) {
 				//if they overlap, and body 2 is either a leaf or smaller than body_1, break down body_1
 
 				findCollisions(node1.child1, node2, body1, body2);
@@ -684,7 +680,7 @@ public class CollisionProcessor {
 	 */
 	private void wakeNeighbors(RigidBody body1, int hop) {
 		if (hop > 0) {
-			body1.active = 0;
+			body1.state = ObjectState.ACTIVE;
 			/*if (!body1.active_past.isEmpty()) {
 				body1.active_past.remove(body1.active_past.size() - 1);} */
 			hop--;

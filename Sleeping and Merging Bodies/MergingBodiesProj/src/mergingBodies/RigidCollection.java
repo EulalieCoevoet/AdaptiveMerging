@@ -12,6 +12,8 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mergingBodies.RigidBody.ObjectState;
+
 public class RigidCollection extends RigidBody{
 
 	public LinkedList<RigidBody> colRemovalQueue = new LinkedList<RigidBody>();
@@ -183,7 +185,7 @@ public class RigidCollection extends RigidBody{
 			v.x += force.x * dt/massLinear + delta_V.get(0);
 			v.y += force.y * dt/massLinear + delta_V.get(1);
 			omega += torque * dt/ massAngular + delta_V.get(2);
-			if (active == 0) {
+			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;
 				x.y += v.y * dt;
 				theta += omega*dt;
