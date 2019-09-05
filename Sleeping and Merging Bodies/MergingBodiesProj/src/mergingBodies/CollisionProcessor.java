@@ -729,7 +729,6 @@ public class CollisionProcessor {
 
 	/**
 	 * Processes a collision between two bodies for two given blocks that are colliding.
-	 * Currently this implements a penalty force.
 	 * @param body1
 	 * @param b1
 	 * @param body2
@@ -833,12 +832,7 @@ public class CollisionProcessor {
 		vfp.add( forceMetricTolerance.getSliderControls(false) );
 		vfp.add( collisionWake.getSliderControls());
 		vfp.add( sleepAccum.getSliderControls());
-		VerticalFlowPanel vfp2 = new VerticalFlowPanel();
-		vfp2.setBorder( new TitledBorder("penalty method controls") );
 
-		CollapsiblePanel cp = new CollapsiblePanel(vfp2.getPanel());
-		cp.collapse();
-		vfp.add( cp );        
 		return vfp.getPanel();
 	}
 

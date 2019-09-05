@@ -1097,7 +1097,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
 	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
-	private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces", true);
+	private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces of merged collections", true);
 	private BooleanParameter drawExternalContactForces = new BooleanParameter("draw External Forces", true);
 	private BooleanParameter drawInternalContactDeltas = new BooleanParameter("draw Internal Deltas", true);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw Internal Histories", false );
@@ -1109,7 +1109,6 @@ public class RigidBodySystem {
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
 	public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", false);
-	public BooleanParameter use_pendulum = new BooleanParameter( "create pendulum", false );
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
 
@@ -1149,7 +1148,6 @@ public class RigidBodySystem {
 		vfp.add( enableSleeping.getControls() );
 		vfp.add( collisionProcessor.getControls() );
 
-		vfp.add( use_pendulum.getControls() );
 		vfp.add( useGravity.getControls() );
 		vfp.add( gravityAmount.getSliderControls(false) );
 		vfp.add( gravityAngle.getSliderControls(false) );
