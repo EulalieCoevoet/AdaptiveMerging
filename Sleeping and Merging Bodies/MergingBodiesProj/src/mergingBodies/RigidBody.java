@@ -21,9 +21,7 @@ import javax.vecmath.Vector2d;
  */
 public class RigidBody {
 
-	/*
-	 * Pointer to the parent of this body if it is merged
-	 */
+	/**Pointer to the parent of this body if it is merged*/
 	RigidCollection parent = null;
 	/** Unique identifier for this body */
 	public int index;
@@ -55,7 +53,7 @@ public class RigidBody {
 	double massLinear;
 
 	public boolean pinned;
-	/** option used to pinned object for a fixed amount of step */
+	/** option used to pinned object for a fixed amount of steps */
 	public boolean temporarilyPinned;
 	double steps;
 
@@ -119,18 +117,19 @@ public class RigidBody {
 	public double rho;
 
 	/**
-	 * list of contacting bodies present with this rigidbody. cleared after every
+	 * list of contacting bodies present with this RigidBody. cleared after every
 	 * time step, unless the contact was between two sleeping bodies
 	 **/
+	//eulalie: this list is only used in updateInternalCollectionForces
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
 	/**
-	 * list of contacting bodies present with this rigidbody. cleared after every
+	 * list of contacting bodies present with this RigidBody. cleared after every
 	 * timestep, unless the contact was between two sleeping bodies
 	 **/
 	public ArrayList<BodyContact> bodyContactList = new ArrayList<BodyContact>();
 
-	/* List of BodyContacts that occured before this body was merged. */
+	/** List of BodyContacts that occurred before this body was merged. */
 	public ArrayList<BodyContact> bodyContactListPreMerging = new ArrayList<BodyContact>();
 
 	/** list of springs attached to the body **/

@@ -346,7 +346,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         imageWidth = blocker.width;
         imageHeight= blocker.height;
         system.bodies.addAll(blocker.bodies);
-        system.originalBodies = system.bodies;
+        system.initialBodies = system.bodies;
     	system.collisionProcessor.bodyContacts.clear();
     	system.collisionProcessor.contacts.clear();
     }

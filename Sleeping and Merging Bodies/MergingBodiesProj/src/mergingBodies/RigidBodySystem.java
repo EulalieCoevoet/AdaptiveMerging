@@ -32,36 +32,25 @@ public class RigidBodySystem {
 	public double simulationTime = 0;
 
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
+	public ArrayList<RigidBody> initialBodies = new ArrayList<RigidBody>();
+	
 	public int nbCollections = 0;
-
-	//only includes body contacts that are not between merged bodies. essentially just a pointer to collisionProcessor.bodyContacts
-	public ArrayList<BodyContact> externalBodyContacts;
-
-	public ArrayList<RigidBody> originalBodies = new ArrayList<RigidBody>();
 
 	public CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
 
 	public MouseSpringForce mouseSpring;
 
 	BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
-
 	DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );
-
 	DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
 
-	/**
-	 * Stiffness of  spring
-	 */
+	/**Stiffness of  spring*/
 	public DoubleParameter spring_k = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
 
-	/**
-	 * Viscous damping coefficient for the  spring
-	 */
+	/**Viscous damping coefficient for the  spring*/
 	public DoubleParameter spring_c= new DoubleParameter("spring damping", 0, 0, 1000 );
 
-	/**
-	 * Viscous damping coefficient for the  spring
-	 */
+	/**Viscous damping coefficient for the  spring*/
 	public static IntParameter springLength= new IntParameter("spring rest length", 1, 1, 100 );
 
 	/**
@@ -92,19 +81,13 @@ public class RigidBodySystem {
 		}
 	}
 
-	/** 
-	 * Time in seconds to advance the system
-	 */
+	/**Time in seconds to advance the system*/
 	public double computeTime;
 
-	/**
-	 * Total time in seconds for computation since last reset
-	 */
+	/**Total time in seconds for computation since last reset*/
 	public double totalAccumulatedComputeTime;
 
-	/** 
-	 * Total number of steps performed
-	 */
+	/**Total number of steps performed*/
 	public int totalSteps = 0;
 	
 	/**
@@ -116,8 +99,7 @@ public class RigidBodySystem {
 		long now = System.nanoTime();  
 		totalSteps++;
 
-		externalBodyContacts = collisionProcessor.bodyContacts;
-		clearJunkAtStartOfTimestep();
+		clearJunkAtStartOfTimeStep();
 
 		// apply gravity to all bodies... also take this opportunity to clear all forces at the start of the time step
 		if ( useGravity.getValue() ) {
@@ -125,9 +107,8 @@ public class RigidBodySystem {
 		}  
 
 		if(mouseSpring != null) {
-			mouseSpring.apply(); 
-			// deal with zero length springs
-			applySpringForces();
+			mouseSpring.apply();
+			applySpringForces(); // deal with zero length springs
 		}
 		
 		if ( processCollisions.getValue() ) {
@@ -309,7 +290,7 @@ public class RigidBodySystem {
 		}*/
 	}
 
-	private void clearJunkAtStartOfTimestep() {
+	private void clearJunkAtStartOfTimeStep() {
 		for (RigidBody b: bodies) {
 			b.merged = false;
 			b.force.set(0, 0);
@@ -325,7 +306,8 @@ public class RigidBodySystem {
 			//b.bodyContactList.clear();
 			ArrayList<BodyContact> newBodyContactList = new ArrayList<BodyContact>();
 			for (BodyContact bc : b.bodyContactList) 
-				if (bc.updatedThisTimeStep) newBodyContactList.add(bc);
+				if (bc.updatedThisTimeStep) 
+					newBodyContactList.add(bc);
 			b.bodyContactList.clear();
 			b.bodyContactList.addAll(newBodyContactList);
 
@@ -344,13 +326,14 @@ public class RigidBodySystem {
 					sB.merged = false;
 					newBodyContactList.clear();
 					for (BodyContact bc : sB.bodyContactList) 
-						if (bc.merged || bc.updatedThisTimeStep) newBodyContactList.add(bc);
+						if (bc.merged || bc.updatedThisTimeStep) 
+							newBodyContactList.add(bc);
 					sB.bodyContactList.clear();
 					sB.bodyContactList.addAll(newBodyContactList);
 				}
 			}
 		}
-		for (BodyContact bc : externalBodyContacts) {
+		for (BodyContact bc : collisionProcessor.bodyContacts) {
 			bc.clearForces();
 		}
 	}
@@ -361,7 +344,7 @@ public class RigidBodySystem {
 	private void applyExternalContactForces(double dt) {
 		for (BodyContact bc : collisionProcessor.bodyContacts) {
 			for (Contact c: bc.contactList) {
-
+				// Body 1
 				c.body1.savedContactForce.add(c.contactForceB1);
 				c.body1.contactTorques += (c.contactTorqueB1);
 				if (c.body1 instanceof RigidCollection) {
@@ -373,11 +356,12 @@ public class RigidBodySystem {
 					}
 					applyToBodyContact(c, c.subBody1, c.contactForceB1, cTorque);
 				} else applyToBodyContact(c, c.body1, c.contactForceB1, c.contactTorqueB1);
+				// Body 2
 				c.body2.savedContactForce.add(c.contactForceB2);
 				c.body2.contactTorques += (c.contactTorqueB2);
 				if (c.body2 instanceof RigidCollection) {
 					double cTorque = getSubBodyTorque(c, c.subBody2);
-
+					
 					if (!c.subBody2.bodyContactListPreMerging.contains(bc)) {
 						c.subBody2.currentContactForce.add(c.contactForceB2);
 						c.subBody2.currentContactTorques += cTorque;
@@ -429,7 +413,25 @@ public class RigidBodySystem {
 			return cTorque;
 		}
 	}
+	
 
+	/**	
+	 * Goes through bodies. If it's a collection, does a Gauss Seidel iteration to update contact forces	
+	 */	
+	private void updateInternalCollectionForces(double dt) {	
+		for (RigidBody b: bodies) {	
+			if (b instanceof RigidCollection) {	
+				double now = 0;	
+				RigidCollection colB = (RigidCollection) b;	
+				colB.collisionProcessor.iterations.setValue(1);	
+				colB.collisionProcessor.contacts.addAll(colB.internalContacts); 	
+				colB.collisionProcessor.contacts.addAll(colB.contactList); 
+				colB.collisionProcessor.PGS(dt, now, false);	
+				//colB.collisionProcessor.calculateContactForce(dt); // eulalie: Why not updating contact forces?	
+				colB.collisionProcessor.contacts.clear();	
+			}	
+		}	
+	}	
 
 	/**
 	 * applies contact force to body contacts so we know how much force each body contact exhudes
@@ -443,7 +445,6 @@ public class RigidBodySystem {
 			c.bc.body2ContactForce.add(cForce);
 			c.bc.body2ContactTorque += cTorque;
 		}
-
 	}
 
 	/**

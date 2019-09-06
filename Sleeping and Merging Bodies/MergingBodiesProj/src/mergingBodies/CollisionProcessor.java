@@ -72,7 +72,7 @@ public class CollisionProcessor {
 		contacts.clear();
 		if (RigidBodySystem.enableSleeping.getValue() || RigidBodySystem.enableMerging.getValue()) 
 			rememberBodyContacts();
-
+		
 		long now = System.nanoTime();
 		broadPhase(); // fill contacts list
 		
@@ -82,7 +82,8 @@ public class CollisionProcessor {
 
 		if ( contacts.size() > 0) {
 			now = System.nanoTime();
-			PGS( dt,  now);
+			PGS( dt,  now, false);
+			removeCollectionsInternalContacts();
 			calculateContactForce(dt);	
 		}
 	}
@@ -96,7 +97,6 @@ public class CollisionProcessor {
 			cForce.scale(1/dt);
 			c.subBody1.transformW2B.transform(cForce);
 			c.contactForceB1.set(cForce);
-
 			c.contactTorqueB1 = cTorque/dt;
 
 			c.body1ContactForceHistory.add(c.contactForceB1);
@@ -113,7 +113,6 @@ public class CollisionProcessor {
 			cForce.scale(1/dt);
 			c.subBody2.transformW2B.transform(cForce);
 			c.contactForceB2.set(cForce);
-
 			c.contactTorqueB2 = cTorque/dt;
 
 			c.body2ContactForceHistory.add(c.contactForceB2);
@@ -162,7 +161,7 @@ public class CollisionProcessor {
 	}
 
 
-	public void PGS(double dt, double now) {
+	public void PGS(double dt, double now, boolean updateCollectionInternalContact) {
 		double mu = friction.getValue();
 		DenseVector lamdas = new DenseVector(2*contacts.size());
 		lamdas.zero();
@@ -227,7 +226,6 @@ public class CollisionProcessor {
 					t_2_omega_t =  j_2.get(5) * j2inv* old_delta_lamda_t;
 
 					//update delta V;
-
 					DenseVector dV1 = c.body1.delta_V; 
 					DenseVector dV2 = c.body2.delta_V; 
 					dV1.set( 0, dV1.get( 0) + t_1_x_n  + t_1_x_t);
@@ -254,6 +252,9 @@ public class CollisionProcessor {
 
 		while(iteration > 0) {
 			//shuffle for stability
+			
+			if (iteration==1 && updateCollectionInternalContact) 
+				lamdas = addCollectionsInternalContacts(lamdas);			
 
 			for (i = 0; i < 2*contacts.size(); i++) {
 
@@ -264,10 +265,14 @@ public class CollisionProcessor {
 				DenseVector j_1 = new DenseVector(contact_i.j_1);
 				DenseVector j_2 = new DenseVector(contact_i.j_2);
 
-				double m1inv = (contact_i.body1.temporarilyPinned)? 0: contact_i.body1.minv; 
-				double m2inv = (contact_i.body2.temporarilyPinned)? 0: contact_i.body2.minv;
-				double j1inv = (contact_i.body1.temporarilyPinned)? 0: contact_i.body1.jinv;
-				double j2inv = (contact_i.body2.temporarilyPinned)? 0: contact_i.body2.jinv;
+				// eulalie: actually the body in contact always are subBody...
+				RigidBody body1 = (contact_i.body1.parent!=null)? contact_i.subBody1: contact_i.body1;
+				RigidBody body2 = (contact_i.body2.parent!=null)? contact_i.subBody2: contact_i.body2;
+				
+				double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
+				double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
+				double j1inv = (body1.temporarilyPinned)? 0: body1.jinv;
+				double j2inv = (body2.temporarilyPinned)? 0: body2.jinv;
 
 				//calculate D_i_i 
 				double d_i = 0;
@@ -295,8 +300,8 @@ public class CollisionProcessor {
 				//get J Row i Delta V term first
 				//multiply the 6 J values with the appropriate delta V values
 
-				DenseVector dV1 = contact_i.body1.delta_V; 
-				DenseVector dV2 = contact_i.body2.delta_V; 
+				DenseVector dV1 = body1.delta_V; 
+				DenseVector dV2 = body2.delta_V; 
 				double j_row_i_delta_V = 0;
 
 				if (i%2 == 0) { //normal component
@@ -323,22 +328,22 @@ public class CollisionProcessor {
 
 				//now take care of assembling b
 				// find all relevant values of u.
-				double u_1_x = contact_i.body1.v.x;
-				double u_1_y = contact_i.body1.v.y;
-				double u_1_omega = contact_i.body1.omega;
+				double u_1_x = body1.v.x;
+				double u_1_y = body1.v.y;
+				double u_1_omega = body1.omega;
 
-				double u_2_x = contact_i.body2.v.x;
-				double u_2_y = contact_i.body2.v.y;
-				double u_2_omega = contact_i.body2.omega;
+				double u_2_x = body2.v.x;
+				double u_2_y = body2.v.y;
+				double u_2_omega = body2.omega;
 
 				//add all relevant values of f, multiplied by appropriate minv to u_1_x etc
-				u_1_x += contact_i.body1.force.x * m1inv*dt;
-				u_1_y += contact_i.body1.force.y * m1inv*dt;
-				u_1_omega += contact_i.body1.torque * j1inv*dt;
+				u_1_x += body1.force.x * m1inv*dt;
+				u_1_y += body1.force.y * m1inv*dt;
+				u_1_omega += body1.torque * j1inv*dt;
 
-				u_2_x += contact_i.body2.force.x*m2inv*dt;
-				u_2_y += contact_i.body2.force.y*m2inv*dt;
-				u_2_omega += contact_i.body2.torque*j2inv*dt;
+				u_2_x += body2.force.x * m2inv*dt;
+				u_2_y += body2.force.y * m2inv*dt;
+				u_2_omega += body2.torque * j2inv*dt;
 
 				//multiply all the u values by the appropriate J values.
 				if (i%2 == 0) {
@@ -387,7 +392,7 @@ public class CollisionProcessor {
 					//tangential lamda, constrained by mu* normal lamda
 					//get previous normal value for lamda
 					double normal_lamda = lamdas.get(i - 1);
-					lamda_i = Math.max(lamda_i, -mu * normal_lamda);
+					lamda_i = Math.max(lamda_i, -mu*normal_lamda);
 					lamda_i = Math.min(lamda_i, mu*normal_lamda);
 
 				}
@@ -448,6 +453,47 @@ public class CollisionProcessor {
 			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), co);
 		} 
 		collisionSolveTime = (System.nanoTime() - now) * 1e-9;
+	}
+	
+	protected DenseVector addCollectionsInternalContacts(DenseVector lamdas)
+	{
+		boolean hasCollection = false;
+		
+		// Add contacts inside collection for the last time step
+		DenseVector prevLamdas = new DenseVector(lamdas);
+		for (RigidBody b: bodies) {	
+			if (b instanceof RigidCollection) {	
+				RigidCollection colB = (RigidCollection) b;	
+				contacts.addAll(colB.internalContacts); 
+				hasCollection = true;
+			}	
+		}
+		if (hasCollection) {
+			organize();
+			lamdas = new DenseVector(2*contacts.size());
+			for (int j=0; j<lamdas.size(); j++) {
+				if (j<prevLamdas.size()) {
+					lamdas.set(j, prevLamdas.get(j));
+				} else {
+					lamdas.set(j, contacts.get(j/2).lamda.x);
+					lamdas.set(j+1, contacts.get(j/2).lamda.y);
+					j++;
+				}
+			}
+		}	
+		return lamdas;
+	}
+	
+	protected void removeCollectionsInternalContacts()
+	{
+		// Add contacts inside collection for the last time step
+		for (RigidBody b: bodies) {	
+			if (b instanceof RigidCollection) {	
+				RigidCollection colB = (RigidCollection) b;	
+				contacts.removeAll(colB.internalContacts); 
+			}	
+		}
+		organize();
 	}
 	
 
