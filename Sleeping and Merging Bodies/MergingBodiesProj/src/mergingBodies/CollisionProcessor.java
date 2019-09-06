@@ -95,7 +95,7 @@ public class CollisionProcessor {
 			cForce.set(c.lamda.x*c.j_1.get(0) + c.lamda.y*c.j_2.get(0),c.lamda.x*c.j_1.get(1) + c.lamda.y*c.j_2.get(1) );
 			cTorque = c.lamda.x*c.j_1.get(2) + c.lamda.y*c.j_2.get(2);
 			cForce.scale(1/dt);
-			c.subBody1.transformW2B.transform(cForce);
+			c.body1.transformW2B.transform(cForce);
 			c.contactForceB1.set(cForce);
 			c.contactTorqueB1 = cTorque/dt;
 
@@ -111,7 +111,7 @@ public class CollisionProcessor {
 			cForce.set(c.lamda.x*c.j_1.get(3) + c.lamda.y*c.j_2.get(3),c.lamda.x*c.j_1.get(4) + c.lamda.y*c.j_2.get(4) );
 			cTorque = c.lamda.x*c.j_1.get(5) + c.lamda.y*c.j_2.get(5);
 			cForce.scale(1/dt);
-			c.subBody2.transformW2B.transform(cForce);
+			c.body2.transformW2B.transform(cForce);
 			c.contactForceB2.set(cForce);
 			c.contactTorqueB2 = cTorque/dt;
 
@@ -180,17 +180,22 @@ public class CollisionProcessor {
 
 				if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))|| lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
 
-					double m1inv = (contact_i.body1.temporarilyPinned)? 0: contact_i.body1.minv; 
-					double m2inv = (contact_i.body2.temporarilyPinned)? 0: contact_i.body2.minv;
-					double j1inv = (contact_i.body1.temporarilyPinned)? 0: contact_i.body1.jinv;
-					double j2inv = (contact_i.body2.temporarilyPinned)? 0: contact_i.body2.jinv;
+					RigidBody body1 = (contact_i.body1.isInCollection())? contact_i.body1.parent: contact_i.body1;
+					RigidBody body2 = (contact_i.body2.isInCollection())? contact_i.body2.parent: contact_i.body2;
+					
+					double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
+					double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
+					double j1inv = (body1.temporarilyPinned)? 0: body1.jinv;
+					double j2inv = (body2.temporarilyPinned)? 0: body2.jinv;
 
 					Contact c = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
 					if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
 						c = lastTimeStepMap.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
 					//if the old map contains this key, then get the lamda of the old map
 
-					if (c.body1 != contact_i.body1 || c.body2 != contact_i.body2) {
+					RigidBody cbody1 = (c.body1.isInCollection())? c.body1.parent: c.body1;
+					RigidBody cbody2 = (c.body2.isInCollection())? c.body2.parent: c.body2;
+					if (cbody1 != body1 || cbody2 != body2) {
 						continue;
 					}
 
@@ -226,8 +231,8 @@ public class CollisionProcessor {
 					t_2_omega_t =  j_2.get(5) * j2inv* old_delta_lamda_t;
 
 					//update delta V;
-					DenseVector dV1 = c.body1.delta_V; 
-					DenseVector dV2 = c.body2.delta_V; 
+					DenseVector dV1 = cbody1.delta_V; 
+					DenseVector dV2 = cbody2.delta_V; 
 					dV1.set( 0, dV1.get( 0) + t_1_x_n  + t_1_x_t);
 					dV1.set( 1, dV1.get( 1) + t_1_y_n + t_1_y_t );
 					dV1.set(2, dV1.get(2) +  t_1_omega_n + t_1_omega_t);
@@ -265,9 +270,8 @@ public class CollisionProcessor {
 				DenseVector j_1 = new DenseVector(contact_i.j_1);
 				DenseVector j_2 = new DenseVector(contact_i.j_2);
 
-				// eulalie: actually the body in contact always are subBody...
-				RigidBody body1 = (contact_i.body1.parent!=null)? contact_i.subBody1: contact_i.body1;
-				RigidBody body2 = (contact_i.body2.parent!=null)? contact_i.subBody2: contact_i.body2;
+				RigidBody body1 = (contact_i.body1.isInCollection())? contact_i.body1.parent: contact_i.body1;
+				RigidBody body2 = (contact_i.body2.isInCollection())? contact_i.body2.parent: contact_i.body2;
 				
 				double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
 				double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
@@ -602,16 +606,19 @@ public class CollisionProcessor {
 	 * @param contact
 	 */
 	private void storeContactInBodies(Contact contact) {
+
+		RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
+		RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
 		
-		if (!contact.body1.contactList.contains(contact)) {
-			contact.body1.contactList.add(contact);
+		if (!body1.contactList.contains(contact)) {
+			body1.contactList.add(contact);
 		}
-		if (!contact.body2.contactList.contains(contact)) {
-			contact.body2.contactList.add(contact);
+		if (!body2.contactList.contains(contact)) {
+			body2.contactList.add(contact);
 		}
 		
 		// check if this body contact exists already
-		BodyContact bc = BodyContact.checkExists(contact.subBody1, contact.subBody2, bodyContacts);
+		BodyContact bc = BodyContact.checkExists(contact.body1, contact.body2, bodyContacts);
 
 		if (bc != null) { // if it exists
 			if (!bc.updatedThisTimeStep) { // only once per time step
@@ -622,16 +629,16 @@ public class CollisionProcessor {
 				bc.updatedThisTimeStep = true;
 			}
 		} else { // body contact did not exist in previous list
-			bc = new BodyContact(contact.subBody1, contact.subBody2);
+			bc = new BodyContact(contact.body1, contact.body2);
 			bc.relativeVelHistory.add(contact.getRelativeMetric());
 			bc.updatedThisTimeStep = true;
 			bodyContacts.add(bc);
 		}
 
-		if (!contact.subBody1.bodyContactList.contains(bc))
-			contact.subBody1.bodyContactList.add(bc);
-		if (!contact.subBody2.bodyContactList.contains(bc))
-			contact.subBody2.bodyContactList.add(bc);
+		if (!contact.body1.bodyContactList.contains(bc))
+			contact.body1.bodyContactList.add(bc);
+		if (!contact.body2.bodyContactList.contains(bc))
+			contact.body2.bodyContactList.add(bc);
 		
 		contact.bc = bc;
 		bc.contactList.add(contact);
@@ -805,18 +812,7 @@ public class CollisionProcessor {
 			 *  where if any of the bodies involved are parts of a collection, then the contact 
 			 *  will list the collection as one of its bodies... not the actual contacting subbody
 			 */
-			if (body1.parent != null && body2.parent != null) {
-				contact = new Contact( body1.parent, body2.parent, contactW, normal, b1, b2, distance, body1, body2);
-			}
-			else if (body1.parent != null) {
-				contact = new Contact( body1.parent, body2, contactW, normal, b1, b2, distance,  body1, body2);
-			}
-			else if (body2.parent != null) {
-				contact = new Contact( body1, body2.parent, contactW, normal, b1, b2, distance,  body1, body2);
-			}
-			else {
-				contact = new Contact( body1, body2, contactW, normal, b1, b2, distance,  body1, body2);
-			}
+			contact = new Contact( body1, body2, contactW, normal, b1, b2, distance);
 
 			//set normals in body coordinates
 			contact.normalB1.set(normal);

@@ -266,6 +266,10 @@ public class RigidBody {
 		index = nextIndex++;
 		delta_V.zero();
 	}
+	
+	public boolean isInCollection() {
+		return (parent!=null);
+	}
 
 	/**
 	 * Updates the B2W and W2B transformations

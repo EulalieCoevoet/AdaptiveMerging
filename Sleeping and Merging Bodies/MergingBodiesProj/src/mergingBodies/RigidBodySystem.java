@@ -344,30 +344,34 @@ public class RigidBodySystem {
 	private void applyExternalContactForces(double dt) {
 		for (BodyContact bc : collisionProcessor.bodyContacts) {
 			for (Contact c: bc.contactList) {
-				// Body 1
-				c.body1.savedContactForce.add(c.contactForceB1);
-				c.body1.contactTorques += (c.contactTorqueB1);
-				if (c.body1 instanceof RigidCollection) {
-					double cTorque = getSubBodyTorque(c, c.subBody1);
 
-					if (!c.subBody1.bodyContactListPreMerging.contains(bc)) {
-						c.subBody1.currentContactForce.add(c.contactForceB1);
-						c.subBody1.currentContactTorques += cTorque;
+				RigidBody body1 = (c.body1.isInCollection())? c.body1.parent: c.body1;
+				RigidBody body2 = (c.body2.isInCollection())? c.body2.parent: c.body2;
+				
+				// Body 1
+				body1.savedContactForce.add(c.contactForceB1);
+				body1.contactTorques += (c.contactTorqueB1);
+				if (body1 instanceof RigidCollection) {
+					double cTorque = getSubBodyTorque(c, c.body1);
+
+					if (!c.body1.bodyContactListPreMerging.contains(bc)) {
+						c.body1.currentContactForce.add(c.contactForceB1);
+						c.body1.currentContactTorques += cTorque;
 					}
-					applyToBodyContact(c, c.subBody1, c.contactForceB1, cTorque);
-				} else applyToBodyContact(c, c.body1, c.contactForceB1, c.contactTorqueB1);
+					applyToBodyContact(c, c.body1, c.contactForceB1, cTorque);
+				} else applyToBodyContact(c, body1, c.contactForceB1, c.contactTorqueB1);
 				// Body 2
-				c.body2.savedContactForce.add(c.contactForceB2);
-				c.body2.contactTorques += (c.contactTorqueB2);
-				if (c.body2 instanceof RigidCollection) {
-					double cTorque = getSubBodyTorque(c, c.subBody2);
+				body2.savedContactForce.add(c.contactForceB2);
+				body2.contactTorques += (c.contactTorqueB2);
+				if (body2 instanceof RigidCollection) {
+					double cTorque = getSubBodyTorque(c, c.body2);
 					
-					if (!c.subBody2.bodyContactListPreMerging.contains(bc)) {
-						c.subBody2.currentContactForce.add(c.contactForceB2);
-						c.subBody2.currentContactTorques += cTorque;
+					if (!c.body2.bodyContactListPreMerging.contains(bc)) {
+						c.body2.currentContactForce.add(c.contactForceB2);
+						c.body2.currentContactTorques += cTorque;
 					}
-					applyToBodyContact(c, c.subBody2, c.contactForceB2, cTorque);
-				}else applyToBodyContact(c, c.body2, c.contactForceB2, c.contactTorqueB2);
+					applyToBodyContact(c, c.body2, c.contactForceB2, cTorque);
+				}else applyToBodyContact(c, body2, c.contactForceB2, c.contactTorqueB2);
 			}
 		}
 	}
