@@ -452,7 +452,7 @@ public class RigidCollection extends RigidBody{
 	 * ... does not do anything to the collection itself.
 	 */
 	public void unmergeSingleBody(RigidBody sB) {
-		if (sB.parent == null) return;
+		if (!sB.isInCollection()) return;
 		else {
 			sB.parent.transformB2W.transform(sB.x);
 			sB.theta = sB.transformB2W.getTheta();

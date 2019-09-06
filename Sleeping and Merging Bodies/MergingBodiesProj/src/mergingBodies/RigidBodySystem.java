@@ -725,17 +725,17 @@ public class RigidBodySystem {
 			if (mergeCondition) {
 				bc.merged = true;
 				//if they are both not collections...make a new collection!
-				if(bc.body1.parent == null && bc.body2.parent == null) {
+				if(!bc.body1.isInCollection() && !bc.body2.isInCollection()) {
 					bodies.remove(bc.body1); bodies.remove(bc.body2);
 					RigidCollection col = new RigidCollection(bc.body1, bc.body2);
 					col.addInternalContact(bc);
 					bodies.add(col);
 				}
-				else if (bc.body1.parent != null && bc.body2.parent != null) {
+				else if (bc.body1.isInCollection() && bc.body2.isInCollection()) {
 					// if they are BOTH collections... think about what to do
 					//take all the bodies in the least massive one and add them to the collection of the most massive
 					if (bc.body1.parent.massLinear > bc.body2.parent.massLinear) {
-						bc.body1.merged=true;
+						bc.body1.merged = true;
 						bodies.remove(bc.body2.parent);
 						bc.body1.parent.addCollection(bc.body2.parent);
 						bc.body1.parent.addInternalContact(bc);
@@ -749,14 +749,14 @@ public class RigidBodySystem {
 						bc.body1.parent.addIncompleteCollectionContacts(bc.body2.parent, removalQueue);
 					}
 				}
-				else if (bc.body1.parent != null) {
+				else if (bc.body1.isInCollection()) {
 					//body1 is in a collection... body2 isnt
 					bodies.remove(bc.body2);
 					bc.body1.parent.addBody(bc.body2);
 					bc.body1.parent.addInternalContact(bc);
 					bc.body1.parent.addIncompleteContacts(bc.body2, removalQueue);
 				}
-				else if (bc.body2.parent != null) {
+				else if (bc.body2.isInCollection()) {
 					//body2 is in a collection... body1 isnt
 					bodies.remove(bc.body1);
 					bc.body2.parent.addBody(bc.body1);

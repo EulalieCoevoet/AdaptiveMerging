@@ -79,7 +79,6 @@ public class Contact {
 	//lagrange multiplier for contact, Vector2d(normal, tangent)
 	Vector2d lamda = new Vector2d();
 	BVNode bvn1;
-
 	BVNode bvn2;
 
 	//vector points from body 2 to body 1, magnitude is the amount of overlap.
