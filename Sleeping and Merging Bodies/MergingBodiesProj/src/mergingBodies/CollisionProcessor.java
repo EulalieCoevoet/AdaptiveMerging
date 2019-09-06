@@ -607,14 +607,14 @@ public class CollisionProcessor {
 	 */
 	private void storeContactInBodies(Contact contact) {
 
-		RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
-		RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+		RigidBody bodyOrCollection1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
+		RigidBody bodyOrCollection2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
 		
-		if (!body1.contactList.contains(contact)) {
-			body1.contactList.add(contact);
+		if (!bodyOrCollection1.contactList.contains(contact)) {
+			bodyOrCollection1.contactList.add(contact);
 		}
-		if (!body2.contactList.contains(contact)) {
-			body2.contactList.add(contact);
+		if (!bodyOrCollection2.contactList.contains(contact)) {
+			bodyOrCollection2.contactList.add(contact);
 		}
 		
 		// check if this body contact exists already

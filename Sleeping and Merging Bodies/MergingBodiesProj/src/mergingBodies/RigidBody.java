@@ -293,7 +293,7 @@ public class RigidBody {
 		// holds r vector.
 		Vector2d r = new Vector2d(contactPointW);
 		Point2d tempX = new Point2d(x);
-		if (parent != null) {
+		if (isInCollection()) {
 			parent.transformB2W.transform(tempX);
 		}
 		r.sub(tempX);
@@ -603,7 +603,7 @@ public class RigidBody {
 		gl.glColor3f(1, 0, 1);
 		gl.glBegin(GL.GL_LINES);
 		Point2d p = new Point2d(x);
-		if (parent != null) {
+		if (isInCollection()) {
 			parent.transformB2W.transform(p);
 		}
 		double scale = 2 / massLinear;

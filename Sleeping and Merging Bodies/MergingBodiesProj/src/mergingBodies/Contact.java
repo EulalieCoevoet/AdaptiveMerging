@@ -91,13 +91,12 @@ public class Contact {
 	//Pointer to the BodyContact this contact is a part of. 
 	BodyContact bc;
 
-	//history of the last (max N) timesteps for this contact.
+	//history of the last (max N) time steps for this contact.
 	public ArrayList<Vector2d> body1ContactForceHistory = new ArrayList<Vector2d>();
 	public ArrayList<Double> body1ContactTorqueHistory = new ArrayList<Double>();
 
 	public ArrayList<Vector2d> body2ContactForceHistory = new ArrayList<Vector2d>();
 	public ArrayList<Double> body2ContactTorqueHistory = new ArrayList<Double>();
-
 
 	/**
 	 * Creates a new contact, and assigns it an index
@@ -106,26 +105,44 @@ public class Contact {
 	 * @param contactW
 	 * @param normal
 	 */
-	public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2, double distance) {
-
-		RigidBody cbody1 = (body1.isInCollection())? body1.parent: body1;
-		RigidBody cbody2 = (body2.isInCollection())? body2.parent: body2;
+	public Contact( RigidBody _body1, RigidBody _body2, Point2d _contactW, Vector2d _normal, Block b1, Block b2, double distance) {
 		
-		this.body1 = body1;
-		this.body2 = body2;
-		this.contactW.set( contactW );
-		this.normal.set( normal );        
+		body1 = _body1;
+		body2 = _body2;
+		contactW.set( _contactW );
+		normal.set( _normal );        
+		block1 = b1;
+		block2 = b2;
+		constraintViolation =  distance - 2*Block.radius;
 		index = nextContactIndex++;        
 
+		computeRelativeVelocity();
+		computeJacobian();
+
+		contactB1.set(contactW);
+		contactB2.set(contactW);
+		body1.transformW2B.transform(contactB1);
+		body2.transformW2B.transform(contactB2);
+	}
+
+	protected void computeRelativeVelocity() {
+		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
+		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
+		
+		relativeVelocity.sub(body2.v, body1.v);
+		relativeAngularVelocity = body2.omega - body1.omega;
+	}
+	
+	protected void computeJacobian() {
+		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
+		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
+		
+		Point2d radius_i_body_1 = new Point2d(body1.x);
+		Point2d radius_i_body_2 = new Point2d(body2.x);
+
 		Vector2d contact_point = new Vector2d(contactW);
-
-		Point2d radius_i_body_1 = new Point2d(cbody1.x);
-		Point2d radius_i_body_2 = new Point2d(cbody2.x);
-
 		radius_i_body_1.sub(contact_point, radius_i_body_1);
 		radius_i_body_2.sub(contact_point, radius_i_body_2);
-
-		Vector2d tangeant = new Vector2d(-normal.y, normal.x);
 
 		Vector2d r1 = new Vector2d(-radius_i_body_1.y, radius_i_body_1.x);
 		Vector2d r2 = new Vector2d(-radius_i_body_2.y, radius_i_body_2.x);
@@ -136,26 +153,15 @@ public class Contact {
 		j_1.set(4, normal.y);
 		j_1.set(5, r2.dot(normal));
 
+		Vector2d tangeant = new Vector2d(-normal.y, normal.x);
 		j_2.set(0, -tangeant.x);
 		j_2.set(1, -tangeant.y);
 		j_2.set(2, - r1.dot(tangeant));
 		j_2.set(3, tangeant.x);
 		j_2.set(4, tangeant.y);
 		j_2.set(5, r2.dot(tangeant));
-
-		block1 = b1;
-		block2 = b2;
-
-		constraintViolation =  distance - 2*Block.radius;
-
-		relativeVelocity.sub(cbody2.v, cbody1.v);
-		relativeAngularVelocity = cbody2.omega - cbody1.omega;
-		contactB1.set(contactW);
-		contactB2.set(contactW);
-		body1.transformW2B.transform(contactB1);
-		body2.transformW2B.transform(contactB2);
 	}
-
+	
 	public double getRelativeMetric() {
 		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
 		return k;
