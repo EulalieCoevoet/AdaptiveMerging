@@ -90,4 +90,13 @@ public class LCPAppTests extends LCPApp {
 		assertNotEquals(zeroVelocity, tempPinnedBody.v); 
 		assertFalse(tempPinnedBody.temporarilyPinned); 
     }
+    
+    @Test
+    public void twoStackTest() {
+		loadSystem("datalcp/twoStacks.png");
+    	
+    	for (int i=0; i<400; i++)
+    		system.advanceTime(dt);
+    	assertEquals(system.collisionProcessor.contacts.size(),2); 
+    }
 }
