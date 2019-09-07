@@ -114,11 +114,6 @@ public class RigidBodySystem {
 		if ( processCollisions.getValue() ) {
 			collisionProcessor.processCollisions( dt );
 		}
-
-		// eulalie: weird behavior with boat examples
-//		if (enableMerging.getValue()) { 
-//			updateInternalCollectionForces(dt);
-//		}
 		
 		if (enableMerging.getValue()||enableSleeping.getValue()) {
 			applyExternalContactForces(dt);
@@ -295,7 +290,7 @@ public class RigidBodySystem {
 			b.merged = false;
 			b.force.set(0, 0);
 			b.torque = 0;
-			b.delta_V.zero();
+			b.deltaV.zero();
 
 			b.savedContactForce.set(0, 0);
 
@@ -317,7 +312,7 @@ public class RigidBodySystem {
 				for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
 					//sB.contactForce.set(0, 0);
 					//sB.contactTorques = 0;
-					sB.delta_V.zero();
+					sB.deltaV.zero();
 					sB.currentContactForce.set(sB.savedContactForce);
 					sB.currentContactTorques = sB.contactTorques;
 					//	sB.contactList.clear();
@@ -417,25 +412,6 @@ public class RigidBodySystem {
 			return cTorque;
 		}
 	}
-	
-
-	/**	
-	 * Goes through bodies. If it's a collection, does a Gauss Seidel iteration to update contact forces	
-	 */	
-	private void updateInternalCollectionForces(double dt) {	
-		for (RigidBody b: bodies) {	
-			if (b instanceof RigidCollection) {	
-				double now = 0;	
-				RigidCollection colB = (RigidCollection) b;	
-				colB.collisionProcessor.iterations.setValue(1);	
-				colB.collisionProcessor.contacts.addAll(colB.internalContacts); 	
-				colB.collisionProcessor.contacts.addAll(colB.contactList); 
-				colB.collisionProcessor.PGS(dt, now, false);	
-				//colB.collisionProcessor.calculateContactForce(dt); // eulalie: Why not updating contact forces?	
-				colB.collisionProcessor.contacts.clear();	
-			}	
-		}	
-	}	
 
 	/**
 	 * applies contact force to body contacts so we know how much force each body contact exhudes

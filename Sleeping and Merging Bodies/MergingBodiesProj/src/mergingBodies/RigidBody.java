@@ -169,7 +169,7 @@ public class RigidBody {
 
 	public boolean merged = false;
 
-	DenseVector delta_V = new DenseVector(3);
+	DenseVector deltaV = new DenseVector(3);
 
 	Vector2d deltaF = new Vector2d();
 
@@ -231,7 +231,7 @@ public class RigidBody {
 
 		// set our index
 		index = nextIndex++;
-		delta_V.zero();
+		deltaV.zero();
 	}
 
 	/**
@@ -264,7 +264,7 @@ public class RigidBody {
 		// set our index
 
 		index = nextIndex++;
-		delta_V.zero();
+		deltaV.zero();
 	}
 	
 	public boolean isInCollection() {
@@ -324,10 +324,10 @@ public class RigidBody {
 		if (!pinned && !temporarilyPinned) {
 
 			// non ARPS
-			v.x += force.x * dt / massLinear + delta_V.get(0);
-			v.y += force.y * dt / massLinear + delta_V.get(1);
-			omega += torque * dt / massAngular + delta_V.get(2);
-			delta_V.zero();
+			v.x += force.x * dt / massLinear + deltaV.get(0);
+			v.y += force.y * dt / massLinear + deltaV.get(1);
+			omega += torque * dt / massAngular + deltaV.get(2);
+			deltaV.zero();
 
 			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;

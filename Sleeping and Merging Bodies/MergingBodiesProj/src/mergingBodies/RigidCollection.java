@@ -180,9 +180,9 @@ public class RigidCollection extends RigidBody{
 			temporarilyPinned=!temporarilyPinned; 
 		
 		if (!pinned && !temporarilyPinned) {
-			v.x += force.x * dt/massLinear + delta_V.get(0);
-			v.y += force.y * dt/massLinear + delta_V.get(1);
-			omega += torque * dt/ massAngular + delta_V.get(2);
+			v.x += force.x * dt/massLinear + deltaV.get(0);
+			v.y += force.y * dt/massLinear + deltaV.get(1);
+			omega += torque * dt/ massAngular + deltaV.get(2);
 			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;
 				x.y += v.y * dt;

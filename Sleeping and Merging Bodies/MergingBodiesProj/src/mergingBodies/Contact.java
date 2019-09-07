@@ -72,9 +72,9 @@ public class Contact {
 	/** Position of contact point in subBody2 coordinates */
 	Point2d contactB2  = new Point2d();
 	//for normal
-	DenseVector j_1 = new DenseVector(6);
+	DenseVector j1 = new DenseVector(6);
 	//for tangential
-	DenseVector j_2 = new DenseVector(6);
+	DenseVector j2 = new DenseVector(6);
 
 	//lagrange multiplier for contact, Vector2d(normal, tangent)
 	Vector2d lamda = new Vector2d();
@@ -105,12 +105,12 @@ public class Contact {
 	 * @param contactW
 	 * @param normal
 	 */
-	public Contact( RigidBody _body1, RigidBody _body2, Point2d _contactW, Vector2d _normal, Block b1, Block b2, double distance) {
+	public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2, double distance) {
 		
-		body1 = _body1;
-		body2 = _body2;
-		contactW.set( _contactW );
-		normal.set( _normal );        
+		this.body1 = body1;
+		this.body2 = body2;
+		this.contactW.set( contactW );
+		this.normal.set( normal );        
 		block1 = b1;
 		block2 = b2;
 		constraintViolation =  distance - 2*Block.radius;
@@ -125,6 +125,10 @@ public class Contact {
 		body2.transformW2B.transform(contactB2);
 	}
 
+	/**
+	 * Computes the relative velocity between the two bodies in contact.
+	 * In case of body in a collection, use velocities of parent.
+	 */
 	protected void computeRelativeVelocity() {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
@@ -133,6 +137,10 @@ public class Contact {
 		relativeAngularVelocity = body2.omega - body1.omega;
 	}
 	
+	/**
+	 * Computes the Jacobian matrix of the constraint.
+	 * In case of body in a collection, use position of parent.
+	 */
 	protected void computeJacobian() {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
@@ -146,27 +154,30 @@ public class Contact {
 
 		Vector2d r1 = new Vector2d(-radius_i_body_1.y, radius_i_body_1.x);
 		Vector2d r2 = new Vector2d(-radius_i_body_2.y, radius_i_body_2.x);
-		j_1.set(0, -normal.x); 
-		j_1.set(1, -normal.y);
-		j_1.set(2, - r1.dot(normal));
-		j_1.set(3, normal.x);
-		j_1.set(4, normal.y);
-		j_1.set(5, r2.dot(normal));
+		j1.set(0, -normal.x); 
+		j1.set(1, -normal.y);
+		j1.set(2, - r1.dot(normal));
+		j1.set(3, normal.x);
+		j1.set(4, normal.y);
+		j1.set(5, r2.dot(normal));
 
 		Vector2d tangeant = new Vector2d(-normal.y, normal.x);
-		j_2.set(0, -tangeant.x);
-		j_2.set(1, -tangeant.y);
-		j_2.set(2, - r1.dot(tangeant));
-		j_2.set(3, tangeant.x);
-		j_2.set(4, tangeant.y);
-		j_2.set(5, r2.dot(tangeant));
+		j2.set(0, -tangeant.x);
+		j2.set(1, -tangeant.y);
+		j2.set(2, - r1.dot(tangeant));
+		j2.set(3, tangeant.x);
+		j2.set(4, tangeant.y);
+		j2.set(5, r2.dot(tangeant));
 	}
 	
+	/**
+	 * Computes and returns the relative kinetic energy without the mass
+	 * @return metric
+	 */
 	public double getRelativeMetric() {
 		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
 		return k;
 	}
-
 
 	/**
 	 * Draws the contact points
@@ -197,8 +208,10 @@ public class Contact {
 			Point2d p1 = new Point2d(body1.x);
 			Point2d p2 = new Point2d(body2.x);
 			
-			if (body1.isInCollection()) body1.parent.transformB2W.transform(p1);
-			if (body2.isInCollection()) body2.parent.transformB2W.transform(p2);
+			if (body1.isInCollection()) 
+				body1.parent.transformB2W.transform(p1);
+			if (body2.isInCollection()) 
+				body2.parent.transformB2W.transform(p2);
 
 			gl.glVertex2d(p1.x, p1.y);
 			gl.glVertex2d(p2.x, p2.y);
