@@ -14,14 +14,14 @@ public class PGS {
 	
 	public PGS() {
 		mu=0.6;
-		iteration=200;
+		iterations=200;
 		restitution=0;
 		warmStart=false;
 	}
 	
 	public PGS(double mu, int iteration, double restitution) {
 		this.mu=mu;
-		this.iteration=iteration;
+		this.iterations=iteration;
 		this.restitution=restitution;
 	}
 	
@@ -32,13 +32,17 @@ public class PGS {
 	public double mu;
 	
 	/** Number of iterations */
-	public int iteration;
+	public int iterations;
 	
 	/** Feedback stiffness coefficient*/
 	public double feedbackStiffness;
 	
 	/** Coefficient of restitution (bounce) */
 	public double restitution;
+	
+	/** Special case for contacts in collections */
+	public boolean computeInCollections;
+	public boolean confidentWarmStart;
 	
 	/** Warm start option */
 	protected boolean warmStart;
@@ -68,43 +72,43 @@ public class PGS {
 			System.out.println("Error: PGS.solve() method needs the list PGS.contacts to be filled.");
 			return;
 		}
-		
+
 		initLambdas();
 		organizeContactIndex();
 		
-		if (warmStart && lastTimeStepMap != null) 
+		if (confidentWarmStart)
+			confidentWarmStart();
+		else if (warmStart && lastTimeStepMap != null) 
 			warmStart();
 		
-		while(iteration > 0) {
+		while(iterations > 0) {
 			
 			for (int i=0; i<dim; i++) {
 				
-				double d = computeD(i);
+				double JMinv = computeJMinv(i);
 				double Jdv = computeJdv(i);
-				Jdv /= d;
-				double b = computeB(i, dt, d);
+				double b = computeB(i, dt);
 
 				double lambda = lambdas.get(i);
 				double prevLambda = lambda;
-				lambda -= b + Jdv;
+				lambda -= b/JMinv + Jdv/JMinv;
 				lambda = handleContactConstraints(lambda, i);
-				
-				double delta = lambda - prevLambda;
 				
 				//update the force on each body to account for the collision
 				//updating lambda vector
-				Contact contact_i = contacts.get(i/2);
+				Contact contact = contacts.get(i/2);
 				if (i%2 ==0) {
-					lambdas.set(2*contact_i.index,  lambda);
-					contact_i.lamda.set(lambda, contact_i.lamda.y);
+					lambdas.set(2*contact.index,  lambda);
+					contact.lambda.set(lambda, contact.lambda.y);
 				} else {
-					lambdas.set(2*contact_i.index + 1, lambda);
-					contact_i.lamda.set(contact_i.lamda.x, lambda);
+					lambdas.set(2*contact.index + 1, lambda);
+					contact.lambda.set(contact.lambda.x, lambda);
 				}
 				
-				updateVelocity(i, delta);
+				double dLambda = lambda - prevLambda;
+				updateVelocity(i, dLambda);
 			}
-			iteration--;
+			iterations--;
 		}
 	}
 	
@@ -125,11 +129,11 @@ public class PGS {
 	 * @param index index in lambdas list
 	 * @return d(index)
 	 */
-	protected double computeD(int index) {
+	protected double computeJMinv(int index) {
 		
 		Contact contact = contacts.get(index/2);
-		RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
-		RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollections)? contact.body1.parent: contact.body1;
+		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollections)? contact.body2.parent: contact.body2;
 		
 		double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
 		double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
@@ -161,8 +165,8 @@ public class PGS {
 	protected double computeJdv(int index) {
 		
 		Contact contact = contacts.get(index/2);
-		RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
-		RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollections)? contact.body1.parent: contact.body1;
+		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollections)? contact.body2.parent: contact.body2;
 		
 		DenseVector dv1 = body1.deltaV; 
 		DenseVector dv2 = body2.deltaV; 
@@ -194,11 +198,11 @@ public class PGS {
 	 * @param d
 	 * @return
 	 */
-	protected double computeB(int index, double dt, double d) {	
+	protected double computeB(int index, double dt) {	
 		
 		Contact contact = contacts.get(index/2);
-		RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
-		RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollections)? contact.body1.parent: contact.body1;
+		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollections)? contact.body2.parent: contact.body2;
 
 		double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
 		double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
@@ -212,31 +216,31 @@ public class PGS {
 			j = new DenseVector(contact.j2);
 		
 		// find all relevant values of u.
-		double u_1_x = body1.v.x;
-		double u_1_y = body1.v.y;
-		double u_1_omega = body1.omega;
+		double u1x = body1.v.x;
+		double u1y = body1.v.y;
+		double u1omega = body1.omega;
 
-		double u_2_x = body2.v.x;
-		double u_2_y = body2.v.y;
-		double u_2_omega = body2.omega;
+		double u2x = body2.v.x;
+		double u2y = body2.v.y;
+		double u2omega = body2.omega;
 
 		// add all relevant values of f, multiplied by appropriate minv to u_1_x etc
-		u_1_x += body1.force.x * m1inv*dt;
-		u_1_y += body1.force.y * m1inv*dt;
-		u_1_omega += body1.torque * j1inv*dt;
+		u1x += body1.force.x * m1inv*dt;
+		u1y += body1.force.y * m1inv*dt;
+		u1omega += body1.torque * j1inv*dt;
 
-		u_2_x += body2.force.x * m2inv*dt;
-		u_2_y += body2.force.y * m2inv*dt;
-		u_2_omega += body2.torque * j2inv*dt;
+		u2x += body2.force.x * m2inv*dt;
+		u2y += body2.force.y * m2inv*dt;
+		u2omega += body2.torque * j2inv*dt;
 
 		// multiply all the u values by the appropriate J values.
-		u_1_x *= j.get(0);
-		u_1_y *= j.get(1);
-		u_1_omega *= j.get(2);
+		u1x *= j.get(0);
+		u1y *= j.get(1);
+		u1omega *= j.get(2);
 
-		u_2_x *= j.get(3);
-		u_2_y *= j.get(4);
-		u_2_omega *= j.get(5);
+		u2x *= j.get(3);
+		u2y *= j.get(4);
+		u2omega *= j.get(5);
 
 		// add the Bounce vector to the u's over here, but don't need to do that just yet
 		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
@@ -246,9 +250,9 @@ public class PGS {
 		// putting b together.
 		double b = 0;
 		if (index%2 ==0)
-			b = (u_1_x + u_2_x + u_1_y + u_2_y + u_1_omega + u_2_omega - restitution + baumgarteFeedback)/d;
+			b = u1x + u2x + u1y + u2y + u1omega + u2omega - restitution + baumgarteFeedback;
 		else
-			b = (u_1_x + u_2_x + u_1_y + u_2_y + u_1_omega + u_2_omega)/d;
+			b = u1x + u2x + u1y + u2y + u1omega + u2omega;
 			
 		return b;
 	}
@@ -278,8 +282,8 @@ public class PGS {
 	protected void updateVelocity(int index, double dLambda) {
 		
 		Contact contact = contacts.get(index/2);
-		RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
-		RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollections)? contact.body1.parent: contact.body1;
+		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollections)? contact.body2.parent: contact.body2;
 
 		double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
 		double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
@@ -338,8 +342,8 @@ public class PGS {
 					continue;
 				}
 
-				double old_lamda_n = c.lamda.x;
-				double old_lamda_t = c.lamda.y;
+				double old_lamda_n = c.lambda.x;
+				double old_lamda_t = c.lambda.y;
 				double old_delta_lamda_n = old_lamda_n;
 				double old_delta_lamda_t = old_lamda_t;
 				//set this lamda to the old lamda
@@ -390,5 +394,17 @@ public class PGS {
 				contact.body2ContactTorqueHistory.addAll(c.body2ContactTorqueHistory);
 			}
 		}
-	} 	
+	}
+	
+	/**
+	 * Warm start if the confidence that each contact already has a value for lambda
+	 */
+	protected void confidentWarmStart() {
+		int index = 0;
+		for (Contact contact : contacts) {
+			lambdas.set(index, contact.lambda.x);
+			lambdas.set(index+1, contact.lambda.y);
+			index+=2;
+		}
+	}
 }

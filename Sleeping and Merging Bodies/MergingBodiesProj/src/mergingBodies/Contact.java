@@ -71,30 +71,32 @@ public class Contact {
 	
 	/** Position of contact point in subBody2 coordinates */
 	Point2d contactB2  = new Point2d();
-	//for normal
+	
+	/** Jacobian for normal direction */ 
 	DenseVector j1 = new DenseVector(6);
-	//for tangential
+	
+	/** Jacobian for tangential direction */ 
 	DenseVector j2 = new DenseVector(6);
 
-	//lagrange multiplier for contact, Vector2d(normal, tangent)
-	Vector2d lamda = new Vector2d();
+	/** Lagrange multiplier for contact, Vector2d(normal, tangent) */
+	Vector2d lambda = new Vector2d();
+	
 	BVNode bvn1;
 	BVNode bvn2;
 
-	//vector points from body 2 to body 1, magnitude is the amount of overlap.
+	/** vector points from body 2 to body 1, magnitude is the amount of overlap.*/
 	double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
 
 	Vector2d relativeVelocity = new Vector2d();
 
 	double relativeAngularVelocity = 0;
 
-	//Pointer to the BodyContact this contact is a part of. 
+	/** Pointer to the BodyContact this contact is a part of. */
 	BodyContact bc;
 
-	//history of the last (max N) time steps for this contact.
+	/** history of the last (max N) time steps for this contact. */
 	public ArrayList<Vector2d> body1ContactForceHistory = new ArrayList<Vector2d>();
 	public ArrayList<Double> body1ContactTorqueHistory = new ArrayList<Double>();
-
 	public ArrayList<Vector2d> body2ContactForceHistory = new ArrayList<Vector2d>();
 	public ArrayList<Double> body2ContactTorqueHistory = new ArrayList<Double>();
 
@@ -139,21 +141,21 @@ public class Contact {
 	
 	/**
 	 * Computes the Jacobian matrix of the constraint.
-	 * In case of body in a collection, use position of parent.
+	 * In case of body in a collection, use position of parent to compute the third component of the Jacobian.
 	 */
 	protected void computeJacobian() {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		Point2d radius_i_body_1 = new Point2d(body1.x);
-		Point2d radius_i_body_2 = new Point2d(body2.x);
+		Point2d radiusBody1 = new Point2d(body1.x);
+		Point2d radiusBody2 = new Point2d(body2.x);
 
-		Vector2d contact_point = new Vector2d(contactW);
-		radius_i_body_1.sub(contact_point, radius_i_body_1);
-		radius_i_body_2.sub(contact_point, radius_i_body_2);
+		Vector2d contactPoint = new Vector2d(contactW);
+		radiusBody1.sub(contactPoint, radiusBody1);
+		radiusBody2.sub(contactPoint, radiusBody2);
 
-		Vector2d r1 = new Vector2d(-radius_i_body_1.y, radius_i_body_1.x);
-		Vector2d r2 = new Vector2d(-radius_i_body_2.y, radius_i_body_2.x);
+		Vector2d r1 = new Vector2d(-radiusBody1.y, radiusBody1.x);
+		Vector2d r2 = new Vector2d(-radiusBody2.y, radiusBody2.x);
 		j1.set(0, -normal.x); 
 		j1.set(1, -normal.y);
 		j1.set(2, - r1.dot(normal));
@@ -161,13 +163,13 @@ public class Contact {
 		j1.set(4, normal.y);
 		j1.set(5, r2.dot(normal));
 
-		Vector2d tangeant = new Vector2d(-normal.y, normal.x);
-		j2.set(0, -tangeant.x);
-		j2.set(1, -tangeant.y);
-		j2.set(2, - r1.dot(tangeant));
-		j2.set(3, tangeant.x);
-		j2.set(4, tangeant.y);
-		j2.set(5, r2.dot(tangeant));
+		Vector2d tangent = new Vector2d(-normal.y, normal.x);
+		j2.set(0, -tangent.x);
+		j2.set(1, -tangent.y);
+		j2.set(2, - r1.dot(tangent));
+		j2.set(3, tangent.x);
+		j2.set(4, tangent.y);
+		j2.set(5, r2.dot(tangent));
 	}
 	
 	/**

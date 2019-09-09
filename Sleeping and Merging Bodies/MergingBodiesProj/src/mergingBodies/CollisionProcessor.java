@@ -85,7 +85,8 @@ public class CollisionProcessor {
 	    		knuth_shuffle();
 	    	
 			PGS solver = new PGS(friction.getValue(), iterations.getValue(), restitution.getValue());
-			solver.enableWarmStart(lastTimeStepMap);
+			if (warmStart.getValue())
+				solver.enableWarmStart(lastTimeStepMap);
 			solver.contacts = contacts;
 			
 			now = System.nanoTime();
@@ -99,16 +100,44 @@ public class CollisionProcessor {
 				lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), co);
 			} 
 			
+			// apply one iteration of PGS for contacts inside the collections
+			solver.iterations = 1;
+			solver.confidentWarmStart = true;
+			solver.computeInCollections = true;
+			addCollectionsInternalContacts();
+			solver.solve(dt);
+			removeCollectionsInternalContacts();
+			
 			calculateContactForce(dt);	
 		}
 	}
+	
+	protected void addCollectionsInternalContacts()	
+	{	
+		for (RigidBody body: bodies) {		
+			if (body instanceof RigidCollection) {		
+				RigidCollection colB = (RigidCollection) body;		
+				contacts.addAll(colB.internalContacts); 	
+			}		
+		}	
+	}	
+
+	protected void removeCollectionsInternalContacts()	
+	{	
+		for (RigidBody body: bodies) {		
+			if (body instanceof RigidCollection) {		
+				RigidCollection colB = (RigidCollection) body;		
+				contacts.removeAll(colB.internalContacts); 	
+			}		
+		}	
+	}	
 
 	public void calculateContactForce(double dt) {
 		Vector2d cForce = new Vector2d();
 		double cTorque = 0;
 		for (Contact c: contacts) {
-			cForce.set(c.lamda.x*c.j1.get(0) + c.lamda.y*c.j2.get(0),c.lamda.x*c.j1.get(1) + c.lamda.y*c.j2.get(1) );
-			cTorque = c.lamda.x*c.j1.get(2) + c.lamda.y*c.j2.get(2);
+			cForce.set(c.lambda.x*c.j1.get(0) + c.lambda.y*c.j2.get(0),c.lambda.x*c.j1.get(1) + c.lambda.y*c.j2.get(1) );
+			cTorque = c.lambda.x*c.j1.get(2) + c.lambda.y*c.j2.get(2);
 			cForce.scale(1/dt);
 			c.body1.transformW2B.transform(cForce);
 			c.contactForceB1.set(cForce);
@@ -123,8 +152,8 @@ public class CollisionProcessor {
 
 			//if Body1 is a parent, also apply the contact force to the appropriate subBody
 
-			cForce.set(c.lamda.x*c.j1.get(3) + c.lamda.y*c.j2.get(3),c.lamda.x*c.j1.get(4) + c.lamda.y*c.j2.get(4) );
-			cTorque = c.lamda.x*c.j1.get(5) + c.lamda.y*c.j2.get(5);
+			cForce.set(c.lambda.x*c.j1.get(3) + c.lambda.y*c.j2.get(3),c.lambda.x*c.j1.get(4) + c.lambda.y*c.j2.get(4) );
+			cTorque = c.lambda.x*c.j1.get(5) + c.lambda.y*c.j2.get(5);
 			cForce.scale(1/dt);
 			c.body2.transformW2B.transform(cForce);
 			c.contactForceB2.set(cForce);
@@ -168,12 +197,6 @@ public class CollisionProcessor {
 			bc.addToBodyLists();
 		}
 	}
-
-	private void organize() {
-		for (Contact c : contacts) {
-			c.index = contacts.indexOf(c);
-		}
-	}	
 
 	private void knuth_shuffle() {
 		//go through each element in contacts 2.

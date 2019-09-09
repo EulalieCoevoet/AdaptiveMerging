@@ -354,7 +354,9 @@ public class RigidBodySystem {
 						c.body1.currentContactTorques += cTorque;
 					}
 					applyToBodyContact(c, c.body1, c.contactForceB1, cTorque);
-				} else applyToBodyContact(c, body1, c.contactForceB1, c.contactTorqueB1);
+				} else 
+					applyToBodyContact(c, body1, c.contactForceB1, c.contactTorqueB1);
+				
 				// Body 2
 				body2.savedContactForce.add(c.contactForceB2);
 				body2.contactTorques += (c.contactTorqueB2);
@@ -366,7 +368,8 @@ public class RigidBodySystem {
 						c.body2.currentContactTorques += cTorque;
 					}
 					applyToBodyContact(c, c.body2, c.contactForceB2, cTorque);
-				}else applyToBodyContact(c, body2, c.contactForceB2, c.contactTorqueB2);
+				}else 
+					applyToBodyContact(c, body2, c.contactForceB2, c.contactTorqueB2);
 			}
 		}
 	}
@@ -392,7 +395,7 @@ public class RigidBodySystem {
 				jt_omega *= -1;
 			}
 
-			cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
+			cTorque = c.lambda.x*jn_omega + c.lambda.y*jt_omega;
 			return cTorque;
 		}
 		else {
@@ -408,7 +411,7 @@ public class RigidBodySystem {
 				jn_omega *= -1;
 				jt_omega *= -1;
 			}
-			cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
+			cTorque = c.lambda.x*jn_omega + c.lambda.y*jt_omega;
 			return cTorque;
 		}
 	}
@@ -421,7 +424,7 @@ public class RigidBodySystem {
 			c.bc.body1ContactForce.add(cForce);
 			c.bc.body1ContactTorque += cTorque;
 
-		}else if (c.bc.body2 == body) {
+		} else if (c.bc.body2 == body) {
 			c.bc.body2ContactForce.add(cForce);
 			c.bc.body2ContactTorque += cTorque;
 		}
@@ -457,7 +460,7 @@ public class RigidBodySystem {
 
 			}
 
-			cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
+			cTorque = c.lambda.x*jn_omega + c.lambda.y*jt_omega;
 
 			//add to force in subBodies because we need to remember the 
 			//contact forces, but not the ones modified... otherwise itll keep accumulating
@@ -486,7 +489,7 @@ public class RigidBodySystem {
 				jt_omega *= -1;
 			}
 
-			cTorque = c.lamda.x*jn_omega + c.lamda.y*jt_omega;
+			cTorque = c.lambda.x*jn_omega + c.lambda.y*jt_omega;
 			c.bc.body2.torque += cTorque;
 		}
 	}
