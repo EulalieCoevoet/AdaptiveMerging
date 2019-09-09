@@ -91,7 +91,7 @@ public class PGS {
 
 				double lambda = lambdas.get(i);
 				double prevLambda = lambda;
-				lambda -= b/JMinv + Jdv/JMinv;
+				lambda -= (b + Jdv)/JMinv;
 				lambda = handleContactConstraints(lambda, i);
 				
 				//update the force on each body to account for the collision
@@ -105,9 +105,12 @@ public class PGS {
 					contact.lambda.set(contact.lambda.x, lambda);
 				}
 				
-				double dLambda = lambda - prevLambda;
-				updateVelocity(i, dLambda);
+				if (!computeInCollections) {
+					double dLambda = lambda - prevLambda;
+					updateVelocity(i, dLambda);
+				}
 			}
+			
 			iterations--;
 		}
 	}

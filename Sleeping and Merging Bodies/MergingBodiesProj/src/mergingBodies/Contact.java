@@ -28,8 +28,6 @@ public class Contact {
 
 	/**    If the contact is between two sleeping bodies or not  */
 	boolean passive = false;
-
-	boolean precomputer = false;
 	
 	/** First RigidBody in contact */
 	public RigidBody body1;
@@ -51,25 +49,25 @@ public class Contact {
 	/** Contact normal in Body2 coordinates. GOES FROM BODY1 to BODY2*/
 	Vector2d normalB2 = new Vector2d();
 
-	/**contact force being applied by this contact on body1*/
+	/** Contact force being applied by this contact on body1*/
 	Vector2d contactForceB1 = new Vector2d();
 
-	/**contact torque being applied by this contact on body1*/
+	/** Contact torque being applied by this contact on body1*/
 	double contactTorqueB1 = 0;
 
 	/** Contact force being applied by this contact on body2*/
 	Vector2d contactForceB2 = new Vector2d();
 
-	/**contact torque being applied by this contact on body2*/
+	/** Contact torque being applied by this contact on body2*/
 	double contactTorqueB2 = 0;
 
 	/** Position of contact point in world coordinates */
 	Point2d contactW = new Point2d();
 	
-	/** Position of contact point in subBody1 coordinates */
+	/** Position of contact point in Body1 coordinates */
 	Point2d contactB1  = new Point2d();
 	
-	/** Position of contact point in subBody2 coordinates */
+	/** Position of contact point in Body2 coordinates */
 	Point2d contactB2  = new Point2d();
 	
 	/** Jacobian for normal direction */ 
@@ -141,7 +139,7 @@ public class Contact {
 	
 	/**
 	 * Computes the Jacobian matrix of the constraint.
-	 * In case of body in a collection, use position of parent to compute the third component of the Jacobian.
+	 * In case of body in a collection, use position of parent to compute the torque component of the Jacobian.
 	 */
 	protected void computeJacobian() {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;

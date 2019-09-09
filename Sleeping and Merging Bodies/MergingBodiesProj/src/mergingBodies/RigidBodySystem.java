@@ -102,20 +102,20 @@ public class RigidBodySystem {
 		clearJunkAtStartOfTimeStep();
 
 		// apply gravity to all bodies... also take this opportunity to clear all forces at the start of the time step
-		if ( useGravity.getValue() ) {
+		if (useGravity.getValue()) {
 			applyGravityForce();
 		}  
 
-		if(mouseSpring != null) {
+		if (mouseSpring != null) {
 			mouseSpring.apply();
 			applySpringForces(); // deal with zero length springs
 		}
 		
-		if ( processCollisions.getValue() ) {
+		if (processCollisions.getValue()) {
 			collisionProcessor.processCollisions( dt );
 		}
 		
-		if (enableMerging.getValue()||enableSleeping.getValue()) {
+		if (enableMerging.getValue() || enableSleeping.getValue()) {
 			applyExternalContactForces(dt);
 		}
 
@@ -272,19 +272,6 @@ public class RigidBodySystem {
 		}
 	}
 
-	private void applyInternalContactForces(double dt) {
-		/*for (RigidBody b: bodies) {
-			if (b instanceof RigidCollection) {
-				for (Contact c : ((RigidCollection) b).internalContacts) {
-					  c.subBody1.contactForce.add(c.contactForceB1);
-					  c.subBody1.contactTorques += (c.contactTorqueB1);
-					  c.subBody2.contactForce.add(c.contactForceB2);
-					  c.subBody2.contactTorques += (c.contactTorqueB2);
-				}
-			}
-		}*/
-	}
-
 	private void clearJunkAtStartOfTimeStep() {
 		for (RigidBody b: bodies) {
 			b.merged = false;
@@ -298,11 +285,12 @@ public class RigidBodySystem {
 			b.contactTorques = 0;
 			b.currentContactTorques = 0;
 			b.contactList.clear();
-			//b.bodyContactList.clear();
+			
 			ArrayList<BodyContact> newBodyContactList = new ArrayList<BodyContact>();
 			for (BodyContact bc : b.bodyContactList) 
 				if (bc.updatedThisTimeStep) 
 					newBodyContactList.add(bc);
+			
 			b.bodyContactList.clear();
 			b.bodyContactList.addAll(newBodyContactList);
 
@@ -310,26 +298,22 @@ public class RigidBodySystem {
 				((RigidCollection) b).unmergedThisTimeStep = false;
 				((RigidCollection) b).updatedThisTimeStep = false; 
 				for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
-					//sB.contactForce.set(0, 0);
-					//sB.contactTorques = 0;
 					sB.deltaV.zero();
 					sB.currentContactForce.set(sB.savedContactForce);
 					sB.currentContactTorques = sB.contactTorques;
-					//	sB.contactList.clear();
 					sB.force.set(0, 0);
 					sB.torque = 0;
 					sB.merged = false;
+					
 					newBodyContactList.clear();
 					for (BodyContact bc : sB.bodyContactList) 
 						if (bc.merged || bc.updatedThisTimeStep) 
 							newBodyContactList.add(bc);
+					
 					sB.bodyContactList.clear();
 					sB.bodyContactList.addAll(newBodyContactList);
 				}
 			}
-		}
-		for (BodyContact bc : collisionProcessor.bodyContacts) {
-			bc.clearForces();
 		}
 	}
 
@@ -353,9 +337,7 @@ public class RigidBodySystem {
 						c.body1.currentContactForce.add(c.contactForceB1);
 						c.body1.currentContactTorques += cTorque;
 					}
-					applyToBodyContact(c, c.body1, c.contactForceB1, cTorque);
-				} else 
-					applyToBodyContact(c, body1, c.contactForceB1, c.contactTorqueB1);
+				} 
 				
 				// Body 2
 				body2.savedContactForce.add(c.contactForceB2);
@@ -367,9 +349,7 @@ public class RigidBodySystem {
 						c.body2.currentContactForce.add(c.contactForceB2);
 						c.body2.currentContactTorques += cTorque;
 					}
-					applyToBodyContact(c, c.body2, c.contactForceB2, cTorque);
-				}else 
-					applyToBodyContact(c, body2, c.contactForceB2, c.contactTorqueB2);
+				}
 			}
 		}
 	}
@@ -413,20 +393,6 @@ public class RigidBodySystem {
 			}
 			cTorque = c.lambda.x*jn_omega + c.lambda.y*jt_omega;
 			return cTorque;
-		}
-	}
-
-	/**
-	 * applies contact force to body contacts so we know how much force each body contact exhudes
-	 */
-	private void applyToBodyContact(Contact c, RigidBody body, Vector2d cForce, double cTorque) {
-		if (c.bc.body1 == body) {
-			c.bc.body1ContactForce.add(cForce);
-			c.bc.body1ContactTorque += cTorque;
-
-		} else if (c.bc.body2 == body) {
-			c.bc.body2ContactForce.add(cForce);
-			c.bc.body2ContactTorque += cTorque;
 		}
 	}
 
@@ -538,7 +504,6 @@ public class RigidBodySystem {
 						}
 						removalQueue.add(colB);
 						newBodies.clear();
-						int x = 0;
 					}
 				}
 			}

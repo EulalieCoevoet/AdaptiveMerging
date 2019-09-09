@@ -106,9 +106,9 @@ public class CollisionProcessor {
 			solver.computeInCollections = true;
 			addCollectionsInternalContacts();
 			solver.solve(dt);
-			removeCollectionsInternalContacts();
 			
 			calculateContactForce(dt);	
+			removeCollectionsInternalContacts();
 		}
 	}
 	
@@ -132,25 +132,22 @@ public class CollisionProcessor {
 		}	
 	}	
 
+	/**
+	 * Compute the contact force J*lambda.
+	 * Also compute contact force history for visualization only.
+	 * @param dt
+	 */
 	public void calculateContactForce(double dt) {
 		Vector2d cForce = new Vector2d();
 		double cTorque = 0;
 		for (Contact c: contacts) {
+			
 			cForce.set(c.lambda.x*c.j1.get(0) + c.lambda.y*c.j2.get(0),c.lambda.x*c.j1.get(1) + c.lambda.y*c.j2.get(1) );
 			cTorque = c.lambda.x*c.j1.get(2) + c.lambda.y*c.j2.get(2);
 			cForce.scale(1/dt);
 			c.body1.transformW2B.transform(cForce);
 			c.contactForceB1.set(cForce);
 			c.contactTorqueB1 = cTorque/dt;
-
-			c.body1ContactForceHistory.add(c.contactForceB1);
-			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
-			if (c.body1ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
-				c.body1ContactForceHistory.remove(0);
-				c.body1ContactTorqueHistory.remove(0);
-			}
-
-			//if Body1 is a parent, also apply the contact force to the appropriate subBody
 
 			cForce.set(c.lambda.x*c.j1.get(3) + c.lambda.y*c.j2.get(3),c.lambda.x*c.j1.get(4) + c.lambda.y*c.j2.get(4) );
 			cTorque = c.lambda.x*c.j1.get(5) + c.lambda.y*c.j2.get(5);
@@ -159,6 +156,13 @@ public class CollisionProcessor {
 			c.contactForceB2.set(cForce);
 			c.contactTorqueB2 = cTorque/dt;
 
+			c.body1ContactForceHistory.add(c.contactForceB1);
+			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
+			if (c.body1ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
+				c.body1ContactForceHistory.remove(0);
+				c.body1ContactTorqueHistory.remove(0);
+			}
+
 			c.body2ContactForceHistory.add(c.contactForceB2);
 			c.body2ContactTorqueHistory.add(c.contactTorqueB2);
 			if (c.body2ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
@@ -166,6 +170,7 @@ public class CollisionProcessor {
 				c.body2ContactTorqueHistory.remove(0);
 			}
 
+			//if Body1 is a parent, also apply the contact force to the appropriate subBody
 			//if Body2 is a parent, also apply the contact force to the appropriate subBody
 		}
 	}
