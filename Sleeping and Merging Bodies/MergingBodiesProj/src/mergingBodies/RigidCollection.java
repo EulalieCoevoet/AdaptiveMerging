@@ -31,9 +31,9 @@ public class RigidCollection extends RigidBody{
 	/**
 	 * Create a RigidCollection from two RigidBody: 
 	 * <p><ul>
-	 * <il> Copy body1, and add body1 and body2 to collectionBodies
-	 * <il> Saved bodyContactList of RigidBody in bodyContactListPreMerging
-	 * <il> Update temporarilyPinned option, transfer to RigidCollection, removed from RigidBody
+	 * <li> copy body1, and add body1 and body2 to collectionBodies
+	 * <li> save bodyContactList of RigidBody in bodyContactListPreMerging
+	 * <li> update temporarilyPinned option: transfer to RigidCollection, removed from RigidBody
 	 * </ul><p>
 	 * @param body1
 	 * @param body2
@@ -150,6 +150,70 @@ public class RigidCollection extends RigidBody{
 			internalContacts.add(c);
 			//col.transformB2W.transform(c.contactW);
 			col.transformB2W.transform(c.normal);
+		}
+	}
+	
+	/**
+	 * Update the contact's Jacobian of bodies inside a given collection
+	 * @param collection
+	 */
+	public void updateBodiesJacobian() {
+		for (Contact c : internalContacts) {
+			Vector2d normal = new Vector2d(c.normalB1);
+			c.body1.transformB2W.transform(normal);
+			c.computeJacobian(normal);
+		}
+	}
+	
+	/**
+	 * Update forces applied on bodies inside a given collection:
+	 * <p><ul>
+	 * <li> gravity is already added
+	 * <li> spring forces are already added 
+	 * <li> in this method, we add the new external contact forces
+	 * <li> (note) this force is set to zero at each beginning of time step
+	 * </ul><p>
+	 * @param collection
+	 */
+	public void updateBodiesForces(double dt) {
+		for (RigidBody body : collectionBodies) { 
+			for (BodyContact bc : body.bodyContactList) { 
+				RigidBody otherBody = bc.getOtherBody(body);
+				if (!otherBody.isInCollection(this)) {
+					for (Contact c : bc.contactList) {
+							
+						Vector2d force = new Vector2d();
+						double torque;
+						
+						if (c.body1==body) {
+							force.set(c.lambda.x*c.j1.get(0) + c.lambda.y*c.j2.get(0), c.lambda.x*c.j1.get(1) + c.lambda.y*c.j2.get(1));
+							torque = c.lambda.x*c.j1.get(2) + c.lambda.y*c.j2.get(2);
+						} else {
+							force.set(c.lambda.x*c.j1.get(3) + c.lambda.y*c.j2.get(3), c.lambda.x*c.j1.get(4) + c.lambda.y*c.j2.get(4));
+							torque = c.lambda.x*c.j1.get(5) + c.lambda.y*c.j2.get(5);
+						}
+						
+						force.scale(1./dt);
+						body.transformW2B.transform(force);
+						torque /= dt;
+
+						body.force.add(force);
+						body.torque += torque;
+					}
+				}
+			}
+		}
+	}
+	
+	public void updateBodiesVelocity() {
+		for (RigidBody body : collectionBodies) {
+			body.v.set(v);
+		}
+	}
+	
+	public void resetBodiesVelocity() {
+		for (RigidBody body : collectionBodies) {
+			body.v.set(0.,0.);
 		}
 	}
 
@@ -508,7 +572,6 @@ public class RigidCollection extends RigidBody{
 
 	public void contactsToBody() {
 		for (Contact c: internalContacts) {
-		//	transformW2B.transform(c.contactW);
 			transformW2B.transform(c.normal);
 		}
 	}

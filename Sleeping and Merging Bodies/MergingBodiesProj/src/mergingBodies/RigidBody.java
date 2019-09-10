@@ -263,6 +263,10 @@ public class RigidBody {
 	public boolean isInCollection() {
 		return (parent!=null);
 	}
+	
+	public boolean isInCollection(RigidCollection collection) {
+		return (parent!=collection);
+	}
 
 	/**
 	 * Updates the B2W and W2B transformations

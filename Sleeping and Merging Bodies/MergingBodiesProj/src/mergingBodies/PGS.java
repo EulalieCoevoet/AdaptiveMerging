@@ -92,7 +92,7 @@ public class PGS {
 				double lambda = lambdas.get(i);
 				double prevLambda = lambda;
 				lambda -= (b + Jdv)/d;
-				lambda = handleContactConstraints(lambda, i);
+				lambda = processContactConstraints(lambda, i);
 				
 				//update the force on each body to account for the collision
 				//updating lambda vector
@@ -128,7 +128,7 @@ public class PGS {
 	}
 	
 	/**
-	 * 
+	 * Compute Dii
 	 * @param index index in lambdas list
 	 * @return d(index)
 	 */
@@ -151,13 +151,13 @@ public class PGS {
 		
 		double d = 0.;
 		//first body component
-		d += Math.pow(j.get(0), 2) * m1inv;
-		d += Math.pow(j.get(1), 2) * m1inv;
-		d += Math.pow(j.get(2), 2) * j1inv;
+		d += j.get(0) * m1inv * j.get(0);
+		d += j.get(1) * m1inv * j.get(1);
+		d += j.get(2) * j1inv * j.get(2);
 		//second body component
-		d += Math.pow(j.get(3), 2) * m2inv;
-		d += Math.pow(j.get(4), 2) * m2inv;
-		d += Math.pow(j.get(5), 2) * j2inv;
+		d += j.get(3) * m2inv * j.get(3);
+		d += j.get(4) * m2inv * j.get(4);
+		d += j.get(5) * j2inv * j.get(5);
 		return d;
 	}
 
@@ -248,7 +248,7 @@ public class PGS {
 	 * @param index
 	 * @return
 	 */
-	protected double handleContactConstraints(double lambda, int index) {
+	protected double processContactConstraints(double lambda, int index) {
 		if (index%2 == 0) { // normal component
 			lambda = Math.max(0, lambda);
 		} else { // tangential component

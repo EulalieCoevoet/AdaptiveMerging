@@ -101,7 +101,6 @@ public class RigidBodySystem {
 
 		clearJunkAtStartOfTimeStep();
 
-		// apply gravity to all bodies... also take this opportunity to clear all forces at the start of the time step
 		if (useGravity.getValue()) {
 			applyGravityForce();
 		}  
@@ -226,7 +225,6 @@ public class RigidBodySystem {
 		Vector2d force = new Vector2d();
 		for ( RigidBody b : bodies ) {
 			//fully active, regular stepping
-
 			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
 			force.set( Math.cos( theta ), Math.sin(theta) );
 			force.scale( b.massLinear * gravityAmount.getValue() );
@@ -234,7 +232,7 @@ public class RigidBodySystem {
 			b.force.add( force );
 			//apply force of gravity to all children as well
 			if( b instanceof RigidCollection) {
-				applyGravitySubBodies((RigidCollection) b, force, theta);
+				applyGravitySubBodies((RigidCollection) b, theta);
 			}
 		}
 	}
@@ -249,7 +247,6 @@ public class RigidBodySystem {
 				for (RigidBody sB : ((RigidCollection) b).collectionBodies) {
 					for (Spring s: sB.springs) {
 						applySpringForce(sB, s);
-
 					}
 				}
 			}
@@ -264,7 +261,8 @@ public class RigidBodySystem {
 		s.updateP2();
 	}
 
-	private void applyGravitySubBodies(RigidCollection b, Vector2d force, double theta) {
+	private void applyGravitySubBodies(RigidCollection b, double theta) {
+		Vector2d force = new Vector2d();
 		for (RigidBody sB : ((RigidCollection) b).collectionBodies) {
 			force.set( Math.cos( theta ), Math.sin(theta) );
 			force.scale( sB.massLinear * gravityAmount.getValue() );
@@ -363,12 +361,12 @@ public class RigidBodySystem {
 
 			radius_i.sub(c.contactW, radius_i);
 
-			Vector2d tangeant = new Vector2d(-c.normal.y, c.normal.x);
+			Vector2d tangent = new Vector2d(-c.normal.y, c.normal.x);
 
 			Vector2d r1 = new Vector2d(-radius_i.y, radius_i.x);
 
 			jn_omega = - r1.dot(c.normal);
-			jt_omega = - r1.dot(tangeant);
+			jt_omega = - r1.dot(tangent);
 			if (body == c.body2) {
 				jn_omega *= -1;
 				jt_omega *= -1;
@@ -958,7 +956,7 @@ public class RigidBodySystem {
 		if(drawInternalContactForces.getValue()) {
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
-						((RigidCollection) b).drawInternalContacts(drawable);
+					((RigidCollection) b).drawInternalContacts(drawable);
 				}
 			}
 		}
@@ -966,7 +964,7 @@ public class RigidBodySystem {
 		if(drawInternalContactDeltas.getValue()) {
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
-						((RigidCollection) b).drawInternalDeltas(drawable);
+					((RigidCollection) b).drawInternalDeltas(drawable);
 				}
 			}
 		}

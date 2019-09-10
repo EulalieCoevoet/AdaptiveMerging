@@ -83,8 +83,9 @@ public class CollisionProcessor {
 	    } else {
 	    	
 	    	if (shuffle.getValue()) 
-	    		knuth_shuffle();
+	    		knuthShuffle();
 	    	
+	    	// solve contacts
 			PGS solver = new PGS(friction.getValue(), iterations.getValue(), restitution.getValue());
 			if (warmStart.getValue())
 				solver.enableWarmStart(lastTimeStepMap);
@@ -94,31 +95,24 @@ public class CollisionProcessor {
 			solver.solve(dt);
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
-			lastTimeStepMap.clear();
-			for (Contact co : contacts) {
-				Block block1 = co.block1;
-				Block block2 = co.block2;
-				lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), co);
-			} 
+			updateContactMap();
 			
-			// apply one iteration of PGS for contacts inside the collections
+			// apply one iteration of PGS for contacts in each collection
 			/*for (RigidBody body : bodies) {
 				if (body instanceof RigidCollection) {
 					RigidCollection collection = (RigidCollection)body;
-
-					for (Contact c : collection.internalContacts) {
-						
-						// c.j1;
-						// update Jacobian knowing the motion of the collection
-						// update/reset force acting on the body (gravity, spring, external contact)
-						// velocity should be the velocity of the collection velocity
-					}
-
+					
+					collection.updateBodiesJacobian();
+					collection.updateBodiesForces(dt);
+					collection.updateBodiesVelocity();
+					
 					solver.iterations = 1;
 					solver.confidentWarmStart = true;
 					solver.computeInCollections = true;
 					solver.contacts = collection.internalContacts;
 					solver.solve(dt);
+					
+					collection.resetBodiesVelocity();
 				}
 			}*/
 
@@ -126,25 +120,14 @@ public class CollisionProcessor {
 		}
 	}
 	
-	protected void addCollectionsInternalContacts()	
-	{	
-		for (RigidBody body: bodies) {		
-			if (body instanceof RigidCollection) {		
-				RigidCollection colB = (RigidCollection) body;		
-				contacts.addAll(colB.internalContacts); 	
-			}		
-		}	
-	}	
-
-	protected void removeCollectionsInternalContacts()	
-	{	
-		for (RigidBody body: bodies) {		
-			if (body instanceof RigidCollection) {		
-				RigidCollection colB = (RigidCollection) body;		
-				contacts.removeAll(colB.internalContacts); 	
-			}		
-		}	
-	}	
+	protected void updateContactMap() {
+		lastTimeStepMap.clear();
+		for (Contact co : contacts) {
+			Block block1 = co.block1;
+			Block block2 = co.block2;
+			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), co);
+		} 
+	}
 
 	/**
 	 * Compute the contact force J*lambda.
@@ -183,9 +166,6 @@ public class CollisionProcessor {
 				c.body2ContactForceHistory.remove(0);
 				c.body2ContactTorqueHistory.remove(0);
 			}
-
-			//if Body1 is a parent, also apply the contact force to the appropriate subBody
-			//if Body2 is a parent, also apply the contact force to the appropriate subBody
 		}
 	}
 
@@ -217,13 +197,13 @@ public class CollisionProcessor {
 		}
 	}
 
-	private void knuth_shuffle() {
-		//go through each element in contacts 2.
-		//at each element, swap it for another random member of contacts2. 
-		//at each element, get a random index from i to contacts.size.
-		//swap this element with that element at that index. 
-		// go to next element in contacts 2
-
+	/**go through each element in contacts 2.
+	* at each element, swap it for another random member of contacts2. 
+	* at each element, get a random index from i to contacts.size.
+	* swap this element with that element at that index. 
+	* go to next element in contacts 2
+	*/
+	private void knuthShuffle() {
 		Collections.shuffle(contacts);
 		for (Contact c : contacts) {
 			c.index = contacts.indexOf(c);
@@ -249,79 +229,84 @@ public class CollisionProcessor {
 				tmpBodyBodyContacts.clear();
 				narrowPhase( b1, b2 );
 				
-				if ( pruneContacts.getValue() && tmpBodyBodyContacts.size() >= 3 ) {
-					
-					ArrayList<Point2d> points = new ArrayList<Point2d>();
-					Point2d meanPos = new Point2d();
-					Vector2d v = new Vector2d();
-					int N = tmpBodyBodyContacts.size();
-					for ( Contact c : tmpBodyBodyContacts ) {
-						points.add( c.contactW );
-						meanPos.add( c.contactW );						
-					}
-					meanPos.scale( 1.0 / N );
-					Matrix2d covariance = new Matrix2d();
-					for ( Contact c : tmpBodyBodyContacts ) {
-						v.sub( c.contactW, meanPos );						
-						covariance.rank1( 1.0 / N, v );
-					}
-					covariance.evd();
-					double eps = 1e-4;
-					if ( !(covariance.ev1 > eps && covariance.ev2 > eps) ) { // not a flat region... could do convex hull
-						
-						Vector2d dir = null;
-						if ( covariance.ev1 <= eps ) {
-							dir = covariance.v2;
-						} else {
-							dir = covariance.v1;
-						}
-						
-						// now search for the farthest contacts in this direction!
-						double minDot = Double.MAX_VALUE;
-						double maxDot = Double.MIN_VALUE;
-						Contact cmin = null;
-						Contact cmax = null;
-						double minDotViolation = Double.MAX_VALUE;
-						double maxDotViolation = Double.MAX_VALUE;
-						eps = 1e-2;
-						
-						for ( Contact c : tmpBodyBodyContacts ) {
-							v.sub( c.contactW, meanPos );
-							double dot = v.dot( dir ); 
-							if ( dot > maxDot & c.constraintViolation <= maxDotViolation + eps) {
-								maxDot = dot;
-								cmax = c;
-								maxDotViolation = c.constraintViolation;
-							}
-							if ( dot < minDot & c.constraintViolation <= minDotViolation + eps) {
-								minDot = dot;
-								cmin = c;
-								minDotViolation = c.constraintViolation;
-							}
-						}
-						
-						tmpBodyBodyContacts.clear();
-						tmpBodyBodyContacts.add( cmax );
-						tmpBodyBodyContacts.add( cmin );
-					}
-				} // end prune
+				if ( pruneContacts.getValue() && tmpBodyBodyContacts.size() >= 3 ) 
+					prune();
 				
 				if (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue())
 					for (Contact contact : tmpBodyBodyContacts) 
 						if (!contact.body1.pinned || !contact.body2.pinned)
-							storeContactInBodies(contact);
+							storeInBodyContacts(contact);
 				
 				contacts.addAll(tmpBodyBodyContacts);
 			}
 		}        
 	}
-	
+
+	/**
+	 * Prune tmpBodyBodyContacts list
+	 */
+	protected void prune() {
+		
+		ArrayList<Point2d> points = new ArrayList<Point2d>();
+		Point2d meanPos = new Point2d();
+		Vector2d v = new Vector2d();
+		int N = tmpBodyBodyContacts.size();
+		for ( Contact c : tmpBodyBodyContacts ) {
+			points.add( c.contactW );
+			meanPos.add( c.contactW );						
+		}
+		meanPos.scale( 1.0 / N );
+		Matrix2d covariance = new Matrix2d();
+		for ( Contact c : tmpBodyBodyContacts ) {
+			v.sub( c.contactW, meanPos );						
+			covariance.rank1( 1.0 / N, v );
+		}
+		covariance.evd();
+		double eps = 1e-4;
+		if ( !(covariance.ev1 > eps && covariance.ev2 > eps) ) { // not a flat region... could do convex hull
+			
+			Vector2d dir = null;
+			if ( covariance.ev1 <= eps ) {
+				dir = covariance.v2;
+			} else {
+				dir = covariance.v1;
+			}
+			
+			// now search for the farthest contacts in this direction!
+			double minDot = Double.MAX_VALUE;
+			double maxDot = Double.MIN_VALUE;
+			Contact cmin = null;
+			Contact cmax = null;
+			double minDotViolation = Double.MAX_VALUE;
+			double maxDotViolation = Double.MAX_VALUE;
+			eps = 1e-2;
+			
+			for ( Contact c : tmpBodyBodyContacts ) {
+				v.sub( c.contactW, meanPos );
+				double dot = v.dot( dir ); 
+				if ( dot > maxDot & c.constraintViolation <= maxDotViolation + eps) {
+					maxDot = dot;
+					cmax = c;
+					maxDotViolation = c.constraintViolation;
+				}
+				if ( dot < minDot & c.constraintViolation <= minDotViolation + eps) {
+					minDot = dot;
+					cmin = c;
+					minDotViolation = c.constraintViolation;
+				}
+			}
+			
+			tmpBodyBodyContacts.clear();
+			tmpBodyBodyContacts.add( cmax );
+			tmpBodyBodyContacts.add( cmin );
+		}
+	}
 	
 	/**
-	 * Store contact in bodyContacts and bodies.contactList list, and update relative velocity history.
+	 * Store contact in bodyContacts, and update relative velocity history.
 	 * @param contact
 	 */
-	private void storeContactInBodies(Contact contact) {
+	private void storeInBodyContacts(Contact contact) {
 		
 		// check if this body contact exists already
 		BodyContact bc = BodyContact.checkExists(contact.body1, contact.body2, bodyContacts);
@@ -350,7 +335,6 @@ public class CollisionProcessor {
 		bc.contactList.add(contact);
 	}
 		
-
 	/**
 	 * Checks for collision between boundary blocks on two rigid bodies.
 	 * @param body1
@@ -358,7 +342,6 @@ public class CollisionProcessor {
 	 */
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
 		//if both bodies are inactive, they do not collide
-
 		if ((body1.state==ObjectState.SLEEPING && body2.state==ObjectState.SLEEPING)) {
 			return;
 		}
@@ -369,8 +352,7 @@ public class CollisionProcessor {
 			findCollisions(body1.root, body2.root, body1, body2);
 		}
 	}
-	
-	
+
 	/**
 	 * Recursive method that makes us check for collisions with each body in a rigidCollection
 	 */
@@ -389,7 +371,6 @@ public class CollisionProcessor {
 			}
 		}
 	}
-	
 	
 	/** 
 	 * Recurses through all of body_1, then body_2
@@ -448,12 +429,9 @@ public class CollisionProcessor {
 	private void wakeNeighbors(RigidBody body1, int hop) {
 		if (hop > 0) {
 			body1.state = ObjectState.ACTIVE;
-			/*if (!body1.active_past.isEmpty()) {
-				body1.active_past.remove(body1.active_past.size() - 1);} */
 			hop--;
 			body1.visited = true;
 			body1.wokenUp = true;
-			//	body1.active_past.add(true); makes bodies oscillate between sleeping and waking
 			for (BodyContact c: body1.bodyContactList) {
 				if (!c.body2.pinned)
 					wakeNeighbors(c.body2, hop);
@@ -470,7 +448,6 @@ public class CollisionProcessor {
 	 */
 	int visitID = 0;
 
-
 	/**
 	 * Resets the state of the collision processor by clearing all
 	 * currently identified contacts, and reseting the visitID for
@@ -482,13 +459,11 @@ public class CollisionProcessor {
 		visitID = 0;            
 	}
 
-	
 	// some working variables for processing collisions
 	private Point2d tmp1 = new Point2d();
 	private Point2d tmp2 = new Point2d();
 	private Point2d contactW = new Point2d();
 	private Vector2d normal = new Vector2d();
-
 
 	/**
 	 * Processes a collision between two bodies for two given blocks that are colliding.

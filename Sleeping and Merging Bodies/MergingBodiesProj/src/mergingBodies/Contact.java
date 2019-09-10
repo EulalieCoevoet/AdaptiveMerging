@@ -110,14 +110,14 @@ public class Contact {
 		this.body1 = body1;
 		this.body2 = body2;
 		this.contactW.set( contactW );
-		this.normal.set( normal );        
+		this.normal.set( normal );   
 		block1 = b1;
 		block2 = b2;
 		constraintViolation =  distance - 2*Block.radius;
 		index = nextContactIndex++;        
 
 		computeRelativeVelocity();
-		computeJacobian();
+		computeJacobian(normal);
 
 		contactB1.set(contactW);
 		contactB2.set(contactW);
@@ -141,7 +141,7 @@ public class Contact {
 	 * Computes the Jacobian matrix of the constraint.
 	 * In case of body in a collection, use position of parent to compute the torque component of the Jacobian.
 	 */
-	protected void computeJacobian() {
+	public void computeJacobian(Vector2d normal) {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
