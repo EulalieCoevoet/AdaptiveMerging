@@ -28,6 +28,7 @@ public class CollisionProcessor {
 
 	private HashMap<String, Contact> lastTimeStepMap = new HashMap<String, Contact>();
 
+	// eulalie: this is never filled, though I think it could be useful. 
 	public ArrayList<RigidCollection> collections = new ArrayList<RigidCollection>();
 	/**
 	 * The current contacts that resulted in the last call to process collisions
@@ -101,15 +102,26 @@ public class CollisionProcessor {
 			} 
 			
 			// apply one iteration of PGS for contacts inside the collections
-			// loop over RigidCollection
-			// solve only contacts in collection with an updated external forces
-			/*solver.iterations = 1;
-			solver.confidentWarmStart = true;
-			solver.computeInCollections = true;
-			addCollectionsInternalContacts();
-			solver.solve(dt);
-			removeCollectionsInternalContacts();*/
-			
+			/*for (RigidBody body : bodies) {
+				if (body instanceof RigidCollection) {
+					RigidCollection collection = (RigidCollection)body;
+
+					for (Contact c : collection.internalContacts) {
+						
+						// c.j1;
+						// update Jacobian knowing the motion of the collection
+						// update/reset force acting on the body (gravity, spring, external contact)
+						// velocity should be the velocity of the collection velocity
+					}
+
+					solver.iterations = 1;
+					solver.confidentWarmStart = true;
+					solver.computeInCollections = true;
+					solver.contacts = collection.internalContacts;
+					solver.solve(dt);
+				}
+			}*/
+
 			calculateContactForce(dt);	
 		}
 	}

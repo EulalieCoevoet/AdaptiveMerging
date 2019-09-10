@@ -85,10 +85,9 @@ public class PGS {
 			
 			for (int i=0; i<dim; i++) {
 				
-				double d = computeJMinvJtDiagonal(i); //move up and store in contact
+				double d = computeJMinvJtDiagonal(i); 
 				double Jdv = computeJdv(i);  
-				double b = computeB(i, dt); //move up and store in contact
-				// in b we use the velocity
+				double b = computeB(i, dt); 
 
 				double lambda = lambdas.get(i);
 				double prevLambda = lambda;
@@ -220,31 +219,13 @@ public class PGS {
 			j = new DenseVector(contact.j2);
 		
 		// find all relevant values of u.
-		double u1x = body1.v.x;
-		double u1y = body1.v.y;
-		double u1omega = body1.omega;
+		double u1x =     (body1.v.x + body1.force.x * m1inv * dt) * j.get(0);
+		double u1y =     (body1.v.y + body1.force.y * m1inv * dt) * j.get(1);
+		double u1omega = (body1.omega + body1.torque * j1inv * dt) * j.get(2);
 
-		double u2x = body2.v.x;
-		double u2y = body2.v.y;
-		double u2omega = body2.omega;
-
-		// add all relevant values of f, multiplied by appropriate minv to u_1_x etc
-		u1x += body1.force.x * m1inv*dt;
-		u1y += body1.force.y * m1inv*dt;
-		u1omega += body1.torque * j1inv*dt;
-
-		u2x += body2.force.x * m2inv*dt;
-		u2y += body2.force.y * m2inv*dt;
-		u2omega += body2.torque * j2inv*dt;
-
-		// multiply all the u values by the appropriate J values.
-		u1x *= j.get(0);
-		u1y *= j.get(1);
-		u1omega *= j.get(2);
-
-		u2x *= j.get(3);
-		u2y *= j.get(4);
-		u2omega *= j.get(5);
+		double u2x =     (body2.v.x + body2.force.x * m2inv * dt) * j.get(3);
+		double u2y =     (body2.v.y + body2.force.y * m2inv * dt) * j.get(4);
+		double u2omega = (body2.omega + body2.torque * j2inv * dt) * j.get(5);
 
 		// add the Bounce vector to the u's over here, but don't need to do that just yet
 		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
@@ -314,7 +295,6 @@ public class PGS {
 	
 	/**
 	 * Fills lambdas with values from previous time step
-	 * TODO: refactor
 	 */
 	protected void warmStart() {
 		for (Contact contact : contacts) {
@@ -335,58 +315,32 @@ public class PGS {
 				double j1inv = (body1.temporarilyPinned)? 0: body1.jinv;
 				double j2inv = (body2.temporarilyPinned)? 0: body2.jinv;
 
+				// if the old map contains this key, then get the lambda of the old map
 				Contact c = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
 				if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
 					c = lastTimeStepMap.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
-				//if the old map contains this key, then get the lamda of the old map
-
+				
 				RigidBody cbody1 = (c.body1.isInCollection())? c.body1.parent: c.body1;
 				RigidBody cbody2 = (c.body2.isInCollection())? c.body2.parent: c.body2;
 				if (cbody1 != body1 || cbody2 != body2) {
 					continue;
 				}
 
-				double old_lamda_n = c.lambda.x;
-				double old_lamda_t = c.lambda.y;
-				double old_delta_lamda_n = old_lamda_n;
-				double old_delta_lamda_t = old_lamda_t;
-				//set this lamda to the old lamda
-				lambdas.set(2*contact.index, old_lamda_n);
-				lambdas.set(2*contact.index + 1, old_lamda_t);
-				//recompute Delta V's
+				double oldLamda_n = c.lambda.x;
+				double oldLamda_t = c.lambda.y;
+				// set this lambda to the old lambda
+				lambdas.set(2*contact.index, oldLamda_n);
+				lambdas.set(2*contact.index + 1, oldLamda_t);
 
-				//first recompute t.
-				double t_1_x_n=0, t_1_y_n=0, t_1_omega_n=0, t_2_x_n=0, t_2_y_n=0, t_2_omega_n=0;
-				double t_1_x_t=0, t_1_y_t=0, t_1_omega_t=0, t_2_x_t=0, t_2_y_t=0, t_2_omega_t=0;
-				//first body
-				t_1_x_n = j1.get(0) * m1inv*old_delta_lamda_n;
-				t_1_y_n = j1.get(1) * m1inv*old_delta_lamda_n;
-				t_1_omega_n = j1.get(2) * j1inv*old_delta_lamda_n;
-				//second body
-				t_2_x_n = j1.get(3) * m2inv*old_delta_lamda_n;
-				t_2_y_n = j1.get(4) * m2inv*old_delta_lamda_n;
-				t_2_omega_n = j1.get(5) * j2inv*old_delta_lamda_n;
-
-				//first body
-				t_1_x_t = j2.get(0) * m1inv*old_delta_lamda_t;
-				t_1_y_t = j2.get(1) * m1inv*old_delta_lamda_t;
-				t_1_omega_t = j2.get(2) * j1inv*old_delta_lamda_t;
-				//second body
-				t_2_x_t = j2.get(3) * m2inv*old_delta_lamda_t;
-				t_2_y_t = j2.get(4) * m2inv*old_delta_lamda_t;
-				t_2_omega_t = j2.get(5) * j2inv* old_delta_lamda_t;
-
-				//update delta V;
+				// update delta V;
 				DenseVector dV1 = cbody1.deltaV; 
 				DenseVector dV2 = cbody2.deltaV; 
-				dV1.set(0, dV1.get(0) + t_1_x_n  + t_1_x_t);
-				dV1.set(1, dV1.get(1) + t_1_y_n + t_1_y_t );
-				dV1.set(2, dV1.get(2) + t_1_omega_n + t_1_omega_t);
-
-				//update delta V;
-				dV2.set(0, dV2.get(0) + t_2_x_n + t_2_x_t);
-				dV2.set(1, dV2.get(1) + t_2_y_n + t_2_y_t );
-				dV2.set(2, dV2.get(2) + t_2_omega_n + t_2_omega_t );
+				dV1.set(0, dV1.get(0) + j1.get(0) * m1inv * oldLamda_n + j2.get(0) * m1inv * oldLamda_t);
+				dV1.set(1, dV1.get(1) + j1.get(1) * m1inv * oldLamda_n + j2.get(1) * m1inv * oldLamda_t );
+				dV1.set(2, dV1.get(2) + j1.get(2) * j1inv * oldLamda_n + j2.get(2) * j1inv * oldLamda_t);
+				dV2.set(0, dV2.get(0) + j1.get(3) * m2inv * oldLamda_n + j2.get(3) * m2inv * oldLamda_t);
+				dV2.set(1, dV2.get(1) + j1.get(4) * m2inv * oldLamda_n + j2.get(4) * m2inv * oldLamda_t );
+				dV2.set(2, dV2.get(2) + j1.get(5) * j2inv * oldLamda_n + j2.get(5) * j2inv * oldLamda_t );
 				
 				contact.body1ContactForceHistory.clear();
 				contact.body1ContactTorqueHistory.clear();
