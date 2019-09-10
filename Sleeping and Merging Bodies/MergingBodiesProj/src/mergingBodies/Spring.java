@@ -124,7 +124,7 @@ public class Spring {
     	spring_force.scale(-spring_force_scale);
     		
     	//adding the forces
-    	b1.applyContactForceW(p2, spring_force);
+    	b1.applyForceW(p2, spring_force);
     }
     
     /**

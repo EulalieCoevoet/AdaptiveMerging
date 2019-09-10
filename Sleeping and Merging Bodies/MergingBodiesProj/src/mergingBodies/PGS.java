@@ -85,13 +85,14 @@ public class PGS {
 			
 			for (int i=0; i<dim; i++) {
 				
-				double JMinv = computeJMinv(i);
-				double Jdv = computeJdv(i);
-				double b = computeB(i, dt);
+				double d = computeJMinvJtDiagonal(i); //move up and store in contact
+				double Jdv = computeJdv(i);  
+				double b = computeB(i, dt); //move up and store in contact
+				// in b we use the velocity
 
 				double lambda = lambdas.get(i);
 				double prevLambda = lambda;
-				lambda -= (b + Jdv)/JMinv;
+				lambda -= (b + Jdv)/d;
 				lambda = handleContactConstraints(lambda, i);
 				
 				//update the force on each body to account for the collision
@@ -132,7 +133,7 @@ public class PGS {
 	 * @param index index in lambdas list
 	 * @return d(index)
 	 */
-	protected double computeJMinv(int index) {
+	protected double computeJMinvJtDiagonal(int index) {
 		
 		Contact contact = contacts.get(index/2);
 		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollections)? contact.body1.parent: contact.body1;

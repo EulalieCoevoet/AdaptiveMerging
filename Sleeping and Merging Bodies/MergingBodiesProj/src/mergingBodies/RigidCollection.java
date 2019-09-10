@@ -72,8 +72,6 @@ public class RigidCollection extends RigidBody{
 		boundaryBlocks.clear();
 
 		velHistory.clear();
-		//no longer relevant
-		contactList.clear();
 
 		savedContactForce.set(0, 0);
 		contactTorques = 0;
@@ -607,7 +605,6 @@ public class RigidCollection extends RigidBody{
 
 		for (RigidBody b : colRemovalQueue) {
 			b.bodyContactList.clear();
-			b.contactList.clear();
 			transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
@@ -628,7 +625,6 @@ public class RigidCollection extends RigidBody{
 
 		for (RigidBody b : bodies) {
 			b.bodyContactList.clear();
-			b.contactList.clear();
 			transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();

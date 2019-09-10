@@ -193,7 +193,7 @@ public class Contact {
 	}
 
 	/**
-	 * Draws the connections between bodies to visualize the 
+	 * Draws the connections between bodies to visualize 
 	 * the adjacency structure of the matrix as a graph.
 	 * @param drawable
 	 */

@@ -284,7 +284,6 @@ public class RigidBodySystem {
 			b.currentContactForce.set(0, 0);
 			b.contactTorques = 0;
 			b.currentContactTorques = 0;
-			b.contactList.clear();
 			
 			ArrayList<BodyContact> newBodyContactList = new ArrayList<BodyContact>();
 			for (BodyContact bc : b.bodyContactList) 
@@ -401,6 +400,7 @@ public class RigidBodySystem {
 	 * the normal and tangential contact force components will be the same...
 	 * but the rotational ones will be different. 
 	 */
+	@Deprecated
 	private void applyContactForceToSubBody(Contact c, RigidCollection body, Vector2d cForce) {
 
 		double cTorque= 0;
@@ -934,8 +934,8 @@ public class RigidBodySystem {
 		
 		if ( drawContactGraph.getValue() ) {
 			if (CollisionProcessor.use_contact_graph.getValue()) {
-				for (RigidBody b : bodies) {
-					for (Contact c:b.contactList) {
+				for (BodyContact bc : collisionProcessor.bodyContacts) {
+					for (Contact c : bc.contactList) {
 						c.displayConnection(drawable);
 					}
 				} 

@@ -118,13 +118,6 @@ public class RigidBody {
 
 	/**
 	 * list of contacting bodies present with this RigidBody. cleared after every
-	 * time step, unless the contact was between two sleeping bodies
-	 **/
-	//eulalie: this list is only used in updateInternalCollectionForces
-	public ArrayList<Contact> contactList = new ArrayList<Contact>();
-
-	/**
-	 * list of contacting bodies present with this RigidBody. cleared after every
 	 * timestep, unless the contact was between two sleeping bodies
 	 **/
 	public ArrayList<BodyContact> bodyContactList = new ArrayList<BodyContact>();
@@ -286,7 +279,7 @@ public class RigidBody {
 	 * @param contactPointW
 	 * @param contactForceW
 	 */
-	public void applyContactForceW(Point2d contactPointW, Vector2d contactForceW) {
+	public void applyForceW(Point2d contactPointW, Vector2d contactForceW) {
 		force.add(contactForceW);
 		// TODO: Objective 1: Compute the torque applied to the body
 
@@ -441,7 +434,6 @@ public class RigidBody {
 
 		transformB2C.T.setIdentity();
 		transformC2B.T.setIdentity();
-		contactList.clear();
 		bodyContactList.clear();
 		state = ObjectState.ACTIVE;
 		velHistory.clear();

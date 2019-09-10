@@ -101,14 +101,16 @@ public class CollisionProcessor {
 			} 
 			
 			// apply one iteration of PGS for contacts inside the collections
-			solver.iterations = 1;
+			// loop over RigidCollection
+			// solve only contacts in collection with an updated external forces
+			/*solver.iterations = 1;
 			solver.confidentWarmStart = true;
 			solver.computeInCollections = true;
 			addCollectionsInternalContacts();
 			solver.solve(dt);
+			removeCollectionsInternalContacts();*/
 			
 			calculateContactForce(dt);	
-			removeCollectionsInternalContacts();
 		}
 	}
 	
@@ -308,16 +310,6 @@ public class CollisionProcessor {
 	 * @param contact
 	 */
 	private void storeContactInBodies(Contact contact) {
-
-		RigidBody bodyOrCollection1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
-		RigidBody bodyOrCollection2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
-		
-		if (!bodyOrCollection1.contactList.contains(contact)) {
-			bodyOrCollection1.contactList.add(contact);
-		}
-		if (!bodyOrCollection2.contactList.contains(contact)) {
-			bodyOrCollection2.contactList.add(contact);
-		}
 		
 		// check if this body contact exists already
 		BodyContact bc = BodyContact.checkExists(contact.body1, contact.body2, bodyContacts);
