@@ -21,9 +21,7 @@ import javax.vecmath.Vector2d;
  */
 public class RigidBody {
 
-	/*
-	 * Pointer to the parent of this body if it is merged
-	 */
+	/**Pointer to the parent of this body if it is merged*/
 	RigidCollection parent = null;
 	/** Unique identifier for this body */
 	public int index;
@@ -55,7 +53,7 @@ public class RigidBody {
 	double massLinear;
 
 	public boolean pinned;
-	/** option used to pinned object for a fixed amount of step */
+	/** option used to pinned object for a fixed amount of steps */
 	public boolean temporarilyPinned;
 	double steps;
 
@@ -119,18 +117,12 @@ public class RigidBody {
 	public double rho;
 
 	/**
-	 * list of contacting bodies present with this rigidbody. cleared after every
-	 * time step, unless the contact was between two sleeping bodies
-	 **/
-	public ArrayList<Contact> contactList = new ArrayList<Contact>();
-
-	/**
-	 * list of contacting bodies present with this rigidbody. cleared after every
+	 * list of contacting bodies present with this RigidBody. cleared after every
 	 * timestep, unless the contact was between two sleeping bodies
 	 **/
 	public ArrayList<BodyContact> bodyContactList = new ArrayList<BodyContact>();
 
-	/* List of BodyContacts that occured before this body was merged. */
+	/** List of BodyContacts that occurred before this body was merged. */
 	public ArrayList<BodyContact> bodyContactListPreMerging = new ArrayList<BodyContact>();
 
 	/** list of springs attached to the body **/
@@ -170,7 +162,7 @@ public class RigidBody {
 
 	public boolean merged = false;
 
-	DenseVector delta_V = new DenseVector(3);
+	DenseVector deltaV = new DenseVector(3);
 
 	Vector2d deltaF = new Vector2d();
 
@@ -232,7 +224,7 @@ public class RigidBody {
 
 		// set our index
 		index = nextIndex++;
-		delta_V.zero();
+		deltaV.zero();
 	}
 
 	/**
@@ -265,7 +257,11 @@ public class RigidBody {
 		// set our index
 
 		index = nextIndex++;
-		delta_V.zero();
+		deltaV.zero();
+	}
+	
+	public boolean isInCollection() {
+		return (parent!=null);
 	}
 
 	/**
@@ -283,14 +279,14 @@ public class RigidBody {
 	 * @param contactPointW
 	 * @param contactForceW
 	 */
-	public void applyContactForceW(Point2d contactPointW, Vector2d contactForceW) {
+	public void applyForceW(Point2d contactPointW, Vector2d contactForceW) {
 		force.add(contactForceW);
 		// TODO: Objective 1: Compute the torque applied to the body
 
 		// holds r vector.
 		Vector2d r = new Vector2d(contactPointW);
 		Point2d tempX = new Point2d(x);
-		if (parent != null) {
+		if (isInCollection()) {
 			parent.transformB2W.transform(tempX);
 		}
 		r.sub(tempX);
@@ -321,10 +317,10 @@ public class RigidBody {
 		if (!pinned && !temporarilyPinned) {
 
 			// non ARPS
-			v.x += force.x * dt / massLinear + delta_V.get(0);
-			v.y += force.y * dt / massLinear + delta_V.get(1);
-			omega += torque * dt / massAngular + delta_V.get(2);
-			delta_V.zero();
+			v.x += force.x * dt / massLinear + deltaV.get(0);
+			v.y += force.y * dt / massLinear + deltaV.get(1);
+			omega += torque * dt / massAngular + deltaV.get(2);
+			deltaV.zero();
 
 			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;
@@ -438,7 +434,6 @@ public class RigidBody {
 
 		transformB2C.T.setIdentity();
 		transformC2B.T.setIdentity();
-		contactList.clear();
 		bodyContactList.clear();
 		state = ObjectState.ACTIVE;
 		velHistory.clear();
@@ -600,7 +595,7 @@ public class RigidBody {
 		gl.glColor3f(1, 0, 1);
 		gl.glBegin(GL.GL_LINES);
 		Point2d p = new Point2d(x);
-		if (parent != null) {
+		if (isInCollection()) {
 			parent.transformB2W.transform(p);
 		}
 		double scale = 2 / massLinear;

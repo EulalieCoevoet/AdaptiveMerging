@@ -31,12 +31,6 @@ public class BodyContact {
 	public ArrayList<Vector2d> body2ContactForceHistory = new ArrayList<Vector2d>();
 	public ArrayList<Double> body2ContactTorqueHistory = new ArrayList<Double>();
 	
-	Vector2d body1ContactForce = new Vector2d();
-	Vector2d body2ContactForce = new Vector2d();
-	
-	double body1ContactTorque = 0;
-	double body2ContactTorque = 0;
-	
 	boolean merged = false;
 	
 	public BodyContact(RigidBody body1, RigidBody body2) {
@@ -92,13 +86,6 @@ public class BodyContact {
 			}
 		}
 		return false;
-	}
-	
-	public void clearForces() {
-		body1ContactForce.set(0, 0);
-		body2ContactForce.set(0, 0);
-		body1ContactTorque = 0;
-		body2ContactTorque = 0;
 	}
 	
 	/**

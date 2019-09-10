@@ -72,8 +72,6 @@ public class RigidCollection extends RigidBody{
 		boundaryBlocks.clear();
 
 		velHistory.clear();
-		//no longer relevant
-		contactList.clear();
 
 		savedContactForce.set(0, 0);
 		contactTorques = 0;
@@ -180,9 +178,9 @@ public class RigidCollection extends RigidBody{
 			temporarilyPinned=!temporarilyPinned; 
 		
 		if (!pinned && !temporarilyPinned) {
-			v.x += force.x * dt/massLinear + delta_V.get(0);
-			v.y += force.y * dt/massLinear + delta_V.get(1);
-			omega += torque * dt/ massAngular + delta_V.get(2);
+			v.x += force.x * dt/massLinear + deltaV.get(0);
+			v.y += force.y * dt/massLinear + deltaV.get(1);
+			omega += torque * dt/ massAngular + deltaV.get(2);
 			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;
 				x.y += v.y * dt;
@@ -295,9 +293,9 @@ public class RigidCollection extends RigidBody{
 			gl.glBegin( GL.GL_LINES );
 			p1.set(bc.body1.x);
 			p2.set(bc.body2.x);
-			if (bc.body1.parent !=null)
+			if (bc.body1.isInCollection())
 				bc.body1.parent.transformB2W.transform(p1);
-			if (bc.body2.parent != null)
+			if (bc.body2.isInCollection())
 				bc.body2.parent.transformB2W.transform(p2);
 			gl.glVertex2d(p1.x, p1.y);
 			gl.glVertex2d(p2.x, p2.y);
@@ -319,7 +317,7 @@ public class RigidCollection extends RigidBody{
 
 		for (RigidBody b: collectionBodies) {
 			double bRatio = b.massLinear/totalMass;
-			if (b.parent != null) {
+			if (b.isInCollection()) {
 				//transform back to world if the body is in collection coordinates... dont worry, very temporary
 				b.parent.transformB2W.transform(b.x);
 			}
@@ -452,7 +450,7 @@ public class RigidCollection extends RigidBody{
 	 * ... does not do anything to the collection itself.
 	 */
 	public void unmergeSingleBody(RigidBody sB) {
-		if (sB.parent == null) return;
+		if (!sB.isInCollection()) return;
 		else {
 			sB.parent.transformB2W.transform(sB.x);
 			sB.theta = sB.transformB2W.getTheta();
@@ -547,7 +545,7 @@ public class RigidCollection extends RigidBody{
 			b.bodyContactListPreMerging.clear();
 			//transform all the subBodies to their world coordinates... 
 			b.merged = true;
-			if (b.parent != null) b.parent.transformB2W.transform(b.x);
+			if (b.isInCollection()) b.parent.transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
 			b.transformC2B.T.setIdentity();
@@ -607,7 +605,6 @@ public class RigidCollection extends RigidBody{
 
 		for (RigidBody b : colRemovalQueue) {
 			b.bodyContactList.clear();
-			b.contactList.clear();
 			transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
@@ -628,7 +625,6 @@ public class RigidCollection extends RigidBody{
 
 		for (RigidBody b : bodies) {
 			b.bodyContactList.clear();
-			b.contactList.clear();
 			transformB2W.transform(b.x);
 			b.theta = b.transformB2W.getTheta();
 			b.transformB2C.T.setIdentity();
