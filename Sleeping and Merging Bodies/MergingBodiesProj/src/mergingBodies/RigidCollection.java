@@ -72,7 +72,6 @@ public class RigidCollection extends RigidBody{
 		boundaryBlocks.clear();
 
 		velHistory.clear();
-
 		savedContactForce.set(0, 0);
 		contactTorques = 0;
 		springs.clear();
@@ -203,17 +202,33 @@ public class RigidCollection extends RigidBody{
 				}
 			}
 		}
-	}
+	}	
 	
 	public void updateBodiesVelocity() {
 		for (RigidBody body : collectionBodies) {
 			body.v.set(v);
+			body.omega = omega;
 		}
 	}
 	
-	public void resetBodiesVelocity() {
-		for (RigidBody body : collectionBodies) {
-			body.v.set(0.,0.);
+	public void updateBodiesContactForces(double dt) { 
+		Vector2d cForce = new Vector2d();
+		double cTorque = 0;
+		for (Contact c: internalContacts) {
+			
+			cForce.set(c.lambda.x*c.j1.get(0) + c.lambda.y*c.j2.get(0),c.lambda.x*c.j1.get(1) + c.lambda.y*c.j2.get(1) );
+			cTorque = c.lambda.x*c.j1.get(2) + c.lambda.y*c.j2.get(2);
+			cForce.scale(1/dt);
+			c.body1.transformW2B.transform(cForce);
+			c.contactForceB1.set(cForce);
+			c.contactTorqueB1 = cTorque/dt;
+
+			cForce.set(c.lambda.x*c.j1.get(3) + c.lambda.y*c.j2.get(3),c.lambda.x*c.j1.get(4) + c.lambda.y*c.j2.get(4) );
+			cTorque = c.lambda.x*c.j1.get(5) + c.lambda.y*c.j2.get(5);
+			cForce.scale(1/dt);
+			c.body2.transformW2B.transform(cForce);
+			c.contactForceB2.set(cForce);
+			c.contactTorqueB2 = cTorque/dt;
 		}
 	}
 
@@ -419,45 +434,12 @@ public class RigidCollection extends RigidBody{
 		massAngular = inertia;
 		jinv = 1/inertia;
 	}
-	
-	/** Map to keep track of display list IDs for drawing our rigid bodies efficiently */
-	static private HashMap<ArrayList<Block>,Integer> mapBlocksToDisplayList = new HashMap<ArrayList<Block>,Integer>();
 
 	/** display list ID for this rigid body */
 	int myListID = -1;
 
 	//list of bodies to be added to this collection in the next timestep
 	ArrayList<RigidBody> bodyQueue = new ArrayList<RigidBody>();
-
-	/**
-	 * Goes through each body in collection and sees if it should be unmerged. Fill the removal queue with the bodies that need to be unmerged
-	 */
-	public void fillNewBodiesQueue(Vector2d totalForce, double totalTorque, double forceMetric){
-		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
-		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
-
-		for (RigidBody sB: collectionBodies) {
-
-			checkMetric(sB, totalForce, totalTorque, forceMetric);
-			if (!newRigidBodies.isEmpty()) 
-				for(RigidBody b : newRigidBodies) {
-					if (b instanceof RigidCollection) {
-						RigidCollection colB = (RigidCollection) b;
-						colB.fillNewBodiesQueue(totalForce, totalTorque, forceMetric);
-						if (!colB.newRigidBodies.isEmpty()) {
-							additionQueue.addAll(colB.newRigidBodies);
-							removalQueue.add(b);
-						}
-					}
-				}
-			break;
-		}
-
-		newRigidBodies.addAll(additionQueue);
-		for (RigidBody element : removalQueue)
-			newRigidBodies.remove(element);
-	}
-	
 	
 	/**
 	 * Checks if body sB is going to unmerge by comparing forces acting on the object with a threshold.
@@ -484,31 +466,6 @@ public class RigidCollection extends RigidBody{
 		else return false;
 	}
 	
-	/**
-	 * Checks if body sB is going to unmerge by comparing the acceleration vector magnitude with a threshold
-	 */
-	public void checkMetric(RigidBody sB, Vector2d totalForce, double totalTorque, double forceMetric) {
-		totalForce.set(sB.force);
-		sB.transformB2W.transform(sB.savedContactForce);
-
-		totalForce.add(sB.savedContactForce);
-
-		sB.transformW2B.transform(sB.savedContactForce);
-		totalTorque = sB.torque + sB.contactTorques;
-		forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/sB.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/sB.massAngular;
-
-		if (forceMetric > CollisionProcessor.forceMetricTolerance.getValue()) {
-			handledBodies.add(sB);
-			newRigidBodies.add(sB);
-			unmergeSingleBody(sB);
-			contactsToWorld();
-			dealWithNeighbors(sB);
-
-			//sB.unmergeBodyContacts();
-			//checkSubBodyNeighbors(sB, totalForce, totalTorque, forceMetric);
-		}
-	}
-
 	/**
 	 * Makes body ready to be used by system... converts everything to world coordinates and makes body independant of collection
 	 * ... does not do anything to the collection itself.
@@ -639,22 +596,6 @@ public class RigidCollection extends RigidBody{
 				neighborCollection.add(body2);
 				handledBodies.add(body2);
 				makeNeighborCollection(body2);
-			}
-		}
-	}
-
-
-	/**
-	 * for each neighbor of sB, check whether or not that neighbor is still awake by applying the previous contact forces.
-	 */
-	private void checkSubBodyNeighbors(RigidBody sB, Vector2d totalForce, double totalTorque, double forceMetric) {
-		for (BodyContact bc : sB.bodyContactList) {
-			if (!bc.merged) continue;
-
-			if (sB.equals(bc.body1)) {
-				checkMetric(bc.body2, totalForce, totalTorque, forceMetric);
-			} else {
-				checkMetric(bc.body1, totalForce, totalTorque, forceMetric);
 			}
 		}
 	}

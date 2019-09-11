@@ -265,7 +265,7 @@ public class RigidBody {
 	}
 	
 	public boolean isInCollection(RigidCollection collection) {
-		return (parent!=collection);
+		return (parent==collection);
 	}
 
 	/**

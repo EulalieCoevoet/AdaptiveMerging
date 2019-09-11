@@ -64,7 +64,7 @@ public class PGS {
 	 * @param dt time step
 	 */
 	public void solve(double dt) {
-		
+				
 		if (contacts == null) {
 			System.out.println("Error: PGS.solve() method needs the list PGS.contacts to be filled.");
 			return;
@@ -91,21 +91,10 @@ public class PGS {
 				lambda -= (b + Jdv)/d;
 				lambda = processContactConstraints(lambda, i);
 				
-				//update the force on each body to account for the collision
-				//updating lambda vector
-				Contact contact = contacts.get(i/2);
-				if (i%2 ==0) {
-					lambdas.set(2*contact.index,  lambda);
-					contact.lambda.set(lambda, contact.lambda.y);
-				} else {
-					lambdas.set(2*contact.index + 1, lambda);
-					contact.lambda.set(contact.lambda.x, lambda);
-				}
+				updateLambda(i, lambda);
 				
-				if (!computeInCollections) {
-					double dLambda = lambda - prevLambda;
-					updateVelocity(i, dLambda);
-				}
+				double dLambda = lambda - prevLambda;
+				updateVelocity(i, dLambda);
 			}
 			
 			iterations--;
@@ -258,9 +247,9 @@ public class PGS {
 	/**
 	 * Update velocity of bodies in contact w.r.t new value of dLambda
 	 * @param index
-	 * @param dLambda
+	 * @param lambda
 	 */
-	protected void updateVelocity(int index, double dLambda) {
+	protected void updateVelocity(int index, double lambda) {
 		
 		Contact contact = contacts.get(index/2);
 		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollections)? contact.body1.parent: contact.body1;
@@ -280,12 +269,29 @@ public class PGS {
 		//update delta V;
 		DenseVector dv1 = body1.deltaV; 
 		DenseVector dv2 = body2.deltaV;
-		dv1.add( 0, j.get(0) * m1inv * dLambda );
-		dv1.add( 1, j.get(1) * m1inv * dLambda );
-		dv1.add( 2, j.get(2) * j1inv * dLambda );
-		dv2.add( 0, j.get(3) * m2inv * dLambda );
-		dv2.add( 1, j.get(4) * m2inv * dLambda );
-		dv2.add( 2, j.get(5) * j2inv * dLambda );
+		dv1.add( 0, j.get(0) * m1inv * lambda );
+		dv1.add( 1, j.get(1) * m1inv * lambda );
+		dv1.add( 2, j.get(2) * j1inv * lambda );
+		dv2.add( 0, j.get(3) * m2inv * lambda );
+		dv2.add( 1, j.get(4) * m2inv * lambda );
+		dv2.add( 2, j.get(5) * j2inv * lambda );
+	}
+	
+	/**
+	 * Updates the force on each body to account for the collision and 
+	 * also updates lambdas vector.
+	 * @param index
+	 * @param lambda
+	 */
+	protected void updateLambda(int index, double lambda) {
+		Contact contact = contacts.get(index/2);
+		if (index%2 ==0) {
+			lambdas.set(2*contact.index,  lambda);
+			contact.lambda.set(lambda, contact.lambda.y);
+		} else {
+			lambdas.set(2*contact.index + 1, lambda);
+			contact.lambda.set(contact.lambda.x, lambda);
+		}
 	}
 	
 	/**
@@ -360,6 +366,10 @@ public class PGS {
 		for (Contact contact : contacts) {
 			lambdas.set(index, contact.lambda.x);
 			lambdas.set(index+1, contact.lambda.y);
+			
+			updateVelocity(contact.index*2, contact.lambda.x);
+			updateVelocity(contact.index*2 + 1, contact.lambda.y);
+			
 			index+=2;
 		}
 	}

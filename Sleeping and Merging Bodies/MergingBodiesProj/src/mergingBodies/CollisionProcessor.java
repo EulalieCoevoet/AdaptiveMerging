@@ -98,7 +98,7 @@ public class CollisionProcessor {
 			updateContactMap();
 			
 			// apply one iteration of PGS for contacts in each collection
-			/*for (RigidBody body : bodies) {
+			for (RigidBody body : bodies) {
 				if (body instanceof RigidCollection) {
 					RigidCollection collection = (RigidCollection)body;
 					
@@ -111,10 +111,10 @@ public class CollisionProcessor {
 					solver.computeInCollections = true;
 					solver.contacts = collection.internalContacts;
 					solver.solve(dt);
-					
-					collection.resetBodiesVelocity();
+
+					collection.updateBodiesContactForces(dt);
 				}
-			}*/
+			}
 
 			calculateContactForce(dt);	
 		}

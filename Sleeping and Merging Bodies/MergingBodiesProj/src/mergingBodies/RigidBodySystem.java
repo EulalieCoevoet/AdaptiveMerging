@@ -141,9 +141,9 @@ public class RigidBodySystem {
 			checkIndex();
 		}
 
-		if (this.generateBody) {
+		if (generateBody) {
 			generateBody();
-			this.generateBody = false;
+			generateBody = false;
 		}
 
 		computeTime = (System.nanoTime() - now) / 1e9;
@@ -278,7 +278,6 @@ public class RigidBodySystem {
 			b.deltaV.zero();
 
 			b.savedContactForce.set(0, 0);
-
 			b.currentContactForce.set(0, 0);
 			b.contactTorques = 0;
 			b.currentContactTorques = 0;
@@ -374,8 +373,7 @@ public class RigidBodySystem {
 
 			cTorque = c.lambda.x*jn_omega + c.lambda.y*jt_omega;
 			return cTorque;
-		}
-		else {
+		} else {
 			double jn_omega, jt_omega;
 			Point2d radius_i = new Point2d(c.bc.body2.x);
 			body.transformB2W.transform(radius_i);
@@ -594,40 +592,6 @@ public class RigidBodySystem {
 	 */
 	private void forceClosureMethod() {
 		// TODO Fill this method out		
-	}
-
-	/**goes through bodies and sees if any collection should be unmerged, and then
-	 * unmerges ALLL bodies in that collecion with no discrimination
-	 * 
-	 */
-	private void generalHeuristic() {
-		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
-		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
-		Vector2d totalForce = new Vector2d();
-		double totalTorque = 0;
-		for(RigidBody b : bodies) {
-			//check if force on Collection is high enough. If it is... unmerge the entire rigidCollection
-			if (b instanceof RigidCollection) {
-
-				totalForce.set(b.force);
-				totalForce.add(b.savedContactForce);
-				totalTorque = b.torque + b.contactTorques;
-
-				double forceMetric = Math.sqrt(Math.pow(totalForce.x,2 ) + Math.pow(totalForce.y, 2))/b.massLinear + Math.sqrt(Math.pow(totalTorque, 2))/b.massAngular;
-				if (forceMetric > CollisionProcessor.forceMetricTolerance.getValue()) {
-					((RigidCollection) b).unmergeAllBodies();
-					additionQueue.addAll(((RigidCollection) b).collectionBodies);
-					removalQueue.add(b);
-				}
-			}
-		}
-
-		for (RigidBody b: additionQueue) {
-			bodies.add(b);
-		}
-		for (RigidBody b : removalQueue) {
-			bodies.remove(b);
-		}
 	}
 	
 
