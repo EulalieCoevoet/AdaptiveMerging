@@ -106,9 +106,11 @@ public class CollisionProcessor {
 	 * @param dt
 	 */
 	public void updateContactsInCollections(double dt) {
+		
 		PGS solver = new PGS(friction.getValue(), iterations.getValue(), restitution.getValue());
+		
 		for (RigidBody body : bodies) {
-			if (body instanceof RigidCollection) {
+			if (body instanceof RigidCollection && !body.temporarilyPinned) {
 				RigidCollection collection = (RigidCollection)body;
 				
 				collection.updateBodiesJacobian();

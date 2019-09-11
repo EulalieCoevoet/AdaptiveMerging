@@ -472,33 +472,32 @@ public class RigidBodySystem {
 		from the rest of the collection. 
 	 */
 	private void generalOneBodyAtATime() {
+		
 		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
-		Vector2d totalForce = new Vector2d();
-		double totalTorque = 0;
-		boolean unmerge = false;
-		for(RigidBody b : bodies) {
-			//check if force on Collection is high enough. If it is... unmerge the entire rigidCollection
-			if (b instanceof RigidCollection) {
-				RigidCollection colB = (RigidCollection) b;
-				if (!colB.unmergedThisTimeStep) {
+
+		for(RigidBody body : bodies) {
+			if (body instanceof RigidCollection) {
+				RigidCollection collection = (RigidCollection) body;
+				if (!collection.unmergedThisTimeStep) {
+					
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
-					for (RigidBody sB: colB.collectionBodies) {
-						unmerge = colB.metricCheck(sB, totalForce, totalTorque);
+					for (RigidBody b: collection.collectionBodies) {
+						boolean unmerge = collection.checkBodiesContacts(b, collisionProcessor.friction.getValue());
 						if (unmerge)
-							unmergingBodies.add(sB);
+							unmergingBodies.add(b);
 					}
 					
 					ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
 					if (!unmergingBodies.isEmpty()) {
-						unmergeSelectBodies(colB, unmergingBodies, newBodies);				
+						unmergeSelectBodies(collection, unmergingBodies, newBodies);				
 					}
 
 					if (!newBodies.isEmpty()) {
 						for (RigidBody bd: newBodies) {
 							additionQueue.add(bd);
 						}
-						removalQueue.add(colB);
+						removalQueue.add(collection);
 						newBodies.clear();
 					}
 				}
@@ -512,22 +511,22 @@ public class RigidBodySystem {
 		}
 	}
 
-	private void unmergeSelectBodies(RigidCollection colB, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies) {
+	private void unmergeSelectBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies) {
 		ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
 
 		handledBodies.addAll((unmergingBodies));
-		for (RigidBody b: unmergingBodies) {
-
-			colB.unmergeSingleBody(b);
-			newBodies.add(b);
-			colB.contactsToWorld();
+		for (RigidBody body: unmergingBodies) {
+			collection.unmergeSingleBody(body);
+			newBodies.add(body);
+			collection.contactsToWorld();
 		}
+		
 		ArrayList<BodyContact> clearedBodyContacts = new ArrayList<BodyContact>();
-		for (RigidBody b: unmergingBodies) {
+		for (RigidBody body: unmergingBodies) {
 			ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 
-			for (BodyContact bc : b.bodyContactList) {
-				RigidBody body2 = bc.getOtherBody(b);
+			for (BodyContact bc : body.bodyContactList) {
+				RigidBody body2 = bc.getOtherBody(body);
 				clearedBodyContacts.add(bc);
 				if (bc.merged) {
 					bc.merged = false;
@@ -543,21 +542,21 @@ public class RigidBodySystem {
 							RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
 							newCollection.addBodies(subBodies);
 							newCollection.fillInternalBodyContacts();
-							newCollection.v.set(colB.v);
-							newCollection.omega = colB.omega;
+							newCollection.v.set(collection.v);
+							newCollection.omega = collection.omega;
 							newCollection.contactsToBody();
 							newBodies.add(newCollection);
 							subBodies.clear();
 						}	else if ( subBodies.size() == 1){
-							colB.unmergeSingleBody(subBodies.get(0));
+							collection.unmergeSingleBody(subBodies.get(0));
 							newBodies.add(subBodies.remove(0));
 							subBodies.clear();
 						}
 					}
 				}
 			}
-			b.bodyContactList.clear();
-			b.bodyContactListPreMerging.clear();
+			body.bodyContactList.clear();
+			body.bodyContactListPreMerging.clear();
 			for (BodyContact bc: clearedBodyContacts) {
 				bc.body1.bodyContactList.remove(bc);
 				bc.body2.bodyContactList.remove(bc);

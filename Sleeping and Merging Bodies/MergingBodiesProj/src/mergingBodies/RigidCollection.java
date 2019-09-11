@@ -248,11 +248,22 @@ public class RigidCollection extends RigidBody{
 			b.parent = null;
 		}
 	}
+	
+	public boolean checkBodiesContacts(RigidBody body, double mu) {
+		for (BodyContact bc: body.bodyContactList) {
+			for (Contact c : bc.contactList) {
+				if (c.lambda.x == 0.)
+					return true;
+				/*if (Math.abs(c.lambda.y) == c.lambda.x*mu)
+					return true;*/
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public void advanceTime(double dt){
-		
-		// check for temporary pinned condition
+
 		if(temporarilyPinned && ++steps>=200)
 			temporarilyPinned=!temporarilyPinned; 
 		
