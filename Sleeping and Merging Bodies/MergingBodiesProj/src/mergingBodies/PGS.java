@@ -56,9 +56,6 @@ public class PGS {
 	public void disableWarmStart(){
 		warmStart = false;
 	}
-
-	/** Dimension of the system */
-	protected int dim;
 	
 	protected DenseVector lambdas;
 	
@@ -83,7 +80,7 @@ public class PGS {
 		
 		while(iterations > 0) {
 			
-			for (int i=0; i<dim; i++) {
+			for (int i=0; i<lambdas.size(); i++) {
 				
 				double d = computeJMinvJtDiagonal(i); 
 				double Jdv = computeJdv(i);  
@@ -124,7 +121,6 @@ public class PGS {
 	protected void initLambdas() {
 		lambdas = new DenseVector(2*contacts.size());
 		lambdas.zero();
-		dim = lambdas.size();
 	}
 	
 	/**
@@ -280,17 +276,16 @@ public class PGS {
 			j = new DenseVector(contact.j1);
 		else // tangent component
 			j = new DenseVector(contact.j2);
-
+		
 		//update delta V;
 		DenseVector dv1 = body1.deltaV; 
 		DenseVector dv2 = body2.deltaV;
-		
-		dv1.set( 0, dv1.get(0) + j.get(0) * m1inv * dLambda );
-		dv1.set( 1, dv1.get(1) + j.get(1) * m1inv * dLambda );
-		dv1.set( 2, dv1.get(2) + j.get(2) * j1inv * dLambda );
-		dv2.set( 0, dv2.get(0) + j.get(3) * m2inv * dLambda );
-		dv2.set( 1, dv2.get(1) + j.get(4) * m2inv * dLambda );
-		dv2.set( 2, dv2.get(2) + j.get(5) * j2inv * dLambda );
+		dv1.add( 0, j.get(0) * m1inv * dLambda );
+		dv1.add( 1, j.get(1) * m1inv * dLambda );
+		dv1.add( 2, j.get(2) * j1inv * dLambda );
+		dv2.add( 0, j.get(3) * m2inv * dLambda );
+		dv2.add( 1, j.get(4) * m2inv * dLambda );
+		dv2.add( 2, j.get(5) * j2inv * dLambda );
 	}
 	
 	/**
@@ -298,60 +293,63 @@ public class PGS {
 	 */
 	protected void warmStart() {
 		for (Contact contact : contacts) {
-
-			DenseVector j1 = new DenseVector(contact.j1);
-			DenseVector j2 = new DenseVector(contact.j2);
-			Block block1 = contact.block1;
-			Block block2 = contact.block2;
-
-			if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))
-					|| lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
-
-				RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
-				RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+			Contact oldContact = getOldContact(contact);
+			if(oldContact != null) { 
 				
-				double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
-				double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
-				double j1inv = (body1.temporarilyPinned)? 0: body1.jinv;
-				double j2inv = (body2.temporarilyPinned)? 0: body2.jinv;
+				double oldLamda_n = oldContact.lambda.x;
+				double oldLamda_t = oldContact.lambda.y;
 
-				// if the old map contains this key, then get the lambda of the old map
-				Contact c = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
-				if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
-					c = lastTimeStepMap.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
+				lambdas.set(contact.index*2, oldLamda_n);
+				lambdas.set(contact.index*2 + 1, oldLamda_t);
 				
-				RigidBody cbody1 = (c.body1.isInCollection())? c.body1.parent: c.body1;
-				RigidBody cbody2 = (c.body2.isInCollection())? c.body2.parent: c.body2;
-				if (cbody1 != body1 || cbody2 != body2) {
-					continue;
-				}
-
-				double oldLamda_n = c.lambda.x;
-				double oldLamda_t = c.lambda.y;
-				// set this lambda to the old lambda
-				lambdas.set(2*contact.index, oldLamda_n);
-				lambdas.set(2*contact.index + 1, oldLamda_t);
-
-				// update delta V;
-				DenseVector dV1 = cbody1.deltaV; 
-				DenseVector dV2 = cbody2.deltaV; 
-				dV1.set(0, dV1.get(0) + j1.get(0) * m1inv * oldLamda_n + j2.get(0) * m1inv * oldLamda_t);
-				dV1.set(1, dV1.get(1) + j1.get(1) * m1inv * oldLamda_n + j2.get(1) * m1inv * oldLamda_t );
-				dV1.set(2, dV1.get(2) + j1.get(2) * j1inv * oldLamda_n + j2.get(2) * j1inv * oldLamda_t);
-				dV2.set(0, dV2.get(0) + j1.get(3) * m2inv * oldLamda_n + j2.get(3) * m2inv * oldLamda_t);
-				dV2.set(1, dV2.get(1) + j1.get(4) * m2inv * oldLamda_n + j2.get(4) * m2inv * oldLamda_t );
-				dV2.set(2, dV2.get(2) + j1.get(5) * j2inv * oldLamda_n + j2.get(5) * j2inv * oldLamda_t );
+				updateVelocity(contact.index*2, oldLamda_n);
+				updateVelocity(contact.index*2 + 1, oldLamda_t);
 				
 				contact.body1ContactForceHistory.clear();
 				contact.body1ContactTorqueHistory.clear();
 				contact.body2ContactForceHistory.clear();
 				contact.body2ContactTorqueHistory.clear();
-				contact.body1ContactForceHistory.addAll(c.body1ContactForceHistory);
-				contact.body1ContactTorqueHistory.addAll(c.body1ContactTorqueHistory);
-				contact.body2ContactForceHistory.addAll(c.body2ContactForceHistory);
-				contact.body2ContactTorqueHistory.addAll(c.body2ContactTorqueHistory);
+				contact.body1ContactForceHistory.addAll(oldContact.body1ContactForceHistory);
+				contact.body1ContactTorqueHistory.addAll(oldContact.body1ContactTorqueHistory);
+				contact.body2ContactForceHistory.addAll(oldContact.body2ContactForceHistory);
+				contact.body2ContactTorqueHistory.addAll(oldContact.body2ContactTorqueHistory);
 			}
 		}
+	}
+	
+	/**
+	 * Checks if lastTimeStepMap (contact map of last time step) contains a similar contact and returns the corresponding contact. 
+	 * @param contact
+	 * @return oldContact
+	 */
+	protected Contact getOldContact(Contact contact) {
+		
+		Contact oldContact;
+		
+		Block block1 = contact.block1;
+		Block block2 = contact.block2;
+
+		if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))
+				|| lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
+
+			RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
+			RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+
+			// if the old map contains this key, then get the lambda of the old map
+			oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
+			if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
+				oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
+			
+			RigidBody oldBody1 = (oldContact.body1.isInCollection())? oldContact.body1.parent: oldContact.body1;
+			RigidBody oldBody2 = (oldContact.body2.isInCollection())? oldContact.body2.parent: oldContact.body2;
+			
+			if (oldBody1 != body1 || oldBody2 != body2) 
+				return null;
+		}
+		else
+			return null;
+		
+		return oldContact;
 	}
 	
 	/**
