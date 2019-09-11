@@ -97,26 +97,32 @@ public class CollisionProcessor {
 			
 			updateContactMap();
 			
-			// apply one iteration of PGS for contacts in each collection
-			for (RigidBody body : bodies) {
-				if (body instanceof RigidCollection) {
-					RigidCollection collection = (RigidCollection)body;
-					
-					collection.updateBodiesJacobian();
-					collection.updateBodiesForces(dt);
-					collection.updateBodiesVelocity();
-					
-					solver.iterations = 1;
-					solver.confidentWarmStart = true;
-					solver.computeInCollections = true;
-					solver.contacts = collection.internalContacts;
-					solver.solve(dt);
-
-					collection.updateBodiesContactForces(dt);
-				}
-			}
-
 			calculateContactForce(dt);	
+		}
+	}
+	
+	/**
+	 * Does one iteration of PGS to update contacts inside collections
+	 * @param dt
+	 */
+	public void updateContactsInCollections(double dt) {
+		PGS solver = new PGS(friction.getValue(), iterations.getValue(), restitution.getValue());
+		for (RigidBody body : bodies) {
+			if (body instanceof RigidCollection) {
+				RigidCollection collection = (RigidCollection)body;
+				
+				collection.updateBodiesJacobian();
+				collection.updateBodiesForces(dt);
+				collection.updateBodiesVelocity();
+				
+				solver.iterations = 1;
+				solver.confidentWarmStart = true;
+				solver.computeInCollections = true;
+				solver.contacts = collection.internalContacts;
+				solver.solve(dt);
+
+				collection.updateBodiesContactForces(dt);
+			}
 		}
 	}
 	

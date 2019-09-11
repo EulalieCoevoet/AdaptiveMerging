@@ -111,7 +111,9 @@ public class RigidBodySystem {
 		}
 		
 		if (processCollisions.getValue()) {
-			collisionProcessor.processCollisions( dt );
+			collisionProcessor.processCollisions(dt);
+			if(enableMerging.getValue())
+				collisionProcessor.updateContactsInCollections(dt);
 		}
 		
 		if (enableMerging.getValue() || enableSleeping.getValue()) {
@@ -461,9 +463,7 @@ public class RigidBodySystem {
 	 * this problem, it will call different methods for each unmerging solution.
 	 */
 	private void unmergeBodies() {
-		//generalHeuristic();
 		generalOneBodyAtATime();
-		//forceClosureMethod();
 	}
 
 	/**
