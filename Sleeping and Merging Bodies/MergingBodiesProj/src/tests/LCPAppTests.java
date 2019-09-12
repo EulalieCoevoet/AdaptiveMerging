@@ -22,7 +22,7 @@ public class LCPAppTests extends LCPApp {
 	
     @Test
     public void collisionWithCollectionTest() {
-    	loadSystem("datalcp/twoStacks.png");
+    	loadSystem("datalcp/twoStacksTest.png");
 
     	RigidBodySystem.enableMerging.setValue(true);
     	for (int i=0; i<122; i++)
@@ -42,7 +42,7 @@ public class LCPAppTests extends LCPApp {
 	
     @Test
     public void mergingTest() {
-		loadSystem("datalcp/twoStacks.png");
+		loadSystem("datalcp/twoStacksTest.png");
 		
     	assertEquals(system.bodies.size(),6); // should have 6 bodies when loading the scene
     	
@@ -54,7 +54,7 @@ public class LCPAppTests extends LCPApp {
     
     @Test
     public void mergingAndSleepingTest() {  
-		loadSystem("datalcp/twoStacks.png");
+		loadSystem("datalcp/twoStacksTest.png");
 		
     	for (RigidBody body: system.bodies)
 			assertEquals(ObjectState.ACTIVE, body.state); // every bodies should be active at beginning of the simulation
@@ -70,7 +70,7 @@ public class LCPAppTests extends LCPApp {
     
     @Test
     public void temporarilyPinnedObjectTest() {
-    	loadSystem("datalcp/twoStacks.png");
+    	loadSystem("datalcp/twoStacksTest.png");
     	
     	for (int i=0; i<10; i++)
     		system.advanceTime(dt);
@@ -92,10 +92,25 @@ public class LCPAppTests extends LCPApp {
     }
     
     @Test
+    /**
+     * Checks that the merging is working with a temporarily pinned object.
+     */
     public void twoStackTest() {
-		loadSystem("datalcp/twoStacks.png");
+		loadSystem("datalcp/twoStacksTest.png");
     	
     	for (int i=0; i<400; i++)
+    		system.advanceTime(dt);
+    	assertEquals(system.collisionProcessor.contacts.size(),2); 
+    }
+    
+    @Test
+    /**
+     * Failing example with current pruning technique combined with update of contacts in collection
+     */
+    public void inactiveContactsTest() {
+		loadSystem("datalcp/unstableStackTest.png");
+    	
+    	for (int i=0; i<200; i++)
     		system.advanceTime(dt);
     	assertEquals(system.collisionProcessor.contacts.size(),2); 
     }

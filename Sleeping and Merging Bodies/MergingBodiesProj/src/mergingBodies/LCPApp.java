@@ -73,7 +73,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     
     public void setUp() {
         system.mouseSpring = mouseSpring;
-        systemDir = "datalcp/twoStacks.png";
+        systemDir = "datalcp/unstableStackTest.png";
         loadSystem(systemDir); 
         // good default scene
         T.getBackingMatrix().setIdentity();
@@ -168,6 +168,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         text += "total steps = " + system.totalSteps + "\n";
         text += "collision detection = " + system.collisionProcessor.collisionDetectTime + "\n";
         text += "collision processing = " + system.collisionProcessor.collisionSolveTime + "\n";
+        text += "collision update in collections = " + system.collisionProcessor.collectionUpdateTime + "\n";
         text += "h = " + stepsize.getValue() + " (with " + substeps.getValue() + " substeps)\n";
         text += "PGS iterations = " + system.collisionProcessor.iterations.getValue() + "\n";
         text += "mu = " + system.collisionProcessor.friction.getValue() + "\n";

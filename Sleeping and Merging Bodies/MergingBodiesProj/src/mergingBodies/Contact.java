@@ -237,15 +237,12 @@ public class Contact {
 		gl.glLineWidth(2);
 		gl.glColor4f(1, 0, 0, 1);
 		gl.glBegin( GL.GL_LINES );
+		
 		gl.glVertex2d(p2.x, p2.y);
 		gl.glVertex2d(p2.x + scale*contactForceB2.x, p2.y+scale*contactForceB2.y);
-		gl.glEnd();
-
-		gl.glLineWidth(2);
-		gl.glColor4f(1 , 0, 0, 1);
-		gl.glBegin( GL.GL_LINES );
 		gl.glVertex2d(p1.x, p1.y);
 		gl.glVertex2d(p1.x + scale*contactForceB1.x, p1.y+scale*contactForceB1.y);
+		
 		gl.glEnd();
 
 		body1.transformW2B.transform(contactForceB1);
@@ -271,21 +268,15 @@ public class Contact {
 
 		gl.glLineWidth(2);
 		gl.glColor4f(0, 0, 1, 1);
+		
 		gl.glBegin( GL.GL_LINES );
 
-		gl.glVertex2d(p2.x, p2.y);
 		double scale = 0.05;
-
+		gl.glVertex2d(p2.x, p2.y);
 		gl.glVertex2d(p2.x + scale*contactForceB2.x, p2.y+scale*contactForceB2.y);
-		gl.glEnd();
-
-		gl.glLineWidth(2);
-		gl.glColor4f(0, 0, 1, 1);
-		gl.glBegin( GL.GL_LINES );
-
 		gl.glVertex2d(p1.x, p1.y);
-
 		gl.glVertex2d(p1.x + scale*contactForceB1.x, p1.y+scale*contactForceB1.y);
+		
 		gl.glEnd();
 
 		body1.transformW2B.transform(contactForceB1);
@@ -466,7 +457,6 @@ public class Contact {
 		}
 		x/=list.size();
 		return  x;
-
 	}
 
 	private Vector2d getAverageContactForce(ArrayList<Vector2d> list) {

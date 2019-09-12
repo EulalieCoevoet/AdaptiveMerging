@@ -12,9 +12,8 @@ import mergingBodies.RigidBody;
 
 class CollisionProcessorTest extends CollisionProcessor {
 
-	String defaultFile = "datalcp/twoStacks.png";
+	String defaultFile = "datalcp/twoStacksTest.png";
 	public List<RigidBody> defaultBodies;
-	
 	
 	public CollisionProcessorTest() {
 		load(defaultFile);

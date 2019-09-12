@@ -58,7 +58,10 @@ public class CollisionProcessor {
 
 	/** keeps track of the time used to solve the LCP based velocity update on the last call */
 	double collisionSolveTime = 0;
-
+	
+	/** keeps track of the time used to update the contacts inside the collections on the last call */
+	double collectionUpdateTime = 0;
+	
 	/**list that keeps track of all the body contacts that occurred in this time step */
 	public ArrayList<BodyContact> bodyContacts = new ArrayList<BodyContact>();
 
@@ -95,6 +98,10 @@ public class CollisionProcessor {
 			solver.solve(dt);
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
+			if (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue())
+				for (Contact contact : contacts) 
+					storeInBodyContacts(contact);
+			
 			updateContactMap();
 			
 			calculateContactForce(dt);	
@@ -109,6 +116,7 @@ public class CollisionProcessor {
 		
 		PGS solver = new PGS(friction.getValue(), iterations.getValue(), restitution.getValue());
 		
+		long now = System.nanoTime();
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
 				RigidCollection collection = (RigidCollection)body;
@@ -126,6 +134,7 @@ public class CollisionProcessor {
 				collection.updateBodiesContactForces(dt);
 			}
 		}
+		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
 	}
 	
 	protected void updateContactMap() {
@@ -240,11 +249,6 @@ public class CollisionProcessor {
 				if ( pruneContacts.getValue() && tmpBodyBodyContacts.size() >= 3 ) 
 					prune();
 				
-				if (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue())
-					for (Contact contact : tmpBodyBodyContacts) 
-						if (!contact.body1.pinned || !contact.body2.pinned)
-							storeInBodyContacts(contact);
-				
 				contacts.addAll(tmpBodyBodyContacts);
 			}
 		}        
@@ -315,6 +319,9 @@ public class CollisionProcessor {
 	 * @param contact
 	 */
 	private void storeInBodyContacts(Contact contact) {
+
+		if (contact.body1.pinned && contact.body2.pinned) return;
+		//if (contact.lambda.x==0.) return;
 		
 		// check if this body contact exists already
 		BodyContact bc = BodyContact.checkExists(contact.body1, contact.body2, bodyContacts);

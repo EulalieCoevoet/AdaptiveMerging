@@ -112,6 +112,7 @@ public class RigidBodySystem {
 		
 		if (processCollisions.getValue()) {
 			collisionProcessor.processCollisions(dt);
+			// eulalie: This update is not compatible with the current pruning technique
 			if(enableMerging.getValue())
 				collisionProcessor.updateContactsInCollections(dt);
 		}
@@ -394,71 +395,6 @@ public class RigidBodySystem {
 	}
 
 	/**
-	 * takes the collection, applies the appropriate contact force to the subBody
-	 * the normal and tangential contact force components will be the same...
-	 * but the rotational ones will be different. 
-	 */
-	@Deprecated
-	private void applyContactForceToSubBody(Contact c, RigidCollection body, Vector2d cForce) {
-
-		double cTorque= 0;
-		if (c.bc.body1.parent == (body)) {
-
-
-			double jn_omega, jt_omega;
-
-			Point2d radius_i = new Point2d(c.bc.body1.x);
-			body.transformB2W.transform(radius_i);
-
-			radius_i.sub(c.contactW, radius_i);
-
-			Vector2d tangeant = new Vector2d(-c.normal.y, c.normal.x);
-
-			Vector2d r1 = new Vector2d(-radius_i.y, radius_i.x);
-
-			jn_omega = - r1.dot(c.normal);
-			jt_omega = - r1.dot(tangeant);
-			if (body == c.body2) {
-				jn_omega *= -1;
-				jt_omega *= -1;
-
-			}
-
-			cTorque = c.lambda.x*jn_omega + c.lambda.y*jt_omega;
-
-			//add to force in subBodies because we need to remember the 
-			//contact forces, but not the ones modified... otherwise itll keep accumulating
-			c.bc.body1.force.add(cForce);
-			c.bc.body1.torque += cTorque;
-
-		}
-		if (c.bc.body2.parent == body) {
-			c.bc.body2.force.add(cForce);
-
-			double jn_omega, jt_omega;
-
-			Point2d radius_i = new Point2d(c.bc.body2.x);
-			body.transformB2W.transform(radius_i);
-
-			radius_i.sub(c.contactW, radius_i);
-
-			Vector2d tangeant = new Vector2d(-c.normal.y, c.normal.x);
-
-			Vector2d r1 = new Vector2d(-radius_i.y, radius_i.x);
-
-			jn_omega = - r1.dot(c.normal);
-			jt_omega = - r1.dot(tangeant);
-			if (body == c.body2) { //contact normal may be in the wrong direction based on which body in Contact it is
-				jn_omega *= -1;
-				jt_omega *= -1;
-			}
-
-			cTorque = c.lambda.x*jn_omega + c.lambda.y*jt_omega;
-			c.bc.body2.torque += cTorque;
-		}
-	}
-
-	/**
 	 * Method that deals with unmerging rigidBodies... because we will explore different solutions to
 	 * this problem, it will call different methods for each unmerging solution.
 	 */
@@ -580,19 +516,6 @@ public class RigidBodySystem {
 		}
 	}
 
-	/**
-	 * The idea is to check at every timestep, the force acting on the system including:
-	 * Gravity, Spring, Collision Lamdas, etc.
-	 * 
-	 * We then go through each body in the collection, and for each body we go through each
-	 * contact and see if the new applied force at that contact location lies 
-	 * outside of the friction cone. If yes, then unmerge that body... (may need to recurse)
-	 * if no, then dont unmerge
-	 */
-	private void forceClosureMethod() {
-		// TODO Fill this method out		
-	}
-	
 
 	/**
 	 * Merges all rigidBodies in the system that fit the appropriate criteria: 
@@ -676,14 +599,6 @@ public class RigidBodySystem {
 		}
 	}
 
-	private void downIndex(double i, ArrayList<RigidBody> bodyList) {
-		for(RigidBody b: bodyList) {
-			if (b.index > i) {
-				b.index --;
-			}
-		}
-	}
-
 	/**
 	 * Finds the body which has a block that intersects the provided point.
 	 * @param p
@@ -733,7 +648,6 @@ public class RigidBodySystem {
 		//	bodies = this.originalBodies;
 		int size = bodies.size();
 		int counter = 0;
-		boolean done = false;
 		int i = 0;
 		while(true) {
 			if (bodies.size() == 0) break;
@@ -774,7 +688,8 @@ public class RigidBodySystem {
 
 		simulationTime = 0;
 		collisionProcessor.reset();
-		totalAccumulatedComputeTime = 0;        
+		totalAccumulatedComputeTime = 0; 
+		totalSteps = 0;
 	}
 
 	private void collectionReset(RigidCollection b) {

@@ -119,19 +119,23 @@ public class CollisionComputationMonitor {
 	
 	private MonitorData CD = new MonitorData("collision detection", "bodies");
 	private MonitorData CP = new MonitorData("collision processing", "contacts");
+	private MonitorData CU = new MonitorData("collision update in collections", "tests");
 	
 	public void monitor( RigidBodySystem system ) {
 		int nb = system.bodies.size(); 
 		int nc = system.collisionProcessor.contacts.size();
 		double tcs = system.collisionProcessor.collisionSolveTime;
 		double tcd = system.collisionProcessor.collisionDetectTime;
+		double tcu = system.collisionProcessor.collectionUpdateTime;
 	
 		CD.add( nb, tcd );
 		CP.add( nc, tcs );
+		CU.add( nc, tcs );
 	}
 	
 	public void draw( GLAutoDrawable drawable) {
 		CD.draw(drawable, 0);
 		CP.draw(drawable, 1);
+		CU.draw(drawable, 1);
 	}
 }

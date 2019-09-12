@@ -17,11 +17,11 @@ public class RigidCollection extends RigidBody{
 	public LinkedList<RigidBody> colRemovalQueue = new LinkedList<RigidBody>();
 
 	/** List of RigidBody of the collection */
-	ArrayList<RigidBody> collectionBodies = new ArrayList<RigidBody>();
+	protected ArrayList<RigidBody> collectionBodies = new ArrayList<RigidBody>();
 	/** List of BodyContact in the collection: BodyContact between RigidBody of the collection */
-	ArrayList<BodyContact> internalBodyContacts = new ArrayList<BodyContact>();
+	protected ArrayList<BodyContact> internalBodyContacts = new ArrayList<BodyContact>();
 	/** List of Contact in the collection: Contact between RigidBody of the collection */
-	ArrayList<Contact> internalContacts = new ArrayList<Contact>();
+	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 
 	boolean unmergedThisTimeStep = false;
 	boolean updatedThisTimeStep = false;
@@ -306,10 +306,12 @@ public class RigidCollection extends RigidBody{
 
 	private void updateCollectionBodyTransformations(double dt) {
 		//WHY doesn't this work!
+		//eulalie : you sure it does not work?
 		for (RigidBody b: collectionBodies) {
 			b.transformB2W.set(b.transformB2C);
 			b.transformB2W.leftMult(transformB2W);
-			b.transformW2B.set(b.transformB2W); b.transformW2B.invert();
+			b.transformW2B.set(b.transformB2W); 
+			b.transformW2B.invert();
 		}
 	}
 	
@@ -323,7 +325,8 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody body: collectionBodies) {
 			body.transformB2C.set(body.transformB2W);
 			body.transformB2C.leftMult(transformW2B);
-			body.transformC2B.set(body.transformB2C); body.transformC2B.invert();
+			body.transformC2B.set(body.transformB2C); 
+			body.transformC2B.invert();
 		}
 	}
 
@@ -335,7 +338,7 @@ public class RigidCollection extends RigidBody{
 		//RigidTransform temp = new RigidTransform();
 		for (RigidBody b : collectionBodies) {
 			transformW2B.transform(b.x);
-			b.theta =  b.transformB2C.getTheta();
+			b.theta = b.transformB2C.getTheta();
 		}
 	}
 
