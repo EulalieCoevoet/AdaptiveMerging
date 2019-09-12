@@ -140,7 +140,7 @@ public class RigidBodySystem {
 		}
 
 		if (enableMerging.getValue()) {
-			unmergeBodies();
+			unmergeBodies(dt);
 			checkIndex();
 		}
 
@@ -398,8 +398,8 @@ public class RigidBodySystem {
 	 * Method that deals with unmerging rigidBodies... because we will explore different solutions to
 	 * this problem, it will call different methods for each unmerging solution.
 	 */
-	private void unmergeBodies() {
-		generalOneBodyAtATime();
+	private void unmergeBodies(double dt) {
+		generalOneBodyAtATime(dt);
 	}
 
 	/**
@@ -407,7 +407,7 @@ public class RigidBodySystem {
 		If a body has enough force acting on it (over a threshold), seperate just that body
 		from the rest of the collection. 
 	 */
-	private void generalOneBodyAtATime() {
+	private void generalOneBodyAtATime(double dt) {
 		
 		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
@@ -419,7 +419,7 @@ public class RigidBodySystem {
 					
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 					for (RigidBody b: collection.collectionBodies) {
-						boolean unmerge = collection.checkBodiesContacts(b, collisionProcessor.friction.getValue());
+						boolean unmerge = collection.checkRelativeVelocity(b, dt);
 						if (unmerge)
 							unmergingBodies.add(b);
 					}

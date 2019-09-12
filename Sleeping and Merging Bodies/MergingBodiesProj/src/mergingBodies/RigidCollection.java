@@ -249,16 +249,16 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 	
-	public boolean checkBodiesContacts(RigidBody body, double mu) {
-		for (BodyContact bc: body.bodyContactList) {
-			for (Contact c : bc.contactList) {
-				if (c.lambda.x == 0.)
-					return true;
-				/*if (Math.abs(c.lambda.y) == c.lambda.x*mu)
-					return true;*/
-			}
-		}
-		return false;
+	public boolean checkRelativeVelocity(RigidBody body, double dt) {
+		Vector2d v_rel = new Vector2d();
+		double omega_rel = 0.;
+		
+		v_rel.x += body.force.x * dt / body.massLinear + body.deltaV.get(0);
+		v_rel.y += body.force.y * dt / body.massLinear + body.deltaV.get(1);
+		omega_rel += body.torque * dt / body.massAngular + body.deltaV.get(2);
+		
+		double metric = 0.5*v_rel.dot(v_rel) + 0.5*omega_rel*omega_rel;
+		return (metric>1e-5);
 	}
 
 	@Override

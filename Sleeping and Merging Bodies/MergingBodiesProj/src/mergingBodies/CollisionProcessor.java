@@ -321,7 +321,6 @@ public class CollisionProcessor {
 	private void storeInBodyContacts(Contact contact) {
 
 		if (contact.body1.pinned && contact.body2.pinned) return;
-		//if (contact.lambda.x==0.) return;
 		
 		// check if this body contact exists already
 		BodyContact bc = BodyContact.checkExists(contact.body1, contact.body2, bodyContacts);
