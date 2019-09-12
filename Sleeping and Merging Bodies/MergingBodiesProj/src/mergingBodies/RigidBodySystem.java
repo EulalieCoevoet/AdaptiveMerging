@@ -404,7 +404,7 @@ public class RigidBodySystem {
 
 	/**
 	 * Goes through all bodies in each collection. 
-		If a body has enough force acting on it (over a threshold), seperate just that body
+		If a body has enough force acting on it (over a threshold), separate just that body
 		from the rest of the collection. 
 	 */
 	private void generalOneBodyAtATime(double dt) {
@@ -419,6 +419,7 @@ public class RigidBodySystem {
 					
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 					for (RigidBody b: collection.collectionBodies) {
+						//eulalie: this is not enough... we get a weird relative velocity right after a merge... 
 						boolean unmerge = collection.checkRelativeVelocity(b, dt);
 						if (unmerge)
 							unmergingBodies.add(b);

@@ -70,7 +70,6 @@ public class RigidCollection extends RigidBody{
 	private void clearUselessJunk() {
 		blocks.clear();
 		boundaryBlocks.clear();
-
 		velHistory.clear();
 		savedContactForce.set(0, 0);
 		contactTorques = 0;
@@ -249,16 +248,22 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 	
+	/**
+	 * Check if body is about to move w.r.t collection
+	 * @param body
+	 * @param dt
+	 * @return
+	 */
 	public boolean checkRelativeVelocity(RigidBody body, double dt) {
-		Vector2d v_rel = new Vector2d();
+		Vector2d v_rel = new Vector2d(0.,0.);
 		double omega_rel = 0.;
 		
 		v_rel.x += body.force.x * dt / body.massLinear + body.deltaV.get(0);
 		v_rel.y += body.force.y * dt / body.massLinear + body.deltaV.get(1);
 		omega_rel += body.torque * dt / body.massAngular + body.deltaV.get(2);
 		
-		double metric = 0.5*v_rel.dot(v_rel) + 0.5*omega_rel*omega_rel;
-		return (metric>1e-5);
+		double metric = 0.5*v_rel.lengthSquared() + 0.5*omega_rel*omega_rel;
+		return (metric>1e-3);
 	}
 
 	@Override
@@ -665,10 +670,8 @@ public class RigidCollection extends RigidBody{
 		//set Transform B2C and C2B for each body
 		setMergedTransformationMatrices();
 		transformToCollectionCoords();
-
 		calculateInertia();
 		//update BVNode roots for each body
-
 		springs.clear();
 		addSprings();
 	}

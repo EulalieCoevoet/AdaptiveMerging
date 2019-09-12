@@ -47,14 +47,19 @@ public class LCPAppTests extends LCPApp {
     	assertEquals(system.bodies.size(),6); // should have 6 bodies when loading the scene
     	
     	RigidBodySystem.enableMerging.setValue(true);
-    	for (int i=0; i<400; i++)
+    	for (int i=0; i<450; i++)
     		system.advanceTime(dt);
     	assertEquals(system.bodies.size(),2); // with the rule that pinned objects should not been merged, we should get 2 bodies at the end of the simulation
     }
     
     @Test
     public void mergingAndSleepingTest() {  
-		loadSystem("datalcp/twoStacksTest.png");
+    	
+    	// TODO: This test failed after changing the unmerging rule to relative velocity check
+    	// Need to be fixed
+    	
+    	assertTrue(false);
+		/*loadSystem("datalcp/twoStacksTest.png");
 		
     	for (RigidBody body: system.bodies)
 			assertEquals(ObjectState.ACTIVE, body.state); // every bodies should be active at beginning of the simulation
@@ -65,7 +70,7 @@ public class LCPAppTests extends LCPApp {
     		system.advanceTime(dt);
     	for (RigidBody body: system.bodies)
     		if (body instanceof RigidCollection)
-    			assertEquals(ObjectState.SLEEPING, body.state); 
+    			assertEquals(ObjectState.SLEEPING, body.state);*/ 
     }
     
     @Test
@@ -98,7 +103,7 @@ public class LCPAppTests extends LCPApp {
     public void twoStackTest() {
 		loadSystem("datalcp/twoStacksTest.png");
     	
-    	for (int i=0; i<400; i++)
+    	for (int i=0; i<450; i++)
     		system.advanceTime(dt);
     	assertEquals(system.collisionProcessor.contacts.size(),2); 
     }
@@ -112,6 +117,6 @@ public class LCPAppTests extends LCPApp {
     	
     	for (int i=0; i<200; i++)
     		system.advanceTime(dt);
-    	assertEquals(system.collisionProcessor.contacts.size(),2); 
+    	assertEquals(system.bodies.size(),2); 
     }
 }

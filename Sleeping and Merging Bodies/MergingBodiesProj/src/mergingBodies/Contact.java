@@ -171,6 +171,15 @@ public class Contact {
 	}
 	
 	/**
+	 * Returns if given body is part of the contact
+	 * @param body
+	 * @return
+	 */
+	public boolean withBody(RigidBody body) {
+		return (body1==body || body2==body);
+	}
+	
+	/**
 	 * Computes and returns the relative kinetic energy without the mass
 	 * @return metric
 	 */

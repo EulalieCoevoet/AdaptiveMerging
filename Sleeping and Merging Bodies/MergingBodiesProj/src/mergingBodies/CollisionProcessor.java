@@ -246,30 +246,56 @@ public class CollisionProcessor {
 				tmpBodyBodyContacts.clear();
 				narrowPhase( b1, b2 );
 				
-				if ( pruneContacts.getValue() && tmpBodyBodyContacts.size() >= 3 ) 
-					prune();
+				if ( pruneContacts.getValue() && tmpBodyBodyContacts.size() > 2 ) {
+					if ( b1 instanceof RigidCollection ) {
+						RigidCollection collection = (RigidCollection) b1;
+						pruneCollection(collection);
+					} else if ( b2 instanceof RigidCollection ) {
+						RigidCollection collection = (RigidCollection) b2;
+						pruneCollection(collection);
+					} else {
+						prune(tmpBodyBodyContacts);
+					}
+				}
 				
 				contacts.addAll(tmpBodyBodyContacts);
 			}
 		}        
 	}
+	
+	protected void pruneCollection(RigidCollection collection) {
+		
+		ArrayList<Contact> collectionContacts = new ArrayList<Contact>();
+		ArrayList<Contact> contacts = new ArrayList<Contact>();
+		for (RigidBody body : collection.collectionBodies) {
+			contacts.clear();
+			for (Contact contact : tmpBodyBodyContacts)
+				if (contact.withBody(body))
+					contacts.add(contact);
+			if (contacts.size()>3)
+				prune(contacts);
+			collectionContacts.addAll(contacts);
+		}
+		tmpBodyBodyContacts.clear();
+		tmpBodyBodyContacts.addAll(collectionContacts);
+	}
 
 	/**
 	 * Prune tmpBodyBodyContacts list
 	 */
-	protected void prune() {
+	protected void prune(ArrayList<Contact> contacts) {
 		
 		ArrayList<Point2d> points = new ArrayList<Point2d>();
 		Point2d meanPos = new Point2d();
 		Vector2d v = new Vector2d();
-		int N = tmpBodyBodyContacts.size();
-		for ( Contact c : tmpBodyBodyContacts ) {
+		int N = contacts.size();
+		for ( Contact c : contacts ) {
 			points.add( c.contactW );
 			meanPos.add( c.contactW );						
 		}
 		meanPos.scale( 1.0 / N );
 		Matrix2d covariance = new Matrix2d();
-		for ( Contact c : tmpBodyBodyContacts ) {
+		for ( Contact c : contacts ) {
 			v.sub( c.contactW, meanPos );						
 			covariance.rank1( 1.0 / N, v );
 		}
@@ -293,7 +319,7 @@ public class CollisionProcessor {
 			double maxDotViolation = Double.MAX_VALUE;
 			eps = 1e-2;
 			
-			for ( Contact c : tmpBodyBodyContacts ) {
+			for ( Contact c : contacts ) {
 				v.sub( c.contactW, meanPos );
 				double dot = v.dot( dir ); 
 				if ( dot > maxDot & c.constraintViolation <= maxDotViolation + eps) {
@@ -308,9 +334,9 @@ public class CollisionProcessor {
 				}
 			}
 			
-			tmpBodyBodyContacts.clear();
-			tmpBodyBodyContacts.add( cmax );
-			tmpBodyBodyContacts.add( cmin );
+			contacts.clear();
+			contacts.add( cmax );
+			contacts.add( cmin );
 		}
 	}
 	
