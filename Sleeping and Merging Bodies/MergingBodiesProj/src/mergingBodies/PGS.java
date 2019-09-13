@@ -215,7 +215,7 @@ public class PGS {
 		// add the Bounce vector to the u's over here, but don't need to do that just yet
 		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
 		// calculate Baumgarte Feedback (overlap of the two bodies)
-		double baumgarteFeedback = feedbackStiffness*contact.constraintViolation;
+		double baumgarteFeedback = (computeInCollections)? 0. : feedbackStiffness*contact.constraintViolation;
 
 		// putting b together.
 		double b = 0;

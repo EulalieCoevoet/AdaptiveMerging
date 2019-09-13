@@ -112,9 +112,6 @@ public class RigidBodySystem {
 		
 		if (processCollisions.getValue()) {
 			collisionProcessor.processCollisions(dt);
-			// eulalie: This update is not compatible with the current pruning technique
-			if(enableMerging.getValue())
-				collisionProcessor.updateContactsInCollections(dt);
 		}
 		
 		if (enableMerging.getValue() || enableSleeping.getValue()) {
@@ -140,6 +137,7 @@ public class RigidBodySystem {
 		}
 
 		if (enableMerging.getValue()) {
+			collisionProcessor.updateContactsInCollections(dt);
 			unmergeBodies(dt);
 			checkIndex();
 		}
@@ -295,7 +293,6 @@ public class RigidBodySystem {
 
 			if (b instanceof RigidCollection) {
 				((RigidCollection) b).unmergedThisTimeStep = false;
-				((RigidCollection) b).updatedThisTimeStep = false; 
 				for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
 					sB.deltaV.zero();
 					sB.currentContactForce.set(sB.savedContactForce);
@@ -484,7 +481,7 @@ public class RigidBodySystem {
 							newCollection.contactsToBody();
 							newBodies.add(newCollection);
 							subBodies.clear();
-						}	else if ( subBodies.size() == 1){
+						} else if (subBodies.size() == 1) {
 							collection.unmergeSingleBody(subBodies.get(0));
 							newBodies.add(subBodies.remove(0));
 							subBodies.clear();

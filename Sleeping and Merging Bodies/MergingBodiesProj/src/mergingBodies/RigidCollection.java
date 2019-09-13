@@ -1,7 +1,6 @@
 package mergingBodies;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 
 import javax.vecmath.Color3f;
@@ -24,7 +23,6 @@ public class RigidCollection extends RigidBody{
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 
 	boolean unmergedThisTimeStep = false;
-	boolean updatedThisTimeStep = false;
 
 	CollisionProcessor collisionProcessor = new CollisionProcessor(collectionBodies);
 
@@ -196,7 +194,7 @@ public class RigidCollection extends RigidBody{
 						torque /= dt;
 
 						body.force.add(force);
-						body.torque += torque;
+						body.torque += torque;						
 					}
 				}
 			}
@@ -207,6 +205,7 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody body : collectionBodies) {
 			body.v.set(v);
 			body.omega = omega;
+			body.deltaV.zero();
 		}
 	}
 	
@@ -255,14 +254,15 @@ public class RigidCollection extends RigidBody{
 	 * @return
 	 */
 	public boolean checkRelativeVelocity(RigidBody body, double dt) {
-		Vector2d v_rel = new Vector2d(0.,0.);
-		double omega_rel = 0.;
+		Vector2d v_rel = new Vector2d();
+		double omega_rel;
 		
-		v_rel.x += body.force.x * dt / body.massLinear + body.deltaV.get(0);
-		v_rel.y += body.force.y * dt / body.massLinear + body.deltaV.get(1);
-		omega_rel += body.torque * dt / body.massAngular + body.deltaV.get(2);
+		v_rel.x = body.force.x * dt / body.massLinear + body.deltaV.get(0);
+		v_rel.y = body.force.y * dt / body.massLinear + body.deltaV.get(1);
+		omega_rel = body.torque * dt / body.massAngular + body.deltaV.get(2);
 		
 		double metric = 0.5*v_rel.lengthSquared() + 0.5*omega_rel*omega_rel;
+		
 		return (metric>1e-3);
 	}
 
@@ -310,8 +310,6 @@ public class RigidCollection extends RigidBody{
 	}
 
 	private void updateCollectionBodyTransformations(double dt) {
-		//WHY doesn't this work!
-		//eulalie : you sure it does not work?
 		for (RigidBody b: collectionBodies) {
 			b.transformB2W.set(b.transformB2C);
 			b.transformB2W.leftMult(transformB2W);
@@ -320,7 +318,6 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 	
-
 	/** 
 	 * For each body in collection, determine the transformations to go from body to collection
 	 * But also, make each body's x, in collection and theta in collection, relative to this x and theta
@@ -335,7 +332,6 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 
-	
 	/**
 	 * transforms body x's and thetas in world coordinates into collection cooridnates
 	 */
