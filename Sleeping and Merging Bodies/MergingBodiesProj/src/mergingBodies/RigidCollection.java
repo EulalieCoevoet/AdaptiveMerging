@@ -11,6 +11,8 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mergingBodies.Contact.ContactState;
+
 public class RigidCollection extends RigidBody{
 
 	public LinkedList<RigidBody> colRemovalQueue = new LinkedList<RigidBody>();
@@ -253,7 +255,7 @@ public class RigidCollection extends RigidBody{
 	 * @param dt
 	 * @return
 	 */
-	public boolean checkRelativeVelocity(RigidBody body, double dt) {
+	public boolean checkUnmergeCondition(RigidBody body, double dt) {
 		Vector2d v_rel = new Vector2d();
 		double omega_rel;
 		
@@ -262,8 +264,16 @@ public class RigidCollection extends RigidBody{
 		omega_rel = body.torque * dt / body.massAngular + body.deltaV.get(2);
 		
 		double metric = 0.5*v_rel.lengthSquared() + 0.5*omega_rel*omega_rel;
-		
-		return (metric>1e-3);
+
+		boolean unmerge = false;
+		for (BodyContact bc : body.bodyContactList)
+			for (Contact contact : bc.contactList)
+				if (contact.state == ContactState.BROKE || contact.state == ContactState.SLIDING)
+					if (body.relativeVelocity < metric)
+						unmerge = true;
+
+		body.relativeVelocity = (unmerge)? Double.MAX_VALUE : metric;
+		return unmerge;
 	}
 
 	@Override
@@ -499,55 +509,17 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 	
-	
-	private void removeBodyContact(BodyContact bc) {
-		internalBodyContacts.remove(bc);
-	}
-	
 	//contains all the new RigidBodies that result after this unmerging
 	ArrayList<RigidBody> newRigidBodies = new ArrayList<RigidBody>();
 
 	//the bodies here have been handled in this unmerging step...
 	ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
-	
-	/**
-	 * loops through the current unmerged body's neighbors. each one becomes the source of a new RigidCollection surrounding the body
-	 */
-	private void dealWithNeighbors(RigidBody sB) {
-		for (BodyContact bc : sB.bodyContactList ) {
-			if (bc.merged) {
-				bc.merged = false;
-				RigidBody body2 = bc.getOtherBody(sB);
-				handledBodies.add(body2);
-				neighborCollection.add(body2);
-				makeNeighborCollection(body2);
-				if (neighborCollection.size() >= 2) {
-					//make a new collection
-					RigidCollection newCollection = new RigidCollection(neighborCollection.remove(0), neighborCollection.remove(0));
-					newCollection.addBodies(neighborCollection);
-					newCollection.fillInternalBodyContacts();
-					contactsToBody();
-					newCollection.v.set(v);
-					newCollection.omega = omega;
-					newRigidBodies.add(newCollection);
-					neighborCollection.clear();
-				}
-				else if ( neighborCollection.size() == 1){
-					unmergeSingleBody(neighborCollection.get(0));
-					newRigidBodies.add(neighborCollection.remove(0));
-					contactsToBody();
-				}
-			}
-		}
-	}
-	
 
 	public void contactsToBody() {
 		for (Contact c: internalContacts) {
 			transformW2B.transform(c.normal);
 		}
 	}
-
 
 	/**
 	 * Go through all bodies and makes sure all the BodyContacts of each body is in the collection
@@ -596,25 +568,10 @@ public class RigidCollection extends RigidBody{
 		setupCollection();
 	}
 	
-	
 	/**
 	 * given input body, finds all the bodies this body is connected to and makes them into a single rigidCollection
 	 */
 	public ArrayList<RigidBody> neighborCollection = new ArrayList<RigidBody>();
-
-	private void makeNeighborCollection(RigidBody body) {
-		for (BodyContact bc : body.bodyContactList) {
-			if( !bc.merged) continue;
-			RigidBody body2 = bc.getOtherBody(body);
-			if (handledBodies.contains(body2) ) continue;
-			else {
-				neighborCollection.add(body2);
-				handledBodies.add(body2);
-				makeNeighborCollection(body2);
-			}
-		}
-	}
-
 
 	/**
 	 * Removes a body from the current collection, without changing the other Bodies

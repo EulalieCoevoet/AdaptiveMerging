@@ -133,6 +133,8 @@ public class RigidBody {
 	 * should be asleep, if true, should be awake
 	 */
 	public ArrayList<Double> velHistory = new ArrayList<Double>();
+	
+	public double relativeVelocity = Double.MAX_VALUE;
 
 	/**
 	 * a list of the total contact torques acting on this body in the last N steps

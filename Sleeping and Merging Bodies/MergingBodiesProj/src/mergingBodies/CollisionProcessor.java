@@ -14,7 +14,6 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
-import no.uib.cipr.matrix.DenseVector;
 
 import mergingBodies.RigidBody.ObjectState;
 
@@ -551,7 +550,7 @@ public class CollisionProcessor {
 	public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
 
 	/** Coulomb friction coefficient for contact constraint */
-	public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.3, 0, 2 );
+	public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.8, 0, 2 );
 
 	/** Number of iterations to use in projected Gauss Seidel solve */
 	public IntParameter iterations = new IntParameter("iterations for GS solve", 200, 1, 500);

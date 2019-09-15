@@ -29,6 +29,11 @@ public class Contact {
 	/**    If the contact is between two sleeping bodies or not  */
 	boolean passive = false;
 	
+	/**    Used for unmerge condition, true if the contact changed (break or slide) during the time step  */
+	public ContactState state = ContactState.CLEAR;
+	
+	public enum ContactState {BROKE, SLIDING, CLEAR};
+	
 	/** First RigidBody in contact */
 	public RigidBody body1;
 
@@ -431,18 +436,6 @@ public class Contact {
 		gl.glVertex2d(p1.x, p1.y);
 		gl.glEnd();
 	}
-	
-
-	private double getContactTorqueVar(ArrayList<Double> list, double avg) {
-		double sum = 0;
-		for (Double dub : list) {
-			sum+= (dub -avg)*(dub -avg);
-		}
-		if (list.size()>1)
-			sum/=(list.size() - 1);
-
-		return sum;
-	}
 
 	private Vector2d getContactForceVar(ArrayList<Vector2d> list, Vector2d avg) {
 
@@ -457,15 +450,6 @@ public class Contact {
 			sum2 /= (list.size() - 1);
 		}
 		return new Vector2d(sum1, sum2);
-	}
-
-	private double getAverageContactTorque(ArrayList<Double> list) {
-		double x = 0;
-		for (Double dub: list) {
-			x += dub;
-		}
-		x/=list.size();
-		return  x;
 	}
 
 	private Vector2d getAverageContactForce(ArrayList<Vector2d> list) {

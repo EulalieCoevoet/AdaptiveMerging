@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import mergingBodies.LCPApp;
 import mergingBodies.RigidBodySystem;
 import mergingBodies.RigidBody;
-import mergingBodies.RigidBody.ObjectState;
 import mergingBodies.RigidCollection;
 import mergingBodies.Contact;
 import javax.vecmath.Vector2d;

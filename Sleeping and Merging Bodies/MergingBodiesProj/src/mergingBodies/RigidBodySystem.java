@@ -416,8 +416,7 @@ public class RigidBodySystem {
 					
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 					for (RigidBody b: collection.collectionBodies) {
-						//eulalie: this is not enough... we get a weird relative velocity right after a merge... 
-						boolean unmerge = collection.checkRelativeVelocity(b, dt);
+						boolean unmerge = collection.checkUnmergeCondition(b, dt);
 						if (unmerge)
 							unmergingBodies.add(b);
 					}
@@ -690,18 +689,6 @@ public class RigidBodySystem {
 		totalSteps = 0;
 	}
 
-	private void collectionReset(RigidCollection b) {
-		//resets the state of the rigidBodies inside all collections in the scene. 
-		//loops through them and takes careful care not to mess up the index
-
-		for (RigidBody subBody : b.collectionBodies) {
-			subBody.reset();
-			bodies.add(subBody);
-		}
-		bodies.remove(b);
-		checkIndex();
-	}
-	
 	/**
 	 * if there are bodies with the index i, ups the index of all bodies greater than i to leave room 
 	 * for the new body about to be "reintroduced" to the scene

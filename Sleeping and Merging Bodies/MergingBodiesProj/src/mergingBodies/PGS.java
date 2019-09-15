@@ -3,6 +3,7 @@ package mergingBodies;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import mergingBodies.Contact.ContactState;
 import no.uib.cipr.matrix.DenseVector;
 
 /**
@@ -90,8 +91,9 @@ public class PGS {
 				double prevLambda = lambda;
 				lambda -= (b + Jdv)/d;
 				lambda = processContactConstraints(lambda, i);
-				
 				updateLambda(i, lambda);
+				if (computeInCollections)
+					checkContactState(lambda, prevLambda, i);
 				
 				double dLambda = lambda - prevLambda;
 				updateVelocity(i, dLambda);
@@ -112,6 +114,17 @@ public class PGS {
 		lambdas.zero();
 	}
 	
+	protected void checkContactState(double lambda, double prevLambda, int index) {
+		Contact contact = contacts.get(index/2);
+
+		if (index%2==0 && lambda == 0. && prevLambda > 0.)
+			contact.state = ContactState.BROKE;	
+		else if (index%2==1 && lambdas.get(index-1) != 0. && Math.abs(lambda) == lambdas.get(index-1)*mu) 
+			contact.state = ContactState.SLIDING;
+		else
+			contact.state = ContactState.CLEAR;
+	}
+
 	/**
 	 * Compute Dii
 	 * @param index index in lambdas list
