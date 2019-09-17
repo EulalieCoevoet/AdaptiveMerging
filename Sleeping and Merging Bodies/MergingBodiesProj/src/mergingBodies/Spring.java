@@ -16,8 +16,8 @@ public class Spring {
 
 	RigidBody originalBody;
 	Point2d p1;
-	Vector2d v1 = new Vector2d();
 	RigidBody b1;
+	Vector2d v1 = new Vector2d();
 
 	Point2d p2;
 	Point2d p2b; // coordinate of second spring in body frame

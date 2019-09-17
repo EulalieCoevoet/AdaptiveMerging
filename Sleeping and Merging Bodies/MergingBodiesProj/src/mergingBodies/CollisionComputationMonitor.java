@@ -67,16 +67,17 @@ public class CollisionComputationMonitor {
 			gl.glPushMatrix();
 
 			gl.glScaled( w, h, 1 );
-			if ( (where%2) == 0 ) {
-				gl.glTranslated( 0.25, 0, 0);
+			if ( (where%3) == 0 ) {
+				gl.glTranslated( -0.25, 0.25, 0);
+			} else if ( (where%3) == 1 ) {
+				gl.glTranslated( 0.25, -0.25, 0);
 			} else {
-				gl.glTranslated( -0.25, 0, 0);
+				gl.glTranslated( 0.25, 0.25, 0);
 			}
 			gl.glTranslated( 0.5, 0.5, 0 );
 			gl.glScaled( 0.4, -0.4, 1 );
 			gl.glTranslated( -0.5, -0.5, 0 );
-
-
+ 
 			gl.glColor3f( 0,0,0 );
 			gl.glBegin( GL.GL_LINE_STRIP );
 			gl.glVertex2d( 1,0 );
@@ -136,6 +137,6 @@ public class CollisionComputationMonitor {
 	public void draw( GLAutoDrawable drawable) {
 		CD.draw(drawable, 0);
 		CP.draw(drawable, 1);
-		CU.draw(drawable, 1);
+		CU.draw(drawable, 2);
 	}
 }

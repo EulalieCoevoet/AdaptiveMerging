@@ -95,7 +95,7 @@ public class Contact {
 	double relativeAngularVelocity = 0;
 
 	/** Pointer to the BodyContact this contact is a part of. */
-	BodyContact bc;
+	BodyPairContact bc;
 
 	/** history of the last (max N) time steps for this contact. */
 	public ArrayList<Vector2d> body1ContactForceHistory = new ArrayList<Vector2d>();
@@ -122,7 +122,7 @@ public class Contact {
 		index = nextContactIndex++;        
 
 		computeRelativeVelocity();
-		computeJacobian(normal);
+		computeJacobian();
 
 		contactB1.set(contactW);
 		contactB2.set(contactW);
@@ -143,15 +143,16 @@ public class Contact {
 	}
 	
 	/**
-	 * Computes the Jacobian matrix of the constraint.
-	 * In case of body in a collection, use position of parent to compute the torque component of the Jacobian.
+	 * Computes the Jacobian matrix of the contact.
+	 * In case of body in a collection, use COM of parent to compute the torque component of the Jacobian.
 	 */
-	public void computeJacobian(Vector2d normal) {
-		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
-		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
+	public void computeJacobian() {
 		
-		Point2d radiusBody1 = new Point2d(body1.x);
-		Point2d radiusBody2 = new Point2d(body2.x);
+		RigidBody b1 = (body1.isInCollection())? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection())? body2.parent: body2;
+			
+		Point2d radiusBody1 = new Point2d(b1.x);
+		Point2d radiusBody2 = new Point2d(b2.x);
 
 		Vector2d contactPoint = new Vector2d(contactW);
 		radiusBody1.sub(contactPoint, radiusBody1);
@@ -240,27 +241,16 @@ public class Contact {
 	 */
 	public void drawContactForce( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
-		// draw a line between the two bodies but only if they're both not pinned
-		Point2d p1 = new Point2d(contactW);
-		Point2d p2 = new Point2d(contactW);
 
-		body1.transformB2W.transform(contactForceB1);
-		body2.transformB2W.transform(contactForceB2);
-
-		double scale = 0.05;
 		gl.glLineWidth(2);
 		gl.glColor4f(1, 0, 0, 1);
 		gl.glBegin( GL.GL_LINES );
-		
-		gl.glVertex2d(p2.x, p2.y);
-		gl.glVertex2d(p2.x + scale*contactForceB2.x, p2.y+scale*contactForceB2.y);
-		gl.glVertex2d(p1.x, p1.y);
-		gl.glVertex2d(p1.x + scale*contactForceB1.x, p1.y+scale*contactForceB1.y);
+
+		double scale = 0.05;
+		gl.glVertex2d(contactW.x + scale*contactForceB1.x, contactW.y+scale*contactForceB1.y);
+		gl.glVertex2d(contactW.x + scale*contactForceB2.x, contactW.y+scale*contactForceB2.y);
 		
 		gl.glEnd();
-
-		body1.transformW2B.transform(contactForceB1);
-		body2.transformW2B.transform(contactForceB2);
 	}
 
 
@@ -271,30 +261,24 @@ public class Contact {
 	 */
 	public void drawInternalContactForce( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
-		// draw a line between the two bodies but only if they're both not pinned
-		Point2d p1 = new Point2d(contactB1);
-		Point2d p2 = new Point2d(contactB2);
-		
-		body1.transformB2W.transform(p1); 
-		body2.transformB2W.transform(p2);
-		body1.transformB2W.transform(contactForceB1);
-		body2.transformB2W.transform(contactForceB2);
 
-		gl.glLineWidth(2);
 		gl.glColor4f(0, 0, 1, 1);
 		
+		gl.glLineWidth(2);
 		gl.glBegin( GL.GL_LINES );
-
+		
 		double scale = 0.05;
-		gl.glVertex2d(p2.x, p2.y);
-		gl.glVertex2d(p2.x + scale*contactForceB2.x, p2.y+scale*contactForceB2.y);
-		gl.glVertex2d(p1.x, p1.y);
-		gl.glVertex2d(p1.x + scale*contactForceB1.x, p1.y+scale*contactForceB1.y);
+		gl.glVertex2d(contactW.x + scale*contactForceB1.x, contactW.y+scale*contactForceB1.y);
+		gl.glVertex2d(contactW.x + scale*contactForceB2.x, contactW.y+scale*contactForceB2.y);
 		
 		gl.glEnd();
-
-		body1.transformW2B.transform(contactForceB1);
-		body2.transformW2B.transform(contactForceB2);
+		
+		gl.glPointSize(5);		
+		gl.glBegin( GL.GL_POINTS );
+		
+		gl.glVertex2d(contactW.x, contactW.y);
+		
+		gl.glEnd();
 	}
 
 	/*
@@ -341,7 +325,6 @@ public class Contact {
 
 		Point2d p1 = new Point2d(contactB1);
 		Point2d p2 = new Point2d(contactB2);
-
 
 		double scale = 0.05;
 		max_x_1.set(p1.x + scale*body1Force.x + scale*body1ForceVar.x, p1.y + scale*body1Force.y );

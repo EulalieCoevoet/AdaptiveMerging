@@ -74,6 +74,7 @@ public class PGS {
 		initLambdas();
 		organizeContactIndex();
 		
+		
 		if (confidentWarmStart)
 			confidentWarmStart();
 		else if (warmStart && lastTimeStepMap != null) 
@@ -103,7 +104,7 @@ public class PGS {
 		}
 	}
 	
-	protected void organizeContactIndex() {
+	protected void organizeContactIndex() { // TODO: is this unnecessary?  Can be cleaned... huh?
 		for (Contact c : contacts) {
 			c.index = contacts.indexOf(c);
 		}
@@ -229,7 +230,9 @@ public class PGS {
 		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
 		// calculate Baumgarte Feedback (overlap of the two bodies)
 		double baumgarteFeedback = (computeInCollections)? 0. : feedbackStiffness*contact.constraintViolation;
-
+		if (computeInCollections)
+			restitution=0.;
+		
 		// putting b together.
 		double b = 0;
 		if (index%2 ==0)
