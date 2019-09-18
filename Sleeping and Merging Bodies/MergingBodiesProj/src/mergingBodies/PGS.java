@@ -124,10 +124,12 @@ public class PGS {
 	protected void checkContactState(double lambda, double prevLambda, int index) {
 		Contact contact = contacts.get(index/2);
 
-		if (index%2==0 && lambda == 0. && prevLambda > 0.)
+		if (index%2==0 && lambda == 0.) //&& prevLambda > 0.) 
 			contact.state = ContactState.BROKE;	
-		else if (index%2==1 && lambdas.get(index-1) != 0. && Math.abs(lambda) == lambdas.get(index-1)*mu) 
-			contact.state = ContactState.SLIDING;
+		else if (index%2==1 && Math.abs(lambda) == lambdas.get(index-1)*mu) {
+			if (lambdas.get(index-1) != 0.)
+				contact.state = ContactState.SLIDING;
+		}
 		else
 			contact.state = ContactState.CLEAR;
 	}

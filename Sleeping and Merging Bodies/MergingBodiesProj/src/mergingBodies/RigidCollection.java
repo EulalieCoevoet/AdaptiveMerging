@@ -123,7 +123,7 @@ public class RigidCollection extends RigidBody{
 	 * Computes transforms, COM, mass, inertia, spring.
 	 */
 	private void updateCollection() {
-		contactsToWorld(); // eulalie : why do we do that?
+		contactsToWorld();
 		updateMass();
 		updateCOM(); 
 		updateTransforms(); 
@@ -255,11 +255,12 @@ public class RigidCollection extends RigidBody{
 		double metric = 0.5*v_rel.lengthSquared() + 0.5*omega_rel*omega_rel;
 
 		boolean unmerge = false;
-		for (BodyPairContact bc : body.bodyPairContactList)
-			for (Contact contact : bc.contactList)
-				if (contact.state == ContactState.BROKE || contact.state == ContactState.SLIDING)
-					if (body.relativeVelocity < metric)
+		for (BodyPairContact bpc : body.bodyPairContactList)
+			for (Contact contact : bpc.contactList)
+				if (contact.state == ContactState.BROKE || contact.state == ContactState.SLIDING) 
+					if (metric > body.relativeVelocity)
 						unmerge = true;
+					
 		// eulalie : we miss a rule here... a contact can act as a pivot. Meaning, no contact breaking, no sliding effect, yet still some relative velocity
 
 		body.relativeVelocity = (unmerge)? Double.MAX_VALUE : metric;
@@ -308,10 +309,12 @@ public class RigidCollection extends RigidBody{
 			body.theta = body.transformB2W.getTheta();
 			
 			//update velocities
-			final Vector2d r = new Vector2d( -body.x.y, body.x.x );
+			// eulalie : I'm not sure we always want that...
+			/*final Vector2d r = new Vector2d( -body.x.y, body.x.x );
 			transformB2W.transform( r );
 			r.scale( omega );
-			body.v.add(v, r);
+			body.v.add(v, r);*/
+			body.v = new Vector2d(v);
 			body.omega = omega;
 			body.deltaV.zero();
 		}
@@ -326,7 +329,7 @@ public class RigidCollection extends RigidBody{
 			c.normal = new Vector2d(c.normalB1);
 			c.body1.transformB2W.transform(c.normal); 
 			c.body1.transformB2W.transform(c.contactB1, c.contactW);
-			c.computeJacobian();
+			c.computeJacobian(true);
 		}
 		// eulalie: we also need to transform the forces contactForceB1 contactTorqueB1 contactForceB2 contactTorqueB2...
 	}
@@ -364,11 +367,11 @@ public class RigidCollection extends RigidBody{
 		transformW2B.invert();
 	}
 
-	//list of bodies to be added to this collection in the next timestep
+	/** list of bodies to be added to this collection in the next time step */
 	ArrayList<RigidBody> bodyQueue = new ArrayList<RigidBody>();
 	
 	/**
-	 * Makes body ready to be used by system... converts everything to world coordinates and makes body independant of collection
+	 * Makes body ready to be used by system... converts everything to world coordinates and makes body independent of collection
 	 * ... does not do anything to the collection itself.
 	 */
 	public void unmergeSingleBody(RigidBody body) {

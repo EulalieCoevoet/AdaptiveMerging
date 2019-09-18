@@ -222,17 +222,26 @@ public class RigidBodySystem {
 
 	private void applyGravityForce() {
 		Vector2d force = new Vector2d();
-		for ( RigidBody b : bodies ) {
+		for ( RigidBody body : bodies ) {
 			//fully active, regular stepping
 			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
 			force.set( Math.cos( theta ), Math.sin(theta) );
-			force.scale( b.massLinear * gravityAmount.getValue() );
+			force.scale( body.massLinear * gravityAmount.getValue() );
 			// gravity goes directly into the accumulator!  no torque!
-			b.force.add( force );
+			body.force.add( force );
 			//apply force of gravity to all children as well
-			if( b instanceof RigidCollection) {
-				applyGravitySubBodies((RigidCollection) b, theta);
+			if( body instanceof RigidCollection) {
+				applyGravitySubBodies((RigidCollection) body, theta);
 			}
+		}
+	}
+	
+	private void applyGravitySubBodies(RigidCollection collection, double theta) {
+		Vector2d force = new Vector2d();
+		for (RigidBody body : collection.collectionBodies) {
+			force.set( Math.cos( theta ), Math.sin(theta) );
+			force.scale( body.massLinear * gravityAmount.getValue() );
+			body.force.add( force );
 		}
 	}
 
@@ -258,15 +267,6 @@ public class RigidBodySystem {
 
 		s.apply(spring_k.getValue(), spring_c.getValue());
 		s.updateP2();
-	}
-
-	private void applyGravitySubBodies(RigidCollection b, double theta) {
-		Vector2d force = new Vector2d();
-		for (RigidBody body : ((RigidCollection) b).collectionBodies) {
-			force.set( Math.cos( theta ), Math.sin(theta) );
-			force.scale( body.massLinear * gravityAmount.getValue() );
-			body.force.add( force );
-		}
 	}
 
 	private void clearJunkAtStartOfTimeStep() {
@@ -821,8 +821,8 @@ public class RigidBodySystem {
 	private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", false );
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
 	public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
-	public static BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", false);
-	public static BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", false);
+	public static BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", true);
+	public static BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", true);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", false);
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
