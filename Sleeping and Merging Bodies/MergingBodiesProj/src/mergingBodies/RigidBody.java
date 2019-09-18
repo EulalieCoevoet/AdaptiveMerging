@@ -118,13 +118,9 @@ public class RigidBody {
 
 	/**
 	 * list of contacting bodies present with this RigidBody. cleared after every
-	 * timestep, unless the contact was between two sleeping bodies
+	 * time step, unless the contact was between two sleeping bodies
 	 **/
 	public ArrayList<BodyPairContact> bodyPairContactList = new ArrayList<BodyPairContact>();
-
-	/** List of BodyContacts that occurred before this body was merged. */
-	// eulalie : to remove
-	public ArrayList<BodyPairContact> bodyContactListPreMerging = new ArrayList<BodyPairContact>();
 
 	/** list of springs attached to the body **/
 	public ArrayList<Spring> springs = new ArrayList<Spring>();

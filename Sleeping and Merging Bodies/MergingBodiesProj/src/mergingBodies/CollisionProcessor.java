@@ -14,7 +14,6 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
-
 import mergingBodies.RigidBody.ObjectState;
 
 /**
@@ -122,6 +121,7 @@ public class CollisionProcessor {
 		Vector2d force = new Vector2d();
 		double torque = 0.;
 		for (Contact contact : contacts) {
+			
 			if (contact.body1.isInCollection() && !contact.body1.isInSameCollection(contact.body2)) {
 				force.set(contact.lambda.x*contact.j1.get(0) + contact.lambda.y*contact.j2.get(0), contact.lambda.x*contact.j1.get(1) + contact.lambda.y*contact.j2.get(1));
 				torque = contact.lambda.x*contact.j1.get(2) + contact.lambda.y*contact.j2.get(2);

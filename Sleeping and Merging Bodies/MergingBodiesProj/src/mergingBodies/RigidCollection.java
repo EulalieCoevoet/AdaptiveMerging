@@ -123,7 +123,7 @@ public class RigidCollection extends RigidBody{
 	 * Computes transforms, COM, mass, inertia, spring.
 	 */
 	private void updateCollection() {
-		contactsToWorld();
+		contactsToWorld(); // eulalie : why do we do that?
 		updateMass();
 		updateCOM(); 
 		updateTransforms(); 
@@ -244,7 +244,7 @@ public class RigidCollection extends RigidBody{
 	 * @param dt
 	 * @return
 	 */
-	public boolean checkUnmergeCondition(RigidBody body, double dt) {
+	public boolean checkUnmergeCondition(RigidBody body, double dt) {		
 		Vector2d v_rel = new Vector2d();
 		double omega_rel;
 		
@@ -260,6 +260,7 @@ public class RigidCollection extends RigidBody{
 				if (contact.state == ContactState.BROKE || contact.state == ContactState.SLIDING)
 					if (body.relativeVelocity < metric)
 						unmerge = true;
+		// eulalie : we miss a rule here... a contact can act as a pivot. Meaning, no contact breaking, no sliding effect, yet still some relative velocity
 
 		body.relativeVelocity = (unmerge)? Double.MAX_VALUE : metric;
 		return unmerge;
