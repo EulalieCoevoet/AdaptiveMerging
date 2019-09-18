@@ -20,10 +20,20 @@ public class PGS {
 		warmStart=false;
 	}
 	
-	public PGS(double mu, int iteration, double restitution) {
+	public PGS(double mu, int iterations) {
+		init(mu, iterations);
+	}
+	
+	public void init(double mu, int iterations) {
 		this.mu=mu;
-		this.iterations=iteration;
-		this.restitution=restitution;
+		this.iterations=iterations;
+		this.restitution=0.;
+		this.feedbackStiffness=0.;
+		contacts = null;
+		warmStart = false;
+		lastTimeStepMap = null;
+		confidentWarmStart = false;
+		computeInCollections = false;
 	}
 	
 	/** List of contacts to solve */
@@ -71,7 +81,8 @@ public class PGS {
 			return;
 		}
 
-		initLambdas();
+		lambdas = new DenseVector(2*contacts.size());
+		lambdas.zero();
 		organizeContactIndex();
 		
 		if (confidentWarmStart)
@@ -79,7 +90,8 @@ public class PGS {
 		else if (warmStart && lastTimeStepMap != null) 
 			warmStart();
 		
-		while(iterations > 0) {
+		int iter = iterations;
+		while(iter > 0) {
 			
 			for (int i=0; i<lambdas.size(); i++) {
 				
@@ -99,19 +111,14 @@ public class PGS {
 				updateVelocity(i, dLambda);
 			}
 			
-			iterations--;
+			iter--;
 		}
 	}
 	
-	protected void organizeContactIndex() {
+	protected void organizeContactIndex() { // TODO: is this unnecessary?  Can be cleaned... huh?
 		for (Contact c : contacts) {
 			c.index = contacts.indexOf(c);
 		}
-	}
-	
-	protected void initLambdas() {
-		lambdas = new DenseVector(2*contacts.size());
-		lambdas.zero();
 	}
 	
 	protected void checkContactState(double lambda, double prevLambda, int index) {
@@ -229,7 +236,9 @@ public class PGS {
 		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
 		// calculate Baumgarte Feedback (overlap of the two bodies)
 		double baumgarteFeedback = (computeInCollections)? 0. : feedbackStiffness*contact.constraintViolation;
-
+		if (computeInCollections)
+			restitution=0.;
+		
 		// putting b together.
 		double b = 0;
 		if (index%2 ==0)

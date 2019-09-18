@@ -42,7 +42,7 @@ public class RigidBody {
 
 	BVNode root;
 
-	/** accumulator for forces acting on this body */
+	/** accumulator for forces acting on this body in world coordinate*/
 	Vector2d force = new Vector2d();
 
 	/** accumulator for torques acting on this body */
@@ -118,12 +118,9 @@ public class RigidBody {
 
 	/**
 	 * list of contacting bodies present with this RigidBody. cleared after every
-	 * timestep, unless the contact was between two sleeping bodies
+	 * time step, unless the contact was between two sleeping bodies
 	 **/
-	public ArrayList<BodyContact> bodyContactList = new ArrayList<BodyContact>();
-
-	/** List of BodyContacts that occurred before this body was merged. */
-	public ArrayList<BodyContact> bodyContactListPreMerging = new ArrayList<BodyContact>();
+	public ArrayList<BodyPairContact> bodyPairContactList = new ArrayList<BodyPairContact>();
 
 	/** list of springs attached to the body **/
 	public ArrayList<Spring> springs = new ArrayList<Spring>();
@@ -143,33 +140,24 @@ public class RigidBody {
 	public double contactTorques = 0;
 
 	/**
-	 * a list of the total contact torques acting on this body in the last N steps
-	 * before sleeping or merging
-	 */
-	public double currentContactTorques = 0;
-
-	/**
 	 * the total contact forces acting on it at this current time step, in world
 	 * coordinates. Does not get updated when a body is part of a collection, unless
 	 * a new body joins that collection.
 	 **/
 	public Vector2d savedContactForce = new Vector2d();
 
-	/**
-	 * the total contact forces acting on it at this current time step, in world
-	 * coordinates. Gets updated only if there are new BodyContacts that were not
-	 * seen prior to merging.
-	 **/
-	public Vector2d currentContactForce = new Vector2d();
-
 	public boolean merged = false;
 
 	DenseVector deltaV = new DenseVector(3);
 
-	Vector2d deltaF = new Vector2d();
+	/** NEVER SET! New feature?? */
+	private Vector2d deltaF = new Vector2d();
 
 	public Vector2d forcePreSleep = new Vector2d();
 	public double torquePreSleep = 0;
+	
+	public RigidBody() {
+	}
 	
 	/**
 	 * Creates a new rigid body from a collection of blocks
@@ -266,6 +254,10 @@ public class RigidBody {
 		return (parent!=null);
 	}
 	
+	public boolean isInSameCollection(RigidBody body) {
+		return (parent!=null && parent==body.parent);
+	}
+	
 	public boolean isInCollection(RigidCollection collection) {
 		return (parent==collection);
 	}
@@ -292,9 +284,6 @@ public class RigidBody {
 		// holds r vector.
 		Vector2d r = new Vector2d(contactPointW);
 		Point2d tempX = new Point2d(x);
-		if (isInCollection()) {
-			parent.transformB2W.transform(tempX);
-		}
 		r.sub(tempX);
 		Vector2d ortho_r = new Vector2d(-r.y, r.x);
 
@@ -440,7 +429,7 @@ public class RigidBody {
 
 		transformB2C.T.setIdentity();
 		transformC2B.T.setIdentity();
-		bodyContactList.clear();
+		bodyPairContactList.clear();
 		state = ObjectState.ACTIVE;
 		velHistory.clear();
 		parent = null;
@@ -505,6 +494,7 @@ public class RigidBody {
 		} else {
 			gl.glCallList(myListID);
 		}
+		
 		gl.glPopMatrix();
 	}
 
@@ -543,21 +533,7 @@ public class RigidBody {
 		}
 	}
 
-	public void displayConnection(GLAutoDrawable drawable, RigidBody c) {
-		GL2 gl = drawable.getGL().getGL2();
-		// draw a line between the two bodies but only if they're both not pinned
-		if (!this.pinned && !c.pinned) {
-			gl.glLineWidth(2);
-			gl.glColor4f(0, .3f, 0, 0.5f);
-			gl.glBegin(GL.GL_LINES);
-			gl.glVertex2d(this.x.x, this.x.y);
-			gl.glVertex2d(c.x.x, c.x.y);
-			gl.glEnd();
-		}
-	}
-
 	public void drawSpeedCOM(GLAutoDrawable drawable) {
-		// TODO Auto-generated method stub
 		GL2 gl = drawable.getGL().getGL2();
 		double k = this.v.length() + this.omega;
 
@@ -587,23 +563,19 @@ public class RigidBody {
 
 	public void unmergeBodyContacts() {
 
-		for (BodyContact bc : bodyContactList) {
+		for (BodyPairContact bc : bodyPairContactList) {
 			RigidBody otherBody = bc.getOtherBody(this);
-			otherBody.bodyContactList.remove(bc);
+			otherBody.bodyPairContactList.remove(bc);
 		}
-		bodyContactList.clear();
+		bodyPairContactList.clear();
 	}
 
 	public void drawDeltaF(GLAutoDrawable drawable) {
-		// TODO Auto-generated method stub
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glLineWidth(3);
 		gl.glColor3f(1, 0, 1);
 		gl.glBegin(GL.GL_LINES);
 		Point2d p = new Point2d(x);
-		if (isInCollection()) {
-			parent.transformB2W.transform(p);
-		}
 		double scale = 2 / massLinear;
 		gl.glVertex2d(p.x, p.y);
 		gl.glVertex2d(p.x + scale * deltaF.x, p.y + scale * deltaF.y);

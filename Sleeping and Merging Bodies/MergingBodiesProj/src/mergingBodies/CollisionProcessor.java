@@ -14,7 +14,6 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
-
 import mergingBodies.RigidBody.ObjectState;
 
 /**
@@ -26,16 +25,17 @@ public class CollisionProcessor {
 	public List<RigidBody> bodies;
 
 	private HashMap<String, Contact> lastTimeStepMap = new HashMap<String, Contact>();
-
-	// eulalie: this is never filled, though I think it could be useful. 
-	public ArrayList<RigidCollection> collections = new ArrayList<RigidCollection>();
+	
 	/**
 	 * The current contacts that resulted in the last call to process collisions
 	 */
 	public ArrayList<Contact> contacts = new ArrayList<Contact>();
 	
 	/** body-body contacts for pruning */
-	ArrayList<Contact> tmpBodyBodyContacts = new ArrayList<Contact>();
+	ArrayList<Contact> tmpContacts = new ArrayList<Contact>();
+	
+	/** PGS solver */
+	PGS solver = new PGS();
 
 	/**
 	 * Default constructor
@@ -62,7 +62,7 @@ public class CollisionProcessor {
 	double collectionUpdateTime = 0;
 	
 	/**list that keeps track of all the body contacts that occurred in this time step */
-	public ArrayList<BodyContact> bodyContacts = new ArrayList<BodyContact>();
+	public ArrayList<BodyPairContact> bodyContacts = new ArrayList<BodyPairContact>();
 
 	/**
 	 * Processes all collisions. Find collision points and calculate contact force.
@@ -88,7 +88,9 @@ public class CollisionProcessor {
 	    		knuthShuffle();
 	    	
 	    	// solve contacts
-			PGS solver = new PGS(friction.getValue(), iterations.getValue(), restitution.getValue());
+			solver.init(friction.getValue(), iterations.getValue());
+			solver.restitution = restitution.getValue();
+			solver.feedbackStiffness = feedbackStiffness.getValue();
 			if (warmStart.getValue())
 				solver.enableWarmStart(lastTimeStepMap);
 			solver.contacts = contacts;
@@ -103,7 +105,7 @@ public class CollisionProcessor {
 			
 			updateContactMap();
 			
-			calculateContactForce(dt);	
+			computeContactsForce(dt);	
 		}
 	}
 	
@@ -112,27 +114,51 @@ public class CollisionProcessor {
 	 * @param dt
 	 */
 	public void updateContactsInCollections(double dt) {
-		
-		PGS solver = new PGS(friction.getValue(), iterations.getValue(), restitution.getValue());
-		
+
 		long now = System.nanoTime();
+		
+		// Apply external (not in a collection) contacts as external forces to bodies in collections
+		Vector2d force = new Vector2d();
+		double torque = 0.;
+		for (Contact contact : contacts) {
+			
+			if (contact.body1.isInCollection() && !contact.body1.isInSameCollection(contact.body2)) {
+				force.set(contact.lambda.x*contact.j1.get(0) + contact.lambda.y*contact.j2.get(0), contact.lambda.x*contact.j1.get(1) + contact.lambda.y*contact.j2.get(1));
+				torque = contact.lambda.x*contact.j1.get(2) + contact.lambda.y*contact.j2.get(2);
+				
+				force.scale(1./dt);
+				torque /= dt;
+
+				contact.body1.force.add(force);
+				contact.body1.torque += torque;	
+			}
+			if (contact.body2.isInCollection() && !contact.body2.isInSameCollection(contact.body1)) {
+				force.set(contact.lambda.x*contact.j1.get(3) + contact.lambda.y*contact.j2.get(3), contact.lambda.x*contact.j1.get(4) + contact.lambda.y*contact.j2.get(4));
+				torque = contact.lambda.x*contact.j1.get(5) + contact.lambda.y*contact.j2.get(5);
+			
+				force.scale(1./dt);
+				torque /= dt;
+
+				contact.body2.force.add(force);
+				contact.body2.torque += torque;	
+			}
+		}
+		
+		solver.init(friction.getValue(), 1);
+		solver.confidentWarmStart = true;
+		solver.computeInCollections = true;
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
 				RigidCollection collection = (RigidCollection)body;
 				
-				collection.updateBodiesJacobian();
-				collection.updateBodiesForces(dt);
-				collection.updateBodiesVelocity();
-				
-				solver.iterations = 1;
-				solver.confidentWarmStart = true;
-				solver.computeInCollections = true;
+				collection.updateBodies(dt);
 				solver.contacts = collection.internalContacts;
 				solver.solve(dt);
-
-				collection.updateBodiesContactForces(dt);
+				
+				collection.computeInternalContactsForce(dt);
 			}
 		}
+		
 		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
 	}
 	
@@ -150,24 +176,9 @@ public class CollisionProcessor {
 	 * Also compute contact force history for visualization only.
 	 * @param dt
 	 */
-	public void calculateContactForce(double dt) {
-		Vector2d cForce = new Vector2d();
-		double cTorque = 0;
+	public void computeContactsForce(double dt) {
 		for (Contact c: contacts) {
-			
-			cForce.set(c.lambda.x*c.j1.get(0) + c.lambda.y*c.j2.get(0),c.lambda.x*c.j1.get(1) + c.lambda.y*c.j2.get(1) );
-			cTorque = c.lambda.x*c.j1.get(2) + c.lambda.y*c.j2.get(2);
-			cForce.scale(1/dt);
-			c.body1.transformW2B.transform(cForce);
-			c.contactForceB1.set(cForce);
-			c.contactTorqueB1 = cTorque/dt;
-
-			cForce.set(c.lambda.x*c.j1.get(3) + c.lambda.y*c.j2.get(3),c.lambda.x*c.j1.get(4) + c.lambda.y*c.j2.get(4) );
-			cTorque = c.lambda.x*c.j1.get(5) + c.lambda.y*c.j2.get(5);
-			cForce.scale(1/dt);
-			c.body2.transformW2B.transform(cForce);
-			c.contactForceB2.set(cForce);
-			c.contactTorqueB2 = cTorque/dt;
+			c.computeContactForce(dt);
 
 			c.body1ContactForceHistory.add(c.contactForceB1);
 			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
@@ -192,9 +203,9 @@ public class CollisionProcessor {
 	 * </ul><p>
 	 */
 	private void rememberBodyContacts() {
-		ArrayList<BodyContact> savedBodyContacts = new ArrayList<BodyContact>();
+		ArrayList<BodyPairContact> savedBodyContacts = new ArrayList<BodyPairContact>();
 		
-		for (BodyContact bc : bodyContacts) {
+		for (BodyPairContact bc : bodyContacts) {
 			if (!bc.merged && ( bc.body1.state == ObjectState.ACTIVE || bc.body2.state == ObjectState.ACTIVE ))
 				bc.contactList.clear();
 			
@@ -208,7 +219,7 @@ public class CollisionProcessor {
 		}
 		bodyContacts.clear();
 		bodyContacts.addAll(savedBodyContacts);
-		for (BodyContact bc: bodyContacts) {
+		for (BodyPairContact bc: bodyContacts) {
 			bc.addToBodyLists();
 		}
 	}
@@ -242,10 +253,10 @@ public class CollisionProcessor {
 				if ( b1.index >= b2.index ) continue;
 				if ( b1.pinned && b2.pinned ) continue; 
 				
-				tmpBodyBodyContacts.clear();
+				tmpContacts.clear();
 				narrowPhase( b1, b2 );
 				
-				if ( pruneContacts.getValue() && tmpBodyBodyContacts.size() > 2 ) {
+				if ( pruneContacts.getValue() && tmpContacts.size() > 2 ) {
 					if ( b1 instanceof RigidCollection ) {
 						RigidCollection collection = (RigidCollection) b1;
 						pruneCollection(collection);
@@ -253,11 +264,11 @@ public class CollisionProcessor {
 						RigidCollection collection = (RigidCollection) b2;
 						pruneCollection(collection);
 					} else {
-						prune(tmpBodyBodyContacts);
+						prune(tmpContacts);
 					}
 				}
 				
-				contacts.addAll(tmpBodyBodyContacts);
+				contacts.addAll(tmpContacts);
 			}
 		}        
 	}
@@ -268,15 +279,15 @@ public class CollisionProcessor {
 		ArrayList<Contact> contacts = new ArrayList<Contact>();
 		for (RigidBody body : collection.collectionBodies) {
 			contacts.clear();
-			for (Contact contact : tmpBodyBodyContacts)
+			for (Contact contact : tmpContacts)
 				if (contact.withBody(body))
 					contacts.add(contact);
 			if (contacts.size()>3)
 				prune(contacts);
 			collectionContacts.addAll(contacts);
 		}
-		tmpBodyBodyContacts.clear();
-		tmpBodyBodyContacts.addAll(collectionContacts);
+		tmpContacts.clear();
+		tmpContacts.addAll(collectionContacts);
 	}
 
 	/**
@@ -348,30 +359,30 @@ public class CollisionProcessor {
 		if (contact.body1.pinned && contact.body2.pinned) return;
 		
 		// check if this body contact exists already
-		BodyContact bc = BodyContact.checkExists(contact.body1, contact.body2, bodyContacts);
+		BodyPairContact bpc = BodyPairContact.checkExists(contact.body1, contact.body2, bodyContacts);
 
-		if (bc != null) { // if it exists
-			if (!bc.updatedThisTimeStep) { // only once per time step
-				bc.relativeVelHistory.add(contact.getRelativeMetric());
-				if (bc.relativeVelHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
-					bc.relativeVelHistory.remove(0);
+		if (bpc != null) { // if it exists
+			if (!bpc.updatedThisTimeStep) { // only once per time step
+				bpc.relativeVelHistory.add(contact.getRelativeMetric());
+				if (bpc.relativeVelHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
+					bpc.relativeVelHistory.remove(0);
 				}
-				bc.updatedThisTimeStep = true;
+				bpc.updatedThisTimeStep = true;
 			}
 		} else { // body contact did not exist in previous list
-			bc = new BodyContact(contact.body1, contact.body2);
-			bc.relativeVelHistory.add(contact.getRelativeMetric());
-			bc.updatedThisTimeStep = true;
-			bodyContacts.add(bc);
+			bpc = new BodyPairContact(contact.body1, contact.body2);
+			bpc.relativeVelHistory.add(contact.getRelativeMetric());
+			bpc.updatedThisTimeStep = true;
+			bodyContacts.add(bpc);
 		}
 
-		if (!contact.body1.bodyContactList.contains(bc))
-			contact.body1.bodyContactList.add(bc);
-		if (!contact.body2.bodyContactList.contains(bc))
-			contact.body2.bodyContactList.add(bc);
+		if (!contact.body1.bodyPairContactList.contains(bpc))
+			contact.body1.bodyPairContactList.add(bpc);
+		if (!contact.body2.bodyPairContactList.contains(bpc))
+			contact.body2.bodyPairContactList.add(bpc);
 		
-		contact.bc = bc;
-		bc.contactList.add(contact);
+		contact.bc = bpc;
+		bpc.contactList.add(contact);
 	}
 		
 	/**
@@ -446,7 +457,7 @@ public class CollisionProcessor {
 					}
 				}
 			} else if(node1.isLeaf()|| node1.boundingDisc.r <= node2.boundingDisc.r){
-				//if theys overlap, and body 1 is either a leaf or smaller than body_2, break down body_2
+				//if they overlap, and body 1 is either a leaf or smaller than body_2, break down body_2
 
 				findCollisions(node1, node2.child1, body1, body2);
 				findCollisions(node1, node2.child2, body1, body2);
@@ -471,7 +482,7 @@ public class CollisionProcessor {
 			hop--;
 			body1.visited = true;
 			body1.wokenUp = true;
-			for (BodyContact c: body1.bodyContactList) {
+			for (BodyPairContact c: body1.bodyPairContactList) {
 				if (!c.body2.pinned)
 					wakeNeighbors(c.body2, hop);
 			}
@@ -482,8 +493,8 @@ public class CollisionProcessor {
 	 * The visitID is used to tag boundary volumes that are visited in 
 	 * a given time step.  Marking boundary volume nodes as visited during
 	 * a time step allows for a visualization of those used, but it can also
-	 * be used to more efficiently update the centeres of bounding volumes
-	 * (i.e., call a BVNode's updatecW method at most once on any given timestep)
+	 * be used to more efficiently update the centers of bounding volumes
+	 * (i.e., call a BVNode's updatecW method at most once on any given time step)
 	 */
 	int visitID = 0;
 
@@ -520,21 +531,14 @@ public class CollisionProcessor {
 		if ( distance < Block.radius * 2 ) {
 			// contact point at halfway between points 
 			// NOTE: this assumes that the two blocks have the same radius!
-			contactW.interpolate( tmp1, tmp2, .5 );
-			// contact normal
+			contactW.interpolate( tmp1, tmp2, 0.5 );
 			normal.sub( tmp2, tmp1 );
 			normal.normalize();
-			// create the contact
+			
 			Contact contact = null;
-
-			/*
-			 *  very important here... the Contact will contain information on contact location, 
-			 *  where if any of the bodies involved are parts of a collection, then the contact 
-			 *  will list the collection as one of its bodies... not the actual contacting subbody
-			 */
 			contact = new Contact( body1, body2, contactW, normal, b1, b2, distance);
 
-			//set normals in body coordinates
+			// set normals in body coordinates
 			contact.normalB1.set(normal);
 			contact.normalB2.set(normal);
 			body1.transformW2B.transform(contact.normalB1);
@@ -542,38 +546,22 @@ public class CollisionProcessor {
 			contact.normalB2.scale(-1);
 
 			// put contact into a preliminary list that will be filtered in BroadPhase
-			tmpBodyBodyContacts.add( contact );
+			tmpContacts.add( contact );
 		}
 	}
 
-	/** Restitution parameter for contact constraints */
 	public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
-
-	/** Coulomb friction coefficient for contact constraint */
-	public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.8, 0, 2 );
-
-	/** Number of iterations to use in projected Gauss Seidel solve */
+	public DoubleParameter friction = new DoubleParameter("Coulomb friction coefficient", 0.8, 0, 2 );
 	public IntParameter iterations = new IntParameter("iterations for GS solve", 200, 1, 500);
-
-	/** Flag for using shuffle */
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
-	/** Flag for using shuffle */
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
-
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0, 0,50  );
-
 	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1.0, 0, 10 );
-
 	public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 15, 0, 30);
-
 	public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", false );
-
 	public static DoubleParameter forceMetricTolerance = new DoubleParameter("force metric tolerance", 10, 0, 15);
-
 	public static IntParameter collisionWake = new IntParameter("wake n neighbors", 2, 0, 10 );
-
 	public static IntParameter sleepAccum = new IntParameter("accumulate N sleep queries", 50, 0, 200 );
-
 	public BooleanParameter pruneContacts = new BooleanParameter( "prune contacts", true );
 
 	/**
@@ -581,6 +569,7 @@ public class CollisionProcessor {
 	 */
 	public JPanel getControls() {
 		VerticalFlowPanel vfp = new VerticalFlowPanel();
+		
 		vfp.setBorder( new TitledBorder("Collision Processing Controls") );
 		vfp.add( shuffle.getControls() );
 		vfp.add( pruneContacts.getControls() );
@@ -589,15 +578,12 @@ public class CollisionProcessor {
 		vfp.add( restitution.getSliderControls(false) );
 		vfp.add( friction.getSliderControls(false) );
 		vfp.add( feedbackStiffness.getSliderControls(false) );
-
 		vfp.add( sleepingThreshold.getSliderControls(false) );
-		
 		vfp.add( wakingThreshold.getSliderControls(false) );
-
 		vfp.add( use_contact_graph.getControls() );
 		vfp.add( forceMetricTolerance.getSliderControls(false) );
-		vfp.add( collisionWake.getSliderControls());
-		vfp.add( sleepAccum.getSliderControls());
+		vfp.add( collisionWake.getSliderControls() );
+		vfp.add( sleepAccum.getSliderControls() );
 
 		return vfp.getPanel();
 	}

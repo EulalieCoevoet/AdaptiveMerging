@@ -2,3 +2,4 @@ coulomb
 restitution
 unmerging
 eulalie
+jacobian
