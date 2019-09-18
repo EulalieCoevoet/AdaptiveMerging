@@ -122,7 +122,15 @@ public class CollisionProcessor {
 		double torque = 0.;
 		for (Contact contact : contacts) {
 			
+			// eulalie : to clean...
 			if (contact.body1.isInCollection() && !contact.body1.isInSameCollection(contact.body2)) {
+				
+				Vector2d tmp = new Vector2d(contact.normal);
+				contact.normal = new Vector2d(contact.normalB1);
+				contact.body1.transformB2W.transform(contact.normal); 
+				contact.body1.transformB2W.transform(contact.contactB1, contact.contactW);
+				contact.computeJacobian(true);
+				
 				force.set(contact.lambda.x*contact.j1.get(0) + contact.lambda.y*contact.j2.get(0), contact.lambda.x*contact.j1.get(1) + contact.lambda.y*contact.j2.get(1));
 				torque = contact.lambda.x*contact.j1.get(2) + contact.lambda.y*contact.j2.get(2);
 				
@@ -131,8 +139,18 @@ public class CollisionProcessor {
 
 				contact.body1.force.add(force);
 				contact.body1.torque += torque;	
+				
+				contact.normal = new Vector2d(tmp);
+				contact.computeJacobian(false);
 			}
 			if (contact.body2.isInCollection() && !contact.body2.isInSameCollection(contact.body1)) {
+				
+				Vector2d tmp = new Vector2d(contact.normal);
+				contact.normal = new Vector2d(contact.normalB1);
+				contact.body1.transformB2W.transform(contact.normal); 
+				contact.body1.transformB2W.transform(contact.contactB1, contact.contactW);
+				contact.computeJacobian(true);
+				
 				force.set(contact.lambda.x*contact.j1.get(3) + contact.lambda.y*contact.j2.get(3), contact.lambda.x*contact.j1.get(4) + contact.lambda.y*contact.j2.get(4));
 				torque = contact.lambda.x*contact.j1.get(5) + contact.lambda.y*contact.j2.get(5);
 			
@@ -141,6 +159,9 @@ public class CollisionProcessor {
 
 				contact.body2.force.add(force);
 				contact.body2.torque += torque;	
+
+				contact.normal = new Vector2d(tmp);
+				contact.computeJacobian(false);
 			}
 		}
 		

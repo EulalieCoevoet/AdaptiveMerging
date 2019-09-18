@@ -122,7 +122,7 @@ public class Contact {
 		index = nextContactIndex++;        
 
 		computeRelativeVelocity();
-		computeJacobian();
+		computeJacobian(false);
 
 		contactB1.set(contactW);
 		contactB2.set(contactW);
@@ -146,10 +146,10 @@ public class Contact {
 	 * Computes the Jacobian matrix of the contact.
 	 * In case of body in a collection, use COM of parent to compute the torque component of the Jacobian.
 	 */
-	public void computeJacobian() {
+	public void computeJacobian(boolean computeInCollection) {
 		
-		RigidBody b1 = (body1.isInCollection() && !body1.isInSameCollection(body2))? body1.parent: body1;
-		RigidBody b2 = (body2.isInCollection() && !body2.isInSameCollection(body1))? body2.parent: body2;
+		RigidBody b1 = (body1.isInCollection() && !computeInCollection )? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection() && !computeInCollection )? body2.parent: body2;
 
 		Point2d radiusBody1 = new Point2d(b1.x);
 		Point2d radiusBody2 = new Point2d(b2.x);
@@ -165,9 +165,7 @@ public class Contact {
 		j1.set(2, - r1.dot(normal));
 		j1.set(3, normal.x);
 		j1.set(4, normal.y);
-		j1.set(5, r2.dot(normal)); // eulalie : after merging this value changes when considering the collection instead of the bodies
-		// thus it changes the torque of contacts external to the collection
-		// and finally changes the internal contact force...
+		j1.set(5, r2.dot(normal)); 
 
 		Vector2d tangent = new Vector2d(-normal.y, normal.x);
 		j2.set(0, -tangent.x);
