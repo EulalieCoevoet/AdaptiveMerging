@@ -331,25 +331,12 @@ public class RigidCollection extends RigidBody{
 	}
 	
 	/**
-	 * Compute internal contacts forces w.r.t lambdas 
+	 * Compute internal contacts force w.r.t lambdas 
 	 * @param dt
 	 */
-	public void computeInternalContactForces(double dt) { 
-		Vector2d cForce = new Vector2d();
-		double cTorque = 0;
+	public void computeInternalContactsForce(double dt) { 
 		for (Contact c: internalContacts) {
-			
-			cForce.set(c.lambda.x*c.j1.get(0) + c.lambda.y*c.j2.get(0),c.lambda.x*c.j1.get(1) + c.lambda.y*c.j2.get(1) );
-			cTorque = c.lambda.x*c.j1.get(2) + c.lambda.y*c.j2.get(2);
-			cForce.scale(1/dt);
-			c.contactForceB1.set(cForce);
-			c.contactTorqueB1 = cTorque/dt;
-
-			cForce.set(c.lambda.x*c.j1.get(3) + c.lambda.y*c.j2.get(3),c.lambda.x*c.j1.get(4) + c.lambda.y*c.j2.get(4) );
-			cTorque = c.lambda.x*c.j1.get(5) + c.lambda.y*c.j2.get(5);
-			cForce.scale(1/dt);
-			c.contactForceB2.set(cForce);
-			c.contactTorqueB2 = cTorque/dt;
+			c.computeContactForce(dt);
 		}
 	}
 

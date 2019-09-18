@@ -148,8 +148,8 @@ public class Contact {
 	 */
 	public void computeJacobian() {
 		
-		RigidBody b1 = (body1.isInCollection())? body1.parent: body1;
-		RigidBody b2 = (body2.isInCollection())? body2.parent: body2;
+		RigidBody b1 = (body1.isInCollection() && !body1.isInSameCollection(body2))? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection() && !body2.isInSameCollection(body1))? body2.parent: body2;
 			
 		Point2d radiusBody1 = new Point2d(b1.x);
 		Point2d radiusBody2 = new Point2d(b2.x);
@@ -174,6 +174,26 @@ public class Contact {
 		j2.set(3, tangent.x);
 		j2.set(4, tangent.y);
 		j2.set(5, r2.dot(tangent));
+	}
+	
+	public void computeContactForce(double dt) {
+		
+		Vector2d cForce = new Vector2d();
+		double cTorque = 0;
+		
+		cForce.set(lambda.x*j1.get(0) + lambda.y*j2.get(0),lambda.x*j1.get(1) + lambda.y*j2.get(1));
+		cTorque = lambda.x*j1.get(2) + lambda.y*j2.get(2);
+		cForce.scale(1/dt);
+		cTorque/=dt;
+		contactForceB1.set(cForce);
+		contactTorqueB1 = cTorque;
+
+		cForce.set(lambda.x*j1.get(3) + lambda.y*j2.get(3),lambda.x*j1.get(4) + lambda.y*j2.get(4));
+		cTorque = lambda.x*j1.get(5) + lambda.y*j2.get(5);
+		cForce.scale(1/dt);
+		cTorque/=dt;
+		contactForceB2.set(cForce);
+		contactTorqueB2 = cTorque;
 	}
 	
 	/**
@@ -222,11 +242,6 @@ public class Contact {
 			
 			Point2d p1 = new Point2d(body1.x);
 			Point2d p2 = new Point2d(body2.x);
-			
-			if (body1.isInCollection()) 
-				body1.parent.transformB2W.transform(p1);
-			if (body2.isInCollection()) 
-				body2.parent.transformB2W.transform(p2);
 
 			gl.glVertex2d(p1.x, p1.y);
 			gl.glVertex2d(p2.x, p2.y);

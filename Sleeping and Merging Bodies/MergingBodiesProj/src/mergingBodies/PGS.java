@@ -20,10 +20,20 @@ public class PGS {
 		warmStart=false;
 	}
 	
-	public PGS(double mu, int iteration, double restitution) {
+	public PGS(double mu, int iterations) {
+		init(mu, iterations);
+	}
+	
+	public void init(double mu, int iterations) {
 		this.mu=mu;
-		this.iterations=iteration;
-		this.restitution=restitution;
+		this.iterations=iterations;
+		this.restitution=0.;
+		this.feedbackStiffness=0.;
+		contacts = null;
+		warmStart = false;
+		lastTimeStepMap = null;
+		confidentWarmStart = false;
+		computeInCollections = false;
 	}
 	
 	/** List of contacts to solve */
@@ -71,16 +81,17 @@ public class PGS {
 			return;
 		}
 
-		initLambdas();
+		lambdas = new DenseVector(2*contacts.size());
+		lambdas.zero();
 		organizeContactIndex();
-		
 		
 		if (confidentWarmStart)
 			confidentWarmStart();
 		else if (warmStart && lastTimeStepMap != null) 
 			warmStart();
 		
-		while(iterations > 0) {
+		int iter = iterations;
+		while(iter > 0) {
 			
 			for (int i=0; i<lambdas.size(); i++) {
 				
@@ -100,7 +111,7 @@ public class PGS {
 				updateVelocity(i, dLambda);
 			}
 			
-			iterations--;
+			iter--;
 		}
 	}
 	
@@ -108,11 +119,6 @@ public class PGS {
 		for (Contact c : contacts) {
 			c.index = contacts.indexOf(c);
 		}
-	}
-	
-	protected void initLambdas() {
-		lambdas = new DenseVector(2*contacts.size());
-		lambdas.zero();
 	}
 	
 	protected void checkContactState(double lambda, double prevLambda, int index) {

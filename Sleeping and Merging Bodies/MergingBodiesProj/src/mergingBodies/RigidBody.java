@@ -288,9 +288,6 @@ public class RigidBody {
 		// holds r vector.
 		Vector2d r = new Vector2d(contactPointW);
 		Point2d tempX = new Point2d(x);
-		if (isInCollection()) {
-			parent.transformB2W.transform(tempX);
-		}
 		r.sub(tempX);
 		Vector2d ortho_r = new Vector2d(-r.y, r.x);
 

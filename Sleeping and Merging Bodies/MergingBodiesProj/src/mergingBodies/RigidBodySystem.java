@@ -262,43 +262,44 @@ public class RigidBodySystem {
 
 	private void applyGravitySubBodies(RigidCollection b, double theta) {
 		Vector2d force = new Vector2d();
-		for (RigidBody sB : ((RigidCollection) b).collectionBodies) {
+		for (RigidBody body : ((RigidCollection) b).collectionBodies) {
 			force.set( Math.cos( theta ), Math.sin(theta) );
-			force.scale( sB.massLinear * gravityAmount.getValue() );
-			sB.force.add( force );
+			force.scale( body.massLinear * gravityAmount.getValue() );
+			body.force.add( force );
 		}
 	}
 
 	private void clearJunkAtStartOfTimeStep() {
-		for (RigidBody b: bodies) {
-			b.merged = false;
-			b.force.set(0, 0);
-			b.torque = 0;
-			b.deltaV.zero();
+		for (RigidBody body: bodies) {
+			body.merged = false;
+			body.force.set(0, 0);
+			body.torque = 0;
+			body.deltaV.zero();
 
-			b.savedContactForce.set(0, 0);
-			b.contactTorques = 0;
+			body.savedContactForce.set(0, 0);
+			body.contactTorques = 0;
 			
 			ArrayList<BodyPairContact> newBodyContactList = new ArrayList<BodyPairContact>();
-			for (BodyPairContact bc : b.bodyPairContactList) 
+			for (BodyPairContact bc : body.bodyPairContactList) 
 				if (bc.updatedThisTimeStep) 
 					newBodyContactList.add(bc);
 			
-			b.bodyPairContactList.clear();
-			b.bodyPairContactList.addAll(newBodyContactList);
+			body.bodyPairContactList.clear();
+			body.bodyPairContactList.addAll(newBodyContactList);
 
-			if (b instanceof RigidCollection) {
-				((RigidCollection) b).unmergedThisTimeStep = false;
-				for (RigidBody sB: ((RigidCollection )b).collectionBodies) {
+			if (body instanceof RigidCollection) {
+				RigidCollection collection = (RigidCollection)body;
+				collection.unmergedThisTimeStep = false;
+				for (RigidBody sB: collection.collectionBodies) {
 					sB.deltaV.zero();
 					sB.force.set(0, 0);
 					sB.torque = 0;
 					sB.merged = false;
 					
 					newBodyContactList.clear();
-					for (BodyPairContact bc : sB.bodyPairContactList) 
-						if (bc.merged || bc.updatedThisTimeStep) 
-							newBodyContactList.add(bc);
+					for (BodyPairContact bpc : sB.bodyPairContactList) 
+						if (bpc.merged || bpc.updatedThisTimeStep) 
+							newBodyContactList.add(bpc);
 					
 					sB.bodyPairContactList.clear();
 					sB.bodyPairContactList.addAll(newBodyContactList);
@@ -405,10 +406,9 @@ public class RigidBodySystem {
 				}
 			}
 			body.bodyPairContactList.clear();
-			for (BodyPairContact bpc: clearedBodyContacts) {
-				bpc.body1.bodyPairContactList.remove(bpc);
-				bpc.body2.bodyPairContactList.remove(bpc);
-			}
+			
+			for (BodyPairContact bpc: clearedBodyContacts)
+				bpc.removeFromBodyLists();
 		}
 	}
 

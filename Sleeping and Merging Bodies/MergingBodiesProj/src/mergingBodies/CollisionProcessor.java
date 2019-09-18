@@ -34,6 +34,9 @@ public class CollisionProcessor {
 	
 	/** body-body contacts for pruning */
 	ArrayList<Contact> tmpContacts = new ArrayList<Contact>();
+	
+	/** PGS solver */
+	PGS solver = new PGS();
 
 	/**
 	 * Default constructor
@@ -86,7 +89,9 @@ public class CollisionProcessor {
 	    		knuthShuffle();
 	    	
 	    	// solve contacts
-			PGS solver = new PGS(friction.getValue(), iterations.getValue(), restitution.getValue());
+			solver.init(friction.getValue(), iterations.getValue());
+			solver.restitution = restitution.getValue();
+			solver.feedbackStiffness = feedbackStiffness.getValue();
 			if (warmStart.getValue())
 				solver.enableWarmStart(lastTimeStepMap);
 			solver.contacts = contacts;
@@ -101,7 +106,7 @@ public class CollisionProcessor {
 			
 			updateContactMap();
 			
-			computeContactForce(dt);	
+			computeContactsForce(dt);	
 		}
 	}
 	
@@ -110,12 +115,12 @@ public class CollisionProcessor {
 	 * @param dt
 	 */
 	public void updateContactsInCollections(double dt) {
-		
-		PGS solver = new PGS(friction.getValue(), iterations.getValue(), restitution.getValue());
+
+		long now = System.nanoTime();
 		
 		// Apply external (not in a collection) contacts as external forces to bodies in collections
 		Vector2d force = new Vector2d();
-		double torque;
+		double torque = 0.;
 		for (Contact contact : contacts) {
 			if (contact.body1.isInCollection() && !contact.body1.isInSameCollection(contact.body2)) {
 				force.set(contact.lambda.x*contact.j1.get(0) + contact.lambda.y*contact.j2.get(0), contact.lambda.x*contact.j1.get(1) + contact.lambda.y*contact.j2.get(1));
@@ -139,20 +144,21 @@ public class CollisionProcessor {
 			}
 		}
 		
-		long now = System.nanoTime();
+		solver.init(friction.getValue(), 1);
+		solver.confidentWarmStart = true;
+		solver.computeInCollections = true;
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
 				RigidCollection collection = (RigidCollection)body;
 				
-				solver.iterations = 1;
-				solver.confidentWarmStart = true;
-				solver.computeInCollections = true;
+				collection.updateBodies(dt);
 				solver.contacts = collection.internalContacts;
 				solver.solve(dt);
 				
-				collection.computeInternalContactForces(dt);
+				collection.computeInternalContactsForce(dt);
 			}
 		}
+		
 		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
 	}
 	
@@ -170,22 +176,9 @@ public class CollisionProcessor {
 	 * Also compute contact force history for visualization only.
 	 * @param dt
 	 */
-	public void computeContactForce(double dt) {
-		Vector2d cForce = new Vector2d();
-		double cTorque = 0;
+	public void computeContactsForce(double dt) {
 		for (Contact c: contacts) {
-			
-			cForce.set(c.lambda.x*c.j1.get(0) + c.lambda.y*c.j2.get(0),c.lambda.x*c.j1.get(1) + c.lambda.y*c.j2.get(1) );
-			cTorque = c.lambda.x*c.j1.get(2) + c.lambda.y*c.j2.get(2);
-			cForce.scale(1/dt);
-			c.contactForceB1.set(cForce);
-			c.contactTorqueB1 = cTorque/dt;
-
-			cForce.set(c.lambda.x*c.j1.get(3) + c.lambda.y*c.j2.get(3),c.lambda.x*c.j1.get(4) + c.lambda.y*c.j2.get(4) );
-			cTorque = c.lambda.x*c.j1.get(5) + c.lambda.y*c.j2.get(5);
-			cForce.scale(1/dt);
-			c.contactForceB2.set(cForce);
-			c.contactTorqueB2 = cTorque/dt;
+			c.computeContactForce(dt);
 
 			c.body1ContactForceHistory.add(c.contactForceB1);
 			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
