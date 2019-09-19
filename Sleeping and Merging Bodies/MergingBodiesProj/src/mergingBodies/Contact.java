@@ -4,6 +4,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mintools.parameters.DoubleParameter;
 import no.uib.cipr.matrix.DenseVector;
 
 import java.util.ArrayList;
@@ -213,6 +214,15 @@ public class Contact {
 		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
 		return k;
 	}
+	
+	/**
+	 * Getter for lambda
+	 * @return metric
+	 */
+	public Vector2d getLambda() {
+		Vector2d l = new Vector2d(lambda);
+		return l;
+	}
 
 	/**
 	 * Draws the contact points
@@ -261,13 +271,14 @@ public class Contact {
 		gl.glColor4f(1, 0, 0, 1);
 		gl.glBegin( GL.GL_LINES );
 
-		double scale = 0.05;
+		double scale = forceVizScale.getValue();
 		gl.glVertex2d(contactW.x + scale*contactForceB1.x, contactW.y+scale*contactForceB1.y);
 		gl.glVertex2d(contactW.x + scale*contactForceB2.x, contactW.y+scale*contactForceB2.y);
 		
 		gl.glEnd();
 	}
 
+	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.01, 1);
 
 	/**
 	 * Draws the connections between bodies to visualize the 
@@ -282,7 +293,7 @@ public class Contact {
 		gl.glLineWidth(2);
 		gl.glBegin( GL.GL_LINES );
 		
-		double scale = 0.05;
+		double scale = forceVizScale.getValue();
 		gl.glVertex2d(contactW.x + scale*contactForceB1.x, contactW.y+scale*contactForceB1.y);
 		gl.glVertex2d(contactW.x + scale*contactForceB2.x, contactW.y+scale*contactForceB2.y);
 		

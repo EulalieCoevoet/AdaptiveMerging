@@ -92,7 +92,7 @@ public class RigidCollection extends RigidBody{
 		internalBodyPairContacts.addAll(collection.internalBodyPairContacts);
 		for (Contact c: collection.internalContacts) {
 			internalContacts.add(c);
-			collection.transformB2W.transform(c.normal);
+			//collection.transformB2W.transform(c.normal);
 		}
 		
 		temporarilyPinned = (temporarilyPinned || collection.temporarilyPinned);
@@ -123,7 +123,7 @@ public class RigidCollection extends RigidBody{
 	 * Computes transforms, COM, mass, inertia, spring.
 	 */
 	private void updateCollection() {
-		contactsToWorld();
+		//contactsToWorld();
 		updateMass();
 		updateCOM(); 
 		updateTransforms(); 
@@ -212,12 +212,12 @@ public class RigidCollection extends RigidBody{
 	public void addInternalContact(BodyPairContact bpc) {
 		if (!internalBodyPairContacts.contains(bpc))
 			internalBodyPairContacts.add(bpc);
-		if (!bpc.body1.bodyPairContactList.contains(bpc)) {
+		
+		if (!bpc.body1.bodyPairContactList.contains(bpc)) 
 			bpc.body1.bodyPairContactList.add(bpc);
-		}
-		if (!bpc.body2.bodyPairContactList.contains(bpc)) {
+		
+		if (!bpc.body2.bodyPairContactList.contains(bpc)) 
 			bpc.body2.bodyPairContactList.add(bpc);
-		}
 
 		for (Contact c: bpc.contactList)
 			c.getHistoryStatistics();
@@ -284,7 +284,7 @@ public class RigidCollection extends RigidBody{
 			} 
 			updateTransformations();
 			updateBodies(dt);
-			updateInternalContactsDatas();
+			updateInternalContactsDatas(dt);
 		} 
 	}
 	
@@ -324,14 +324,14 @@ public class RigidCollection extends RigidBody{
 	 * Update the contact's Jacobian the internal contacts
 	 * @param collection
 	 */
-	public void updateInternalContactsDatas() {
+	public void updateInternalContactsDatas(double dt) {
 		for (Contact c : internalContacts) {
 			c.normal = new Vector2d(c.normalB1);
 			c.body1.transformB2W.transform(c.normal); 
 			c.body1.transformB2W.transform(c.contactB1, c.contactW);
 			c.computeJacobian(true);
+			c.computeContactForce(dt);
 		}
-		// eulalie: we also need to transform the forces contactForceB1 contactTorqueB1 contactForceB2 contactTorqueB2...
 	}
 	
 	/**
@@ -413,12 +413,12 @@ public class RigidCollection extends RigidBody{
 	
 	/**
 	 * input parameter is a body being merged. We need to also add the other contacts that body has with the collection it's being merged with
-		//Must also add the bodycontacts around the body that didn't reach 50 timesteps but are still part of the same parents.
+	 * Must also add the BodyPairContact around the body that didn't reach 50 time steps but are still part of the same parents.
 
 	 */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyPairContact> removalQueue) {
 		for (BodyPairContact bc: body.bodyPairContactList) {
-			if (bc.body1.parent == bc.body2.parent && bc.relativeVelHistory.size() <= CollisionProcessor.sleepAccum.getValue() && !bc.merged) {
+			if (bc.body1.parent == bc.body2.parent && bc.relativeVelocityHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bc.merged) {
 				bc.merged = true;
 				body.parent.addInternalContact(bc);
 				removalQueue.add(bc);
@@ -432,6 +432,12 @@ public class RigidCollection extends RigidBody{
 			addIncompleteContacts(b, removalQueue);
 		}
 	}	
+	
+	
+	public ArrayList<Contact> getInternalContacts() {
+		ArrayList<Contact> contacts = new ArrayList<Contact>(internalContacts);
+		return contacts;
+	}
 	
 	/** display list ID for this rigid body */
 	int myListID = -1;

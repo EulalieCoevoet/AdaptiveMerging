@@ -13,11 +13,13 @@ public class BodyPairContact {
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
-	public ArrayList<Double> relativeVelHistory = new ArrayList<Double>();
+	public ArrayList<Double> relativeVelocityHist = new ArrayList<Double>();
 	
 	boolean updatedThisTimeStep = false;
 	
 	boolean merged = false;
+	
+	ArrayList<Boolean> contactStateHist = new ArrayList<Boolean>();
 	
 	public BodyPairContact(RigidBody body1, RigidBody body2) {
 		this.body1 = body1;
@@ -54,6 +56,45 @@ public class BodyPairContact {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Check if relative velocity has been strictly decreasing over CollisionProcessor.sleepAccum time steps.
+	 * @return true or false
+	 */
+	public boolean isRelativeVelocityDecreasing() {
+
+		double epsilon = 5e-4;
+		double threshold = CollisionProcessor.sleepingThreshold.getValue();
+		
+		if ((relativeVelocityHist.size() == CollisionProcessor.sleepAccum.getValue())) {
+			double previousValue = 0; 
+			double currentValue = 0;
+			for (Double relativeVelocity : relativeVelocityHist) {
+				currentValue = relativeVelocity;
+				if (relativeVelocity > threshold || currentValue > previousValue + epsilon ) 
+					return false;
+				previousValue = relativeVelocity;
+			}
+		} else {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Check if contacts have been stable over CollisionProcessor.sleepAccum time steps.
+	 * @return true or false
+	 */
+	public boolean areContactsStable() {
+		
+		if ((contactStateHist.size() == CollisionProcessor.sleepAccum.getValue()))
+			for (boolean isStable : contactStateHist)
+				if (!isStable)
+					return false;
+		
+		return true;
 	}
 	
 	/**

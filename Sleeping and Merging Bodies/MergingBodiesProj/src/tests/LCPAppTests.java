@@ -1,11 +1,15 @@
 package tests;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.Test;
 
 import mergingBodies.LCPApp;
 import mergingBodies.RigidBodySystem;
 import mergingBodies.RigidBody;
+import mergingBodies.RigidBody.ObjectState;
 import mergingBodies.RigidCollection;
 import mergingBodies.Contact;
 import javax.vecmath.Vector2d;
@@ -20,45 +24,27 @@ public class LCPAppTests extends LCPApp {
 	}
 	
     @Test
-    public void collisionWithCollectionTest() {
-    	loadSystem("datalcp/twoStacksTest.png");
-
-    	RigidBodySystem.enableMerging.setValue(true);
-    	for (int i=0; i<122; i++)
-    		system.advanceTime(dt);
-    	
-    	boolean hasCollection = false;
-		for (RigidBody body: system.bodies)
-			if (body instanceof RigidCollection)
-				hasCollection = true;
-		assertTrue(hasCollection);
-    	
-    	for (Contact contact : system.collisionProcessor.contacts) {
-    		assertFalse(contact.body1 instanceof RigidCollection);
-    		assertFalse(contact.body2 instanceof RigidCollection);
-    	}
-    }
-	
-    @Test
+    /**
+     * Simple test for merge condition
+     */
     public void mergingTest() {
 		loadSystem("datalcp/twoStacksTest.png");
 		
-    	assertEquals(system.bodies.size(),6); // should have 6 bodies when loading the scene
+    	assertEquals(6, system.bodies.size()); // should have 6 bodies when loading the scene
     	
     	RigidBodySystem.enableMerging.setValue(true);
     	for (int i=0; i<450; i++)
     		system.advanceTime(dt);
-    	assertEquals(system.bodies.size(),2); // with the rule that pinned objects should not been merged, we should get 2 bodies at the end of the simulation
+    	assertEquals(2, system.bodies.size()); // with the rule that pinned objects should not been merged, we should get 2 bodies at the end of the simulation
     }
     
     @Test
+    /**
+     * Simple test for sleeping condition 
+     */
     public void mergingAndSleepingTest() {  
     	
-    	// TODO: This test failed after changing the unmerging rule to relative velocity check
-    	// Need to be fixed
-    	
-    	assertTrue(false);
-		/*loadSystem("datalcp/twoStacksTest.png");
+		loadSystem("datalcp/twoStacksTest.png");
 		
     	for (RigidBody body: system.bodies)
 			assertEquals(ObjectState.ACTIVE, body.state); // every bodies should be active at beginning of the simulation
@@ -69,10 +55,13 @@ public class LCPAppTests extends LCPApp {
     		system.advanceTime(dt);
     	for (RigidBody body: system.bodies)
     		if (body instanceof RigidCollection)
-    			assertEquals(ObjectState.SLEEPING, body.state);*/ 
+    			assertEquals(ObjectState.SLEEPING, body.state);
     }
     
     @Test
+    /**
+     * Test the behavior of temporarily pinned bodies
+     */
     public void temporarilyPinnedObjectTest() {
     	loadSystem("datalcp/twoStacksTest.png");
     	
@@ -97,25 +86,71 @@ public class LCPAppTests extends LCPApp {
     
     @Test
     /**
-     * Checks that the merging is working with a temporarily pinned object.
+     * Checks that the merging is working with a temporarily pinned body.
      */
     public void twoStackTest() {
 		loadSystem("datalcp/twoStacksTest.png");
-    	
+
+		RigidBodySystem.enableMerging.setValue(true);
     	for (int i=0; i<450; i++)
     		system.advanceTime(dt);
-    	assertEquals(system.collisionProcessor.contacts.size(),2); 
+    	assertEquals(2, system.bodies.size()); 
     }
     
     @Test
     /**
-     * Failing example with current pruning technique combined with update of contacts in collection
+     * Simple test for one iteration PGS in collection
      */
-    public void inactiveContactsTest() {
-		loadSystem("datalcp/unstableStackTest.png");
+    public void updateContactInCollectionTest() {
+		loadSystem("datalcp/twoStacksTest.png");
+		
+		RigidBodySystem.enableMerging.setValue(true);
+    	RigidBodySystem.enableUpdateContactsInCollections.setValue(true);
+    	for (int i=0; i<160; i++)
+    		system.advanceTime(dt);
+    	
+    	RigidCollection collection = (RigidCollection)system.bodies.get(2);
+    	Contact contact = collection.getInternalContacts().get(1);
+    	Vector2d lambda = contact.getLambda();
     	
     	for (int i=0; i<200; i++)
     		system.advanceTime(dt);
-    	assertEquals(system.bodies.size(),2); 
+    	
+    	assertTrue(lambda.x < contact.getLambda().x);
+    }
+    
+    @Test
+    /**
+     * Critical test : this test will fail if the external contacts are not updated correctly
+     */
+    public void inactiveContactsTest() {
+		loadSystem("datalcp/unstableStackTest.png");
+
+    	RigidBodySystem.enableMerging.setValue(true);
+    	RigidBodySystem.enableUnmerging.setValue(true);
+    	RigidBodySystem.enableUpdateContactsInCollections.setValue(true);
+    	for (int i=0; i<200; i++)
+    		system.advanceTime(dt);
+    	assertEquals(2, system.bodies.size()); 
+    }
+    
+    @Test
+    /**
+     * Critical test for multiple bodies merge during single time step
+     */
+    public void mergeMultipleBodiesSingleStepTest() {
+		loadSystem("datalcp/jamTest.png");
+
+    	RigidBodySystem.enableMerging.setValue(false);
+    	RigidBodySystem.enableUnmerging.setValue(false);
+    	RigidBodySystem.enableUpdateContactsInCollections.setValue(false);
+    	for (int i=0; i<100; i++)
+    		system.advanceTime(dt);
+    	assertEquals(4, system.bodies.size()); 
+
+    	RigidBodySystem.enableMerging.setValue(true);
+    	for (int i=0; i<system.collisionProcessor.sleepAccum.getValue(); i++)
+    		system.advanceTime(dt);
+    	assertEquals(2, system.bodies.size()); 
     }
 }

@@ -73,9 +73,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
     
     public void setUp() {
         system.mouseSpring = mouseSpring;
-        systemDir = "datalcp/unstableStackTest.png";
+        systemDir = "datalcp/jamTest.png";
         loadSystem(systemDir); 
-        // good default scene
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(540,480), new Dimension(640,480) );
         ev.addInteractor(this); 
@@ -465,9 +464,13 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     stepped = true;
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
-                    //systemReset(); 
-                
+                	double px = posx.getValue();
+                    double py = posy.getValue();
+                    double s = scale.getValue();
                 	loadSystem(system.name);
+                	posx.setValue(px);
+                    posy.setValue(py);
+                    scale.setValue(s);
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_A ) {
                 	scale.setValue( imageWidth / windowWidth );

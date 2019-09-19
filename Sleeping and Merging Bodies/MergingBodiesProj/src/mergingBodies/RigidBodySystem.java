@@ -135,9 +135,10 @@ public class RigidBodySystem {
 		}
 
 		if (enableMerging.getValue()) {
-			if(enableUnmerging.getValue())
+			if(enableUnmerging.getValue()) {
 				unmergeBodies(dt);
-			checkIndex();
+				checkIndex();
+			}
 		}
 
 		if (generateBody) {
@@ -437,40 +438,28 @@ public class RigidBodySystem {
 	 */
 	public void mergeBodies() {
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
+		
 		for (BodyPairContact bpc:collisionProcessor.bodyContacts) {
-			boolean mergeCondition = false;
-			double threshold = CollisionProcessor.sleepingThreshold.getValue();
 
-			double epsilon = 0.0005;
-			if ((bpc.relativeVelHistory.size() == CollisionProcessor.sleepAccum.getValue())) {
-
-				mergeCondition = true;
-				double prevValue = 0; double currentValue = 0;
-				for (Double relVel : bpc.relativeVelHistory) {
-					currentValue = relVel;
-					if (relVel > threshold || currentValue > prevValue + epsilon ) {
-						mergeCondition = false; break;
-					}
-					prevValue = relVel;
-				}
-			}
+			boolean mergeCondition = (bpc.isRelativeVelocityDecreasing());// || bpc.areContactsStable());
 			
 			if (!bpc.updatedThisTimeStep) mergeCondition = false;
 			if (bpc.body1.pinned || bpc.body2.pinned) mergeCondition = false;
-			if (bpc.body1.merged || bpc.body2.merged) mergeCondition = false;
-			if(bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
+			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;
+			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 
 			if (mergeCondition) {
 				bpc.merged = true;
-				//if they are both not collections...make a new collection!
 				if(!bpc.body1.isInCollection() && !bpc.body2.isInCollection()) {
-					bodies.remove(bpc.body1); bodies.remove(bpc.body2);
-					RigidCollection col = new RigidCollection(bpc.body1, bpc.body2);
-					col.addInternalContact(bpc);
-					bodies.add(col);
+					//both are not collections: make a new collection
+					bodies.remove(bpc.body1); 
+					bodies.remove(bpc.body2);
+					RigidCollection collection = new RigidCollection(bpc.body1, bpc.body2);
+					collection.addInternalContact(bpc);
+					bodies.add(collection);
 				}
 				else if (bpc.body1.isInCollection() && bpc.body2.isInCollection()) {
-					// if they are BOTH collections... think about what to do
+					//both are collections:
 					//take all the bodies in the least massive one and add them to the collection of the most massive
 					if (bpc.body1.parent.massLinear > bpc.body2.parent.massLinear) {
 						bpc.body1.merged = true;
@@ -488,14 +477,14 @@ public class RigidBodySystem {
 					}
 				}
 				else if (bpc.body1.isInCollection()) {
-					//body1 is in a collection... body2 isnt
+					//body1 is in a collection, body2 is not
 					bodies.remove(bpc.body2);
 					bpc.body1.parent.addBody(bpc.body2);
 					bpc.body1.parent.addInternalContact(bpc);
 					bpc.body1.parent.addIncompleteContacts(bpc.body2, removalQueue);
 				}
 				else if (bpc.body2.isInCollection()) {
-					//body2 is in a collection... body1 isnt
+					//body2 is in a collection, body1 is not
 					bodies.remove(bpc.body1);
 					bpc.body2.parent.addBody(bpc.body1);
 					bpc.body2.parent.addInternalContact(bpc);
@@ -609,10 +598,10 @@ public class RigidBodySystem {
 	private void checkIndex() {
 		int i = 0;
 		nbCollections = 0;
-		for(RigidBody b: bodies) {
-			b.index = i;
+		for(RigidBody body: bodies) {
+			body.index = i;
 			i++;
-			if(b instanceof RigidCollection)
+			if(body instanceof RigidCollection)
 				nbCollections++;
 		}
 	}
@@ -820,9 +809,9 @@ public class RigidBodySystem {
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
 	private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", false );
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
-	public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
-	public static BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", true);
-	public static BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", true);
+	public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", false);
+	public static BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", false);
+	public static BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", false);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", false);
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
@@ -853,6 +842,7 @@ public class RigidBodySystem {
 		vfpv.add( drawContactGraph.getControls() );
 		vfpv.add( drawSpeedCOM.getControls() );
 		vfpv.add( drawIndex.getControls() );
+		vfpv.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
 
 		CollapsiblePanel cp = new CollapsiblePanel(vfpv.getPanel());
 		cp.collapse();

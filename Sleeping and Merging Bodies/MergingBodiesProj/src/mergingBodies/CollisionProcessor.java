@@ -101,7 +101,7 @@ public class CollisionProcessor {
 			
 			if (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue())
 				for (Contact contact : contacts) 
-					storeInBodyContacts(contact);
+					storeInBodyPairContacts(contact);
 			
 			updateContactMap();
 			
@@ -372,10 +372,10 @@ public class CollisionProcessor {
 	}
 	
 	/**
-	 * Store contact in bodyContacts, and update relative velocity history.
+	 * Store contact in bodyPairContacts, and update relative velocity history.
 	 * @param contact
 	 */
-	private void storeInBodyContacts(Contact contact) {
+	private void storeInBodyPairContacts(Contact contact) {
 
 		if (contact.body1.pinned && contact.body2.pinned) return;
 		
@@ -384,15 +384,21 @@ public class CollisionProcessor {
 
 		if (bpc != null) { // if it exists
 			if (!bpc.updatedThisTimeStep) { // only once per time step
-				bpc.relativeVelHistory.add(contact.getRelativeMetric());
-				if (bpc.relativeVelHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
-					bpc.relativeVelHistory.remove(0);
-				}
-				bpc.updatedThisTimeStep = true;
+				bpc.relativeVelocityHist.add(contact.getRelativeMetric());
+				if (bpc.relativeVelocityHist.size() > CollisionProcessor.sleepAccum.getValue())
+					bpc.relativeVelocityHist.remove(0);
+				
+//				if (bpc.contactStateHist.size() == 0)
+//					bpc.contactStateHist.add(true);
+//				
+//				if (bpc.contactStateHist.size() > CollisionProcessor.sleepAccum.getValue())
+//					bpc.contactStateHist.remove(0);
+				
+				bpc.updatedThisTimeStep = true;				
 			}
 		} else { // body contact did not exist in previous list
 			bpc = new BodyPairContact(contact.body1, contact.body2);
-			bpc.relativeVelHistory.add(contact.getRelativeMetric());
+			bpc.relativeVelocityHist.add(contact.getRelativeMetric());
 			bpc.updatedThisTimeStep = true;
 			bodyContacts.add(bpc);
 		}
@@ -557,7 +563,7 @@ public class CollisionProcessor {
 			normal.normalize();
 			
 			Contact contact = null;
-			contact = new Contact( body1, body2, contactW, normal, b1, b2, distance);
+			contact = new Contact(body1, body2, contactW, normal, b1, b2, distance);
 
 			// set normals in body coordinates
 			contact.normalB1.set(normal);
@@ -573,7 +579,7 @@ public class CollisionProcessor {
 
 	public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
 	public DoubleParameter friction = new DoubleParameter("Coulomb friction coefficient", 0.8, 0, 2 );
-	public IntParameter iterations = new IntParameter("iterations for GS solve", 200, 1, 500);
+	public IntParameter iterations = new IntParameter("iterations for GS solve", 500, 1, 1000);
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0, 0,50  );
