@@ -89,12 +89,12 @@ public class BodyPairContact {
 	 */
 	public boolean areContactsStable() {
 		
-		if ((contactStateHist.size() == CollisionProcessor.sleepAccum.getValue()))
+		/*if ((contactStateHist.size() == CollisionProcessor.sleepAccum.getValue()))
 			for (boolean isStable : contactStateHist)
 				if (!isStable)
-					return false;
+					return false;*/
 		
-		return true;
+		return false;
 	}
 	
 	/**

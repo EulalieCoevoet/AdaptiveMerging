@@ -441,7 +441,7 @@ public class RigidBodySystem {
 		
 		for (BodyPairContact bpc:collisionProcessor.bodyContacts) {
 
-			boolean mergeCondition = (bpc.isRelativeVelocityDecreasing());// || bpc.areContactsStable());
+			boolean mergeCondition = (bpc.isRelativeVelocityDecreasing() || bpc.areContactsStable());
 			
 			if (!bpc.updatedThisTimeStep) mergeCondition = false;
 			if (bpc.body1.pinned || bpc.body2.pinned) mergeCondition = false;
@@ -458,18 +458,16 @@ public class RigidBodySystem {
 					collection.addInternalContact(bpc);
 					bodies.add(collection);
 				}
-				else if (bpc.body1.isInCollection() && bpc.body2.isInCollection()) {
+				else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() && !bpc.body1.isInSameCollection(bpc.body2)) {
 					//both are collections:
 					//take all the bodies in the least massive one and add them to the collection of the most massive
 					if (bpc.body1.parent.massLinear > bpc.body2.parent.massLinear) {
-						bpc.body1.merged = true;
 						bodies.remove(bpc.body2.parent);
 						bpc.body1.parent.addCollection(bpc.body2.parent);
 						bpc.body1.parent.addInternalContact(bpc);
 						bpc.body1.parent.addIncompleteCollectionContacts(bpc.body2.parent, removalQueue);
 					}
 					else {
-						bpc.body2.merged = true;
 						bodies.remove(bpc.body1.parent);
 						bpc.body2.parent.addCollection(bpc.body1.parent);
 						bpc.body2.parent.addInternalContact(bpc);
