@@ -369,27 +369,28 @@ public class RigidBodySystem {
 		for (RigidBody body: unmergingBodies) {
 			collection.unmergeSingleBody(body);
 			newBodies.add(body);
-			collection.contactsToWorld();
+			//collection.contactsToWorld();
 		}
 		
 		ArrayList<BodyPairContact> clearedBodyContacts = new ArrayList<BodyPairContact>();
 		for (RigidBody body: unmergingBodies) {
 			ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 
-			for (BodyPairContact bc : body.bodyPairContactList) {
-				RigidBody body2 = bc.getOtherBody(body);
-				clearedBodyContacts.add(bc);
-				if (bc.merged) {
-					bc.merged = false;
-					if(!handledBodies.contains(body2)) {
+			for (BodyPairContact bpc : body.bodyPairContactList) {
+				RigidBody otherBody = bpc.getOtherBody(body);
+				clearedBodyContacts.add(bpc);
+				if (bpc.merged) {
+					bpc.merged = false;
+					if(!handledBodies.contains(otherBody)) {
 
-						subBodies.add(body2);
-
-						handledBodies.add(body2);
-						buildNeighborBody(body2, subBodies, handledBodies);
+						subBodies.add(otherBody);
+						handledBodies.add(otherBody);
+						buildNeighborBody(otherBody, subBodies, handledBodies);
 
 						if (subBodies.size() > 1) {
 							//make a new collection
+							// eulalie : I think this code should be reviewed because when you 
+							// remove a body on top of a stack it creates a new collection, while it shouldn't...
 							RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
 							newCollection.addBodies(subBodies);
 							newCollection.fillInternalBodyContacts();
@@ -413,16 +414,17 @@ public class RigidBodySystem {
 		}
 	}
 
-	private void buildNeighborBody(RigidBody b, ArrayList<RigidBody> subBodies, ArrayList<RigidBody> handledBodies) {
+	private void buildNeighborBody(RigidBody body, ArrayList<RigidBody> subBodies, ArrayList<RigidBody> handledBodies) {
 
-		for (BodyPairContact bc : b.bodyPairContactList) {
-			if (!bc.merged) continue;
+		for (BodyPairContact bpc : body.bodyPairContactList) {
+			if (!bpc.merged) 
+				continue;
 
-			RigidBody body2 = bc.getOtherBody(b);
-			if (!handledBodies.contains(body2)) {
-				handledBodies.add(body2);
-				subBodies.add(body2);
-				buildNeighborBody(body2, subBodies, handledBodies);
+			RigidBody otherBody = bpc.getOtherBody(body);
+			if (!handledBodies.contains(otherBody)) {
+				handledBodies.add(otherBody);
+				subBodies.add(otherBody);
+				buildNeighborBody(otherBody, subBodies, handledBodies);
 			}
 		}
 	}
@@ -634,10 +636,8 @@ public class RigidBodySystem {
 		}  
 		
 		if ( drawBodies.getValue() ) {
-			int collectionId = 0;
 			
-			// Check if collections color should be updated
-			// Can be removed if we build a consistent track of the collections id 
+			// Check if collections color should be 
 			for ( RigidBody b : bodies ) {
 				if ( b instanceof RigidCollection && b.updateColor == true) {
 					b.updateColor = false;
@@ -649,13 +649,8 @@ public class RigidBodySystem {
 				if ( b instanceof RigidCollection) {
 					RigidCollection collection = (RigidCollection)b;
 					Color3f color = null;
-					collectionId++;
-					// Can be changed if we build a consistent track of the collections id 
-					if(drawCollections.getValue() && updateCollectionColor) {
-						float greenShade = collectionId/(float)nbCollections;
-						float blueShade = 1 - collectionId/(float)nbCollections;
-						color = new Color3f(0.f, greenShade, blueShade);
-					}
+					if(drawCollections.getValue() && updateCollectionColor)
+						color = new Color3f(collection.color);
 					collection.displayCollection(drawable, color);
 				}
 				else {

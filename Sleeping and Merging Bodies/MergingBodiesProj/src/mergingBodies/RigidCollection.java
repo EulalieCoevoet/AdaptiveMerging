@@ -2,6 +2,7 @@ package mergingBodies;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 
 import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
@@ -25,6 +26,8 @@ public class RigidCollection extends RigidBody{
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 
 	boolean unmergedThisTimeStep = false;
+	
+	public Color3f color;
 
 	CollisionProcessor collisionProcessor = new CollisionProcessor(collectionBodies);
 
@@ -44,11 +47,14 @@ public class RigidCollection extends RigidBody{
 		transformB2W.set(body1.transformB2W);
 		transformW2B.set(body1.transformW2B);
 
+		updateColor = true;
+		generateColor();
+		
 		body1.parent = this;
 		body2.parent = this;
 		body1.merged = true;
 		body2.merged = true;
-		updateColor = true;
+		
 		collectionBodies.add(body1);
 		collectionBodies.add(body2);
 		
@@ -433,10 +439,16 @@ public class RigidCollection extends RigidBody{
 		}
 	}	
 	
-	
 	public ArrayList<Contact> getInternalContacts() {
 		ArrayList<Contact> contacts = new ArrayList<Contact>(internalContacts);
 		return contacts;
+	}
+	
+	protected void generateColor() {
+		Random r = new Random();
+		Random g = new Random();
+		Random b = new Random();
+		color = new Color3f(r.nextFloat(), g.nextFloat(), b.nextFloat());
 	}
 	
 	/** display list ID for this rigid body */
