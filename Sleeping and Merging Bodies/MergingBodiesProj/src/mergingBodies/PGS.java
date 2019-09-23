@@ -85,6 +85,13 @@ public class PGS {
 		lambdas.zero();
 		organizeContactIndex();
 		
+		
+		
+		//precompute terms
+		for (Contact c: contacts) {
+			c.computeB(dt, restitution, feedbackStiffness, computeInCollections);
+			c.computeJMinvJtDiagonal(computeInCollections);
+		}
 		if (confidentWarmStart)
 			confidentWarmStart();
 		else if (warmStart && lastTimeStepMap != null) 
@@ -94,10 +101,10 @@ public class PGS {
 		while(iter > 0) {
 			
 			for (int i=0; i<lambdas.size(); i++) {
-				
-				double d = computeJMinvJtDiagonal(i); 
+				Contact c = contacts.get(i/2);
+				double d = (i%2 == 0)? c.diin:c.diit; 
 				double Jdv = computeJdv(i);  
-				double b = computeB(i, dt); 
+				double b = (i%2 == 0)?  c.bn:c.bt; 
 
 				double lambda = lambdas.get(i);
 				double prevLambda = lambda;

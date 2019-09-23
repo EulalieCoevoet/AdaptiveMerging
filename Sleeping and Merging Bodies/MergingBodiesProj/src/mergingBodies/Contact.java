@@ -85,6 +85,18 @@ public class Contact {
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent) */
 	Vector2d lambda = new Vector2d();
 	
+	/**
+	 * B vector for Matrix Sovle (Precomputed)
+	 */
+	double bn = 0;
+	double bt = 0;
+	
+	/** 
+	 * Diagonal Entries for Matrix solve (Precomputed)
+	 */
+	double diin = 0;
+	double diit = 0;
+	
 	BVNode bvn1;
 	BVNode bvn2;
 
@@ -471,6 +483,113 @@ public class Contact {
 		x/=list.size();
 		y/= list.size();
 		return new Vector2d(x, y);
+	}
+	
+	/**
+	 * 
+	 * @param dt
+	 * @param restitution
+	 * @param feedbackStiffness
+	 * @param computeInCollections
+	 */
+
+	public void computeB(double dt, double restitution, double feedbackStiffness,  boolean computeInCollections) {
+		
+		RigidBody b1 = (body1.isInCollection() && !computeInCollections)? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection() && !computeInCollections)? body2.parent: body2;
+
+		double m1inv = (b1.temporarilyPinned)? 0: b1.minv; 
+		double m2inv = (b2.temporarilyPinned)? 0: b2.minv;
+		double j1inv = (b1.temporarilyPinned)? 0: b1.jinv;
+		double j2inv = (b2.temporarilyPinned)? 0: b2.jinv;
+	
+		// normal component
+		DenseVector jn = new DenseVector(j1);
+	
+		// tangent component
+		DenseVector jt = new DenseVector(j2);
+		
+		// find all relevant values of u. (normal)
+		double u1xn =     (b1.v.x + b1.force.x * m1inv * dt) * jn.get(0);
+		double u1yn =     (b1.v.y + b1.force.y * m1inv * dt) * jn.get(1);
+		double u1omegan = (b1.omega + b1.torque * j1inv * dt) * jn.get(2);
+
+		double u2xn =     (b2.v.x + b2.force.x * m2inv * dt) * jn.get(3);
+		double u2yn =     (b2.v.y + b2.force.y * m2inv * dt) * jn.get(4);
+		double u2omegan = (b2.omega + b2.torque * j2inv * dt) * jn.get(5);
+		
+		// find all relevant values of u. (tangential)
+		double u1xt =     (b1.v.x + b1.force.x * m1inv * dt) * jt.get(0);
+		double u1yt =     (b1.v.y + b1.force.y * m1inv * dt) * jt.get(1);
+		double u1omegat = (b1.omega + b1.torque * j1inv * dt) * jt.get(2);
+
+		double u2xt =     (b2.v.x + b2.force.x * m2inv * dt) * jt.get(3);
+		double u2yt =     (b2.v.y + b2.force.y * m2inv * dt) * jt.get(4);
+		double u2omegat = (b2.omega + b2.torque * j2inv * dt) * jt.get(5);
+
+		// add the Bounce vector to the u's over here, but don't need to do that just yet
+		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
+		// calculate Baumgarte Feedback (overlap of the two bodies)
+
+		double baumgarteFeedback = (computeInCollections)? 0. : feedbackStiffness*constraintViolation;
+		if (computeInCollections)
+			restitution=0.;
+		
+		// putting b together.
+
+		double bn = u1xn + u2xn + u1yn + u2yn + u1omegan + u2omegan - restitution + baumgarteFeedback;
+		double bt = u1xt + u2xt + u1yt + u2yt + u1omegat + u2omegat;
+			
+		this.bn = bn;
+		this.bt = bt;
+	}
+	
+	/**
+	 * Compute Dii
+	 * @param compputeInCollection 
+	 * @return fills dii values of contact
+	 */
+
+	public void computeJMinvJtDiagonal(boolean computeInCollections) {
+		
+		RigidBody b1 = (body1.isInCollection() && !computeInCollections)? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection() && !computeInCollections)? body2.parent: body2;
+		
+		double m1inv = (b1.temporarilyPinned)? 0: b1.minv; 
+		double m2inv = (b2.temporarilyPinned)? 0: b2.minv;
+		double j1inv = (b1.temporarilyPinned)? 0: b1.jinv;
+		double j2inv = (b2.temporarilyPinned)? 0: b2.jinv;
+
+		// normal component
+		DenseVector jn = new DenseVector(j1);
+		
+		double dn = 0.;
+		//first body component
+		dn += jn.get(0) * m1inv * jn.get(0);
+		dn += jn.get(1) * m1inv * jn.get(1);
+		dn += jn.get(2) * j1inv * jn.get(2);
+		//second body component
+		dn += jn.get(3) * m2inv * jn.get(3);
+		dn += jn.get(4) * m2inv * jn.get(4);
+		dn += jn.get(5) * j2inv * jn.get(5);
+		
+		// tangent component
+		DenseVector jt = new DenseVector(j2);
+		
+		double dt = 0.;
+		//first body component
+		dt += jt.get(0) * m1inv * jt.get(0);
+		dt += jt.get(1) * m1inv * jt.get(1);
+		dt += jt.get(2) * j1inv * jt.get(2);
+		//second body component
+		dt += jt.get(3) * m2inv * jt.get(3);
+		dt += jt.get(4) * m2inv * jt.get(4);
+		dt += jt.get(5) * j2inv * jt.get(5);
+		
+		
+		diin = dn;
+		diit = dt;
+		
 	}
 
 }
