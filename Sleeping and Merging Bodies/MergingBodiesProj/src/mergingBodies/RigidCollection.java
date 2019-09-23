@@ -98,7 +98,6 @@ public class RigidCollection extends RigidBody{
 		internalBodyPairContacts.addAll(collection.internalBodyPairContacts);
 		for (Contact c: collection.internalContacts) {
 			internalContacts.add(c);
-			//collection.transformB2W.transform(c.normal);
 		}
 		
 		temporarilyPinned = (temporarilyPinned || collection.temporarilyPinned);
@@ -129,7 +128,6 @@ public class RigidCollection extends RigidBody{
 	 * Computes transforms, COM, mass, inertia, spring.
 	 */
 	private void updateCollection() {
-		//contactsToWorld();
 		updateMass();
 		updateCOM(); 
 		updateTransforms(); 
@@ -137,14 +135,6 @@ public class RigidCollection extends RigidBody{
 		addBodiesSpringsToCollection();
 	}
 
-	/**
-	 * Transforms internal contacts normal to world
-	 */
-	public void contactsToWorld() {
-		for (Contact c: internalContacts)
-			transformB2W.transform(c.normal);
-	}
-	
 	/**
 	 * Compute mass of collection w.r.t bodies
 	 */
@@ -406,12 +396,6 @@ public class RigidCollection extends RigidBody{
 			body.omega = body.parent.omega;
 			body.parent = null;
 			body.updateColor = true;
-		}
-	}
-
-	public void contactsToBody() {
-		for (Contact c: internalContacts) {
-			transformW2B.transform(c.normal);
 		}
 	}
 

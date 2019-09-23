@@ -10,6 +10,7 @@ import javax.swing.border.TitledBorder;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import javafx.util.Pair;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
@@ -131,8 +132,8 @@ public class CollisionProcessor {
 				contact.body1.transformB2W.transform(contact.contactB1, contact.contactW);
 				contact.computeJacobian(true);
 				
-				force.set(contact.lambda.x*contact.j1.get(0) + contact.lambda.y*contact.j2.get(0), contact.lambda.x*contact.j1.get(1) + contact.lambda.y*contact.j2.get(1));
-				torque = contact.lambda.x*contact.j1.get(2) + contact.lambda.y*contact.j2.get(2);
+				force.set(contact.lambda.x*contact.jn.get(0) + contact.lambda.y*contact.jt.get(0), contact.lambda.x*contact.jn.get(1) + contact.lambda.y*contact.jt.get(1));
+				torque = contact.lambda.x*contact.jn.get(2) + contact.lambda.y*contact.jt.get(2);
 				
 				force.scale(1./dt);
 				torque /= dt;
@@ -151,8 +152,8 @@ public class CollisionProcessor {
 				contact.body1.transformB2W.transform(contact.contactB1, contact.contactW);
 				contact.computeJacobian(true);
 				
-				force.set(contact.lambda.x*contact.j1.get(3) + contact.lambda.y*contact.j2.get(3), contact.lambda.x*contact.j1.get(4) + contact.lambda.y*contact.j2.get(4));
-				torque = contact.lambda.x*contact.j1.get(5) + contact.lambda.y*contact.j2.get(5);
+				force.set(contact.lambda.x*contact.jn.get(3) + contact.lambda.y*contact.jt.get(3), contact.lambda.x*contact.jn.get(4) + contact.lambda.y*contact.jt.get(4));
+				torque = contact.lambda.x*contact.jn.get(5) + contact.lambda.y*contact.jt.get(5);
 			
 				force.scale(1./dt);
 				torque /= dt;
@@ -167,12 +168,11 @@ public class CollisionProcessor {
 		
 		solver.init(friction.getValue(), 1);
 		solver.confidentWarmStart = true;
-		solver.computeInCollections = true;
+		solver.computeInCollection = true;
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
 				RigidCollection collection = (RigidCollection)body;
 
-				// TODO: Jacobians not updated!??
 				collection.updateContactJacobianAndDataAsInternal(dt);
 				solver.contacts = collection.internalContacts;
 				solver.solve(dt);
@@ -388,18 +388,23 @@ public class CollisionProcessor {
 				bpc.relativeVelocityHist.add(contact.getRelativeMetric());
 				if (bpc.relativeVelocityHist.size() > CollisionProcessor.sleepAccum.getValue())
 					bpc.relativeVelocityHist.remove(0);
-				
-//				if (bpc.contactStateHist.size() == 0)
-//					bpc.contactStateHist.add(true);
-//				
-//				if (bpc.contactStateHist.size() > CollisionProcessor.sleepAccum.getValue())
-//					bpc.contactStateHist.remove(0);
+
+				Pair<Integer, Double> state = new Pair<Integer, Double>(1, contact.lambda.x);
+				bpc.contactStateHist.add(state);
+				if (bpc.contactStateHist.size() > CollisionProcessor.sleepAccum.getValue())
+					bpc.contactStateHist.remove(0);
 				
 				bpc.updatedThisTimeStep = true;				
+			} else {
+				Pair<Integer, Double> state = bpc.contactStateHist.get(bpc.contactStateHist.size()-1);
+				state = new Pair<Integer, Double>(state.getKey()+1, state.getValue()+contact.lambda.x);
 			}
+				
 		} else { // body contact did not exist in previous list
 			bpc = new BodyPairContact(contact.body1, contact.body2);
 			bpc.relativeVelocityHist.add(contact.getRelativeMetric());
+			Pair<Integer, Double> state = new Pair<Integer, Double>(1, contact.lambda.x);
+			bpc.contactStateHist.add(state);
 			bpc.updatedThisTimeStep = true;
 			bodyPairContacts.add(bpc);
 		}

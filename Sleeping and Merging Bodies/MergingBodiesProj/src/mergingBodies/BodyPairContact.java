@@ -2,6 +2,8 @@ package mergingBodies;
 
 import java.util.ArrayList;
 
+import javafx.util.Pair;
+
 
 /**
  * This class holds info about two colliding bodies (list of contacts, relative velocity, if they are merged...).
@@ -14,12 +16,11 @@ public class BodyPairContact {
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
 	public ArrayList<Double> relativeVelocityHist = new ArrayList<Double>();
+	public ArrayList<Pair<Integer, Double>> contactStateHist = new ArrayList<Pair<Integer, Double>>();
 	
 	boolean updatedThisTimeStep = false;
 	
 	boolean merged = false;
-	
-	ArrayList<Boolean> contactStateHist = new ArrayList<Boolean>();
 	
 	public BodyPairContact(RigidBody body1, RigidBody body2) {
 		this.body1 = body1;
@@ -85,16 +86,33 @@ public class BodyPairContact {
 	
 	/**
 	 * Check if contacts have been stable over CollisionProcessor.sleepAccum time steps.
+	 * eulalie : work in progress
+	 * 			- missing class for cleaner access instead of using Pair
+	 * 			- currently a simple test on the sum of lambda.x
 	 * @return true or false
 	 */
 	public boolean areContactsStable() {
+
+		double epsilon = 1e-3;
 		
-		/*if ((contactStateHist.size() == CollisionProcessor.sleepAccum.getValue()))
-			for (boolean isStable : contactStateHist)
-				if (!isStable)
-					return false;*/
+		if ((contactStateHist.size() == CollisionProcessor.sleepAccum.getValue())) {
+			Pair<Integer, Double> previousState = contactStateHist.get(0);
+			Pair<Integer, Double> currentState;
+			for (Pair<Integer, Double> state : contactStateHist) {
+				currentState = state;
+				if (currentState.getKey() != previousState.getKey())
+					return false;
+				if (currentState.getValue() < previousState.getValue()-epsilon)
+					return false;
+				if (currentState.getValue() > previousState.getValue()+epsilon)
+					return false;
+				previousState = currentState;
+			}
+		} else {
+			return false;
+		}
 		
-		return false;
+		return true;
 	}
 	
 	/**
