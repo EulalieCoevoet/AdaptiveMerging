@@ -44,6 +44,9 @@ public class RigidBodySystem {
 	DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );
 	DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
 
+	/** Viscous damping on all bodies */
+	public DoubleParameter globalViscousDecay = new DoubleParameter("global viscous decay", 1, 0.1, 1 );
+	
 	/**Stiffness of  spring*/
 	public DoubleParameter spring_k = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
 
@@ -144,6 +147,12 @@ public class RigidBodySystem {
 		if (generateBody) {
 			generateBody();
 			generateBody = false;
+		}
+		
+		double alpha = globalViscousDecay.getValue();
+		for ( RigidBody b : bodies ) {
+			b.deltaV.scale( alpha );
+			b.omega *= alpha;
 		}
 		
 		computeTime = (System.nanoTime() - now) / 1e9;
@@ -854,6 +863,7 @@ public class RigidBodySystem {
 		vfp.add( gravityAmount.getSliderControls(false) );
 		vfp.add( gravityAngle.getSliderControls(false) );
 
+		vfp.add( globalViscousDecay.getSliderControls(false) );
 		vfp.add(spring_k.getSliderControls(false));
 		vfp.add(spring_c.getSliderControls(false));
 		vfp.add(springLength.getSliderControls());
