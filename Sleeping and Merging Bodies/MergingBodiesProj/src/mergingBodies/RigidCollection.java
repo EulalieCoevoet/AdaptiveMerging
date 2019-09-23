@@ -152,6 +152,12 @@ public class RigidCollection extends RigidBody{
 		double mass = 0;
 		for(RigidBody b: collectionBodies) {
 			mass += b.massLinear;
+			if ( b.pinned ) {
+				minv = 0;
+				jinv = 0;
+				pinned = true;
+				return;
+			}
 		}
 		massLinear = mass;
 		minv = 1/mass;
@@ -161,6 +167,7 @@ public class RigidCollection extends RigidBody{
 	 * Loops through all bodies in collectionBodies
 	 */
 	public void updateCOM() {
+		if ( pinned ) return; // no need to update!
 		Point2d com = new Point2d();
 		Point2d tmp = new Point2d();
 		double totalMass = massLinear;
@@ -200,6 +207,10 @@ public class RigidCollection extends RigidBody{
 		Point2d tmp = new Point2d(0, 0);
 		Point2d zero = new Point2d(0, 0);
 		for (RigidBody body: collectionBodies) {
+			if ( body.pinned ) {
+				// jinv already set to zero when computing mass
+				return;
+			}
 			for ( Block block : body.blocks ) {
 				double mass = block.getColourMass();
 				tmp.set(block.pB);
@@ -216,17 +227,25 @@ public class RigidCollection extends RigidBody{
 	 * @param bpc
 	 */
 	public void addInternalContact(BodyPairContact bpc) {
-		if (!internalBodyPairContacts.contains(bpc))
+		if (!internalBodyPairContacts.contains(bpc)) {
 			internalBodyPairContacts.add(bpc);
+		} else {
+			System.err.println("This should probably never happen: RigidCollection.addInternalContact()");
+		}
 		
-		if (!bpc.body1.bodyPairContactList.contains(bpc)) 
+		if (!bpc.body1.bodyPairContactList.contains(bpc)) {
+			System.err.println("Shouldn't this already be in the body1 list? RigidCollection.addInternalContact() ");
 			bpc.body1.bodyPairContactList.add(bpc);
+		}
 		
-		if (!bpc.body2.bodyPairContactList.contains(bpc)) 
+		if (!bpc.body2.bodyPairContactList.contains(bpc))  {
+			System.err.println("Shouldn't this already be in the body2 list? RigidCollection.addInternalContact() ");
 			bpc.body2.bodyPairContactList.add(bpc);
+		}
 
-		for (Contact c: bpc.contactList)
+		for (Contact c: bpc.contactList) {
 			c.getHistoryStatistics();
+		}
 
 		internalContacts.addAll(bpc.contactList);
 	}
@@ -290,7 +309,7 @@ public class RigidCollection extends RigidBody{
 			} 
 			updateTransformations();
 			updateBodies(dt);
-			updateInternalContactsDatas(dt);
+			updateContactJacobianAndDataAsInternal(dt);
 		} 
 	}
 	
@@ -327,10 +346,10 @@ public class RigidCollection extends RigidBody{
 	}
 	
 	/**
-	 * Update the contact's Jacobian the internal contacts
-	 * @param collection
+	 * Update the all contact Jacobians the internal contacts, along with position and normal data
+	 * @param dt time step needed to get correct contact forces from lambda impulses ONLY FOR VIZ
 	 */
-	public void updateInternalContactsDatas(double dt) {
+	public void updateContactJacobianAndDataAsInternal(double dt) {
 		for (Contact c : internalContacts) {
 			c.normal = new Vector2d(c.normalB1);
 			c.body1.transformB2W.transform(c.normal); 
@@ -418,9 +437,10 @@ public class RigidCollection extends RigidBody{
 	}
 	
 	/**
-	 * input parameter is a body being merged. We need to also add the other contacts that body has with the collection it's being merged with
+	 * We need to also add the other contacts that body has with the same collection it's being merged with.
 	 * Must also add the BodyPairContact around the body that didn't reach 50 time steps but are still part of the same parents.
-
+	 * The input parameter is the body being merged, and the body pair contact removal queue so that any BPCs 
+	 * identified in this call can also be later removed. 
 	 */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyPairContact> removalQueue) {
 		for (BodyPairContact bc: body.bodyPairContactList) {

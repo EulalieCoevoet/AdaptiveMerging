@@ -115,6 +115,7 @@ public class PGS {
 		}
 	}
 	
+	@Deprecated // TODO: totally unnecessary if we put the lambdas inside the contact objects?
 	protected void organizeContactIndex() { // TODO: is this unnecessary?  Can be cleaned... huh?
 		for (Contact c : contacts) {
 			c.index = contacts.indexOf(c);
@@ -390,7 +391,7 @@ public class PGS {
 		for (Contact contact : contacts) {
 			lambdas.set(index, contact.lambda.x);
 			lambdas.set(index+1, contact.lambda.y);
-			
+						
 			updateVelocity(contact.index*2, contact.lambda.x);
 			updateVelocity(contact.index*2 + 1, contact.lambda.y);
 			

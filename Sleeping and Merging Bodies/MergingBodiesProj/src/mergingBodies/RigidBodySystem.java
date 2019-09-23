@@ -441,12 +441,12 @@ public class RigidBodySystem {
 	public void mergeBodies() {
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
 		
-		for (BodyPairContact bpc:collisionProcessor.bodyContacts) {
+		for (BodyPairContact bpc:collisionProcessor.bodyPairContacts) {
 
 			boolean mergeCondition = (bpc.isRelativeVelocityDecreasing() || bpc.areContactsStable());
 			
 			if (!bpc.updatedThisTimeStep) mergeCondition = false;
-			if (bpc.body1.pinned || bpc.body2.pinned) mergeCondition = false;
+//			if (bpc.body1.pinned || bpc.body2.pinned) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 
@@ -494,7 +494,7 @@ public class RigidBodySystem {
 			}
 		}
 		for (BodyPairContact element : removalQueue) {
-			collisionProcessor.bodyContacts.remove(element);
+			collisionProcessor.bodyPairContacts.remove(element);
 		}
 	}
 
@@ -594,7 +594,9 @@ public class RigidBodySystem {
 	/**
 	 * if there are bodies with the index i, ups the index of all bodies greater than i to leave room 
 	 * for the new body about to be "reintroduced" to the scene
+	 * TODO: remove me?  Can we remove all body indices?
 	 */
+	@Deprecated
 	private void checkIndex() {
 		int i = 0;
 		nbCollections = 0;
@@ -690,7 +692,7 @@ public class RigidBodySystem {
 		
 		if ( drawContactGraph.getValue() ) {
 			if (CollisionProcessor.use_contact_graph.getValue()) {
-				for (BodyPairContact bc : collisionProcessor.bodyContacts) {
+				for (BodyPairContact bc : collisionProcessor.bodyPairContacts) {
 					for (Contact c : bc.contactList) {
 						c.displayConnection(drawable);
 					}

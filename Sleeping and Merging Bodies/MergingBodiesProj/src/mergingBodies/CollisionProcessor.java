@@ -62,7 +62,7 @@ public class CollisionProcessor {
 	double collectionUpdateTime = 0;
 	
 	/**list that keeps track of all the body contacts that occurred in this time step */
-	public ArrayList<BodyPairContact> bodyContacts = new ArrayList<BodyPairContact>();
+	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
 
 	/**
 	 * Processes all collisions. Find collision points and calculate contact force.
@@ -171,8 +171,9 @@ public class CollisionProcessor {
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
 				RigidCollection collection = (RigidCollection)body;
-				
-				collection.updateBodies(dt);
+
+				// TODO: Jacobians not updated!??
+				collection.updateContactJacobianAndDataAsInternal(dt);
 				solver.contacts = collection.internalContacts;
 				solver.solve(dt);
 				
@@ -226,7 +227,7 @@ public class CollisionProcessor {
 	private void rememberBodyContacts() {
 		ArrayList<BodyPairContact> savedBodyContacts = new ArrayList<BodyPairContact>();
 		
-		for (BodyPairContact bc : bodyContacts) {
+		for (BodyPairContact bc : bodyPairContacts) {
 			if (!bc.merged && ( bc.body1.state == ObjectState.ACTIVE || bc.body2.state == ObjectState.ACTIVE ))
 				bc.contactList.clear();
 			
@@ -238,9 +239,9 @@ public class CollisionProcessor {
 				bc.updatedThisTimeStep = false;
 			}
 		}
-		bodyContacts.clear();
-		bodyContacts.addAll(savedBodyContacts);
-		for (BodyPairContact bc: bodyContacts) {
+		bodyPairContacts.clear();
+		bodyPairContacts.addAll(savedBodyContacts);
+		for (BodyPairContact bc: bodyPairContacts) {
 			bc.addToBodyLists();
 		}
 	}
@@ -380,7 +381,7 @@ public class CollisionProcessor {
 		if (contact.body1.pinned && contact.body2.pinned) return;
 		
 		// check if this body contact exists already
-		BodyPairContact bpc = BodyPairContact.checkExists(contact.body1, contact.body2, bodyContacts);
+		BodyPairContact bpc = BodyPairContact.checkExists(contact.body1, contact.body2, bodyPairContacts);
 
 		if (bpc != null) { // if it exists
 			if (!bpc.updatedThisTimeStep) { // only once per time step
@@ -400,7 +401,7 @@ public class CollisionProcessor {
 			bpc = new BodyPairContact(contact.body1, contact.body2);
 			bpc.relativeVelocityHist.add(contact.getRelativeMetric());
 			bpc.updatedThisTimeStep = true;
-			bodyContacts.add(bpc);
+			bodyPairContacts.add(bpc);
 		}
 
 		if (!contact.body1.bodyPairContactList.contains(bpc))
