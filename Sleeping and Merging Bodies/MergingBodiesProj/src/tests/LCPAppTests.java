@@ -2,8 +2,6 @@ package tests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.Test;
 
 import mergingBodies.LCPApp;
@@ -35,12 +33,13 @@ public class LCPAppTests extends LCPApp {
     	RigidBodySystem.enableMerging.setValue(true);
     	for (int i=0; i<450; i++)
     		system.advanceTime(dt);
-    	assertEquals(2, system.bodies.size()); // with the rule that pinned objects should not been merged, we should get 2 bodies at the end of the simulation
+    	assertEquals(1, system.bodies.size());
     }
     
-    @Test
+    //@Test
     /**
      * Simple test for sleeping condition 
+     * With the new rule that pinned body can be merged: this test is no longer relevant as pinned body are not put to SLEEPING mode
      */
     public void mergingAndSleepingTest() {  
     	
@@ -94,7 +93,7 @@ public class LCPAppTests extends LCPApp {
 		RigidBodySystem.enableMerging.setValue(true);
     	for (int i=0; i<450; i++)
     		system.advanceTime(dt);
-    	assertEquals(2, system.bodies.size()); 
+    	assertEquals(1, system.bodies.size()); 
     }
     
     @Test
@@ -105,13 +104,14 @@ public class LCPAppTests extends LCPApp {
 		loadSystem("datalcp/twoStacksTest.png");
 		
 		RigidBodySystem.enableMerging.setValue(true);
+    	RigidBodySystem.enableUnmerging.setValue(false);
     	RigidBodySystem.enableUpdateContactsInCollections.setValue(true);
     	for (int i=0; i<160; i++)
     		system.advanceTime(dt);
     	
-    	RigidCollection collection = (RigidCollection)system.bodies.get(2);
-    	Contact contact = collection.getInternalContacts().get(1);
-    	Vector2d lambda = contact.getLambda();
+    	RigidCollection collection = (RigidCollection)system.bodies.get(1);
+    	Contact contact = collection.getInternalContacts().get(0);
+    	Vector2d lambda = new Vector2d(contact.getLambda());
     	
     	for (int i=0; i<200; i++)
     		system.advanceTime(dt);
@@ -122,6 +122,7 @@ public class LCPAppTests extends LCPApp {
     @Test
     /**
      * Critical test : this test will fail if the external contacts are not updated correctly
+     * eulalie : this fails with new rule that pinned object should merge
      */
     public void inactiveContactsTest() {
 		loadSystem("datalcp/unstableStackTest.png");
@@ -131,7 +132,7 @@ public class LCPAppTests extends LCPApp {
     	RigidBodySystem.enableUpdateContactsInCollections.setValue(true);
     	for (int i=0; i<200; i++)
     		system.advanceTime(dt);
-    	assertEquals(2, system.bodies.size()); 
+    	assertEquals(1, system.bodies.size()); 
     }
     
     @Test
@@ -151,6 +152,6 @@ public class LCPAppTests extends LCPApp {
     	RigidBodySystem.enableMerging.setValue(true);
     	for (int i=0; i<system.collisionProcessor.sleepAccum.getValue(); i++)
     		system.advanceTime(dt);
-    	assertEquals(2, system.bodies.size()); 
+    	assertEquals(1, system.bodies.size()); 
     }
 }
