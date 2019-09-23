@@ -405,7 +405,6 @@ public class RigidBodySystem {
 							newCollection.fillInternalBodyContacts();
 							newCollection.v.set(collection.v);
 							newCollection.omega = collection.omega;
-							newCollection.contactsToBody();
 							newBodies.add(newCollection);
 							subBodies.clear();
 						} else if (subBodies.size() == 1) {
@@ -455,8 +454,8 @@ public class RigidBodySystem {
 			boolean mergeCondition = (bpc.isRelativeVelocityDecreasing() || bpc.areContactsStable());
 			
 			if (!bpc.updatedThisTimeStep) mergeCondition = false;
-//			if (bpc.body1.pinned || bpc.body2.pinned) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;
+			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 
 			if (mergeCondition) {
