@@ -449,7 +449,7 @@ public class RigidBodySystem {
 		
 		for (BodyPairContact bpc:collisionProcessor.bodyPairContacts) {
 
-			boolean mergeCondition = (bpc.isRelativeVelocityDecreasing() /*|| bpc.areContactsStable()*/);
+			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() /*|| bpc.areContactsStable()*/);
 			
 			if (!bpc.updatedThisTimeStep) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;

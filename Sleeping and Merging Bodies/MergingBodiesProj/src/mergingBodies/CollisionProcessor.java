@@ -386,9 +386,9 @@ public class CollisionProcessor {
 
 		if (bpc != null) { // if it exists
 			if (!bpc.updatedThisTimeStep) { // only once per time step
-				bpc.relativeVelocityHist.add(contact.getRelativeMetric());
-				if (bpc.relativeVelocityHist.size() > CollisionProcessor.sleepAccum.getValue())
-					bpc.relativeVelocityHist.remove(0);
+				bpc.relativeKineticEnergyHist.add(contact.getRelativeKineticEnergy());
+				if (bpc.relativeKineticEnergyHist.size() > CollisionProcessor.sleepAccum.getValue())
+					bpc.relativeKineticEnergyHist.remove(0);
 
 				Pair<Integer, Double> state = new Pair<Integer, Double>(1, contact.lambda.x);
 				bpc.contactStateHist.add(state);
@@ -403,7 +403,7 @@ public class CollisionProcessor {
 				
 		} else { // body contact did not exist in previous list
 			bpc = new BodyPairContact(contact.body1, contact.body2);
-			bpc.relativeVelocityHist.add(contact.getRelativeMetric());
+			bpc.relativeKineticEnergyHist.add(contact.getRelativeKineticEnergy());
 			Pair<Integer, Double> state = new Pair<Integer, Double>(1, contact.lambda.x);
 			bpc.contactStateHist.add(state);
 			bpc.updatedThisTimeStep = true;

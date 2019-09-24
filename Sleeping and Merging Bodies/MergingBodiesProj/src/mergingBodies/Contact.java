@@ -380,7 +380,7 @@ public class Contact {
 	 * Computes and returns the relative kinetic energy without the mass
 	 * @return metric
 	 */
-	public double getRelativeMetric() {
+	public double getRelativeKineticEnergy() {
 		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
 		return k;
 	}

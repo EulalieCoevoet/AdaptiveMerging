@@ -15,7 +15,7 @@ public class BodyPairContact {
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
-	public ArrayList<Double> relativeVelocityHist = new ArrayList<Double>();
+	public ArrayList<Double> relativeKineticEnergyHist = new ArrayList<Double>();
 	public ArrayList<Pair<Integer, Double>> contactStateHist = new ArrayList<Pair<Integer, Double>>();
 	
 	boolean updatedThisTimeStep = false;
@@ -60,22 +60,22 @@ public class BodyPairContact {
 	}
 	
 	/**
-	 * Check if relative velocity has been strictly decreasing over CollisionProcessor.sleepAccum time steps.
+	 * Check if relative kinetic energy (without the mass) has been strictly decreasing and lower that a threshold over CollisionProcessor.sleepAccum time steps.
 	 * @return true or false
 	 */
-	public boolean isRelativeVelocityDecreasing() {
+	public boolean checkRelativeKineticEnergy() {
 
 		double epsilon = 5e-4;
 		double threshold = CollisionProcessor.sleepingThreshold.getValue();
 		
-		if ((relativeVelocityHist.size() == CollisionProcessor.sleepAccum.getValue())) {
+		if ((relativeKineticEnergyHist.size() == CollisionProcessor.sleepAccum.getValue())) {
 			double previousValue = 0; 
 			double currentValue = 0;
-			for (Double relativeVelocity : relativeVelocityHist) {
-				currentValue = relativeVelocity;
-				if (relativeVelocity > threshold || currentValue > previousValue + epsilon ) 
+			for (Double relativeEnergy : relativeKineticEnergyHist) {
+				currentValue = relativeEnergy;
+				if (relativeEnergy > threshold || currentValue > previousValue + epsilon ) 
 					return false;
-				previousValue = relativeVelocity;
+				previousValue = relativeEnergy;
 			}
 		} else {
 			return false;
