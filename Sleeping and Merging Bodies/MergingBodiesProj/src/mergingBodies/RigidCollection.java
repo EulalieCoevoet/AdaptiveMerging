@@ -434,7 +434,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyPairContact> removalQueue) {
 		for (BodyPairContact bc: body.bodyPairContactList) {
-			if (bc.body1.parent == bc.body2.parent && bc.relativeVelocityHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bc.merged) {
+			if (bc.body1.parent == bc.body2.parent && bc.relativeKineticEnergyHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bc.merged) {
 				bc.merged = true;
 				body.parent.addInternalContact(bc);
 				removalQueue.add(bc);
