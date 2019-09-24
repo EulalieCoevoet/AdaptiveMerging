@@ -13,10 +13,7 @@ import no.uib.cipr.matrix.DenseVector;
 public class PGS {
 	
 	public PGS() {
-		mu=0.6;
-		iterations=200;
-		restitution=0;
-		warmStart=false;
+		init(0.6, 200);
 	}
 	
 	public PGS(double mu, int iterations) {
@@ -74,7 +71,7 @@ public class PGS {
 	public void solve(double dt) {
 				
 		if (contacts == null) {
-			System.out.println("Error: PGS.solve() method needs the list PGS.contacts to be filled.");
+			System.err.println("PGS.solve() method needs the list PGS.contacts to be filled.");
 			return;
 		}
 
