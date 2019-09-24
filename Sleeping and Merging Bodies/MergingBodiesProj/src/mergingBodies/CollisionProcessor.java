@@ -173,6 +173,7 @@ public class CollisionProcessor {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
 				RigidCollection collection = (RigidCollection)body;
 
+				collection.updateBodiesVelocities();
 				collection.updateContactJacobianAndDataAsInternal(dt);
 				solver.contacts = collection.internalContacts;
 				solver.solve(dt);

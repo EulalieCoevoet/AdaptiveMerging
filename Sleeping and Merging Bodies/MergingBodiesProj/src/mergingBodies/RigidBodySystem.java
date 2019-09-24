@@ -33,8 +33,6 @@ public class RigidBodySystem {
 
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 	public ArrayList<RigidBody> initialBodies = new ArrayList<RigidBody>();
-	
-	public int nbCollections = 0;
 
 	public CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
 
@@ -607,12 +605,9 @@ public class RigidBodySystem {
 	@Deprecated
 	private void checkIndex() {
 		int i = 0;
-		nbCollections = 0;
 		for(RigidBody body: bodies) {
 			body.index = i;
 			i++;
-			if(body instanceof RigidCollection)
-				nbCollections++;
 		}
 	}
 

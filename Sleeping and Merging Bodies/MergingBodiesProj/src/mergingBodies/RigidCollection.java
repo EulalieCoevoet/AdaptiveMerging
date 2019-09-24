@@ -298,16 +298,16 @@ public class RigidCollection extends RigidBody{
 				theta += omega*dt;
 			} 
 			updateTransformations();
-			updateBodies(dt);
+			updateBodiesPositionAndTransform(dt);
+			updateBodiesVelocities();
 			updateContactJacobianAndDataAsInternal(dt);
 		} 
 	}
 	
 	/**
 	 * Updates bodies position, orientation, and transformations
-	 * eulalie : I don't like the name of this method
 	 */
-	protected void updateBodies(double dt) {
+	protected void updateBodiesPositionAndTransform(double dt) {
 		for (RigidBody body: collectionBodies) {
 			//reset position and orientation 
 			body.transformW2B.transform(body.x);
@@ -322,22 +322,28 @@ public class RigidCollection extends RigidBody{
 			//update position and orientation
 			body.transformB2W.transform(body.x);
 			body.theta = body.transformB2W.getTheta();
-			
+		}
+	}
+	
+	/**
+	 * Updates bodies velocities
+	 */
+	protected void updateBodiesVelocities() {
+		for (RigidBody body: collectionBodies) {			
 			//update velocities
 			// eulalie : I'm not sure we always want that...
-			/*final Vector2d r = new Vector2d( -body.x.y, body.x.x );
+			final Vector2d r = new Vector2d( -body.x.y, body.x.x );
 			transformB2W.transform( r );
 			r.scale( omega );
-			body.v.add(v, r);*/
-			body.v = new Vector2d(v);
+			body.v.add(v, r);
 			body.omega = omega;
 			body.deltaV.zero();
 		}
 	}
 	
 	/**
-	 * Update the all contact Jacobians the internal contacts, along with position and normal data
-	 * @param dt time step needed to get correct contact forces from lambda impulses ONLY FOR VIZ
+	 * Update all internal contacts Jacobians, along with position and normal data
+	 * @param dt time step needed to get correct contact forces from lambda impulses (only for visualization)
 	 */
 	public void updateContactJacobianAndDataAsInternal(double dt) {
 		for (Contact c : internalContacts) {
