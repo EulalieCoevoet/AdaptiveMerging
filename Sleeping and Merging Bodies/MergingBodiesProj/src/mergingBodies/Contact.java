@@ -97,13 +97,6 @@ public class Contact {
 	/** vector points from body 2 to body 1, magnitude is the amount of overlap.*/
 	double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
 
-	Vector2d relativeVelocity = new Vector2d();
-
-	double relativeAngularVelocity = 0;
-
-	/** Pointer to the BodyContact this contact is a part of. */
-	BodyPairContact bc;
-
 	/** history of the last (max N) time steps for this contact. */
 	public ArrayList<Vector2d> body1ContactForceHistory = new ArrayList<Vector2d>();
 	public ArrayList<Double> body1ContactTorqueHistory = new ArrayList<Double>();
@@ -128,25 +121,12 @@ public class Contact {
 		constraintViolation =  distance - 2*Block.radius;
 		index = nextContactIndex++;        
 
-		computeRelativeVelocity();
 		computeJacobian(false);
 
 		contactB1.set(contactW);
 		contactB2.set(contactW);
 		body1.transformW2B.transform(contactB1);
 		body2.transformW2B.transform(contactB2);
-	}
-
-	/**
-	 * Computes the relative velocity between the two bodies in contact.
-	 * In case of body in a collection, use velocities of parent.
-	 */
-	protected void computeRelativeVelocity() {
-		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
-		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
-		
-		relativeVelocity.sub(body2.v, body1.v);
-		relativeAngularVelocity = body2.omega - body1.omega;
 	}
 	
 	/**
@@ -225,7 +205,7 @@ public class Contact {
 	 * @param mu
 	 */
 	protected void updateContactState(double prevLambda_n, double mu) {
-		if (lambda.x == 0.) //&& prevLambda_n > 0.) 
+		if (lambda.x == 0. && prevLambda_n > 0.) 
 			state = ContactState.BROKE;	
 		else if (Math.abs(lambda.y) == lambda.x*mu) 
 			state = ContactState.SLIDING;
@@ -374,15 +354,6 @@ public class Contact {
 	 */
 	public boolean withBody(RigidBody body) {
 		return (body1==body || body2==body);
-	}
-	
-	/**
-	 * Computes and returns the relative kinetic energy without the mass
-	 * @return metric
-	 */
-	public double getRelativeKineticEnergy() {
-		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
-		return k;
 	}
 	
 	/**

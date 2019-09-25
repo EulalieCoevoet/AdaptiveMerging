@@ -9,6 +9,7 @@ import mergingBodies.RigidBodySystem;
 import mergingBodies.RigidBody;
 import mergingBodies.RigidBody.ObjectState;
 import mergingBodies.RigidCollection;
+import mergingBodies.CollisionProcessor;
 import mergingBodies.Contact;
 import javax.vecmath.Vector2d;
 
@@ -129,7 +130,7 @@ public class LCPAppTests extends LCPApp {
 
     	RigidBodySystem.enableMerging.setValue(true);
     	RigidBodySystem.enableUpdateContactsInCollections.setValue(true);
-    	for (int i=0; i<23+system.collisionProcessor.sleepAccum.getValue(); i++)
+    	for (int i=0; i<23+CollisionProcessor.sleepAccum.getValue(); i++)
     		system.advanceTime(dt);
     	
     	RigidCollection collection = (RigidCollection)system.bodies.get(0);
@@ -173,7 +174,7 @@ public class LCPAppTests extends LCPApp {
     	assertEquals(4, system.bodies.size()); 
 
     	RigidBodySystem.enableMerging.setValue(true);
-    	for (int i=0; i<system.collisionProcessor.sleepAccum.getValue(); i++)
+    	for (int i=0; i<CollisionProcessor.sleepAccum.getValue(); i++)
     		system.advanceTime(dt);
     	assertEquals(1, system.bodies.size()); 
     }

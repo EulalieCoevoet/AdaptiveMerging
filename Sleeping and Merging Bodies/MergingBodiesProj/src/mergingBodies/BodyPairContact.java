@@ -2,6 +2,8 @@ package mergingBodies;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Vector2d;
+
 import javafx.util.Pair;
 
 
@@ -15,12 +17,15 @@ public class BodyPairContact {
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
+	Vector2d relativeVelocity = new Vector2d();
+	double relativeAngularVelocity = 0;
+	
 	public ArrayList<Double> relativeKineticEnergyHist = new ArrayList<Double>();
 	public ArrayList<Pair<Integer, Double>> contactStateHist = new ArrayList<Pair<Integer, Double>>();
 	
 	boolean updatedThisTimeStep = false;
 	
-	boolean merged = false;
+	boolean inCollection = false;
 	
 	public BodyPairContact(RigidBody body1, RigidBody body2) {
 		this.body1 = body1;
@@ -57,6 +62,49 @@ public class BodyPairContact {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Computes the relative velocity between the two bodies in contact.
+	 * In case of body in a collection, use velocities of parent.
+	 */
+	protected void computeRelativeVelocity() {
+		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
+		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
+		
+		relativeVelocity.sub(body2.v, body1.v);
+		relativeAngularVelocity = body2.omega - body1.omega;
+	}
+	
+	/**
+	 * Computes and returns the relative kinetic energy without the mass
+	 * @return metric
+	 */
+	public double getRelativeKineticEnergy() {
+		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
+		return k;
+	}
+	
+	/**
+	 * Accumulate criteria for unmerge condition
+	 * @param contact
+	 */
+	public void accumulate() {
+		
+		computeRelativeVelocity();
+		
+		relativeKineticEnergyHist.add(getRelativeKineticEnergy());
+		if (relativeKineticEnergyHist.size() > CollisionProcessor.sleepAccum.getValue())
+			relativeKineticEnergyHist.remove(0);
+	
+		double totalLambda_n = 0.;
+		for (Contact contact : contactList) 
+			totalLambda_n+=contact.lambda.x;
+		Pair<Integer, Double> state = new Pair<Integer, Double>(contactList.size(), totalLambda_n);
+		
+		contactStateHist.add(state);
+		if (contactStateHist.size() > CollisionProcessor.sleepAccum.getValue())
+			contactStateHist.remove(0);
 	}
 	
 	/**
