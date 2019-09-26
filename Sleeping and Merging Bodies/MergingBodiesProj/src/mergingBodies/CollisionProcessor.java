@@ -107,18 +107,30 @@ public class CollisionProcessor {
 		}
 	}
 	
-	// eulalie : now that everything is gathered here...
-	// it looks redundant and not clean
-	// shouldn't we clear the bodyPairContacts list? meaning remove bpc with no contacts this time step?
-    // instead of keeping the boolean updatedThisTimeStep?
+	/**
+	 * Clears bodyPairContacts list
+	 */
 	protected void processBodyPairContacts() {
-		rememberBodyPairContacts();
-	
+		
+		for (BodyPairContact bpc : bodyPairContacts) 
+			bpc.contactList.clear();
+		
 		for (Contact contact : contacts) 
 			storeInBodyPairContacts(contact);
 		
-		for (BodyPairContact bpc : bodyPairContacts)
-			bpc.accumulate();
+		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+		for (BodyPairContact bpc : bodyPairContacts) {
+			
+			if (!bpc.contactList.isEmpty()) {
+				tmpBodyPairContacts.add(bpc);
+				bpc.accumulate();
+			}
+			
+			if (bpc.inCollection)
+				System.err.println("processBodyPairContacts: we sould not run collision detection inside a collection.");
+		}
+		bodyPairContacts.clear();
+		bodyPairContacts.addAll(tmpBodyPairContacts);
 	}
 	
 	/**
@@ -229,35 +241,6 @@ public class CollisionProcessor {
 				c.body2ContactForceHistory.remove(0);
 				c.body2ContactTorqueHistory.remove(0);
 			}
-		}
-	}
-
-	/**
-	 * If bpc not in collection : clear bpc.contactList
-	 * If bpc in collection : remove bpc from bodyPairContacts
-	 */
-	private void rememberBodyPairContacts() {
-		ArrayList<BodyPairContact> savedBodyPairContacts = new ArrayList<BodyPairContact>();
-		
-		for (BodyPairContact bpc : bodyPairContacts) {
-			
-			if (!bpc.inCollection && ( bpc.body1.state == ObjectState.ACTIVE || bpc.body2.state == ObjectState.ACTIVE ))
-				bpc.contactList.clear();
-			
-			if (bpc.updatedThisTimeStep || bpc.body1.state == ObjectState.SLEEPING || bpc.body2.state == ObjectState.SLEEPING) {
-				
-				if ( bpc.body1.state == ObjectState.SLEEPING || bpc.body2.state == ObjectState.SLEEPING) 
-					contacts.addAll(bpc.contactList);
-
-				savedBodyPairContacts.add(bpc);
-				bpc.updatedThisTimeStep = false;
-			}
-		}
-		
-		bodyPairContacts.clear();
-		bodyPairContacts.addAll(savedBodyPairContacts);
-		for (BodyPairContact bpc: bodyPairContacts) {
-			bpc.addToBodyLists();
 		}
 	}
 
@@ -388,7 +371,7 @@ public class CollisionProcessor {
 	}
 	
 	/**
-	 * Store contact in bodyPairContacts, and update relative velocity history.
+	 * Store contact in bodyPairContacts.
 	 * @param contact
 	 */
 	private void storeInBodyPairContacts(Contact contact) {
@@ -402,8 +385,6 @@ public class CollisionProcessor {
 			bpc = new BodyPairContact(contact.body1, contact.body2);
 			bodyPairContacts.add(bpc);
 		} 
-		
-		bpc.updatedThisTimeStep = true;
 		
 		bpc.addToBodyLists();
 		bpc.contactList.add(contact);

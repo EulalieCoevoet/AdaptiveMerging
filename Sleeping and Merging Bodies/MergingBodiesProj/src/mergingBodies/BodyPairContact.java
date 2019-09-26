@@ -22,9 +22,7 @@ public class BodyPairContact {
 	
 	public ArrayList<Double> relativeKineticEnergyHist = new ArrayList<Double>();
 	public ArrayList<Pair<Integer, Double>> contactStateHist = new ArrayList<Pair<Integer, Double>>();
-	
-	boolean updatedThisTimeStep = false;
-	
+		
 	boolean inCollection = false;
 	
 	public BodyPairContact(RigidBody body1, RigidBody body2) {

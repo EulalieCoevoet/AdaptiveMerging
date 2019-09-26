@@ -281,14 +281,6 @@ public class RigidBodySystem {
 			body.force.set(0, 0);
 			body.torque = 0;
 			body.deltaV.zero();
-			
-			ArrayList<BodyPairContact> newBodyPairContactList = new ArrayList<BodyPairContact>();
-			for (BodyPairContact bpc : body.bodyPairContactList) 
-				if (bpc.updatedThisTimeStep) 
-					newBodyPairContactList.add(bpc);
-			
-			body.bodyPairContactList.clear();
-			body.bodyPairContactList.addAll(newBodyPairContactList);
 
 			if (body instanceof RigidCollection) {
 				RigidCollection collection = (RigidCollection)body;
@@ -298,14 +290,6 @@ public class RigidBodySystem {
 					sB.deltaV.zero();
 					sB.force.set(0, 0);
 					sB.torque = 0;
-					
-					newBodyPairContactList.clear();
-					for (BodyPairContact bpc : sB.bodyPairContactList) 
-						if (bpc.inCollection || bpc.updatedThisTimeStep) 
-							newBodyPairContactList.add(bpc);
-					
-					sB.bodyPairContactList.clear();
-					sB.bodyPairContactList.addAll(newBodyPairContactList);
 				}
 			}
 		}
@@ -443,7 +427,6 @@ public class RigidBodySystem {
 
 			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() /*|| bpc.areContactsStable()*/);
 			
-			if (!bpc.updatedThisTimeStep) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;
 			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
