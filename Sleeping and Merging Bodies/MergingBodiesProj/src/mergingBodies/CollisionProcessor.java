@@ -261,7 +261,7 @@ public class CollisionProcessor {
 	}
 
 	/**
-	 * Checks for collisions between bodies.  Note that you can optionally implement some broad
+	 * Checks for collisions between bodies. Note that you can optionally implement some broad
 	 * phase test such as spatial hashing to reduce the n squared body-body tests.
 	 * Currently this does the naive n squared collision check.
 	 * Has prune option.
