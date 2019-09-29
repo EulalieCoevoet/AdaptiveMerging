@@ -386,6 +386,10 @@ public class CollisionProcessor {
 
 		if (bpc != null) { // if it exists
 			if (!bpc.updatedThisTimeStep) { // only once per time step
+				// TODO: should call a method in body pair to pudate this rather than doing this work here
+				// also, is this being done at the rigth stage??  certainly want to add contacts
+				// to the body pair contact object, but figure out the relative velocity information
+				// at a different point of execution.
 				bpc.relativeKineticEnergyHist.add(contact.getRelativeKineticEnergy());
 				if (bpc.relativeKineticEnergyHist.size() > CollisionProcessor.sleepAccum.getValue())
 					bpc.relativeKineticEnergyHist.remove(0);

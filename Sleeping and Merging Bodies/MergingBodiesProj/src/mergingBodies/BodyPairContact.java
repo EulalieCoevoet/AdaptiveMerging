@@ -60,7 +60,9 @@ public class BodyPairContact {
 	}
 	
 	/**
-	 * Check if relative kinetic energy (without the mass) has been strictly decreasing and lower that a threshold over CollisionProcessor.sleepAccum time steps.
+	 * Check if relative kinetic energy (without the mass) has been strictly decreasing and
+	 * lower than a threshold over CollisionProcessor.sleepAccum time steps.
+	 * PGK: what does without the mass mean?
 	 * @return true or false
 	 */
 	public boolean checkRelativeKineticEnergy() {
