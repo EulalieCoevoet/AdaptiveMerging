@@ -183,7 +183,7 @@ public class Contact {
 		relativeVelocity.sub( tmp2 );
 		
 		relativeAngularVelocity = body2.omega - body1.omega;
-		System.out.println( body2.omega - body1.omega );
+		//System.out.println( body2.omega - body1.omega );
 	}
 	
 	/**
