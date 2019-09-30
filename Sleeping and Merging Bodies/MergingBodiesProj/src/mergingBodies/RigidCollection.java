@@ -62,6 +62,8 @@ public class RigidCollection extends RigidBody{
 		steps = Math.max(body1.steps, body2.steps);
 		body1.temporarilyPinned = false;
 		body2.temporarilyPinned = false;
+		
+		pinned = (body1.pinned || body2.pinned);
 
 		updateCollection();
 	}
@@ -79,6 +81,8 @@ public class RigidCollection extends RigidBody{
 		temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
 		steps = Math.max(body.steps, steps);
 		body.temporarilyPinned = false;
+		
+		pinned = (pinned || body.pinned);
 		
 		updateCollection();
 	}
@@ -102,6 +106,8 @@ public class RigidCollection extends RigidBody{
 		
 		temporarilyPinned = (temporarilyPinned || collection.temporarilyPinned);
 		steps = Math.max(collection.steps, steps);
+		
+		pinned = (pinned || collection.pinned);
 
 		updateCollection();
 	}
@@ -119,6 +125,8 @@ public class RigidCollection extends RigidBody{
 			temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
 			steps = Math.max(body.steps, steps);
 			body.temporarilyPinned = false;
+			
+			pinned = (pinned || body.pinned);
 		}
 
 		updateCollection();
@@ -128,6 +136,12 @@ public class RigidCollection extends RigidBody{
 	 * Computes transforms, COM, mass, inertia, spring.
 	 */
 	private void updateCollection() {
+		
+		if(pinned) {
+			v.set(0.,0.);
+			omega = 0.;
+		}
+		
 		updateMass();
 		updateCOM(); 
 		updateTransformations();
@@ -140,15 +154,16 @@ public class RigidCollection extends RigidBody{
 	 * Compute mass of collection w.r.t bodies
 	 */
 	public void updateMass() {
+		
+		if (pinned) {
+			massLinear = 0.;
+			minv = 0.;
+			return;
+		}
+		
 		double mass = 0;
-		for(RigidBody b: collectionBodies) {
-			mass += b.massLinear;
-			if ( b.pinned ) {
-				minv = 0;
-				jinv = 0;
-				pinned = true;
-				return;
-			}
+		for (RigidBody body: collectionBodies) {
+			mass += body.massLinear;
 		}
 		massLinear = mass;
 		minv = 1/mass;
@@ -158,7 +173,10 @@ public class RigidCollection extends RigidBody{
 	 * Loops through all bodies in collectionBodies
 	 */
 	public void updateCOM() {
-		if ( pinned ) return; // no need to update!
+		
+		if (pinned) 
+			return; // no need to update!
+		
 		Point2d com = new Point2d();
 		Point2d tmp = new Point2d();
 		double totalMass = massLinear;
@@ -189,14 +207,18 @@ public class RigidCollection extends RigidBody{
 	 * Updates the angular inertia. 
 	 */
 	public void updateInertia() {
+		
+		if (pinned) {
+			massAngular = 0.;
+			jinv = 0.;
+			return;
+		}
+		
 		double inertia = 0;
 		Point2d tmp = new Point2d(0, 0);
 		Point2d zero = new Point2d(0, 0);
 		for (RigidBody body: collectionBodies) {
-			if ( body.pinned ) {
-				// jinv already set to zero when computing mass
-				return;
-			}
+			
 			for ( Block block : body.blocks ) {
 				double mass = block.getColourMass();
 				tmp.set(block.pB);
@@ -234,19 +256,6 @@ public class RigidCollection extends RigidBody{
 		}
 
 		internalContacts.addAll(bpc.contactList);
-	}
-
-	/** 
-	 * Separates each collectionBody from its parent so the bodies are ready to be added back to the system individually.
-	 * x positions now need to be in world coordinates etc.
-	 */
-	public void unmergeAllBodies() {
-		internalBodyPairContacts.clear();
-		for (RigidBody b: collectionBodies) {
-			b.v.set(v);
-			b.omega = omega;
-			b.parent = null;
-		}
 	}
 	
 	/**
