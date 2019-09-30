@@ -155,27 +155,21 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void updateMass() {
 		
-		if (pinned) {
-			massLinear = 0.;
-			minv = 0.;
-			return;
-		}
-		
 		double mass = 0;
 		for (RigidBody body: collectionBodies) {
 			mass += body.massLinear;
 		}
 		massLinear = mass;
-		minv = 1/mass;
+		if (pinned)
+			minv = 0.;
+		else
+			minv = 1/mass;
 	}
 	
 	/**
 	 * Loops through all bodies in collectionBodies
 	 */
 	public void updateCOM() {
-		
-		if (pinned) 
-			return; // no need to update!
 		
 		Point2d com = new Point2d();
 		Point2d tmp = new Point2d();
@@ -207,13 +201,7 @@ public class RigidCollection extends RigidBody{
 	 * Updates the angular inertia. 
 	 */
 	public void updateInertia() {
-		
-		if (pinned) {
-			massAngular = 0.;
-			jinv = 0.;
-			return;
-		}
-		
+				
 		double inertia = 0;
 		Point2d tmp = new Point2d(0, 0);
 		Point2d zero = new Point2d(0, 0);
@@ -227,7 +215,10 @@ public class RigidCollection extends RigidBody{
 			}
 		}
 		massAngular = inertia;
-		jinv = 1./inertia;
+		if (pinned)
+			jinv = 0.;
+		else
+			jinv = 1./inertia;
 	}
 	
 	/**
@@ -238,16 +229,16 @@ public class RigidCollection extends RigidBody{
 		if (!internalBodyPairContacts.contains(bpc)) {
 			internalBodyPairContacts.add(bpc);
 		} else {
-			System.err.println("This should probably never happen: RigidCollection.addInternalContact()");
+			System.err.println("RigidCollection.addInternalContact : This should probably never happen");
 		}
 		
 		if (!bpc.body1.bodyPairContactList.contains(bpc)) {
-			System.err.println("Shouldn't this already be in the body1 list? RigidCollection.addInternalContact() ");
+			System.err.println("RigidCollection.addInternalContact : Shouldn't bpc already be in the body1 list?");
 			bpc.body1.bodyPairContactList.add(bpc);
 		}
 		
 		if (!bpc.body2.bodyPairContactList.contains(bpc))  {
-			System.err.println("Shouldn't this already be in the body2 list? RigidCollection.addInternalContact() ");
+			System.err.println("RigidCollection.addInternalContact : Shouldn't bpc already be in the body2 list?");
 			bpc.body2.bodyPairContactList.add(bpc);
 		}
 
@@ -274,17 +265,33 @@ public class RigidCollection extends RigidBody{
 		
 		double metric = 0.5*v_rel.lengthSquared() + 0.5*omega_rel*omega_rel;
 
-		boolean unmerge = false;
-		for (BodyPairContact bpc : body.bodyPairContactList)
-			for (Contact contact : bpc.contactList)
-				if (contact.state == ContactState.BROKE || contact.state == ContactState.SLIDING) 
-					if (metric > body.relativeKineticEnergy)
-						unmerge = true;
-		
-		// eulalie : we miss a rule here... a contact can act as a pivot. Meaning, no contact breaking, no sliding effect, yet still some relative motion
-
-		body.relativeKineticEnergy = (unmerge)? Double.MAX_VALUE : metric;
-		return unmerge;
+		//if (metric > body.relativeKineticEnergy) { // rule 0. possible motion (this is no longer working, I don't know why)
+					
+			int nbContacts = 0;
+			for (BodyPairContact bpc : body.bodyPairContactList) {
+				for (Contact contact : bpc.contactList) { 
+					if (contact.state == ContactState.BROKE) { 
+						body.relativeKineticEnergy = Double.MAX_VALUE;
+						return true; // rule 1. if one contact is breaking
+					} else if (contact.state == ContactState.SLIDING) { 
+						body.relativeKineticEnergy = Double.MAX_VALUE;
+						return true; // rule 2. one or more contacts on the edge of friction cone 
+						// we should add a condition: if there are multiple sliding contacts, we should sum them and make sure
+						// the total friction force is not zero
+					}
+					nbContacts++;
+				}
+			}
+			
+			if (nbContacts < 2) {
+				body.relativeKineticEnergy = Double.MAX_VALUE;
+				return true; // rule 3. only one contact point (should act as pivot)
+			}
+			
+		//}
+	
+		body.relativeKineticEnergy = metric;
+		return false;
 	}
 
 	@Override

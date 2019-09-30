@@ -92,6 +92,7 @@ public class LCPAppTests extends LCPApp {
 		loadSystem("datalcp/twoStacksTest.png");
 
 		RigidBodySystem.enableMerging.setValue(true);
+		RigidBodySystem.enableMergePinned.setValue(true);
     	for (int i=0; i<450; i++)
     		system.advanceTime(dt);
     	assertEquals(1, system.bodies.size()); 
@@ -126,10 +127,35 @@ public class LCPAppTests extends LCPApp {
      * After merging, if the bodies are stable/static, the internal contacts should remain the same after merging
      */
     public void updateContactInCollectionConsistencyTest() {
+		loadSystem("datalcp/doubleStackUnmergeTest.png");
+
+    	RigidBodySystem.enableMerging.setValue(true);
+    	RigidBodySystem.enableUpdateContactsInCollections.setValue(true);
+    	RigidBodySystem.enableMergePinned.setValue(false);
+    	for (int i=0; i<40+CollisionProcessor.sleepAccum.getValue(); i++)
+    		system.advanceTime(dt);
+    
+    	RigidCollection collection = (RigidCollection)system.bodies.get(1);
+    	Contact contact = collection.getInternalContacts().get(0);
+    	Vector2d lambda = new Vector2d(contact.getLambda());
+    	
+    	system.advanceTime(dt);
+
+    	assertTrue(Math.abs(lambda.x - contact.getLambda().x) < 1e-14); 
+    	assertTrue(Math.abs(lambda.y - contact.getLambda().y) < 1e-14); 
+    }
+    
+    @Test
+    /**
+     * Critical test for one iteration PGS in collection
+     * After merging, if the bodies are stable/static, the internal contacts should remain the same after merging
+     */
+    public void updateContactInCollectionConsistencyPinnedTest() {
 		loadSystem("datalcp/singleBlockSmallTest.png");
 
     	RigidBodySystem.enableMerging.setValue(true);
     	RigidBodySystem.enableUpdateContactsInCollections.setValue(true);
+    	RigidBodySystem.enableMergePinned.setValue(true);
     	for (int i=0; i<23+CollisionProcessor.sleepAccum.getValue(); i++)
     		system.advanceTime(dt);
     	

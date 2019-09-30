@@ -410,6 +410,7 @@ public class RigidBodySystem {
 
 			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() /*|| bpc.areContactsStable()*/);
 			
+			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;
 			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
@@ -760,6 +761,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", false );
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
 	public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
+	public static BooleanParameter enableMergePinned = new BooleanParameter( "enable merging pinned body", true);
 	public static BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", true);
 	public static BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", true);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", false);
@@ -800,6 +802,7 @@ public class RigidBodySystem {
 
 		vfp.add( processCollisions.getControls() );
 		vfp.add( enableMerging.getControls() );
+		vfp.add( enableMergePinned.getControls() );
 		vfp.add( enableUnmerging.getControls() );
 		vfp.add( enableUpdateContactsInCollections.getControls() );
 		vfp.add( enableSleeping.getControls() );

@@ -195,7 +195,7 @@ public class Contact {
 	 * @return
 	 */
 	protected void processContactConstraints(double mu) {
-		lambda.x = Math.max(0, lambda.x);
+		lambda.x = Math.max(0., lambda.x);
 		lambda.y = Math.max(lambda.y, -mu*lambda.x);
 		lambda.y = Math.min(lambda.y, mu*lambda.x);
 	}

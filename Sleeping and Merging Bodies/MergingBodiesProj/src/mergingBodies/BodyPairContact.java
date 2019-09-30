@@ -56,7 +56,7 @@ public class BodyPairContact {
 	public boolean isIn(ArrayList<BodyPairContact> bodyPairContacts) {
 		
 		for (BodyPairContact c : bodyPairContacts) {
-			if (c.body2.equals(this.body2)){ // eulalie: why only testing body2?
+			if (c.body1.equals(this.body1) && c.body2.equals(this.body2)) { 
 				return true;
 			}
 		}
@@ -87,28 +87,31 @@ public class BodyPairContact {
 			relativeAngularVelocity = body1.omega;
 			return;
 		}
-		Point2d com = new Point2d();
-		Vector2d tmp = new Vector2d();
-		Vector2d tmp2 = new Vector2d();
-		com.scale( body1.massLinear, body1.x );
-		tmp.scale( body2.massLinear, body2.x );
-		com.add( tmp );
-		com.scale( 1/(body1.massLinear + body2.massLinear) );
+
+		Point2d massCom1 = new Point2d();
+		Point2d massCom2 = new Point2d();
+		massCom1.scale( body1.massLinear, body1.x );
+		massCom2.scale( body2.massLinear, body2.x );		
+		Point2d newCom = new Point2d();
+		newCom.add( massCom1, massCom2 );
+		newCom.scale( 1./(body1.massLinear + body2.massLinear) );
 			
 		relativeVelocity.sub(body2.v, body1.v);
 
-		tmp.sub( com, body2.x );
+		Vector2d tmp = new Vector2d();
+		Vector2d tmp2 = new Vector2d();
+		
+		tmp.sub( newCom, body2.x );
 		tmp.scale( body2.omega );
 		tmp2.set( -tmp.y, tmp.x );
 		relativeVelocity.add( tmp2 );
 		
-		tmp.sub( com, body1.x );
+		tmp.sub( newCom, body1.x );
 		tmp.scale( body1.omega );
 		tmp2.set( -tmp.y, tmp.x );
 		relativeVelocity.sub( tmp2 );
 		
 		relativeAngularVelocity = body2.omega - body1.omega;
-		//System.out.println( body2.omega - body1.omega );
 	}
 	
 	/**

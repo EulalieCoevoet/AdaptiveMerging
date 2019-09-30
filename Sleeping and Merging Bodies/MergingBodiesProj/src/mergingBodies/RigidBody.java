@@ -316,13 +316,13 @@ public class RigidBody {
 	}
 	
 	/**
-	 * Takes the 
+	 * Apply the linear and angular velocities to the given body
 	 * @param body
 	 */
 	public void applyVelocities(RigidBody body) {
-    	final Vector2d r = new Vector2d( -(body.x.y - x.y), body.x.x - x.x );
-		r.scale( omega );
-		body.v.add(v, r);
+    	final Vector2d rw = new Vector2d( -(body.x.y - x.y), body.x.x - x.x );
+		rw.scale( omega );
+		body.v.add(v, rw);
 		body.omega = omega;
     }
 	
