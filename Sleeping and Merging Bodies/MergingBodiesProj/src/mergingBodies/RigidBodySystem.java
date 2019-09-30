@@ -46,10 +46,10 @@ public class RigidBodySystem {
 	public DoubleParameter globalViscousDecay = new DoubleParameter("global viscous decay", 1, 0.1, 1 );
 	
 	/**Stiffness of  spring*/
-	public DoubleParameter spring_k = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
+	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
 
 	/**Viscous damping coefficient for the  spring*/
-	public DoubleParameter spring_c= new DoubleParameter("spring damping", 0, 0, 1000 );
+	public DoubleParameter springDamping= new DoubleParameter("spring damping", 0, 0, 1000 );
 
 	/**Viscous damping coefficient for the  spring*/
 	public static IntParameter springLength= new IntParameter("spring rest length", 1, 1, 100 );
@@ -256,25 +256,9 @@ public class RigidBodySystem {
 	private void applySpringForces() {
 		for (RigidBody b: bodies){
 			for (Spring s: b.springs) {
-				applySpringForce(b, s);
-			}
-			//also apply spring forces to the child
-			if (b instanceof RigidCollection) {
-				for (RigidBody sB : ((RigidCollection) b).collectionBodies) {
-					for (Spring s: sB.springs) {
-						applySpringForce(sB, s);
-					}
-				}
+				s.apply(springStiffness.getValue(), springDamping.getValue());
 			}
 		}
-	}
-
-	private void applySpringForce(RigidBody b, Spring s) {
-		s.updateP2();
-		s.computeVelocities();
-
-		s.apply(spring_k.getValue(), spring_c.getValue());
-		s.updateP2();
 	}
 
 	private void clearJunkAtStartOfTimeStep() {
@@ -567,14 +551,8 @@ public class RigidBodySystem {
 
 					b = bodies.get(i);
 				}
-				b.reset();
-
-
-				for (Spring s: b.springs) {
-					s.reset();
-				}
-			}
-			else {
+				b.reset();		
+			} else {
 				counter = i;
 				break;
 			}
@@ -858,8 +836,8 @@ public class RigidBodySystem {
 		vfp.add( gravityAngle.getSliderControls(false) );
 
 		vfp.add( globalViscousDecay.getSliderControls(false) );
-		vfp.add(spring_k.getSliderControls(false));
-		vfp.add(spring_c.getSliderControls(false));
+		vfp.add(springStiffness.getSliderControls(false));
+		vfp.add(springDamping.getSliderControls(false));
 		vfp.add(springLength.getSliderControls());
 
 		VerticalFlowPanel vfpv_2 = new VerticalFlowPanel();

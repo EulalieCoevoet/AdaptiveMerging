@@ -368,14 +368,19 @@ public class RigidCollection extends RigidBody{
 	/** Applies springs on the body, to the collection */
 	private void addBodiesSpringsToCollection() {
 		springs.clear();
-		ArrayList<Spring> newSprings = new ArrayList<Spring>();
-		for (RigidBody body: collectionBodies) {
-			for (Spring s: body.springs) {
-				Spring newSpring = new Spring(s, this);
-				newSprings.add(newSpring);
-			}
+		for ( RigidBody body : collectionBodies ) {
+			springs.addAll( body.springs );
 		}
-		springs.addAll(newSprings);
+		
+		// TODO: Nuke this before checkin... 
+//		ArrayList<Spring> newSprings = new ArrayList<Spring>();
+//		for (RigidBody body: collectionBodies) {
+//			for (Spring s: body.springs) {
+//				Spring newSpring = new Spring(s, this);
+//				newSprings.add(newSpring);
+//			}
+//		}
+//		springs.addAll(newSprings);
 	}
 
 	@Override

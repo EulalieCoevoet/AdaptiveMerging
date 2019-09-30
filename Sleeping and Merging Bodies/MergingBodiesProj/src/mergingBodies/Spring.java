@@ -1,7 +1,5 @@
 package mergingBodies;
 
-import java.util.ArrayList;
-
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -12,109 +10,59 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 public class Spring {
 
-	ArrayList<Block> blocks;
+	/** The body to which this spring is attached */
+	private RigidBody body;
+	/** The point at which this spring is attached in body coordinates */
+	private Point2d pb = new Point2d();
+	/** The point on the body transformed to world coordinates */
+	private Point2d pbw = new Point2d();
+	/** The point in the world to which this spring is attached */
+	private Point2d pw = new Point2d();
 
-	RigidBody originalBody;
-	Point2d p1;
-	RigidBody b1;
-	Vector2d v1 = new Vector2d();
+	/** Rest length of the spring */
+	private double l0 = 0;
 
-	Point2d p2;
-	Point2d p2b; // coordinate of second spring in body frame
-	Vector2d v2 = new Vector2d();
-
-	double l0 = 1;
-
-	Spring originalSpring;
-
-	public Spring(Point2d p, RigidBody body) {
-		// TODO Auto-generated constructor stub
-		this.l0 = RigidBodySystem.springLength.getValue();
-		this.p1 = new Point2d(p.x, p.y - l0);
-		this.p2 = new Point2d(p);
-		this.b1 = body;
-		this.originalBody = body;
-		this.p2b = new Point2d(p);
-		b1.transformW2B.transform(p2b);
-		originalSpring = new Spring(this);
-	}
-	
-	public Spring (Spring s) {   
-		// TODO Auto-generated constructor stub
-		this.l0 = s.l0;
-		this.p1 = s.p1;
-		this.v1 = s.v1;
-		this.b1 = s.b1;
-
-		this.p2 = s.p2;
-		this.p2b = s.p2b;
-		this.v2 = s.v2;
-		this.originalSpring = s.originalSpring;
-		this.originalBody = s.originalBody;
-	}
-
-	//create the same spring attached to a new body
-	public Spring (Spring s, RigidBody newBody) {   
-		// TODO Auto-generated constructor stub
-		l0 = s.l0;
-		p1 = s.p1;
-		v1 = s.v1;
-		b1 = newBody;
-
-		p2 = new Point2d(s.p2b);
-		s.b1.transformB2W.transform(p2);
-		p2b = new Point2d(p2);
-		//NEED TO WATCH OUT WITH TRANSFORM
-		b1.transformW2B.transform(p2b);
-		v2.set(s.v2);
-		originalSpring = s.originalSpring;
-	}
-
-	public void updateP2() {
-		this.p2 = new Point2d(this.p2b);
-		this.l0 = RigidBodySystem.springLength.getValue();
-		this.b1.transformB2W.transform(p2);
-	}
-	
-	/**
-	 * changes the body associated with this spring. Can be useful for applying springs to collections 
+	/** 
+	 * Creates a new body pinned to world spring.
+	 * @param p 	The attachment point in the world
+	 * @param body	The body to which the spring should be attached
 	 */
-	public void changeBody(RigidBody b) {
-		this.b1 = b;
+	public Spring(Point2d p, RigidBody body) {
+		this.body = body;
+		pw.set( p );
+		body.transformW2B.transform( pw, pb );
+		pbw.set( p );
 	}
-
-	public void computeVelocities() {
-		//double r1 = p1.distance(b1.x);		
-		double w1 = b1.omega;
-		v2 = new Vector2d(b1.v);
-		Vector2d temp = new Vector2d(w1 * v2.y, -w1 * v2.x);
-		v2.add(temp);
-	}
-
+	
 	/**
-	 * Applies the spring force by adding a force and a torque to both bodies
+	 * Applies the spring force by adding a force and a torque to the body.
+	 * If this body is in a collection, then it applies the force to *BOTH* the sub-body 
+	 * and the collection.
 	 */
 	public void apply(double k, double c) {
+		l0 = RigidBodySystem.springLength.getValue();
+		body.transformB2W.transform( pb, pbw );
+		final Vector2d displacement = new Vector2d();
+		final Vector2d velocity = new Vector2d(); // velocity of the point on the body
+		final Vector2d force = new Vector2d();
 
-		Vector2d displacement, velocity, spring_force;
-		double spring_force_scale;
+		displacement.sub( pw, pbw ); 
 
-		displacement = new Vector2d();
-		velocity = new Vector2d();
-
-		displacement.sub(p1,  p2); //displacement from a to b
-		velocity.sub(v1,  v2);
-
-		spring_force_scale = 
+		velocity.set( -pb.y, pb.x );
+		velocity.scale( body.omega );
+		body.transformB2W.transform( velocity );
+		velocity.add( body.v );
+		
+		double scale = 
 				- (k * (displacement.length()  - l0) + 	c * (velocity.dot(displacement) / displacement.length())) 
 				/ displacement.length();
 
-		spring_force = new Vector2d(displacement);	
+		force.scale( - scale, displacement );
 
-		spring_force.scale(-spring_force_scale);
-
-		//adding the forces
-		b1.applyForceW(p2, spring_force);
+		body.applyForceW( pbw, force );
+		if ( body.parent != null ) {
+			body.parent.applyForceW( pbw, force );
+		}
 	}
 
 	/**
@@ -123,26 +71,11 @@ public class Spring {
 	 */
 	public void displayConnection( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
-		// draw a line between the two bodies but only if they're both not pinned
-
 		gl.glLineWidth(2);
 		gl.glColor4f(1, 0 ,0, 0.5f);
 		gl.glBegin( GL.GL_LINES );
-		gl.glVertex2d(p1.x, p1.y);
-		gl.glVertex2d(p2.x, p2.y);
+		gl.glVertex2d(pw.x, pw.y);
+		gl.glVertex2d(pbw.x, pbw.y);
 		gl.glEnd();
-
-	}
-
-	public void reset() {
-		// TODO Auto-generated constructor stub
-		this.l0 = originalSpring.l0;
-		this.p1 =  originalSpring.p1;
-		this.v1 = originalSpring.v1;
-		this.b1 =  originalSpring.b1;
-
-		this.p2 =  originalSpring.p2;
-		this.p2b =  originalSpring.p2b;
-		this.v2 =  originalSpring.v2;
 	}
 }
