@@ -10,7 +10,6 @@ import javax.swing.border.TitledBorder;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import javafx.util.Pair;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
@@ -62,7 +61,7 @@ public class CollisionProcessor {
 	/** keeps track of the time used to update the contacts inside the collections on the last call */
 	double collectionUpdateTime = 0;
 	
-	/**list that keeps track of all the body contacts that occurred in this time step */
+	/**list that keeps track of all the body pair contacts that occurred in this time step */
 	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
 
 	/**
@@ -74,12 +73,14 @@ public class CollisionProcessor {
 		Contact.nextContactIndex = 0;
 		
 		contacts.clear();
-		if (RigidBodySystem.enableSleeping.getValue() || RigidBodySystem.enableMerging.getValue()) 
-			rememberBodyContacts();
 		
+		// detect contacts and fill contacts list
 		long now = System.nanoTime();
-		broadPhase(); // fill contacts list
+		broadPhase(); 
 		collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
+
+		if (RigidBodySystem.enableSleeping.getValue() || RigidBodySystem.enableMerging.getValue()) 
+			processBodyPairContacts();
 		
 		if (contacts.size() == 0) {
 			lastTimeStepMap.clear();
@@ -88,7 +89,7 @@ public class CollisionProcessor {
 	    	if (shuffle.getValue()) 
 	    		knuthShuffle();
 	    	
-	    	// solve contacts
+	    	// set up contacts solver 
 			solver.init(friction.getValue(), iterations.getValue());
 			solver.restitution = restitution.getValue();
 			solver.feedbackStiffness = feedbackStiffness.getValue();
@@ -96,18 +97,40 @@ public class CollisionProcessor {
 				solver.enableWarmStart(lastTimeStepMap);
 			solver.contacts = contacts;
 			
+			// solve contacts
 			now = System.nanoTime();
 			solver.solve(dt);
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
-			if (RigidBodySystem.enableMerging.getValue() || RigidBodySystem.enableSleeping.getValue())
-				for (Contact contact : contacts) 
-					storeInBodyPairContacts(contact);
-			
-			updateContactMap();
-			
+			updateContactsMap();
 			computeContactsForce(dt);	
 		}
+	}
+	
+	/**
+	 * Clears bodyPairContacts list
+	 */
+	protected void processBodyPairContacts() {
+		
+		for (BodyPairContact bpc : bodyPairContacts) 
+			bpc.contactList.clear();
+		
+		for (Contact contact : contacts) 
+			storeInBodyPairContacts(contact);
+		
+		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+		for (BodyPairContact bpc : bodyPairContacts) {
+			
+			if (!bpc.contactList.isEmpty()) {
+				tmpBodyPairContacts.add(bpc);
+				bpc.accumulate();
+			}
+			
+			if (bpc.inCollection)
+				System.err.println("processBodyPairContacts: we sould not run collision detection inside a collection.");
+		}
+		bodyPairContacts.clear();
+		bodyPairContacts.addAll(tmpBodyPairContacts);
 	}
 	
 	/**
@@ -173,7 +196,7 @@ public class CollisionProcessor {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
 				RigidCollection collection = (RigidCollection)body;
 
-				collection.updateBodiesVelocities();
+				collection.updateBodiesVelocity();
 				collection.updateContactJacobianAndDataAsInternal(dt);
 				solver.contacts = collection.internalContacts;
 				solver.solve(dt);
@@ -185,23 +208,25 @@ public class CollisionProcessor {
 		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
 	}
 	
-	protected void updateContactMap() {
+	protected void updateContactsMap() {
 		lastTimeStepMap.clear();
-		for (Contact co : contacts) {
-			Block block1 = co.block1;
-			Block block2 = co.block2;
-			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), co);
+		for (Contact contact : contacts) {
+			Block block1 = contact.block1;
+			Block block2 = contact.block2;
+			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
 		} 
 	}
 
 	/**
 	 * Compute the contact force J*lambda.
-	 * Also compute contact force history for visualization only.
+	 * Also compute contact force history.
+	 * For visualization only.
 	 * @param dt
 	 */
 	public void computeContactsForce(double dt) {
+		
 		for (Contact c: contacts) {
-			c.computeContactForce(dt);
+			c.computeContactForce(dt);			
 
 			c.body1ContactForceHistory.add(c.contactForceB1);
 			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
@@ -216,34 +241,6 @@ public class CollisionProcessor {
 				c.body2ContactForceHistory.remove(0);
 				c.body2ContactTorqueHistory.remove(0);
 			}
-		}
-	}
-
-	/**
-	 * Remember body contacts if:
-	 * <p><ul>
-	 * <li> merged or not active
-	 * </ul><p>
-	 */
-	private void rememberBodyContacts() {
-		ArrayList<BodyPairContact> savedBodyContacts = new ArrayList<BodyPairContact>();
-		
-		for (BodyPairContact bc : bodyPairContacts) {
-			if (!bc.merged && ( bc.body1.state == ObjectState.ACTIVE || bc.body2.state == ObjectState.ACTIVE ))
-				bc.contactList.clear();
-			
-			if (bc.updatedThisTimeStep || bc.body1.state == ObjectState.SLEEPING || bc.body2.state == ObjectState.SLEEPING) {
-				if ( bc.body1.state == ObjectState.SLEEPING || bc.body2.state == ObjectState.SLEEPING) 
-					contacts.addAll(bc.contactList);
-
-				savedBodyContacts.add(bc);
-				bc.updatedThisTimeStep = false;
-			}
-		}
-		bodyPairContacts.clear();
-		bodyPairContacts.addAll(savedBodyContacts);
-		for (BodyPairContact bc: bodyPairContacts) {
-			bc.addToBodyLists();
 		}
 	}
 
@@ -374,52 +371,22 @@ public class CollisionProcessor {
 	}
 	
 	/**
-	 * Store contact in bodyPairContacts, and update relative velocity history.
+	 * Store contact in bodyPairContacts.
 	 * @param contact
 	 */
 	private void storeInBodyPairContacts(Contact contact) {
 
-		if (contact.body1.pinned && contact.body2.pinned) return;
+		if (contact.body1.pinned && contact.body2.pinned) 
+			return;
 		
-		// check if this body contact exists already
 		BodyPairContact bpc = BodyPairContact.checkExists(contact.body1, contact.body2, bodyPairContacts);
 
-		if (bpc != null) { // if it exists
-			if (!bpc.updatedThisTimeStep) { // only once per time step
-				// TODO: should call a method in body pair to pudate this rather than doing this work here
-				// also, is this being done at the rigth stage??  certainly want to add contacts
-				// to the body pair contact object, but figure out the relative velocity information
-				// at a different point of execution.
-				bpc.relativeKineticEnergyHist.add(contact.getRelativeKineticEnergy());
-				if (bpc.relativeKineticEnergyHist.size() > CollisionProcessor.sleepAccum.getValue())
-					bpc.relativeKineticEnergyHist.remove(0);
-
-				Pair<Integer, Double> state = new Pair<Integer, Double>(1, contact.lambda.x);
-				bpc.contactStateHist.add(state);
-				if (bpc.contactStateHist.size() > CollisionProcessor.sleepAccum.getValue())
-					bpc.contactStateHist.remove(0);
-				
-				bpc.updatedThisTimeStep = true;				
-			} else {
-				Pair<Integer, Double> state = bpc.contactStateHist.get(bpc.contactStateHist.size()-1);
-				state = new Pair<Integer, Double>(state.getKey()+1, state.getValue()+contact.lambda.x);
-			}
-				
-		} else { // body contact did not exist in previous list
+		if (bpc == null) { // body contact did not exist in previous list
 			bpc = new BodyPairContact(contact.body1, contact.body2);
-			bpc.relativeKineticEnergyHist.add(contact.getRelativeKineticEnergy());
-			Pair<Integer, Double> state = new Pair<Integer, Double>(1, contact.lambda.x);
-			bpc.contactStateHist.add(state);
-			bpc.updatedThisTimeStep = true;
 			bodyPairContacts.add(bpc);
-		}
-
-		if (!contact.body1.bodyPairContactList.contains(bpc))
-			contact.body1.bodyPairContactList.add(bpc);
-		if (!contact.body2.bodyPairContactList.contains(bpc))
-			contact.body2.bodyPairContactList.add(bpc);
+		} 
 		
-		contact.bc = bpc;
+		bpc.addToBodyLists();
 		bpc.contactList.add(contact);
 	}
 		

@@ -144,7 +144,8 @@ public class RigidCollection extends RigidBody{
 		
 		updateMass();
 		updateCOM(); 
-		updateTransforms(); 
+		updateTransformations();
+		updateBodiesTransformations();
 		updateInertia();
 		addBodiesSpringsToCollection();
 	}
@@ -190,15 +191,10 @@ public class RigidCollection extends RigidBody{
 	}
 	
 	/** 
-	 * Updates tranforms of collection.
-	 * And for each body in collection, determines the transformations to go from body to collection
+	 * For each body in collection, determines the transformations to go from body to collection
 	 * But also, make each body's x and theta in collection, relative to this x and theta
 	 */
-	public void updateTransforms() {
-		transformB2W.set( theta, x );
-		transformW2B.set( transformB2W );
-		transformW2B.invert();
-		
+	public void updateBodiesTransformations() {		
 		for (RigidBody body: collectionBodies) {
 			body.transformB2C.set(body.transformB2W);
 			body.transformB2C.leftMult(transformW2B);
@@ -282,12 +278,12 @@ public class RigidCollection extends RigidBody{
 		for (BodyPairContact bpc : body.bodyPairContactList)
 			for (Contact contact : bpc.contactList)
 				if (contact.state == ContactState.BROKE || contact.state == ContactState.SLIDING) 
-					if (metric > body.relativeVelocity)
+					if (metric > body.relativeKineticEnergy)
 						unmerge = true;
-					
-		// eulalie : we miss a rule here... a contact can act as a pivot. Meaning, no contact breaking, no sliding effect, yet still some relative velocity
+		
+		// eulalie : we miss a rule here... a contact can act as a pivot. Meaning, no contact breaking, no sliding effect, yet still some relative motion
 
-		body.relativeVelocity = (unmerge)? Double.MAX_VALUE : metric;
+		body.relativeKineticEnergy = (unmerge)? Double.MAX_VALUE : metric;
 		return unmerge;
 	}
 
@@ -298,17 +294,21 @@ public class RigidCollection extends RigidBody{
 			temporarilyPinned=!temporarilyPinned; 
 		
 		if (!pinned && !temporarilyPinned) {
+			
 			v.x += force.x * dt/massLinear + deltaV.get(0);
 			v.y += force.y * dt/massLinear + deltaV.get(1);
 			omega += torque * dt/ massAngular + deltaV.get(2);
+			deltaV.zero();
+			
 			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;
 				x.y += v.y * dt;
 				theta += omega*dt;
 			} 
+			
 			updateTransformations();
-			updateBodiesPositionAndTransform(dt);
-			updateBodiesVelocities();
+			updateBodiesPositionAndTransformations();
+			updateBodiesVelocity();
 			updateContactJacobianAndDataAsInternal(dt);
 		} 
 	}
@@ -316,7 +316,7 @@ public class RigidCollection extends RigidBody{
 	/**
 	 * Updates bodies position, orientation, and transformations
 	 */
-	protected void updateBodiesPositionAndTransform(double dt) {
+	protected void updateBodiesPositionAndTransformations() {
 		for (RigidBody body: collectionBodies) {
 			//reset position and orientation 
 			body.transformW2B.transform(body.x);
@@ -337,10 +337,8 @@ public class RigidCollection extends RigidBody{
 	/**
 	 * Updates bodies velocities
 	 */
-	protected void updateBodiesVelocities() {
-		for (RigidBody body: collectionBodies) {			
-			//update velocities
-			// eulalie : I'm not sure we always want that...
+	protected void updateBodiesVelocity() {
+		for (RigidBody body: collectionBodies) {	
 			final Vector2d r = new Vector2d( -body.x.y, body.x.x );
 			transformB2W.transform( r );
 			r.scale( omega );
@@ -418,15 +416,15 @@ public class RigidCollection extends RigidBody{
 	 * Go through all bodies and makes sure all the BodyContacts of each body is in the collection
 	 */
 	public void fillInternalBodyContacts() {
-		for (RigidBody b: collectionBodies) {
-			for (BodyPairContact bc: b.bodyPairContactList) {
-				if (!internalBodyPairContacts.contains(bc) && bc.merged == true) {
-					RigidBody body2 = bc.getOtherBody(b);
-					if (b.parent.collectionBodies.contains(body2)) {
-						internalBodyPairContacts.add(bc);
-						for (Contact c : bc.contactList) {
-							if (!internalContacts.contains(c)) {
-								internalContacts.add(c);
+		for (RigidBody body: collectionBodies) {
+			for (BodyPairContact bpc: body.bodyPairContactList) {
+				if (!internalBodyPairContacts.contains(bpc) && bpc.inCollection == true) {
+					RigidBody otherBody = bpc.getOtherBody(body);
+					if (body.parent.collectionBodies.contains(otherBody)) {
+						internalBodyPairContacts.add(bpc);
+						for (Contact contact : bpc.contactList) {
+							if (!internalContacts.contains(contact)) {
+								internalContacts.add(contact);
 							}
 						}
 					}
@@ -442,19 +440,19 @@ public class RigidCollection extends RigidBody{
 	 * identified in this call can also be later removed. 
 	 */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyPairContact> removalQueue) {
-		for (BodyPairContact bc: body.bodyPairContactList) {
-			if (bc.body1.parent == bc.body2.parent && bc.relativeKineticEnergyHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bc.merged) {
-				bc.merged = true;
-				body.parent.addInternalContact(bc);
-				removalQueue.add(bc);
+		for (BodyPairContact bpc: body.bodyPairContactList) {
+			if (bpc.body1.parent == bpc.body2.parent && bpc.relativeKineticEnergyHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bpc.inCollection) {
+				bpc.inCollection = true;
+				body.parent.addInternalContact(bpc);
+				removalQueue.add(bpc);
 			}
 		}
 	}
 
 	/** input parameter is a collection being merged . we must add also all the incomplete contacts this parent has with other collections. */
 	public void addIncompleteCollectionContacts(RigidCollection parent, LinkedList<BodyPairContact> removalQueue) {
-		for (RigidBody b: parent.collectionBodies) {
-			addIncompleteContacts(b, removalQueue);
+		for (RigidBody body : parent.collectionBodies) {
+			addIncompleteContacts(body, removalQueue);
 		}
 	}	
 	
@@ -476,7 +474,7 @@ public class RigidCollection extends RigidBody{
 	public void drawInternalContacts(GLAutoDrawable drawable) {
 
 		for (BodyPairContact bc: internalBodyPairContacts) {
-			if (!bc.merged) 
+			if (!bc.inCollection) 
 				continue;
 			for (Contact c: bc.contactList) 
 				c.drawInternalContactForce(drawable);
