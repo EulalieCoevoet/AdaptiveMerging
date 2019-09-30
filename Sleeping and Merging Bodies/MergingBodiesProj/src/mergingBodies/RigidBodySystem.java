@@ -114,14 +114,14 @@ public class RigidBodySystem {
 		if (processCollisions.getValue()) {
 			collisionProcessor.processCollisions(dt);
 		}
-
+		
 		if (enableMerging.getValue()) {
 			mergeBodies();
 			checkIndex();
 			if (enableUpdateContactsInCollections.getValue())
 				collisionProcessor.updateContactsInCollections(dt);
 		}
-
+		
 		if (enableSleeping.getValue()) {
 			sleep();
 		}
@@ -130,7 +130,7 @@ public class RigidBodySystem {
 		for (RigidBody b : bodies) {
 			b.advanceTime(dt); 
 		}
-
+		
 		if (enableSleeping.getValue()) {
 			wake();
 		}
@@ -149,7 +149,7 @@ public class RigidBodySystem {
 		
 		double alpha = globalViscousDecay.getValue();
 		for ( RigidBody b : bodies ) {
-			b.deltaV.scale( alpha );
+			b.v.scale( alpha );
 			b.omega *= alpha;
 		}
 		

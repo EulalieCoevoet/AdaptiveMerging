@@ -57,7 +57,7 @@ public class Spring {
 		velocity.add( body.v );
 		
 		double scale = 
-				- (k * (displacement.length()  - l0) + 	c * (velocity.dot(displacement) / displacement.length())) 
+				- (k * (displacement.length()  - l0) - 	c * (velocity.dot(displacement) / displacement.length())) 
 				/ displacement.length();
 
 		force.scale( - scale, displacement );
