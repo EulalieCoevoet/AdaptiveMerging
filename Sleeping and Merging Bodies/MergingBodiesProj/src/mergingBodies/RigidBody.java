@@ -314,8 +314,18 @@ public class RigidBody {
 			updateTransformations();
 		}
 	}
-
-
+	
+	/**
+	 * Takes the 
+	 * @param body
+	 */
+	public void applyVelocities(RigidBody body) {
+    	final Vector2d r = new Vector2d( -(body.x.y - x.y), body.x.x - x.x );
+		r.scale( omega );
+		body.v.add(v, r);
+		body.omega = omega;
+    }
+	
 	/**
 	 * Computes the total kinetic energy of the body.
 	 * 

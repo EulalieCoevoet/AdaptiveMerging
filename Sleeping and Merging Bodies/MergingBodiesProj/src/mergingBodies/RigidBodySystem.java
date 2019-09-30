@@ -377,8 +377,7 @@ public class RigidBodySystem {
 							RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
 							newCollection.addBodies(subBodies);
 							newCollection.fillInternalBodyContacts();
-							newCollection.v.set(collection.v);
-							newCollection.omega = collection.omega;
+							collection.applyVelocities(newCollection);
 							newBodies.add(newCollection);
 							subBodies.clear();
 						} else if (subBodies.size() == 1) {

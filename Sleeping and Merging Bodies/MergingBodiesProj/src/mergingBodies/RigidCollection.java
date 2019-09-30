@@ -339,11 +339,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	protected void updateBodiesVelocity() {
 		for (RigidBody body: collectionBodies) {	
-			final Vector2d r = new Vector2d( -body.x.y, body.x.x );
-			transformB2W.transform( r );
-			r.scale( omega );
-			body.v.add(v, r);
-			body.omega = omega;
+			applyVelocities(body);
 			body.deltaV.zero();
 		}
 	}
@@ -405,8 +401,7 @@ public class RigidCollection extends RigidBody{
 	public void unmergeSingleBody(RigidBody body) {
 		if (!body.isInCollection()) return;
 		else {
-			body.v.set(body.parent.v);
-			body.omega = body.parent.omega;
+			body.parent.applyVelocities(body);
 			body.parent = null;
 			body.updateColor = true;
 		}
