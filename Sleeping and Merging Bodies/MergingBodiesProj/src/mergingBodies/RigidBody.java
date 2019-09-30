@@ -52,10 +52,10 @@ public class RigidBody {
 
 	double massLinear;
 
-	public boolean pinned;
+	public boolean pinned = false;
 	/** option used to pinned object for a fixed amount of steps */
-	public boolean temporarilyPinned;
-	double steps;
+	public boolean temporarilyPinned = false;
+	int steps = 0;
 
 	/**
 	 * Transforms points in Body coordinates to World coordinates
@@ -80,7 +80,7 @@ public class RigidBody {
 	RigidTransform transformC2B = new RigidTransform();
 
 	/** linear velocity */
-	public Vector2d v = new Vector2d();
+	public Vector2d v = new Vector2d(0.,0.);
 
 	/** Position of center of mass in the world frame */
 	public Point2d x = new Point2d();
@@ -89,10 +89,10 @@ public class RigidBody {
 	Point2d x0 = new Point2d();
 
 	/** orientation angle in radians */
-	public double theta;
+	public double theta = 0.;
 
 	/** angular velocity in radians per second */
-	public double omega;
+	public double omega = 0.;
 
 	/** inverse of the linear mass, or zero if pinned */
 	double minv;

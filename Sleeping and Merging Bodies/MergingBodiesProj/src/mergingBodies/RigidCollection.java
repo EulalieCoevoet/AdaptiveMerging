@@ -41,48 +41,36 @@ public class RigidCollection extends RigidBody{
 		// These bodies being added to the collection, with the collection being new,
 		// their state w.r.t the collection frame is unchanged as C2W and W2C are Identity
 		
-		v.set(body1.v);
-		omega = body1.omega;
-		theta = 0.;
-		transformB2W.set(body1.transformB2W);
-		transformW2B.set(body1.transformW2B);
-
-		updateColor = true;
 		generateColor();
 		
-		body1.parent = this;
-		body2.parent = this;
-		body1.merged = true;
-		body2.merged = true;
+		copyVelocitiesFrom(body1);
 		
-		collectionBodies.add(body1);
-		collectionBodies.add(body2);
+		addBodyInternalMethod(body1);
+		updateCollectionPinnedConditions(body1);
+		addBodyInternalMethod(body2);
+		updateCollectionPinnedConditions(body2);
 		
-		temporarilyPinned = (body1.temporarilyPinned || body2.temporarilyPinned);
-		steps = Math.max(body1.steps, body2.steps);
-		body1.temporarilyPinned = false;
-		body2.temporarilyPinned = false;
-		
-		pinned = (body1.pinned || body2.pinned);
-
 		updateCollection();
 	}
-
+	
 	/**
 	 * Adds a body to the collection
 	 * @param body body to add 
 	 */
 	public void addBody(RigidBody body) {
-		body.parent = this;
-		body.merged = true;
-		updateColor = true;
-		collectionBodies.add(body);
-		
-		temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
-		steps = Math.max(body.steps, steps);
-		body.temporarilyPinned = false;
-		
-		pinned = (pinned || body.pinned);
+		addBodyInternalMethod(body);
+		updateCollectionPinnedConditions(body);
+		updateCollection();
+	}
+	
+	/**
+	 * Adds given list of bodies the collection
+	 */
+	public void addBodies(ArrayList<RigidBody> bodies) {
+		for (RigidBody body : bodies) {		
+			addBodyInternalMethod(body);
+			updateCollectionPinnedConditions(body);
+		}
 		
 		updateCollection();
 	}
@@ -92,44 +80,50 @@ public class RigidCollection extends RigidBody{
 	 * @param collection collection to add 
 	 */
 	public void addCollection(RigidCollection collection) {
-		for (RigidBody body : collection.collectionBodies) {
-			body.parent = this;
-			body.merged = true;
-			updateColor = true;
-			collectionBodies.add(body);
-		}
-
+		for (RigidBody body : collection.collectionBodies)
+			addBodyInternalMethod(body);
+		
 		internalBodyPairContacts.addAll(collection.internalBodyPairContacts);
-		for (Contact c: collection.internalContacts) {
-			internalContacts.add(c);
-		}
+		internalContacts.addAll(collection.internalContacts);
 		
-		temporarilyPinned = (temporarilyPinned || collection.temporarilyPinned);
-		steps = Math.max(collection.steps, steps);
-		
-		pinned = (pinned || collection.pinned);
-
+		updateCollectionPinnedConditions(collection);
 		updateCollection();
 	}
 	
 	/**
-	 * Adds given list of bodies the collection
+	 * Adds a body to the collection (internal method, for factoring purposes).
+	 * @param body body to add 
 	 */
-	public void addBodies(ArrayList<RigidBody> bodies) {
-		for (RigidBody body : bodies) {			
-			body.parent = this; 
-			body.merged = true;
-			updateColor = true;
-			collectionBodies.add(body);
-			
-			temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
-			steps = Math.max(body.steps, steps);
-			body.temporarilyPinned = false;
-			
-			pinned = (pinned || body.pinned);
-		}
-
-		updateCollection();
+	protected void addBodyInternalMethod(RigidBody body) {
+		body.parent = this;
+		body.merged = true;
+		collectionBodies.add(body);
+		
+		v.add(body.v);
+		v.scale(0.5);
+		omega += body.omega;
+		omega *= 0.5;
+	}
+	
+	/**
+	 * Copy velocities of given body
+	 * @param body
+	 */
+	protected void copyVelocitiesFrom(RigidBody body) {
+		v.set(body.v);
+		omega = body.omega;
+	}
+	
+	/**
+	 * Update collection pinned condition 
+	 * @param body
+	 */
+	protected void updateCollectionPinnedConditions(RigidBody body) {
+		temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
+		steps = Math.max(body.steps, steps);
+		body.temporarilyPinned = false;
+		
+		pinned = (pinned || body.pinned);
 	}
 	
 	/**
@@ -141,6 +135,8 @@ public class RigidCollection extends RigidBody{
 			v.set(0.,0.);
 			omega = 0.;
 		}
+		
+		updateColor = true;
 		
 		updateMass();
 		updateCOM(); 
@@ -222,10 +218,11 @@ public class RigidCollection extends RigidBody{
 	}
 	
 	/**
-	 * Add given BodyContact to internalBodyContacts, and BodyContact's contactList to internalContacts
+	 * Add given BodyPairContact to internalBodyPairContacts, and BodyPairContact's contactList to internalContacts
 	 * @param bpc
 	 */
 	public void addInternalContact(BodyPairContact bpc) {
+		
 		if (!internalBodyPairContacts.contains(bpc)) {
 			internalBodyPairContacts.add(bpc);
 		} else {
@@ -245,7 +242,7 @@ public class RigidCollection extends RigidBody{
 		for (Contact c: bpc.contactList) {
 			c.getHistoryStatistics();
 		}
-
+	
 		internalContacts.addAll(bpc.contactList);
 	}
 	
@@ -270,9 +267,9 @@ public class RigidCollection extends RigidBody{
 			int nbContacts = 0;
 			for (BodyPairContact bpc : body.bodyPairContactList) {
 				for (Contact contact : bpc.contactList) { 
-					if (contact.state == ContactState.BROKE) { 
+					if (contact.state == ContactState.BROKEN) { 
 						body.relativeKineticEnergy = Double.MAX_VALUE;
-						return true; // rule 1. if one contact is breaking
+						return true; // rule 1. if one contact has broken
 					} else if (contact.state == ContactState.SLIDING) { 
 						body.relativeKineticEnergy = Double.MAX_VALUE;
 						return true; // rule 2. one or more contacts on the edge of friction cone 
@@ -315,7 +312,7 @@ public class RigidCollection extends RigidBody{
 			
 			updateTransformations();
 			updateBodiesPositionAndTransformations();
-			updateBodiesVelocity();
+			updateBodiesVelocities();
 			updateContactJacobianAndDataAsInternal(dt);
 		} 
 	}
@@ -344,7 +341,7 @@ public class RigidCollection extends RigidBody{
 	/**
 	 * Updates bodies velocities
 	 */
-	protected void updateBodiesVelocity() {
+	protected void updateBodiesVelocities() {
 		for (RigidBody body: collectionBodies) {	
 			applyVelocities(body);
 			body.deltaV.zero();

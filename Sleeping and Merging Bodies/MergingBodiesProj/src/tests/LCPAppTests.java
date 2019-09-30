@@ -130,6 +130,7 @@ public class LCPAppTests extends LCPApp {
 		loadSystem("datalcp/doubleStackUnmergeTest.png");
 
     	RigidBodySystem.enableMerging.setValue(true);
+    	RigidBodySystem.enableUnmerging.setValue(false);
     	RigidBodySystem.enableUpdateContactsInCollections.setValue(true);
     	RigidBodySystem.enableMergePinned.setValue(false);
     	for (int i=0; i<40+CollisionProcessor.sleepAccum.getValue(); i++)
