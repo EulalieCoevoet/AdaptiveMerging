@@ -48,6 +48,9 @@ public class Spring {
 
 		displacement.sub( pw, pbw ); 
 
+		// Silly fix... the force should go gracefully to zero without giving NaNs :(
+		if ( displacement.length() < 1 ) return;
+
 		velocity.set( -pb.y, pb.x );
 		velocity.scale( body.omega );
 		body.transformB2W.transform( velocity );
