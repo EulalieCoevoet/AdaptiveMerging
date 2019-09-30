@@ -216,11 +216,9 @@ public class RigidBodySystem {
 		double threshold = CollisionProcessor.forceMetricTolerance.getValue();
 		for (RigidBody b: bodies) {
 			if (b.state == ObjectState.ACTIVE || b.pinned || b.temporarilyPinned) continue;
-			b.transformB2W.transform(b.savedContactForce);
 			double forceMetric1 = (b.force.x-b.forcePreSleep.x)*b.minv;
 			double forceMetric2 = (b.force.y-b.forcePreSleep.y)*b.minv;
 			double forceMetric3 = (b.torque-b.torquePreSleep)*b.jinv;
-			b.transformW2B.transform(b.savedContactForce);
 			if (b.state == ObjectState.SLEEPING && (forceMetric1 > threshold || forceMetric2 > threshold || forceMetric3 > threshold)) {
 				b.velHistory.clear();
 				b.state = ObjectState.ACTIVE;
@@ -268,33 +266,14 @@ public class RigidBodySystem {
 			body.torque = 0;
 			body.deltaV.zero();
 
-			body.savedContactForce.set(0, 0);
-			body.contactTorques = 0;
-			
-			ArrayList<BodyPairContact> newBodyContactList = new ArrayList<BodyPairContact>();
-			for (BodyPairContact bc : body.bodyPairContactList) 
-				if (bc.updatedThisTimeStep) 
-					newBodyContactList.add(bc);
-			
-			body.bodyPairContactList.clear();
-			body.bodyPairContactList.addAll(newBodyContactList);
-
 			if (body instanceof RigidCollection) {
 				RigidCollection collection = (RigidCollection)body;
 				collection.unmergedThisTimeStep = false;
 				for (RigidBody sB: collection.collectionBodies) {
+					sB.merged = false;
 					sB.deltaV.zero();
 					sB.force.set(0, 0);
 					sB.torque = 0;
-					sB.merged = false;
-					
-					newBodyContactList.clear();
-					for (BodyPairContact bpc : sB.bodyPairContactList) 
-						if (bpc.merged || bpc.updatedThisTimeStep) 
-							newBodyContactList.add(bpc);
-					
-					sB.bodyPairContactList.clear();
-					sB.bodyPairContactList.addAll(newBodyContactList);
 				}
 			}
 		}
@@ -360,18 +339,17 @@ public class RigidBodySystem {
 		for (RigidBody body: unmergingBodies) {
 			collection.unmergeSingleBody(body);
 			newBodies.add(body);
-			//collection.contactsToWorld();
 		}
 		
-		ArrayList<BodyPairContact> clearedBodyContacts = new ArrayList<BodyPairContact>();
+		ArrayList<BodyPairContact> clearedBodyPairContacts = new ArrayList<BodyPairContact>();
 		for (RigidBody body: unmergingBodies) {
 			ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 
 			for (BodyPairContact bpc : body.bodyPairContactList) {
 				RigidBody otherBody = bpc.getOtherBody(body);
-				clearedBodyContacts.add(bpc);
-				if (bpc.merged) {
-					bpc.merged = false;
+				clearedBodyPairContacts.add(bpc);
+				if (bpc.inCollection) {
+					bpc.inCollection = false;
 					if(!handledBodies.contains(otherBody)) {
 
 						subBodies.add(otherBody);
@@ -380,13 +358,10 @@ public class RigidBodySystem {
 
 						if (subBodies.size() > 1) {
 							//make a new collection
-							// eulalie : I think this code should be reviewed because when you 
-							// remove a body on top of a stack it creates a new collection, while it shouldn't...
 							RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
 							newCollection.addBodies(subBodies);
 							newCollection.fillInternalBodyContacts();
-							newCollection.v.set(collection.v);
-							newCollection.omega = collection.omega;
+							collection.applyVelocities(newCollection);
 							newBodies.add(newCollection);
 							subBodies.clear();
 						} else if (subBodies.size() == 1) {
@@ -399,7 +374,7 @@ public class RigidBodySystem {
 			}
 			body.bodyPairContactList.clear();
 			
-			for (BodyPairContact bpc: clearedBodyContacts)
+			for (BodyPairContact bpc: clearedBodyPairContacts)
 				bpc.removeFromBodyLists();
 		}
 	}
@@ -407,7 +382,7 @@ public class RigidBodySystem {
 	private void buildNeighborBody(RigidBody body, ArrayList<RigidBody> subBodies, ArrayList<RigidBody> handledBodies) {
 
 		for (BodyPairContact bpc : body.bodyPairContactList) {
-			if (!bpc.merged) 
+			if (!bpc.inCollection) 
 				continue;
 
 			RigidBody otherBody = bpc.getOtherBody(body);
@@ -431,17 +406,16 @@ public class RigidBodySystem {
 	public void mergeBodies() {
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
 		
-		for (BodyPairContact bpc:collisionProcessor.bodyPairContacts) {
+		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 
 			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() /*|| bpc.areContactsStable()*/);
 			
-			if (!bpc.updatedThisTimeStep) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;
 			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 
 			if (mergeCondition) {
-				bpc.merged = true;
+				bpc.inCollection = true;
 				if(!bpc.body1.isInCollection() && !bpc.body2.isInCollection()) {
 					//both are not collections: make a new collection
 					bodies.remove(bpc.body1); 
@@ -785,9 +759,9 @@ public class RigidBodySystem {
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
 	private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", false );
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
-	public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", false);
-	public static BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", false);
-	public static BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", false);
+	public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
+	public static BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", true);
+	public static BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", true);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", false);
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 

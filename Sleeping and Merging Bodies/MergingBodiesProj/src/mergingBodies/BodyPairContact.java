@@ -2,6 +2,9 @@ package mergingBodies;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+
 import javafx.util.Pair;
 
 
@@ -15,12 +18,13 @@ public class BodyPairContact {
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
+	Vector2d relativeVelocity = new Vector2d();
+	double relativeAngularVelocity = 0;
+	
 	public ArrayList<Double> relativeKineticEnergyHist = new ArrayList<Double>();
 	public ArrayList<Pair<Integer, Double>> contactStateHist = new ArrayList<Pair<Integer, Double>>();
-	
-	boolean updatedThisTimeStep = false;
-	
-	boolean merged = false;
+		
+	boolean inCollection = false;
 	
 	public BodyPairContact(RigidBody body1, RigidBody body2) {
 		this.body1 = body1;
@@ -59,6 +63,85 @@ public class BodyPairContact {
 		return false;
 	}
 	
+	 /**
+	 * Computes the relative velocity between the two bodies in contact.
+	 * In case of body in a collection, use velocities of parent.
+	 * NOTE MUST COMPARE IN THE SAME COORDINATE FRAME!  In this case, use the 
+	 * combined mass center of mass frame.  Note that we migth want an effective 
+	 * mass weighted relative velocity to measure relative velocity kinetic energy.
+	 */
+	protected void computeRelativeVelocity() {
+		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
+		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
+		
+		if ( body1.pinned ) {
+			// ASSERT that body 1 velocity is zero for this to be correct
+			// NOTE this will break if we ever have non zero velocities on pinned bodies!
+			relativeVelocity.set( body2.v );
+			relativeAngularVelocity = body2.omega;
+			return;
+		} else if ( body2.pinned ) {
+			// ASSERT that body 2 velocity is zero for this to be correct
+			// NOTE this will break if we ever have non zero velocities on pinned bodies!
+			relativeVelocity.set( body1.v );
+			relativeAngularVelocity = body1.omega;
+			return;
+		}
+		Point2d com = new Point2d();
+		Vector2d tmp = new Vector2d();
+		Vector2d tmp2 = new Vector2d();
+		com.scale( body1.massLinear, body1.x );
+		tmp.scale( body2.massLinear, body2.x );
+		com.add( tmp );
+		com.scale( 1/(body1.massLinear + body2.massLinear) );
+			
+		relativeVelocity.sub(body2.v, body1.v);
+
+		tmp.sub( com, body2.x );
+		tmp.scale( body2.omega );
+		tmp2.set( -tmp.y, tmp.x );
+		relativeVelocity.add( tmp2 );
+		
+		tmp.sub( com, body1.x );
+		tmp.scale( body1.omega );
+		tmp2.set( -tmp.y, tmp.x );
+		relativeVelocity.sub( tmp2 );
+		
+		relativeAngularVelocity = body2.omega - body1.omega;
+		//System.out.println( body2.omega - body1.omega );
+	}
+	
+	/**
+	 * Computes and returns the relative kinetic energy without the mass
+	 * @return metric
+	 */
+	public double getRelativeKineticEnergy() {
+		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
+		return k;
+	}
+	
+	/**
+	 * Accumulate criteria for unmerge condition
+	 * @param contact
+	 */
+	public void accumulate() {
+		
+		computeRelativeVelocity();
+		
+		relativeKineticEnergyHist.add(getRelativeKineticEnergy());
+		if (relativeKineticEnergyHist.size() > CollisionProcessor.sleepAccum.getValue())
+			relativeKineticEnergyHist.remove(0);
+	
+		double totalLambda_n = 0.;
+		for (Contact contact : contactList) 
+			totalLambda_n+=contact.lambda.x;
+		Pair<Integer, Double> state = new Pair<Integer, Double>(contactList.size(), totalLambda_n);
+		
+		contactStateHist.add(state);
+		if (contactStateHist.size() > CollisionProcessor.sleepAccum.getValue())
+			contactStateHist.remove(0);
+	}
+	
 	/**
 	 * Check if relative kinetic energy (without the mass) has been strictly decreasing and
 	 * lower than a threshold over CollisionProcessor.sleepAccum time steps.
@@ -84,7 +167,7 @@ public class BodyPairContact {
 		}
 		
 		return true;
-	}
+  }  
 	
 	/**
 	 * Check if contacts have been stable over CollisionProcessor.sleepAccum time steps.

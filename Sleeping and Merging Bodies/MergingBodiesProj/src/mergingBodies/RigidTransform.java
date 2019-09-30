@@ -116,5 +116,4 @@ public class RigidTransform {
         result.x = T.m00 * p.x + T.m01 * p.y;
         result.y = T.m10 * p.x + T.m11 * p.y;
     }
-
 }

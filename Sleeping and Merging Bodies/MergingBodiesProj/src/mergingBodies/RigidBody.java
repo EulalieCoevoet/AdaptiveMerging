@@ -131,20 +131,7 @@ public class RigidBody {
 	 */
 	public ArrayList<Double> velHistory = new ArrayList<Double>();
 	
-	public double relativeVelocity = Double.MAX_VALUE;
-
-	/**
-	 * a list of the total contact torques acting on this body in the last N steps
-	 * before sleeping or merging
-	 */
-	public double contactTorques = 0;
-
-	/**
-	 * the total contact forces acting on it at this current time step, in world
-	 * coordinates. Does not get updated when a body is part of a collection, unless
-	 * a new body joins that collection.
-	 **/
-	public Vector2d savedContactForce = new Vector2d();
+	public double relativeKineticEnergy = Double.MAX_VALUE;
 
 	public boolean merged = false;
 
@@ -304,10 +291,8 @@ public class RigidBody {
 			temporarilyPinned=!temporarilyPinned; 
 
 		// update particles activity or sleepiness.
-		double epsilon_1 = CollisionProcessor.sleepingThreshold.getValue();
-
 		// fully active, regular stepping
-		this.setActivityContactGraph(epsilon_1);
+		setActivityContactGraph(CollisionProcessor.sleepingThreshold.getValue());
 
 		if (!pinned && !temporarilyPinned) {
 
@@ -329,8 +314,18 @@ public class RigidBody {
 			updateTransformations();
 		}
 	}
-
-
+	
+	/**
+	 * Takes the 
+	 * @param body
+	 */
+	public void applyVelocities(RigidBody body) {
+    	final Vector2d r = new Vector2d( -(body.x.y - x.y), body.x.x - x.x );
+		r.scale( omega );
+		body.v.add(v, r);
+		body.omega = omega;
+    }
+	
 	/**
 	 * Computes the total kinetic energy of the body.
 	 * 
