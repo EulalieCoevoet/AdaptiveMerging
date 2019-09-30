@@ -78,9 +78,6 @@ public class CollisionProcessor {
 		long now = System.nanoTime();
 		broadPhase(); 
 		collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
-
-		if (RigidBodySystem.enableSleeping.getValue() || RigidBodySystem.enableMerging.getValue()) 
-			processBodyPairContacts();
 		
 		if (contacts.size() == 0) {
 			lastTimeStepMap.clear();
@@ -116,7 +113,8 @@ public class CollisionProcessor {
 			bpc.contactList.clear();
 		
 		for (Contact contact : contacts) 
-			storeInBodyPairContacts(contact);
+			if (contact.lambda.x >= 1e-14)
+				storeInBodyPairContacts(contact);
 		
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
 		for (BodyPairContact bpc : bodyPairContacts) {
@@ -141,11 +139,38 @@ public class CollisionProcessor {
 
 		long now = System.nanoTime();
 		
-		// Apply external (not in a collection) contacts as external forces to bodies in collections
+		applyContactsAsExternalForces(dt);
+		
+		solver.init(friction.getValue(), 1);
+		solver.confidentWarmStart = true;
+		solver.computeInCollection = true;
+		for (RigidBody body : bodies) {
+			if (body instanceof RigidCollection && !body.temporarilyPinned) {
+				RigidCollection collection = (RigidCollection)body;
+
+				collection.updateBodiesVelocities();
+				collection.updateContactJacobianAndDataAsInternal(dt);
+				solver.contacts = collection.internalContacts;
+				solver.solve(dt);
+				
+				collection.computeInternalContactsForce(dt);
+			}
+		}
+		
+		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
+	}
+	
+	/**
+	 * If a collection has external contacts, apply these contacts as
+	 * external forces to the corresponding real body that is in contact (meaning inside the collection). 
+	 * @param dt
+	 */
+	protected void applyContactsAsExternalForces(double dt) {
+		
 		Vector2d force = new Vector2d();
 		double torque = 0.;
+		
 		for (Contact contact : contacts) {
-			
 			// eulalie : to clean...
 			if (contact.body1.isInCollection() && !contact.body1.isInSameCollection(contact.body2)) {
 				
@@ -160,7 +185,7 @@ public class CollisionProcessor {
 				
 				force.scale(1./dt);
 				torque /= dt;
-
+	
 				contact.body1.force.add(force);
 				contact.body1.torque += torque;	
 				
@@ -180,33 +205,16 @@ public class CollisionProcessor {
 			
 				force.scale(1./dt);
 				torque /= dt;
-
+	
 				contact.body2.force.add(force);
 				contact.body2.torque += torque;	
-
+	
 				contact.normal = new Vector2d(tmp);
 				contact.computeJacobian(false);
 			}
 		}
-		
-		solver.init(friction.getValue(), 1);
-		solver.confidentWarmStart = true;
-		solver.computeInCollection = true;
-		for (RigidBody body : bodies) {
-			if (body instanceof RigidCollection && !body.temporarilyPinned) {
-				RigidCollection collection = (RigidCollection)body;
-
-				collection.updateBodiesVelocity();
-				collection.updateContactJacobianAndDataAsInternal(dt);
-				solver.contacts = collection.internalContacts;
-				solver.solve(dt);
-				
-				collection.computeInternalContactsForce(dt);
-			}
-		}
-		
-		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
 	}
+	
 	
 	protected void updateContactsMap() {
 		lastTimeStepMap.clear();

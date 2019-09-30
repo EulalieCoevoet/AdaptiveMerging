@@ -34,7 +34,7 @@ public class Contact {
 	/**    Used for unmerge condition, true if the contact changed (break or slide) during the time step  */
 	public ContactState state = ContactState.CLEAR;
 	
-	public enum ContactState {BROKE, SLIDING, CLEAR};
+	public enum ContactState {BROKEN, SLIDING, CLEAR};
 	
 	/** First RigidBody in contact */
 	public RigidBody body1;
@@ -205,9 +205,9 @@ public class Contact {
 	 * @param prevLambda_n
 	 * @param mu
 	 */
-	protected void updateContactState(double prevLambda_n, double mu) {
-		if (lambda.x == 0. && prevLambda_n > 0.) 
-			state = ContactState.BROKE;	
+	protected void updateContactState(double mu) {
+		if (lambda.x <= 1e-14) 
+			state = ContactState.BROKEN;	
 		else if (Math.abs(lambda.y) == lambda.x*mu) 
 			state = ContactState.SLIDING;
 		else

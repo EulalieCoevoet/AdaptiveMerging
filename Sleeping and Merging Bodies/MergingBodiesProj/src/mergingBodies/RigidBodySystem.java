@@ -114,32 +114,32 @@ public class RigidBodySystem {
 		if (processCollisions.getValue()) {
 			collisionProcessor.processCollisions(dt);
 		}
-		
-		if (enableMerging.getValue()) {
-			mergeBodies();
-			checkIndex();
-			if (enableUpdateContactsInCollections.getValue())
-				collisionProcessor.updateContactsInCollections(dt);
-		}
-		
-		if (enableSleeping.getValue()) {
-			sleep();
-		}
 
 		// advance the system by the given time step (update position and velocities of each body)
 		for (RigidBody b : bodies) {
 			b.advanceTime(dt); 
 		}
 		
+		if (enableMerging.getValue()) {
+			mergeBodies();
+			checkIndex();
+		}
+		
+		if (enableSleeping.getValue()) {
+			sleep();
+		}
+		
+		if (enableMerging.getValue() && enableUpdateContactsInCollections.getValue()) {
+			collisionProcessor.updateContactsInCollections(dt);
+		}
+		
 		if (enableSleeping.getValue()) {
 			wake();
 		}
 
-		if (enableMerging.getValue()) {
-			if(enableUnmerging.getValue()) {
-				unmergeBodies(dt);
-				checkIndex();
-			}
+		if (enableMerging.getValue() && enableUnmerging.getValue()) {
+			unmergeBodies(dt);
+			checkIndex();
 		}
 
 		if (generateBody) {
@@ -282,18 +282,11 @@ public class RigidBodySystem {
 	/**
 	 * Method that deals with unmerging rigidBodies... because we will explore different solutions to
 	 * this problem, it will call different methods for each unmerging solution.
-	 */
-	private void unmergeBodies(double dt) {
-		generalOneBodyAtATime(dt);
-	}
-
-	/**
 	 * Goes through all bodies in each collection. 
 		If a body has enough force acting on it (over a threshold), separate just that body
 		from the rest of the collection. 
 	 */
-	private void generalOneBodyAtATime(double dt) {
-		
+	private void unmergeBodies(double dt) {
 		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 
@@ -406,9 +399,11 @@ public class RigidBodySystem {
 	public void mergeBodies() {
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
 		
+		collisionProcessor.processBodyPairContacts();
+		
 		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 
-			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() /*|| bpc.areContactsStable()*/);
+			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() && bpc.areContactsStable());
 			
 			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;
@@ -438,7 +433,7 @@ public class RigidBodySystem {
 						bodies.remove(bpc.body1.parent);
 						bpc.body2.parent.addCollection(bpc.body1.parent);
 						bpc.body2.parent.addInternalContact(bpc);
-						bpc.body1.parent.addIncompleteCollectionContacts(bpc.body2.parent, removalQueue);
+						bpc.body2.parent.addIncompleteCollectionContacts(bpc.body1.parent, removalQueue);
 					}
 				}
 				else if (bpc.body1.isInCollection()) {
@@ -458,6 +453,7 @@ public class RigidBodySystem {
 				removalQueue.add(bpc);
 			}
 		}
+		
 		for (BodyPairContact element : removalQueue) {
 			collisionProcessor.bodyPairContacts.remove(element);
 		}

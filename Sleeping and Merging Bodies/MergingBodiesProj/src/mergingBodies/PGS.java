@@ -101,7 +101,7 @@ public class PGS {
 				
 				contact.processContactConstraints(mu);
 				if (computeInCollection)
-					contact.updateContactState(prevLambda_n, mu);
+					contact.updateContactState(mu);
 				
 				double dLambda_n = contact.lambda.x - prevLambda_n;
 				double dLambda_t = contact.lambda.y - prevLambda_t;

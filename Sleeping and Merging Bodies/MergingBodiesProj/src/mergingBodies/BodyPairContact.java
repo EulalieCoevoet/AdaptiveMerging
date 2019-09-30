@@ -63,6 +63,19 @@ public class BodyPairContact {
 		return false;
 	}
 	
+	/**
+	 * Removes the inactive contacts from the contactList
+	 */
+	public void removeInactiveContacts() {
+		ArrayList<Contact> inactiveContacts = new ArrayList<Contact>();
+		for (Contact contact : contactList) {
+			if (contact.lambda.x <= 1e-14) {
+				inactiveContacts.add(contact);
+			}
+		}
+		contactList.removeAll(inactiveContacts);
+	}
+	
 	 /**
 	 * Computes the relative velocity between the two bodies in contact.
 	 * In case of body in a collection, use velocities of parent.
@@ -135,10 +148,11 @@ public class BodyPairContact {
 		if (relativeKineticEnergyHist.size() > CollisionProcessor.sleepAccum.getValue())
 			relativeKineticEnergyHist.remove(0);
 	
-		double totalLambda_n = 0.;
+		double meanLambda_n = 0.;
 		for (Contact contact : contactList) 
-			totalLambda_n+=contact.lambda.x;
-		Pair<Integer, Double> state = new Pair<Integer, Double>(contactList.size(), totalLambda_n);
+			meanLambda_n+=contact.lambda.x;
+		meanLambda_n/=contactList.size();
+		Pair<Integer, Double> state = new Pair<Integer, Double>(contactList.size(), meanLambda_n);
 		
 		contactStateHist.add(state);
 		if (contactStateHist.size() > CollisionProcessor.sleepAccum.getValue())
@@ -155,7 +169,7 @@ public class BodyPairContact {
 
 		double epsilon = 5e-4;
 		double threshold = CollisionProcessor.sleepingThreshold.getValue();
-		
+
 		if ((relativeKineticEnergyHist.size() == CollisionProcessor.sleepAccum.getValue())) {
 			double previousValue = 0; 
 			double currentValue = 0;
@@ -168,26 +182,25 @@ public class BodyPairContact {
 		} else {
 			return false;
 		}
-		
+
 		return true;
-  }  
-	
+	}  
+
 	/**
 	 * Check if contacts have been stable over CollisionProcessor.sleepAccum time steps.
 	 * eulalie : work in progress
 	 * 			- missing class for cleaner access instead of using Pair
-	 * 			- currently a simple test on the sum of lambda.x
+	 * 			- currently a simple test on the mean of lambda.x
 	 * @return true or false
 	 */
 	public boolean areContactsStable() {
 
-		double epsilon = 1e-3;
-		
 		if ((contactStateHist.size() == CollisionProcessor.sleepAccum.getValue())) {
 			Pair<Integer, Double> previousState = contactStateHist.get(0);
 			Pair<Integer, Double> currentState;
 			for (Pair<Integer, Double> state : contactStateHist) {
 				currentState = state;
+				double epsilon = currentState.getValue()/4.;
 				if (currentState.getKey() != previousState.getKey())
 					return false;
 				if (currentState.getValue() < previousState.getValue()-epsilon)
