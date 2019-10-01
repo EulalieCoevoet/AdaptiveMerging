@@ -410,7 +410,10 @@ public class Contact {
 		GL2 gl = drawable.getGL().getGL2();
 
 		gl.glLineWidth(2);
-		gl.glColor4f(1, 0, 0, 1);
+		if (state == ContactState.SLIDING)
+			gl.glColor4f(0, 0, 0, 1);
+		else
+			gl.glColor4f(1, 0, 0, 1);
 		gl.glBegin( GL.GL_LINES );
 
 		double scale = forceVizScale.getValue();
@@ -430,7 +433,10 @@ public class Contact {
 	public void drawInternalContactForce( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
 
-		gl.glColor4f(0, 0, 1, 1);
+		if (state != ContactState.CLEAR)
+			gl.glColor4f(0, 0, 0, 1);
+		else
+			gl.glColor4f(0, 0, 1, 1);
 		
 		gl.glLineWidth(2);
 		gl.glBegin( GL.GL_LINES );
