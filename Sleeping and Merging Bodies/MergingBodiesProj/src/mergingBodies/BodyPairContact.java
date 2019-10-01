@@ -24,7 +24,7 @@ public class BodyPairContact {
 	public ArrayList<Double> relativeKineticEnergyHist = new ArrayList<Double>();
 	public ArrayList<Pair<Integer, Double>> contactStateHist = new ArrayList<Pair<Integer, Double>>();
 		
-	boolean inCollection = false;
+	public boolean inCollection = false;
 	
 	public BodyPairContact(RigidBody body1, RigidBody body2) {
 		this.body1 = body1;
@@ -61,19 +61,6 @@ public class BodyPairContact {
 			}
 		}
 		return false;
-	}
-	
-	/**
-	 * Removes the inactive contacts from the contactList
-	 */
-	public void removeInactiveContacts() {
-		ArrayList<Contact> inactiveContacts = new ArrayList<Contact>();
-		for (Contact contact : contactList) {
-			if (contact.lambda.x <= 1e-14) {
-				inactiveContacts.add(contact);
-			}
-		}
-		contactList.removeAll(inactiveContacts);
 	}
 	
 	 /**
@@ -150,8 +137,8 @@ public class BodyPairContact {
 	
 		double meanLambda_n = 0.;
 		for (Contact contact : contactList) 
-			meanLambda_n+=contact.lambda.x;
-		meanLambda_n/=contactList.size();
+			meanLambda_n += contact.lambda.x;
+		meanLambda_n /= contactList.size();
 		Pair<Integer, Double> state = new Pair<Integer, Double>(contactList.size(), meanLambda_n);
 		
 		contactStateHist.add(state);

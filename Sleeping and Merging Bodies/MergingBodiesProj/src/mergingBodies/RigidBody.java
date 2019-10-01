@@ -131,7 +131,7 @@ public class RigidBody {
 	 */
 	public ArrayList<Double> velHistory = new ArrayList<Double>();
 	
-	public double relativeKineticEnergy = Double.MAX_VALUE;
+	public double metric = Double.MAX_VALUE;
 
 	public boolean merged = false;
 
@@ -201,7 +201,6 @@ public class RigidBody {
 
 		// set our index
 		index = nextIndex++;
-		deltaV.zero();
 	}
 
 	/**
@@ -234,7 +233,6 @@ public class RigidBody {
 		// set our index
 
 		index = nextIndex++;
-		deltaV.zero();
 	}
 	
 	public boolean isInCollection() {
@@ -300,7 +298,6 @@ public class RigidBody {
 			v.x += force.x * dt / massLinear + deltaV.get(0);
 			v.y += force.y * dt / massLinear + deltaV.get(1);
 			omega += torque * dt / massAngular + deltaV.get(2);
-			deltaV.zero();
 
 			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;
@@ -319,10 +316,10 @@ public class RigidBody {
 	 * Apply the linear and angular velocities to the given body
 	 * @param body
 	 */
-	public void applyVelocities(RigidBody body) {
+	public void applyVelocitiesTo(RigidBody body) {
     	final Vector2d rw = new Vector2d( -(body.x.y - x.y), body.x.x - x.x );
 		rw.scale( omega );
-		body.v.add(v, rw);
+		body.v.add(v, rw); // sets the value of the sum
 		body.omega = omega;
     }
 	

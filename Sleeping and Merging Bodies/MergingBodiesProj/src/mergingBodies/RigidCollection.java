@@ -13,6 +13,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import mergingBodies.Contact.ContactState;
+import no.uib.cipr.matrix.DenseVector;
 
 public class RigidCollection extends RigidBody{
 
@@ -43,8 +44,11 @@ public class RigidCollection extends RigidBody{
 		
 		generateColor();
 		
-		copyVelocitiesFrom(body1);
-		
+		if (body1.massLinear > body2.massLinear) 
+			copyVelocitiesFrom(body1);
+		else 
+			copyVelocitiesFrom(body2);
+
 		addBodyInternalMethod(body1);
 		updateCollectionPinnedConditions(body1);
 		addBodyInternalMethod(body2);
@@ -99,10 +103,12 @@ public class RigidCollection extends RigidBody{
 		body.merged = true;
 		collectionBodies.add(body);
 		
-		v.add(body.v);
+		/*v.add(body.v);
 		v.scale(0.5);
 		omega += body.omega;
 		omega *= 0.5;
+		deltaV.add(body.deltaV);
+		deltaV.scale(0.5);*/
 	}
 	
 	/**
@@ -110,8 +116,9 @@ public class RigidCollection extends RigidBody{
 	 * @param body
 	 */
 	protected void copyVelocitiesFrom(RigidBody body) {
-		v.set(body.v);
+		v = new Vector2d(body.v);
 		omega = body.omega;
+		deltaV = new DenseVector(body.deltaV);
 	}
 	
 	/**
@@ -253,41 +260,49 @@ public class RigidCollection extends RigidBody{
 	 * @return
 	 */
 	public boolean checkUnmergeCondition(RigidBody body, double dt) {		
-		Vector2d v_rel = new Vector2d();
-		double omega_rel;
 		
-		v_rel.x = body.force.x * dt / body.massLinear + body.deltaV.get(0);
-		v_rel.y = body.force.y * dt / body.massLinear + body.deltaV.get(1);
-		omega_rel = body.torque * dt / body.massAngular + body.deltaV.get(2);
+		Vector2d dv = new Vector2d();
+		double domega;
 		
-		double metric = 0.5*v_rel.lengthSquared() + 0.5*omega_rel*omega_rel;
+		if(body.pinned)
+			return false;
+		
+		dv.x = body.force.x * dt / body.massLinear + body.deltaV.get(0);
+		dv.y = body.force.y * dt / body.massLinear + body.deltaV.get(1);
+		domega = body.torque * dt / body.massAngular + body.deltaV.get(2);
+		
+		double metric = 0.5*dv.lengthSquared() + 0.5*domega*domega;
 
-		//if (metric > body.relativeKineticEnergy) { // rule 0. possible motion (this is no longer working, I don't know why)
-					
+		if (metric > body.metric && metric > 1e-14) { // rule 0. possible motion 
+			
 			int nbContacts = 0;
+			Vector2d ft = new Vector2d(0.,0.);
+			Vector2d ftsum = new Vector2d(0.,0.);
 			for (BodyPairContact bpc : body.bodyPairContactList) {
 				for (Contact contact : bpc.contactList) { 
 					if (contact.state == ContactState.BROKEN) { 
-						body.relativeKineticEnergy = Double.MAX_VALUE;
+						body.metric = Double.MAX_VALUE;
 						return true; // rule 1. if one contact has broken
-					} else if (contact.state == ContactState.SLIDING) { 
-						body.relativeKineticEnergy = Double.MAX_VALUE;
-						return true; // rule 2. one or more contacts on the edge of friction cone 
-						// we should add a condition: if there are multiple sliding contacts, we should sum them and make sure
-						// the total friction force is not zero
+					} else if (contact.state == ContactState.SLIDING) {
+						ft.set(contact.jt.get(0)*contact.lambda.y, contact.jt.get(1)*contact.lambda.y);
+						ftsum.add(ft);
 					}
 					nbContacts++;
 				}
 			}
 			
-			if (nbContacts < 2) {
-				body.relativeKineticEnergy = Double.MAX_VALUE;
-				return true; // rule 3. only one contact point (should act as pivot)
+			if (0.5*ftsum.lengthSquared() > 1e-14) { 
+				body.metric = Double.MAX_VALUE;
+				return true; // rule 2. contacts on the edge of friction cone and norm of sum of forces not zero
 			}
 			
-		//}
+			if (nbContacts < 2) { 
+				body.metric = Double.MAX_VALUE;
+				return true; // rule 3. only one contact point (should act as pivot)
+			}
+		}
 	
-		body.relativeKineticEnergy = metric;
+		body.metric = metric;
 		return false;
 	}
 
@@ -302,7 +317,6 @@ public class RigidCollection extends RigidBody{
 			v.x += force.x * dt/massLinear + deltaV.get(0);
 			v.y += force.y * dt/massLinear + deltaV.get(1);
 			omega += torque * dt/ massAngular + deltaV.get(2);
-			deltaV.zero();
 			
 			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;
@@ -312,7 +326,7 @@ public class RigidCollection extends RigidBody{
 			
 			updateTransformations();
 			updateBodiesPositionAndTransformations();
-			updateBodiesVelocities();
+			applyVelocitiesToBodies();
 			updateContactJacobianAndDataAsInternal(dt);
 		} 
 	}
@@ -341,9 +355,17 @@ public class RigidCollection extends RigidBody{
 	/**
 	 * Updates bodies velocities
 	 */
-	protected void updateBodiesVelocities() {
+	protected void applyVelocitiesToBodies() {
 		for (RigidBody body: collectionBodies) {	
-			applyVelocities(body);
+			applyVelocitiesTo(body);
+		}
+	}
+	
+	/**
+	 * Clear deltaV of bodies
+	 */
+	protected void clearBodiesDeltaV() {
+		for (RigidBody body: collectionBodies) {	
 			body.deltaV.zero();
 		}
 	}
@@ -378,16 +400,6 @@ public class RigidCollection extends RigidBody{
 		for ( RigidBody body : collectionBodies ) {
 			springs.addAll( body.springs );
 		}
-		
-		// TODO: Nuke this before checkin... 
-//		ArrayList<Spring> newSprings = new ArrayList<Spring>();
-//		for (RigidBody body: collectionBodies) {
-//			for (Spring s: body.springs) {
-//				Spring newSpring = new Spring(s, this);
-//				newSprings.add(newSpring);
-//			}
-//		}
-//		springs.addAll(newSprings);
 	}
 
 	@Override
@@ -408,9 +420,9 @@ public class RigidCollection extends RigidBody{
 	 * ... does not do anything to the collection itself.
 	 */
 	public void unmergeSingleBody(RigidBody body) {
-		if (!body.isInCollection()) return;
+		if (!body.isInCollection()) 
+			return;
 		else {
-			body.parent.applyVelocities(body);
 			body.parent = null;
 			body.updateColor = true;
 		}

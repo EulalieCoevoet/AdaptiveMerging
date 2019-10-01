@@ -112,8 +112,8 @@ public class CollisionProcessor {
 		for (BodyPairContact bpc : bodyPairContacts) 
 			bpc.contactList.clear();
 		
-		for (Contact contact : contacts) 
-			if (contact.lambda.x >= 1e-14)
+		for (Contact contact : contacts)
+			if (contact.lambda.x >= 1e-14) // stores only if the contact is active
 				storeInBodyPairContacts(contact);
 		
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
@@ -124,9 +124,8 @@ public class CollisionProcessor {
 				bpc.accumulate();
 			}
 			
-			if (bpc.inCollection)
-				System.err.println("processBodyPairContacts: we sould not run collision detection inside a collection.");
 		}
+		
 		bodyPairContacts.clear();
 		bodyPairContacts.addAll(tmpBodyPairContacts);
 	}
@@ -148,7 +147,8 @@ public class CollisionProcessor {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
 				RigidCollection collection = (RigidCollection)body;
 
-				collection.updateBodiesVelocities();
+				collection.applyVelocitiesToBodies();
+				collection.clearBodiesDeltaV();
 				collection.updateContactJacobianAndDataAsInternal(dt);
 				solver.contacts = collection.internalContacts;
 				solver.solve(dt);

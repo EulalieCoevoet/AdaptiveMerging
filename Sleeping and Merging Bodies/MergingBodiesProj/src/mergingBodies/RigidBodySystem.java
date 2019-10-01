@@ -108,29 +108,29 @@ public class RigidBodySystem {
 
 		if (mouseSpring != null) {
 			mouseSpring.apply();
-			applySpringForces(); // deal with zero length springs
+			applySpringForces(); 
 		}
 		
 		if (processCollisions.getValue()) {
-			collisionProcessor.processCollisions(dt);
-		}
-
-		// advance the system by the given time step (update position and velocities of each body)
-		for (RigidBody b : bodies) {
-			b.advanceTime(dt); 
+			collisionProcessor.processCollisions(dt); 
 		}
 		
 		if (enableMerging.getValue()) {
-			mergeBodies();
+			mergeBodies(); 
 			checkIndex();
+		}
+		
+		if (enableMerging.getValue() && enableUpdateContactsInCollections.getValue()) {
+			collisionProcessor.updateContactsInCollections(dt);
 		}
 		
 		if (enableSleeping.getValue()) {
 			sleep();
 		}
-		
-		if (enableMerging.getValue() && enableUpdateContactsInCollections.getValue()) {
-			collisionProcessor.updateContactsInCollections(dt);
+
+		// advance the system by the given time step (update position and velocities of each body)
+		for (RigidBody b : bodies) {
+			b.advanceTime(dt); 
 		}
 		
 		if (enableSleeping.getValue()) {
@@ -271,9 +271,9 @@ public class RigidBodySystem {
 				collection.unmergedThisTimeStep = false;
 				for (RigidBody sB: collection.collectionBodies) {
 					sB.merged = false;
-					sB.deltaV.zero();
 					sB.force.set(0, 0);
 					sB.torque = 0;
+					sB.deltaV.zero();
 				}
 			}
 		}
@@ -354,11 +354,12 @@ public class RigidBodySystem {
 							RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
 							newCollection.addBodies(subBodies);
 							newCollection.fillInternalBodyContacts();
-							collection.applyVelocities(newCollection);
+							collection.applyVelocitiesTo(newCollection);
 							newBodies.add(newCollection);
 							subBodies.clear();
 						} else if (subBodies.size() == 1) {
 							collection.unmergeSingleBody(subBodies.get(0));
+							collection.applyVelocitiesTo(body);
 							newBodies.add(subBodies.remove(0));
 							subBodies.clear();
 						}
@@ -402,7 +403,7 @@ public class RigidBodySystem {
 		collisionProcessor.processBodyPairContacts();
 		
 		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
-
+			
 			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() && bpc.areContactsStable());
 			
 			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;

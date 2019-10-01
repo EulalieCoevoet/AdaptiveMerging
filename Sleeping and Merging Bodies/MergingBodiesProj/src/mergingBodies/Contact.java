@@ -10,7 +10,6 @@ import no.uib.cipr.matrix.DenseVector;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 
 /**
