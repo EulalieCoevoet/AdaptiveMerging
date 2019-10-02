@@ -404,7 +404,7 @@ public class RigidBodySystem {
 		
 		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 			
-			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() && bpc.areContactsStable());
+			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() /*&& bpc.areContactsStable()*/);
 			
 			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;

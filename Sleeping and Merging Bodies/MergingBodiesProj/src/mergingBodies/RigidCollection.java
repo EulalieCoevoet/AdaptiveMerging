@@ -48,7 +48,7 @@ public class RigidCollection extends RigidBody{
 			copyVelocitiesFrom(body1);
 		else 
 			copyVelocitiesFrom(body2);
-
+		
 		addBodyInternalMethod(body1);
 		updateCollectionPinnedConditions(body1);
 		addBodyInternalMethod(body2);

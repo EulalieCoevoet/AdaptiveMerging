@@ -14,6 +14,7 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
+import no.uib.cipr.matrix.DenseVector;
 import mergingBodies.RigidBody.ObjectState;
 
 /**
@@ -138,13 +139,18 @@ public class CollisionProcessor {
 
 		long now = System.nanoTime();
 		
-		applyContactsAsExternalForces(dt);
-		
 		solver.init(friction.getValue(), 1);
 		solver.confidentWarmStart = true;
 		solver.computeInCollection = true;
+		boolean doneOnceForAllCollections = false;
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
+				
+				if (!doneOnceForAllCollections) {
+					doneOnceForAllCollections = true;
+					applyContactsAsExternalForces(dt);
+				}
+				
 				RigidCollection collection = (RigidCollection)body;
 
 				collection.applyVelocitiesToBodies();
@@ -550,14 +556,7 @@ public class CollisionProcessor {
 			
 			Contact contact = null;
 			contact = new Contact(body1, body2, contactW, normal, b1, b2, distance);
-
-			// set normals in body coordinates
-			contact.normalB1.set(normal);
-			contact.normalB2.set(normal);
-			body1.transformW2B.transform(contact.normalB1);
-			body2.transformW2B.transform(contact.normalB2);
-			contact.normalB2.scale(-1);
-
+			
 			// put contact into a preliminary list that will be filtered in BroadPhase
 			tmpContacts.add( contact );
 		}

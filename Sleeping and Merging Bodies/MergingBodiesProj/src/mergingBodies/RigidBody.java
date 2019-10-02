@@ -298,7 +298,7 @@ public class RigidBody {
 			v.x += force.x * dt / massLinear + deltaV.get(0);
 			v.y += force.y * dt / massLinear + deltaV.get(1);
 			omega += torque * dt / massAngular + deltaV.get(2);
-
+			
 			if (state == ObjectState.ACTIVE) {
 				x.x += v.x * dt;
 				x.y += v.y * dt;

@@ -132,11 +132,11 @@ public class LCPAppTests extends LCPApp {
     	RigidBodySystem.enableMerging.setValue(true);
     	RigidBodySystem.enableUnmerging.setValue(false);
     	RigidBodySystem.enableUpdateContactsInCollections.setValue(true);
-    	RigidBodySystem.enableMergePinned.setValue(false);
+    	RigidBodySystem.enableMergePinned.setValue(true);
     	for (int i=0; i<40+CollisionProcessor.sleepAccum.getValue(); i++)
     		system.advanceTime(dt);
     
-    	RigidCollection collection = (RigidCollection)system.bodies.get(1);
+    	RigidCollection collection = (RigidCollection)system.bodies.get(0);
     	Contact contact = collection.getInternalContacts().get(0);
     	Vector2d lambda = new Vector2d(contact.getLambda());
     	

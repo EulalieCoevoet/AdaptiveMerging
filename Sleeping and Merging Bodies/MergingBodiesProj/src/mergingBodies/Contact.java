@@ -127,6 +127,13 @@ public class Contact {
 		contactB2.set(contactW);
 		body1.transformW2B.transform(contactB1);
 		body2.transformW2B.transform(contactB2);
+		
+		// set normals in body coordinates
+		normalB1.set(normal);
+		normalB2.set(normal);
+		body1.transformW2B.transform(normalB1);
+		body2.transformW2B.transform(normalB2);
+		normalB2.scale(-1);
 	}
 	
 	/**
@@ -138,19 +145,18 @@ public class Contact {
 		RigidBody b1 = (body1.isInCollection() && !computeInCollection )? body1.parent: body1;
 		RigidBody b2 = (body2.isInCollection() && !computeInCollection )? body2.parent: body2;
 
-		Point2d radiusBody1 = new Point2d(b1.x);
-		Point2d radiusBody2 = new Point2d(b2.x);
+		Point2d radiusBody1 = new Point2d();
+		Point2d radiusBody2 = new Point2d();
 
-		Vector2d contactPoint = new Vector2d(contactW);
-		radiusBody1.sub(contactPoint, radiusBody1);
-		radiusBody2.sub(contactPoint, radiusBody2);
+		radiusBody1.sub(contactW, b1.x);
+		radiusBody2.sub(contactW, b2.x);
 
 		Vector2d r1 = new Vector2d(-radiusBody1.y, radiusBody1.x);
 		Vector2d r2 = new Vector2d(-radiusBody2.y, radiusBody2.x);
 		
 		jn.set(0, -normal.x); 
 		jn.set(1, -normal.y);
-		jn.set(2, - r1.dot(normal));
+		jn.set(2, -r1.dot(normal));
 		jn.set(3, normal.x);
 		jn.set(4, normal.y);
 		jn.set(5, r2.dot(normal)); 
@@ -158,7 +164,7 @@ public class Contact {
 		Vector2d tangent = new Vector2d(-normal.y, normal.x);
 		jt.set(0, -tangent.x);
 		jt.set(1, -tangent.y);
-		jt.set(2, - r1.dot(tangent));
+		jt.set(2, -r1.dot(tangent));
 		jt.set(3, tangent.x);
 		jt.set(4, tangent.y);
 		jt.set(5, r2.dot(tangent));
