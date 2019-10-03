@@ -104,8 +104,8 @@ public class RigidCollection extends RigidBody{
 		
 		v.add(body.v);
 		v.scale(0.5);
-		//omega += body.omega;
-		//omega *= 0.5;
+		omega += body.omega;
+		omega *= 0.5;
 	}
 	
 	/**
@@ -277,6 +277,7 @@ public class RigidCollection extends RigidBody{
 			for (BodyPairContact bpc : body.bodyPairContactList) {
 				for (Contact contact : bpc.contactList) { 
 					if (contact.state == ContactState.BROKEN) { 
+						//System.out.println(ContactState.BROKEN);
 						body.metric = Double.MAX_VALUE;
 						return true; // rule 1. if one contact has broken
 					} else if (contact.state == ContactState.SLIDING) {
@@ -288,11 +289,13 @@ public class RigidCollection extends RigidBody{
 			}
 			
 			if (0.5*ftsum.lengthSquared() > 1e-14) { 
+				//System.out.println(ContactState.SLIDING);
 				body.metric = Double.MAX_VALUE;
 				return true; // rule 2. contacts on the edge of friction cone and norm of sum of forces not zero
 			}
 			
 			if (nbContacts < 2) { 
+				//System.out.println("PIVOT");
 				body.metric = Double.MAX_VALUE;
 				return true; // rule 3. only one contact point (should act as pivot)
 			}

@@ -114,7 +114,7 @@ public class CollisionProcessor {
 			bpc.contactList.clear();
 		
 		for (Contact contact : contacts)
-			if (contact.lambda.x >= 1e-14) // stores only if the contact is active
+			if (contact.lambda.x > 1e-14) // stores only if the contact is active
 				storeInBodyPairContacts(contact);
 		
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
