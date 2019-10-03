@@ -324,6 +324,8 @@ public class RigidBodySystem {
 		for (RigidBody b: removalQueue) {
 			bodies.remove(b);
 		}
+		
+		processCollectionsColor();
 	}
 
 	private void unmergeSelectBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies) {
@@ -355,6 +357,7 @@ public class RigidBodySystem {
 							RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
 							newCollection.addBodies(subBodies);
 							newCollection.fillInternalBodyContacts();
+							newCollection.color = new Color3f(collection.color);
 							collection.applyVelocitiesTo(newCollection);
 							newBodies.add(newCollection);
 							subBodies.clear();
@@ -378,7 +381,7 @@ public class RigidBodySystem {
 				}
 				bpc.removeFromBodyLists();
 			}
-		}
+		}			
 	}
 
 	private void buildNeighborBody(RigidBody body, ArrayList<RigidBody> subBodies, ArrayList<RigidBody> handledBodies) {
@@ -514,7 +517,6 @@ public class RigidBodySystem {
 	 * Resets the position of all bodies, and sets all velocities to zero
 	 */
 	public void reset() {
-		//	bodies = this.originalBodies;
 		int size = bodies.size();
 		int counter = 0;
 		int i = 0;
@@ -576,6 +578,31 @@ public class RigidBodySystem {
 		bodies.clear();
 		RigidBody.nextIndex = 0;
 		reset();
+	}
+	
+	/**
+	 * Process collections color:
+	 * <p><ul>
+	 * <li> if two collections have the same color, the most massive one will keep it
+	 * </ul><p>
+	 */
+	protected void processCollectionsColor() {
+		ArrayList<Color3f> colors = new ArrayList<Color3f>();
+		ArrayList<RigidCollection> collections = new ArrayList<RigidCollection>();
+		for (RigidBody body : bodies) {
+			if (body instanceof RigidCollection) {
+				RigidCollection collection = (RigidCollection)body;
+				if (colors.contains(collection.color)) {
+					RigidCollection sameColorCollection = collections.get(colors.indexOf(collection.color));
+					if(sameColorCollection.massLinear>collection.massLinear)
+						collection.generateColor();
+					else
+						sameColorCollection.generateColor();
+				}
+				colors.add(collection.color);
+				collections.add(collection);
+			}
+		}
 	}
 
 	/**

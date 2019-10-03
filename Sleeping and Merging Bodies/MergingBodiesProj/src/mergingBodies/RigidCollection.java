@@ -271,7 +271,6 @@ public class RigidCollection extends RigidBody{
 
 		if (metric > body.metric && metric > 1e-14) { // rule 0. possible motion 
 			
-			int nbContacts = 0;
 			Vector2d ft = new Vector2d(0.,0.);
 			Vector2d ftsum = new Vector2d(0.,0.);
 			for (BodyPairContact bpc : body.bodyPairContactList) {
@@ -284,7 +283,6 @@ public class RigidCollection extends RigidBody{
 						ft.set(contact.jt.get(0)*contact.lambda.y, contact.jt.get(1)*contact.lambda.y);
 						ftsum.add(ft);
 					}
-					nbContacts++;
 				}
 			}
 			
@@ -292,12 +290,6 @@ public class RigidCollection extends RigidBody{
 				//System.out.println(ContactState.SLIDING);
 				body.metric = Double.MAX_VALUE;
 				return true; // rule 2. contacts on the edge of friction cone and norm of sum of forces not zero
-			}
-			
-			if (nbContacts < 2) { 
-				//System.out.println("PIVOT");
-				body.metric = Double.MAX_VALUE;
-				return true; // rule 3. only one contact point (should act as pivot)
 			}
 		}
 	
