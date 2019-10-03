@@ -18,7 +18,7 @@ public class BodyPairContact {
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 
-	Vector2d relativeVelocity = new Vector2d();
+	Vector2d relativeLinearVelocity = new Vector2d();
 	double relativeAngularVelocity = 0;
 	
 	public ArrayList<Double> relativeKineticEnergyHist = new ArrayList<Double>();
@@ -77,13 +77,13 @@ public class BodyPairContact {
 		if ( body1.pinned ) {
 			// ASSERT that body 1 velocity is zero for this to be correct
 			// NOTE this will break if we ever have non zero velocities on pinned bodies!
-			relativeVelocity.set( body2.v );
+			relativeLinearVelocity.set( body2.v );
 			relativeAngularVelocity = body2.omega;
 			return;
 		} else if ( body2.pinned ) {
 			// ASSERT that body 2 velocity is zero for this to be correct
 			// NOTE this will break if we ever have non zero velocities on pinned bodies!
-			relativeVelocity.set( body1.v );
+			relativeLinearVelocity.set( body1.v );
 			relativeAngularVelocity = body1.omega;
 			return;
 		}
@@ -96,7 +96,7 @@ public class BodyPairContact {
 		newCom.add( massCom1, massCom2 );
 		newCom.scale( 1./(body1.massLinear + body2.massLinear) );
 			
-		relativeVelocity.sub(body2.v, body1.v);
+		relativeLinearVelocity.sub(body2.v, body1.v);
 
 		Vector2d tmp = new Vector2d();
 		Vector2d tmp2 = new Vector2d();
@@ -104,12 +104,12 @@ public class BodyPairContact {
 		tmp.sub( newCom, body2.x );
 		tmp.scale( body2.omega );
 		tmp2.set( -tmp.y, tmp.x );
-		relativeVelocity.add( tmp2 );
+		relativeLinearVelocity.add( tmp2 );
 		
 		tmp.sub( newCom, body1.x );
 		tmp.scale( body1.omega );
 		tmp2.set( -tmp.y, tmp.x );
-		relativeVelocity.sub( tmp2 );
+		relativeLinearVelocity.sub( tmp2 );
 		
 		relativeAngularVelocity = body2.omega - body1.omega;
 	}
@@ -119,7 +119,7 @@ public class BodyPairContact {
 	 * @return metric
 	 */
 	public double getRelativeKineticEnergy() {
-		double k = 0.5*relativeVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
+		double k = 0.5*relativeLinearVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
 		return k;
 	}
 	
