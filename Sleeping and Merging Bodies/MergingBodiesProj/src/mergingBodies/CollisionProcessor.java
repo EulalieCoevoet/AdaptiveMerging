@@ -25,7 +25,7 @@ public class CollisionProcessor {
 
 	public List<RigidBody> bodies;
 
-	private HashMap<String, Contact> lastTimeStepMap = new HashMap<String, Contact>();
+	public HashMap<String, Contact> lastTimeStepMap = new HashMap<String, Contact>();
 	
 	/**
 	 * The current contacts that resulted in the last call to process collisions

@@ -115,22 +115,23 @@ public class RigidBodySystem {
 			collisionProcessor.processCollisions(dt); 
 		}
 		
+		if (enableMerging.getValue() && enableUpdateContactsInCollections.getValue()) {
+			// this should be done before advanceTime() so that external forces and velocities are of the same time step
+			collisionProcessor.updateContactsInCollections(dt);
+		}
+
+		for (RigidBody b : bodies) {
+			b.advanceTime(dt); 
+		}
+		
 		if (enableMerging.getValue()) {
+			// this should be done after advanceTime() so that the deltaVs are applied to each bodies before merging
 			mergeBodies(); 
 			checkIndex();
 		}
 		
-		if (enableMerging.getValue() && enableUpdateContactsInCollections.getValue()) {
-			collisionProcessor.updateContactsInCollections(dt);
-		}
-		
 		if (enableSleeping.getValue()) {
 			sleep();
-		}
-
-		// advance the system by the given time step (update position and velocities of each body)
-		for (RigidBody b : bodies) {
-			b.advanceTime(dt); 
 		}
 		
 		if (enableSleeping.getValue()) {
@@ -368,8 +369,15 @@ public class RigidBodySystem {
 			}
 			body.bodyPairContactList.clear();
 			
-			for (BodyPairContact bpc: clearedBodyPairContacts)
+			for (BodyPairContact bpc: clearedBodyPairContacts) {
+				for (Contact contact : bpc.contactList) {
+					collisionProcessor.contacts.add(contact);
+					Block block1 = contact.block1;
+					Block block2 = contact.block2;
+					collisionProcessor.lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
+				}
 				bpc.removeFromBodyLists();
+			}
 		}
 	}
 
@@ -404,7 +412,7 @@ public class RigidBodySystem {
 		
 		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 			
-			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() /*&& bpc.areContactsStable()*/);
+			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() && bpc.areContactsStable());
 			
 			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;

@@ -13,7 +13,6 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import mergingBodies.Contact.ContactState;
-import no.uib.cipr.matrix.DenseVector;
 
 public class RigidCollection extends RigidBody{
 
@@ -103,12 +102,10 @@ public class RigidCollection extends RigidBody{
 		body.merged = true;
 		collectionBodies.add(body);
 		
-		/*v.add(body.v);
+		v.add(body.v);
 		v.scale(0.5);
-		omega += body.omega;
-		omega *= 0.5;
-		deltaV.add(body.deltaV);
-		deltaV.scale(0.5);*/
+		//omega += body.omega;
+		//omega *= 0.5;
 	}
 	
 	/**
@@ -118,7 +115,6 @@ public class RigidCollection extends RigidBody{
 	protected void copyVelocitiesFrom(RigidBody body) {
 		v = new Vector2d(body.v);
 		omega = body.omega;
-		deltaV = new DenseVector(body.deltaV);
 	}
 	
 	/**
