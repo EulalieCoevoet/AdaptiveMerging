@@ -137,9 +137,6 @@ public class RigidBody {
 
 	DenseVector deltaV = new DenseVector(3);
 
-	/** NEVER SET! New feature?? */
-	private Vector2d deltaF = new Vector2d();
-
 	public Vector2d forcePreSleep = new Vector2d();
 	public double torquePreSleep = 0;
 	
@@ -561,61 +558,4 @@ public class RigidBody {
 		}
 		bodyPairContactList.clear();
 	}
-
-	public void drawDeltaF(GLAutoDrawable drawable) {
-		GL2 gl = drawable.getGL().getGL2();
-		gl.glLineWidth(3);
-		gl.glColor3f(1, 0, 1);
-		gl.glBegin(GL.GL_LINES);
-		Point2d p = new Point2d(x);
-		double scale = 2 / massLinear;
-		gl.glVertex2d(p.x, p.y);
-		gl.glVertex2d(p.x + scale * deltaF.x, p.y + scale * deltaF.y);
-
-		gl.glEnd();
-
-		double max = CollisionProcessor.forceMetricTolerance.getValue();
-		if (deltaF.length() / massLinear > 0.05 * max) {
-			gl.glLineWidth(1);
-			gl.glBegin(GL.GL_LINES);
-
-			gl.glColor3f(0, 0, 0);
-			gl.glVertex2d(p.x, p.y);
-			Vector2d deltaF2 = new Vector2d(deltaF);
-			deltaF2.normalize();
-
-			// drawing the max force here... think of this being a line starting at the body
-			// COM, that goes, in the direction of the new applied contact forces, towards a
-			// point
-			// that indicates the MAX applied contact force before unmerging.
-			// so you need to find a point on a square defined by the max force applied in x
-			// and y directions before it unmerges.
-			// use similar triangles
-			if (Math.abs(deltaF2.y) >= Math.abs(deltaF2.x)) {
-				double scaling = deltaF2.y / max;
-				double newX = deltaF2.x / scaling;
-				if (deltaF2.y < 0)
-					gl.glVertex2d(p.x - 2 * newX, p.y - 2 * max);
-				else
-					gl.glVertex2d(p.x + 2 * newX, p.y + 2 * max);
-
-			} else {
-				double scaling = deltaF2.x / max;
-				double newY = deltaF2.y / scaling;
-				if (deltaF2.x < 0)
-					gl.glVertex2d(p.x - 2 * max, p.y - 2 * newY);
-				else
-					gl.glVertex2d(p.x + 2 * max, p.y + 2 * newY);
-			}
-
-			gl.glEnd();
-		}
-	}
-
-	/*
-	 * public void scale(Double value) { // TODO Auto-generated method stub
-	 * ArrayList<Block> new_blocks = new ArrayList<Block>;
-	 * 
-	 * }
-	 */
 }

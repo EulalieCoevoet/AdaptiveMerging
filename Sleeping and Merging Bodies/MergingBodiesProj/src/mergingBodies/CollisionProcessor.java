@@ -14,7 +14,6 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
-import no.uib.cipr.matrix.DenseVector;
 import mergingBodies.RigidBody.ObjectState;
 
 /**

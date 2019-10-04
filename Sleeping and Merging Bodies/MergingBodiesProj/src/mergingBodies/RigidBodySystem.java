@@ -294,7 +294,7 @@ public class RigidBodySystem {
 		for(RigidBody body : bodies) {
 			if (body instanceof RigidCollection) {
 				RigidCollection collection = (RigidCollection) body;
-				if (!collection.unmergedThisTimeStep) {
+				if (!collection.unmergedThisTimeStep && !collection.temporarilyPinned) {
 					
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 					for (RigidBody b: collection.collectionBodies) {
@@ -403,9 +403,12 @@ public class RigidBodySystem {
 	/**
 	 * Merges all rigidBodies in the system that fit the appropriate criteria: 
 	 * <p><ul>
-	 * <li> 1. They have been in contact for 50 time steps
-	 * <li> 2. The relative velocities of the two bodies in contact has been below the CollisionProcessor.sleep_accum
+	 * <li> 1. They have been in contact for at least "sleepAccum" number of time steps
+	 * <li> 2. The "metric" of the two bodies in contact has been below the "sleepingThreshold"
 	 * 	  value for the ENTIRETY of the contact.
+	 * <li> 3. The contacts have been stable for "sleepAccum" number of time steps
+	 * <li> 4. Satisfies the force closure criteria: only bodies that share two
+     * contacts, or cycles formed by 3 bodies with one contact between each
 	 * </ul><p>
 	 */
 	public void mergeBodies() {
@@ -709,14 +712,6 @@ public class RigidBodySystem {
 			}
 		}
 		
-		if(drawInternalContactDeltas.getValue()) {
-			for (RigidBody b : bodies) {
-				if (b instanceof RigidCollection) {
-					((RigidCollection) b).drawInternalDeltas(drawable);
-				}
-			}
-		}
-		
 		if(drawInternalHistories.getValue()) {
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
@@ -784,7 +779,6 @@ public class RigidBodySystem {
 	private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
 	private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces of merged collections", true);
 	private BooleanParameter drawExternalContactForces = new BooleanParameter("draw External Forces", true);
-	private BooleanParameter drawInternalContactDeltas = new BooleanParameter("draw Internal Deltas", true);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw Internal Histories", false );
 
 	private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", true );
@@ -819,7 +813,6 @@ public class RigidBodySystem {
 		vfpv.add( drawInternalContactForces.getControls() );
 		vfpv.add( drawExternalContactForces.getControls() );
 		vfpv.add( drawInternalHistories.getControls() );
-		vfpv.add( drawInternalContactDeltas.getControls() );
 
 		vfpv.add( drawCOMs.getControls() );
 		vfpv.add( drawContacts.getControls() );

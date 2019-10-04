@@ -266,11 +266,10 @@ public class RigidCollection extends RigidBody{
 		dv.x = body.force.x * dt / body.massLinear + body.deltaV.get(0);
 		dv.y = body.force.y * dt / body.massLinear + body.deltaV.get(1);
 		domega = body.torque * dt / body.massAngular + body.deltaV.get(2);
-		
 		double metric = 0.5*dv.lengthSquared() + 0.5*domega*domega;
 
-		if (metric > body.metric && metric > 1e-14) { // rule 0. possible motion 
-			
+		if (metric > body.metric && metric > 1e-10) { // rule 0. possible motion 
+		
 			Vector2d ft = new Vector2d(0.,0.);
 			Vector2d ftsum = new Vector2d(0.,0.);
 			for (BodyPairContact bpc : body.bodyPairContactList) {
@@ -290,6 +289,12 @@ public class RigidCollection extends RigidBody{
 				//System.out.println(ContactState.SLIDING);
 				body.metric = Double.MAX_VALUE;
 				return true; // rule 2. contacts on the edge of friction cone and norm of sum of forces not zero
+			}
+			
+			if (metric>1e-4) {
+				//System.out.println("MOVING");
+				body.metric = Double.MAX_VALUE;
+				return true; // rule 3. the body is unbalanced
 			}
 		}
 	
@@ -485,12 +490,6 @@ public class RigidCollection extends RigidBody{
 				continue;
 			for (Contact c: bc.contactList) 
 				c.drawInternalContactForce(drawable);
-		}
-	}
-
-	public void drawInternalDeltas(GLAutoDrawable drawable) {
-		for (RigidBody b: collectionBodies) {
-			b.drawDeltaF(drawable);
 		}
 	}
 
