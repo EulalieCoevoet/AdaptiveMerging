@@ -310,17 +310,6 @@ public class RigidBody {
 	}
 	
 	/**
-	 * Apply the linear and angular velocities to the given body
-	 * @param body
-	 */
-	public void applyVelocitiesTo(RigidBody body) {
-    	final Vector2d rw = new Vector2d( -(body.x.y - x.y), body.x.x - x.x );
-		rw.scale( omega );
-		body.v.add(v, rw); // sets the value of the sum
-		body.omega = omega;
-    }
-	
-	/**
 	 * Computes the total kinetic energy of the body.
 	 * 
 	 * @return the total kinetic energy

@@ -298,7 +298,10 @@ public class RigidBodySystem {
 					
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 					for (RigidBody b: collection.collectionBodies) {
-						boolean unmerge = collection.checkUnmergeCondition(b, dt);
+						boolean unmerge = collection.checkUnmergeCondition(b, dt, 
+																			enableUnmergeMovingCondition.getValue(), 
+																			enableUnmergeNormalCondition.getValue(), 
+																			enableUnmergeFrictionCondition.getValue());
 						if (unmerge)
 							unmergingBodies.add(b);
 					}
@@ -407,7 +410,7 @@ public class RigidBodySystem {
 	 * <li> 2. The "metric" of the two bodies in contact has been below the "sleepingThreshold"
 	 * 	  value for the ENTIRETY of the contact.
 	 * <li> 3. The contacts have been stable for "sleepAccum" number of time steps
-	 * <li> 4. Satisfies the force closure criteria: only bodies that share two
+	 * <li> 4. Satisfies the conservative force closure: only bodies that share two
      * contacts, or cycles formed by 3 bodies with one contact between each
 	 * </ul><p>
 	 */
@@ -418,7 +421,9 @@ public class RigidBodySystem {
 		
 		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 			
-			boolean mergeCondition = (bpc.checkRelativeKineticEnergy() && bpc.areContactsStable());
+			boolean mergeCondition = bpc.checkRelativeKineticEnergy();
+			if (enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable());
+			if (enableMergeCheckCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkForceClosureCritera());
 			
 			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
 			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;
@@ -786,10 +791,15 @@ public class RigidBodySystem {
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
 	private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", false );
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
-	public static BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
-	public static BooleanParameter enableMergePinned = new BooleanParameter( "enable merging pinned body", true);
-	public static BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", true);
-	public static BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", true);
+	public BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
+	public BooleanParameter enableMergePinned = new BooleanParameter( "enable merging pinned body", true);
+	public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "enable merging check cycle condition", true);
+	public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "enable merging stable contact condition", true);
+	public BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", true);
+	public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "enable unmerging friction condition", true);
+	public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "enable unmerging contact normal condition", true);
+	public BooleanParameter enableUnmergeMovingCondition = new BooleanParameter( "enable unmerging moving condition", true);
+	public BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", true);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", false);
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
@@ -824,15 +834,26 @@ public class RigidBodySystem {
 		CollapsiblePanel cp = new CollapsiblePanel(vfpv.getPanel());
 		cp.collapse();
 		vfp.add( cp );
+		
+		VerticalFlowPanel vfpm = new VerticalFlowPanel();
+		vfpm.setBorder( new TitledBorder("merging unmerging rules") );
+		vfpm.add( enableMerging.getControls() );
+		vfpm.add( enableMergePinned.getControls() );
+		vfpm.add( enableMergeCheckCycleCondition.getControls() );
+		vfpm.add( enableMergeStableContactCondition.getControls() );
+		vfpm.add( enableUnmerging.getControls() );
+		vfpm.add( enableUnmergeFrictionCondition.getControls() );
+		vfpm.add( enableUnmergeNormalCondition.getControls() );
+		vfpm.add( enableUnmergeMovingCondition.getControls() );
+		vfpm.add( enableUpdateContactsInCollections.getControls() );
+		vfpm.add( enableSleeping.getControls() );
+		CollapsiblePanel cpm = new CollapsiblePanel(vfpm.getPanel());
+		cpm.collapse();
+		vfp.add( cpm );
 
-		vfp.add( processCollisions.getControls() );
-		vfp.add( enableMerging.getControls() );
-		vfp.add( enableMergePinned.getControls() );
-		vfp.add( enableUnmerging.getControls() );
-		vfp.add( enableUpdateContactsInCollections.getControls() );
-		vfp.add( enableSleeping.getControls() );
+		vfp.add( processCollisions.getControls() );		
 		vfp.add( collisionProcessor.getControls() );
-
+		
 		vfp.add( useGravity.getControls() );
 		vfp.add( gravityAmount.getSliderControls(false) );
 		vfp.add( gravityAngle.getSliderControls(false) );

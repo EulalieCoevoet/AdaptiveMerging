@@ -208,6 +208,22 @@ public class BodyPairContact {
 	}
 	
 	/**
+	 * Check if it satisfies the force closure criteria: only bodies that share two
+	 * contacts, or cycles formed by 3 bodies with one contact between each.
+	 * @return true if the criteria is satisfied
+	 */
+	public boolean checkForceClosureCritera() {
+		
+		if (contactList.size()>2)
+			return true;
+		
+		if (true /*checkForCycles()*/)
+			return true;
+		
+		return false;
+	}
+	
+	/**
 	 * Given a RigidBody sB in a BodyPairContact, return the adjacent RigidBody in the BodyPairContact
 	 * @param body
 	 * @return

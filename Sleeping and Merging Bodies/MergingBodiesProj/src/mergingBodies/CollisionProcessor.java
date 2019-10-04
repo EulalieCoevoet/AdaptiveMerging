@@ -336,15 +336,17 @@ public class CollisionProcessor {
 			points.add( c.contactW );
 			meanPos.add( c.contactW );						
 		}
+		
 		meanPos.scale( 1.0 / N );
 		Matrix2d covariance = new Matrix2d();
 		for ( Contact c : contacts ) {
 			v.sub( c.contactW, meanPos );						
 			covariance.rank1( 1.0 / N, v );
 		}
+		
 		covariance.evd();
-		double eps = 1e-4;
-		if ( !(covariance.ev1 > eps && covariance.ev2 > eps) ) { // not a flat region... could do convex hull
+		double eps = epsilonPruneConvexHull.getValue();
+		if ( covariance.ev1 <= eps || covariance.ev2 <= eps ) { // not a flat region... could do convex hull
 			
 			Vector2d dir = null;
 			if ( covariance.ev1 <= eps ) {
@@ -465,8 +467,6 @@ public class CollisionProcessor {
 
 				processCollision(body1, leafBlock1, body2, leafBlock2);
 				
-				// Wake neighbors, and update wokenUp boolean for display
-				// eulalie: shouldn't we do that in processCollision when an actual contact is detected?
 				if (RigidBodySystem.enableSleeping.getValue()){
 					if (!body1.wokenUp && body1.state == ObjectState.ACTIVE && !body1.pinned && body2.state == ObjectState.SLEEPING) {
 						wakeNeighbors(body2, collisionWake.getValue());
@@ -574,6 +574,7 @@ public class CollisionProcessor {
 	public static IntParameter collisionWake = new IntParameter("wake n neighbors", 2, 0, 10 );
 	public static IntParameter sleepAccum = new IntParameter("accumulate N sleep queries", 50, 0, 200 );
 	public BooleanParameter pruneContacts = new BooleanParameter( "prune contacts", true );
+	public DoubleParameter epsilonPruneConvexHull = new DoubleParameter( "epsilon for convex hull (prune contacts)", 1e-4, 1e-14, 1);
 
 	/**
 	 * @return controls for the collision processor
@@ -584,6 +585,7 @@ public class CollisionProcessor {
 		vfp.setBorder( new TitledBorder("Collision Processing Controls") );
 		vfp.add( shuffle.getControls() );
 		vfp.add( pruneContacts.getControls() );
+		vfp.add( epsilonPruneConvexHull.getSliderControls(true) );
 		vfp.add( warmStart.getControls() );
 		vfp.add( iterations.getSliderControls() );
 		vfp.add( restitution.getSliderControls(false) );

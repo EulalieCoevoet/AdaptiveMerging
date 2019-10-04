@@ -43,11 +43,7 @@ public class RigidCollection extends RigidBody{
 		
 		generateColor();
 		
-		if (body1.massLinear > body2.massLinear) 
-			copyVelocitiesFrom(body1);
-		else 
-			copyVelocitiesFrom(body2);
-		
+		copyVelocitiesFrom(body1);
 		addBodyInternalMethod(body1);
 		updateCollectionPinnedConditions(body1);
 		addBodyInternalMethod(body2);
@@ -101,11 +97,12 @@ public class RigidCollection extends RigidBody{
 		body.parent = this;
 		body.merged = true;
 		collectionBodies.add(body);
-		
-		v.add(body.v);
-		v.scale(0.5);
-		omega += body.omega;
-		omega *= 0.5;
+
+		Vector2d tmp = new Vector2d(body.v);
+		v.scale(massLinear);
+		tmp.scale(body.massLinear);
+		v.add(tmp);
+		v.scale(1./(massLinear+body.massLinear));
 	}
 	
 	/**
@@ -255,7 +252,10 @@ public class RigidCollection extends RigidBody{
 	 * @param dt
 	 * @return
 	 */
-	public boolean checkUnmergeCondition(RigidBody body, double dt) {		
+	public boolean checkUnmergeCondition(RigidBody body, double dt, 
+											boolean enableUnmergeMovingCondition, 
+											boolean enableUnmergeNormalCondition, 
+											boolean enableUnmergeFrictionCondition) {		
 		
 		Vector2d dv = new Vector2d();
 		double domega;
@@ -268,14 +268,14 @@ public class RigidCollection extends RigidBody{
 		domega = body.torque * dt / body.massAngular + body.deltaV.get(2);
 		double metric = 0.5*dv.lengthSquared() + 0.5*domega*domega;
 
-		if (metric > body.metric && metric > 1e-10) { // rule 0. possible motion 
+		if ((metric > body.metric && metric > 1e-10)  // rule 0. possible motion 
+				|| !enableUnmergeMovingCondition) {
 		
 			Vector2d ft = new Vector2d(0.,0.);
 			Vector2d ftsum = new Vector2d(0.,0.);
 			for (BodyPairContact bpc : body.bodyPairContactList) {
 				for (Contact contact : bpc.contactList) { 
-					if (contact.state == ContactState.BROKEN) { 
-						//System.out.println(ContactState.BROKEN);
+					if (contact.state == ContactState.BROKEN && enableUnmergeNormalCondition) { 
 						body.metric = Double.MAX_VALUE;
 						return true; // rule 1. if one contact has broken
 					} else if (contact.state == ContactState.SLIDING) {
@@ -285,14 +285,12 @@ public class RigidCollection extends RigidBody{
 				}
 			}
 			
-			if (0.5*ftsum.lengthSquared() > 1e-14) { 
-				//System.out.println(ContactState.SLIDING);
+			if (0.5*ftsum.lengthSquared() > 1e-14 && enableUnmergeFrictionCondition) { 
 				body.metric = Double.MAX_VALUE;
 				return true; // rule 2. contacts on the edge of friction cone and norm of sum of forces not zero
 			}
 			
-			if (metric>1e-4) {
-				//System.out.println("MOVING");
+			if (metric>1e-4 && enableUnmergeMovingCondition) {
 				body.metric = Double.MAX_VALUE;
 				return true; // rule 3. the body is unbalanced
 			}
@@ -357,6 +355,17 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 	
+	/**
+	 * Apply the linear and angular velocities to the given body
+	 * @param body
+	 */
+	public void applyVelocitiesTo(RigidBody body) {
+    	final Vector2d rw = new Vector2d( -(body.x.y - x.y), body.x.x - x.x );
+		rw.scale( omega );
+		body.v.add(v, rw); // sets the value of the sum
+		body.omega = omega;
+    }
+		
 	/**
 	 * Clear deltaV of bodies
 	 */
