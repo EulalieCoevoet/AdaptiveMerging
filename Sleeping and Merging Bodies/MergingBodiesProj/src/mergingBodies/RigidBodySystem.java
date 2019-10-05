@@ -262,7 +262,7 @@ public class RigidBodySystem {
 
 	private void clearJunkAtStartOfTimeStep() {
 		for (RigidBody body: bodies) {
-			body.merged = false;
+			body.mergedThisTimeStep = false;
 			body.force.set(0, 0);
 			body.torque = 0;
 			body.deltaV.zero();
@@ -271,7 +271,7 @@ public class RigidBodySystem {
 				RigidCollection collection = (RigidCollection)body;
 				collection.unmergedThisTimeStep = false;
 				for (RigidBody sB: collection.collectionBodies) {
-					sB.merged = false;
+					sB.mergedThisTimeStep = false;
 					sB.force.set(0, 0);
 					sB.torque = 0;
 					sB.deltaV.zero();
@@ -376,6 +376,7 @@ public class RigidBodySystem {
 			body.bodyPairContactList.clear();
 			
 			for (BodyPairContact bpc: clearedBodyPairContacts) {
+				// Store in contacts map for warm start
 				for (Contact contact : bpc.contactList) {
 					collisionProcessor.contacts.add(contact);
 					Block block1 = contact.block1;
@@ -424,9 +425,9 @@ public class RigidBodySystem {
 			boolean mergeCondition = bpc.checkRelativeKineticEnergy();
 			if (enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable());
 			if (enableMergeCheckCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkForceClosureCritera());
-			
+
 			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
-			if (bpc.body1.merged && bpc.body2.merged) mergeCondition = false;
+			if (bpc.body1.mergedThisTimeStep && bpc.body2.mergedThisTimeStep) mergeCondition = false;
 			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 

@@ -122,8 +122,9 @@ public class CollisionProcessor {
 			if (!bpc.contactList.isEmpty()) {
 				tmpBodyPairContacts.add(bpc);
 				bpc.accumulate();
+			} else {
+				bpc.removeFromBodyLists();
 			}
-			
 		}
 		
 		bodyPairContacts.clear();
@@ -284,7 +285,7 @@ public class CollisionProcessor {
 			for ( RigidBody b2 : bodies ) { // not so inefficient given the continue on the next line
 				
 				if ( b1.index >= b2.index ) continue;
-				if ( b1.pinned && b2.pinned ) continue; 
+				if ( (b1.pinned || b1.temporarilyPinned) && (b2.pinned || b2.temporarilyPinned) ) continue; 
 				
 				tmpContacts.clear();
 				narrowPhase( b1, b2 );
@@ -391,6 +392,7 @@ public class CollisionProcessor {
 	 */
 	private void storeInBodyPairContacts(Contact contact) {
 
+		// eulalie : I think this will never happen as we don't detect collision between two pinned bodies
 		if (contact.body1.pinned && contact.body2.pinned) 
 			return;
 		

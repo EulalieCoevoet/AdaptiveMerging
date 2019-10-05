@@ -133,7 +133,7 @@ public class RigidBody {
 	
 	public double metric = Double.MAX_VALUE;
 
-	public boolean merged = false;
+	public boolean mergedThisTimeStep = false;
 
 	DenseVector deltaV = new DenseVector(3);
 
@@ -332,6 +332,50 @@ public class RigidBody {
 		double ypart = result.x;
 		result.set(xpart, ypart);
 		result.add(v);
+	}
+	
+	/**
+	 * For merging condition. In progress.
+	 * @param count
+	 * @param startBody
+	 * @param bpcFrom
+	 * @return
+	 */
+	protected boolean checkForCycles(int count, RigidBody startBody, BodyPairContact bpcFrom) {
+		
+		if (count>3) // more than three bodies in the cycle
+			return false;
+		
+		// if we come across a collection in the contact graph, we consider it as a body and check the external bpc 
+		ArrayList<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContactList : bodyPairContactList;
+		
+		RigidBody otherBodyFrom = bpcFrom.getOtherBodyFromCollectionPerspective(this);		
+		
+		BodyPairContact bpcToCheck = null;
+		for (BodyPairContact bpc: bpcList) {
+			if(bpc != bpcFrom) { // don't check the bpc we come from
+				RigidBody otherBody = bpc.getOtherBodyFromCollectionPerspective(this);
+
+				if (!bpc.inCollection && bpc.contactList.size()==1) // if there is only one contact in the bpc, it is a direction we want to check for cycle
+					bpcToCheck = bpc;
+				
+				if(otherBody == otherBodyFrom) // we are touching two different bodies in a same collection
+					return true;
+				
+				if(otherBody == startBody || // we've reached the body from which the cycle starts 
+					otherBody.isInSameCollection(startBody) || // we are part of a collection that touches a same body 
+					  (otherBody.pinned && startBody.pinned)) // there is a body between two pinned body
+					return true;
+			}
+		}
+
+		// we did not find a cycle, continue
+		if(bpcToCheck!=null) {
+			RigidBody otherBody = bpcToCheck.getOtherBodyFromCollectionPerspective(this);
+			return otherBody.checkForCycles(++count, startBody, bpcToCheck); 
+		}
+		
+		return false;
 	}
 
 	/**
@@ -537,14 +581,5 @@ public class RigidBody {
 		gl.glRasterPos2d(this.x.x, this.x.y);
 
 		EasyViewer.glut.glutBitmapString(font, Integer.toString(this.index));
-	}
-
-	public void unmergeBodyContacts() {
-
-		for (BodyPairContact bc : bodyPairContactList) {
-			RigidBody otherBody = bc.getOtherBody(this);
-			otherBody.bodyPairContactList.remove(bc);
-		}
-		bodyPairContactList.clear();
 	}
 }

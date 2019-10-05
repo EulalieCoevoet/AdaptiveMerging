@@ -95,7 +95,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	protected void addBodyInternalMethod(RigidBody body) {
 		body.parent = this;
-		body.merged = true;
+		body.mergedThisTimeStep = true;
 		collectionBodies.add(body);
 
 		Vector2d tmp = new Vector2d(body.v);
@@ -229,16 +229,8 @@ public class RigidCollection extends RigidBody{
 			System.err.println("RigidCollection.addInternalContact : This should probably never happen");
 		}
 		
-		if (!bpc.body1.bodyPairContactList.contains(bpc)) {
-			System.err.println("RigidCollection.addInternalContact : Shouldn't bpc already be in the body1 list?");
-			bpc.body1.bodyPairContactList.add(bpc);
-		}
+		bpc.addToBodyLists();
 		
-		if (!bpc.body2.bodyPairContactList.contains(bpc))  {
-			System.err.println("RigidCollection.addInternalContact : Shouldn't bpc already be in the body2 list?");
-			bpc.body2.bodyPairContactList.add(bpc);
-		}
-
 		for (Contact c: bpc.contactList) {
 			c.getHistoryStatistics();
 		}
@@ -462,7 +454,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyPairContact> removalQueue) {
 		for (BodyPairContact bpc: body.bodyPairContactList) {
-			if (bpc.body1.parent == bpc.body2.parent && bpc.relativeKineticEnergyHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bpc.inCollection) {
+			if (bpc.body1.isInSameCollection(bpc.body2) && bpc.relativeKineticEnergyHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bpc.inCollection) {
 				bpc.inCollection = true;
 				body.parent.addInternalContact(bpc);
 				removalQueue.add(bpc);

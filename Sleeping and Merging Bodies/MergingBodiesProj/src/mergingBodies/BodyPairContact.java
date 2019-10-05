@@ -74,13 +74,13 @@ public class BodyPairContact {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		if ( body1.pinned ) {
+		if ( body1.pinned || body1.temporarilyPinned ) {
 			// ASSERT that body 1 velocity is zero for this to be correct
 			// NOTE this will break if we ever have non zero velocities on pinned bodies!
 			relativeLinearVelocity.set( body2.v );
 			relativeAngularVelocity = body2.omega;
 			return;
-		} else if ( body2.pinned ) {
+		} else if ( body2.pinned || body2.temporarilyPinned ) {
 			// ASSERT that body 2 velocity is zero for this to be correct
 			// NOTE this will break if we ever have non zero velocities on pinned bodies!
 			relativeLinearVelocity.set( body1.v );
@@ -214,13 +214,10 @@ public class BodyPairContact {
 	 */
 	public boolean checkForceClosureCritera() {
 		
-		if (contactList.size()>2)
+		if (contactList.size()>1)
 			return true;
 		
-		if (true /*checkForCycles()*/)
-			return true;
-		
-		return false;
+		return body1.checkForCycles(0, body1, this);
 	}
 	
 	/**
@@ -233,6 +230,18 @@ public class BodyPairContact {
 		if (body2 == body) return body1;
 		return null;
 	}
+	
+	/**
+	 * Given a RigidBody or RigidCollection sB in a BodyPairContact, return the adjacent RigidBody in the BodyPairContact
+	 * @param body
+	 * @return
+	 */
+	public RigidBody getOtherBodyFromCollectionPerspective(RigidBody body) {
+		if (body.isInCollection()) 
+			return (body1.isInSameCollection(body))? body2 : body1;
+		else 
+			return getOtherBody(body);
+	}
 
 	/**
 	 * Add the BodyContact to bodyContactList of members body1 and body2  
@@ -244,6 +253,13 @@ public class BodyPairContact {
 		if (!body2.bodyPairContactList.contains(this)) {
 			body2.bodyPairContactList.add(this);
 		}
+		
+		if (body1.isInCollection() && !body1.parent.bodyPairContactList.contains(this)) {
+			body1.parent.bodyPairContactList.add(this);
+		}
+		if (body2.isInCollection() && !body2.isInSameCollection(body1) && !body2.parent.bodyPairContactList.contains(this)) {
+			body2.parent.bodyPairContactList.add(this);
+		}
 	}
 	
 	/**
@@ -252,5 +268,12 @@ public class BodyPairContact {
 	public void removeFromBodyLists() {
 		body1.bodyPairContactList.remove(this);
 		body2.bodyPairContactList.remove(this);
+		
+		if (body1.isInCollection()) {
+			body1.parent.bodyPairContactList.remove(this);
+		}
+		if (body2.isInCollection() && !body2.isInSameCollection(body1)) {
+			body2.parent.bodyPairContactList.remove(this);
+		}
 	}
 }

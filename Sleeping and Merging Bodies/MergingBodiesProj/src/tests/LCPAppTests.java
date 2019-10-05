@@ -194,13 +194,13 @@ public class LCPAppTests extends LCPApp {
 		loadSystem("datalcp/jamTest.png");
 
 		system.enableMerging.setValue(false);
-		system.enableUnmerging.setValue(false);
-		system.enableUpdateContactsInCollections.setValue(false);
 		for (int i=0; i<100; i++)
 			system.advanceTime(dt);
 		assertEquals(4, system.bodies.size()); 
 
 		system.enableMerging.setValue(true);
+		system.enableUnmerging.setValue(false);
+		system.enableMergeCheckCycleCondition.setValue(false);
 		for (int i=0; i<CollisionProcessor.sleepAccum.getValue(); i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
