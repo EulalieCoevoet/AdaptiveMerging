@@ -90,6 +90,7 @@ public class CollisionProcessor {
 			solver.init(friction.getValue(), iterations.getValue());
 			solver.restitution = restitution.getValue();
 			solver.feedbackStiffness = feedbackStiffness.getValue();
+			solver.compliance = compliance.getValue();
 			if (warmStart.getValue())
 				solver.enableWarmStart(lastTimeStepMap);
 			solver.contacts = contacts;
@@ -565,10 +566,11 @@ public class CollisionProcessor {
 
 	public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
 	public DoubleParameter friction = new DoubleParameter("Coulomb friction coefficient", 0.8, 0, 2 );
-	public IntParameter iterations = new IntParameter("iterations for GS solve", 500, 1, 1000);
+	public IntParameter iterations = new IntParameter("iterations for GS solve", 2000, 1, 5000);
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0, 0,50  );
+	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-5, 1e-10, 1  );
 	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1.0, 0, 10 );
 	public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 15, 0, 30);
 	public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", false );
@@ -593,6 +595,7 @@ public class CollisionProcessor {
 		vfp.add( restitution.getSliderControls(false) );
 		vfp.add( friction.getSliderControls(false) );
 		vfp.add( feedbackStiffness.getSliderControls(false) );
+		vfp.add( compliance.getSliderControls(true) );
 		vfp.add( sleepingThreshold.getSliderControls(false) );
 		vfp.add( wakingThreshold.getSliderControls(false) );
 		vfp.add( use_contact_graph.getControls() );

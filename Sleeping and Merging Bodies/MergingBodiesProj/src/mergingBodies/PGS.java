@@ -44,6 +44,9 @@ public class PGS {
 	/** Feedback stiffness coefficient*/
 	public double feedbackStiffness;
 	
+	/** Compliance */
+	public double compliance;
+	
 	/** Coefficient of restitution (bounce) */
 	public double restitution;
 	
@@ -54,6 +57,8 @@ public class PGS {
 	/** Warm start option */
 	protected boolean warmStart;
 	protected HashMap<String, Contact> lastTimeStepMap = null;
+
+	
 	
 	public void enableWarmStart(HashMap<String, Contact> lastTimeStepMap){
 		warmStart = true;
@@ -77,7 +82,7 @@ public class PGS {
 
 		for (Contact contact: contacts) {
 			contact.computeB(dt, restitution, feedbackStiffness, computeInCollection);
-			contact.computeJMinvJtDiagonal(computeInCollection);
+			contact.computeJMinvJtDiagonal(computeInCollection, compliance);
 		}
 		
 		if (confidentWarmStart)
@@ -91,20 +96,48 @@ public class PGS {
 			for (int i=0; i<contacts.size(); i++) {
 				
 				Contact contact = contacts.get(i);
+				
+				RigidBody body1 = (contact.body1.isInCollection() && !computeInCollection)? contact.body1.parent: contact.body1;
+				RigidBody body2 = (contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
+
+				double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
+				double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
+				double j1inv = (body1.temporarilyPinned)? 0: body1.jinv;
+				double j2inv = (body2.temporarilyPinned)? 0: body2.jinv;
+				
+				DenseVector dv1 = body1.deltaV; 
+				DenseVector dv2 = body2.deltaV;
+				
 				double Jdvn = contact.getJdvn(computeInCollection);
-				double Jdvt = contact.getJdvt(computeInCollection);
-				
 				double prevLambda_n = contact.lambda.x;
-				double prevLambda_t = contact.lambda.y;
 				contact.lambda.x -= (contact.bn + Jdvn)/contact.diin;
-				contact.lambda.y -= (contact.bt + Jdvt)/contact.diit;
-				
-				contact.processContactConstraints(mu);
-				contact.updateContactState(mu);
-				
+				contact.lambda.x = Math.max(0., contact.lambda.x);
 				double dLambda_n = contact.lambda.x - prevLambda_n;
+				
+				//update delta V;
+				dv1.add( 0, contact.jn.get(0) * m1inv * dLambda_n );
+				dv1.add( 1, contact.jn.get(1) * m1inv * dLambda_n );
+				dv1.add( 2, contact.jn.get(2) * j1inv * dLambda_n );
+				dv2.add( 0, contact.jn.get(3) * m2inv * dLambda_n );
+				dv2.add( 1, contact.jn.get(4) * m2inv * dLambda_n );
+				dv2.add( 2, contact.jn.get(5) * j2inv * dLambda_n );
+				
+				double Jdvt = contact.getJdvt(computeInCollection);
+				double prevLambda_t = contact.lambda.y;
+				contact.lambda.y -= (contact.bt + Jdvt)/contact.diit;
+				contact.lambda.y = Math.max(contact.lambda.y, -mu*contact.lambda.x);
+				contact.lambda.y = Math.min(contact.lambda.y, mu*contact.lambda.x);
 				double dLambda_t = contact.lambda.y - prevLambda_t;
-				updateVelocity(contact, dLambda_n, dLambda_t);
+				
+				//update delta V;
+				dv1.add( 0, contact.jt.get(0) * m1inv * dLambda_t );
+				dv1.add( 1, contact.jt.get(1) * m1inv * dLambda_t );
+				dv1.add( 2, contact.jt.get(2) * j1inv * dLambda_t );
+				dv2.add( 0, contact.jt.get(3) * m2inv * dLambda_t );
+				dv2.add( 1, contact.jt.get(4) * m2inv * dLambda_t );
+				dv2.add( 2, contact.jt.get(5) * j2inv * dLambda_t );
+				
+				contact.updateContactState(mu);
 			}
 			
 			iter--;

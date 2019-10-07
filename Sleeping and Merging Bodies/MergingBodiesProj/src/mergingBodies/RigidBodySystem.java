@@ -54,6 +54,9 @@ public class RigidBodySystem {
 	/**Viscous damping coefficient for the  spring*/
 	public static IntParameter springLength= new IntParameter("spring rest length", 1, 1, 100 );
 
+	public boolean mergingEvent = false;
+	public boolean triggerMergingEvent = false;
+	
 	/**
 	 * Creates a new rigid body system
 	 */
@@ -261,6 +264,7 @@ public class RigidBodySystem {
 	}
 
 	private void clearJunkAtStartOfTimeStep() {
+
 		for (RigidBody body: bodies) {
 			body.mergedThisTimeStep = false;
 			body.force.set(0, 0);
@@ -302,7 +306,7 @@ public class RigidBodySystem {
 																			enableUnmergeMovingCondition.getValue(), 
 																			enableUnmergeNormalCondition.getValue(), 
 																			enableUnmergeFrictionCondition.getValue());
-						if (unmerge)
+						if (unmerge) 
 							unmergingBodies.add(b);
 					}
 					
@@ -332,6 +336,9 @@ public class RigidBodySystem {
 	}
 
 	private void unmergeSelectBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies) {
+
+		mergingEvent = true;
+		
 		ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
 
 		handledBodies.addAll((unmergingBodies));
@@ -432,6 +439,7 @@ public class RigidBodySystem {
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 
 			if (mergeCondition) {
+				mergingEvent = true;
 				bpc.inCollection = true;
 				if(!bpc.body1.isInCollection() && !bpc.body2.isInCollection()) {
 					//both are not collections: make a new collection

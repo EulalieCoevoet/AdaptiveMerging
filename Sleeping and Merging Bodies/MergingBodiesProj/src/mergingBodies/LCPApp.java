@@ -73,7 +73,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     
     public void setUp() {
         system.mouseSpring = mouseSpring;
-        systemDir = "datalcp/pivotMergeTest.png";
+        systemDir = "datalcp/pivotMerge.png";
         loadSystem(systemDir); 
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(540,480), new Dimension(640,480) );
@@ -109,7 +109,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         windowWidth = drawable.getSurfaceWidth();
         windowHeight = drawable.getSurfaceHeight();
-        if ( run.getValue() ) {
+        if ( run.getValue() && (!system.mergingEvent || !system.triggerMergingEvent)) {
             double dt = stepsize.getValue() / (int)substeps.getValue();
             for ( int i = 0; i < substeps.getValue(); i++ ) {
                 if ( factory.use ) factory.advanceTime( dt );
@@ -453,7 +453,13 @@ public class LCPApp implements SceneGraphNode, Interactor {
             @Override
             public void keyPressed(KeyEvent e) {
                 if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
-                    run.setValue( ! run.getValue() ); 
+
+                	if(system.triggerMergingEvent) {
+                    	system.triggerMergingEvent = false;
+                        run.setValue(true); 
+                	} else {
+                		run.setValue( ! run.getValue() ); 
+                	}
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_S ) {
                     double dt = stepsize.getValue() / (int)substeps.getValue();
@@ -462,6 +468,12 @@ public class LCPApp implements SceneGraphNode, Interactor {
                         system.advanceTime( dt );                
                     }
                     stepped = true;
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_M ) {
+
+                	system.triggerMergingEvent = true;
+                	system.mergingEvent = false;
+                    run.setValue( true );       
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
                 	double px = posx.getValue();

@@ -195,17 +195,6 @@ public class Contact {
 	}
 	
 	/**
-	 * Process contact constraints: lambda_n>0, |lambda_t|>=lambda_n*mu
-	 * @param contact
-	 * @return
-	 */
-	protected void processContactConstraints(double mu) {
-		lambda.x = Math.max(0., lambda.x);
-		lambda.y = Math.max(lambda.y, -mu*lambda.x);
-		lambda.y = Math.min(lambda.y, mu*lambda.x);
-	}
-	
-	/**
 	 * Update state of the contact: either BROKE, SLIDING or CLEAR
 	 * @param prevLambda_n
 	 * @param mu
@@ -273,8 +262,9 @@ public class Contact {
 	/**
 	 * Compute Dii values and store in contact
 	 * @param computeInCollections
+	 * @param compliance 
 	 */
-	public void computeJMinvJtDiagonal(boolean computeInCollections) {
+	public void computeJMinvJtDiagonal(boolean computeInCollections, double compliance) {
 		
 		RigidBody b1 = (body1.isInCollection() && !computeInCollections)? body1.parent: body1;
 		RigidBody b2 = (body2.isInCollection() && !computeInCollections)? body2.parent: body2;
@@ -283,7 +273,7 @@ public class Contact {
 		double m2inv = (b2.temporarilyPinned)? 0: b2.minv;
 		double j1inv = (b1.temporarilyPinned)? 0: b1.jinv;
 		double j2inv = (b2.temporarilyPinned)? 0: b2.jinv;
-
+		
 		// normal component		
 		diin = 0.;
 		//first body component
@@ -295,6 +285,9 @@ public class Contact {
 		diin += jn.get(4) * m2inv * jn.get(4);
 		diin += jn.get(5) * j2inv * jn.get(5);
 		
+		// add compliance
+		diin += compliance;
+		
 		// tangent component
 		diit = 0.;
 		//first body component
@@ -305,6 +298,9 @@ public class Contact {
 		diit += jt.get(3) * m2inv * jt.get(3);
 		diit += jt.get(4) * m2inv * jt.get(4);
 		diit += jt.get(5) * j2inv * jt.get(5);
+		
+		// add compliance
+		diit += compliance;
 	}
 	
 	/**
