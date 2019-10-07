@@ -803,11 +803,11 @@ public class RigidBodySystem {
 	public BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
 	public BooleanParameter enableMergePinned = new BooleanParameter( "enable merging pinned body", true);
 	public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "enable merging check cycle condition", true);
-	public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "enable merging stable contact condition", true);
+	public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "enable merging stable contact condition", false);
 	public BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", true);
 	public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "enable unmerging friction condition", true);
 	public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "enable unmerging contact normal condition", true);
-	public BooleanParameter enableUnmergeMovingCondition = new BooleanParameter( "enable unmerging moving condition", true);
+	public BooleanParameter enableUnmergeMovingCondition = new BooleanParameter( "enable unmerging moving condition", false);
 	public BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", true);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", false);
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
