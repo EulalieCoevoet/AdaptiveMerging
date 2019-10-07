@@ -90,7 +90,7 @@ public class CollisionProcessor {
 			solver.init(friction.getValue(), iterations.getValue());
 			solver.restitution = restitution.getValue();
 			solver.feedbackStiffness = feedbackStiffness.getValue();
-			solver.compliance = compliance.getValue();
+			solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 			if (warmStart.getValue())
 				solver.enableWarmStart(lastTimeStepMap);
 			solver.contacts = contacts;
@@ -570,6 +570,7 @@ public class CollisionProcessor {
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0, 0,50  );
+	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", false );
 	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-5, 1e-10, 1  );
 	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1.0, 0, 10 );
 	public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 15, 0, 30);
@@ -595,6 +596,7 @@ public class CollisionProcessor {
 		vfp.add( restitution.getSliderControls(false) );
 		vfp.add( friction.getSliderControls(false) );
 		vfp.add( feedbackStiffness.getSliderControls(false) );
+		vfp.add( enableCompliance.getControls() );
 		vfp.add( compliance.getSliderControls(true) );
 		vfp.add( sleepingThreshold.getSliderControls(false) );
 		vfp.add( wakingThreshold.getSliderControls(false) );

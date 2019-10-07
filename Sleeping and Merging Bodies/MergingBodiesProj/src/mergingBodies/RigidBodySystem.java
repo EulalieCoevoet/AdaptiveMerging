@@ -800,16 +800,16 @@ public class RigidBodySystem {
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
 	private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", false );
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
-	public BooleanParameter enableMerging = new BooleanParameter( "enable merging", true);
-	public BooleanParameter enableMergePinned = new BooleanParameter( "enable merging pinned body", true);
-	public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "enable merging check cycle condition", true);
-	public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "enable merging stable contact condition", false);
-	public BooleanParameter enableUnmerging = new BooleanParameter( "enable unmerging", true);
-	public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "enable unmerging friction condition", true);
-	public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "enable unmerging contact normal condition", true);
-	public BooleanParameter enableUnmergeMovingCondition = new BooleanParameter( "enable unmerging moving condition", false);
-	public BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "enable update contact in collection", true);
-	public static BooleanParameter enableSleeping = new BooleanParameter( "enable sleeping", false);
+	public BooleanParameter enableMerging = new BooleanParameter( "merging", true);
+	public BooleanParameter enableMergePinned = new BooleanParameter( "merging pinned body", true);
+	public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "merging check cycle condition", true);
+	public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging stable contact condition", false);
+	public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
+	public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging friction condition", true);
+	public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
+	public BooleanParameter enableUnmergeMovingCondition = new BooleanParameter( "unmerging moving condition", false);
+	public BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "update contact in collection", true);
+	public static BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
 

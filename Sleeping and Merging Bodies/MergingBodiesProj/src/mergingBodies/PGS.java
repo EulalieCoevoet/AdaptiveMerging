@@ -23,8 +23,9 @@ public class PGS {
 	public void init(double mu, int iterations) {
 		this.mu=mu;
 		this.iterations=iterations;
-		this.restitution=0.;
-		this.feedbackStiffness=0.;
+		restitution=0.;
+		feedbackStiffness=0.;
+		compliance=0.;
 		contacts = null;
 		warmStart = false;
 		lastTimeStepMap = null;
