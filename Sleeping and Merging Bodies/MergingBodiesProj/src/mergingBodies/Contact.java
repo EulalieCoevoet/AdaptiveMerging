@@ -264,7 +264,7 @@ public class Contact {
 	 * @param computeInCollections
 	 * @param compliance 
 	 */
-	public void computeJMinvJtDiagonal(boolean computeInCollections, double compliance) {
+	public void computeJMinvJtDiagonal(boolean computeInCollections) {
 		
 		RigidBody b1 = (body1.isInCollection() && !computeInCollections)? body1.parent: body1;
 		RigidBody b2 = (body2.isInCollection() && !computeInCollections)? body2.parent: body2;
@@ -285,9 +285,6 @@ public class Contact {
 		diin += jn.get(4) * m2inv * jn.get(4);
 		diin += jn.get(5) * j2inv * jn.get(5);
 		
-		// add compliance
-		diin += compliance;
-		
 		// tangent component
 		diit = 0.;
 		//first body component
@@ -298,9 +295,6 @@ public class Contact {
 		diit += jt.get(3) * m2inv * jt.get(3);
 		diit += jt.get(4) * m2inv * jt.get(4);
 		diit += jt.get(5) * j2inv * jt.get(5);
-		
-		// add compliance
-		diit += compliance;
 	}
 	
 	/**

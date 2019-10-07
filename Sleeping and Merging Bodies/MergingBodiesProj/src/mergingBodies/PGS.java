@@ -82,7 +82,7 @@ public class PGS {
 
 		for (Contact contact: contacts) {
 			contact.computeB(dt, restitution, feedbackStiffness, computeInCollection);
-			contact.computeJMinvJtDiagonal(computeInCollection, compliance);
+			contact.computeJMinvJtDiagonal(computeInCollection);
 		}
 		
 		if (confidentWarmStart)
@@ -110,7 +110,7 @@ public class PGS {
 				
 				double Jdvn = contact.getJdvn(computeInCollection);
 				double prevLambda_n = contact.lambda.x;
-				contact.lambda.x -= (contact.bn + Jdvn)/contact.diin;
+				contact.lambda.x = (contact.lambda.x*contact.diin - contact.bn - Jdvn)/(contact.diin+compliance);
 				contact.lambda.x = Math.max(0., contact.lambda.x);
 				double dLambda_n = contact.lambda.x - prevLambda_n;
 				
@@ -124,7 +124,7 @@ public class PGS {
 				
 				double Jdvt = contact.getJdvt(computeInCollection);
 				double prevLambda_t = contact.lambda.y;
-				contact.lambda.y -= (contact.bt + Jdvt)/contact.diit;
+				contact.lambda.y = (contact.lambda.y*contact.diit - contact.bt - Jdvt)/(contact.diit+compliance);
 				contact.lambda.y = Math.max(contact.lambda.y, -mu*contact.lambda.x);
 				contact.lambda.y = Math.min(contact.lambda.y, mu*contact.lambda.x);
 				double dLambda_t = contact.lambda.y - prevLambda_t;
