@@ -1,9 +1,12 @@
 package mergingBodies;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Color3f;
@@ -19,6 +22,7 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.CollapsiblePanel;
+import mintools.swing.HorizontalFlowPanel;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -118,7 +122,7 @@ public class RigidBodySystem {
 			collisionProcessor.processCollisions(dt); 
 		}
 		
-		if (enableMerging.getValue() && enableUpdateContactsInCollections.getValue()) {
+		if (enableUpdateContactsInCollections.getValue()) {
 			// this should be done before advanceTime() so that external forces and velocities are of the same time step
 			collisionProcessor.updateContactsInCollections(dt);
 		}
@@ -141,7 +145,7 @@ public class RigidBodySystem {
 			wake();
 		}
 
-		if (enableMerging.getValue() && enableUnmerging.getValue()) {
+		if (enableUnmerging.getValue()) {
 			unmergeBodies(dt);
 			checkIndex();
 		}
@@ -382,6 +386,7 @@ public class RigidBodySystem {
 																			enableUnmergeMovingCondition.getValue(), 
 																			enableUnmergeNormalCondition.getValue(), 
 																			enableUnmergeFrictionCondition.getValue());
+						unmerge = (unmergeAll.getValue() || unmerge); 
 						if (unmerge) 
 							unmergingBodies.add(b);
 					}
@@ -409,6 +414,7 @@ public class RigidBodySystem {
 		}
 		
 		processCollectionsColor();
+		unmergeAll.setValue(false);
 	}
 
 	private void unmergeSelectBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies) {
@@ -807,6 +813,7 @@ public class RigidBodySystem {
 	public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
 	public BooleanParameter enableUnmergeMovingCondition = new BooleanParameter( "unmerging moving condition", false);
 	public BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "update contact in collection", true);
+	public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
@@ -853,6 +860,15 @@ public class RigidBodySystem {
 		vfpm.add( enableUnmergeNormalCondition.getControls() );
 		vfpm.add( enableUnmergeMovingCondition.getControls() );
 		vfpm.add( enableUpdateContactsInCollections.getControls() );
+		vfpm.add( unmergeAll.getControls() );
+        JButton umergeButton = new JButton("unmerge all");
+        vfpm.add( umergeButton);
+        umergeButton.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	unmergeAll.setValue(true);
+            }
+        });
 		vfpm.add( enableSleeping.getControls() );
 		CollapsiblePanel cpm = new CollapsiblePanel(vfpm.getPanel());
 		cpm.collapse();
