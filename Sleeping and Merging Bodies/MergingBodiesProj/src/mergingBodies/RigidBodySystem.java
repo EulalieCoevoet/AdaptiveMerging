@@ -283,6 +283,82 @@ public class RigidBodySystem {
 			}
 		}
 	}
+	
+	/**
+	 * Merges all rigidBodies in the system that fit the appropriate criteria: 
+	 * <p><ul>
+	 * <li> 1. They have been in contact for at least "sleepAccum" number of time steps
+	 * <li> 2. The "metric" of the two bodies in contact has been below the "sleepingThreshold"
+	 * 	  value for the ENTIRETY of the contact.
+	 * <li> 3. The contacts have been stable for "sleepAccum" number of time steps
+	 * <li> 4. Satisfies the conservative force closure: only bodies that share two
+     * contacts, or cycles formed by 3 bodies with one contact between each
+	 * </ul><p>
+	 */
+	public void mergeBodies() {
+		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
+		
+		collisionProcessor.processBodyPairContacts();
+
+		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
+			
+			boolean mergeCondition = bpc.checkRelativeKineticEnergy();
+			if (enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable());
+			if (enableMergeCheckCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkForceClosureCritera());
+
+			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
+			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
+			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
+
+			if (mergeCondition) {
+				mergingEvent = true;
+				bpc.inCollection = true;
+				if(!bpc.body1.isInCollection() && !bpc.body2.isInCollection()) {
+					//both are not collections: make a new collection
+					bodies.remove(bpc.body1); 
+					bodies.remove(bpc.body2);
+					RigidCollection collection = new RigidCollection(bpc.body1, bpc.body2);
+					collection.addInternalContact(bpc);
+					bodies.add(collection);
+				}
+				else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() && !bpc.body1.isInSameCollection(bpc.body2)) {
+					//both are collections:
+					//take all the bodies in the least massive one and add them to the collection of the most massive
+					if (bpc.body1.parent.massLinear > bpc.body2.parent.massLinear) {
+						bodies.remove(bpc.body2.parent);
+						bpc.body1.parent.addCollection(bpc.body2.parent);
+						bpc.body1.parent.addInternalContact(bpc);
+						bpc.body1.parent.addIncompleteCollectionContacts(bpc.body2.parent, removalQueue);
+					}
+					else {
+						bodies.remove(bpc.body1.parent);
+						bpc.body2.parent.addCollection(bpc.body1.parent);
+						bpc.body2.parent.addInternalContact(bpc);
+						bpc.body2.parent.addIncompleteCollectionContacts(bpc.body1.parent, removalQueue);
+					}
+				}
+				else if (bpc.body1.isInCollection()) {
+					//body1 is in a collection, body2 is not
+					bodies.remove(bpc.body2);
+					bpc.body1.parent.addBody(bpc.body2);
+					bpc.body1.parent.addInternalContact(bpc);
+					bpc.body1.parent.addIncompleteContacts(bpc.body2, removalQueue);
+				}
+				else if (bpc.body2.isInCollection()) {
+					//body2 is in a collection, body1 is not
+					bodies.remove(bpc.body1);
+					bpc.body2.parent.addBody(bpc.body1);
+					bpc.body2.parent.addInternalContact(bpc);
+					bpc.body2.parent.addIncompleteContacts(bpc.body1, removalQueue);
+				}
+				removalQueue.add(bpc);
+			}
+		}
+		
+		for (BodyPairContact element : removalQueue) {
+			collisionProcessor.bodyPairContacts.remove(element);
+		}
+	}
 
 	/**
 	 * Method that deals with unmerging rigidBodies... because we will explore different solutions to
@@ -407,84 +483,6 @@ public class RigidBodySystem {
 				subBodies.add(otherBody);
 				buildNeighborBody(otherBody, subBodies, handledBodies);
 			}
-		}
-	}
-
-
-	/**
-	 * Merges all rigidBodies in the system that fit the appropriate criteria: 
-	 * <p><ul>
-	 * <li> 1. They have been in contact for at least "sleepAccum" number of time steps
-	 * <li> 2. The "metric" of the two bodies in contact has been below the "sleepingThreshold"
-	 * 	  value for the ENTIRETY of the contact.
-	 * <li> 3. The contacts have been stable for "sleepAccum" number of time steps
-	 * <li> 4. Satisfies the conservative force closure: only bodies that share two
-     * contacts, or cycles formed by 3 bodies with one contact between each
-	 * </ul><p>
-	 */
-	public void mergeBodies() {
-		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
-		
-		collisionProcessor.processBodyPairContacts();
-		
-		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
-			
-			boolean mergeCondition = bpc.checkRelativeKineticEnergy();
-			if (enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable());
-			if (enableMergeCheckCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkForceClosureCritera());
-
-			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
-			if (bpc.body1.mergedThisTimeStep && bpc.body2.mergedThisTimeStep) mergeCondition = false;
-			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
-			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
-
-			if (mergeCondition) {
-				mergingEvent = true;
-				bpc.inCollection = true;
-				if(!bpc.body1.isInCollection() && !bpc.body2.isInCollection()) {
-					//both are not collections: make a new collection
-					bodies.remove(bpc.body1); 
-					bodies.remove(bpc.body2);
-					RigidCollection collection = new RigidCollection(bpc.body1, bpc.body2);
-					collection.addInternalContact(bpc);
-					bodies.add(collection);
-				}
-				else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() && !bpc.body1.isInSameCollection(bpc.body2)) {
-					//both are collections:
-					//take all the bodies in the least massive one and add them to the collection of the most massive
-					if (bpc.body1.parent.massLinear > bpc.body2.parent.massLinear) {
-						bodies.remove(bpc.body2.parent);
-						bpc.body1.parent.addCollection(bpc.body2.parent);
-						bpc.body1.parent.addInternalContact(bpc);
-						bpc.body1.parent.addIncompleteCollectionContacts(bpc.body2.parent, removalQueue);
-					}
-					else {
-						bodies.remove(bpc.body1.parent);
-						bpc.body2.parent.addCollection(bpc.body1.parent);
-						bpc.body2.parent.addInternalContact(bpc);
-						bpc.body2.parent.addIncompleteCollectionContacts(bpc.body1.parent, removalQueue);
-					}
-				}
-				else if (bpc.body1.isInCollection()) {
-					//body1 is in a collection, body2 is not
-					bodies.remove(bpc.body2);
-					bpc.body1.parent.addBody(bpc.body2);
-					bpc.body1.parent.addInternalContact(bpc);
-					bpc.body1.parent.addIncompleteContacts(bpc.body2, removalQueue);
-				}
-				else if (bpc.body2.isInCollection()) {
-					//body2 is in a collection, body1 is not
-					bodies.remove(bpc.body1);
-					bpc.body2.parent.addBody(bpc.body1);
-					bpc.body2.parent.addInternalContact(bpc);
-					bpc.body2.parent.addIncompleteContacts(bpc.body1, removalQueue);
-				}
-				removalQueue.add(bpc);
-			}
-		}
-		
-		for (BodyPairContact element : removalQueue) {
-			collisionProcessor.bodyPairContacts.remove(element);
 		}
 	}
 
