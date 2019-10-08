@@ -143,6 +143,8 @@ public class CollisionProcessor {
 		solver.init(friction.getValue(), 1);
 		solver.confidentWarmStart = true;
 		solver.computeInCollection = true;
+		solver.feedbackStiffness = feedbackStiffness.getValue();
+		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0. ;
 		boolean doneOnceForAllCollections = false;
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.temporarilyPinned) {
@@ -317,7 +319,7 @@ public class CollisionProcessor {
 			for (Contact contact : tmpContacts)
 				if (contact.withBody(body))
 					contacts.add(contact);
-			if (contacts.size()>3)
+			if (contacts.size()>2)
 				prune(contacts);
 			collectionContacts.addAll(contacts);
 		}
@@ -579,7 +581,7 @@ public class CollisionProcessor {
 	public static IntParameter collisionWake = new IntParameter("wake n neighbors", 2, 0, 10 );
 	public static IntParameter sleepAccum = new IntParameter("accumulate N sleep queries", 50, 0, 200 );
 	public BooleanParameter pruneContacts = new BooleanParameter( "prune contacts", true );
-	public DoubleParameter epsilonPruneConvexHull = new DoubleParameter( "epsilon for convex hull (prune contacts)", 1e-4, 1e-14, 1);
+	public DoubleParameter epsilonPruneConvexHull = new DoubleParameter( "epsilon for convex hull (prune contacts)", 1e-4, 1e-14, 10);
 
 	/**
 	 * @return controls for the collision processor
