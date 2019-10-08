@@ -249,7 +249,7 @@ public class Contact {
 		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
 		// calculate Baumgarte Feedback (overlap of the two bodies)
 
-		double baumgarteFeedback = (computeInCollections)? 0. : feedbackStiffness*constraintViolation;
+		double baumgarteFeedback = feedbackStiffness*constraintViolation;
 		if (computeInCollections)
 			restitution=0.;
 		
