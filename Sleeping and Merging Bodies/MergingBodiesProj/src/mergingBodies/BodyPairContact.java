@@ -22,7 +22,7 @@ public class BodyPairContact {
 	double relativeAngularVelocity = 0;
 	
 	public ArrayList<Double> relativeKineticEnergyHist = new ArrayList<Double>();
-	public ArrayList<Pair<Integer, Double>> contactStateHist = new ArrayList<Pair<Integer, Double>>();
+	public ArrayList<Contact.ContactState> contactStateHist = new ArrayList<Contact.ContactState>();
 		
 	public boolean inCollection = false;
 	
@@ -135,11 +135,10 @@ public class BodyPairContact {
 		if (relativeKineticEnergyHist.size() > CollisionProcessor.sleepAccum.getValue())
 			relativeKineticEnergyHist.remove(0);
 	
-		double meanLambda_n = 0.;
+		Contact.ContactState state = Contact.ContactState.CLEAR;
 		for (Contact contact : contactList) 
-			meanLambda_n += contact.lambda.x;
-		meanLambda_n /= contactList.size();
-		Pair<Integer, Double> state = new Pair<Integer, Double>(contactList.size(), meanLambda_n);
+			if (contact.state == Contact.ContactState.ONEDGE)
+				state = Contact.ContactState.ONEDGE;
 		
 		contactStateHist.add(state);
 		if (contactStateHist.size() > CollisionProcessor.sleepAccum.getValue())
@@ -178,27 +177,16 @@ public class BodyPairContact {
 	}  
 
 	/**
-	 * Check if contacts have been stable over CollisionProcessor.sleepAccum time steps.
-	 * eulalie : work in progress
-	 * 			- missing class for cleaner access instead of using Pair
-	 * 			- currently a simple test on the mean of lambda.x
+	 * Check if contacts have been stable over CollisionProcessor.sleepAccum time steps 
+	 * (i.e not on edge of friction cone during the entire time)
 	 * @return true or false
 	 */
 	public boolean areContactsStable() {
 
 		if ((contactStateHist.size() == CollisionProcessor.sleepAccum.getValue())) {
-			Pair<Integer, Double> previousState = contactStateHist.get(0);
-			Pair<Integer, Double> currentState;
-			for (Pair<Integer, Double> state : contactStateHist) {
-				currentState = state;
-				double epsilon = currentState.getValue()/4.;
-				if (currentState.getKey() != previousState.getKey())
+			for (Contact.ContactState state : contactStateHist) {
+				if (state == Contact.ContactState.ONEDGE)
 					return false;
-				if (currentState.getValue() < previousState.getValue()-epsilon)
-					return false;
-				if (currentState.getValue() > previousState.getValue()+epsilon)
-					return false;
-				previousState = currentState;
 			}
 		} else {
 			return false;

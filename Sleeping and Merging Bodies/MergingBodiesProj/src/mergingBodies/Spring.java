@@ -72,7 +72,7 @@ public class Spring {
 	 * Draws the spring end points with a red line through them
 	 * @param drawable
 	 */
-	public void displayConnection( GLAutoDrawable drawable ) {
+	public void displaySpring( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glLineWidth(2);
 		gl.glColor4f(1, 0 ,0, 0.5f);

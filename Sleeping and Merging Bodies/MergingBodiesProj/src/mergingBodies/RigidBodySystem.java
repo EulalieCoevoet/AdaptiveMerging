@@ -663,13 +663,12 @@ public class RigidBodySystem {
 					if(drawCollections.getValue() && updateCollectionColor)
 						color = new Color3f(collection.color);
 					collection.displayCollection(drawable, color);
-				}
-				else {
+				} else {
 					b.display(drawable);
 				}
 
 				for (Spring s : b.springs) {
-					s.displayConnection(drawable);
+					s.displaySpring(drawable);
 				}
 			}
 		}
@@ -677,15 +676,17 @@ public class RigidBodySystem {
 		gl.glLineWidth(1);
 		if ( drawBoundingVolumes.getValue() ) {
 			for ( RigidBody b : bodies ) {
-				b.root.boundingDisc.display(drawable);
+				if (!(b instanceof RigidCollection)) {
+					b.root.boundingDisc.display(drawable);
+				}
 			}
 		}
 		
 		if ( drawAllBoundingVolumes.getValue() ) {
 			for ( RigidBody b : bodies ) {
-				if (!(b instanceof RigidCollection))
+				if (!(b instanceof RigidCollection)) {
 					b.root.display( drawable );
-				else {
+				} else {
 					displayCollectionBV((RigidCollection) b, drawable);
 				}
 			}
@@ -693,39 +694,33 @@ public class RigidBodySystem {
 		
 		if ( drawBoundingVolumesUsed.getValue() ) {
 			for ( RigidBody b : bodies ) {
-				if (!(b instanceof RigidCollection))
+				if (!(b instanceof RigidCollection)) {
 					b.root.displayVisitBoundary( drawable, collisionProcessor.visitID );
-				else displayVisitBoundaryCollection((RigidCollection) b, drawable);
+				} else {
+					displayVisitBoundaryCollection((RigidCollection) b, drawable);
+				}
 			}
 		}
 		
 		if ( drawContactGraph.getValue() ) {
-			if (CollisionProcessor.use_contact_graph.getValue()) {
-				for (BodyPairContact bc : collisionProcessor.bodyPairContacts) {
-					for (Contact c : bc.contactList) {
-						c.displayConnection(drawable);
+			if (CollisionProcessor.useContactGraph.getValue()) {
+				for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
+					for (Contact c : bpc.contactList) {
+						c.displayContactGraph(drawable);
 					}
 				} 
 			} 
 			else {
 				for ( Contact c : collisionProcessor.contacts ) {
-					c.displayConnection(drawable);
+					c.displayContactGraph(drawable);
 				}
 			}
 		}
 		
-		if (drawConnections.getValue()) {
+		if (drawCollectionContactGraph.getValue()) {
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
-					((RigidCollection)b).displayConnection(drawable);
-				}
-			}
-		}
-		
-		if(drawInternalContactForces.getValue()) {
-			for (RigidBody b : bodies) {
-				if (b instanceof RigidCollection) {
-					((RigidCollection) b).drawInternalContacts(drawable);
+					((RigidCollection)b).displayContactGraph(drawable);
 				}
 			}
 		}
@@ -733,34 +728,47 @@ public class RigidBodySystem {
 		if(drawInternalHistories.getValue()) {
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
-						((RigidCollection) b).drawInternalHistory(drawable);
+						((RigidCollection) b).displayInternalHistory(drawable);
 				}
 			}
 		}
 		
-		if ( drawSpeedCOM.getValue() ) {
+		if ( drawSpeedCOMs.getValue() ) {
 			for (RigidBody b: bodies) {
-				b.drawSpeedCOM(drawable);
+				b.displaySpeedCOM(drawable);
 			}
 		}
 
-		if ( drawContacts.getValue() ) {
+		if (drawContactLocations.getValue() || drawContactForces.getValue()) {
 			for ( Contact c : collisionProcessor.contacts ) {
-				c.display(drawable);
-				if(drawExternalContactForces.getValue())
-					c.drawContactForce(drawable);
+				if (drawContactLocations.getValue()) 
+					c.displayContactLocation(drawable, new Color3f(1,0,0)); 
+				if (drawContactForces.getValue())
+					c.displayContactForce(drawable, new Color3f(1,0,0));
+			}
+		}
+		
+		if (drawContactLocations.getValue() || drawContactForcesInCollection.getValue()) {
+			for (RigidBody b : bodies) {
+				if (b instanceof RigidCollection) {
+					RigidCollection collection = (RigidCollection)b;
+					if (drawContactLocations.getValue())
+						collection.displayInternalContactLocations(drawable);
+					if (drawContactForcesInCollection.getValue())
+						collection.displayInternalContactForces(drawable);
+				}
 			}
 		}
 		
 		if ( drawCOMs.getValue() ) {
 			for ( RigidBody b : bodies ) {
-				b.displayCOM(drawable);
+				b.displayCOMs(drawable);
 			}
 		}
 		
 		if ( drawIndex.getValue()) {
 			for (RigidBody b : bodies) {
-				b.printIndex(drawable, GLUT.BITMAP_8_BY_13);
+				b.displayIndex(drawable, GLUT.BITMAP_8_BY_13);
 			}
 		}
 	}
@@ -790,20 +798,25 @@ public class RigidBodySystem {
 
 	private DoubleParameter transparency = new DoubleParameter("body block transparency", .5, 0, 1 );
 	private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
-	private BooleanParameter drawCollections = new BooleanParameter( "draw collections", true );
-	private BooleanParameter drawConnections = new BooleanParameter( "draw connections", false );
+	private BooleanParameter drawCollections = new BooleanParameter( "draw collections with different colors", true );
+	
 	private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
-	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
-	private BooleanParameter drawInternalContactForces = new BooleanParameter("draw Internal Forces of merged collections", true);
-	private BooleanParameter drawExternalContactForces = new BooleanParameter("draw External Forces", true);
-	private BooleanParameter drawInternalHistories = new BooleanParameter("draw Internal Histories", false );
-
-	private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", true );
-	private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", true);
+	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
+	
+	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true);
+	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true);
+	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true);
+	private BooleanParameter drawInternalHistories = new BooleanParameter("draw internal histories", false );
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
-	private BooleanParameter drawSpeedCOM = new BooleanParameter( "draw speed COM", false );
+	private BooleanParameter drawCollectionContactGraph = new BooleanParameter( "draw collections' contact graph", false );
+	
+	private BooleanParameter drawCOMs = new BooleanParameter( "draw COM", true );
+	private BooleanParameter drawSpeedCOMs = new BooleanParameter( "draw speed COM", false );
+	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
+	
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
+	
 	public BooleanParameter enableMerging = new BooleanParameter( "merging", true);
 	public BooleanParameter enableMergePinned = new BooleanParameter( "merging pinned body", true);
 	public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "merging check cycle condition", true);
@@ -815,7 +828,6 @@ public class RigidBodySystem {
 	public BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 	public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
-	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 
 
 	/**
@@ -827,21 +839,23 @@ public class RigidBodySystem {
 
 		VerticalFlowPanel vfpv = new VerticalFlowPanel();
 		vfpv.setBorder( new TitledBorder("viewing controls") );
+		vfpv.add( transparency.getSliderControls(false));
 		vfpv.add( drawBodies.getControls() );
 		vfpv.add( drawCollections.getControls() );
-		vfpv.add( drawConnections.getControls() );
-		vfpv.add( transparency.getSliderControls(false));
+		
 		vfpv.add( drawBoundingVolumes.getControls() );
-		vfpv.add( drawAllBoundingVolumes.getControls() );
 		vfpv.add( drawBoundingVolumesUsed.getControls() );
-		vfpv.add( drawInternalContactForces.getControls() );
-		vfpv.add( drawExternalContactForces.getControls() );
+		vfpv.add( drawAllBoundingVolumes.getControls() );
+		
+		vfpv.add( drawContactForces.getControls() );
+		vfpv.add( drawContactForcesInCollection.getControls() );
+		vfpv.add( drawContactLocations.getControls() );
 		vfpv.add( drawInternalHistories.getControls() );
+		vfpv.add( drawContactGraph.getControls() );
+		vfpv.add( drawCollectionContactGraph.getControls() );
 
 		vfpv.add( drawCOMs.getControls() );
-		vfpv.add( drawContacts.getControls() );
-		vfpv.add( drawContactGraph.getControls() );
-		vfpv.add( drawSpeedCOM.getControls() );
+		vfpv.add( drawSpeedCOMs.getControls() );
 		vfpv.add( drawIndex.getControls() );
 		vfpv.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
 

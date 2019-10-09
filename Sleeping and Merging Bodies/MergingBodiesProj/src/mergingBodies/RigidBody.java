@@ -343,7 +343,7 @@ public class RigidBody {
 	 */
 	protected boolean checkForCycles(int count, RigidBody startBody, BodyPairContact bpcFrom) {
 		
-		if (count>3) // more than three bodies in the cycle
+		if (count>3) // more than three bodies in the cycle, not stable
 			return false;
 		
 		// if we come across a collection in the contact graph, we consider it as a body and check the external bpc 
@@ -526,7 +526,7 @@ public class RigidBody {
 	 * 
 	 * @param drawable
 	 */
-	public void displayCOM(GLAutoDrawable drawable) {
+	public void displayCOMs(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 		if (!pinned) {
 			if (state == ObjectState.ACTIVE || wokenUp) {
@@ -555,7 +555,7 @@ public class RigidBody {
 		}
 	}
 
-	public void drawSpeedCOM(GLAutoDrawable drawable) {
+	public void displaySpeedCOM(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 		double k = this.v.length() + this.omega;
 
@@ -575,7 +575,7 @@ public class RigidBody {
 		gl.glEnd();
 	}
 
-	public void printIndex(GLAutoDrawable drawable, int font) {
+	public void displayIndex(GLAutoDrawable drawable, int font) {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glColor3f(1, 0, 0);
 		gl.glRasterPos2d(this.x.x, this.x.y);

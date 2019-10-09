@@ -9,6 +9,8 @@ import no.uib.cipr.matrix.DenseVector;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Color3f;
+import javax.vecmath.Color4f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -33,7 +35,7 @@ public class Contact {
 	/**    Used for unmerge condition, true if the contact changed (break or slide) during the time step  */
 	public ContactState state = ContactState.CLEAR;
 	
-	public enum ContactState {BROKEN, SLIDING, CLEAR};
+	public enum ContactState {BROKEN, ONEDGE, CLEAR};
 	
 	/** First RigidBody in contact */
 	public RigidBody body1;
@@ -203,7 +205,7 @@ public class Contact {
 		if (lambda.x <= 1e-14) 
 			state = ContactState.BROKEN;	
 		else if (Math.abs(lambda.y) == lambda.x*mu) 
-			state = ContactState.SLIDING;
+			state = ContactState.ONEDGE;
 		else
 			state = ContactState.CLEAR;
 	}
@@ -362,24 +364,11 @@ public class Contact {
 	}
 
 	/**
-	 * Draws the contact points
-	 * @param drawable
-	 */
-	public void display( GLAutoDrawable drawable ) {
-		GL2 gl = drawable.getGL().getGL2();
-		gl.glPointSize(5);
-		gl.glColor3f(.7f,0,0);
-		gl.glBegin( GL.GL_POINTS );
-		gl.glVertex2d(contactW.x, contactW.y);
-		gl.glEnd();
-	}
-
-	/**
 	 * Draws the connections between bodies to visualize 
 	 * the adjacency structure of the matrix as a graph.
 	 * @param drawable
 	 */
-	public void displayConnection( GLAutoDrawable drawable ) {
+	public void displayContactGraph( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
 		// draw a line between the two bodies but only if they're both not pinned
 		if ( !body1.pinned && ! body2.pinned ) {
@@ -401,54 +390,37 @@ public class Contact {
 	 * the adjacency structure of the matrix as a graph.
 	 * @param drawable
 	 */
-	public void drawContactForce( GLAutoDrawable drawable ) {
+	public void displayContactForce( GLAutoDrawable drawable, Color3f color ) {
 		GL2 gl = drawable.getGL().getGL2();
 
 		gl.glLineWidth(2);
-		if (state == ContactState.SLIDING)
+		if (state == ContactState.ONEDGE)
 			gl.glColor4f(0, 0, 0, 1);
 		else
-			gl.glColor4f(1, 0, 0, 1);
+			gl.glColor4f(color.x, color.y, color.z, 1);
 		gl.glBegin( GL.GL_LINES );
 
 		double scale = forceVizScale.getValue();
 		gl.glVertex2d(contactW.x + scale*contactForceB1.x, contactW.y+scale*contactForceB1.y);
 		gl.glVertex2d(contactW.x + scale*contactForceB2.x, contactW.y+scale*contactForceB2.y);
 		
+		gl.glEnd();
+	}
+	
+	/**
+	 * Draws the contact points
+	 * @param drawable
+	 */
+	public void displayContactLocation( GLAutoDrawable drawable, Color3f color ) {
+		GL2 gl = drawable.getGL().getGL2();
+		gl.glPointSize(5);
+		gl.glColor4f(color.x, color.y, color.z, 1);
+		gl.glBegin( GL.GL_POINTS );
+		gl.glVertex2d(contactW.x, contactW.y);
 		gl.glEnd();
 	}
 
 	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.01, 1);
-
-	/**
-	 * Draws the connections between bodies to visualize the 
-	 * the adjacency structure of the matrix as a graph.
-	 * @param drawable
-	 */
-	public void drawInternalContactForce( GLAutoDrawable drawable ) {
-		GL2 gl = drawable.getGL().getGL2();
-
-		if (state != ContactState.CLEAR)
-			gl.glColor4f(0, 0, 0, 1);
-		else
-			gl.glColor4f(0, 0, 1, 1);
-		
-		gl.glLineWidth(2);
-		gl.glBegin( GL.GL_LINES );
-		
-		double scale = forceVizScale.getValue();
-		gl.glVertex2d(contactW.x + scale*contactForceB1.x, contactW.y+scale*contactForceB1.y);
-		gl.glVertex2d(contactW.x + scale*contactForceB2.x, contactW.y+scale*contactForceB2.y);
-		
-		gl.glEnd();
-		
-		gl.glPointSize(5);		
-		gl.glBegin( GL.GL_POINTS );
-		
-		gl.glVertex2d(contactW.x, contactW.y);
-		
-		gl.glEnd();
-	}
 
 	/*
 	 * Variables that help with measuring the variance and average contact force

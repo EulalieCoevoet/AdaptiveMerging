@@ -270,7 +270,7 @@ public class RigidCollection extends RigidBody{
 					if (contact.state == ContactState.BROKEN && enableUnmergeNormalCondition) { 
 						body.metric = Double.MAX_VALUE;
 						return true; // rule 1. if one contact has broken
-					} else if (contact.state == ContactState.SLIDING) {
+					} else if (contact.state == ContactState.ONEDGE) {
 						ft.set(contact.jt.get(0)*contact.lambda.y, contact.jt.get(1)*contact.lambda.y);
 						ftsum.add(ft);
 					}
@@ -475,26 +475,41 @@ public class RigidCollection extends RigidBody{
 	}
 	
 	protected void generateColor() {
-		Random r = new Random();
-		Random g = new Random();
-		Random b = new Random();
-		color = new Color3f(r.nextFloat(), g.nextFloat(), b.nextFloat());
+		
+		Float r = (new Random()).nextFloat();
+		Float g = (new Random()).nextFloat();
+		Float b = (new Random()).nextFloat();
+		
+		if (Math.abs(r - g) < 1.5e-1 && Math.abs(g - b) < 1.5e-1) // avoid gray
+			generateColor();
+		else 
+			color = new Color3f(r, g, b);
 	}
 	
 	/** display list ID for this rigid body */
 	int myListID = -1;
 
-	public void drawInternalContacts(GLAutoDrawable drawable) {
+	public void displayInternalContactForces(GLAutoDrawable drawable) {
 
-		for (BodyPairContact bc: internalBodyPairContacts) {
-			if (!bc.inCollection) 
+		for (BodyPairContact bpc: internalBodyPairContacts) {
+			if (!bpc.inCollection) 
 				continue;
-			for (Contact c: bc.contactList) 
-				c.drawInternalContactForce(drawable);
+			for (Contact c: bpc.contactList) 
+				c.displayContactForce(drawable, new Color3f(0,0,1)); //blue inside collection
+		}
+	}
+	
+	public void displayInternalContactLocations(GLAutoDrawable drawable) {
+
+		for (BodyPairContact bpc: internalBodyPairContacts) {
+			if (!bpc.inCollection) 
+				continue;
+			for (Contact c: bpc.contactList) 
+				c.displayContactLocation(drawable, new Color3f(0,0,1)); //blue inside collection
 		}
 	}
 
-	public void drawInternalHistory(GLAutoDrawable drawable) {
+	public void displayInternalHistory(GLAutoDrawable drawable) {
 		for (Contact c: internalContacts) {
 			c.drawInternalContactHistory(drawable);;
 		}
@@ -517,7 +532,7 @@ public class RigidCollection extends RigidBody{
 	 * Uses a string arrayList to check if a connection has already been drawn.
 	 * @param drawable
 	 */
-	public void displayConnection( GLAutoDrawable drawable) {
+	public void displayContactGraph( GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 
 		// draw a line between the two bodies but only if they're both not pinned

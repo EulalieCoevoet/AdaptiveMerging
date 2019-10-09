@@ -571,12 +571,12 @@ public class CollisionProcessor {
 	public IntParameter iterations = new IntParameter("iterations for GS solve", 2000, 1, 5000);
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
-	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0, 0,50  );
-	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", false );
-	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-5, 1e-10, 1  );
+	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
+	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
+	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
 	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1.0, 0, 10 );
 	public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 15, 0, 30);
-	public static BooleanParameter  use_contact_graph = new BooleanParameter("enable use of contact graph heuristic", false );
+	public static BooleanParameter  useContactGraph = new BooleanParameter("enable use of contact graph heuristic", false );
 	public static DoubleParameter forceMetricTolerance = new DoubleParameter("force metric tolerance", 10, 0, 15);
 	public static IntParameter collisionWake = new IntParameter("wake n neighbors", 2, 0, 10 );
 	public static IntParameter sleepAccum = new IntParameter("accumulate N sleep queries", 50, 0, 200 );
@@ -602,7 +602,7 @@ public class CollisionProcessor {
 		vfp.add( compliance.getSliderControls(true) );
 		vfp.add( sleepingThreshold.getSliderControls(false) );
 		vfp.add( wakingThreshold.getSliderControls(false) );
-		vfp.add( use_contact_graph.getControls() );
+		vfp.add( useContactGraph.getControls() );
 		vfp.add( forceMetricTolerance.getSliderControls(false) );
 		vfp.add( collisionWake.getSliderControls() );
 		vfp.add( sleepAccum.getSliderControls() );
