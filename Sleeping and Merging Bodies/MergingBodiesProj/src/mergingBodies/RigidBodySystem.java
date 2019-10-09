@@ -860,7 +860,6 @@ public class RigidBodySystem {
 		vfpm.add( enableUnmergeNormalCondition.getControls() );
 		vfpm.add( enableUnmergeMovingCondition.getControls() );
 		vfpm.add( enableUpdateContactsInCollections.getControls() );
-		vfpm.add( unmergeAll.getControls() );
         JButton umergeButton = new JButton("unmerge all");
         vfpm.add( umergeButton);
         umergeButton.addActionListener( new ActionListener() {
