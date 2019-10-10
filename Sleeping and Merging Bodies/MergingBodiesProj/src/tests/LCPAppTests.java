@@ -124,7 +124,7 @@ public class LCPAppTests extends LCPApp {
 	@Test
 	/**
 	 * Critical test for one iteration PGS in collection
-	 * After merging, if the bodies are stable/static, the internal contacts should remain the same after merging
+	 * After merging, if the bodies are stable/static, the internal contacts should remain the same
 	 */
 	public void updateContactInCollectionConsistencyTest() {
 		loadSystem("datalcp/doubleStackUnmergeTest.png");
@@ -149,7 +149,7 @@ public class LCPAppTests extends LCPApp {
 	@Test
 	/**
 	 * Critical test for one iteration PGS in collection
-	 * After merging, if the bodies are stable/static, the internal contacts should remain the same after merging
+	 * After merging, if the bodies are stable/static, the internal contacts should remain the same 
 	 */
 	public void updateContactInCollectionConsistencyPinnedTest() {
 		loadSystem("datalcp/singleBlockSmallTest.png");

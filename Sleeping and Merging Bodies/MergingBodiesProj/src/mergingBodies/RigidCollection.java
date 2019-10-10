@@ -43,7 +43,8 @@ public class RigidCollection extends RigidBody{
 		
 		generateColor();
 		
-		copyVelocitiesFrom(body1);
+		copyFrom(body1);
+		
 		addBodyInternalMethod(body1);
 		updateCollectionPinnedConditions(body1);
 		addBodyInternalMethod(body2);
@@ -97,21 +98,46 @@ public class RigidCollection extends RigidBody{
 		body.parent = this;
 		body.mergedThisTimeStep = true;
 		collectionBodies.add(body);
+		
+		Point2d massCom1 = new Point2d();
+		Point2d massCom2 = new Point2d();
+		massCom1.scale( body.massLinear, body.x );
+		massCom2.scale( massLinear, x );		
+		Point2d newCom = new Point2d();
+		newCom.add( massCom1, massCom2 );
+		newCom.scale( 1./(body.massLinear + massLinear) );
 
-		Vector2d tmp = new Vector2d(body.v);
-		v.scale(massLinear);
-		tmp.scale(body.massLinear);
-		v.add(tmp);
-		v.scale(1./(massLinear+body.massLinear));
+		Vector2d tmp1 = new Vector2d();
+		Vector2d tmp2 = new Vector2d();
+		Vector2d tmp3 = new Vector2d();
+		
+		tmp1.sub( newCom, body.x );
+		tmp1.scale( body.omega );
+		tmp2.set( -tmp1.y, tmp1.x );
+		tmp3.set(body.v);
+		tmp3.add(tmp2);
+		
+		tmp1.sub( newCom, x );
+		tmp1.scale( omega );
+		tmp2.set( -tmp1.y, tmp1.x );
+		tmp3.add(v);
+		tmp3.add(tmp2);
+		
+		tmp3.scale(0.5);
+		
+		v.set(tmp3);
 	}
 	
 	/**
 	 * Copy velocities of given body
 	 * @param body
 	 */
-	protected void copyVelocitiesFrom(RigidBody body) {
+	protected void copyFrom(RigidBody body) {
 		v = new Vector2d(body.v);
 		omega = body.omega;
+		x = new Point2d(body.x);
+		theta = body.theta;
+		massLinear = body.massLinear;
 	}
 	
 	/**
@@ -277,7 +303,7 @@ public class RigidCollection extends RigidBody{
 				}
 			}
 			
-			if (0.5*ftsum.lengthSquared() > 1e-14 && enableUnmergeFrictionCondition) { 
+			if (Math.sqrt(ftsum.lengthSquared()) > 1e-14 && enableUnmergeFrictionCondition) { 
 				body.metric = Double.MAX_VALUE;
 				return true; // rule 2. contacts on the edge of friction cone and norm of sum of forces not zero
 			}
