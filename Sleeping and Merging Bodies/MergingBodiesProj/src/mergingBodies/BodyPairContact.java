@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import javafx.util.Pair;
+//import javafx.util.Pair;
 
 
 /**

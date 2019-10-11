@@ -120,7 +120,8 @@ public class Contact {
 		this.normal.set( normal );   
 		block1 = b1;
 		block2 = b2;
-		constraintViolation =  distance - 2*Block.radius;
+		double offset  = CollisionProcessor.constraintOffset.getValue();
+		constraintViolation =  (distance - 2*Block.radius) + offset;
 		index = nextContactIndex++;        
 
 		computeJacobian(false);

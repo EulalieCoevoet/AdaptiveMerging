@@ -572,6 +572,7 @@ public class CollisionProcessor {
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
+	public static DoubleParameter constraintOffset = new DoubleParameter("constraintOffset", 0.05, -0.5, 0.5 );
 	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
 	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1.0, 0, 10 );
@@ -598,6 +599,7 @@ public class CollisionProcessor {
 		vfp.add( restitution.getSliderControls(false) );
 		vfp.add( friction.getSliderControls(false) );
 		vfp.add( feedbackStiffness.getSliderControls(false) );
+		vfp.add( constraintOffset.getSliderControls(false) );
 		vfp.add( enableCompliance.getControls() );
 		vfp.add( compliance.getSliderControls(true) );
 		vfp.add( sleepingThreshold.getSliderControls(false) );

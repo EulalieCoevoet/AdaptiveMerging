@@ -45,7 +45,7 @@ public class RigidBodySystem {
 	BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
 	DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );
 	DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
-
+	public static DoubleParameter tempSleepCount = new DoubleParameter( "temp pinned body sleep (s)", 1000, 1, 10000 );
 	/** Viscous damping on all bodies */
 	public DoubleParameter globalViscousDecay = new DoubleParameter("global viscous decay", 1, 0.1, 1 );
 	
@@ -890,6 +890,7 @@ public class RigidBodySystem {
 		vfp.add( processCollisions.getControls() );		
 		vfp.add( collisionProcessor.getControls() );
 		
+		vfp.add( tempSleepCount.getSliderControls(false) );
 		vfp.add( useGravity.getControls() );
 		vfp.add( gravityAmount.getSliderControls(false) );
 		vfp.add( gravityAngle.getSliderControls(false) );

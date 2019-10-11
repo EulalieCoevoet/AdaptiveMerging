@@ -282,7 +282,7 @@ public class RigidBody {
 	public void advanceTime(double dt) {
 		
 		// check for temporary pinned condition
-		if(temporarilyPinned && ++steps>=200)
+		if(temporarilyPinned && ++steps>=RigidBodySystem.tempSleepCount.getValue())
 			temporarilyPinned=!temporarilyPinned; 
 
 		// update particles activity or sleepiness.

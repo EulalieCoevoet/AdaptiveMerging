@@ -321,7 +321,7 @@ public class RigidCollection extends RigidBody{
 	@Override
 	public void advanceTime(double dt){
 
-		if(temporarilyPinned && ++steps>=200)
+		if(temporarilyPinned && ++steps>=RigidBodySystem.tempSleepCount.getValue())
 			temporarilyPinned=!temporarilyPinned; 
 		
 		if (!pinned && !temporarilyPinned) {
