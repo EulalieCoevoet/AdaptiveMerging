@@ -145,7 +145,7 @@ public class RigidBodySystem {
 			wake();
 		}
 
-		if (enableUnmerging.getValue()) {
+		if (enableUnmerging.getValue() || unmergeAll.getValue()) {
 			unmergeBodies(dt);
 			checkIndex();
 		}
@@ -820,7 +820,7 @@ public class RigidBodySystem {
 	public BooleanParameter enableMerging = new BooleanParameter( "merging", true);
 	public BooleanParameter enableMergePinned = new BooleanParameter( "merging pinned body", true);
 	public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "merging check cycle condition", true);
-	public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging stable contact condition", false);
+	public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging stable contact condition", true);
 	public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
 	public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging friction condition", true);
 	public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
