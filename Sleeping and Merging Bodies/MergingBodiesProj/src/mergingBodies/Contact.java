@@ -247,17 +247,18 @@ public class Contact {
 		double u2yt =     (b2.v.y + b2.force.y * m2inv * dt) * jt.get(4);
 		double u2omegat = (b2.omega + b2.torque * j2inv * dt) * jt.get(5);
 
-		// add the Bounce vector to the u's over here, but don't need to do that just yet
-		// bounce bounce bounce bounce bounce bounce bounce bounce bounce bounce ///
 		// calculate Baumgarte Feedback (overlap of the two bodies)
-
 		double baumgarteFeedback = feedbackStiffness*constraintViolation;
+		
+		// add the Bounce vector to the u's over here, but don't need to do that just yet
 		if (computeInCollections)
 			restitution=0.;
+		double bBounce = restitution*(b1.v.x*jn.get(0) + b1.v.y*jn.get(1) + b1.omega*jn.get(2));
+		bBounce += restitution*(b2.v.x*jn.get(3) + b2.v.y*jn.get(4) + b2.omega*jn.get(5));
 		
 		// putting b together.
 
-		bn = u1xn + u2xn + u1yn + u2yn + u1omegan + u2omegan - restitution + baumgarteFeedback;
+		bn = u1xn + u2xn + u1yn + u2yn + u1omegan + u2omegan + bBounce + baumgarteFeedback;
 		bt = u1xt + u2xt + u1yt + u2yt + u1omegat + u2omegat;
 	}
 	
