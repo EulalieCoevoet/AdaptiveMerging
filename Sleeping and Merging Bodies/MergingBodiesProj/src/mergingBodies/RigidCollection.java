@@ -480,7 +480,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyPairContact> removalQueue) {
 		for (BodyPairContact bpc: body.bodyPairContactList) {
-			if (bpc.body1.isInSameCollection(bpc.body2) && bpc.relativeKineticEnergyHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bpc.inCollection) {
+			if (bpc.body1.isInSameCollection(bpc.body2) && bpc.relativeKineticEnergyMetricHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bpc.inCollection) {
 				bpc.inCollection = true;
 				body.parent.addInternalContact(bpc);
 				removalQueue.add(bpc);

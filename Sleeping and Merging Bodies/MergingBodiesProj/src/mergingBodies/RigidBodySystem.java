@@ -821,6 +821,7 @@ public class RigidBodySystem {
 	public BooleanParameter enableMergePinned = new BooleanParameter( "merging pinned body", true);
 	public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "merging check cycle condition", true);
 	public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging stable contact condition", true);
+	public static BooleanParameter useMassNormKinEnergy = new BooleanParameter( "use mass normalization of kin energy", true);
 	public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
 	public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging friction condition", true);
 	public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
@@ -867,6 +868,8 @@ public class RigidBodySystem {
 		vfpm.setBorder( new TitledBorder("merging unmerging rules") );
 		vfpm.add( enableMerging.getControls() );
 		vfpm.add( enableMergePinned.getControls() );
+		vfpm.add( useMassNormKinEnergy.getControls() );
+		
 		vfpm.add( enableMergeCheckCycleCondition.getControls() );
 		vfpm.add( enableMergeStableContactCondition.getControls() );
 		vfpm.add( enableUnmerging.getControls() );

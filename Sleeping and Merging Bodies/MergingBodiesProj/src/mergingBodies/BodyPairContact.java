@@ -21,7 +21,7 @@ public class BodyPairContact {
 	Vector2d relativeLinearVelocity = new Vector2d();
 	double relativeAngularVelocity = 0;
 	
-	public ArrayList<Double> relativeKineticEnergyHist = new ArrayList<Double>();
+	public ArrayList<Double> relativeKineticEnergyMetricHist = new ArrayList<Double>();
 	public ArrayList<Contact.ContactState> contactStateHist = new ArrayList<Contact.ContactState>();
 		
 	public boolean inCollection = false;
@@ -115,12 +115,24 @@ public class BodyPairContact {
 	}
 	
 	/**
-	 * Computes and returns the relative kinetic energy without the mass
+	 * Computes and returns the relative kinetic energy normalized by the mass
+	 * @return metric
+	 */
+	public double getRelativeKineticEnergyMassNormalized() {
+		double k = 0.5*relativeLinearVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
+		return k;
+	}
+	
+	/**
+	 * Computes and returns the relative kinetic energy 
 	 * @return metric
 	 */
 	public double getRelativeKineticEnergy() {
-		double k = 0.5*relativeLinearVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
-		return k;
+		double massDifference = Math.abs(body1.massLinear - body2.massLinear);
+		double inertiaDifference = Math.abs(body1.massAngular - body2.massAngular);
+		double k = 0.5*relativeLinearVelocity.lengthSquared()*massDifference+ 0.5*relativeAngularVelocity*relativeAngularVelocity*inertiaDifference;
+		
+		return k/massDifference;
 	}
 	
 	/**
@@ -130,10 +142,12 @@ public class BodyPairContact {
 	public void accumulate() {
 		
 		computeRelativeVelocity();
-		
-		relativeKineticEnergyHist.add(getRelativeKineticEnergy());
-		if (relativeKineticEnergyHist.size() > CollisionProcessor.sleepAccum.getValue())
-			relativeKineticEnergyHist.remove(0);
+		if (RigidBodySystem.useMassNormKinEnergy.getValue())
+			relativeKineticEnergyMetricHist.add(getRelativeKineticEnergyMassNormalized());
+		else
+			relativeKineticEnergyMetricHist.add(getRelativeKineticEnergy());
+		if (relativeKineticEnergyMetricHist.size() > CollisionProcessor.sleepAccum.getValue())
+			relativeKineticEnergyMetricHist.remove(0);
 	
 		Contact.ContactState state = Contact.ContactState.CLEAR;
 		for (Contact contact : contactList) 
@@ -160,10 +174,10 @@ public class BodyPairContact {
 		double epsilon = 5e-4;
 		double threshold = CollisionProcessor.sleepingThreshold.getValue();
 
-		if ((relativeKineticEnergyHist.size() == CollisionProcessor.sleepAccum.getValue())) {
+		if ((relativeKineticEnergyMetricHist.size() == CollisionProcessor.sleepAccum.getValue())) {
 			double previousValue = 0; 
 			double currentValue = 0;
-			for (Double relativeEnergy : relativeKineticEnergyHist) {
+			for (Double relativeEnergy : relativeKineticEnergyMetricHist) {
 				currentValue = relativeEnergy;
 				if (relativeEnergy > threshold || currentValue > previousValue + epsilon ) 
 					return false;
