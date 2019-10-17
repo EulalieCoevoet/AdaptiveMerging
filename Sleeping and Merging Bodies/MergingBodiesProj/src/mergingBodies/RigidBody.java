@@ -7,6 +7,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mergingBodies.Contact.ContactState;
 import mintools.viewer.EasyViewer;
 import no.uib.cipr.matrix.DenseVector;
 
@@ -130,8 +131,6 @@ public class RigidBody {
 	 * should be asleep, if true, should be awake
 	 */
 	public ArrayList<Double> velHistory = new ArrayList<Double>();
-	
-	public double metric = Double.MAX_VALUE;
 
 	public boolean mergedThisTimeStep = false;
 
@@ -356,15 +355,18 @@ public class RigidBody {
 			if(bpc != bpcFrom) { // don't check the bpc we come from
 				RigidBody otherBody = bpc.getOtherBodyFromCollectionPerspective(this);
 
-				if (!bpc.inCollection && bpc.contactList.size()==1) // if there is only one contact in the bpc, it is a direction we want to check for cycle
+				int nbActiveContact = 0;
+				for (Contact contact : bpc.contactList)
+					if (contact.state != ContactState.BROKEN)
+						nbActiveContact += 1;
+				
+				if (!bpc.inCollection && nbActiveContact==1) // if there is only one contact in the bpc, it is a direction we want to check for cycle
 					bpcToCheck = bpc;
 				
-				if(otherBody == otherBodyFrom) // we are touching two different bodies in a same collection
-					return true;
-				
-				if(otherBody == startBody || // we've reached the body from which the cycle starts 
-					otherBody.isInSameCollection(startBody) || // we are part of a collection that touches a same body 
-					  (otherBody.pinned && startBody.pinned)) // there is a body between two pinned body
+				if(otherBody == otherBodyFrom || // we are touching two different bodies in a same collection
+				   otherBody == startBody || // we've reached the body from which the cycle starts 
+				   otherBody.isInSameCollection(startBody) || // we are part of a collection that touches a same body 
+				  (otherBody.pinned && startBody.pinned)) // there is a body between two pinned body
 					return true;
 			}
 		}

@@ -258,7 +258,6 @@ public class Contact {
 		bBounce += restitution*(b2.v.x*jn.get(3) + b2.v.y*jn.get(4) + b2.omega*jn.get(5));
 		
 		// putting b together.
-
 		bn = u1xn + u2xn + u1yn + u2yn + u1omegan + u2omegan + bBounce + baumgarteFeedback;
 		bt = u1xt + u2xt + u1yt + u2yt + u1omegat + u2omegat;
 	}

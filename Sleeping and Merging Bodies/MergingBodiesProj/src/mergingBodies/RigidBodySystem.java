@@ -383,7 +383,6 @@ public class RigidBodySystem {
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 					for (RigidBody b: collection.collectionBodies) {
 						boolean unmerge = collection.checkUnmergeCondition(b, dt, 
-																			enableUnmergeMovingCondition.getValue(), 
 																			enableUnmergeNormalCondition.getValue(), 
 																			enableUnmergeFrictionCondition.getValue());
 						unmerge = (unmergeAll.getValue() || unmerge); 
@@ -808,7 +807,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true);
 	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw internal histories", false );
-	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", true );
+	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
 	private BooleanParameter drawCollectionContactGraph = new BooleanParameter( "draw collections' contact graph", false );
 	
 	private BooleanParameter drawCOMs = new BooleanParameter( "draw COM", true );
@@ -825,7 +824,6 @@ public class RigidBodySystem {
 	public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
 	public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging friction condition", true);
 	public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
-	public BooleanParameter enableUnmergeMovingCondition = new BooleanParameter( "unmerging moving condition", false);
 	public BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 	public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	public static BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
@@ -875,7 +873,6 @@ public class RigidBodySystem {
 		vfpm.add( enableUnmerging.getControls() );
 		vfpm.add( enableUnmergeFrictionCondition.getControls() );
 		vfpm.add( enableUnmergeNormalCondition.getControls() );
-		vfpm.add( enableUnmergeMovingCondition.getControls() );
 		vfpm.add( enableUpdateContactsInCollections.getControls() );
         JButton umergeButton = new JButton("unmerge all");
         vfpm.add( umergeButton);

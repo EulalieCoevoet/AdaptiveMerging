@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import mergingBodies.Contact.ContactState;
+
 //import javafx.util.Pair;
 
 
@@ -216,7 +218,12 @@ public class BodyPairContact {
 	 */
 	public boolean checkForceClosureCritera() {
 		
-		if (contactList.size()>1)
+		int nbActiveContact = 0;
+		for (Contact contact : contactList)
+			if (contact.state != ContactState.BROKEN)
+				nbActiveContact += 1;
+		
+		if (nbActiveContact>1)
 			return true;
 		
 		return body1.checkForCycles(0, body1, this);
