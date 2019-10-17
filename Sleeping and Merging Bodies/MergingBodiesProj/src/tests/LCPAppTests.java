@@ -32,7 +32,7 @@ public class LCPAppTests extends LCPApp {
 		assertEquals(6, system.bodies.size()); // should have 6 bodies when loading the scene
 
 		system.enableMerging.setValue(true);
-		for (int i=0; i<450; i++)
+		for (int i=0; i<system.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size());
 	}
@@ -51,7 +51,7 @@ public class LCPAppTests extends LCPApp {
 
 		system.enableMerging.setValue(true);
 		RigidBodySystem.enableSleeping.setValue(true);
-		for (int i=0; i<400; i++)
+		for (int i=0; i<system.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		for (RigidBody body: system.bodies)
 			if (body instanceof RigidCollection)
@@ -64,7 +64,7 @@ public class LCPAppTests extends LCPApp {
 	 */
 	public void temporarilyPinnedObjectTest() {
 		loadSystem("datalcp/twoStacksTest.png");
-
+		
 		for (int i=0; i<10; i++)
 			system.advanceTime(dt);
 
@@ -76,7 +76,7 @@ public class LCPAppTests extends LCPApp {
 				assertEquals(zeroVelocity, tempPinnedBody.v); 
 			}
 
-		for (int i=0; i<190; i++)
+		for (int i=0; i<system.tempSleepCount.getValue(); i++)
 			system.advanceTime(dt);
 
 		assertNotEquals(null, tempPinnedBody); 
@@ -93,7 +93,7 @@ public class LCPAppTests extends LCPApp {
 
 		system.enableMerging.setValue(true);
 		system.enableMergePinned.setValue(true);
-		for (int i=0; i<450; i++)
+		for (int i=0; i<system.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
 	}
@@ -108,14 +108,14 @@ public class LCPAppTests extends LCPApp {
 		system.enableMerging.setValue(true);
 		system.enableUnmerging.setValue(false);
 		system.enableUpdateContactsInCollections.setValue(true);
-		for (int i=0; i<160; i++)
+		for (int i=0; i<200; i++)
 			system.advanceTime(dt);
 
 		RigidCollection collection = (RigidCollection)system.bodies.get(1);
 		Contact contact = collection.getInternalContacts().get(0);
 		Vector2d lambda = new Vector2d(contact.getLambda());
 
-		for (int i=0; i<200; i++)
+		for (int i=0; i<system.tempSleepCount.getValue(); i++)
 			system.advanceTime(dt);
 
 		assertTrue(lambda.x < contact.getLambda().x);
@@ -125,6 +125,7 @@ public class LCPAppTests extends LCPApp {
 	/**
 	 * Critical test for one iteration PGS in collection
 	 * After merging, if the bodies are stable/static, the internal contacts should remain the same
+	 * failing : (eulalie) since the use of compliance and stiffness feedback... 
 	 */
 	public void updateContactInCollectionConsistencyTest() {
 		loadSystem("datalcp/doubleStackUnmergeTest.png");
@@ -150,6 +151,7 @@ public class LCPAppTests extends LCPApp {
 	/**
 	 * Critical test for one iteration PGS in collection
 	 * After merging, if the bodies are stable/static, the internal contacts should remain the same 
+	 * failing : (eulalie) since the use of compliance and stiffness feedback... 
 	 */
 	public void updateContactInCollectionConsistencyPinnedTest() {
 		loadSystem("datalcp/singleBlockSmallTest.png");
@@ -173,7 +175,6 @@ public class LCPAppTests extends LCPApp {
 	@Test
 	/**
 	 * Critical test : this test will fail if the external contacts are not updated correctly
-	 * eulalie : this fails with new rule that pinned object should merge
 	 */
 	public void inactiveContactsTest() {
 		loadSystem("datalcp/unstableStackTest.png");
@@ -181,7 +182,7 @@ public class LCPAppTests extends LCPApp {
 		system.enableMerging.setValue(true);
 		system.enableUnmerging.setValue(true);
 		system.enableUpdateContactsInCollections.setValue(true);
-		for (int i=0; i<200; i++)
+		for (int i=0; i<400; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
 	}
