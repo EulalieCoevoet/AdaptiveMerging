@@ -352,7 +352,8 @@ public class RigidBody {
 		
 		BodyPairContact bpcToCheck = null;
 		for (BodyPairContact bpc: bpcList) {
-			if(bpc != bpcFrom) { // don't check the bpc we come from
+			
+			if(bpc != bpcFrom && !bpc.inCollection) { // don't check the bpc we come from
 				RigidBody otherBody = bpc.getOtherBodyFromCollectionPerspective(this);
 
 				int nbActiveContact = 0;
@@ -360,7 +361,7 @@ public class RigidBody {
 					if (contact.state != ContactState.BROKEN)
 						nbActiveContact += 1;
 				
-				if (!bpc.inCollection && nbActiveContact==1) // if there is only one contact in the bpc, it is a direction we want to check for cycle
+				if (nbActiveContact==1) // if there is only one contact in the bpc, it is a direction we want to check for cycle
 					bpcToCheck = bpc;
 				
 				if(otherBody == otherBodyFrom || // we are touching two different bodies in a same collection
