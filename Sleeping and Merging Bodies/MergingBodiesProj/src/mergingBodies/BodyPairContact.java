@@ -19,6 +19,11 @@ public class BodyPairContact {
 	public RigidBody body2;
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
+	
+	// Utils for cycle merge/unmerge condition.
+	public boolean inCycle = false; /** merge condition : by using this tag we avoid checking the same cycle twice*/
+	public ArrayList<BodyPairContact> othersInCycle = null; /** store the bpc which are part of the cycle */
+	public boolean unmerge = false; /** unmerge condition : by using this tag we allow to unmerge all bodies that are part of a cycle*/
 
 	Vector2d relativeLinearVelocity = new Vector2d();
 	double relativeAngularVelocity = 0;
@@ -213,7 +218,7 @@ public class BodyPairContact {
 	
 	/**
 	 * Check if it satisfies the force closure criteria: only bodies that share two
-	 * contacts, or cycles formed by 3 bodies with one contact between each.
+	 * contacts, or cycles formed by three bodies with one contact between each.
 	 * @return true if the criteria is satisfied
 	 */
 	public boolean checkForceClosureCritera() {
@@ -223,10 +228,16 @@ public class BodyPairContact {
 			if (contact.state != ContactState.BROKEN)
 				nbActiveContact += 1;
 		
+		// if there are more than one active contact within the bpc, we can merge
 		if (nbActiveContact>1)
 			return true;
+
+		// if the bpc has already been identified as being part of a cycle, we can merge
+		if(inCycle)
+			return true;
 		
-		return body1.checkForCycles(0, body1, this);
+		// otherwise check if this bpc is in a cycle formed by three bodies with one contact between each
+		return body1.checkForCycle(0, body1, this);
 	}
 	
 	/**
@@ -284,5 +295,43 @@ public class BodyPairContact {
 		if (body2.isInCollection() && !body2.isInSameCollection(body1)) {
 			body2.parent.bodyPairContactList.remove(this);
 		}
+	}
+	
+	/**
+	 * Clear datas related to the cycle, and tag the other bpc in the cycle with input unmerge value 
+	 * @param unmerge
+	 */
+	public void clearOthersInCycle(boolean unmerge) {
+		if (othersInCycle != null) {
+			for (BodyPairContact bpc : othersInCycle) {
+				bpc.unmerge = unmerge;
+				bpc.inCycle = false;
+				bpc.othersInCycle.clear();
+			}
+			this.unmerge = false;
+			inCycle = false;
+			othersInCycle.clear();
+		}
+	}
+	
+	/**
+	 * Input bpc is added as being part of the cycle. Update all lists and datas accordingly. 
+	 * @param bpc
+	 */
+	public void updateOthersInCycle(BodyPairContact bpc) {
+		if (othersInCycle == null)
+			othersInCycle = new ArrayList<BodyPairContact>();
+		bpc.othersInCycle = new ArrayList<BodyPairContact>();
+		
+		if (!othersInCycle.isEmpty()) {
+			bpc.othersInCycle.add(othersInCycle.get(0));
+			othersInCycle.get(0).othersInCycle.add(bpc);
+		}
+		
+		othersInCycle.add(bpc);
+		bpc.othersInCycle.add(this);
+		
+		bpc.inCycle = true;
+		inCycle = true;
 	}
 }

@@ -279,9 +279,15 @@ public class RigidCollection extends RigidBody{
 		
 		for (BodyPairContact bpc : body.bodyPairContactList) {	
 			for (Contact contact : bpc.contactList) { 
+				if (bpc.unmerge) {
+					bpc.unmerge = false;
+					return true;
+				}
 				if (contact.state == ContactState.BROKEN && enableUnmergeNormalCondition) { 
+					bpc.clearOthersInCycle(true);
 					return true; // rule 1. if one contact has broken
 				} else if (contact.state == ContactState.ONEDGE && enableUnmergeFrictionCondition) {
+					bpc.clearOthersInCycle(true);
 					return true; // rule 2. if one contact is on the edge of friction cone
 				}
 			}
