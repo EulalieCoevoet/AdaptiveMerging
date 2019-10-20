@@ -29,7 +29,7 @@ public class RigidBody {
 
 	/** Variable to keep track of identifiers that can be given to rigid bodies */
 	static public int nextIndex = 0;
-
+	
 	public boolean wokenUp = false;
 
 	/** visitID of this contact at this time step. */
@@ -118,8 +118,8 @@ public class RigidBody {
 	public double rho;
 
 	/**
-	 * list of contacting bodies present with this RigidBody. cleared after every
-	 * time step, unless the contact was between two sleeping bodies
+	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
+	 * both internal and external bpc.
 	 **/
 	public ArrayList<BodyPairContact> bodyPairContactList = new ArrayList<BodyPairContact>();
 
@@ -229,6 +229,13 @@ public class RigidBody {
 		// set our index
 
 		index = nextIndex++;
+	}
+	
+	public void clear() {
+		mergedThisTimeStep = false;
+		force.set(0, 0);
+		torque = 0;
+		deltaV.zero();
 	}
 	
 	public boolean isInCollection() {
@@ -343,20 +350,20 @@ public class RigidBody {
 	protected boolean checkForCycle(int count, RigidBody startBody, BodyPairContact bpcFrom) {
 		
 		if (count>3) { // more than three bodies in the cycle
-			bpcFrom.clearOthersInCycle(false);
+			bpcFrom.clearCycle();
 			return false;
 		}
 		
 		// if we come across a collection in the contact graph, we consider it as a body and check the external bpc 
 		ArrayList<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContactList : bodyPairContactList;
 		
-		RigidBody otherBodyFrom = bpcFrom.getOtherBodyFromCollectionPerspective(this);		
+		RigidBody otherBodyFrom = bpcFrom.getOtherBodyWithCollectionPerspective(this);		
 		
 		BodyPairContact bpcToCheck = null;
 		for (BodyPairContact bpc: bpcList) {
 			
-			if(bpc != bpcFrom && !bpc.inCollection) { // we do not want to check the bpc we come from
-				RigidBody otherBody = bpc.getOtherBodyFromCollectionPerspective(this);
+			if(bpc != bpcFrom && !bpc.inCollection) { // we do not want to check the bpc we come from, nor the bpc inside the collection
+				RigidBody otherBody = bpc.getOtherBodyWithCollectionPerspective(this);
 
 				int nbActiveContact = 0;
 				for (Contact contact : bpc.contactList)
@@ -369,7 +376,7 @@ public class RigidBody {
 				if(otherBody == otherBodyFrom || // we are touching two different bodies in a same collection
 				   otherBody == startBody || // we have reached the body from which the cycle starts 
 				   otherBody.isInSameCollection(startBody) || // we are part of a collection that touches a same body 
-				  (otherBody.pinned && startBody.pinned)) { // there is a body between two pinned body					
+				  (otherBody.pinned && startBody.pinned)) { // there is a body between two pinned body	
 					return true;
 				}
 			}
@@ -377,13 +384,13 @@ public class RigidBody {
 
 		// we did not find a cycle, but there is another candidate, continue
 		if(bpcToCheck!=null) {
-			bpcFrom.updateOthersInCycle(bpcToCheck);
-			RigidBody otherBody = bpcToCheck.getOtherBodyFromCollectionPerspective(this);
+			bpcFrom.updateCycle(bpcToCheck);
+			RigidBody otherBody = bpcToCheck.getOtherBodyWithCollectionPerspective(this);
 			return otherBody.checkForCycle(++count, startBody, bpcToCheck); 
 		}
 		
 		// we did not find a cycle, and there is no another candidate, break
-		bpcFrom.clearOthersInCycle(false);
+		bpcFrom.clearCycle();
 		return false;
 	}
 

@@ -22,7 +22,6 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.CollapsiblePanel;
-import mintools.swing.HorizontalFlowPanel;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -107,7 +106,9 @@ public class RigidBodySystem {
 		long now = System.nanoTime();  
 		totalSteps++;
 		
-		clearJunkAtStartOfTimeStep();
+		for (RigidBody body: bodies) {
+				body.clear();
+		}
 
 		if (useGravity.getValue()) {
 			applyGravityForce();
@@ -266,27 +267,6 @@ public class RigidBodySystem {
 			}
 		}
 	}
-
-	private void clearJunkAtStartOfTimeStep() {
-
-		for (RigidBody body: bodies) {
-			body.mergedThisTimeStep = false;
-			body.force.set(0, 0);
-			body.torque = 0;
-			body.deltaV.zero();
-
-			if (body instanceof RigidCollection) {
-				RigidCollection collection = (RigidCollection)body;
-				collection.unmergedThisTimeStep = false;
-				for (RigidBody sB: collection.collectionBodies) {
-					sB.mergedThisTimeStep = false;
-					sB.force.set(0, 0);
-					sB.torque = 0;
-					sB.deltaV.zero();
-				}
-			}
-		}
-	}
 	
 	/**
 	 * Merges all rigidBodies in the system that fit the appropriate criteria: 
@@ -301,9 +281,9 @@ public class RigidBodySystem {
 	 */
 	public void mergeBodies() {
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
-		
-		collisionProcessor.processBodyPairContacts();
 
+		collisionProcessor.processBodyPairContacts();
+		
 		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 			
 			boolean mergeCondition = bpc.checkRelativeKineticEnergy();
@@ -322,7 +302,8 @@ public class RigidBodySystem {
 					bodies.remove(bpc.body1); 
 					bodies.remove(bpc.body2);
 					RigidCollection collection = new RigidCollection(bpc.body1, bpc.body2);
-					collection.addInternalContact(bpc);
+					collection.addToInternalContact(bpc);
+					collection.addToBodyPairContacts(bpc);
 					bodies.add(collection);
 				}
 				else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() && !bpc.body1.isInSameCollection(bpc.body2)) {
@@ -330,14 +311,24 @@ public class RigidBodySystem {
 					//take all the bodies in the least massive one and add them to the collection of the most massive
 					if (bpc.body1.parent.massLinear > bpc.body2.parent.massLinear) {
 						bodies.remove(bpc.body2.parent);
+						for (BodyPairContact bpccollection : bpc.body2.parent.bodyPairContactList)
+							if(!bpc.body1.parent.bodyPairContactList.contains(bpccollection))
+								bpc.body1.parent.bodyPairContactList.add(bpccollection);
+						bpc.body1.parent.internalContacts.addAll(bpc.body2.parent.internalContacts);
 						bpc.body1.parent.addCollection(bpc.body2.parent);
-						bpc.body1.parent.addInternalContact(bpc);
+						bpc.body1.parent.addToInternalContact(bpc);
+						bpc.body1.parent.addToBodyPairContacts(bpc);
 						bpc.body1.parent.addIncompleteCollectionContacts(bpc.body2.parent, removalQueue);
 					}
 					else {
 						bodies.remove(bpc.body1.parent);
+						for (BodyPairContact bpccollection : bpc.body1.parent.bodyPairContactList)
+							if(!bpc.body2.parent.bodyPairContactList.contains(bpccollection))
+								bpc.body2.parent.bodyPairContactList.add(bpccollection);
+						bpc.body2.parent.internalContacts.addAll(bpc.body1.parent.internalContacts);
 						bpc.body2.parent.addCollection(bpc.body1.parent);
-						bpc.body2.parent.addInternalContact(bpc);
+						bpc.body2.parent.addToInternalContact(bpc);
+						bpc.body2.parent.addToBodyPairContacts(bpc);
 						bpc.body2.parent.addIncompleteCollectionContacts(bpc.body1.parent, removalQueue);
 					}
 				}
@@ -345,17 +336,19 @@ public class RigidBodySystem {
 					//body1 is in a collection, body2 is not
 					bodies.remove(bpc.body2);
 					bpc.body1.parent.addBody(bpc.body2);
-					bpc.body1.parent.addInternalContact(bpc);
+					bpc.body1.parent.addToInternalContact(bpc);
+					bpc.body1.parent.addToBodyPairContacts(bpc);
 					bpc.body1.parent.addIncompleteContacts(bpc.body2, removalQueue);
 				}
 				else if (bpc.body2.isInCollection()) {
 					//body2 is in a collection, body1 is not
 					bodies.remove(bpc.body1);
 					bpc.body2.parent.addBody(bpc.body1);
-					bpc.body2.parent.addInternalContact(bpc);
+					bpc.body2.parent.addToInternalContact(bpc);
+					bpc.body2.parent.addToBodyPairContacts(bpc);
 					bpc.body2.parent.addIncompleteContacts(bpc.body1, removalQueue);
 				}
-				removalQueue.add(bpc);
+				removalQueue.add(bpc); // bpc in now exclusively part of the collection
 			}
 		}
 		
@@ -374,20 +367,41 @@ public class RigidBodySystem {
 	private void unmergeBodies(double dt) {
 		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
-
+		
 		for(RigidBody body : bodies) {
 			if (body instanceof RigidCollection) {
 				RigidCollection collection = (RigidCollection) body;
-				if (!collection.unmergedThisTimeStep && !collection.temporarilyPinned) {
-					
+				if (!collection.temporarilyPinned) {
 					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
-					for (RigidBody b: collection.collectionBodies) {
-						boolean unmerge = collection.checkUnmergeCondition(b, dt, 
-																			enableUnmergeNormalCondition.getValue(), 
-																			enableUnmergeFrictionCondition.getValue());
-						unmerge = (unmergeAll.getValue() || unmerge); 
-						if (unmerge) 
-							unmergingBodies.add(b);
+					for (BodyPairContact bpc: collection.bodyPairContactList) {
+						
+						if (!bpc.inCollection)
+							continue;
+						
+						boolean unmerge = unmergeAll.getValue();
+						if (!unmerge)
+							unmerge = bpc.checkUnmergeCondition(dt, enableUnmergeNormalCondition.getValue(), enableUnmergeFrictionCondition.getValue());
+		
+						if (unmerge) {
+							for (BodyPairContact bpcToCheck: bpc.body1.bodyPairContactList) { // check if body1 was part of a cycle
+								if (bpcToCheck.inCycle) {
+									bpcToCheck.addBodiesToUnmerge(unmergingBodies); 
+									for (BodyPairContact bpcToUnmerge : bpcToCheck.othersInCycle) // unmerge the others bodies
+										bpcToUnmerge.addBodiesToUnmerge(unmergingBodies);
+									bpcToCheck.clearCycle();
+								}
+							}
+							
+							for (BodyPairContact bpcToCheck: bpc.body2.bodyPairContactList) { // check if body2 was part of a cycle
+								if (bpcToCheck.inCycle) {
+									bpcToCheck.addBodiesToUnmerge(unmergingBodies);
+									 for (BodyPairContact bpcToUnmerge : bpcToCheck.othersInCycle) // unmerge the others bodies
+										bpcToUnmerge.addBodiesToUnmerge(unmergingBodies);
+									bpcToCheck.clearCycle();
+								}
+							}
+							bpc.addBodiesToUnmerge(unmergingBodies);
+						}
 					}
 					
 					ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
@@ -435,6 +449,8 @@ public class RigidBodySystem {
 			for (BodyPairContact bpc : body.bodyPairContactList) {
 				RigidBody otherBody = bpc.getOtherBody(body);
 				clearedBodyPairContacts.add(bpc);
+				bpc.removeFromBodyListsParent();
+				
 				if (bpc.inCollection) {
 					bpc.inCollection = false;
 					if(!handledBodies.contains(otherBody)) {
@@ -759,6 +775,14 @@ public class RigidBodySystem {
 			}
 		}
 		
+		if (drawCycles.getValue()) {
+			for (RigidBody b : bodies) {
+				if (b instanceof RigidCollection) {
+					((RigidCollection)b).displayCycles(drawable);
+				}
+			}
+		}
+		
 		if ( drawCOMs.getValue() ) {
 			for ( RigidBody b : bodies ) {
 				b.displayCOMs(drawable);
@@ -809,6 +833,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw internal histories", false );
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
 	private BooleanParameter drawCollectionContactGraph = new BooleanParameter( "draw collections' contact graph", false );
+	private BooleanParameter drawCycles = new BooleanParameter( "draw cycles", true );
 	
 	private BooleanParameter drawCOMs = new BooleanParameter( "draw COM", true );
 	private BooleanParameter drawSpeedCOMs = new BooleanParameter( "draw speed COM", false );
@@ -852,6 +877,7 @@ public class RigidBodySystem {
 		vfpv.add( drawInternalHistories.getControls() );
 		vfpv.add( drawContactGraph.getControls() );
 		vfpv.add( drawCollectionContactGraph.getControls() );
+		vfpv.add( drawCycles.getControls() );
 
 		vfpv.add( drawCOMs.getControls() );
 		vfpv.add( drawSpeedCOMs.getControls() );

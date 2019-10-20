@@ -26,7 +26,7 @@ public class LCPAppTests extends LCPApp {
 	/**
 	 * Simple test for merge condition
 	 */
-	public void mergingTest() {
+	public void simpleMerging() {
 		loadSystem("datalcp/twoStacksTest.png");
 
 		assertEquals(6, system.bodies.size()); // should have 6 bodies when loading the scene
@@ -42,7 +42,7 @@ public class LCPAppTests extends LCPApp {
 	 * Simple test for sleeping condition 
 	 * With the new rule that pinned body can be merged: this test is no longer relevant as pinned body are not put to SLEEPING mode
 	 */
-	public void mergingAndSleepingTest() {  
+	public void mergingAndSleeping() {  
 
 		loadSystem("datalcp/twoStacksTest.png");
 
@@ -62,7 +62,7 @@ public class LCPAppTests extends LCPApp {
 	/**
 	 * Test the behavior of temporarily pinned bodies
 	 */
-	public void temporarilyPinnedObjectTest() {
+	public void tempPinnedObject() {
 		loadSystem("datalcp/twoStacksTest.png");
 		
 		for (int i=0; i<10; i++)
@@ -88,7 +88,7 @@ public class LCPAppTests extends LCPApp {
 	/**
 	 * Checks that the merging is working with a temporarily pinned body.
 	 */
-	public void twoStackTest() {
+	public void mergingWithTempPinnedObject() {
 		loadSystem("datalcp/twoStacksTest.png");
 
 		system.enableMerging.setValue(true);
@@ -102,7 +102,7 @@ public class LCPAppTests extends LCPApp {
 	/**
 	 * Simple test for one iteration PGS in collection
 	 */
-	public void updateContactInCollectionTest() {
+	public void updateContactInCollection() {
 		loadSystem("datalcp/twoStacksTest.png");
 
 		system.enableMerging.setValue(true);
@@ -127,7 +127,7 @@ public class LCPAppTests extends LCPApp {
 	 * After merging, if the bodies are stable/static, the internal contacts should remain the same
 	 * failing : (eulalie) since the use of compliance and stiffness feedback... 
 	 */
-	public void updateContactInCollectionConsistencyTest() {
+	public void updateContactInCollectionConsistency() {
 		loadSystem("datalcp/doubleStackUnmergeTest.png");
 
 		system.enableMerging.setValue(true);
@@ -153,7 +153,7 @@ public class LCPAppTests extends LCPApp {
 	 * After merging, if the bodies are stable/static, the internal contacts should remain the same 
 	 * failing : (eulalie) since the use of compliance and stiffness feedback... 
 	 */
-	public void updateContactInCollectionConsistencyPinnedTest() {
+	public void updateContactInCollectionConsistencyPinned() {
 		loadSystem("datalcp/singleBlockSmallTest.png");
 
 		system.enableMerging.setValue(true);
@@ -176,12 +176,13 @@ public class LCPAppTests extends LCPApp {
 	/**
 	 * Critical test : this test will fail if the external contacts are not updated correctly
 	 */
-	public void inactiveContactsTest() {
+	public void externalContacts() {
 		loadSystem("datalcp/unstableStackTest.png");
 
 		system.enableMerging.setValue(true);
 		system.enableUnmerging.setValue(true);
 		system.enableUpdateContactsInCollections.setValue(true);
+		system.enableMergePinned.setValue(true);
 		for (int i=0; i<400; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
@@ -191,7 +192,7 @@ public class LCPAppTests extends LCPApp {
 	/**
 	 * Critical test for multiple bodies merge during single time step
 	 */
-	public void mergeMultipleBodiesSingleStepTest() {
+	public void mergeMultipleBodiesSingleStep() {
 		loadSystem("datalcp/jamTest.png");
 
 		system.enableMerging.setValue(false);
@@ -206,4 +207,72 @@ public class LCPAppTests extends LCPApp {
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
 	}
+	
+	@Test
+	/**
+	 * Test collisionProcessor bodyPairContact list
+	 */
+	public void storeBodyPairContactInCollisionProcessor() {
+		loadSystem("datalcp/doubleStackUnmergeTest.png");
+		
+		system.enableMerging.setValue(false);
+		
+		for (int i=0; i<23; i++)
+			system.advanceTime(dt);
+		
+		assertEquals(4, system.collisionProcessor.contacts.size()); 
+		system.collisionProcessor.processBodyPairContacts();
+		assertEquals(2, system.collisionProcessor.bodyPairContacts.size()); 
+		
+		for (int i=0; i<9; i++)
+			system.advanceTime(dt);
+
+		system.collisionProcessor.processBodyPairContacts();
+		assertEquals(4, system.collisionProcessor.bodyPairContacts.size()); 
+		
+		for (int i=0; i<7; i++)
+			system.advanceTime(dt);
+
+		system.collisionProcessor.processBodyPairContacts();
+		assertEquals(6, system.collisionProcessor.bodyPairContacts.size()); 
+	}
+	
+	@Test
+	/**
+	 * Test that the bodyPairContact list of collection is correctly being updated
+	 */
+	public void storeBodyPairContactInCollection() {
+		loadSystem("datalcp/doubleStackUnmergeTest.png");
+		RigidCollection collection;
+		
+		system.enableMerging.setValue(true);
+		system.enableMergePinned.setValue(false);
+		
+		system.mergingEvent=false;
+		while(!system.mergingEvent)
+			system.advanceTime(dt);
+		
+		collection = (RigidCollection)system.bodies.get(2);		
+		assertEquals(3, collection.bodyPairContactList.size()); 
+		
+		system.mergingEvent=false;
+		while(!system.mergingEvent)
+			system.advanceTime(dt);
+		
+		collection = (RigidCollection)system.bodies.get(1);		
+		assertEquals(6, collection.bodyPairContactList.size()); 
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -108,19 +108,19 @@ public class CollisionProcessor {
 	/**
 	 * Clears bodyPairContacts list
 	 */
-	protected void processBodyPairContacts() {
+	public void processBodyPairContacts() {
 		
-		for (BodyPairContact bpc : bodyPairContacts) 
+		for (BodyPairContact bpc : bodyPairContacts) // clear contactList of existing bpc
 			bpc.contactList.clear();
-		
+
 		for (Contact contact : contacts)
-			if (contact.lambda.x > 1e-14) // stores only if the contact is active
+			if (contact.lambda.x > 1e-14) // store detected contact in existing or new bpc only if it is active
 				storeInBodyPairContacts(contact);
 		
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
 		for (BodyPairContact bpc : bodyPairContacts) {
 			
-			if (!bpc.contactList.isEmpty()) {
+			if (!bpc.contactList.isEmpty()) { // if the contactList is empty we discard the bpc
 				tmpBodyPairContacts.add(bpc);
 				bpc.accumulate();
 			} else {
@@ -389,7 +389,7 @@ public class CollisionProcessor {
 	
 	/**
 	 * Store contact in bodyPairContacts.
-	 * @param contact
+	 * @param contact newly detected contact
 	 */
 	private void storeInBodyPairContacts(Contact contact) {
 
@@ -405,6 +405,7 @@ public class CollisionProcessor {
 		} 
 		
 		bpc.addToBodyLists();
+		bpc.addToBodyListsParent();
 		bpc.contactList.add(contact);
 	}
 		

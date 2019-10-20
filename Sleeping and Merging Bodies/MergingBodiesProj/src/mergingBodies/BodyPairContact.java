@@ -7,8 +7,6 @@ import javax.vecmath.Vector2d;
 
 import mergingBodies.Contact.ContactState;
 
-//import javafx.util.Pair;
-
 
 /**
  * This class holds info about two colliding bodies (list of contacts, relative velocity, if they are merged...).
@@ -23,7 +21,6 @@ public class BodyPairContact {
 	// Utils for cycle merge/unmerge condition.
 	public boolean inCycle = false; /** merge condition : by using this tag we avoid checking the same cycle twice*/
 	public ArrayList<BodyPairContact> othersInCycle = null; /** store the bpc which are part of the cycle */
-	public boolean unmerge = false; /** unmerge condition : by using this tag we allow to unmerge all bodies that are part of a cycle*/
 
 	Vector2d relativeLinearVelocity = new Vector2d();
 	double relativeAngularVelocity = 0;
@@ -233,11 +230,29 @@ public class BodyPairContact {
 			return true;
 
 		// if the bpc has already been identified as being part of a cycle, we can merge
-		if(inCycle)
+		if(inCycle) 
 			return true;
 		
 		// otherwise check if this bpc is in a cycle formed by three bodies with one contact between each
-		return body1.checkForCycle(0, body1, this);
+		return body1.checkForCycle(1, body2, this); // eulalie : here's a problem, you are in a cycle, yet the other bodies may not be ready to merge...
+	}
+	
+	/**
+	 * Check if body is about to move w.r.t collection
+	 * @param body
+	 * @param dt
+	 * @return
+	 */
+	public boolean checkUnmergeCondition(double dt, boolean enableUnmergeNormalCondition, boolean enableUnmergeFrictionCondition) {		
+				
+		for (Contact contact : contactList) { 
+			if (contact.state == ContactState.BROKEN && enableUnmergeNormalCondition) 
+				return true; // rule 1. if one contact has broken
+			if (contact.state == ContactState.ONEDGE && enableUnmergeFrictionCondition)
+				return true; // rule 2. if one contact is on the edge of friction cone
+		}
+	
+		return false;
 	}
 	
 	/**
@@ -256,11 +271,21 @@ public class BodyPairContact {
 	 * @param body
 	 * @return
 	 */
-	public RigidBody getOtherBodyFromCollectionPerspective(RigidBody body) {
+	public RigidBody getOtherBodyWithCollectionPerspective(RigidBody body) {
 		if (body.isInCollection()) 
 			return (body1.isInSameCollection(body))? body2 : body1;
 		else 
 			return getOtherBody(body);
+	}
+	
+	/**
+	 * Add the BodyContact to bodyContactList of members body1 and body2  
+	 */
+	public void addBodiesToUnmerge(ArrayList<RigidBody> bodiesToUnmerge) {
+		if(!bodiesToUnmerge.contains(body1) && !body1.pinned && body1.isInCollection())
+			bodiesToUnmerge.add(body1);
+		if(!bodiesToUnmerge.contains(body2) && !body2.pinned && body2.isInCollection())
+			bodiesToUnmerge.add(body2);
 	}
 
 	/**
@@ -273,11 +298,16 @@ public class BodyPairContact {
 		if (!body2.bodyPairContactList.contains(this)) {
 			body2.bodyPairContactList.add(this);
 		}
-		
+	}
+	
+	/**
+	 * Add the BodyContact to bodyContactList of parent members body1 and body2  
+	 */
+	public void addToBodyListsParent() {		
 		if (body1.isInCollection() && !body1.parent.bodyPairContactList.contains(this)) {
 			body1.parent.bodyPairContactList.add(this);
 		}
-		if (body2.isInCollection() && !body2.isInSameCollection(body1) && !body2.parent.bodyPairContactList.contains(this)) {
+		if (body2.isInCollection() && !body2.parent.bodyPairContactList.contains(this)) {
 			body2.parent.bodyPairContactList.add(this);
 		}
 	}
@@ -286,13 +316,20 @@ public class BodyPairContact {
 	 * Remove the BodyContact from bodyContactList of members body1 and body2
 	 */
 	public void removeFromBodyLists() {
-		body1.bodyPairContactList.remove(this);
-		body2.bodyPairContactList.remove(this);
-		
-		if (body1.isInCollection()) {
+		if (body1.bodyPairContactList.contains(this))
+			body1.bodyPairContactList.remove(this);
+		if (body2.bodyPairContactList.contains(this))
+			body2.bodyPairContactList.remove(this);
+	}
+	
+	/**
+	 * Remove the BodyContact from bodyContactList of parent of members body1 and body2
+	 */
+	public void removeFromBodyListsParent() {
+		if (body1.isInCollection() && body1.parent.bodyPairContactList.contains(this)) {
 			body1.parent.bodyPairContactList.remove(this);
 		}
-		if (body2.isInCollection() && !body2.isInSameCollection(body1)) {
+		if (body2.isInCollection() && body2.parent.bodyPairContactList.contains(this)) {
 			body2.parent.bodyPairContactList.remove(this);
 		}
 	}
@@ -301,14 +338,12 @@ public class BodyPairContact {
 	 * Clear datas related to the cycle, and tag the other bpc in the cycle with input unmerge value 
 	 * @param unmerge
 	 */
-	public void clearOthersInCycle(boolean unmerge) {
+	public void clearCycle() {
 		if (othersInCycle != null) {
-			for (BodyPairContact bpc : othersInCycle) {
-				bpc.unmerge = unmerge;
+			for (BodyPairContact bpc : othersInCycle) {	
 				bpc.inCycle = false;
 				bpc.othersInCycle.clear();
 			}
-			this.unmerge = false;
 			inCycle = false;
 			othersInCycle.clear();
 		}
@@ -318,20 +353,22 @@ public class BodyPairContact {
 	 * Input bpc is added as being part of the cycle. Update all lists and datas accordingly. 
 	 * @param bpc
 	 */
-	public void updateOthersInCycle(BodyPairContact bpc) {
+	public void updateCycle(BodyPairContact bpc) {
+		
 		if (othersInCycle == null)
 			othersInCycle = new ArrayList<BodyPairContact>();
 		bpc.othersInCycle = new ArrayList<BodyPairContact>();
 		
 		if (!othersInCycle.isEmpty()) {
-			bpc.othersInCycle.add(othersInCycle.get(0));
-			othersInCycle.get(0).othersInCycle.add(bpc);
+			BodyPairContact thirdbpc = othersInCycle.get(0);
+			bpc.othersInCycle.add(thirdbpc);
+			thirdbpc.othersInCycle.add(bpc);
 		}
 		
-		othersInCycle.add(bpc);
 		bpc.othersInCycle.add(this);
+		this.othersInCycle.add(bpc);
 		
 		bpc.inCycle = true;
-		inCycle = true;
+		this.inCycle = true;
 	}
 }

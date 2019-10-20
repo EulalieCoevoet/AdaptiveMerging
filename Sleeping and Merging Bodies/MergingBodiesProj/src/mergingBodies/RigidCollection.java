@@ -12,20 +12,13 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import mergingBodies.Contact.ContactState;
-
 public class RigidCollection extends RigidBody{
 
 	/** List of RigidBody of the collection */
 	protected ArrayList<RigidBody> collectionBodies = new ArrayList<RigidBody>();
 	
-	/** List of BodyContact in the collection: BodyContact between RigidBody of the collection */
-	protected ArrayList<BodyPairContact> internalBodyPairContacts = new ArrayList<BodyPairContact>();
-	
 	/** List of Contact in the collection: Contact between RigidBody of the collection */
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
-
-	boolean unmergedThisTimeStep = false;
 	
 	public Color3f color;
 
@@ -83,9 +76,6 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody body : collection.collectionBodies)
 			addBodyInternalMethod(body);
 		
-		internalBodyPairContacts.addAll(collection.internalBodyPairContacts);
-		internalContacts.addAll(collection.internalContacts);
-		
 		updateCollectionPinnedConditions(collection);
 		updateCollection();
 	}
@@ -126,6 +116,15 @@ public class RigidCollection extends RigidBody{
 		tmp3.scale(0.5);
 		
 		v.set(tmp3);
+	}
+	
+	@Override
+	public void clear() {
+		super.clear();
+		
+		for (RigidBody body: collectionBodies) {
+			body.clear();
+		}
 	}
 	
 	/**
@@ -243,19 +242,7 @@ public class RigidCollection extends RigidBody{
 			jinv = 1./inertia;
 	}
 	
-	/**
-	 * Add given BodyPairContact to internalBodyPairContacts, and BodyPairContact's contactList to internalContacts
-	 * @param bpc
-	 */
-	public void addInternalContact(BodyPairContact bpc) {
-		
-		if (!internalBodyPairContacts.contains(bpc)) {
-			internalBodyPairContacts.add(bpc);
-		} else {
-			System.err.println("RigidCollection.addInternalContact : This should probably never happen");
-		}
-		
-		bpc.addToBodyLists();
+	public void addToInternalContact(BodyPairContact bpc) {
 		
 		for (Contact c: bpc.contactList) {
 			c.getHistoryStatistics();
@@ -264,36 +251,15 @@ public class RigidCollection extends RigidBody{
 		internalContacts.addAll(bpc.contactList);
 	}
 	
-	/**
-	 * Check if body is about to move w.r.t collection
-	 * @param body
-	 * @param dt
-	 * @return
-	 */
-	public boolean checkUnmergeCondition(RigidBody body, double dt, 
-											boolean enableUnmergeNormalCondition, 
-											boolean enableUnmergeFrictionCondition) {		
+	public void addToBodyPairContacts(BodyPairContact bpc) {
 		
-		if(body.pinned)
-			return false;
+		bpc.addToBodyListsParent();
 		
-		for (BodyPairContact bpc : body.bodyPairContactList) {	
-			for (Contact contact : bpc.contactList) { 
-				if (bpc.unmerge) {
-					bpc.unmerge = false;
-					return true;
-				}
-				if (contact.state == ContactState.BROKEN && enableUnmergeNormalCondition) { 
-					bpc.clearOthersInCycle(true);
-					return true; // rule 1. if one contact has broken
-				} else if (contact.state == ContactState.ONEDGE && enableUnmergeFrictionCondition) {
-					bpc.clearOthersInCycle(true);
-					return true; // rule 2. if one contact is on the edge of friction cone
-				}
-			}
-		}
-	
-		return false;
+		// also add the external bpc to the collection bodyPairContactList
+		for (BodyPairContact bpcExt : bpc.body1.bodyPairContactList) 
+			bpcExt.addToBodyListsParent();
+		for (BodyPairContact bpcExt : bpc.body2.bodyPairContactList) 
+			bpcExt.addToBodyListsParent();
 	}
 
 	@Override
@@ -435,13 +401,15 @@ public class RigidCollection extends RigidBody{
 	public void fillInternalBodyContacts() {
 		for (RigidBody body: collectionBodies) {
 			for (BodyPairContact bpc: body.bodyPairContactList) {
-				if (!internalBodyPairContacts.contains(bpc) && bpc.inCollection == true) {
-					RigidBody otherBody = bpc.getOtherBody(body);
-					if (body.parent.collectionBodies.contains(otherBody)) {
-						internalBodyPairContacts.add(bpc);
-						for (Contact contact : bpc.contactList) {
-							if (!internalContacts.contains(contact)) {
-								internalContacts.add(contact);
+				if (!bodyPairContactList.contains(bpc)) {
+					bodyPairContactList.add(bpc);
+					if(bpc.inCollection == true) {
+						RigidBody otherBody = bpc.getOtherBody(body);
+						if (body.parent.collectionBodies.contains(otherBody)) {
+							for (Contact contact : bpc.contactList) {
+								if (!internalContacts.contains(contact)) {
+									internalContacts.add(contact);
+								}
 							}
 						}
 					}
@@ -460,7 +428,8 @@ public class RigidCollection extends RigidBody{
 		for (BodyPairContact bpc: body.bodyPairContactList) {
 			if (bpc.body1.isInSameCollection(bpc.body2) && bpc.relativeKineticEnergyMetricHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bpc.inCollection) {
 				bpc.inCollection = true;
-				body.parent.addInternalContact(bpc);
+				body.parent.addToInternalContact(bpc);
+				body.parent.addToBodyPairContacts(bpc);
 				removalQueue.add(bpc);
 			}
 		}
@@ -495,7 +464,7 @@ public class RigidCollection extends RigidBody{
 
 	public void displayInternalContactForces(GLAutoDrawable drawable) {
 
-		for (BodyPairContact bpc: internalBodyPairContacts) {
+		for (BodyPairContact bpc: bodyPairContactList) {
 			if (!bpc.inCollection) 
 				continue;
 			for (Contact c: bpc.contactList) 
@@ -505,7 +474,7 @@ public class RigidCollection extends RigidBody{
 	
 	public void displayInternalContactLocations(GLAutoDrawable drawable) {
 
-		for (BodyPairContact bpc: internalBodyPairContacts) {
+		for (BodyPairContact bpc: bodyPairContactList) {
 			if (!bpc.inCollection) 
 				continue;
 			for (Contact c: bpc.contactList) 
@@ -542,15 +511,30 @@ public class RigidCollection extends RigidBody{
 		// draw a line between the two bodies but only if they're both not pinned
 		Point2d p1 = new Point2d();
 		Point2d p2 = new Point2d();
-		for (BodyPairContact bc: internalBodyPairContacts) {
-			gl.glLineWidth(5);
-			gl.glColor4f(0.f, 0.f, 0.f, 1.0f);
-			gl.glBegin( GL.GL_LINES );
-			p1.set(bc.body1.x);
-			p2.set(bc.body2.x);
-			gl.glVertex2d(p1.x, p1.y);
-			gl.glVertex2d(p2.x, p2.y);
-			gl.glEnd();
+		for (BodyPairContact bpc: bodyPairContactList) {
+			if(bpc.inCollection) {
+				gl.glLineWidth(5);
+				gl.glColor4f(0.f, 0.f, 0.f, 1.0f);
+				gl.glBegin( GL.GL_LINES );
+				p1.set(bpc.body1.x);
+				p2.set(bpc.body2.x);
+				gl.glVertex2d(p1.x, p1.y);
+				gl.glVertex2d(p2.x, p2.y);
+				gl.glEnd();
+			}
 		}
+	}
+	
+	/**
+	 * displays cycles (from merge condition)
+	 * @param drawable
+	 */
+	public void displayCycles( GLAutoDrawable drawable) {
+		
+		Color3f colorCycle = new Color3f(0,(float) 0.75,0);
+		
+		for(BodyPairContact bpc : bodyPairContactList) 
+			if (bpc.inCycle) 
+				bpc.contactList.get(0).displayContactLocation(drawable, colorCycle);
 	}
 }
