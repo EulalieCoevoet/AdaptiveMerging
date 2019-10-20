@@ -385,23 +385,7 @@ public class RigidBodySystem {
 							unmerge = bpc.checkUnmergeCondition(dt, mergeParams);
 		
 						if (unmerge) {
-							for (BodyPairContact bpcToCheck: bpc.body1.bodyPairContactList) { // check if body1 was part of a cycle
-								if (bpcToCheck.inCycle) {
-									bpcToCheck.addBodiesToUnmerge(unmergingBodies); 
-									for (BodyPairContact bpcToUnmerge : bpcToCheck.othersInCycle) // unmerge the others bodies
-										bpcToUnmerge.addBodiesToUnmerge(unmergingBodies);
-									bpcToCheck.clearCycle();
-								}
-							}
-							
-							for (BodyPairContact bpcToCheck: bpc.body2.bodyPairContactList) { // check if body2 was part of a cycle
-								if (bpcToCheck.inCycle) {
-									bpcToCheck.addBodiesToUnmerge(unmergingBodies);
-									 for (BodyPairContact bpcToUnmerge : bpcToCheck.othersInCycle) // unmerge the others bodies
-										bpcToUnmerge.addBodiesToUnmerge(unmergingBodies);
-									bpcToCheck.clearCycle();
-								}
-							}
+							bpc.checkCyclesToUnmerge(unmergingBodies);
 							bpc.addBodiesToUnmerge(unmergingBodies);
 						}
 					}

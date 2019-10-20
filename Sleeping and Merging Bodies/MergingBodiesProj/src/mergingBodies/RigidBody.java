@@ -390,8 +390,7 @@ public class RigidBody {
 					   otherBody.isInSameCollection(startBody) || // we are part of a collection that touches a same body 
 					   otherBody == startBody || // we have reached the body from which the cycle started
 					  (otherBody.pinned && startBody.pinned)) { // there is a body between two pinned body	
-						if (nbActiveContact==1)
-							bpcFrom.updateCycle(bpc);
+						bpcFrom.updateCycle(bpc);
 						return true;
 					}
 				}

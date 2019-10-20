@@ -369,7 +369,7 @@ public class BodyPairContact {
 			othersInCycle = new ArrayList<BodyPairContact>();
 		bpc.othersInCycle = new ArrayList<BodyPairContact>();
 		
-		if(cycleColor == null) {
+		if (cycleColor == null) {
 			Utils utils = new Utils();
 			cycleColor = utils.getRandomColor();
 		}
@@ -386,5 +386,36 @@ public class BodyPairContact {
 		
 		bpc.inCycle = true;
 		this.inCycle = true;
+	}
+	
+	public void checkCyclesToUnmerge(ArrayList<RigidBody> bodiesToUnmerge) {
+		ArrayList<BodyPairContact> bpcToCheck = new ArrayList<BodyPairContact>();
+		
+		for (BodyPairContact bpc: body1.bodyPairContactList) { // check if body1 was part of a cycle
+			if (bpc.inCycle) {
+				bpc.addBodiesToUnmerge(bodiesToUnmerge); 
+				bpcToCheck.add(bpc);
+				for (BodyPairContact bpcToUnmerge : bpc.othersInCycle) { // unmerge the others bodies
+					bpcToUnmerge.addBodiesToUnmerge(bodiesToUnmerge);
+					bpcToCheck.add(bpcToUnmerge);
+				}
+				bpc.clearCycle();
+			}
+		}
+		
+		for (BodyPairContact bpc: body2.bodyPairContactList) { // check if body2 was part of a cycle
+			if (bpc.inCycle) {
+				bpc.addBodiesToUnmerge(bodiesToUnmerge);
+				bpcToCheck.add(bpc);
+				 for (BodyPairContact bpcToUnmerge : bpc.othersInCycle) { // unmerge the others bodies
+					bpcToUnmerge.addBodiesToUnmerge(bodiesToUnmerge);
+					bpcToCheck.add(bpcToUnmerge);
+				 }
+				bpc.clearCycle();
+			}
+		}
+		
+		for (BodyPairContact bpc: bpcToCheck)
+			bpc.checkCyclesToUnmerge(bodiesToUnmerge);
 	}
 }
