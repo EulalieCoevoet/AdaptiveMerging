@@ -2,7 +2,6 @@ package mergingBodies;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Random;
 
 import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
@@ -448,15 +447,8 @@ public class RigidCollection extends RigidBody{
 	}
 	
 	protected void generateColor() {
-		
-		Float r = (new Random()).nextFloat();
-		Float g = (new Random()).nextFloat();
-		Float b = (new Random()).nextFloat();
-		
-		if (Math.abs(r - g) < 1.5e-1 && Math.abs(g - b) < 1.5e-1) // avoid gray
-			generateColor();
-		else 
-			color = new Color3f(r, g, b);
+		Utils utils = new Utils();
+		color = utils.getRandomColor();
 	}
 	
 	/** display list ID for this rigid body */
@@ -472,13 +464,13 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 	
-	public void displayInternalContactLocations(GLAutoDrawable drawable) {
+	public void displayInternalContactLocations(GLAutoDrawable drawable, int size) {
 
 		for (BodyPairContact bpc: bodyPairContactList) {
 			if (!bpc.inCollection) 
 				continue;
 			for (Contact c: bpc.contactList) 
-				c.displayContactLocation(drawable, new Color3f(0,0,1)); //blue inside collection
+				c.displayContactLocation(drawable, new Color3f(0,0,1), size); //blue inside collection
 		}
 	}
 
@@ -529,12 +521,15 @@ public class RigidCollection extends RigidBody{
 	 * displays cycles (from merge condition)
 	 * @param drawable
 	 */
-	public void displayCycles( GLAutoDrawable drawable) {
+	public void displayCycles( GLAutoDrawable drawable, int size) {
 		
-		Color3f colorCycle = new Color3f(0,(float) 0.75,0);
-		
-		for(BodyPairContact bpc : bodyPairContactList) 
-			if (bpc.inCycle) 
-				bpc.contactList.get(0).displayContactLocation(drawable, colorCycle);
+		for(BodyPairContact bpc : bodyPairContactList) {
+			if (bpc.inCycle) {
+				if(bpc.contactList.isEmpty())
+					System.err.println("[displayCycles] The list of contact is empty. This should not happen. Probably due to an unwanted merge (concave?).");
+				else
+					bpc.contactList.get(0).displayContactLocation(drawable, bpc.cycleColor, size);
+			}
+		}
 	}
 }

@@ -8,6 +8,7 @@ import mergingBodies.LCPApp;
 import mergingBodies.RigidBody;
 import mergingBodies.RigidBody.ObjectState;
 import mergingBodies.RigidBodySystem;
+import mergingBodies.RigidBodySystem.MergeParameters;
 import mergingBodies.RigidCollection;
 import mergingBodies.CollisionProcessor;
 import mergingBodies.Contact;
@@ -16,10 +17,12 @@ import javax.vecmath.Vector2d;
 public class LCPAppTests extends LCPApp {
 
 	double dt = 0.05;
+	MergeParameters mergeParams;
 
 	@Override
 	public void setUp() {
 		// Do nothing, we don't want to launch the app (2D viewer)
+		mergeParams = system.mergeParams;
 	}
 
 	@Test
@@ -31,7 +34,7 @@ public class LCPAppTests extends LCPApp {
 
 		assertEquals(6, system.bodies.size()); // should have 6 bodies when loading the scene
 
-		system.enableMerging.setValue(true);
+		mergeParams.enableMerging.setValue(true);
 		for (int i=0; i<system.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size());
@@ -49,7 +52,7 @@ public class LCPAppTests extends LCPApp {
 		for (RigidBody body: system.bodies)
 			assertEquals(ObjectState.ACTIVE, body.state); // every bodies should be active at beginning of the simulation
 
-		system.enableMerging.setValue(true);
+		mergeParams.enableMerging.setValue(true);
 		RigidBodySystem.enableSleeping.setValue(true);
 		for (int i=0; i<system.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
@@ -91,8 +94,8 @@ public class LCPAppTests extends LCPApp {
 	public void mergingWithTempPinnedObject() {
 		loadSystem("datalcp/twoStacksTest.png");
 
-		system.enableMerging.setValue(true);
-		system.enableMergePinned.setValue(true);
+		mergeParams.enableMerging.setValue(true);
+		mergeParams.enableMergePinned.setValue(true);
 		for (int i=0; i<system.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
@@ -105,9 +108,9 @@ public class LCPAppTests extends LCPApp {
 	public void updateContactInCollection() {
 		loadSystem("datalcp/twoStacksTest.png");
 
-		system.enableMerging.setValue(true);
-		system.enableUnmerging.setValue(false);
-		system.enableUpdateContactsInCollections.setValue(true);
+		mergeParams.enableMerging.setValue(true);
+		mergeParams.enableUnmerging.setValue(false);
+		mergeParams.updateContactsInCollections.setValue(true);
 		for (int i=0; i<200; i++)
 			system.advanceTime(dt);
 
@@ -130,10 +133,10 @@ public class LCPAppTests extends LCPApp {
 	public void updateContactInCollectionConsistency() {
 		loadSystem("datalcp/doubleStackUnmergeTest.png");
 
-		system.enableMerging.setValue(true);
-		system.enableUnmerging.setValue(false);
-		system.enableUpdateContactsInCollections.setValue(true);
-		system.enableMergePinned.setValue(true);
+		mergeParams.enableMerging.setValue(true);
+		mergeParams.enableUnmerging.setValue(false);
+		mergeParams.updateContactsInCollections.setValue(true);
+		mergeParams.enableMergePinned.setValue(true);
 		for (int i=0; i<40+CollisionProcessor.sleepAccum.getValue(); i++)
 			system.advanceTime(dt);
 
@@ -156,9 +159,9 @@ public class LCPAppTests extends LCPApp {
 	public void updateContactInCollectionConsistencyPinned() {
 		loadSystem("datalcp/singleBlockSmallTest.png");
 
-		system.enableMerging.setValue(true);
-		system.enableUpdateContactsInCollections.setValue(true);
-		system.enableMergePinned.setValue(true);
+		mergeParams.enableMerging.setValue(true);
+		mergeParams.updateContactsInCollections.setValue(true);
+		mergeParams.enableMergePinned.setValue(true);
 		for (int i=0; i<23+CollisionProcessor.sleepAccum.getValue(); i++)
 			system.advanceTime(dt);
 
@@ -179,10 +182,10 @@ public class LCPAppTests extends LCPApp {
 	public void externalContacts() {
 		loadSystem("datalcp/unstableStackTest.png");
 
-		system.enableMerging.setValue(true);
-		system.enableUnmerging.setValue(true);
-		system.enableUpdateContactsInCollections.setValue(true);
-		system.enableMergePinned.setValue(true);
+		mergeParams.enableMerging.setValue(true);
+		mergeParams.enableUnmerging.setValue(true);
+		mergeParams.updateContactsInCollections.setValue(true);
+		mergeParams.enableMergePinned.setValue(true);
 		for (int i=0; i<400; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
@@ -195,14 +198,14 @@ public class LCPAppTests extends LCPApp {
 	public void mergeMultipleBodiesSingleStep() {
 		loadSystem("datalcp/jamTest.png");
 
-		system.enableMerging.setValue(false);
+		mergeParams.enableMerging.setValue(false);
 		for (int i=0; i<100; i++)
 			system.advanceTime(dt);
 		assertEquals(4, system.bodies.size()); 
 
-		system.enableMerging.setValue(true);
-		system.enableUnmerging.setValue(false);
-		system.enableMergeCheckCycleCondition.setValue(false);
+		mergeParams.enableMerging.setValue(true);
+		mergeParams.enableUnmerging.setValue(false);
+		mergeParams.enableMergeCheckCycleCondition.setValue(false);
 		for (int i=0; i<CollisionProcessor.sleepAccum.getValue(); i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
@@ -215,25 +218,25 @@ public class LCPAppTests extends LCPApp {
 	public void storeBodyPairContactInCollisionProcessor() {
 		loadSystem("datalcp/doubleStackUnmergeTest.png");
 		
-		system.enableMerging.setValue(false);
+		mergeParams.enableMerging.setValue(false);
 		
 		for (int i=0; i<23; i++)
 			system.advanceTime(dt);
 		
 		assertEquals(4, system.collisionProcessor.contacts.size()); 
-		system.collisionProcessor.processBodyPairContacts();
+		system.collisionProcessor.processBodyPairContacts(mergeParams);
 		assertEquals(2, system.collisionProcessor.bodyPairContacts.size()); 
 		
 		for (int i=0; i<9; i++)
 			system.advanceTime(dt);
 
-		system.collisionProcessor.processBodyPairContacts();
+		system.collisionProcessor.processBodyPairContacts(mergeParams);
 		assertEquals(4, system.collisionProcessor.bodyPairContacts.size()); 
 		
 		for (int i=0; i<7; i++)
 			system.advanceTime(dt);
 
-		system.collisionProcessor.processBodyPairContacts();
+		system.collisionProcessor.processBodyPairContacts(mergeParams);
 		assertEquals(6, system.collisionProcessor.bodyPairContacts.size()); 
 	}
 	
@@ -245,8 +248,8 @@ public class LCPAppTests extends LCPApp {
 		loadSystem("datalcp/doubleStackUnmergeTest.png");
 		RigidCollection collection;
 		
-		system.enableMerging.setValue(true);
-		system.enableMergePinned.setValue(false);
+		mergeParams.enableMerging.setValue(true);
+		mergeParams.enableMergePinned.setValue(false);
 		
 		system.mergingEvent=false;
 		while(!system.mergingEvent)

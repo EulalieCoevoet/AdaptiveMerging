@@ -123,7 +123,7 @@ public class RigidBodySystem {
 			collisionProcessor.processCollisions(dt); 
 		}
 		
-		if (enableUpdateContactsInCollections.getValue()) {
+		if (mergeParams.updateContactsInCollections.getValue()) {
 			// this should be done before advanceTime() so that external forces and velocities are of the same time step
 			collisionProcessor.updateContactsInCollections(dt);
 		}
@@ -132,7 +132,7 @@ public class RigidBodySystem {
 			b.advanceTime(dt); 
 		}
 		
-		if (enableMerging.getValue()) {
+		if (mergeParams.enableMerging.getValue()) {
 			// this should be done after advanceTime() so that the deltaVs are applied to each bodies before merging
 			mergeBodies(); 
 			checkIndex();
@@ -146,7 +146,7 @@ public class RigidBodySystem {
 			wake();
 		}
 
-		if (enableUnmerging.getValue() || unmergeAll.getValue()) {
+		if (mergeParams.enableUnmerging.getValue() || mergeParams.unmergeAll.getValue()) {
 			unmergeBodies(dt);
 			checkIndex();
 		}
@@ -282,16 +282,18 @@ public class RigidBodySystem {
 	public void mergeBodies() {
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
 
-		collisionProcessor.processBodyPairContacts();
+		collisionProcessor.processBodyPairContacts(mergeParams);
 		
 		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 			
-			boolean mergeCondition = bpc.checkRelativeKineticEnergy();
-			if (enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable());
-			if (enableMergeCheckCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkForceClosureCritera());
-			
-			if (!enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
+			boolean mergeCondition = true;		
+
+			// check for merge condition
+			if (!mergeParams.enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
 			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
+			mergeCondition = (mergeCondition && bpc.checkRelativeKineticEnergy());
+			if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable());
+			if (mergeParams.enableMergeCheckCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkForceClosureCritera(mergeParams));
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 
 			if (mergeCondition) {
@@ -378,9 +380,9 @@ public class RigidBodySystem {
 						if (!bpc.inCollection)
 							continue;
 						
-						boolean unmerge = unmergeAll.getValue();
+						boolean unmerge = mergeParams.unmergeAll.getValue();
 						if (!unmerge)
-							unmerge = bpc.checkUnmergeCondition(dt, enableUnmergeNormalCondition.getValue(), enableUnmergeFrictionCondition.getValue());
+							unmerge = bpc.checkUnmergeCondition(dt, mergeParams);
 		
 						if (unmerge) {
 							for (BodyPairContact bpcToCheck: bpc.body1.bodyPairContactList) { // check if body1 was part of a cycle
@@ -427,7 +429,7 @@ public class RigidBodySystem {
 		}
 		
 		processCollectionsColor();
-		unmergeAll.setValue(false);
+		mergeParams.unmergeAll.setValue(false);
 	}
 
 	private void unmergeSelectBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies) {
@@ -756,8 +758,9 @@ public class RigidBodySystem {
 
 		if (drawContactLocations.getValue() || drawContactForces.getValue()) {
 			for ( Contact c : collisionProcessor.contacts ) {
-				if (drawContactLocations.getValue()) 
-					c.displayContactLocation(drawable, new Color3f(1,0,0)); 
+				if (drawContactLocations.getValue()) {
+					c.displayContactLocation(drawable, new Color3f(1,0,0), contactLocationSize.getValue()); 
+				}
 				if (drawContactForces.getValue())
 					c.displayContactForce(drawable, new Color3f(1,0,0));
 			}
@@ -768,7 +771,7 @@ public class RigidBodySystem {
 				if (b instanceof RigidCollection) {
 					RigidCollection collection = (RigidCollection)b;
 					if (drawContactLocations.getValue())
-						collection.displayInternalContactLocations(drawable);
+						collection.displayInternalContactLocations(drawable, contactLocationSize.getValue());
 					if (drawContactForcesInCollection.getValue())
 						collection.displayInternalContactForces(drawable);
 				}
@@ -778,7 +781,7 @@ public class RigidBodySystem {
 		if (drawCycles.getValue()) {
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
-					((RigidCollection)b).displayCycles(drawable);
+					((RigidCollection)b).displayCycles(drawable, contactLocationSize.getValue());
 				}
 			}
 		}
@@ -830,6 +833,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true);
 	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true);
 	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true);
+	private IntParameter contactLocationSize = new IntParameter( "contact point size ", 5, 5, 20);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw internal histories", false );
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
 	private BooleanParameter drawCollectionContactGraph = new BooleanParameter( "draw collections' contact graph", false );
@@ -841,16 +845,22 @@ public class RigidBodySystem {
 	
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
 	
-	public BooleanParameter enableMerging = new BooleanParameter( "merging", true);
-	public BooleanParameter enableMergePinned = new BooleanParameter( "merging pinned body", true);
-	public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "merging check cycle condition", true);
-	public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging stable contact condition", true);
-	public static BooleanParameter useMassNormKinEnergy = new BooleanParameter( "use mass normalization of kin energy", true);
-	public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
-	public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging friction condition", true);
-	public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
-	public BooleanParameter enableUpdateContactsInCollections = new BooleanParameter( "update contact in collection", true);
-	public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
+	public MergeParameters mergeParams = new MergeParameters();
+	public class MergeParameters {
+		public MergeParameters() {}
+		
+		public BooleanParameter enableMerging = new BooleanParameter( "merging", true);
+		public BooleanParameter enableMergePinned = new BooleanParameter( "merging pinned body", true);
+		public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "merging check cycle condition", true);
+		public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging stable contact condition", true);
+		public BooleanParameter useMassNormKinEnergy = new BooleanParameter( "use mass normalization of kin energy", true);
+		public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
+		public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging friction condition", true);
+		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
+		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
+		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
+	}
+	
 	public static BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
 
 
@@ -874,6 +884,7 @@ public class RigidBodySystem {
 		vfpv.add( drawContactForces.getControls() );
 		vfpv.add( drawContactForcesInCollection.getControls() );
 		vfpv.add( drawContactLocations.getControls() );
+		vfpv.add( contactLocationSize.getSliderControls());
 		vfpv.add( drawInternalHistories.getControls() );
 		vfpv.add( drawContactGraph.getControls() );
 		vfpv.add( drawCollectionContactGraph.getControls() );
@@ -890,22 +901,22 @@ public class RigidBodySystem {
 		
 		VerticalFlowPanel vfpm = new VerticalFlowPanel();
 		vfpm.setBorder( new TitledBorder("merging unmerging rules") );
-		vfpm.add( enableMerging.getControls() );
-		vfpm.add( enableMergePinned.getControls() );
-		vfpm.add( useMassNormKinEnergy.getControls() );
+		vfpm.add( mergeParams.enableMerging.getControls() );
+		vfpm.add( mergeParams.enableMergePinned.getControls() );
+		vfpm.add( mergeParams.useMassNormKinEnergy.getControls() );
 		
-		vfpm.add( enableMergeCheckCycleCondition.getControls() );
-		vfpm.add( enableMergeStableContactCondition.getControls() );
-		vfpm.add( enableUnmerging.getControls() );
-		vfpm.add( enableUnmergeFrictionCondition.getControls() );
-		vfpm.add( enableUnmergeNormalCondition.getControls() );
-		vfpm.add( enableUpdateContactsInCollections.getControls() );
+		vfpm.add( mergeParams.enableMergeCheckCycleCondition.getControls() );
+		vfpm.add( mergeParams.enableMergeStableContactCondition.getControls() );
+		vfpm.add( mergeParams.enableUnmerging.getControls() );
+		vfpm.add( mergeParams.enableUnmergeFrictionCondition.getControls() );
+		vfpm.add( mergeParams.enableUnmergeNormalCondition.getControls() );
+		vfpm.add( mergeParams.updateContactsInCollections.getControls() );
         JButton umergeButton = new JButton("unmerge all");
         vfpm.add( umergeButton);
         umergeButton.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	unmergeAll.setValue(true);
+            	mergeParams.unmergeAll.setValue(true);
             }
         });
 		vfpm.add( enableSleeping.getControls() );

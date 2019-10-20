@@ -15,6 +15,7 @@ import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
 import mergingBodies.RigidBody.ObjectState;
+import mergingBodies.RigidBodySystem.MergeParameters;
 
 /**
  * Class for detecting and resolving collisions. Currently this class uses penalty forces between rigid bodies.
@@ -108,7 +109,7 @@ public class CollisionProcessor {
 	/**
 	 * Clears bodyPairContacts list
 	 */
-	public void processBodyPairContacts() {
+	public void processBodyPairContacts(MergeParameters mergeParams) {
 		
 		for (BodyPairContact bpc : bodyPairContacts) // clear contactList of existing bpc
 			bpc.contactList.clear();
@@ -122,7 +123,7 @@ public class CollisionProcessor {
 			
 			if (!bpc.contactList.isEmpty()) { // if the contactList is empty we discard the bpc
 				tmpBodyPairContacts.add(bpc);
-				bpc.accumulate();
+				bpc.accumulate(mergeParams);
 			} else {
 				bpc.removeFromBodyLists();
 			}
@@ -566,8 +567,8 @@ public class CollisionProcessor {
 	}
 
 	public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
-	public DoubleParameter friction = new DoubleParameter("Coulomb friction coefficient", 0.8, 0, 2 );
-	public IntParameter iterations = new IntParameter("iterations for GS solve", 2000, 1, 5000);
+	public DoubleParameter friction = new DoubleParameter("Coulomb friction coefficient", 1.5, 0, 2 );
+	public IntParameter iterations = new IntParameter("iterations for GS solve", 1000, 1, 5000);
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );

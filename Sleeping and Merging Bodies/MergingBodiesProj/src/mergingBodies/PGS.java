@@ -232,7 +232,7 @@ public class PGS {
 			RigidBody oldBody1 = (oldContact.body1.isInCollection())? oldContact.body1.parent: oldContact.body1;
 			RigidBody oldBody2 = (oldContact.body2.isInCollection())? oldContact.body2.parent: oldContact.body2;
 			
-			if ((oldBody1 != body1 && oldBody1 != body2) || (oldBody2 != body2 && oldBody2 != body1))
+			if ((oldBody1 != body1 && oldBody1 != body2) || (oldBody2 != body2 && oldBody2 != body1)) 
 				return null;
 		}
 		else

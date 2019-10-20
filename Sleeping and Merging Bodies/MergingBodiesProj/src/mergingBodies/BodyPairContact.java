@@ -2,10 +2,12 @@ package mergingBodies;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import mergingBodies.Contact.ContactState;
+import mergingBodies.RigidBodySystem.MergeParameters;
 
 
 /**
@@ -21,6 +23,7 @@ public class BodyPairContact {
 	// Utils for cycle merge/unmerge condition.
 	public boolean inCycle = false; /** merge condition : by using this tag we avoid checking the same cycle twice*/
 	public ArrayList<BodyPairContact> othersInCycle = null; /** store the bpc which are part of the cycle */
+	public Color3f cycleColor = null;
 
 	Vector2d relativeLinearVelocity = new Vector2d();
 	double relativeAngularVelocity = 0;
@@ -143,10 +146,10 @@ public class BodyPairContact {
 	 * Accumulate criteria for unmerge condition
 	 * @param contact
 	 */
-	public void accumulate() {
+	public void accumulate(MergeParameters mergeParams) {
 		
 		computeRelativeVelocity();
-		if (RigidBodySystem.useMassNormKinEnergy.getValue())
+		if (mergeParams.useMassNormKinEnergy.getValue())
 			relativeKineticEnergyMetricHist.add(getRelativeKineticEnergyMassNormalized());
 		else
 			relativeKineticEnergyMetricHist.add(getRelativeKineticEnergy());
@@ -218,7 +221,7 @@ public class BodyPairContact {
 	 * contacts, or cycles formed by three bodies with one contact between each.
 	 * @return true if the criteria is satisfied
 	 */
-	public boolean checkForceClosureCritera() {
+	public boolean checkForceClosureCritera(MergeParameters mergeParams) {
 		
 		int nbActiveContact = 0;
 		for (Contact contact : contactList)
@@ -234,7 +237,7 @@ public class BodyPairContact {
 			return true;
 		
 		// otherwise check if this bpc is in a cycle formed by three bodies with one contact between each
-		return body1.checkForCycle(1, body2, this); // eulalie : here's a problem, you are in a cycle, yet the other bodies may not be ready to merge...
+		return body1.checkForCycle(1, body2, this, mergeParams); 
 	}
 	
 	/**
@@ -243,12 +246,12 @@ public class BodyPairContact {
 	 * @param dt
 	 * @return
 	 */
-	public boolean checkUnmergeCondition(double dt, boolean enableUnmergeNormalCondition, boolean enableUnmergeFrictionCondition) {		
+	public boolean checkUnmergeCondition(double dt, MergeParameters mergeParams) {		
 				
 		for (Contact contact : contactList) { 
-			if (contact.state == ContactState.BROKEN && enableUnmergeNormalCondition) 
+			if (contact.state == ContactState.BROKEN && mergeParams.enableUnmergeNormalCondition.getValue()) 
 				return true; // rule 1. if one contact has broken
-			if (contact.state == ContactState.ONEDGE && enableUnmergeFrictionCondition)
+			if (contact.state == ContactState.ONEDGE && mergeParams.enableUnmergeFrictionCondition.getValue())
 				return true; // rule 2. if one contact is on the edge of friction cone
 		}
 	
@@ -282,9 +285,14 @@ public class BodyPairContact {
 	 * Add the BodyContact to bodyContactList of members body1 and body2  
 	 */
 	public void addBodiesToUnmerge(ArrayList<RigidBody> bodiesToUnmerge) {
-		if(!bodiesToUnmerge.contains(body1) && !body1.pinned && body1.isInCollection())
+		if(!body1.isInCollection() || !body2.isInCollection()) {
+			System.err.println("[addBodiesToUnmerge] trying to unmerge a body that is not in a collection. This shouldn't happen.");
+			return;
+		}
+		
+		if(!bodiesToUnmerge.contains(body1) && !body1.pinned)
 			bodiesToUnmerge.add(body1);
-		if(!bodiesToUnmerge.contains(body2) && !body2.pinned && body2.isInCollection())
+		if(!bodiesToUnmerge.contains(body2) && !body2.pinned)
 			bodiesToUnmerge.add(body2);
 	}
 
@@ -342,9 +350,11 @@ public class BodyPairContact {
 		if (othersInCycle != null) {
 			for (BodyPairContact bpc : othersInCycle) {	
 				bpc.inCycle = false;
+				bpc.cycleColor = null;
 				bpc.othersInCycle.clear();
 			}
 			inCycle = false;
+			cycleColor = null;
 			othersInCycle.clear();
 		}
 	}
@@ -358,6 +368,12 @@ public class BodyPairContact {
 		if (othersInCycle == null)
 			othersInCycle = new ArrayList<BodyPairContact>();
 		bpc.othersInCycle = new ArrayList<BodyPairContact>();
+		
+		if(cycleColor == null) {
+			Utils utils = new Utils();
+			cycleColor = utils.getRandomColor();
+		}
+		bpc.cycleColor = cycleColor;
 		
 		if (!othersInCycle.isEmpty()) {
 			BodyPairContact thirdbpc = othersInCycle.get(0);

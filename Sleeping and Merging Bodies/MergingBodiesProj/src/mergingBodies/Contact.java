@@ -103,7 +103,7 @@ public class Contact {
 	public ArrayList<Double> body1ContactTorqueHistory = new ArrayList<Double>();
 	public ArrayList<Vector2d> body2ContactForceHistory = new ArrayList<Vector2d>();
 	public ArrayList<Double> body2ContactTorqueHistory = new ArrayList<Double>();
-
+	
 	/**
 	 * Creates a new contact, and assigns it an index
 	 * @param body1
@@ -411,9 +411,9 @@ public class Contact {
 	 * Draws the contact points
 	 * @param drawable
 	 */
-	public void displayContactLocation( GLAutoDrawable drawable, Color3f color ) {
+	public void displayContactLocation( GLAutoDrawable drawable, Color3f color, int size) {
 		GL2 gl = drawable.getGL().getGL2();
-		gl.glPointSize(5);
+		gl.glPointSize(size);
 		gl.glColor4f(color.x, color.y, color.z, 1);
 		gl.glBegin( GL.GL_POINTS );
 		gl.glVertex2d(contactW.x, contactW.y);
