@@ -346,6 +346,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         imageWidth = blocker.width;
         imageHeight= blocker.height;
         system.bodies.addAll(blocker.bodies);
+        system.controllableSprings = blocker.controllableSprings;
         system.initialBodies = system.bodies;
     	system.collisionProcessor.bodyPairContacts.clear();
     	system.collisionProcessor.contacts.clear();
@@ -452,6 +453,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         component.addKeyListener( new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+            	double ds = 0.5; // step size for moving controllable springs (might want to expose this as a parameter!)
                 if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
 
                 	if(system.triggerMergingEvent) {
@@ -554,6 +556,30 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     if ( ss == substeps.getMinimum() ) return;
                     substeps.setValue( ss - 1 );
                     stepsize.setValue( stepsize.getValue() *(ss-1)/ss );
+                } else if ( e.getKeyCode() == KeyEvent.VK_1 ) {
+                	for ( Spring s : system.controllableSprings ) {
+                		s.moveWorldAttachmentAndRestLength( -ds, 0, 0 );
+                	}
+                } else if ( e.getKeyCode() == KeyEvent.VK_2 ) {
+                	for ( Spring s : system.controllableSprings ) {
+                		s.moveWorldAttachmentAndRestLength( ds, 0, 0 );
+                	}
+                } else if ( e.getKeyCode() == KeyEvent.VK_3 ) {
+                	for ( Spring s : system.controllableSprings ) {
+                		s.moveWorldAttachmentAndRestLength( 0, -ds, 0 );
+                	}
+                } else if ( e.getKeyCode() == KeyEvent.VK_4 ) {
+                	for ( Spring s : system.controllableSprings ) {
+                		s.moveWorldAttachmentAndRestLength( 0, ds, 0 );
+                	}
+                } else if ( e.getKeyCode() == KeyEvent.VK_5 ) {
+                	for ( Spring s : system.controllableSprings ) {
+                		s.moveWorldAttachmentAndRestLength( 0, 0, -ds );
+                	}
+                } else if ( e.getKeyCode() == KeyEvent.VK_6 ) {
+                	for ( Spring s : system.controllableSprings ) {
+                		s.moveWorldAttachmentAndRestLength( 0, 0, ds );
+                	}                    	
                 }
             }
         } );

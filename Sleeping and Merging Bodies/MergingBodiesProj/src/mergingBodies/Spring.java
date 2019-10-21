@@ -24,14 +24,14 @@ public class Spring {
 
 	/** 
 	 * Creates a new body pinned to world spring.
-	 * @param p 	The attachment point in the world
+	 * @param p 	The attachment point in the body frame
 	 * @param body	The body to which the spring should be attached
 	 */
 	public Spring(Point2d p, RigidBody body) {
 		this.body = body;
-		pw.set( p );
-		body.transformW2B.transform( pw, pb );
-		pbw.set( p );
+		pb.set( p );
+		body.transformB2W.transform( pb, pw );
+		pbw.set( pw );
 	}
 	
 	/**
@@ -40,7 +40,7 @@ public class Spring {
 	 * and the collection.
 	 */
 	public void apply(double k, double c) {
-		l0 = RigidBodySystem.springLength.getValue();
+		//l0 = RigidBodySystem.springLength.getValue();
 		body.transformB2W.transform( pb, pbw );
 		final Vector2d displacement = new Vector2d();
 		final Vector2d velocity = new Vector2d(); // velocity of the point on the body
@@ -81,4 +81,13 @@ public class Spring {
 		gl.glVertex2d(pbw.x, pbw.y);
 		gl.glEnd();
 	}
+	
+	/** adjust the spring properties */
+	public void moveWorldAttachmentAndRestLength( double dx, double dy, double dl ) {
+		pw.x += dx;
+		pw.y += dy;
+		l0 += dl;
+		if (l0 < 0 ) l0 = 0;
+	}
+	
 }

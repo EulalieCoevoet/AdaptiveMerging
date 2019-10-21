@@ -36,6 +36,8 @@ public class RigidBodySystem {
 
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 	public ArrayList<RigidBody> initialBodies = new ArrayList<RigidBody>();
+	
+	public ArrayList<Spring> controllableSprings = new ArrayList<Spring>();
 
 	public CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
 

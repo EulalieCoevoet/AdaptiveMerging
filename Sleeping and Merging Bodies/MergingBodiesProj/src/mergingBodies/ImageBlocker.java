@@ -33,8 +33,13 @@ public class ImageBlocker {
      * the bodies identified in the image
      */
     public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
+    
     /**
-
+     * Controllable springs
+     */
+    public ArrayList<Spring> controllableSprings = new ArrayList<Spring>();
+    
+    
     /**
      * Creates a set of rigid bodies form the given image
      * @param filename
@@ -61,13 +66,19 @@ public class ImageBlocker {
 	                // this is part of a new body!
                 	ArrayList<Block> blocks = new ArrayList<Block>();
                 	ArrayList<Block> boundaryBlocks = new ArrayList<Block>();
-                	ArrayList<Point2d> springEndpoints = new ArrayList<Point2d>();
-                	searchConnected( x, y, blocks, boundaryBlocks, springEndpoints );
+                	searchConnected( x, y, blocks, boundaryBlocks );
                 	RigidBody body = new RigidBody( blocks, boundaryBlocks );
                 	
-                	for (Point2d p: springEndpoints) {
-                		Spring s = new Spring(p, body);
-                   		body.springs.add(s);
+                	for ( Block b : blocks ) {
+                		if ( isRed( b.c ) ) {
+                			Spring s = new Spring( b.pB, body );
+                			body.springs.add(s);                				
+                		}
+                		if ( isMagenta( b.c ) ) {
+                			Spring s = new Spring( b.pB, body );
+                			body.springs.add(s);
+                			controllableSprings.add(s);
+                		}
                 	}
                 	
                 	bodies.add( body );
@@ -95,7 +106,7 @@ public class ImageBlocker {
      * Uses a queue rather than recursion to avoid stack overflow in large images
      * @param springEndpoints 
      */
-    private void searchConnected( int x, int y, ArrayList<Block> blocks, ArrayList<Block> boundaryBlocks, ArrayList<Point2d> springEndpoints ) {
+    private void searchConnected( int x, int y, ArrayList<Block> blocks, ArrayList<Block> boundaryBlocks ) {
         List<Coord> Q = new LinkedList<Coord>();
         visited[x][y] = true;
         Q.add( new Coord(x,y) );
@@ -105,9 +116,8 @@ public class ImageBlocker {
             x = p.x;
             y = p.y;
             getColour( colour, x, y );
-            if ( isWhite(colour)) continue;
-            if ( isRed(colour)) springEndpoints.add(new Point2d(x, y));
-       
+            if ( isWhite(colour) ) continue;
+            
             Block b = new Block( y, x, colour );
             blocks.add( b );
             if ( isBoundary( x, y ) ) {
@@ -131,6 +141,11 @@ public class ImageBlocker {
         return colour.epsilonEquals(red, epsilon );
 	}
 
+	private boolean isMagenta(Color3f colour) {
+        final Color3f red= new Color3f(1,0,1);
+        return colour.epsilonEquals(red, epsilon );
+	}
+	
 	/**
      * Checks if this block is on the boundary.  
      * Boundary blocks have at least one white neighbour. 
