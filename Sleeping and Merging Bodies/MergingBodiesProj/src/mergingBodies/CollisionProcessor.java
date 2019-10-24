@@ -162,6 +162,8 @@ public class CollisionProcessor {
 				collection.updateContactJacobianAndDataAsInternal(dt);
 				solver.contacts = collection.internalContacts;
 				solver.solve(dt);
+				
+				collection.computeInternalContactsForce(dt);
 			}
 		}
 		

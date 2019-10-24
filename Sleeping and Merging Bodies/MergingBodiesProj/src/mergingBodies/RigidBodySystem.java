@@ -54,7 +54,7 @@ public class RigidBodySystem {
 	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
 
 	/**Viscous damping coefficient for the  spring*/
-	public DoubleParameter springDamping= new DoubleParameter("spring damping", 0, 0, 1000 );
+	public DoubleParameter springDamping= new DoubleParameter("spring damping", 10, 0, 1000 );
 
 	/**Viscous damping coefficient for the  spring*/
 	public static IntParameter springLength= new IntParameter("spring rest length", 1, 1, 100 );
@@ -470,14 +470,16 @@ public class RigidBodySystem {
 			for (BodyPairContact bpc: clearedBodyPairContacts) {
 				// Store in contacts map for warm start
 				for (Contact contact : bpc.contactList) {
-					collisionProcessor.contacts.add(contact);
+					if(!collisionProcessor.contacts.contains(contact))
+						collisionProcessor.contacts.add(contact);
 					Block block1 = contact.block1;
 					Block block2 = contact.block2;
 					collisionProcessor.lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
 				}
 				bpc.removeFromBodyLists();
 			}
-		}			
+			
+		}		
 	}
 
 	private void buildNeighborBody(RigidBody body, ArrayList<RigidBody> subBodies, ArrayList<RigidBody> handledBodies) {
@@ -825,7 +827,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawCollectionContactGraph = new BooleanParameter( "draw collections' contact graph", false );
 	private BooleanParameter drawCycles = new BooleanParameter( "draw cycles", true );
 	
-	private BooleanParameter drawCOMs = new BooleanParameter( "draw COM", true );
+	private BooleanParameter drawCOMs = new BooleanParameter( "draw COM", false );
 	private BooleanParameter drawSpeedCOMs = new BooleanParameter( "draw speed COM", false );
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 	

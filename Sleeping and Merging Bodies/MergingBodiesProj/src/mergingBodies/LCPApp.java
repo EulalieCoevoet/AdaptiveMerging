@@ -290,6 +290,17 @@ public class LCPApp implements SceneGraphNode, Interactor {
             }
         });                
         vfp.add( hfp2.getPanel() );
+        JButton res3 = new JButton("2240x1280");
+        hfp2.add( res3);
+        res3.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {                
+                ev.glCanvas.setSize( 2240, 1280 );
+                ev.frame.setSize( ev.frame.getPreferredSize() );
+
+            }
+        });                
+        vfp.add( hfp2.getPanel() );
         
         vfp.add( hideOverlay.getControls() );
         vfp.add( drawGraphs.getControls() );
@@ -378,6 +389,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         } else {
             system.reset();
         }
+        nextFrameNum = 0;
     }
     
     private boolean deleteDisplayListRequest = false;
@@ -485,6 +497,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 	posx.setValue(px);
                     posy.setValue(py);
                     scale.setValue(s);
+                    nextFrameNum = 0;
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_A ) {
                 	scale.setValue( imageWidth / windowWidth );
