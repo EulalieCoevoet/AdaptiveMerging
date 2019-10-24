@@ -580,6 +580,15 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 	for ( Spring s : system.controllableSprings ) {
                 		s.moveWorldAttachmentAndRestLength( 0, 0, ds );
                 	}                    	
+                } else if ( e.getKeyCode() == KeyEvent.VK_7 ) {
+                	for ( RigidBody b : system.bodies ) {
+              
+                		if(b.activateMagnet)
+                			b.activateMagnet = false;
+                		else 
+                			b.activateMagnet = true;
+                		
+                	}                    	
                 }
             }
         } );

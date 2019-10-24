@@ -117,6 +117,16 @@ public class RigidBody {
 	 * transition
 	 **/
 	public double rho;
+	
+	/**
+	 * true if body is a magnetic body
+	 */
+	public boolean magneticBody = false;
+	
+	/**
+	 * true if magnetic field is activated
+	 */
+	public boolean activateMagnet = true;
 
 	/**
 	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
@@ -536,6 +546,10 @@ public class RigidBody {
 				myListID = gl.glGenLists(1);
 				gl.glNewList(myListID, GL2.GL_COMPILE_AND_EXECUTE);
 				for (Block b : blocks) {
+					// Handle if block's magnetism is acive or no
+				//	if (activateMagnet && magneticBody) {
+				//		color = new Color3f(1, 0, 1);
+				//	} else if (!activateMagnet && magneticBody) color = new Color3f(0, 1, 1);
 					b.display(drawable, color);
 				}
 				gl.glEndList();

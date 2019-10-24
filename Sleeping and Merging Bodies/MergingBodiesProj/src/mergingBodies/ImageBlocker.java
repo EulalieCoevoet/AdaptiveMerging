@@ -78,6 +78,7 @@ public class ImageBlocker {
                 			Spring s = new Spring( b.pB, body );
                 			body.springs.add(s);
                 			controllableSprings.add(s);
+                			body.magneticBody = true;
                 		}
                 	}
                 	
