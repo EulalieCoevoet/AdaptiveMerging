@@ -51,7 +51,7 @@ public class RigidBodySystem {
 	public DoubleParameter globalViscousDecay = new DoubleParameter("global viscous decay", 1, 0.1, 1 );
 	
 	/**Stiffness of  spring*/
-	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
+	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 10, 1, 1e4 );
 
 	/**Viscous damping coefficient for the  spring*/
 	public DoubleParameter springDamping= new DoubleParameter("spring damping", 10, 0, 1000 );

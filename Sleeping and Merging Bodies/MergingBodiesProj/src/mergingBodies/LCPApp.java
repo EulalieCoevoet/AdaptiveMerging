@@ -73,7 +73,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     
     public void setUp() {
         system.mouseSpring = mouseSpring;
-        systemDir = "datalcp/pivotMerge.png";
+        systemDir = "datalcp/boatCraneSim.png";
         loadSystem(systemDir); 
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(540,480), new Dimension(640,480) );
@@ -596,11 +596,16 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 } else if ( e.getKeyCode() == KeyEvent.VK_7 ) {
                 	for ( RigidBody b : system.bodies ) {
               
-                		if(b.activateMagnet)
-                			b.activateMagnet = false;
-                		else 
-                			b.activateMagnet = true;
+                		if (b instanceof RigidCollection) {
+                			RigidCollection collection = (RigidCollection)b;
+                			for ( RigidBody sb : collection.collectionBodies ) {
+                				if(sb.magneticBody)
+                					sb.activateMagnet = !sb.activateMagnet;
+                			}
+                		}
                 		
+                		if(b.magneticBody)
+                			b.activateMagnet = !b.activateMagnet;
                 	}                    	
                 }
             }

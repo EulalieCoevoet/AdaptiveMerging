@@ -126,7 +126,7 @@ public class RigidBody {
 	/**
 	 * true if magnetic field is activated
 	 */
-	public boolean activateMagnet = true;
+	public boolean activateMagnet = false;
 
 	/**
 	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
