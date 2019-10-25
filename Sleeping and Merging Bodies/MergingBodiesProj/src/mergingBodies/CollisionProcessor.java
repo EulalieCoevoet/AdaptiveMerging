@@ -66,10 +66,10 @@ public class CollisionProcessor {
 	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
 
 	/**
-	 * Processes all collisions. Find collision points and calculate contact force.
+	 * Find collision points
 	 * @param dt time step
 	 */
-	public void processCollisions( double dt ) {
+	public void collisionDetection( double dt ) {
 
 		Contact.nextContactIndex = 0;
 		
@@ -80,9 +80,16 @@ public class CollisionProcessor {
 		broadPhase(); 
 		collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
 		
-		if (contacts.size() == 0) {
+		if (contacts.isEmpty())
 			lastTimeStepMap.clear();
-	    } else {
+	}
+	
+	/**
+	 * Solve LCP
+	 * @param dt time step
+	 */
+	public void solveLCP( double dt ) {
+		if(!contacts.isEmpty()) {
 	    	
 	    	if (shuffle.getValue()) 
 	    		knuthShuffle();
@@ -97,7 +104,7 @@ public class CollisionProcessor {
 			solver.contacts = contacts;
 			
 			// solve contacts
-			now = System.nanoTime();
+			long now = System.nanoTime();
 			solver.solve(dt);
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			

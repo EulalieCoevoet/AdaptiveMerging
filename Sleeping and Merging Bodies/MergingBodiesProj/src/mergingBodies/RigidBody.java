@@ -300,7 +300,7 @@ public class RigidBody {
 		
 		// check for temporary pinned condition
 		if(temporarilyPinned && ++steps>=RigidBodySystem.tempSleepCount.getValue())
-			temporarilyPinned=!temporarilyPinned; 
+			temporarilyPinned = !temporarilyPinned; 
 
 		// update particles activity or sleepiness.
 		// fully active, regular stepping

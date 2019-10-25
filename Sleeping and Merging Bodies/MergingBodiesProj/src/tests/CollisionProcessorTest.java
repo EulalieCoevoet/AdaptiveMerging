@@ -37,7 +37,7 @@ class CollisionProcessorTest extends CollisionProcessor {
 	
 	@Test
 	void processCollisionsTest() {
-		processCollisions(0.05);
+		collisionDetection(0.05);
 		assertEquals(0, contacts.size());
 
 		for (RigidBody body: bodies) {
@@ -48,7 +48,7 @@ class CollisionProcessorTest extends CollisionProcessor {
 			}
 		}
 		
-		processCollisions(0.05);
+		collisionDetection(0.05);
 		assertNotEquals(0, contacts.size());
 	}
 	
@@ -65,7 +65,7 @@ class CollisionProcessorTest extends CollisionProcessor {
 			}
 		}
 	
-		processCollisions(0.05);
+		collisionDetection(0.05);
 		assertEquals(2, contacts.size());
 		
 		clear();
@@ -81,7 +81,7 @@ class CollisionProcessorTest extends CollisionProcessor {
 			}
 		}
 	
-		processCollisions(0.05);
+		collisionDetection(0.05);
 		assertNotEquals(0, contacts.size());
 		assertTrue(2 < contacts.size());
 		clear();

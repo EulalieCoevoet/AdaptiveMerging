@@ -122,7 +122,8 @@ public class RigidBodySystem {
 		}
 		
 		if (processCollisions.getValue()) {
-			collisionProcessor.processCollisions(dt); 
+			collisionProcessor.collisionDetection(dt); 
+			collisionProcessor.solveLCP(dt); 
 		}
 		
 		if (mergeParams.updateContactsInCollections.getValue()) {
