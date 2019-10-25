@@ -35,7 +35,7 @@ public class LCPAppTests extends LCPApp {
 		assertEquals(6, system.bodies.size()); // should have 6 bodies when loading the scene
 
 		mergeParams.enableMerging.setValue(true);
-		for (int i=0; i<system.tempSleepCount.getValue()*2; i++)
+		for (int i=0; i<RigidBodySystem.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size());
 	}
@@ -54,7 +54,7 @@ public class LCPAppTests extends LCPApp {
 
 		mergeParams.enableMerging.setValue(true);
 		RigidBodySystem.enableSleeping.setValue(true);
-		for (int i=0; i<system.tempSleepCount.getValue()*2; i++)
+		for (int i=0; i<RigidBodySystem.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		for (RigidBody body: system.bodies)
 			if (body instanceof RigidCollection)
@@ -79,7 +79,7 @@ public class LCPAppTests extends LCPApp {
 				assertEquals(zeroVelocity, tempPinnedBody.v); 
 			}
 
-		for (int i=0; i<system.tempSleepCount.getValue(); i++)
+		for (int i=0; i<RigidBodySystem.tempSleepCount.getValue(); i++)
 			system.advanceTime(dt);
 
 		assertNotEquals(null, tempPinnedBody); 
@@ -96,7 +96,7 @@ public class LCPAppTests extends LCPApp {
 
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableMergePinned.setValue(true);
-		for (int i=0; i<system.tempSleepCount.getValue()*2; i++)
+		for (int i=0; i<RigidBodySystem.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
 	}
@@ -118,7 +118,7 @@ public class LCPAppTests extends LCPApp {
 		Contact contact = collection.getInternalContacts().get(0);
 		Vector2d lambda = new Vector2d(contact.getLambda());
 
-		for (int i=0; i<system.tempSleepCount.getValue(); i++)
+		for (int i=0; i<RigidBodySystem.tempSleepCount.getValue(); i++)
 			system.advanceTime(dt);
 
 		assertTrue(lambda.x < contact.getLambda().x);
@@ -205,7 +205,7 @@ public class LCPAppTests extends LCPApp {
 
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableUnmerging.setValue(false);
-		mergeParams.enableMergeCheckCycleCondition.setValue(false);
+		mergeParams.enableMergeCycleCondition.setValue(false);
 		for (int i=0; i<CollisionProcessor.sleepAccum.getValue(); i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
