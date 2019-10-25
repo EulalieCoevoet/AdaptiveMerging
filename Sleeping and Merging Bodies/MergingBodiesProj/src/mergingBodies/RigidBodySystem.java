@@ -109,7 +109,7 @@ public class RigidBodySystem {
 		totalSteps++;
 		
 		for (RigidBody body: bodies) {
-				body.clear();
+			body.clear();
 		}
 
 		if (useGravity.getValue()) {
@@ -296,7 +296,7 @@ public class RigidBodySystem {
 			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
 			mergeCondition = (mergeCondition && bpc.checkRelativeKineticEnergy());
 			if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable());
-			if (mergeParams.enableMergeCheckCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkContactsCycle(mergeParams));
+			if (mergeParams.enableMergeCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkContactsCycle(mergeParams));
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 
 			if (mergeCondition) {
@@ -383,14 +383,38 @@ public class RigidBodySystem {
 						if (!bpc.inCollection)
 							continue;
 						
-						boolean unmerge = mergeParams.unmergeAll.getValue();
-						if (!unmerge)
-							unmerge = bpc.checkUnmergeCondition(dt, mergeParams);
-		
-						if (unmerge) {
-							bpc.checkCyclesToUnmerge(unmergingBodies);
+						if (mergeParams.unmergeAll.getValue())
 							bpc.addBodiesToUnmerge(unmergingBodies);
+						else {
+							//eulalie: we should discuss the priority
+							//         I think it should be conditionRelativeVelocity OR conditionContactForces
+							//         If the threshold is to high, we could still detect conditionContactForces
+							//         I also think we should always check the cycles if the feature is on for merging
+							boolean unmerged = false;
+							if(mergeParams.enableUnmergeRelativeMotionCondition.getValue() && bpc.body1.isInSameCollection(bpc.body2)){
+								if (!unmergingBodies.contains(bpc.body1) && collection.isMovingAway(bpc.body1)) {
+									unmerged = true;
+									bpc.checkCyclesToUnmerge(unmergingBodies);
+									unmergingBodies.add(bpc.body1);
+								}
+	
+								if (!unmergingBodies.contains(bpc.body2) && collection.isMovingAway(bpc.body2)) {
+									unmerged = true;
+									bpc.checkCyclesToUnmerge(unmergingBodies);
+									unmergingBodies.add(bpc.body2);
+								}
+							}
+							if (!unmerged && bpc.checkContactsState(dt, mergeParams)) {
+								bpc.checkCyclesToUnmerge(unmergingBodies);
+								bpc.addBodiesToUnmerge(unmergingBodies); 
+								// eulalie: maybe here we could set a priority between bpc.body1 and bpc.body2... 
+								//          we are here because conditionRelativeVelocity didn't trigger
+								//          yet a contact is either breaking or sliding
+								//          in addBodiesToUnmerge we could choose to unmerge only one body, maybe the one with the highest relative velocity
+							}
 						}
+						
+						
 					}
 					
 					ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
@@ -453,7 +477,7 @@ public class RigidBodySystem {
 							RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
 							newCollection.addBodies(subBodies);
 							newCollection.fillInternalBodyContacts();
-							newCollection.color = new Color3f(collection.color);
+							newCollection.color = new Color(collection.color);
 							collection.applyVelocitiesTo(newCollection);
 							newBodies.add(newCollection);
 							subBodies.clear();
@@ -622,9 +646,9 @@ public class RigidBodySystem {
 				if (colors.contains(collection.color)) {
 					RigidCollection sameColorCollection = collections.get(colors.indexOf(collection.color));
 					if(sameColorCollection.massLinear>collection.massLinear)
-						collection.generateColor();
+						collection.color.setRandomColor();
 					else
-						sameColorCollection.generateColor();
+						sameColorCollection.color.setRandomColor();
 				}
 				colors.add(collection.color);
 				collections.add(collection);
@@ -840,12 +864,13 @@ public class RigidBodySystem {
 		
 		public BooleanParameter enableMerging = new BooleanParameter( "merging", true);
 		public BooleanParameter enableMergePinned = new BooleanParameter( "merging pinned body", true);
-		public BooleanParameter enableMergeCheckCycleCondition = new BooleanParameter( "merging check cycle condition", true);
+		public BooleanParameter enableMergeCycleCondition = new BooleanParameter( "merging check cycle condition", true);
 		public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging stable contact condition", true);
 		public BooleanParameter useMassNormKinEnergy = new BooleanParameter( "use mass normalization of kin energy", true);
 		public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
 		public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging friction condition", true);
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
+		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging relative motion condition", false);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	}
@@ -894,11 +919,12 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.enableMergePinned.getControls() );
 		vfpm.add( mergeParams.useMassNormKinEnergy.getControls() );
 		
-		vfpm.add( mergeParams.enableMergeCheckCycleCondition.getControls() );
+		vfpm.add( mergeParams.enableMergeCycleCondition.getControls() );
 		vfpm.add( mergeParams.enableMergeStableContactCondition.getControls() );
 		vfpm.add( mergeParams.enableUnmerging.getControls() );
 		vfpm.add( mergeParams.enableUnmergeFrictionCondition.getControls() );
 		vfpm.add( mergeParams.enableUnmergeNormalCondition.getControls() );
+		vfpm.add( mergeParams.enableUnmergeRelativeMotionCondition.getControls() );
 		vfpm.add( mergeParams.updateContactsInCollections.getControls() );
         JButton umergeButton = new JButton("unmerge all");
         vfpm.add( umergeButton);

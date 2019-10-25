@@ -2,8 +2,6 @@ package mergingBodies;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import mergingBodies.Contact.ContactState;
@@ -23,8 +21,9 @@ public class BodyPairContact {
 	// Utils for cycle merge/unmerge condition.
 	public boolean inCycle = false; /** merge condition : by using this tag we avoid checking the same cycle twice*/
 	public ArrayList<BodyPairContact> othersInCycle = null; /** store the bpc which are part of the cycle */
-	public Color3f cycleColor = null;
+	public Color cycleColor = null;
 
+	RelativeMotionProcessor relativeMProcessor = new RelativeMotionProcessor();
 	Vector2d relativeLinearVelocity = new Vector2d();
 	double relativeAngularVelocity = 0;
 	
@@ -81,65 +80,8 @@ public class BodyPairContact {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		if ( body1.pinned || body1.temporarilyPinned ) {
-			// ASSERT that body 1 velocity is zero for this to be correct
-			// NOTE this will break if we ever have non zero velocities on pinned bodies!
-			relativeLinearVelocity.set( body2.v );
-			relativeAngularVelocity = body2.omega;
-			return;
-		} else if ( body2.pinned || body2.temporarilyPinned ) {
-			// ASSERT that body 2 velocity is zero for this to be correct
-			// NOTE this will break if we ever have non zero velocities on pinned bodies!
-			relativeLinearVelocity.set( body1.v );
-			relativeAngularVelocity = body1.omega;
-			return;
-		}
-
-		Point2d massCom1 = new Point2d();
-		Point2d massCom2 = new Point2d();
-		massCom1.scale( body1.massLinear, body1.x );
-		massCom2.scale( body2.massLinear, body2.x );		
-		Point2d newCom = new Point2d();
-		newCom.add( massCom1, massCom2 );
-		newCom.scale( 1./(body1.massLinear + body2.massLinear) );
-			
-		relativeLinearVelocity.sub(body2.v, body1.v);
-
-		Vector2d tmp = new Vector2d();
-		Vector2d tmp2 = new Vector2d();
-		
-		tmp.sub( newCom, body2.x );
-		tmp.scale( body2.omega );
-		tmp2.set( -tmp.y, tmp.x );
-		relativeLinearVelocity.add( tmp2 );
-		
-		tmp.sub( newCom, body1.x );
-		tmp.scale( body1.omega );
-		tmp2.set( -tmp.y, tmp.x );
-		relativeLinearVelocity.sub( tmp2 );
-		
-		relativeAngularVelocity = body2.omega - body1.omega;
-	}
-	
-	/**
-	 * Computes and returns the relative kinetic energy normalized by the mass
-	 * @return metric
-	 */
-	public double getRelativeKineticEnergyMassNormalized() {
-		double k = 0.5*relativeLinearVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
-		return k;
-	}
-	
-	/**
-	 * Computes and returns the relative kinetic energy 
-	 * @return metric
-	 */
-	public double getRelativeKineticEnergy() {
-		double massDifference = Math.abs(body1.massLinear - body2.massLinear);
-		double inertiaDifference = Math.abs(body1.massAngular - body2.massAngular);
-		double k = 0.5*relativeLinearVelocity.lengthSquared()*massDifference+ 0.5*relativeAngularVelocity*relativeAngularVelocity*inertiaDifference;
-		
-		return k/massDifference;
+		relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(body1, body2);	
+		relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(body1, body2);
 	}
 	
 	/**
@@ -149,10 +91,11 @@ public class BodyPairContact {
 	public void accumulate(MergeParameters mergeParams) {
 		
 		computeRelativeVelocity();
+		
 		if (mergeParams.useMassNormKinEnergy.getValue())
-			relativeKineticEnergyMetricHist.add(getRelativeKineticEnergyMassNormalized());
+			relativeKineticEnergyMetricHist.add(relativeMProcessor.getRelativeKineticEnergyMassNormalized(relativeLinearVelocity, relativeAngularVelocity));
 		else
-			relativeKineticEnergyMetricHist.add(getRelativeKineticEnergy());
+			relativeKineticEnergyMetricHist.add(relativeMProcessor.getRelativeKineticEnergy(body1, body2, relativeLinearVelocity, relativeAngularVelocity));
 		if (relativeKineticEnergyMetricHist.size() > CollisionProcessor.sleepAccum.getValue())
 			relativeKineticEnergyMetricHist.remove(0);
 	
@@ -170,7 +113,7 @@ public class BodyPairContact {
 	 * Check if:
 	 * <p><ul> 
 	 * <li> 1. the two bodies have been in contact for at least "sleepAccum" number of time steps
-	 * <li> 2. the relative kinetic energy (without the mass) has been strictly decreasing 
+	 * <li> 2. the relative kinetic energy (without the mass) has been non-increasing 
 	 * <li> 3. and lower than a threshold over CollisionProcessor.sleepAccum time steps.
 	 * PGK: what does without the mass mean?
 	 * </ul><p>
@@ -241,12 +184,12 @@ public class BodyPairContact {
 	}
 	
 	/**
-	 * Check if body is about to move w.r.t collection
+	 * Check the contacts' state for unmerge
 	 * @param body
 	 * @param dt
-	 * @return
+	 * @return true if should unmerge
 	 */
-	public boolean checkUnmergeCondition(double dt, MergeParameters mergeParams) {		
+	public boolean checkContactsState(double dt, MergeParameters mergeParams) {		
 				
 		for (Contact contact : contactList) { 
 			if (contact.state == ContactState.BROKEN && mergeParams.enableUnmergeNormalCondition.getValue()) 
@@ -285,11 +228,11 @@ public class BodyPairContact {
 	 * Add the BodyContact to bodyContactList of members body1 and body2  
 	 */
 	public void addBodiesToUnmerge(ArrayList<RigidBody> bodiesToUnmerge) {
-		if(!body1.isInCollection() || !body2.isInCollection()) {
-			System.err.println("[addBodiesToUnmerge] trying to unmerge a body that is not in a collection. This shouldn't happen.");
+		if(!body1.isInCollection() || !body2.isInCollection() || !body1.isInSameCollection(body2)) {
+			System.err.println("[addBodiesToUnmerge] trying to unmerge a body that is not in a collection. This shouldn't happen?");
 			return;
 		}
-		
+
 		if(!bodiesToUnmerge.contains(body1) && !body1.pinned)
 			bodiesToUnmerge.add(body1);
 		if(!bodiesToUnmerge.contains(body2) && !body2.pinned)
@@ -370,8 +313,8 @@ public class BodyPairContact {
 		bpc.othersInCycle = new ArrayList<BodyPairContact>();
 		
 		if (cycleColor == null) {
-			Utils utils = new Utils();
-			cycleColor = utils.getRandomColor();
+			cycleColor = new Color();
+			cycleColor.setRandomColor();
 		}
 		bpc.cycleColor = cycleColor;
 		

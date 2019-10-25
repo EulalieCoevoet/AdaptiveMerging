@@ -584,8 +584,8 @@ public class CollisionProcessor {
 	public static DoubleParameter constraintOffset = new DoubleParameter("constraintOffset", 0.05, -0.5, 0.5 );
 	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
-	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1.0, 0, 10 );
-	public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 15, 0, 30);
+	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1, 0, 10 );
+	public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 1e-3, 0, 30);
 	public static BooleanParameter  useContactGraph = new BooleanParameter("enable use of contact graph heuristic", false );
 	public static DoubleParameter forceMetricTolerance = new DoubleParameter("force metric tolerance", 10, 0, 15);
 	public static IntParameter collisionWake = new IntParameter("wake n neighbors", 2, 0, 10 );

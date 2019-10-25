@@ -19,9 +19,10 @@ public class RigidCollection extends RigidBody{
 	/** List of Contact in the collection: Contact between RigidBody of the collection */
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 	
-	public Color3f color;
+	public Color color;
 
 	CollisionProcessor collisionProcessor = new CollisionProcessor(collectionBodies);
+	RelativeMotionProcessor relativeMProcessor = new RelativeMotionProcessor();
 
 	/**
 	 * Creates a RigidCollection from two RigidBody.
@@ -33,7 +34,8 @@ public class RigidCollection extends RigidBody{
 		// These bodies being added to the collection, with the collection being new,
 		// their state w.r.t the collection frame is unchanged as C2W and W2C are Identity
 		
-		generateColor();
+		color = new Color();
+		color.setRandomColor();
 		
 		copyFrom(body1);
 		
@@ -281,9 +283,16 @@ public class RigidCollection extends RigidBody{
 			
 			updateTransformations();
 			updateBodiesPositionAndTransformations();
-			applyVelocitiesToBodies();
 			updateContactJacobianAndDataAsInternal(dt);
+			
+			//applyVelocitiesToBodies();
 		} 
+		
+		for (RigidBody body : collectionBodies) {
+			body.v.x += body.force.x * dt/body.massLinear + body.deltaV.get(0);
+			body.v.y += body.force.y * dt/body.massLinear + body.deltaV.get(1);
+			body.omega += body.torque * dt/ body.massAngular + body.deltaV.get(2);
+		}
 	}
 	
 	/**
@@ -377,9 +386,18 @@ public class RigidCollection extends RigidBody{
 		transformW2B.set(transformB2W);
 		transformW2B.invert();
 	}
-
-	/** list of bodies to be added to this collection in the next time step */
-	ArrayList<RigidBody> bodyQueue = new ArrayList<RigidBody>();
+	
+	public boolean isMovingAway(RigidBody body) {
+		
+		// we should store somewhere the value of the 
+		Vector2d relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(this, body);
+		double relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(this, body);
+		
+		double metric = relativeMProcessor.getRelativeKineticEnergy(this, body, relativeLinearVelocity, relativeAngularVelocity);
+		
+		// eulalie: is it reasonable to use the sleepThreshold?
+		return (metric>CollisionProcessor.wakingThreshold.getValue());
+	}
 	
 	/**
 	 * Makes body ready to be used by system... converts everything to world coordinates and makes body independent of collection
@@ -444,11 +462,6 @@ public class RigidCollection extends RigidBody{
 	public ArrayList<Contact> getInternalContacts() {
 		ArrayList<Contact> contacts = new ArrayList<Contact>(internalContacts);
 		return contacts;
-	}
-	
-	protected void generateColor() {
-		Utils utils = new Utils();
-		color = utils.getRandomColor();
 	}
 	
 	/** display list ID for this rigid body */

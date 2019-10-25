@@ -97,18 +97,7 @@ public class PGS {
 			for (int i=0; i<contacts.size(); i++) {
 				
 				Contact contact = contacts.get(i);
-				
-				RigidBody body1 = (contact.body1.isInCollection() && !computeInCollection)? contact.body1.parent: contact.body1;
-				RigidBody body2 = (contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
-
-				double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
-				double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
-				double j1inv = (body1.temporarilyPinned)? 0: body1.jinv;
-				double j2inv = (body2.temporarilyPinned)? 0: body2.jinv;
-				
-				DenseVector dv1 = body1.deltaV; 
-				DenseVector dv2 = body2.deltaV;
-				
+					
 				double Jdvn = contact.getJdvn(computeInCollection);
 				double prevLambda_n = contact.lambda.x;
 				contact.lambda.x = (contact.lambda.x*contact.diin - contact.bn - Jdvn)/(contact.diin+compliance);
@@ -120,12 +109,7 @@ public class PGS {
 				double dLambda_n = contact.lambda.x - prevLambda_n;
 				
 				//update delta V;
-				dv1.add( 0, contact.jn.get(0) * m1inv * dLambda_n );
-				dv1.add( 1, contact.jn.get(1) * m1inv * dLambda_n );
-				dv1.add( 2, contact.jn.get(2) * j1inv * dLambda_n );
-				dv2.add( 0, contact.jn.get(3) * m2inv * dLambda_n );
-				dv2.add( 1, contact.jn.get(4) * m2inv * dLambda_n );
-				dv2.add( 2, contact.jn.get(5) * j2inv * dLambda_n );
+				updateDeltaV(contact, dLambda_n, 0.);
 				
 				double Jdvt = contact.getJdvt(computeInCollection);
 				double prevLambda_t = contact.lambda.y;
@@ -140,12 +124,7 @@ public class PGS {
 				double dLambda_t = contact.lambda.y - prevLambda_t;
 				
 				//update delta V;
-				dv1.add( 0, contact.jt.get(0) * m1inv * dLambda_t );
-				dv1.add( 1, contact.jt.get(1) * m1inv * dLambda_t );
-				dv1.add( 2, contact.jt.get(2) * j1inv * dLambda_t );
-				dv2.add( 0, contact.jt.get(3) * m2inv * dLambda_t );
-				dv2.add( 1, contact.jt.get(4) * m2inv * dLambda_t );
-				dv2.add( 2, contact.jt.get(5) * j2inv * dLambda_t );
+				updateDeltaV(contact, 0., dLambda_t);
 				
 				contact.updateContactState(mu);
 			}
@@ -155,11 +134,11 @@ public class PGS {
 	}
 	
 	/**
-	 * Update velocity of bodies in contact w.r.t new value of dLambda
+	 * Update deltaV of bodies in contact w.r.t new value of dLambda
 	 * @param index
 	 * @param lambda
 	 */
-	protected void updateVelocity(Contact contact, double lambda_n, double lambda_t) {
+	protected void updateDeltaV(Contact contact, double lambda_n, double lambda_t) {
 		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollection)? contact.body1.parent: contact.body1;
 		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
 
@@ -201,7 +180,7 @@ public class PGS {
 				contact.lambda.x = oldLamda_n;
 				contact.lambda.y = oldLamda_t;
 				
-				updateVelocity(contact, oldLamda_n, oldLamda_t);
+				updateDeltaV(contact, oldLamda_n, oldLamda_t);
 				
 				contact.body1ContactForceHistory.clear();
 				contact.body1ContactTorqueHistory.clear();
@@ -255,7 +234,7 @@ public class PGS {
 	 */
 	protected void confidentWarmStart() {
 		for (Contact contact : contacts) {						
-			updateVelocity(contact, contact.lambda.x, contact.lambda.y);	
+			updateDeltaV(contact, contact.lambda.x, contact.lambda.y);	
 		}
 	}
 }
