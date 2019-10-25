@@ -217,11 +217,11 @@ public class BodyPairContact {
 	}
 	
 	/**
-	 * Check if it satisfies the force closure criteria: only bodies that share two
+	 * Check if it satisfies the cycle criteria: only bodies that share two
 	 * contacts, or cycles formed by three bodies with one contact between each.
 	 * @return true if the criteria is satisfied
 	 */
-	public boolean checkForceClosureCritera(MergeParameters mergeParams) {
+	public boolean checkContactsCycle(MergeParameters mergeParams) {
 		
 		int nbActiveContact = 0;
 		for (Contact contact : contactList)
@@ -237,7 +237,7 @@ public class BodyPairContact {
 			return true;
 		
 		// otherwise check if this bpc is in a cycle formed by three bodies with one contact between each
-		return body1.checkForCycle(1, body2, this, mergeParams); 
+		return body1.checkCycle(1, body2, this, mergeParams); 
 	}
 	
 	/**

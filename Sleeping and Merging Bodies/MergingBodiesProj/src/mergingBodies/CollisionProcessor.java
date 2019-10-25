@@ -115,7 +115,7 @@ public class CollisionProcessor {
 			bpc.contactList.clear();
 
 		for (Contact contact : contacts)
-			if (contact.lambda.x > 1e-14) // store detected contact in existing or new bpc only if it is active
+			if (Math.abs(contact.lambda.x) > 1e-14) // store detected contact in existing or new bpc only if it is active (math.abs is for magnet)
 				storeInBodyPairContacts(contact);
 		
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();

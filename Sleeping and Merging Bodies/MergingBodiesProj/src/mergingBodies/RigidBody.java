@@ -358,7 +358,7 @@ public class RigidBody {
 	 * @param bpcFrom
 	 * @return true or false
 	 */
-	protected boolean checkForCycle(int count, RigidBody startBody, BodyPairContact bpcFrom, MergeParameters mergeParams) {
+	protected boolean checkCycle(int count, RigidBody startBody, BodyPairContact bpcFrom, MergeParameters mergeParams) {
 		
 		if (count>2) { // more than three bodies in the cycle
 			bpcFrom.clearCycle();
@@ -411,7 +411,7 @@ public class RigidBody {
 		if(bpcToCheck!=null) {
 			bpcFrom.updateCycle(bpcToCheck);
 			RigidBody otherBody = bpcToCheck.getOtherBodyWithCollectionPerspective(this);
-			return otherBody.checkForCycle(++count, startBody, bpcToCheck, mergeParams); 
+			return otherBody.checkCycle(++count, startBody, bpcToCheck, mergeParams); 
 		}
 		
 		// we did not find a cycle, and there is no another candidate, break
