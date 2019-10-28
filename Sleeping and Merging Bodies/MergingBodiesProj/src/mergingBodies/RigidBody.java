@@ -310,14 +310,10 @@ public class RigidBody {
 		if (!pinned && !temporarilyPinned) {
 
 			// non ARPS
-			v.x += force.x * dt / massLinear + deltaV.get(0);
-			v.y += force.y * dt / massLinear + deltaV.get(1);
-			omega += torque * dt / massAngular + deltaV.get(2);
+			advanceVelocities(dt);
 			
 			if (state == ObjectState.ACTIVE) {
-				x.x += v.x * dt;
-				x.y += v.y * dt;
-				theta += omega * dt;
+				advancePositions(dt);
 			} else {
 				v.set(0, 0);
 				omega = 0;
@@ -325,6 +321,18 @@ public class RigidBody {
 
 			updateTransformations();
 		}
+	}
+	
+	public void advanceVelocities(double dt) {
+		v.x += force.x * dt / massLinear + deltaV.get(0);
+		v.y += force.y * dt / massLinear + deltaV.get(1);
+		omega += torque * dt / massAngular + deltaV.get(2);
+	}
+	
+	public void advancePositions(double dt) {
+		x.x += v.x * dt;
+		x.y += v.y * dt;
+		theta += omega * dt;
 	}
 	
 	/**

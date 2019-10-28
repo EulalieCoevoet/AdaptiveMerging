@@ -272,30 +272,20 @@ public class RigidCollection extends RigidBody{
 		
 		if (!pinned && !temporarilyPinned) {
 			
-			v.x += force.x * dt/massLinear + deltaV.get(0);
-			v.y += force.y * dt/massLinear + deltaV.get(1);
-			omega += torque * dt/ massAngular + deltaV.get(2);
+			advanceVelocities(dt);
 			
 			if (state == ObjectState.ACTIVE) {
-				x.x += v.x * dt;
-				x.y += v.y * dt;
-				theta += omega*dt;
+				advancePositions(dt);
 			} 
 			
 			updateTransformations();
 			updateBodiesPositionAndTransformations();
 			updateContactJacobianAndDataAsInternal(dt);
-
-			
-			applyVelocitiesToBodies();
 		} 
 		
-		//for (RigidBody body : collectionBodies) {
-		//	body.v.x += body.force.x * dt/body.massLinear + body.deltaV.get(0);
-		//	body.v.y += body.force.y * dt/body.massLinear + body.deltaV.get(1);
-		//	body.omega += body.torque * dt/ body.massAngular + body.deltaV.get(2);
-		//}
-
+		for (RigidBody body : collectionBodies) {
+			body.advanceVelocities(dt);
+		}
 	}
 	
 	/**

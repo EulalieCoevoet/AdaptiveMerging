@@ -415,11 +415,9 @@ public class RigidBodySystem {
 						
 					}
 					
-					collection.applyVelocitiesToBodies(); // we need to set the velocities of the bodies to match the ones of the collection before unmerging
-					
 					ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
 					if (!unmergingBodies.isEmpty()) {
-						unmergeSelectBodies(collection, unmergingBodies, newBodies);				
+						unmergeSelectBodies(collection, unmergingBodies, newBodies, dt);				
 					}
 
 					if (!newBodies.isEmpty()) {
@@ -443,7 +441,7 @@ public class RigidBodySystem {
 		mergeParams.unmergeAll.setValue(false);
 	}
 
-	private void unmergeSelectBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies) {
+	private void unmergeSelectBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies, double dt) {
 
 		mergingEvent = true;
 		
@@ -457,6 +455,7 @@ public class RigidBodySystem {
 		
 		ArrayList<BodyPairContact> clearedBodyPairContacts = new ArrayList<BodyPairContact>();
 		for (RigidBody body: unmergingBodies) {
+			body.advancePositions(dt);
 			ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 
 			for (BodyPairContact bpc : body.bodyPairContactList) {
