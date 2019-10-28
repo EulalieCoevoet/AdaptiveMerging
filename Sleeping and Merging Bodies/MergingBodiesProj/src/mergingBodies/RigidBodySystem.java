@@ -387,10 +387,6 @@ public class RigidBodySystem {
 						if (mergeParams.unmergeAll.getValue())
 							bpc.addBodiesToUnmerge(unmergingBodies);
 						else {
-							//eulalie: we should discuss the priority
-							//         I think it should be conditionRelativeVelocity OR conditionContactForces
-							//         If the threshold is to high, we could still detect conditionContactForces
-							//         I also think we should always check the cycles if the feature is on for merging
 							boolean unmerged = false;
 							if(mergeParams.enableUnmergeRelativeMotionCondition.getValue() && bpc.body1.isInSameCollection(bpc.body2)){
 								if (!unmergingBodies.contains(bpc.body1) && collection.isMovingAway(bpc.body1)) {
@@ -408,15 +404,13 @@ public class RigidBodySystem {
 							if (!unmerged && bpc.checkContactsState(dt, mergeParams)) {
 								bpc.checkCyclesToUnmerge(unmergingBodies);
 								bpc.addBodiesToUnmerge(unmergingBodies); 
-								// eulalie: maybe here we could set a priority between bpc.body1 and bpc.body2... 
-								//          we are here because conditionRelativeVelocity didn't trigger
-								//          yet a contact is either breaking or sliding
-								//          in addBodiesToUnmerge we could choose to unmerge only one body, maybe the one with the highest relative velocity
 							}
 						}
 						
 						
 					}
+					
+					collection.applyVelocitiesToBodies(); // we need to set the velocities of the bodies to match the ones of the collection before unmerging
 					
 					ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
 					if (!unmergingBodies.isEmpty()) {

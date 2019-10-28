@@ -285,6 +285,7 @@ public class RigidCollection extends RigidBody{
 			updateTransformations();
 			updateBodiesPositionAndTransformations();
 			updateContactJacobianAndDataAsInternal(dt);
+
 			
 			applyVelocitiesToBodies();
 		} 
@@ -294,6 +295,7 @@ public class RigidCollection extends RigidBody{
 		//	body.v.y += body.force.y * dt/body.massLinear + body.deltaV.get(1);
 		//	body.omega += body.torque * dt/ body.massAngular + body.deltaV.get(2);
 		//}
+
 	}
 	
 	/**
@@ -396,8 +398,7 @@ public class RigidCollection extends RigidBody{
 		
 		double metric = relativeMProcessor.getRelativeKineticEnergy(this, body, relativeLinearVelocity, relativeAngularVelocity);
 		
-		// eulalie: is it reasonable to use the sleepThreshold?
-		return (metric>CollisionProcessor.wakingThreshold.getValue());
+		return (metric>CollisionProcessor.sleepingThreshold.getValue());
 	}
 	
 	/**
