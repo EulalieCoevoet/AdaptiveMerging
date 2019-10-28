@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import javax.vecmath.Color3f;
+import javax.vecmath.Color4f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -285,14 +286,14 @@ public class RigidCollection extends RigidBody{
 			updateBodiesPositionAndTransformations();
 			updateContactJacobianAndDataAsInternal(dt);
 			
-			//applyVelocitiesToBodies();
+			applyVelocitiesToBodies();
 		} 
 		
-		for (RigidBody body : collectionBodies) {
-			body.v.x += body.force.x * dt/body.massLinear + body.deltaV.get(0);
-			body.v.y += body.force.y * dt/body.massLinear + body.deltaV.get(1);
-			body.omega += body.torque * dt/ body.massAngular + body.deltaV.get(2);
-		}
+		//for (RigidBody body : collectionBodies) {
+		//	body.v.x += body.force.x * dt/body.massLinear + body.deltaV.get(0);
+		//	body.v.y += body.force.y * dt/body.massLinear + body.deltaV.get(1);
+		//	body.omega += body.torque * dt/ body.massAngular + body.deltaV.get(2);
+		//}
 	}
 	
 	/**
@@ -528,6 +529,34 @@ public class RigidCollection extends RigidBody{
 				gl.glEnd();
 			}
 		}
+	}
+	
+	/*
+	 * displays deltaV if body is a collection. If it is a collection, the external 
+	 * collections deltaV's (computed by external multi-iteration PGS) will be drawn 
+	 * in a light shade of cyan. Then, all it's sub-bodies' single iteration deltaV's
+	 * will also be drawn in a darker shade of cyan.
+	 */
+	@Override
+	public void displayDeltaV(GLAutoDrawable drawable, Color4f col) {
+		GL2 gl = drawable.getGL().getGL2();
+
+		gl.glLineWidth(10);
+		
+			
+		gl.glColor4f(col.x, col.y, col.z, col.w);
+		gl.glBegin( GL.GL_LINES );
+		double scale = RigidBodySystem.deltaVVizScale.getValue();
+		
+		gl.glVertex2d(x.x, x.y);
+		gl.glVertex2d(x.x + scale*deltaV.get(0), x.y+scale*deltaV.get(1));
+
+		gl.glEnd();
+		Color4f c = new Color4f(col.x/2, col.y/2, col.z/2, col.w/2);
+		for (RigidBody b : collectionBodies) {
+			b.displayDeltaV(drawable, c);
+		}
+		
 	}
 	
 	/**

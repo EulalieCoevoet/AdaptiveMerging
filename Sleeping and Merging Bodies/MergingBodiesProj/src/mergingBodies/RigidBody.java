@@ -13,6 +13,7 @@ import mintools.viewer.EasyViewer;
 import no.uib.cipr.matrix.DenseVector;
 
 import javax.vecmath.Color3f;
+import javax.vecmath.Color4f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -563,6 +564,29 @@ public class RigidBody {
 		}
 		
 		gl.glPopMatrix();
+	}
+	
+	
+	
+	/*
+	 * displays deltaV computed by PGS LCP solve at each frame. Goes from each body's centre of mass
+	 * outwards in the direction of deltaV
+	 */
+	public void displayDeltaV(GLAutoDrawable drawable, Color4f col) {
+		GL2 gl = drawable.getGL().getGL2();
+
+		gl.glLineWidth(2);
+		
+			
+		gl.glColor4f(col.x, col.y, col.z, col.w);
+		gl.glBegin( GL.GL_LINES );
+		double scale = RigidBodySystem.deltaVVizScale.getValue();
+		
+		gl.glVertex2d(x.x, x.y);
+		gl.glVertex2d(x.x + scale*deltaV.get(0), x.y+scale*deltaV.get(1));
+
+		
+		gl.glEnd();
 	}
 
 	/**

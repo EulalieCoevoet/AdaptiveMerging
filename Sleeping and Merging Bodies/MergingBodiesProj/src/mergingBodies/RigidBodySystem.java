@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Color3f;
+import javax.vecmath.Color4f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -804,6 +805,12 @@ public class RigidBodySystem {
 				b.displayCOMs(drawable);
 			}
 		}
+		if(drawDeltaV.getValue()) {
+			Color4f col = new Color4f(0, 1, 1, 1);
+			for (RigidBody b : bodies) {
+				b.displayDeltaV(drawable, col);
+			}
+		}
 		
 		if ( drawIndex.getValue()) {
 			for (RigidBody b : bodies) {
@@ -843,6 +850,7 @@ public class RigidBodySystem {
 	private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
 	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	
+	private BooleanParameter drawDeltaV = new BooleanParameter("draw DeltaV", true);
 	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true);
 	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true);
 	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true);
@@ -854,6 +862,7 @@ public class RigidBodySystem {
 	
 	private BooleanParameter drawCOMs = new BooleanParameter( "draw COM", false );
 	private BooleanParameter drawSpeedCOMs = new BooleanParameter( "draw speed COM", false );
+	public static DoubleParameter deltaVVizScale = new DoubleParameter( "DeltaV viz scale", 10, 0, 100 );
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 	
 	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
@@ -895,6 +904,7 @@ public class RigidBodySystem {
 		vfpv.add( drawBoundingVolumesUsed.getControls() );
 		vfpv.add( drawAllBoundingVolumes.getControls() );
 		
+		vfpv.add( drawDeltaV.getControls() );
 		vfpv.add( drawContactForces.getControls() );
 		vfpv.add( drawContactForcesInCollection.getControls() );
 		vfpv.add( drawContactLocations.getControls() );
@@ -908,6 +918,7 @@ public class RigidBodySystem {
 		vfpv.add( drawSpeedCOMs.getControls() );
 		vfpv.add( drawIndex.getControls() );
 		vfpv.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
+		vfpv.add( deltaVVizScale.getSliderControls(false) ); // Gross too?
 
 		CollapsiblePanel cp = new CollapsiblePanel(vfpv.getPanel());
 		cp.collapse();
