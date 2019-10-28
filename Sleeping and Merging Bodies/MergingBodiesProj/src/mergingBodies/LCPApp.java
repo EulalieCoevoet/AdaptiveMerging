@@ -24,6 +24,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
@@ -233,6 +234,21 @@ public class LCPApp implements SceneGraphNode, Interactor {
     @Override
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
+        
+        JTextArea ta = new JTextArea(
+        		"   left mouse drag - mouse spring\n" +
+                "   middel mouse drag - translate scene ? \n" +
+        		"   right mouse drag - zoom in and out ?\n" + 
+                "   mouse wheel = zoom in and out ? \n" +
+        		"   space - start and stop sim\n" +
+        		"   m - simulate up to next merge or unmerge \n" +
+        		"   l - load a file \n" +
+        		"   left - previous scene\n" +
+        		"   right - next scene\n" +
+        		"   1 -7 - left right up down spring up down and toggle magnet\n");                  
+        ta.setEditable(false);
+        ta.setBorder( new TitledBorder("Keyboard and Mouse controls") );
+        vfp.add( ta );
         
         JPanel basicControls = new JPanel( new GridLayout(1,3));
         JButton reset = new JButton("Reset");
