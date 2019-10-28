@@ -43,6 +43,7 @@ public class RigidBodySystem {
 	public CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
 
 	public MouseSpringForce mouseSpring;
+	public MouseImpulse mouseImpulse;
 
 	BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
 	DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );
@@ -120,6 +121,10 @@ public class RigidBodySystem {
 		if (mouseSpring != null) {
 			mouseSpring.apply();
 			applySpringForces(); 
+		}
+		
+		if (mouseImpulse != null) {
+			mouseImpulse.apply();
 		}
 		
 		if (processCollisions.getValue()) {

@@ -74,6 +74,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     
     public void setUp() {
         system.mouseSpring = mouseSpring;
+        system.mouseImpulse = mouseImpulse;
         systemDir = "datalcp/boatCraneSim.png";
         loadSystem(systemDir); 
         T.getBackingMatrix().setIdentity();
@@ -145,7 +146,10 @@ public class LCPApp implements SceneGraphNode, Interactor {
             // draw a line from the mouse to the body point
             Point2d tmp = new Point2d();
             picked.transformB2W.transform( grabPointB, tmp );
-            gl.glColor4f( 1,0,0,0.5f);
+            if(mouseImpulse.isGrabbing())
+            	gl.glColor4f( 1,0.5f,0,0.5f);
+            else
+            	gl.glColor4f( 1,0,0,0.5f);
             gl.glLineWidth( 5 );
             gl.glBegin( GL.GL_LINES );
             gl.glVertex2d( mousePoint.x, mousePoint.y );
@@ -237,10 +241,12 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         JTextArea ta = new JTextArea(
         		"   left mouse drag - mouse spring\n" +
-                "   middel mouse drag - translate scene ? \n" +
+                "   shift + left mouse drag - mouse impulse\n" +
+                "   middle mouse drag - translate scene ? \n" +
         		"   right mouse drag - zoom in and out ?\n" + 
                 "   mouse wheel = zoom in and out ? \n" +
-        		"   space - start and stop sim\n" +
+        		"   space - start and stop simulation\n" +
+        		"   enter - start and stop recording\n" +
         		"   m - simulate up to next merge or unmerge \n" +
         		"   l - load a file \n" +
         		"   left - previous scene\n" +
@@ -327,6 +333,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         vfp.add( system.getControls() );
         
         vfp.add( mouseSpring.getControls() );
+        vfp.add( mouseImpulse.getControls() );
         
         VerticalFlowPanel vfpv = new VerticalFlowPanel();
         vfpv.setBorder( new TitledBorder("window content scaling controls") );
@@ -360,6 +367,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private Point2d grabPointB = new Point2d();
     private Point2d mousePoint = new Point2d();    
     private MouseSpringForce mouseSpring = new MouseSpringForce( mousePoint );
+    private MouseImpulse mouseImpulse = new MouseImpulse();
     
     /**
      * Loads the specified image, clearing the old system, and resets viewing parameters.
@@ -428,6 +436,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
     /** current index in the files list */
     private int whichFile = 0;
     
+    private boolean shiftPressed = false;
+    
     /** Attaches mouse and keyboard listeners to the canvas. */
     @Override
     public void attach(Component component) {
@@ -460,7 +470,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         component.addMouseListener( new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {       
+            public void mousePressed(MouseEvent e) {     
+            	
                 prevMousePoint.setLocation( e.getPoint() );
                 setPoint( e.getPoint().x, e.getPoint().y );
                 if ( (e.getModifiers() & InputEvent.BUTTON1_MASK) != 0 ) {
@@ -469,16 +480,36 @@ public class LCPApp implements SceneGraphNode, Interactor {
                         picked.transformW2B.transform( mousePoint, grabPointB );                
                     } 
                 }
-                mouseSpring.setPicked( picked, grabPointB );                
+                
+                if(shiftPressed) {
+                	if(!mouseImpulse.isGrabbing()) {
+                		mouseImpulse.grab( picked, mousePoint ); 
+                	}
+            	} else {
+            		mouseSpring.setPicked( picked, grabPointB );    
+            	}
             }
+            
             @Override
             public void mouseReleased(MouseEvent e) {
-                picked = null;                
-                mouseSpring.setPicked( picked, grabPointB );
+                picked = null; 
+        		if(mouseImpulse.isGrabbing()) {
+            		mouseImpulse.release( mousePoint );
+            	} else {               
+                    mouseSpring.setPicked( picked, grabPointB );	
+            	}
             }
         } );
         
         component.addKeyListener( new KeyAdapter() {
+        	
+        	@Override
+        	public void keyReleased(KeyEvent e) {
+        		if ( e.getKeyCode() == KeyEvent.VK_SHIFT ) {
+                	shiftPressed = false;
+	            } 
+        	}
+        	
             @Override
             public void keyPressed(KeyEvent e) {
             	double ds = 0.5; // step size for moving controllable springs (might want to expose this as a parameter!)
@@ -491,6 +522,9 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 		run.setValue( ! run.getValue() ); 
                 	}
                 } 
+                else if ( e.getKeyCode() == KeyEvent.VK_SHIFT ) {
+                	shiftPressed = true;
+	            } 
                 else if ( e.getKeyCode() == KeyEvent.VK_S ) {
                     double dt = stepsize.getValue() / (int)substeps.getValue();
                     for ( int i = 0; i < substeps.getValue(); i++ ) {
@@ -500,7 +534,6 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     stepped = true;
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_M ) {
-
                 	system.triggerMergingEvent = true;
                 	system.mergingEvent = false;
                     run.setValue( true );       
@@ -585,31 +618,38 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     if ( ss == substeps.getMinimum() ) return;
                     substeps.setValue( ss - 1 );
                     stepsize.setValue( stepsize.getValue() *(ss-1)/ss );
-                } else if ( e.getKeyCode() == KeyEvent.VK_1 ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_1 ) {
                 	for ( Spring s : system.controllableSprings ) {
                 		s.moveWorldAttachmentAndRestLength( -ds, 0, 0 );
                 	}
-                } else if ( e.getKeyCode() == KeyEvent.VK_2 ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_2 ) {
                 	for ( Spring s : system.controllableSprings ) {
                 		s.moveWorldAttachmentAndRestLength( ds, 0, 0 );
                 	}
-                } else if ( e.getKeyCode() == KeyEvent.VK_3 ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_3 ) {
                 	for ( Spring s : system.controllableSprings ) {
                 		s.moveWorldAttachmentAndRestLength( 0, -ds, 0 );
                 	}
-                } else if ( e.getKeyCode() == KeyEvent.VK_4 ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_4 ) {
                 	for ( Spring s : system.controllableSprings ) {
                 		s.moveWorldAttachmentAndRestLength( 0, ds, 0 );
                 	}
-                } else if ( e.getKeyCode() == KeyEvent.VK_5 ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_5 ) {
                 	for ( Spring s : system.controllableSprings ) {
                 		s.moveWorldAttachmentAndRestLength( 0, 0, -ds );
                 	}
-                } else if ( e.getKeyCode() == KeyEvent.VK_6 ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_6 ) {
                 	for ( Spring s : system.controllableSprings ) {
                 		s.moveWorldAttachmentAndRestLength( 0, 0, ds );
                 	}                    	
-                } else if ( e.getKeyCode() == KeyEvent.VK_7 ) {
+                } 
+                else if ( e.getKeyCode() == KeyEvent.VK_7 ) {
                 	for ( RigidBody b : system.bodies ) {
               
                 		if (b instanceof RigidCollection) {
@@ -623,7 +663,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 		if(b.magneticBody)
                 			b.activateMagnet = !b.activateMagnet;
                 	}                    	
-                }
+                } 
             }
         } );
     }

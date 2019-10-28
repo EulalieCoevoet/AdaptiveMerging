@@ -65,27 +65,17 @@ public class MouseSpringForce {
         if ( direction.lengthSquared() < 1e-3 ) return;
         direction.normalize();
         force.scale( distance * k, direction );
+
+    	if (picked.isInCollection()) picked.parent.applyForceW( grabPointW, force );
+        picked.applyForceW( grabPointW, force );
+
+        // spring damping forces
+        if (picked.isInCollection()) picked.parent.getSpatialVelocity( grabPointW, grabPointV );
+        else picked.getSpatialVelocity( grabPointW, grabPointV );
+        force.scale( - grabPointV.dot( direction ) * c, direction );
         
-        
-        if (!picked.isInCollection()) {
-	        picked.applyForceW( grabPointW, force );
-	        
-	        // spring damping forces
-	        picked.getSpatialVelocity( grabPointW, grabPointV );
-	        force.scale( - grabPointV.dot( direction ) * c, direction );
-	        picked.applyForceW( grabPointW, force ); 
-        }else {
-        	//apply the spring force on the parent
-        	picked.parent.applyForceW( grabPointW, force );
-        	  //also apply it on the child
-	        picked.applyForceW( grabPointW, force );
-    
-	        // spring damping forces
-	        picked.parent.getSpatialVelocity( grabPointW, grabPointV );
-	        force.scale( - grabPointV.dot( direction ) * c, direction );
-	        picked.parent.applyForceW( grabPointW, force ); 
-	        picked.applyForceW( grabPointW, force ); 
-        }
+        if (picked.isInCollection()) picked.parent.applyForceW( grabPointW, force ); 
+        picked.applyForceW( grabPointW, force ); 
     }
     
     /**
