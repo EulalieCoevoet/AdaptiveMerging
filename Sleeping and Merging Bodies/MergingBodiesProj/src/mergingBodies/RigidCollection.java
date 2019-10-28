@@ -284,14 +284,15 @@ public class RigidCollection extends RigidBody{
 			updateTransformations();
 			updateBodiesPositionAndTransformations();
 			updateContactJacobianAndDataAsInternal(dt);
-			
-			//applyVelocitiesToBodies();
 		} 
 		
+		// We update the bodies's velocities with the results from the one iteration PGS 
+		// (in order to compute the relative velocity test for unmerge)
+		// but we need to applyVelocitiesToBodies() before unmerging
 		for (RigidBody body : collectionBodies) {
 			body.v.x += body.force.x * dt/body.massLinear + body.deltaV.get(0);
 			body.v.y += body.force.y * dt/body.massLinear + body.deltaV.get(1);
-			body.omega += body.torque * dt/ body.massAngular + body.deltaV.get(2);
+			body.omega += body.torque * dt/body.massAngular + body.deltaV.get(2);
 		}
 	}
 	
@@ -395,8 +396,7 @@ public class RigidCollection extends RigidBody{
 		
 		double metric = relativeMProcessor.getRelativeKineticEnergy(this, body, relativeLinearVelocity, relativeAngularVelocity);
 		
-		// eulalie: is it reasonable to use the sleepThreshold?
-		return (metric>CollisionProcessor.wakingThreshold.getValue());
+		return (metric>CollisionProcessor.sleepingThreshold.getValue());
 	}
 	
 	/**
