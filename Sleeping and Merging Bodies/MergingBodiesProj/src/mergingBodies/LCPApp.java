@@ -175,6 +175,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         text += "collision update in collections = " + system.collisionProcessor.collectionUpdateTime + "\n";
         text += "h = " + stepsize.getValue() + " (with " + substeps.getValue() + " substeps)\n";
         text += "PGS iterations = " + system.collisionProcessor.iterations.getValue() + "\n";
+        text += "PGS iterations in collection = " + system.collisionProcessor.iterationsInCollection.getValue() + "\n";
         text += "mu = " + system.collisionProcessor.friction.getValue() + "\n";
         text += "r = " + system.collisionProcessor.restitution.getValue() +"\n";
         

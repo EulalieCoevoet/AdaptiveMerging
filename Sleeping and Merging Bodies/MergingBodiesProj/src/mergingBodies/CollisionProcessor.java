@@ -148,7 +148,7 @@ public class CollisionProcessor {
 
 		long now = System.nanoTime();
 		
-		solver.init(friction.getValue(), 1);
+		solver.init(friction.getValue(), iterationsInCollection.getValue());
 		solver.confidentWarmStart = true;
 		solver.computeInCollection = true;
 		solver.feedbackStiffness = feedbackStiffness.getValue();
@@ -578,13 +578,14 @@ public class CollisionProcessor {
 	public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
 	public DoubleParameter friction = new DoubleParameter("Coulomb friction coefficient", 1.5, 0, 2 );
 	public IntParameter iterations = new IntParameter("iterations for GS solve", 1000, 1, 5000);
+	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
 	public static DoubleParameter constraintOffset = new DoubleParameter("constraintOffset", 0.05, -0.5, 0.5 );
 	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
-	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1, 0, 10 );
+	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1e-3, 0, 10 );
 	public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 1e-3, 0, 30);
 	public static BooleanParameter  useContactGraph = new BooleanParameter("enable use of contact graph heuristic", false );
 	public static DoubleParameter forceMetricTolerance = new DoubleParameter("force metric tolerance", 10, 0, 15);
@@ -605,6 +606,7 @@ public class CollisionProcessor {
 		vfp.add( epsilonPruneConvexHull.getSliderControls(true) );
 		vfp.add( warmStart.getControls() );
 		vfp.add( iterations.getSliderControls() );
+		vfp.add( iterationsInCollection.getSliderControls() );
 		vfp.add( restitution.getSliderControls(false) );
 		vfp.add( friction.getSliderControls(false) );
 		vfp.add( feedbackStiffness.getSliderControls(false) );
