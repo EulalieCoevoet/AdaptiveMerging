@@ -35,6 +35,12 @@ public class LCPAppTests extends LCPApp {
 		assertEquals(6, system.bodies.size()); // should have 6 bodies when loading the scene
 
 		mergeParams.enableMerging.setValue(true);
+		mergeParams.enableMergePinned.setValue(false);
+		for (int i=0; i<RigidBodySystem.tempSleepCount.getValue()*2; i++)
+			system.advanceTime(dt);
+		assertEquals(2, system.bodies.size());
+		
+		mergeParams.enableMergePinned.setValue(true);
 		for (int i=0; i<RigidBodySystem.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size());
@@ -111,6 +117,7 @@ public class LCPAppTests extends LCPApp {
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableUnmerging.setValue(false);
 		mergeParams.updateContactsInCollections.setValue(true);
+		mergeParams.enableMergePinned.setValue(true);
 		for (int i=0; i<200; i++)
 			system.advanceTime(dt);
 
@@ -205,6 +212,7 @@ public class LCPAppTests extends LCPApp {
 
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableUnmerging.setValue(false);
+		mergeParams.enableMergePinned.setValue(true);
 		mergeParams.enableMergeCycleCondition.setValue(false);
 		for (int i=0; i<CollisionProcessor.sleepAccum.getValue(); i++)
 			system.advanceTime(dt);
