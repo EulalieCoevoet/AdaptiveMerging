@@ -411,8 +411,6 @@ public class RigidBodySystem {
 								bpc.addBodiesToUnmerge(unmergingBodies); 
 							}
 						}
-						
-						
 					}
 					
 					ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
@@ -455,7 +453,10 @@ public class RigidBodySystem {
 		
 		ArrayList<BodyPairContact> clearedBodyPairContacts = new ArrayList<BodyPairContact>();
 		for (RigidBody body: unmergingBodies) {
-			body.advancePositions(dt);
+			if(!body.pinned && !body.temporarilyPinned) {
+				body.advancePositions(dt);
+				body.updateTransformations();
+			}
 			ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 
 			for (BodyPairContact bpc : body.bodyPairContactList) {
@@ -871,7 +872,7 @@ public class RigidBodySystem {
 		
 		public BooleanParameter enableMerging = new BooleanParameter( "merging", true);
 		public BooleanParameter enableMergePinned = new BooleanParameter( "merging pinned body", true);
-		public BooleanParameter enableMergeCycleCondition = new BooleanParameter( "merging check cycle condition", true);
+		public BooleanParameter enableMergeCycleCondition = new BooleanParameter( "merging check cycle condition", false);
 		public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging stable contact condition", true);
 		public BooleanParameter useMassNormKinEnergy = new BooleanParameter( "use mass normalization of kin energy", true);
 		public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);

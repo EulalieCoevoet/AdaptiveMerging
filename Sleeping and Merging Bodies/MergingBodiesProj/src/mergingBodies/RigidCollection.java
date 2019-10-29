@@ -158,7 +158,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	private void updateCollection() {
 		
-		if(pinned) {
+		if(pinned || temporarilyPinned) {
 			v.set(0.,0.);
 			omega = 0.;
 		}
@@ -284,7 +284,8 @@ public class RigidCollection extends RigidBody{
 		} 
 		
 		for (RigidBody body : collectionBodies) {
-			body.advanceVelocities(dt);
+			if(!body.pinned && !body.temporarilyPinned)
+				body.advanceVelocities(dt);
 		}
 	}
 	
@@ -293,6 +294,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	protected void updateBodiesPositionAndTransformations() {
 		for (RigidBody body: collectionBodies) {
+			
 			//reset position and orientation 
 			body.transformW2B.transform(body.x);
 			body.theta = body.transformW2B.getTheta();
@@ -323,6 +325,12 @@ public class RigidCollection extends RigidBody{
 	 * @param body
 	 */
 	public void applyVelocitiesTo(RigidBody body) {
+		if(pinned || temporarilyPinned) {
+			body.v.set(0.,0.);
+			body.omega = 0.;
+			return;
+		}
+		
     	final Vector2d rw = new Vector2d( -(body.x.y - x.y), body.x.x - x.x );
 		rw.scale( omega );
 		body.v.add(v, rw); // sets the value of the sum
@@ -369,16 +377,6 @@ public class RigidCollection extends RigidBody{
 			springs.addAll( body.springs );
 		}
 	}
-
-	@Override
-	/**
-	 * Updates the B2W and W2B transformations
-	 */
-	public void updateTransformations() {
-		transformB2W.set( theta, x );
-		transformW2B.set(transformB2W);
-		transformW2B.invert();
-	}
 	
 	public boolean isMovingAway(RigidBody body) {
 		
@@ -387,6 +385,7 @@ public class RigidCollection extends RigidBody{
 		double relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(this, body);
 		
 		double metric = relativeMProcessor.getRelativeKineticEnergy(this, body, relativeLinearVelocity, relativeAngularVelocity);
+		if(pinned || temporarilyPinned) metric*=1e-3;
 		
 		return (metric>CollisionProcessor.sleepingThreshold.getValue());
 	}
