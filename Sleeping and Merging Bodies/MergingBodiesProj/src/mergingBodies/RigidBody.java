@@ -303,10 +303,6 @@ public class RigidBody {
 		if(temporarilyPinned && ++steps>=RigidBodySystem.tempSleepCount.getValue())
 			temporarilyPinned = !temporarilyPinned; 
 
-		// update particles activity or sleepiness.
-		// fully active, regular stepping
-		setActivityContactGraph(CollisionProcessor.sleepingThreshold.getValue());
-
 		if (!pinned && !temporarilyPinned) {
 
 			// non ARPS
@@ -389,8 +385,8 @@ public class RigidBody {
 				boolean mergeCondition = true;
 				if (!mergeParams.enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
 				if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
-				mergeCondition = (mergeCondition && bpc.checkRelativeKineticEnergy());
-				if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable());
+				mergeCondition = (mergeCondition && bpc.checkRelativeKineticEnergy(mergeParams));
+				if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable(mergeParams));
 				if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
 			
 				if(mergeCondition) {
@@ -472,10 +468,6 @@ public class RigidBody {
 			}
 		}
 		return false;
-	}
-
-	public void setActivityContactGraph(double sleeping_threshold) {
-
 	}
 
 	public double getMetric() {

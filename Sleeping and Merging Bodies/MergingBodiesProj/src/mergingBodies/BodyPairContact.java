@@ -85,7 +85,7 @@ public class BodyPairContact {
 	}
 	
 	/**
-	 * Accumulate criteria for unmerge condition
+	 * Accumulate criteria for merge/unmerge condition
 	 * @param contact
 	 */
 	public void accumulate(MergeParameters mergeParams) {
@@ -96,7 +96,7 @@ public class BodyPairContact {
 			relativeKineticEnergyMetricHist.add(relativeMProcessor.getRelativeKineticEnergyMassNormalized(relativeLinearVelocity, relativeAngularVelocity));
 		else
 			relativeKineticEnergyMetricHist.add(relativeMProcessor.getRelativeKineticEnergy(body1, body2, relativeLinearVelocity, relativeAngularVelocity));
-		if (relativeKineticEnergyMetricHist.size() > CollisionProcessor.sleepAccum.getValue())
+		if (relativeKineticEnergyMetricHist.size() > mergeParams.stepAccum.getValue())
 			relativeKineticEnergyMetricHist.remove(0);
 	
 		Contact.ContactState state = Contact.ContactState.CLEAR;
@@ -105,7 +105,7 @@ public class BodyPairContact {
 				state = Contact.ContactState.ONEDGE;
 		
 		contactStateHist.add(state);
-		if (contactStateHist.size() > CollisionProcessor.sleepAccum.getValue())
+		if (contactStateHist.size() > mergeParams.stepAccum.getValue())
 			contactStateHist.remove(0);
 	}
 	
@@ -119,12 +119,12 @@ public class BodyPairContact {
 	 * </ul><p>
 	 * @return true or false
 	 */
-	public boolean checkRelativeKineticEnergy() {
+	public boolean checkRelativeKineticEnergy(MergeParameters mergeParams) {
 
 		double epsilon = 5e-4;
-		double threshold = CollisionProcessor.sleepingThreshold.getValue();
+		double threshold = mergeParams.threshold.getValue();
 
-		if ((relativeKineticEnergyMetricHist.size() == CollisionProcessor.sleepAccum.getValue())) {
+		if ((relativeKineticEnergyMetricHist.size() == mergeParams.stepAccum.getValue())) {
 			double previousValue = 0; 
 			double currentValue = 0;
 			for (Double relativeEnergy : relativeKineticEnergyMetricHist) {
@@ -145,9 +145,9 @@ public class BodyPairContact {
 	 * (i.e not on edge of friction cone during the entire time)
 	 * @return true or false
 	 */
-	public boolean areContactsStable() {
+	public boolean areContactsStable(MergeParameters mergeParams) {
 
-		if ((contactStateHist.size() == CollisionProcessor.sleepAccum.getValue())) {
+		if ((contactStateHist.size() == mergeParams.stepAccum.getValue())) {
 			for (Contact.ContactState state : contactStateHist) {
 				if (state == Contact.ContactState.ONEDGE)
 					return false;

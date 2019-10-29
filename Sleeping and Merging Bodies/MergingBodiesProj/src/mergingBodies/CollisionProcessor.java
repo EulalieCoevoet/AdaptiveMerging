@@ -241,32 +241,32 @@ public class CollisionProcessor {
 			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
 		} 
 	}
-
-	/**
-	 * Compute the contact force J*lambda.
-	 * Also compute contact force history.
-	 * For visualization only.
-	 * @param dt
-	 */
-	public void computeContactsForce(double dt) {
-		
+	
+	public void updateContactsHistory(MergeParameters mergeParams) {
 		for (Contact c: contacts) {
-			c.computeContactForce(dt);			
-
 			c.body1ContactForceHistory.add(c.contactForceB1);
 			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
-			if (c.body1ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
+			if (c.body1ContactForceHistory.size() > mergeParams.stepAccum.getValue()) {
 				c.body1ContactForceHistory.remove(0);
 				c.body1ContactTorqueHistory.remove(0);
 			}
-
+	
 			c.body2ContactForceHistory.add(c.contactForceB2);
 			c.body2ContactTorqueHistory.add(c.contactTorqueB2);
-			if (c.body2ContactForceHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
+			if (c.body2ContactForceHistory.size() > mergeParams.stepAccum.getValue()) {
 				c.body2ContactForceHistory.remove(0);
 				c.body2ContactTorqueHistory.remove(0);
 			}
 		}
+	}
+
+	/**
+	 * Compute the contact force J*lambda.
+	 * @param dt
+	 */
+	public void computeContactsForce(double dt) {
+		for (Contact c: contacts)
+			c.computeContactForce(dt);	
 	}
 
 	/**go through each element in contacts 2.

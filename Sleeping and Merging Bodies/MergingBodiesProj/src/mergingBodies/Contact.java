@@ -24,12 +24,6 @@ public class Contact {
 
 	/** Index of this contact, determines its rows in the Jacobian */
 	int index;
-
-	/** visitID of this contact at this time step. */
-	boolean visited = false;
-
-	/**    If the contact is between two sleeping bodies or not  */
-	boolean passive = false;
 	
 	/**    Used for unmerge condition, true if the contact changed (break or slide) during the time step  */
 	public ContactState state = ContactState.CLEAR;

@@ -12,6 +12,8 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mergingBodies.RigidBodySystem.MergeParameters;
+
 public class RigidCollection extends RigidBody{
 
 	/** List of RigidBody of the collection */
@@ -378,16 +380,16 @@ public class RigidCollection extends RigidBody{
 		}
 	}
 	
-	public boolean isMovingAway(RigidBody body) {
+	public boolean isMovingAway(RigidBody body, MergeParameters mergeParams) {
 		
 		// we should store somewhere the value of the 
 		Vector2d relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(this, body);
 		double relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(this, body);
 		
 		double metric = relativeMProcessor.getRelativeKineticEnergy(this, body, relativeLinearVelocity, relativeAngularVelocity);
-		if(pinned || temporarilyPinned) metric*=1e-3;
+		if(pinned || temporarilyPinned) metric/=2;
 		
-		return (metric>CollisionProcessor.sleepingThreshold.getValue());
+		return (metric>mergeParams.stepAccum.getValue());
 	}
 	
 	/**

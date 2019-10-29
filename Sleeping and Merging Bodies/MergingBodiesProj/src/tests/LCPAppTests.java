@@ -144,7 +144,7 @@ public class LCPAppTests extends LCPApp {
 		mergeParams.enableUnmerging.setValue(false);
 		mergeParams.updateContactsInCollections.setValue(true);
 		mergeParams.enableMergePinned.setValue(true);
-		for (int i=0; i<40+CollisionProcessor.sleepAccum.getValue(); i++)
+		for (int i=0; i<40+mergeParams.stepAccum.getValue(); i++)
 			system.advanceTime(dt);
 
 		RigidCollection collection = (RigidCollection)system.bodies.get(0);
@@ -169,7 +169,7 @@ public class LCPAppTests extends LCPApp {
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.updateContactsInCollections.setValue(true);
 		mergeParams.enableMergePinned.setValue(true);
-		for (int i=0; i<23+CollisionProcessor.sleepAccum.getValue(); i++)
+		for (int i=0; i<23+mergeParams.stepAccum.getValue(); i++)
 			system.advanceTime(dt);
 
 		RigidCollection collection = (RigidCollection)system.bodies.get(0);
@@ -214,7 +214,7 @@ public class LCPAppTests extends LCPApp {
 		mergeParams.enableUnmerging.setValue(false);
 		mergeParams.enableMergePinned.setValue(true);
 		mergeParams.enableMergeCycleCondition.setValue(false);
-		for (int i=0; i<CollisionProcessor.sleepAccum.getValue(); i++)
+		for (int i=0; i<mergeParams.stepAccum.getValue(); i++)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
 	}
