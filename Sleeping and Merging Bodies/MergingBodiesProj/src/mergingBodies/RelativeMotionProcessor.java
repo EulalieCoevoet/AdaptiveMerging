@@ -17,13 +17,19 @@ public class RelativeMotionProcessor {
 	protected Vector2d getRelativeLinearVelocity(RigidBody body1, RigidBody body2) {
 		
 		if ( body1.pinned || body1.temporarilyPinned ) {
-			// ASSERT that body 1 velocity is zero for this to be correct
-			// NOTE this will break if we ever have non zero velocities on pinned bodies!
-			return body2.v;
+			if(body1.v.x != 0. || body1.v.y != 0.) {
+				System.err.print("[getRelativeLinearVelocity] linear velocity of pinned body is not zero: ");
+				System.err.println(body1.v);
+			} else {
+				return body2.v;
+			}
 		} else if ( body2.pinned || body2.temporarilyPinned ) {
-			// ASSERT that body 2 velocity is zero for this to be correct
-			// NOTE this will break if we ever have non zero velocities on pinned bodies!
-			return body1.v;
+			if(body2.v.x != 0. || body2.v.y != 0.) {
+				System.err.print("[getRelativeLinearVelocity] linear velocity of pinned body is not zero: ");
+				System.err.println(body2.v);
+			} else {
+				return body1.v;
+			}
 		}
 
 		Vector2d relativeLinearVelocity = new Vector2d();
@@ -63,13 +69,19 @@ public class RelativeMotionProcessor {
 	protected double getRelativeAngularVelocity(RigidBody body1, RigidBody body2) {
 		
 		if ( body1.pinned || body1.temporarilyPinned ) {
-			// ASSERT that body 1 velocity is zero for this to be correct
-			// NOTE this will break if we ever have non zero velocities on pinned bodies!
-			return body2.omega;
+			if(body1.omega != 0.) {
+				System.err.print("[getRelativeAngularVelocity] angular velocity of pinned body is not zero: ");
+				System.err.println(body1.omega);
+			} else {
+				return body2.omega;
+			}
 		} else if ( body2.pinned || body2.temporarilyPinned ) {
-			// ASSERT that body 2 velocity is zero for this to be correct
-			// NOTE this will break if we ever have non zero velocities on pinned bodies!
-			return body1.omega;
+			if(body2.omega != 0.) {
+				System.err.print("[getRelativeAngularVelocity] angular velocity of pinned body is not zero: ");
+				System.err.println(body2.omega);
+			} else {
+				return body1.omega;
+			}
 		}
 
 		return body2.omega - body1.omega;
