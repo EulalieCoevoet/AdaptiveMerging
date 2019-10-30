@@ -76,11 +76,11 @@ public class BodyPairContact {
 	 * combined mass center of mass frame.  Note that we migth want an effective 
 	 * mass weighted relative velocity to measure relative velocity kinetic energy.
 	 */
-	protected void computeRelativeVelocity() {
+	protected void computeRelativeVelocity(MergeParameters mergeParams) {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(body1, body2);	
+		relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(body1, body2, mergeParams.useRelativeVelocityFromBB.getValue());	
 		relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(body1, body2);
 	}
 	
@@ -90,7 +90,7 @@ public class BodyPairContact {
 	 */
 	public void accumulate(MergeParameters mergeParams) {
 		
-		computeRelativeVelocity();
+		computeRelativeVelocity(mergeParams);
 		
 		if (mergeParams.useMassNormKinEnergy.getValue())
 			relativeKineticEnergyMetricHist.add(relativeMProcessor.getRelativeKineticEnergyMassNormalized(relativeLinearVelocity, relativeAngularVelocity));

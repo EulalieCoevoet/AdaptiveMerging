@@ -30,6 +30,9 @@ public class Block {
     
     /** position of block in the body frame */
     Point2d pB = new Point2d(); 
+    
+    /** size of pixel */
+    double h = 0.5;
  
     /**
      * Creates a new block
@@ -63,7 +66,6 @@ public class Block {
         else
         	gl.glColor4f( c.x, c.y, c.z, alpha );
         gl.glBegin(GL.GL_TRIANGLE_STRIP);
-        double h = 0.5;
         gl.glVertex2d( pB.x - h, pB.y - h );
         gl.glVertex2d( pB.x - h, pB.y + h );
         gl.glVertex2d( pB.x + h, pB.y - h );

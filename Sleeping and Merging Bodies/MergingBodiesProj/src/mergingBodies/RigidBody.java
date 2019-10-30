@@ -84,12 +84,11 @@ public class RigidBody {
 
 	/** linear velocity */
 	public Vector2d v = new Vector2d(0.,0.);
-
-	/** Position of center of mass in the world frame */
-	public Point2d x = new Point2d();
-
-	/** initial position of center of mass in the world frame */
-	Point2d x0 = new Point2d();
+	
+	public Point2d x = new Point2d(); /** Position of center of mass in the world frame */
+	public Point2d x0 = new Point2d(); /** Initial position of center of mass in the world frame */
+	public Point2d bbmax = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); /** (xmax, ymax) of bounding box, in the world frame */
+	public Point2d bbmin = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE); /** (xmin, ymin) of bounding box, in the world frame */
 
 	/** orientation angle in radians */
 	public double theta = 0.;
@@ -169,7 +168,11 @@ public class RigidBody {
 			double mass = b.getColourMass();
 			massLinear += mass;
 			x0.x += b.j * mass;
+			bbmax.x = Math.max(bbmax.x, b.j + b.h);
+			bbmin.x = Math.min(bbmin.x, b.j - b.h);
 			x0.y += b.i * mass;
+			bbmax.y = Math.max(bbmax.y, b.i + b.h);
+			bbmin.y = Math.min(bbmin.y, b.i - b.h); 
 		}
 		x0.scale(1 / massLinear);
 		// set block positions in world and body coordinates
@@ -314,8 +317,6 @@ public class RigidBody {
 				v.set(0, 0);
 				omega = 0;
 			}
-
-			updateTransformations();
 		}
 	}
 	
@@ -329,15 +330,27 @@ public class RigidBody {
 		x.x += v.x * dt;
 		x.y += v.y * dt;
 		theta += omega * dt;
+		
+		updateTransformations();
+		updateBB();
 	}
 	
-	/**
-	 * Computes the total kinetic energy of the body.
-	 * 
-	 * @return the total kinetic energy
-	 */
-	public double getKineticEnergy() {
-		return 0.5 * massLinear * v.lengthSquared() + 0.5 * massAngular * omega * omega;
+	public void updateBB() {
+		bbmax = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); 
+		bbmin = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE);
+		getBB(bbmax, bbmin);
+	}
+	
+	public void getBB(Point2d max, Point2d min) {
+		for (Block b : boundaryBlocks) {
+			Point2d pW = new Point2d(b.pB);
+			transformB2W.transform(pW);
+			
+			max.x = Math.max(max.x, pW.x + b.h);
+			min.x = Math.min(min.x, pW.x - b.h);
+			max.y = Math.max(max.y, pW.y + b.h);
+			min.y = Math.min(min.y, pW.y - b.h); 
+		}
 	}
 
 	/**
@@ -566,26 +579,22 @@ public class RigidBody {
 		gl.glPopMatrix();
 	}
 	
-	
-	
-	/*
-	 * displays deltaV computed by PGS LCP solve at each frame. Goes from each body's centre of mass
+	/**
+	 * Displays deltaV computed by LCP solve at each frame. Goes from each body's center of mass
 	 * outwards in the direction of deltaV
 	 */
-	public void displayDeltaV(GLAutoDrawable drawable, Color4f col) {
+	public void displayDeltaV(GLAutoDrawable drawable, int size, Color4f color) {
 		GL2 gl = drawable.getGL().getGL2();
 
-		gl.glLineWidth(2);
+		gl.glLineWidth(size);
 		
-			
-		gl.glColor4f(col.x, col.y, col.z, col.w);
+		gl.glColor4f(color.x, color.y, color.z, color.w);
 		gl.glBegin( GL.GL_LINES );
 		double scale = RigidBodySystem.deltaVVizScale.getValue();
 		
 		gl.glVertex2d(x.x, x.y);
 		gl.glVertex2d(x.x + scale*deltaV.get(0), x.y+scale*deltaV.get(1));
 
-		
 		gl.glEnd();
 	}
 
@@ -596,18 +605,19 @@ public class RigidBody {
 	 * @param drawable
 	 */
 	public void displayCOMs(GLAutoDrawable drawable) {
+		
 		GL2 gl = drawable.getGL().getGL2();
 		if (!pinned) {
 			if (state == ObjectState.ACTIVE || wokenUp) {
 				gl.glPointSize(8);
 				gl.glColor3f(0, 0, 0.7f);
 				gl.glBegin(GL.GL_POINTS);
-				gl.glVertex2d(x.x, x.y);
+				gl.glVertex2d(x.x, x.y);			
 				gl.glEnd();
 				gl.glPointSize(4);
 				gl.glColor3f(1, 1, 1);
 				gl.glBegin(GL.GL_POINTS);
-				gl.glVertex2d(x.x, x.y);
+				gl.glVertex2d(x.x, x.y);	
 				gl.glEnd();
 			} else if (state == ObjectState.SLEEPING && !wokenUp) {
 				gl.glPointSize(8);
@@ -622,6 +632,28 @@ public class RigidBody {
 				gl.glEnd();
 			}
 		}
+	}
+	
+	/**
+	 * Draws bounding box
+	 * @param drawable
+	 */
+	public void displayBB(GLAutoDrawable drawable) {
+		
+		GL2 gl = drawable.getGL().getGL2();
+		gl.glLineWidth(1);
+		gl.glColor3f(1, 0, 0);
+		
+		gl.glBegin(GL.GL_LINES);
+		gl.glVertex2d(bbmax.x, bbmax.y);
+		gl.glVertex2d(bbmax.x, bbmin.y);
+		gl.glVertex2d(bbmax.x, bbmax.y);
+		gl.glVertex2d(bbmin.x, bbmax.y);
+		gl.glVertex2d(bbmin.x, bbmin.y);
+		gl.glVertex2d(bbmin.x, bbmax.y);
+		gl.glVertex2d(bbmin.x, bbmin.y);
+		gl.glVertex2d(bbmax.x, bbmin.y);			
+		gl.glEnd();
 	}
 
 	public void displaySpeedCOM(GLAutoDrawable drawable) {

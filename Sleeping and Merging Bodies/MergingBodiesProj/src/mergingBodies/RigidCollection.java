@@ -64,7 +64,7 @@ public class RigidCollection extends RigidBody{
 	 * Adds given list of bodies the collection
 	 */
 	public void addBodies(ArrayList<RigidBody> bodies) {
-		for (RigidBody body : bodies) {		
+		for (RigidBody body : bodies) {
 			addBodyInternalMethod(body);
 			updateCollectionPinnedConditions(body);
 		}
@@ -93,6 +93,7 @@ public class RigidCollection extends RigidBody{
 		body.mergedThisTimeStep = true;
 		collectionBodies.add(body);
 		
+		// compute velocities
 		Point2d massCom1 = new Point2d();
 		Point2d massCom2 = new Point2d();
 		massCom1.scale( body.massLinear, body.x );
@@ -169,6 +170,7 @@ public class RigidCollection extends RigidBody{
 		
 		updateMass();
 		updateCOM(); 
+		updateBB(); 
 		updateTransformations();
 		updateBodiesTransformations();
 		updateInertia();
@@ -280,7 +282,6 @@ public class RigidCollection extends RigidBody{
 				advancePositions(dt);
 			} 
 			
-			updateTransformations();
 			updateBodiesPositionAndTransformations();
 			updateContactJacobianAndDataAsInternal(dt);
 		} 
@@ -310,6 +311,17 @@ public class RigidCollection extends RigidBody{
 			//update position and orientation
 			body.transformB2W.transform(body.x);
 			body.theta = body.transformB2W.getTheta();
+			
+			body.updateBB();
+		}
+	}
+	
+	@Override
+	public void updateBB() {
+		bbmax = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); 
+		bbmin = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE);
+		for(RigidBody body : collectionBodies) {
+			body.getBB(bbmax, bbmin);
 		}
 	}
 	
@@ -383,7 +395,7 @@ public class RigidCollection extends RigidBody{
 	public boolean isMovingAway(RigidBody body, MergeParameters mergeParams) {
 		
 		// we should store somewhere the value of the 
-		Vector2d relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(this, body);
+		Vector2d relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(this, body, mergeParams.useRelativeVelocityFromBB.getValue());
 		double relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(this, body);
 		
 		double metric = relativeMProcessor.getRelativeKineticEnergy(this, body, relativeLinearVelocity, relativeAngularVelocity);
@@ -518,37 +530,25 @@ public class RigidCollection extends RigidBody{
 				p2.set(bpc.body2.x);
 				gl.glVertex2d(p1.x, p1.y);
 				gl.glVertex2d(p2.x, p2.y);
-				gl.glEnd();
+				gl.glEnd(); 
 			}
 		}
 	}
 	
-	/*
-	 * displays deltaV if body is a collection. If it is a collection, the external 
+	/**
+	 * Displays deltaV if body is a collection. If it is a collection, the external 
 	 * collections deltaV's (computed by external multi-iteration PGS) will be drawn 
 	 * in a light shade of cyan. Then, all it's sub-bodies' single iteration deltaV's
 	 * will also be drawn in a darker shade of cyan.
 	 */
 	@Override
-	public void displayDeltaV(GLAutoDrawable drawable, Color4f col) {
-		GL2 gl = drawable.getGL().getGL2();
-
-		gl.glLineWidth(10);
+	public void displayDeltaV(GLAutoDrawable drawable, int size, Color4f color) {
+		super.displayDeltaV(drawable, 10, color);
 		
-			
-		gl.glColor4f(col.x, col.y, col.z, col.w);
-		gl.glBegin( GL.GL_LINES );
-		double scale = RigidBodySystem.deltaVVizScale.getValue();
-		
-		gl.glVertex2d(x.x, x.y);
-		gl.glVertex2d(x.x + scale*deltaV.get(0), x.y+scale*deltaV.get(1));
-
-		gl.glEnd();
-		Color4f c = new Color4f(col.x/2, col.y/2, col.z/2, col.w/2);
+		Color4f c = new Color4f(color.x/2, color.y/2, color.z/2, color.w/2);
 		for (RigidBody b : collectionBodies) {
-			b.displayDeltaV(drawable, c);
+			b.displayDeltaV(drawable, size, c);
 		}
-		
 	}
 	
 	/**

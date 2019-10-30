@@ -460,7 +460,6 @@ public class RigidBodySystem {
 		for (RigidBody body: unmergingBodies) {
 			if(!body.pinned && !body.temporarilyPinned && mergeParams.applyPGSResultsToUnmerge.getValue()) {
 				body.advancePositions(dt);
-				body.updateTransformations();
 			}
 			
 			ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
@@ -810,10 +809,17 @@ public class RigidBodySystem {
 				b.displayCOMs(drawable);
 			}
 		}
+		
+		if ( drawBB.getValue() ) {
+			for ( RigidBody b : bodies ) {
+				b.displayBB(drawable);
+			}
+		}
+		
 		if(drawDeltaV.getValue()) {
-			Color4f col = new Color4f(0, 1, 1, 1);
+			Color4f color = new Color4f(0, 1, 1, 1);
 			for (RigidBody b : bodies) {
-				b.displayDeltaV(drawable, col);
+				b.displayDeltaV(drawable, 2, color);
 			}
 		}
 		
@@ -867,6 +873,7 @@ public class RigidBodySystem {
 	
 	private BooleanParameter drawCOMs = new BooleanParameter( "draw COM", false );
 	private BooleanParameter drawSpeedCOMs = new BooleanParameter( "draw speed COM", false );
+	private BooleanParameter drawBB = new BooleanParameter( "draw bounding box", false );
 	public static DoubleParameter deltaVVizScale = new DoubleParameter( "DeltaV viz scale", 10, 0, 100 );
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
 	
@@ -881,6 +888,7 @@ public class RigidBodySystem {
 		public BooleanParameter enableMergeCycleCondition = new BooleanParameter( "merging check cycle condition", false);
 		public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging stable contact condition", true);
 		public BooleanParameter useMassNormKinEnergy = new BooleanParameter( "use mass normalization of kin energy", true);
+		public BooleanParameter useRelativeVelocityFromBB = new BooleanParameter( "use relative velocities from bounding box", true);
 		public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
 		public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging friction condition", true);
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
@@ -888,7 +896,7 @@ public class RigidBodySystem {
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 50, 0, 200 );
-		public DoubleParameter threshold = new DoubleParameter("merging/unmerging threshold", 1e-3, 1e-10, 1 );
+		public DoubleParameter threshold = new DoubleParameter("merging/unmerging threshold", 1e-5, 1e-10, 1 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	}
 	
@@ -924,6 +932,7 @@ public class RigidBodySystem {
 
 		vfpv.add( drawCOMs.getControls() );
 		vfpv.add( drawSpeedCOMs.getControls() );
+		vfpv.add( drawBB.getControls() );
 		vfpv.add( drawIndex.getControls() );
 		vfpv.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
 		vfpv.add( deltaVVizScale.getSliderControls(false) ); // Gross too?
@@ -937,6 +946,7 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.enableMerging.getControls() );
 		vfpm.add( mergeParams.enableMergePinned.getControls() );
 		vfpm.add( mergeParams.useMassNormKinEnergy.getControls() );
+		vfpm.add( mergeParams.useRelativeVelocityFromBB.getControls() );
 		
 		vfpm.add( mergeParams.enableMergeCycleCondition.getControls() );
 		vfpm.add( mergeParams.enableMergeStableContactCondition.getControls() );
