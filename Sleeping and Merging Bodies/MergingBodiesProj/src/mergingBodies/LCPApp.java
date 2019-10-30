@@ -514,6 +514,11 @@ public class LCPApp implements SceneGraphNode, Interactor {
             @Override
             public void keyPressed(KeyEvent e) {
             	double ds = 0.5; // step size for moving controllable springs (might want to expose this as a parameter!)
+            	
+                if ( e.getKeyCode() == KeyEvent.VK_SHIFT ) {
+                	shiftPressed = true;
+	            }
+            	
                 if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
 
                 	if(system.triggerMergingEvent) {
@@ -522,10 +527,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 	} else {
                 		run.setValue( ! run.getValue() ); 
                 	}
-                } 
-                else if ( e.getKeyCode() == KeyEvent.VK_SHIFT ) {
-                	shiftPressed = true;
-	            } 
+                }  
                 else if ( e.getKeyCode() == KeyEvent.VK_S ) {
                     double dt = stepsize.getValue() / (int)substeps.getValue();
                     for ( int i = 0; i < substeps.getValue(); i++ ) {

@@ -305,7 +305,7 @@ public class RigidBodySystem {
 			if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable(mergeParams));
 			if (mergeParams.enableMergeCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkContactsCycle(mergeParams));
 			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
-
+			
 			if (mergeCondition) {
 				mergingEvent = true;
 				bpc.inCollection = true;
@@ -427,6 +427,10 @@ public class RigidBodySystem {
 						newBodies.clear();
 					}
 				}
+				
+				if (!mergeParams.applyPGSResultsToUnmerge.getValue()) // apply velocities of the collection instead of the one iteration PGS results 
+					collection.applyVelocitiesToBodies();
+				
 			}
 		}
 		for (RigidBody b: additionQueue) {
@@ -454,10 +458,11 @@ public class RigidBodySystem {
 		
 		ArrayList<BodyPairContact> clearedBodyPairContacts = new ArrayList<BodyPairContact>();
 		for (RigidBody body: unmergingBodies) {
-			if(!body.pinned && !body.temporarilyPinned) {
+			if(!body.pinned && !body.temporarilyPinned && mergeParams.applyPGSResultsToUnmerge.getValue()) {
 				body.advancePositions(dt);
 				body.updateTransformations();
 			}
+			
 			ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 
 			for (BodyPairContact bpc : body.bodyPairContactList) {
@@ -881,6 +886,7 @@ public class RigidBodySystem {
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging contact normal condition", true);
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging relative motion condition", false);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
+		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 50, 0, 200 );
 		public DoubleParameter threshold = new DoubleParameter("merging/unmerging threshold", 1e-3, 1e-10, 1 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
@@ -939,6 +945,7 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.enableUnmergeNormalCondition.getControls() );
 		vfpm.add( mergeParams.enableUnmergeRelativeMotionCondition.getControls() );
 		vfpm.add( mergeParams.updateContactsInCollections.getControls() );
+		vfpm.add( mergeParams.applyPGSResultsToUnmerge.getControls() );
 		vfpm.add( mergeParams.stepAccum.getSliderControls() );
 		vfpm.add( mergeParams.threshold.getSliderControls(true) );
         JButton umergeButton = new JButton("unmerge all");

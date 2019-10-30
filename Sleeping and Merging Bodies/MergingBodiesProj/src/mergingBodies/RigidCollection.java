@@ -389,7 +389,7 @@ public class RigidCollection extends RigidBody{
 		double metric = relativeMProcessor.getRelativeKineticEnergy(this, body, relativeLinearVelocity, relativeAngularVelocity);
 		if(pinned || temporarilyPinned) metric/=2;
 		
-		return (metric>mergeParams.stepAccum.getValue());
+		return (metric>mergeParams.threshold.getValue());
 	}
 	
 	/**
@@ -436,7 +436,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyPairContact> removalQueue) {
 		for (BodyPairContact bpc: body.bodyPairContactList) {
-			if (bpc.body1.isInSameCollection(bpc.body2) && bpc.relativeKineticEnergyMetricHist.size() <= CollisionProcessor.sleepAccum.getValue() && !bpc.inCollection) {
+			if (bpc.body1.isInSameCollection(bpc.body2) && !bpc.inCollection) {
 				bpc.inCollection = true;
 				body.parent.addToInternalContact(bpc);
 				body.parent.addToBodyPairContacts(bpc);
