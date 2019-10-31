@@ -18,7 +18,6 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.gl2.GLUT;
 
-import mergingBodies.RigidBody.ObjectState;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
@@ -129,6 +128,17 @@ public class RigidBodySystem {
 		
 		if (processCollisions.getValue()) {
 			collisionProcessor.collisionDetection(dt); 
+		}
+		
+		if (sleepParams.enableSleeping.getValue()) {
+			sleep();
+		}
+		
+		if (sleepParams.enableSleeping.getValue()) {
+			wake();
+		}
+		
+		if (processCollisions.getValue()) {
 			collisionProcessor.solveLCP(dt); 
 			collisionProcessor.updateContactsHistory(mergeParams);
 		}
@@ -146,14 +156,6 @@ public class RigidBodySystem {
 			// this should be done after advanceTime() so that the deltaVs are applied to each bodies before merging
 			mergeBodies(); 
 			checkIndex();
-		}
-		
-		if (enableSleeping.getValue()) {
-			sleep();
-		}
-		
-		if (enableSleeping.getValue()) {
-			wake();
 		}
 
 		if (mergeParams.enableUnmerging.getValue() || mergeParams.unmergeAll.getValue()) {
@@ -187,39 +189,36 @@ public class RigidBodySystem {
 	 * </ul><p>
 	 */
 	private void sleep() {
-		double sleepingThreshold = CollisionProcessor.sleepingThreshold.getValue();
-		for (RigidBody b : bodies) {
-			if (b.pinned || b.temporarilyPinned || b.state == ObjectState.SLEEPING) continue;
-			double vel = b.getMetric();
-			b.velHistory.add(vel);
-			if (b.velHistory.size() > CollisionProcessor.sleepAccum.getValue()) {
-				b.velHistory.remove(0);	
-			}
+		double sleepingThreshold = sleepParams.threshold.getValue();
+		for (RigidBody body : bodies) {
+			if (body.isSleeping)
+				continue;
+			
+			body.accumulate(sleepParams);
+			
 			boolean sleep = true;
-
-			double previousV = Double.MAX_VALUE; 
-			double epsilon = 0.00005;
-			if (b.velHistory.size() < CollisionProcessor.sleepAccum.getValue()) {
-
+			double prevMetric = Double.MAX_VALUE; 
+			double epsilon = 5e-5;
+			if (body.metricHistory.size() < sleepParams.stepAccum.getValue()) {
 				sleep = false;
-			}
-			else {
-				for (Double v : b.velHistory) {
-					if (v > previousV+epsilon) {
+			} else {
+				for (Double metric : body.metricHistory) {
+					if (metric > prevMetric+epsilon) {
 						sleep = false;
 						break;
 					}
-					if (v > sleepingThreshold) {
+					if (metric > sleepingThreshold) {
 						sleep = false;
 						break;
 					}
-					previousV = v;
+					prevMetric = metric;
 				}
 			}
-			if (sleep) {
-				b.state = ObjectState.SLEEPING;
-				b.forcePreSleep.set(b.force);
-				b.torquePreSleep = b.torque;
+			
+			body.isSleeping = sleep;
+			
+			if(body.isSleeping) {
+				body.clear();
 			}
 		}
 	}
@@ -232,15 +231,25 @@ public class RigidBodySystem {
 	 * total Force = sum of all forces (including contact forces)
 	 */
 	private void wake() {
-		double threshold = CollisionProcessor.forceMetricTolerance.getValue();
-		for (RigidBody b: bodies) {
-			if (b.state == ObjectState.ACTIVE || b.pinned || b.temporarilyPinned) continue;
-			double forceMetric1 = (b.force.x-b.forcePreSleep.x)*b.minv;
-			double forceMetric2 = (b.force.y-b.forcePreSleep.y)*b.minv;
-			double forceMetric3 = (b.torque-b.torquePreSleep)*b.jinv;
-			if (b.state == ObjectState.SLEEPING && (forceMetric1 > threshold || forceMetric2 > threshold || forceMetric3 > threshold)) {
-				b.velHistory.clear();
-				b.state = ObjectState.ACTIVE;
+		double threshold = 1e-14;
+		for (RigidBody body: bodies) {
+			if (!body.isSleeping) 
+				continue;
+			
+			boolean wake = false;
+			if (Math.abs(body.force.x) > threshold || Math.abs(body.force.y) > threshold || Math.abs(body.torque) > threshold)
+				wake = true;
+			
+			for (BodyPairContact bpc : body.bodyPairContactList) {
+				if (!bpc.body1.isInSameCollection(bpc.body2)) 
+					wake = true;
+				if (wake)
+					break;
+			}
+			
+			if(wake) {
+				body.metricHistory.clear();
+				body.isSleeping = false;
 			}
 		}
 	}
@@ -248,6 +257,10 @@ public class RigidBodySystem {
 	private void applyGravityForce() {
 		Vector2d force = new Vector2d();
 		for ( RigidBody body : bodies ) {
+			
+			if (body.isSleeping)
+				continue;
+			
 			//fully active, regular stepping
 			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
 			force.set( Math.cos( theta ), Math.sin(theta) );
@@ -271,8 +284,10 @@ public class RigidBodySystem {
 	}
 
 	private void applySpringForces() {
-		for (RigidBody b: bodies){
-			for (Spring s: b.springs) {
+		for (RigidBody body: bodies){
+			if (body.isSleeping)
+				continue;
+			for (Spring s: body.springs) {
 				s.apply(springStiffness.getValue(), springDamping.getValue());
 			}
 		}
@@ -304,7 +319,7 @@ public class RigidBodySystem {
 			mergeCondition = (mergeCondition && bpc.checkRelativeKineticEnergy(mergeParams));
 			if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable(mergeParams));
 			if (mergeParams.enableMergeCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkContactsCycle(mergeParams));
-			if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
+			if (bpc.body1.isSleeping && bpc.body2.isSleeping && sleepParams.enableSleeping.getValue()) mergeCondition = true;
 			
 			if (mergeCondition) {
 				mergingEvent = true;
@@ -381,6 +396,10 @@ public class RigidBodySystem {
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 		
 		for(RigidBody body : bodies) {
+			
+			if(body.isSleeping)
+				continue;
+			
 			if (body instanceof RigidCollection) {
 				RigidCollection collection = (RigidCollection) body;
 				if (!collection.temporarilyPinned) {
@@ -899,8 +918,13 @@ public class RigidBodySystem {
 		public DoubleParameter threshold = new DoubleParameter("merging/unmerging threshold", 1e-5, 1e-10, 1 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	}
-	
-	public static BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
+
+	public SleepParameters sleepParams = new SleepParameters();
+	public class SleepParameters {
+		public BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
+		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 50, 0, 200 );
+		public DoubleParameter threshold = new DoubleParameter("sleeping threshold", 1e-7, 1e-10, 1 );
+	}
 
 
 	/**
@@ -966,8 +990,16 @@ public class RigidBodySystem {
             	mergeParams.unmergeAll.setValue(true);
             }
         });
-		vfpm.add( enableSleeping.getControls() );
 		CollapsiblePanel cpm = new CollapsiblePanel(vfpm.getPanel());
+		cpm.collapse();
+		vfp.add( cpm );
+
+        vfpm = new VerticalFlowPanel();
+		vfpm.setBorder( new TitledBorder("sleeping rules") );
+		vfpm.add( sleepParams.enableSleeping.getControls() );
+		vfpm.add( sleepParams.threshold.getSliderControls(true) );
+		vfpm.add( sleepParams.stepAccum.getSliderControls() );
+		cpm = new CollapsiblePanel(vfpm.getPanel());
 		cpm.collapse();
 		vfp.add( cpm );
 

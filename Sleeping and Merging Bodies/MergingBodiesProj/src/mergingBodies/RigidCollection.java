@@ -43,9 +43,9 @@ public class RigidCollection extends RigidBody{
 		copyFrom(body1);
 		
 		addBodyInternalMethod(body1);
-		updateCollectionPinnedConditions(body1);
+		updateCollectionState(body1);
 		addBodyInternalMethod(body2);
-		updateCollectionPinnedConditions(body2);
+		updateCollectionState(body2);
 		
 		updateCollection();
 	}
@@ -56,7 +56,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void addBody(RigidBody body) {
 		addBodyInternalMethod(body);
-		updateCollectionPinnedConditions(body);
+		updateCollectionState(body);
 		updateCollection();
 	}
 	
@@ -66,7 +66,7 @@ public class RigidCollection extends RigidBody{
 	public void addBodies(ArrayList<RigidBody> bodies) {
 		for (RigidBody body : bodies) {
 			addBodyInternalMethod(body);
-			updateCollectionPinnedConditions(body);
+			updateCollectionState(body);
 		}
 		
 		updateCollection();
@@ -80,7 +80,7 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody body : collection.collectionBodies)
 			addBodyInternalMethod(body);
 		
-		updateCollectionPinnedConditions(collection);
+		updateCollectionState(collection);
 		updateCollection();
 	}
 	
@@ -148,12 +148,15 @@ public class RigidCollection extends RigidBody{
 	 * Update collection pinned condition 
 	 * @param body
 	 */
-	protected void updateCollectionPinnedConditions(RigidBody body) {
+	protected void updateCollectionState(RigidBody body) {
 		temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
-		steps = Math.max(body.steps, steps);
 		body.temporarilyPinned = false;
+		steps = Math.max(body.steps, steps);
 		
 		pinned = (pinned || body.pinned);
+		
+		isSleeping = (isSleeping || body.isSleeping);
+		body.isSleeping = false;
 	}
 	
 	/**
@@ -271,24 +274,19 @@ public class RigidCollection extends RigidBody{
 	@Override
 	public void advanceTime(double dt){
 
-		if(temporarilyPinned && ++steps>=RigidBodySystem.tempSleepCount.getValue())
-			temporarilyPinned=!temporarilyPinned; 
+		super.advanceTime(dt);
 		
-		if (!pinned && !temporarilyPinned) {
-			
-			advanceVelocities(dt);
-			
-			if (state == ObjectState.ACTIVE) {
-				advancePositions(dt);
-			} 
+		if (!pinned && !temporarilyPinned && !isSleeping) {
 			
 			updateBodiesPositionAndTransformations();
 			updateContactJacobianAndDataAsInternal(dt);
 		} 
 		
-		for (RigidBody body : collectionBodies) {
-			if(!body.pinned && !body.temporarilyPinned)
-				body.advanceVelocities(dt);
+		if (!isSleeping) {
+			for (RigidBody body : collectionBodies) {
+				if(!body.pinned && !body.temporarilyPinned)
+					body.advanceVelocities(dt);
+			}
 		}
 	}
 	

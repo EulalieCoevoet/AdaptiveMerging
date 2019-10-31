@@ -9,6 +9,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 import mergingBodies.Contact.ContactState;
 import mergingBodies.RigidBodySystem.MergeParameters;
+import mergingBodies.RigidBodySystem.SleepParameters;
 import mintools.viewer.EasyViewer;
 import no.uib.cipr.matrix.DenseVector;
 
@@ -27,19 +28,15 @@ public class RigidBody {
 	/**Pointer to the parent of this body if it is merged*/
 	RigidCollection parent = null;
 	/** Unique identifier for this body */
-	public int index;
-
+	public int index = 0;
 	/** Variable to keep track of identifiers that can be given to rigid bodies */
 	static public int nextIndex = 0;
-	
-	public boolean wokenUp = false;
 
 	/** visitID of this contact at this time step. */
 	boolean visited = false;
 
 	/** Block approximation of geometry */
 	ArrayList<Block> blocks;
-
 	/** Boundary blocks */
 	ArrayList<Block> boundaryBlocks;
 
@@ -47,12 +44,10 @@ public class RigidBody {
 
 	/** accumulator for forces acting on this body in world coordinate*/
 	Vector2d force = new Vector2d();
-
 	/** accumulator for torques acting on this body */
 	double torque;
 
 	double massAngular;
-
 	double massLinear;
 
 	public boolean pinned = false;
@@ -82,19 +77,14 @@ public class RigidBody {
 	 */
 	RigidTransform transformC2B = new RigidTransform();
 
-	/** linear velocity */
-	public Vector2d v = new Vector2d(0.,0.);
+	public Vector2d v = new Vector2d(0.,0.); /** Linear velocity */
+	public double omega = 0.; /** Angular velocity in radians per second */
 	
 	public Point2d x = new Point2d(); /** Position of center of mass in the world frame */
 	public Point2d x0 = new Point2d(); /** Initial position of center of mass in the world frame */
+	public double theta = 0.; /** Orientation angle in radians */
 	public Point2d bbmax = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); /** (xmax, ymax) of bounding box, in the world frame */
 	public Point2d bbmin = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE); /** (xmin, ymin) of bounding box, in the world frame */
-
-	/** orientation angle in radians */
-	public double theta = 0.;
-
-	/** angular velocity in radians per second */
-	public double omega = 0.;
 
 	/** inverse of the linear mass, or zero if pinned */
 	double minv;
@@ -102,15 +92,7 @@ public class RigidBody {
 	/** inverse of the angular mass, or zero if pinned */
 	double jinv;
 
-	/** linear momentum of this body **/
-	public Vector2d p_lin = new Vector2d();
-
-	/** angular momentum of this body **/
-	public double p_ang;
-
-	public ObjectState state = ObjectState.ACTIVE;
-
-	public enum ObjectState { ACTIVE, SLEEPING };
+	public boolean isSleeping = false;
 	
 	/**
 	 * rho value, 0 if active, 1 if inactive, function of kinetic energy when in
@@ -141,14 +123,11 @@ public class RigidBody {
 	 * keeps track of the activity of the last N steps, if it is false, means that
 	 * should be asleep, if true, should be awake
 	 */
-	public ArrayList<Double> velHistory = new ArrayList<Double>();
+	public ArrayList<Double> metricHistory = new ArrayList<Double>();
 
 	public boolean mergedThisTimeStep = false;
 
 	DenseVector deltaV = new DenseVector(3);
-
-	public Vector2d forcePreSleep = new Vector2d();
-	public double torquePreSleep = 0;
 	
 	public RigidBody() {
 	}
@@ -239,10 +218,10 @@ public class RigidBody {
 		steps = body.steps;
 		minv = body.minv;
 		jinv = body.jinv;
-		state = ObjectState.ACTIVE;
+		isSleeping = false;
 		rho = 0;
+		
 		// set our index
-
 		index = nextIndex++;
 	}
 	
@@ -263,6 +242,17 @@ public class RigidBody {
 	
 	public boolean isInCollection(RigidCollection collection) {
 		return (parent==collection);
+	}
+	
+	/**
+	 * Track metric over time steps
+	 */
+	public void accumulate(SleepParameters sleepParams) {
+		double metric = getMetric();
+		metricHistory.add(metric);
+		if (metricHistory.size() > sleepParams.stepAccum.getValue()) {
+			metricHistory.remove(0);	
+		}
 	}
 
 	/**
@@ -302,21 +292,13 @@ public class RigidBody {
 	 */
 	public void advanceTime(double dt) {
 		
-		// check for temporary pinned condition
 		if(temporarilyPinned && ++steps>=RigidBodySystem.tempSleepCount.getValue())
 			temporarilyPinned = !temporarilyPinned; 
 
-		if (!pinned && !temporarilyPinned) {
+		if (!pinned && !temporarilyPinned && !isSleeping) {
 
-			// non ARPS
 			advanceVelocities(dt);
-			
-			if (state == ObjectState.ACTIVE) {
-				advancePositions(dt);
-			} else {
-				v.set(0, 0);
-				omega = 0;
-			}
+			advancePositions(dt);
 		}
 	}
 	
@@ -400,7 +382,7 @@ public class RigidBody {
 				if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
 				mergeCondition = (mergeCondition && bpc.checkRelativeKineticEnergy(mergeParams));
 				if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable(mergeParams));
-				if (bpc.body1.state == ObjectState.SLEEPING && bpc.body2.state == ObjectState.SLEEPING) mergeCondition = true;
+				if (bpc.body1.isSleeping && bpc.body2.isSleeping) mergeCondition = true;
 			
 				if(mergeCondition) {
 			
@@ -498,8 +480,6 @@ public class RigidBody {
 		omega = 0;
 		force.set(0, 0);
 		torque = 0;
-		p_lin.set(0, 0);
-		p_ang = 0;
 		transformB2W.set(theta, x);
 		transformW2B.set(transformB2W);
 		transformW2B.invert();
@@ -507,8 +487,8 @@ public class RigidBody {
 		transformB2C.T.setIdentity();
 		transformC2B.T.setIdentity();
 		bodyPairContactList.clear();
-		state = ObjectState.ACTIVE;
-		velHistory.clear();
+		isSleeping = false;
+		metricHistory.clear();
 		parent = null;
 	}
 
@@ -607,30 +587,28 @@ public class RigidBody {
 	public void displayCOMs(GLAutoDrawable drawable) {
 		
 		GL2 gl = drawable.getGL().getGL2();
-		if (!pinned) {
-			if (state == ObjectState.ACTIVE || wokenUp) {
-				gl.glPointSize(8);
-				gl.glColor3f(0, 0, 0.7f);
-				gl.glBegin(GL.GL_POINTS);
-				gl.glVertex2d(x.x, x.y);			
-				gl.glEnd();
-				gl.glPointSize(4);
-				gl.glColor3f(1, 1, 1);
-				gl.glBegin(GL.GL_POINTS);
-				gl.glVertex2d(x.x, x.y);	
-				gl.glEnd();
-			} else if (state == ObjectState.SLEEPING && !wokenUp) {
-				gl.glPointSize(8);
-				gl.glColor3f(0, 0, 0.7f);
-				gl.glBegin(GL.GL_POINTS);
-				gl.glVertex2d(x.x, x.y);
-				gl.glEnd();
-				gl.glPointSize(4);
-				gl.glColor3f(0, 0, 1);
-				gl.glBegin(GL.GL_POINTS);
-				gl.glVertex2d(x.x, x.y);
-				gl.glEnd();
-			}
+		if (!isSleeping) {
+			gl.glPointSize(8);
+			gl.glColor3f(0, 0, 0.7f);
+			gl.glBegin(GL.GL_POINTS);
+			gl.glVertex2d(x.x, x.y);			
+			gl.glEnd();
+			gl.glPointSize(4);
+			gl.glColor3f(1, 1, 1);
+			gl.glBegin(GL.GL_POINTS);
+			gl.glVertex2d(x.x, x.y);	
+			gl.glEnd();
+		} else {
+			gl.glPointSize(8);
+			gl.glColor3f(0, 0, 0.7f);
+			gl.glBegin(GL.GL_POINTS);
+			gl.glVertex2d(x.x, x.y);
+			gl.glEnd();
+			gl.glPointSize(4);
+			gl.glColor3f(0, 0, 1);
+			gl.glBegin(GL.GL_POINTS);
+			gl.glVertex2d(x.x, x.y);
+			gl.glEnd();
 		}
 	}
 	

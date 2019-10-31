@@ -14,7 +14,6 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
-import mergingBodies.RigidBody.ObjectState;
 import mergingBodies.RigidBodySystem.MergeParameters;
 
 /**
@@ -155,7 +154,7 @@ public class CollisionProcessor {
 		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0. ;
 		boolean doneOnceForAllCollections = false;
 		for (RigidBody body : bodies) {
-			if (body instanceof RigidCollection && !body.temporarilyPinned) {
+			if (body instanceof RigidCollection && !body.isSleeping) {
 				
 				if (!doneOnceForAllCollections) {
 					doneOnceForAllCollections = true;
@@ -425,11 +424,6 @@ public class CollisionProcessor {
 	 * @param body2
 	 */
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
-		//if both bodies are inactive, they do not collide
-		if ((body1.state==ObjectState.SLEEPING && body2.state==ObjectState.SLEEPING)) {
-			return;
-		}
-
 		if (body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
 			narrowCollection(body1, body2);
 		} else {
@@ -481,13 +475,6 @@ public class CollisionProcessor {
 
 				processCollision(body1, leafBlock1, body2, leafBlock2);
 				
-				if (RigidBodySystem.enableSleeping.getValue()){
-					if (!body1.wokenUp && body1.state == ObjectState.ACTIVE && !body1.pinned && body2.state == ObjectState.SLEEPING) {
-						wakeNeighbors(body2, collisionWake.getValue());
-					} else if (!body2.wokenUp && body2.state == ObjectState.ACTIVE && !body2.pinned && body1.state == ObjectState.SLEEPING) {
-						wakeNeighbors(body1, collisionWake.getValue());
-					}
-				}
 			} else if(node1.isLeaf()|| node1.boundingDisc.r <= node2.boundingDisc.r){
 				//if they overlap, and body 1 is either a leaf or smaller than body_2, break down body_2
 
@@ -498,25 +485,6 @@ public class CollisionProcessor {
 
 				findCollisions(node1.child1, node2, body1, body2);
 				findCollisions(node1.child2, node2, body1, body2);
-			}
-		}
-	}
-
-	/** 
-	 * If a collision is detected, will travel the contact graph and wake up 
-	 * bodies that are n hops away in the contact graph
-	 * @param body1
-	 * @param body2
-	 */
-	private void wakeNeighbors(RigidBody body1, int hop) {
-		if (hop > 0) {
-			body1.state = ObjectState.ACTIVE;
-			hop--;
-			body1.visited = true;
-			body1.wokenUp = true;
-			for (BodyPairContact c: body1.bodyPairContactList) {
-				if (!c.body2.pinned)
-					wakeNeighbors(c.body2, hop);
 			}
 		}
 	}
@@ -585,12 +553,8 @@ public class CollisionProcessor {
 	public static DoubleParameter constraintOffset = new DoubleParameter("constraintOffset", 0.05, -0.5, 0.5 );
 	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
-	public static DoubleParameter sleepingThreshold = new DoubleParameter("sleeping threshold", 1e-3, 0, 10 );
-	public static DoubleParameter wakingThreshold = new DoubleParameter("waking threshold", 1e-3, 0, 30);
 	public static BooleanParameter  useContactGraph = new BooleanParameter("enable use of contact graph heuristic", false );
-	public static DoubleParameter forceMetricTolerance = new DoubleParameter("force metric tolerance", 10, 0, 15);
 	public static IntParameter collisionWake = new IntParameter("wake n neighbors", 2, 0, 10 );
-	public static IntParameter sleepAccum = new IntParameter("accumulate N sleep queries", 50, 0, 200 );
 	public BooleanParameter pruneContacts = new BooleanParameter( "prune contacts", true );
 	public DoubleParameter epsilonPruneConvexHull = new DoubleParameter( "epsilon for convex hull (prune contacts)", 1e-4, 1e-14, 10);
 
@@ -613,12 +577,8 @@ public class CollisionProcessor {
 		vfp.add( constraintOffset.getSliderControls(false) );
 		vfp.add( enableCompliance.getControls() );
 		vfp.add( compliance.getSliderControls(true) );
-		vfp.add( sleepingThreshold.getSliderControls(false) );
-		vfp.add( wakingThreshold.getSliderControls(false) );
 		vfp.add( useContactGraph.getControls() );
-		vfp.add( forceMetricTolerance.getSliderControls(false) );
 		vfp.add( collisionWake.getSliderControls() );
-		vfp.add( sleepAccum.getSliderControls() );
 
 		return vfp.getPanel();
 	}

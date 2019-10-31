@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import mergingBodies.LCPApp;
 import mergingBodies.RigidBody;
-import mergingBodies.RigidBody.ObjectState;
 import mergingBodies.RigidBodySystem;
 import mergingBodies.RigidBodySystem.MergeParameters;
+import mergingBodies.RigidBodySystem.SleepParameters;
 import mergingBodies.RigidCollection;
-import mergingBodies.CollisionProcessor;
 import mergingBodies.Contact;
 import javax.vecmath.Vector2d;
 
@@ -18,11 +17,13 @@ public class LCPAppTests extends LCPApp {
 
 	double dt = 0.05;
 	MergeParameters mergeParams;
+	SleepParameters sleepParams;
 
 	@Override
 	public void setUp() {
 		// Do nothing, we don't want to launch the app (2D viewer)
 		mergeParams = system.mergeParams;
+		sleepParams = system.sleepParams;
 	}
 
 	@Test
@@ -56,15 +57,15 @@ public class LCPAppTests extends LCPApp {
 		loadSystem("datalcp/twoStacksTest.png");
 
 		for (RigidBody body: system.bodies)
-			assertEquals(ObjectState.ACTIVE, body.state); // every bodies should be active at beginning of the simulation
+			assertEquals(false, body.isSleeping); // every bodies should be active at beginning of the simulation
 
 		mergeParams.enableMerging.setValue(true);
-		RigidBodySystem.enableSleeping.setValue(true);
+		sleepParams.enableSleeping.setValue(true);
 		for (int i=0; i<RigidBodySystem.tempSleepCount.getValue()*2; i++)
 			system.advanceTime(dt);
 		for (RigidBody body: system.bodies)
 			if (body instanceof RigidCollection)
-				assertEquals(ObjectState.SLEEPING, body.state);
+				assertEquals(true, body.isSleeping);
 	}
 
 	@Test
