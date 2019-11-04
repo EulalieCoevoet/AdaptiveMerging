@@ -92,8 +92,11 @@ public class RigidCollection extends RigidBody{
 		body.parent = this;
 		body.mergedThisTimeStep = true;
 		collectionBodies.add(body);
-		
-		// compute velocities
+
+		updateVelocitiesFrom(body);		
+	}
+	
+	protected void updateVelocitiesFrom(RigidBody body) {
 		Point2d massCom1 = new Point2d();
 		Point2d massCom2 = new Point2d();
 		massCom1.scale( body.massLinear, body.x );
@@ -137,9 +140,9 @@ public class RigidCollection extends RigidBody{
 	 * @param body
 	 */
 	protected void copyFrom(RigidBody body) {
-		v = new Vector2d(body.v);
+		v.set(body.v);
 		omega = body.omega;
-		x = new Point2d(body.x);
+		x.set(body.x);
 		theta = body.theta;
 		massLinear = body.massLinear;
 	}
@@ -173,9 +176,9 @@ public class RigidCollection extends RigidBody{
 		
 		updateMass();
 		updateCOM(); 
-		updateBB(); 
 		updateTransformations();
 		updateBodiesTransformations();
+		updateBB(); 
 		updateInertia();
 		addBodiesSpringsToCollection();
 	}
@@ -224,6 +227,28 @@ public class RigidCollection extends RigidBody{
 			body.transformB2C.leftMult(transformW2B);
 			body.transformC2B.set(body.transformB2C); 
 			body.transformC2B.invert();
+		}
+	}
+	
+	protected void updateBB() {
+		bbmaxB = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); 
+		bbminB = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE);
+		for (RigidBody body : collectionBodies) {
+			ArrayList<Point2d> bbB = new ArrayList<Point2d>();
+			bbB.add(new Point2d(body.bbmaxB.x, body.bbmaxB.y));
+			bbB.add(new Point2d(body.bbminB.x, body.bbmaxB.y));
+			bbB.add(new Point2d(body.bbminB.x, body.bbminB.y));
+			bbB.add(new Point2d(body.bbmaxB.x, body.bbminB.y));
+			
+			for (Point2d point : bbB) {
+				body.transformB2W.transform(point);
+				transformW2B.transform(point);
+				
+				bbmaxB.x = Math.max(bbmaxB.x, point.x);
+				bbmaxB.y = Math.max(bbmaxB.y, point.y);
+				bbminB.x = Math.min(bbminB.x, point.x);
+				bbminB.y = Math.min(bbminB.y, point.y);
+			}
 		}
 	}
 	
@@ -309,17 +334,6 @@ public class RigidCollection extends RigidBody{
 			//update position and orientation
 			body.transformB2W.transform(body.x);
 			body.theta = body.transformB2W.getTheta();
-			
-			body.updateBB();
-		}
-	}
-	
-	@Override
-	public void updateBB() {
-		bbmax = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); 
-		bbmin = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE);
-		for(RigidBody body : collectionBodies) {
-			body.getBB(bbmax, bbmin);
 		}
 	}
 	
@@ -393,7 +407,7 @@ public class RigidCollection extends RigidBody{
 	public boolean isMovingAway(RigidBody body, MergeParameters mergeParams) {
 		
 		// we should store somewhere the value of the 
-		Vector2d relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(this, body, mergeParams.useRelativeVelocityFromBB.getValue());
+		Vector2d relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(this, body);
 		double relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(this, body);
 		
 		double metric = relativeMProcessor.getRelativeKineticEnergy(this, body, relativeLinearVelocity, relativeAngularVelocity);
@@ -562,6 +576,14 @@ public class RigidCollection extends RigidBody{
 				else
 					bpc.contactList.get(0).displayContactLocation(drawable, bpc.cycleColor, size);
 			}
+		}
+	}
+	
+	@Override
+	public void displayBB(GLAutoDrawable drawable) {
+		super.displayBB(drawable);
+		for (RigidBody body : collectionBodies) {
+			body.displayBB(drawable);
 		}
 	}
 }

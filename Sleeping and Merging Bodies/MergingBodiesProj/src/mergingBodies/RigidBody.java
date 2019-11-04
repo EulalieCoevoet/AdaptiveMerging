@@ -83,8 +83,8 @@ public class RigidBody {
 	public Point2d x = new Point2d(); /** Position of center of mass in the world frame */
 	public Point2d x0 = new Point2d(); /** Initial position of center of mass in the world frame */
 	public double theta = 0.; /** Orientation angle in radians */
-	public Point2d bbmax = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); /** (xmax, ymax) of bounding box, in the world frame */
-	public Point2d bbmin = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE); /** (xmin, ymin) of bounding box, in the world frame */
+	public Point2d bbmaxB = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); /** (xmax, ymax) of bounding box, in the body frame */
+	public Point2d bbminB = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE); /** (xmin, ymin) of bounding box, in the body frame */
 
 	/** inverse of the linear mass, or zero if pinned */
 	double minv;
@@ -147,17 +147,17 @@ public class RigidBody {
 			double mass = b.getColourMass();
 			massLinear += mass;
 			x0.x += b.j * mass;
-			bbmax.x = Math.max(bbmax.x, b.j + b.h);
-			bbmin.x = Math.min(bbmin.x, b.j - b.h);
+			bbmaxB.x = Math.max(bbmaxB.x, b.j + b.h);
+			bbminB.x = Math.min(bbminB.x, b.j - b.h);
 			x0.y += b.i * mass;
-			bbmax.y = Math.max(bbmax.y, b.i + b.h);
-			bbmin.y = Math.min(bbmin.y, b.i - b.h); 
+			bbmaxB.y = Math.max(bbmaxB.y, b.i + b.h);
+			bbminB.y = Math.min(bbminB.y, b.i - b.h); 
 		}
 		x0.scale(1 / massLinear);
 		// set block positions in world and body coordinates
 		for (Block b : blocks) {
 			b.pB.x = b.j - x0.x;
-			b.pB.y = b.i - x0.y;
+			b.pB.y = b.i - x0.y;			
 		}
 		// compute the rotational inertia
 		final Point2d zero = new Point2d(0, 0);
@@ -175,6 +175,9 @@ public class RigidBody {
 		transformB2W.set(theta, x);
 		transformW2B.set(theta, x);
 		transformW2B.invert();
+		
+		transformW2B.transform(bbmaxB);
+		transformW2B.transform(bbminB);
 
 		root = new BVNode(boundaryBlocks, this);
 
@@ -205,6 +208,8 @@ public class RigidBody {
 		massAngular = body.massAngular;
 		x0.set(body.x0);
 		x.set(body.x);
+		bbmaxB.set(body.bbmaxB);
+		bbminB.set(body.bbminB);
 		v.set(body.v);
 		theta = body.theta;
 		omega = body.omega;
@@ -314,26 +319,7 @@ public class RigidBody {
 		theta += omega * dt;
 		
 		updateTransformations();
-		updateBB();
-	}
-	
-	public void updateBB() {
-		bbmax = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); 
-		bbmin = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE);
-		getBB(bbmax, bbmin);
-	}
-	
-	public void getBB(Point2d max, Point2d min) {
-		for (Block b : boundaryBlocks) {
-			Point2d pW = new Point2d(b.pB);
-			transformB2W.transform(pW);
-			
-			max.x = Math.max(max.x, pW.x + b.h);
-			min.x = Math.min(min.x, pW.x - b.h);
-			max.y = Math.max(max.y, pW.y + b.h);
-			min.y = Math.min(min.y, pW.y - b.h); 
-		}
-	}
+	}	
 
 	/**
 	 * Computes the velocity of the provided point provided in world coordinates due
@@ -619,18 +605,26 @@ public class RigidBody {
 	public void displayBB(GLAutoDrawable drawable) {
 		
 		GL2 gl = drawable.getGL().getGL2();
+		
 		gl.glLineWidth(1);
 		gl.glColor3f(1, 0, 0);
 		
-		gl.glBegin(GL.GL_LINES);
-		gl.glVertex2d(bbmax.x, bbmax.y);
-		gl.glVertex2d(bbmax.x, bbmin.y);
-		gl.glVertex2d(bbmax.x, bbmax.y);
-		gl.glVertex2d(bbmin.x, bbmax.y);
-		gl.glVertex2d(bbmin.x, bbmin.y);
-		gl.glVertex2d(bbmin.x, bbmax.y);
-		gl.glVertex2d(bbmin.x, bbmin.y);
-		gl.glVertex2d(bbmax.x, bbmin.y);			
+		Point2d p1 = new Point2d(bbmaxB.x, bbmaxB.y);
+		Point2d p2 = new Point2d(bbminB.x, bbmaxB.y);
+		Point2d p3 = new Point2d(bbminB.x, bbminB.y);
+		Point2d p4 = new Point2d(bbmaxB.x, bbminB.y);
+		
+		transformB2W.transform(p1);
+		transformB2W.transform(p2);
+		transformB2W.transform(p3);
+		transformB2W.transform(p4);
+		
+		gl.glBegin(GL.GL_LINE_LOOP);
+		gl.glVertex2d(p1.x, p1.y);
+		gl.glVertex2d(p2.x, p2.y);
+		gl.glVertex2d(p3.x, p3.y);
+		gl.glVertex2d(p4.x, p4.y);
+					
 		gl.glEnd();
 	}
 
