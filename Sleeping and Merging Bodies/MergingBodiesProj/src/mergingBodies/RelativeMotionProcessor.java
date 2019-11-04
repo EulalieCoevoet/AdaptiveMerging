@@ -1,5 +1,7 @@
 package mergingBodies;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -33,26 +35,20 @@ public class RelativeMotionProcessor {
 		}
 		
 		Vector2d relativeLinearVelocity = new Vector2d();
-		
-		Point2d massCom1 = new Point2d(body1.x);
-		Point2d massCom2 = new Point2d(body2.x);
-		massCom1.scale( body1.massLinear);
-		massCom2.scale( body2.massLinear);
-		Point2d newCom = new Point2d();
-		newCom.add( massCom1, massCom2 );
-		newCom.scale( 1./(body1.massLinear + body2.massLinear) );
+	
+		Point2d COM = getCommonCOM(body1, body2);
 	
 		relativeLinearVelocity.sub(body2.v, body1.v);
 
 		Vector2d tmp = new Vector2d();
 		Vector2d tmp2 = new Vector2d();
 		
-		tmp.sub( newCom, body2.x );
+		tmp.sub( COM, body2.x );
 		tmp.scale( body2.omega );
 		tmp2.set( -tmp.y, tmp.x );
 		relativeLinearVelocity.add( tmp2 );
 		
-		tmp.sub( newCom, body1.x );
+		tmp.sub( COM, body1.x );
 		tmp.scale( body1.omega );
 		tmp2.set( -tmp.y, tmp.x );
 		relativeLinearVelocity.sub( tmp2 );
@@ -66,19 +62,48 @@ public class RelativeMotionProcessor {
 	 * @param body2
 	 * @return relative linear velocity
 	 */
-	public Vector2d getLargestLinearVelocity(RigidBody body1, RigidBody body2) {
+	public double getLargestVelocity(RigidBody body1, RigidBody body2) {
 		
-		Vector2d largestLinearVelocity = new Vector2d();
+		Point2d COM = getCommonCOM(body1, body2);
+		double largestVelocity = getLargestVelocity(body1, COM);
+		largestVelocity = Math.max(largestVelocity, getLargestVelocity(body2, COM));
 		
-		Point2d massCom1 = new Point2d(body1.x);
-		Point2d massCom2 = new Point2d(body2.x);
-		massCom1.scale( body1.massLinear);
-		massCom2.scale( body2.massLinear);
-		Point2d newCom = new Point2d();
-		newCom.add( massCom1, massCom2 );
-		newCom.scale( 1./(body1.massLinear + body2.massLinear) );
+		return largestVelocity;
+	}
 	
-		return largestLinearVelocity;
+	/**
+	 * Compute the relative linear velocity
+	 * @param body1
+	 * @param body2
+	 * @return relative linear velocity
+	 */
+	public double getLargestVelocity(RigidBody body, Point2d COM) {
+		
+		ArrayList<Point2d> bbB = new ArrayList<Point2d>();
+		bbB.add(new Point2d(body.bbmaxB.x, body.bbmaxB.y));
+		bbB.add(new Point2d(body.bbminB.x, body.bbmaxB.y));
+		bbB.add(new Point2d(body.bbminB.x, body.bbminB.y));
+		bbB.add(new Point2d(body.bbmaxB.x, body.bbminB.y));
+
+		double largestVelocity = -Double.MAX_VALUE;
+		for (Point2d point : bbB) {
+			final Vector2d rw = new Vector2d( -(point.y - COM.y), point.x - COM.x );
+			rw.scale( body.omega );
+			largestVelocity = Math.max(largestVelocity, Math.sqrt(rw.lengthSquared()));
+		}
+		
+		return largestVelocity;
+	}
+	
+	protected Point2d getCommonCOM(RigidBody body1, RigidBody body2) {
+		Point2d massCOM1 = new Point2d(body1.x);
+		Point2d massCOM2 = new Point2d(body2.x);
+		massCOM1.scale(body1.massLinear);
+		massCOM2.scale(body2.massLinear);
+		Point2d newCOM = new Point2d();
+		newCOM.add( massCOM1, massCOM2 );
+		newCOM.scale( 1./(body1.massLinear + body2.massLinear) );
+		return newCOM;
 	}
 
 	/**
