@@ -119,12 +119,14 @@ public class ImageBlocker {
             getColour( colour, x, y );
             if ( isWhite(colour) ) continue;
             
-            Block b = new Block( y, x, colour );
-            blocks.add( b );
-            if ( isBoundary( x, y ) ) {
-                boundaryBlocks.add( b );                
+            if ( ! isYellow( colour) ) {
+	            Block b = new Block( y, x, colour );
+	            blocks.add( b );
+	            if ( isBoundary( x, y ) ) {
+	                boundaryBlocks.add( b );                
+	            }
             }
-            // search our 8 neighbours for connected components
+	        // search our 8 neighbours for connected components
             for ( int i = -1; i < 2; i++ ) {
                 for ( int j = -1; j < 2; j++ ) {
                     if ( x+i >= 0 && x+i < width && y+j >= 0 && y+j < height && ! visited[x+i][y+j] ) {
@@ -190,5 +192,15 @@ public class ImageBlocker {
         final Color3f white = new Color3f(1,1,1);
         return colour.epsilonEquals(white, epsilon );
     }
+
+    /**
+     * @param colour
+     * @return true if the colour provided is white
+     */
+    private boolean isYellow( Color3f colour ) {
+        final Color3f white = new Color3f(1,1,0);
+        return colour.epsilonEquals(white, epsilon );
+    }
+
     
 }
