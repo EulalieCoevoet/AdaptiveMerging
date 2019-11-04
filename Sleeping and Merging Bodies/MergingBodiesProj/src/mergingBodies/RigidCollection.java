@@ -501,12 +501,20 @@ public class RigidCollection extends RigidBody{
 	 * @param drawable
 	 */
 	public void displayCollection( GLAutoDrawable drawable, Color3f color ) {
+		GL2 gl = drawable.getGL().getGL2();
+		gl.glEnable(GL2.GL_BLEND);
+		gl.glBlendFunc( GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR);
+		gl.glBlendEquation(GL2.GL_FUNC_ADD);
+		gl.glBlendColor(color.x, color.y, color.z, 0f);
+		
 		for (RigidBody b: collectionBodies) {
-			if(color!=null)
-				b.updateColor = true;
+		//	if(color!=null)
+				//b.updateColor = true;
 			b.display(drawable, color);
 		}
-	}
+		// put it back the way it was.
+        gl.glEnable( GL.GL_BLEND );
+        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );	}
 
 	/**
 	 * displays the Body Collection as lines between the center of masses of each rigid body to the other. 

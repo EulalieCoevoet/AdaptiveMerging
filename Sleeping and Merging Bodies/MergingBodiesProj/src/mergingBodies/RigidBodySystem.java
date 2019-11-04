@@ -111,6 +111,7 @@ public class RigidBodySystem {
 		
 		for (RigidBody body: bodies) {
 			body.clear();
+	
 		}
 
 		if (useGravity.getValue()) {
@@ -178,6 +179,7 @@ public class RigidBodySystem {
 		simulationTime += dt;
 		totalAccumulatedComputeTime += computeTime;
 	}
+
 
 
 	/**
@@ -714,9 +716,11 @@ public class RigidBodySystem {
 				if ( b instanceof RigidCollection) {
 					RigidCollection collection = (RigidCollection)b;
 					Color3f color = null;
-					if(drawCollections.getValue() && updateCollectionColor)
+					if(drawCollections.getValue()) {
 						color = new Color3f(collection.color);
-					collection.displayCollection(drawable, color);
+						collection.displayCollection(drawable, color);
+					}
+						
 				} else {
 					b.display(drawable);
 				}

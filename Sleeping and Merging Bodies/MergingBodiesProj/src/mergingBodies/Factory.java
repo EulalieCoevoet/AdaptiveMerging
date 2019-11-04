@@ -84,7 +84,8 @@ public class Factory {
      * @param dt
      */
     public void advanceTime( double dt ) {
-        if ( createBodyRequest == true ) {
+    	removeLowAltitudeBody();
+    	if ( createBodyRequest == true ) {
             createBodyRequest = false;
             generateBody();
         }
@@ -98,6 +99,22 @@ public class Factory {
             generateBody();
         }
     }
+    
+    /*
+     * Removes body from system body list if body is below y threshold.
+     */
+	private void removeLowAltitudeBody() {
+		ArrayList<RigidBody> removalQueue = new ArrayList<RigidBody>();
+        for (RigidBody b : system.bodies) {
+        	if (b.x.y > minY.getValue() && !b.pinned && b.springs.isEmpty()) {
+        		removalQueue.add(b);
+        	}
+        }
+        for (RigidBody b : removalQueue) {
+        	system.bodies.remove(b);
+        }
+	}
+
     
     /** 
      * Creates a new body by copying a random body among those that were not pinned in the 
@@ -114,6 +131,7 @@ public class Factory {
         body.v.x = (2*rand.nextDouble()-1) * linearVelocityScale.getValue();  
         body.v.y =  downVelocity.getValue();
         body.updateTransformations();
+        body.updateColor = false;;
         system.add( body );
     }
     
@@ -135,6 +153,11 @@ public class Factory {
     /** For controlling the initial angular velocity of new bodies */
     DoubleParameter angularVelocityScale = new DoubleParameter( "angular velocity perturbation scale", 0.3, 0.1, 10 );
 
+    
+    /** Clears all bodies below this y value*/
+    DoubleParameter minY = new DoubleParameter( "Min y value", 60 , -200, 200 );
+
+    
     /**
      * Gets a control panel for the factory
      * @return control panel
@@ -148,6 +171,8 @@ public class Factory {
         vfp.add( linearVelocityScale.getSliderControls(true) );
         vfp.add( downVelocity.getSliderControls(true) );
         vfp.add( angularVelocityScale.getSliderControls(true) );
+        vfp.add( minY.getSliderControls(false));
+        
         CollapsiblePanel cp = new CollapsiblePanel( vfp.getPanel());
         cp.collapse();
         return cp;
