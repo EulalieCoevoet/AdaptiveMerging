@@ -128,7 +128,7 @@ public class RigidBodySystem {
 		}
 		
 		if (processCollisions.getValue()) {
-			collisionProcessor.collisionDetection(dt); 
+			collisionProcessor.collisionDetection(dt);
 		}
 		
 		if (sleepParams.enableSleeping.getValue()) {

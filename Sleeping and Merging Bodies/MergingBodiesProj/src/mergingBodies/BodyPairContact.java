@@ -80,7 +80,7 @@ public class BodyPairContact {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(body1, body2, mergeParams.useRelativeVelocityFromBB.getValue());	
+		relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(body1, body2);	
 		relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(body1, body2);
 	}
 	
