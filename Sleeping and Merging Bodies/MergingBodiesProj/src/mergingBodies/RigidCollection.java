@@ -177,6 +177,7 @@ public class RigidCollection extends RigidBody{
 		
 		updateMass();
 		updateCOM(); 
+		updateTheta();
 		updateTransformations();
 		updateBodiesTransformations();
 		updateBB(); 
@@ -218,6 +219,40 @@ public class RigidCollection extends RigidBody{
 		x.set(com);
 	}
 	
+	/**
+	 * Compute theta of the collection from convex hull informations
+	 */
+	protected void updateTheta() {
+
+		int N = collectionBodies.size()*4;
+		Point2d meanPos = new Point2d();
+		
+		for ( RigidBody body : collectionBodies ) {
+			for (Point2d point : body.boundingBoxB) {
+				Point2d p = new Point2d(point);
+				transformB2C.transform(p);
+				meanPos.add( p );
+			}
+		}
+		meanPos.scale( 1.0 / N );
+
+		Vector2d v = new Vector2d();
+		Matrix2d covariance = new Matrix2d();
+		for ( RigidBody body : collectionBodies ) {
+			for (Point2d point : body.boundingBoxB) {
+				Point2d p = new Point2d(point);
+				transformB2C.transform(p);
+				v.sub( p, meanPos );			
+				covariance.rank1( 1.0 / N, v );
+			}
+		}
+		
+		covariance.evd();
+		Vector2d dir = covariance.v1;
+		dir.normalize();
+		theta = Math.acos(dir.x);
+	}
+	
 	/** 
 	 * For each body in collection, determines the transformations to go from body to collection
 	 * But also, make each body's x and theta in collection, relative to this x and theta
@@ -232,25 +267,23 @@ public class RigidCollection extends RigidBody{
 	}
 	
 	protected void updateBB() {
-		bbmaxB = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); 
-		bbminB = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE);
-		for (RigidBody body : collectionBodies) {
-			ArrayList<Point2d> bbB = new ArrayList<Point2d>();
-			bbB.add(new Point2d(body.bbmaxB.x, body.bbmaxB.y));
-			bbB.add(new Point2d(body.bbminB.x, body.bbmaxB.y));
-			bbB.add(new Point2d(body.bbminB.x, body.bbminB.y));
-			bbB.add(new Point2d(body.bbmaxB.x, body.bbminB.y));
-			
-			for (Point2d point : bbB) {
-				body.transformB2W.transform(point);
-				transformW2B.transform(point);
-				
+		Point2d bbmaxB = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); 
+		Point2d bbminB = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE);
+		for (RigidBody body : collectionBodies) {			
+			for (Point2d point : body.boundingBoxB) { 
+				body.transformB2C.transform(point);
 				bbmaxB.x = Math.max(bbmaxB.x, point.x);
 				bbmaxB.y = Math.max(bbmaxB.y, point.y);
 				bbminB.x = Math.min(bbminB.x, point.x);
 				bbminB.y = Math.min(bbminB.y, point.y);
+				body.transformC2B.transform(point);
 			}
 		}
+		boundingBoxB = new ArrayList<Point2d>();
+		boundingBoxB.add(0, bbmaxB);
+		boundingBoxB.add(1, new Point2d(bbmaxB.x,bbminB.y));
+		boundingBoxB.add(2, bbminB);
+		boundingBoxB.add(3, new Point2d(bbminB.x,bbmaxB.y));
 	}
 	
 	/**

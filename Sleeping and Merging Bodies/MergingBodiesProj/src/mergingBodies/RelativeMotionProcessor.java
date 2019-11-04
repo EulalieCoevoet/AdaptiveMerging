@@ -1,7 +1,5 @@
 package mergingBodies;
 
-import java.util.ArrayList;
-
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -78,15 +76,9 @@ public class RelativeMotionProcessor {
 	 * @return relative linear velocity
 	 */
 	public double getLargestVelocity(RigidBody body, Point2d COM) {
-		
-		ArrayList<Point2d> bbB = new ArrayList<Point2d>();
-		bbB.add(new Point2d(body.bbmaxB.x, body.bbmaxB.y));
-		bbB.add(new Point2d(body.bbminB.x, body.bbmaxB.y));
-		bbB.add(new Point2d(body.bbminB.x, body.bbminB.y));
-		bbB.add(new Point2d(body.bbmaxB.x, body.bbminB.y));
-
 		double largestVelocity = -Double.MAX_VALUE;
-		for (Point2d point : bbB) {
+		
+		for (Point2d point : body.boundingBoxB) {
 			final Vector2d rw = new Vector2d( -(point.y - COM.y), point.x - COM.x );
 			rw.scale( body.omega );
 			largestVelocity = Math.max(largestVelocity, Math.sqrt(rw.lengthSquared()));

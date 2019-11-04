@@ -339,12 +339,10 @@ public class CollisionProcessor {
 	 */
 	protected void prune(ArrayList<Contact> contacts) {
 		
-		ArrayList<Point2d> points = new ArrayList<Point2d>();
 		Point2d meanPos = new Point2d();
 		Vector2d v = new Vector2d();
 		int N = contacts.size();
 		for ( Contact c : contacts ) {
-			points.add( c.contactW );
 			meanPos.add( c.contactW );						
 		}
 		

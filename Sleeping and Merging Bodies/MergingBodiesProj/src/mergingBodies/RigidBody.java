@@ -83,8 +83,7 @@ public class RigidBody {
 	public Point2d x = new Point2d(); /** Position of center of mass in the world frame */
 	public Point2d x0 = new Point2d(); /** Initial position of center of mass in the world frame */
 	public double theta = 0.; /** Orientation angle in radians */
-	public Point2d bbmaxB = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); /** (xmax, ymax) of bounding box, in the body frame */
-	public Point2d bbminB = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE); /** (xmin, ymin) of bounding box, in the body frame */
+	public ArrayList<Point2d> boundingBoxB = new ArrayList<Point2d>(); /** bounding box, in the body frame */
 
 	/** inverse of the linear mass, or zero if pinned */
 	double minv;
@@ -142,6 +141,9 @@ public class RigidBody {
 
 		this.blocks = blocks;
 		this.boundaryBlocks = boundaryBlocks;
+		
+		Point2d bbmaxB = new Point2d(-Double.MAX_VALUE, -Double.MAX_VALUE);
+		Point2d bbminB = new Point2d(Double.MAX_VALUE, Double.MAX_VALUE);
 		// compute the mass and center of mass position
 		for (Block b : blocks) {
 			double mass = b.getColourMass();
@@ -178,6 +180,10 @@ public class RigidBody {
 		
 		transformW2B.transform(bbmaxB);
 		transformW2B.transform(bbminB);
+		boundingBoxB.add(bbmaxB);
+		boundingBoxB.add(new Point2d(bbmaxB.x,bbminB.y));
+		boundingBoxB.add(bbminB);
+		boundingBoxB.add(new Point2d(bbminB.x,bbmaxB.y));
 
 		root = new BVNode(boundaryBlocks, this);
 
@@ -208,8 +214,7 @@ public class RigidBody {
 		massAngular = body.massAngular;
 		x0.set(body.x0);
 		x.set(body.x);
-		bbmaxB.set(body.bbmaxB);
-		bbminB.set(body.bbminB);
+		boundingBoxB = new ArrayList<Point2d>(body.boundingBoxB);
 		v.set(body.v);
 		theta = body.theta;
 		omega = body.omega;
@@ -609,21 +614,12 @@ public class RigidBody {
 		gl.glLineWidth(1);
 		gl.glColor3f(1, 0, 0);
 		
-		Point2d p1 = new Point2d(bbmaxB.x, bbmaxB.y);
-		Point2d p2 = new Point2d(bbminB.x, bbmaxB.y);
-		Point2d p3 = new Point2d(bbminB.x, bbminB.y);
-		Point2d p4 = new Point2d(bbmaxB.x, bbminB.y);
-		
-		transformB2W.transform(p1);
-		transformB2W.transform(p2);
-		transformB2W.transform(p3);
-		transformB2W.transform(p4);
-		
 		gl.glBegin(GL.GL_LINE_LOOP);
-		gl.glVertex2d(p1.x, p1.y);
-		gl.glVertex2d(p2.x, p2.y);
-		gl.glVertex2d(p3.x, p3.y);
-		gl.glVertex2d(p4.x, p4.y);
+		for (Point2d point : boundingBoxB) {
+			Point2d p = new Point2d(point);
+			transformB2W.transform(p);
+			gl.glVertex2d(p.x, p.y);
+		}
 					
 		gl.glEnd();
 	}
