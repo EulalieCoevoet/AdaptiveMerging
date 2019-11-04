@@ -24,8 +24,8 @@ public class Factory {
     
     RigidBodySystem system;
     
-    private ArrayList<RigidBody> pinnedBodies = new ArrayList<RigidBody>();
-    private ArrayList<RigidBody> unpinnedBodies = new ArrayList<RigidBody>();
+    public ArrayList<RigidBody> pinnedBodies = new ArrayList<RigidBody>();
+    public ArrayList<RigidBody> unpinnedBodies = new ArrayList<RigidBody>();
 
     /**
      * Creates a new factory for the provided system

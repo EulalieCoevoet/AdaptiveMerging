@@ -562,7 +562,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     system.jiggle();                                        
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_G ) {                   
-                    File f = FileSelect.select("png", "image for factory", "load", "datalcp/", true );
+                   File f = FileSelect.select("png", "image for factory", "load", "datalcp/", true );
                     if ( f != null ) {
                         loadFactorySystem( f.getPath() );
                     }   

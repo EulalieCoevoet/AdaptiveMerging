@@ -212,7 +212,7 @@ public class RigidBody {
 		// no need to update them as they are in the correct body coordinates already
 		updateTransformations();
 		// We do need our own bounding volumes! can't share!
-		root = new BVNode(boundaryBlocks, body);
+		root = new BVNode(boundaryBlocks, this);
 		pinned = body.pinned;
 		temporarilyPinned = body.temporarilyPinned;
 		steps = body.steps;
