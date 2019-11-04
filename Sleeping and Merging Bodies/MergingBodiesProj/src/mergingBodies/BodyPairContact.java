@@ -6,6 +6,7 @@ import javax.vecmath.Vector2d;
 
 import mergingBodies.Contact.ContactState;
 import mergingBodies.RigidBodySystem.MergeParameters;
+import mergingBodies.RigidBodySystem.Metric;
 
 
 /**
@@ -27,7 +28,7 @@ public class BodyPairContact {
 	Vector2d relativeLinearVelocity = new Vector2d();
 	double relativeAngularVelocity = 0;
 	
-	public ArrayList<Double> relativeKineticEnergyMetricHist = new ArrayList<Double>();
+	public ArrayList<Double> metricHist = new ArrayList<Double>();
 	public ArrayList<Contact.ContactState> contactStateHist = new ArrayList<Contact.ContactState>();
 		
 	public boolean inCollection = false;
@@ -92,12 +93,15 @@ public class BodyPairContact {
 		
 		computeRelativeVelocity(mergeParams);
 		
-		if (mergeParams.useMassNormKinEnergy.getValue())
-			relativeKineticEnergyMetricHist.add(relativeMProcessor.getRelativeKineticEnergyMassNormalized(relativeLinearVelocity, relativeAngularVelocity));
-		else
-			relativeKineticEnergyMetricHist.add(relativeMProcessor.getRelativeKineticEnergy(body1, body2, relativeLinearVelocity, relativeAngularVelocity));
-		if (relativeKineticEnergyMetricHist.size() > mergeParams.stepAccum.getValue())
-			relativeKineticEnergyMetricHist.remove(0);
+		if (mergeParams.metric.getValue() == Metric.VELOCITIESNORM.ordinal())
+			metricHist.add(relativeMProcessor.getRelativeVelocitiesMetric(relativeLinearVelocity, relativeAngularVelocity));
+		else if (mergeParams.metric.getValue() == Metric.RELATIVEKINETICENERGY.ordinal())
+			metricHist.add(relativeMProcessor.getRelativeKineticEnergy(body1, body2, relativeLinearVelocity, relativeAngularVelocity));
+		else // Metric.LARGESTVELOCITY
+			metricHist.add(relativeMProcessor.getLargestVelocity(body1, body2));
+		
+		if (metricHist.size() > mergeParams.stepAccum.getValue())
+			metricHist.remove(0);
 	
 		Contact.ContactState state = Contact.ContactState.CLEAR;
 		for (Contact contact : contactList) 
@@ -124,10 +128,10 @@ public class BodyPairContact {
 		double epsilon = 5e-4;
 		double threshold = mergeParams.threshold.getValue();
 
-		if ((relativeKineticEnergyMetricHist.size() == mergeParams.stepAccum.getValue())) {
+		if ((metricHist.size() == mergeParams.stepAccum.getValue())) {
 			double previousValue = 0; 
 			double currentValue = 0;
-			for (Double relativeEnergy : relativeKineticEnergyMetricHist) {
+			for (Double relativeEnergy : metricHist) {
 				currentValue = relativeEnergy;
 				if (relativeEnergy > threshold || currentValue > previousValue + epsilon ) 
 					return false;

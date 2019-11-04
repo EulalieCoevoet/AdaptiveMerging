@@ -133,20 +133,11 @@ public class RelativeMotionProcessor {
 		return body2.omega - body1.omega;
 	}
 	
-
-	/**
-	 * Computes and returns the relative kinetic energy normalized by the mass
-	 * @return metric
-	 */
-	public double getRelativeKineticEnergyMassNormalized(Vector2d relativeLinearVelocity, double relativeAngularVelocity) {
+	public double getRelativeVelocitiesMetric(Vector2d relativeLinearVelocity, double relativeAngularVelocity) {
 		double k = 0.5*relativeLinearVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
 		return k;
 	}
 	
-	/**
-	 * Computes and returns the relative kinetic energy 
-	 * @return metric
-	 */
 	public double getRelativeKineticEnergy(RigidBody body1, RigidBody body2, Vector2d relativeLinearVelocity, double relativeAngularVelocity) {
 		double massDifference = Math.abs(body1.massLinear - body2.massLinear);
 		double inertiaDifference = Math.abs(body1.massAngular - body2.massAngular);
