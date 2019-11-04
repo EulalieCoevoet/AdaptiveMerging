@@ -45,7 +45,7 @@ public class Factory {
         pinnedBodies.clear();
         unpinnedBodies.clear();
         for ( RigidBody b : blocker.bodies ) {
-            if ( b.pinned ) {
+            if ( b.pinned || !b.springs.isEmpty() ) {
                 pinnedBodies.add(b);
             } else {
                 unpinnedBodies.add(b);
@@ -62,7 +62,8 @@ public class Factory {
         rand.setSeed(0);
         system.clear();
         for ( RigidBody b : pinnedBodies ) {
-            system.bodies.add( new RigidBody(b) );
+           // system.bodies.add( new RigidBody(b) );
+        	system.bodies.add(b);
         }
     }
     
