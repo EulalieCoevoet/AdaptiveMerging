@@ -13,7 +13,6 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import mergingBodies.RigidBodySystem.MergeParameters;
-import mergingBodies.RigidBodySystem.Metric;
 
 public class RigidCollection extends RigidBody{
 
@@ -26,7 +25,7 @@ public class RigidCollection extends RigidBody{
 	public Color color;
 
 	CollisionProcessor collisionProcessor = new CollisionProcessor(collectionBodies);
-	RelativeMotionProcessor relativeMProcessor = new RelativeMotionProcessor();
+	MetricProcessor metricProcessor = new MetricProcessor();
 
 	/**
 	 * Creates a RigidCollection from two RigidBody.
@@ -440,20 +439,10 @@ public class RigidCollection extends RigidBody{
 	
 	public boolean isMovingAway(RigidBody body, MergeParameters mergeParams) {
 		
-		// we should store somewhere the value of the 
-		Vector2d relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(this, body);
-		double relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(this, body);
+		metricProcessor.setMetricType(mergeParams.metricType.getValue());
+		double metric = metricProcessor.getMetric(this, body);
 		
-		double metric;
-
-		if (mergeParams.metric.getValue() == Metric.VELOCITIESNORM.ordinal())
-			metric = relativeMProcessor.getRelativeVelocitiesMetric(relativeLinearVelocity, relativeAngularVelocity);
-		else if (mergeParams.metric.getValue() == Metric.RELATIVEKINETICENERGY.ordinal())
-			metric = relativeMProcessor.getRelativeKineticEnergy(this, body, relativeLinearVelocity, relativeAngularVelocity);
-		else // Metric.LARGESTVELOCITY
-			metric = relativeMProcessor.getLargestVelocity(this, body);
-		
-		if(pinned || temporarilyPinned) metric/=2;
+		if(pinned || temporarilyPinned) metric/=2; 
 		
 		return (metric>mergeParams.threshold.getValue());
 	}

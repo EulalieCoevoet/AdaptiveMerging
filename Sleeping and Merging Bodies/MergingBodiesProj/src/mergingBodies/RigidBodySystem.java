@@ -21,7 +21,6 @@ import com.jogamp.opengl.util.gl2.GLUT;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
-import mintools.parameters.Parameter;
 import mintools.parameters.OptionParameter;
 import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
@@ -113,7 +112,6 @@ public class RigidBodySystem {
 		
 		for (RigidBody body: bodies) {
 			body.clear();
-	
 		}
 
 		if (useGravity.getValue()) {
@@ -413,8 +411,9 @@ public class RigidBodySystem {
 						if (!bpc.inCollection)
 							continue;
 						
-						if (mergeParams.unmergeAll.getValue())
-							bpc.addBodiesToUnmerge(unmergingBodies);
+						if (mergeParams.unmergeAll.getValue()) {
+							bpc.addBodiesToUnmerge(unmergingBodies, true);
+						}
 						else {
 							boolean unmerged = false;
 							if(mergeParams.enableUnmergeRelativeMotionCondition.getValue() && bpc.body1.isInSameCollection(bpc.body2)){
@@ -432,7 +431,7 @@ public class RigidBodySystem {
 							}
 							if (!unmerged && bpc.checkContactsState(dt, mergeParams)) {
 								bpc.checkCyclesToUnmerge(unmergingBodies);
-								bpc.addBodiesToUnmerge(unmergingBodies); 
+								bpc.addBodiesToUnmerge(unmergingBodies, false); 
 							}
 						}
 					}
@@ -906,7 +905,7 @@ public class RigidBodySystem {
 	
 	public MergeParameters mergeParams = new MergeParameters();
 	
-	enum Metric {LARGESTVELOCITY, RELATIVEKINETICENERGY, VELOCITIESNORM};
+	enum MetricType {LARGESTVELOCITY, RELATIVEKINETICENERGY, VELOCITIESNORM};
 	
 	public class MergeParameters {
 		public MergeParameters() {}
@@ -923,10 +922,10 @@ public class RigidBodySystem {
 		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", false);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 50, 0, 200 );
 		public DoubleParameter threshold = new DoubleParameter("merging/unmerging threshold", 1e-5, 1e-10, 1 );
-		public OptionParameter metric = new OptionParameter("metric used", 2, 
-				Metric.LARGESTVELOCITY.toString(),
-				Metric.RELATIVEKINETICENERGY.toString(),
-				Metric.VELOCITIESNORM.toString());
+		public OptionParameter metricType = new OptionParameter("metric used", 2, 
+				MetricType.LARGESTVELOCITY.toString(),
+				MetricType.RELATIVEKINETICENERGY.toString(),
+				MetricType.VELOCITIESNORM.toString());
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	}
 
@@ -990,7 +989,7 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.applyPGSResultsToUnmerge.getControls() );
 		vfpm.add( mergeParams.stepAccum.getSliderControls() );
 		vfpm.add( mergeParams.threshold.getSliderControls(true) );
-		vfpm.add( mergeParams.metric.getControls() );
+		vfpm.add( mergeParams.metricType.getControls() );
         JButton umergeButton = new JButton("unmerge all");
         vfpm.add( umergeButton);
         umergeButton.addActionListener( new ActionListener() {

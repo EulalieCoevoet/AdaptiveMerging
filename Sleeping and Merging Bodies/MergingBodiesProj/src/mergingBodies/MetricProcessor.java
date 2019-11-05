@@ -3,10 +3,71 @@ package mergingBodies;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import mergingBodies.RigidBodySystem.MetricType;
+
 /**
  * This class is used for relative motion's calculations
  */
-public class RelativeMotionProcessor {	
+public class MetricProcessor {	
+	
+	private MetricType metricType;
+	
+	public void setMetricType(int type) {
+		if(type ==  MetricType.LARGESTVELOCITY.ordinal())
+			metricType = MetricType.LARGESTVELOCITY;
+		else if(type ==  MetricType.RELATIVEKINETICENERGY.ordinal())
+			metricType = MetricType.RELATIVEKINETICENERGY;
+		else if(type ==  MetricType.VELOCITIESNORM.ordinal())
+			metricType = MetricType.VELOCITIESNORM;
+		else
+			System.err.println("[getMetric] metric type unknown");
+	}
+	
+	public double getMetric(RigidBody body1, RigidBody body2) {
+	
+			double metric = 0.;
+			
+			if (metricType == MetricType.VELOCITIESNORM)
+				metric = getRelativeVelocitiesNorm(body1, body2);
+			else if (metricType == MetricType.RELATIVEKINETICENERGY) 
+				metric = getRelativeKineticEnergy(body1, body2);
+			else if (metricType == MetricType.LARGESTVELOCITY)
+				metric = getLargestVelocityNorm(body1, body2);
+			else
+				System.err.println("[getMetric] metric type unknown");
+				
+			return metric;
+	}
+	
+	public double getRelativeVelocitiesNorm(RigidBody body1, RigidBody body2) {
+		
+		Vector2d relativeLinearVelocity = getRelativeLinearVelocity(body1, body2);
+		double relativeAngularVelocity = getRelativeAngularVelocity(body1, body2);
+		
+		double k = 0.5*relativeLinearVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
+		return k;
+	}
+	
+	public double getRelativeKineticEnergy(RigidBody body1, RigidBody body2) {
+
+		Vector2d relativeLinearVelocity = getRelativeLinearVelocity(body1, body2);
+		double relativeAngularVelocity = getRelativeAngularVelocity(body1, body2);
+		
+		double massDifference = Math.abs(body1.massLinear - body2.massLinear);
+		double inertiaDifference = Math.abs(body1.massAngular - body2.massAngular);
+		double k = 0.5*relativeLinearVelocity.lengthSquared()*massDifference+ 0.5*relativeAngularVelocity*relativeAngularVelocity*inertiaDifference;
+		
+		return k/massDifference;
+	}
+	
+	public double getLargestVelocityNorm(RigidBody body1, RigidBody body2) {
+		
+		Point2d COM = getCommonCOM(body1, body2);
+		double largestVelocityNorm = getLargestVelocityNorm(body1, COM);
+		largestVelocityNorm = Math.max(largestVelocityNorm, getLargestVelocityNorm(body2, COM));
+		
+		return largestVelocityNorm;
+	}
 	
 	/**
 	 * Compute the relative linear velocity
@@ -60,22 +121,7 @@ public class RelativeMotionProcessor {
 	 * @param body2
 	 * @return relative linear velocity
 	 */
-	public double getLargestVelocity(RigidBody body1, RigidBody body2) {
-		
-		Point2d COM = getCommonCOM(body1, body2);
-		double largestVelocity = getLargestVelocity(body1, COM);
-		largestVelocity = Math.max(largestVelocity, getLargestVelocity(body2, COM));
-		
-		return largestVelocity;
-	}
-	
-	/**
-	 * Compute the relative linear velocity
-	 * @param body1
-	 * @param body2
-	 * @return relative linear velocity
-	 */
-	public double getLargestVelocity(RigidBody body, Point2d COM) {
+	public double getLargestVelocityNorm(RigidBody body, Point2d COM) {
 		double largestVelocity = -Double.MAX_VALUE;
 		
 		for (Point2d point : body.boundingBoxB) {
@@ -123,18 +169,5 @@ public class RelativeMotionProcessor {
 		}
 
 		return body2.omega - body1.omega;
-	}
-	
-	public double getRelativeVelocitiesMetric(Vector2d relativeLinearVelocity, double relativeAngularVelocity) {
-		double k = 0.5*relativeLinearVelocity.lengthSquared() + 0.5*relativeAngularVelocity*relativeAngularVelocity;
-		return k;
-	}
-	
-	public double getRelativeKineticEnergy(RigidBody body1, RigidBody body2, Vector2d relativeLinearVelocity, double relativeAngularVelocity) {
-		double massDifference = Math.abs(body1.massLinear - body2.massLinear);
-		double inertiaDifference = Math.abs(body1.massAngular - body2.massAngular);
-		double k = 0.5*relativeLinearVelocity.lengthSquared()*massDifference+ 0.5*relativeAngularVelocity*relativeAngularVelocity*inertiaDifference;
-		
-		return k/massDifference;
 	}
 }

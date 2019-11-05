@@ -6,7 +6,6 @@ import javax.vecmath.Vector2d;
 
 import mergingBodies.Contact.ContactState;
 import mergingBodies.RigidBodySystem.MergeParameters;
-import mergingBodies.RigidBodySystem.Metric;
 
 
 /**
@@ -24,7 +23,7 @@ public class BodyPairContact {
 	public ArrayList<BodyPairContact> othersInCycle = null; /** store the bpc which are part of the cycle */
 	public Color cycleColor = null;
 
-	RelativeMotionProcessor relativeMProcessor = new RelativeMotionProcessor();
+	MetricProcessor metricProcessor = new MetricProcessor();
 	Vector2d relativeLinearVelocity = new Vector2d();
 	double relativeAngularVelocity = 0;
 	
@@ -70,35 +69,17 @@ public class BodyPairContact {
 		return false;
 	}
 	
-	 /**
-	 * Computes the relative velocity between the two bodies in contact.
-	 * In case of body in a collection, use velocities of parent.
-	 * NOTE MUST COMPARE IN THE SAME COORDINATE FRAME!  In this case, use the 
-	 * combined mass center of mass frame.  Note that we migth want an effective 
-	 * mass weighted relative velocity to measure relative velocity kinetic energy.
-	 */
-	protected void computeRelativeVelocity(MergeParameters mergeParams) {
-		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
-		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
-		
-		relativeLinearVelocity = relativeMProcessor.getRelativeLinearVelocity(body1, body2);	
-		relativeAngularVelocity = relativeMProcessor.getRelativeAngularVelocity(body1, body2);
-	}
-	
 	/**
 	 * Accumulate criteria for merge/unmerge condition
 	 * @param contact
 	 */
 	public void accumulate(MergeParameters mergeParams) {
+
+		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
+		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		computeRelativeVelocity(mergeParams);
-		
-		if (mergeParams.metric.getValue() == Metric.VELOCITIESNORM.ordinal())
-			metricHist.add(relativeMProcessor.getRelativeVelocitiesMetric(relativeLinearVelocity, relativeAngularVelocity));
-		else if (mergeParams.metric.getValue() == Metric.RELATIVEKINETICENERGY.ordinal())
-			metricHist.add(relativeMProcessor.getRelativeKineticEnergy(body1, body2, relativeLinearVelocity, relativeAngularVelocity));
-		else // Metric.LARGESTVELOCITY
-			metricHist.add(relativeMProcessor.getLargestVelocity(body1, body2));
+		metricProcessor.setMetricType(mergeParams.metricType.getValue());
+		metricHist.add(metricProcessor.getMetric(body1, body2));
 		
 		if (metricHist.size() > mergeParams.stepAccum.getValue())
 			metricHist.remove(0);
@@ -231,16 +212,25 @@ public class BodyPairContact {
 	/**
 	 * Add the BodyContact to bodyContactList of members body1 and body2  
 	 */
-	public void addBodiesToUnmerge(ArrayList<RigidBody> bodiesToUnmerge) {
+	public void addBodiesToUnmerge(ArrayList<RigidBody> bodiesToUnmerge, boolean addBoth) {
 		if(!body1.isInCollection() || !body2.isInCollection() || !body1.isInSameCollection(body2)) {
 			System.err.println("[addBodiesToUnmerge] trying to unmerge a body that is not in a collection. This shouldn't happen?");
 			return;
 		}
 
-		if(!bodiesToUnmerge.contains(body1) && !body1.pinned)
-			bodiesToUnmerge.add(body1);
-		if(!bodiesToUnmerge.contains(body2) && !body2.pinned)
-			bodiesToUnmerge.add(body2);
+		if(addBoth) {
+			if(!bodiesToUnmerge.contains(body1) && !body1.pinned)
+				bodiesToUnmerge.add(body1);
+			if(!bodiesToUnmerge.contains(body2) && !body2.pinned)
+				bodiesToUnmerge.add(body2);
+		} else {
+			double metric1 = metricProcessor.getMetric(body1.parent, body1);
+			double metric2 = metricProcessor.getMetric(body2.parent, body2);
+			if(!bodiesToUnmerge.contains(body1) && !body1.pinned && metric1>metric2)
+				bodiesToUnmerge.add(body1);
+			else if (!bodiesToUnmerge.contains(body2) && !body2.pinned)
+				bodiesToUnmerge.add(body2);
+		}
 	}
 
 	/**
@@ -340,10 +330,10 @@ public class BodyPairContact {
 		
 		for (BodyPairContact bpc: body1.bodyPairContactList) { // check if body1 was part of a cycle
 			if (bpc.inCycle) {
-				bpc.addBodiesToUnmerge(bodiesToUnmerge); 
+				bpc.addBodiesToUnmerge(bodiesToUnmerge, false); 
 				bpcToCheck.add(bpc);
 				for (BodyPairContact bpcToUnmerge : bpc.othersInCycle) { // unmerge the others bodies
-					bpcToUnmerge.addBodiesToUnmerge(bodiesToUnmerge);
+					bpcToUnmerge.addBodiesToUnmerge(bodiesToUnmerge, false);
 					bpcToCheck.add(bpcToUnmerge);
 				}
 				bpc.clearCycle();
@@ -352,10 +342,10 @@ public class BodyPairContact {
 		
 		for (BodyPairContact bpc: body2.bodyPairContactList) { // check if body2 was part of a cycle
 			if (bpc.inCycle) {
-				bpc.addBodiesToUnmerge(bodiesToUnmerge);
+				bpc.addBodiesToUnmerge(bodiesToUnmerge, false);
 				bpcToCheck.add(bpc);
 				 for (BodyPairContact bpcToUnmerge : bpc.othersInCycle) { // unmerge the others bodies
-					bpcToUnmerge.addBodiesToUnmerge(bodiesToUnmerge);
+					bpcToUnmerge.addBodiesToUnmerge(bodiesToUnmerge, false);
 					bpcToCheck.add(bpcToUnmerge);
 				 }
 				bpc.clearCycle();
