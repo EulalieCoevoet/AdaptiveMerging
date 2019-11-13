@@ -110,14 +110,13 @@ public class BodyPairContact {
 	public boolean checkRelativeKineticEnergy(MergeParameters mergeParams) {
 
 		double epsilon = 5e-4;
-		double threshold = mergeParams.threshold.getValue();
 
 		if ((motionMetricHist.size() == mergeParams.stepAccum.getValue())) {
 			double previousValue = 0; 
 			double currentValue = 0;
 			for (Double metric : motionMetricHist) {
 				currentValue = metric;
-				if (metric > threshold - mergeParams.epsilon.getValue())
+				if (metric > mergeParams.thresholdMerge.getValue())
 					return false;
 				
 				// I think the monotonically non-increasing metric has no meaning for the largest velocity case

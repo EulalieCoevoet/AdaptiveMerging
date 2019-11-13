@@ -443,7 +443,7 @@ public class RigidCollection extends RigidBody{
 		if(pinned || temporarilyPinned) 
 			metric/=2; 
 		
-		return (metric> mergeParams.threshold.getValue());
+		return (metric> mergeParams.thresholdUnmerge.getValue());
 	}
 	
 	/**
