@@ -35,7 +35,7 @@ public class MotionMetricProcessor {
 				metric = getLargestVelocityNorm(body1, body2);
 			else
 				System.err.println("[getMetric] metric type unknown");
-				
+			
 			return metric;
 	}
 	
@@ -83,8 +83,7 @@ public class MotionMetricProcessor {
 			largestVelocityNorm2 = Math.max(largestVelocityNorm2, Math.sqrt(rw.lengthSquared()));
 		}
 		
-		double largestVelocityNorm = Math.max(largestVelocityNorm1, largestVelocityNorm2);
-		return largestVelocityNorm;
+		return Math.max(largestVelocityNorm1, largestVelocityNorm2);
 	}
 	
 	/**

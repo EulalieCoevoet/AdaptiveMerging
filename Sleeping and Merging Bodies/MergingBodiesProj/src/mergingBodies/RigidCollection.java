@@ -172,8 +172,6 @@ public class RigidCollection extends RigidBody{
 			omega = 0.;
 		}
 		
-		updateColor = true;
-		
 		updateMass();
 		updateCOM(); 
 		updateTheta();
@@ -445,7 +443,7 @@ public class RigidCollection extends RigidBody{
 		if(pinned || temporarilyPinned) 
 			metric/=2; 
 		
-		return (metric>mergeParams.threshold.getValue());
+		return (metric> mergeParams.threshold.getValue());
 	}
 	
 	/**
@@ -455,10 +453,8 @@ public class RigidCollection extends RigidBody{
 	public void unmergeSingleBody(RigidBody body) {
 		if (!body.isInCollection()) 
 			return;
-		else {
+		else 
 			body.parent = null;
-			body.updateColor = true;
-		}
 	}
 
 	/**
@@ -512,9 +508,6 @@ public class RigidCollection extends RigidBody{
 		ArrayList<Contact> contacts = new ArrayList<Contact>(internalContacts);
 		return contacts;
 	}
-	
-	/** display list ID for this rigid body */
-	int myListID = -1;
 
 	public void displayInternalContactForces(GLAutoDrawable drawable) {
 
@@ -546,21 +539,22 @@ public class RigidCollection extends RigidBody{
 	 * displays the Body Collection in different color.
 	 * @param drawable
 	 */
-	public void displayCollection( GLAutoDrawable drawable, Color3f color ) {
+	public void displayCollection( GLAutoDrawable drawable, Color3f color) {
 		GL2 gl = drawable.getGL().getGL2();
-		gl.glEnable(GL2.GL_BLEND);
-		gl.glBlendFunc( GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR);
+		gl.glEnable(GL2.GL_BLEND); 
+		gl.glBlendFunc(GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR);
 		gl.glBlendEquation(GL2.GL_FUNC_ADD);
-		gl.glBlendColor(color.x, color.y, color.z, 0f);
+		gl.glBlendColor(color.x, color.y, color.z, Block.alpha);
 		
 		for (RigidBody b: collectionBodies) {
-		//	if(color!=null)
-				//b.updateColor = true;
+			//if (myListID == -1)
+			//	b.myListID = -1;
 			b.display(drawable, color);
 		}
-		// put it back the way it was.
+		
         gl.glEnable( GL.GL_BLEND );
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );	}
+        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );	
+    }
 
 	/**
 	 * displays the Body Collection as lines between the center of masses of each rigid body to the other. 

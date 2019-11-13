@@ -131,7 +131,6 @@ public class Factory {
         body.v.x = (2*rand.nextDouble()-1) * linearVelocityScale.getValue();  
         body.v.y =  downVelocity.getValue();
         body.updateTransformations();
-        body.updateColor = false;;
         system.add( body );
     }
     

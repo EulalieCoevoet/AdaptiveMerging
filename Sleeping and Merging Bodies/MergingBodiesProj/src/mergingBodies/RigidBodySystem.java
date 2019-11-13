@@ -689,15 +689,12 @@ public class RigidBodySystem {
 	 */
 	public void display( GLAutoDrawable drawable ) {
 		
-		boolean updateCollectionColor = false;
-		
 		GL2 gl = drawable.getGL().getGL2();
 		if ( Block.alpha != (float) (double) transparency.getValue()) {
 			Block.alpha = (float) (double) transparency.getValue();
 			// gross... need to rebuild display lists for the currently set transparency
 			// which is potentially slow and bad news (memory thrashing) for openGL if we do this excessively!
 			RigidBody.clearDisplayLists( gl );
-			updateCollectionColor = true;
 			for ( RigidBody b : bodies ) {
 				b.myListID = -1;
 			}
@@ -705,23 +702,13 @@ public class RigidBodySystem {
 		
 		if ( drawBodies.getValue() ) {
 			
-			// Check if collections color should be 
-			for ( RigidBody b : bodies ) {
-				if ( b instanceof RigidCollection && b.updateColor == true) {
-					b.updateColor = false;
-					updateCollectionColor = true;
-				}	
-			}
-			
 			for ( RigidBody b : bodies ) {
 				if ( b instanceof RigidCollection) {
 					RigidCollection collection = (RigidCollection)b;
-					Color3f color = null;
 					if(drawCollections.getValue()) {
-						color = new Color3f(collection.color);
+						Color3f color = new Color3f(collection.color);
 						collection.displayCollection(drawable, color);
 					}
-						
 				} else {
 					b.display(drawable);
 				}
@@ -921,7 +908,7 @@ public class RigidBodySystem {
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 50, 0, 200 );
-		public DoubleParameter threshold = new DoubleParameter("merging/unmerging threshold", 1e-1, 0, 1000 );
+		public DoubleParameter threshold = new DoubleParameter("merging/unmerging threshold", 1e-3, 1e-10, 1 );
 		public OptionParameter motionMetricType = new OptionParameter("motion metric used", 0, 
 				MotionMetricType.LARGESTVELOCITY.toString(),
 				MotionMetricType.RELATIVEKINETICENERGY.toString(),
@@ -988,7 +975,7 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.updateContactsInCollections.getControls() );
 		vfpm.add( mergeParams.applyPGSResultsToUnmerge.getControls() );
 		vfpm.add( mergeParams.stepAccum.getSliderControls() );
-		vfpm.add( mergeParams.threshold.getSliderControls(false) );
+		vfpm.add( mergeParams.threshold.getSliderControls(true) );
 		vfpm.add( mergeParams.motionMetricType.getControls() );
         JButton umergeButton = new JButton("unmerge all");
         vfpm.add( umergeButton);

@@ -6,6 +6,7 @@ import javax.vecmath.Vector2d;
 
 import mergingBodies.Contact.ContactState;
 import mergingBodies.RigidBodySystem.MergeParameters;
+import mergingBodies.RigidBodySystem.MotionMetricType;
 
 
 /**
@@ -114,11 +115,15 @@ public class BodyPairContact {
 		if ((motionMetricHist.size() == mergeParams.stepAccum.getValue())) {
 			double previousValue = 0; 
 			double currentValue = 0;
-			for (Double relativeEnergy : motionMetricHist) {
-				currentValue = relativeEnergy;
-				if (relativeEnergy > threshold || currentValue > previousValue + epsilon ) 
+			for (Double metric : motionMetricHist) {
+				currentValue = metric;
+				if (metric > threshold - mergeParams.epsilon.getValue())
 					return false;
-				previousValue = relativeEnergy;
+				
+				// I think the monotonically non-increasing metric has no meaning for the largest velocity case
+				if (mergeParams.motionMetricType.getValue() != MotionMetricType.LARGESTVELOCITY.ordinal() && currentValue > previousValue + epsilon)
+					return false;
+				previousValue = metric;
 			}
 		} else {
 			return false;

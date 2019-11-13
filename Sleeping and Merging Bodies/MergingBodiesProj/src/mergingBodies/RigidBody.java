@@ -496,7 +496,6 @@ public class RigidBody {
 
 	/** display list ID for this rigid body */
 	int myListID = -1;
-	boolean updateColor = false;
 
 	public boolean created = false;
 
@@ -529,17 +528,12 @@ public class RigidBody {
 		gl.glTranslated(x.x, x.y, 0);
 		gl.glRotated(theta * 180 / Math.PI, 0, 0, 1);
 		
-		if (myListID == -1 || updateColor) {
+		if (myListID == -1) {
 			Integer ID = mapBlocksToDisplayList.get(blocks);
-			if (ID == null || updateColor) {
-				updateColor = false;
+			if (ID == null) {
 				myListID = gl.glGenLists(1);
 				gl.glNewList(myListID, GL2.GL_COMPILE_AND_EXECUTE);
 				for (Block b : blocks) {
-					// Handle if block's magnetism is acive or no
-				//	if (activateMagnet && magneticBody) {
-				//		color = new Color3f(1, 0, 1);
-				//	} else if (!activateMagnet && magneticBody) color = new Color3f(0, 1, 1);
 					b.display(drawable, color);
 				}
 				gl.glEndList();
