@@ -25,7 +25,7 @@ public class RigidCollection extends RigidBody{
 	public Color color;
 
 	CollisionProcessor collisionProcessor = new CollisionProcessor(collectionBodies);
-	MetricProcessor metricProcessor = new MetricProcessor();
+	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 
 	/**
 	 * Creates a RigidCollection from two RigidBody.
@@ -439,10 +439,11 @@ public class RigidCollection extends RigidBody{
 	
 	public boolean isMovingAway(RigidBody body, MergeParameters mergeParams) {
 		
-		metricProcessor.setMetricType(mergeParams.metricType.getValue());
-		double metric = metricProcessor.getMetric(this, body);
+		motionMetricProcessor.setMotionMetricType(mergeParams.motionMetricType.getValue());
+		double metric = motionMetricProcessor.getMotionMetric(this, body);
 		
-		if(pinned || temporarilyPinned) metric/=2; 
+		if(pinned || temporarilyPinned) 
+			metric/=2; 
 		
 		return (metric>mergeParams.threshold.getValue());
 	}

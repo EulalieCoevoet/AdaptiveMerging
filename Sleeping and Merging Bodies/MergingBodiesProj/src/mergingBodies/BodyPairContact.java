@@ -19,15 +19,17 @@ public class BodyPairContact {
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 	
 	// Utils for cycle merge/unmerge condition.
-	public boolean inCycle = false; /** merge condition : by using this tag we avoid checking the same cycle twice*/
-	public ArrayList<BodyPairContact> othersInCycle = null; /** store the bpc which are part of the cycle */
+	 /** merge condition : by using this tag we avoid checking the same cycle twice*/
+	public boolean inCycle = false;
+	/** store the bpc which are part of the cycle */
+	public ArrayList<BodyPairContact> othersInCycle = null; 
 	public Color cycleColor = null;
 
-	MetricProcessor metricProcessor = new MetricProcessor();
+	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	Vector2d relativeLinearVelocity = new Vector2d();
 	double relativeAngularVelocity = 0;
 	
-	public ArrayList<Double> metricHist = new ArrayList<Double>();
+	public ArrayList<Double> motionMetricHist = new ArrayList<Double>();
 	public ArrayList<Contact.ContactState> contactStateHist = new ArrayList<Contact.ContactState>();
 		
 	public boolean inCollection = false;
@@ -78,11 +80,11 @@ public class BodyPairContact {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		metricProcessor.setMetricType(mergeParams.metricType.getValue());
-		metricHist.add(metricProcessor.getMetric(body1, body2));
+		motionMetricProcessor.setMotionMetricType(mergeParams.motionMetricType.getValue());
+		motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2));
 		
-		if (metricHist.size() > mergeParams.stepAccum.getValue())
-			metricHist.remove(0);
+		if (motionMetricHist.size() > mergeParams.stepAccum.getValue())
+			motionMetricHist.remove(0);
 	
 		Contact.ContactState state = Contact.ContactState.CLEAR;
 		for (Contact contact : contactList) 
@@ -109,10 +111,10 @@ public class BodyPairContact {
 		double epsilon = 5e-4;
 		double threshold = mergeParams.threshold.getValue();
 
-		if ((metricHist.size() == mergeParams.stepAccum.getValue())) {
+		if ((motionMetricHist.size() == mergeParams.stepAccum.getValue())) {
 			double previousValue = 0; 
 			double currentValue = 0;
-			for (Double relativeEnergy : metricHist) {
+			for (Double relativeEnergy : motionMetricHist) {
 				currentValue = relativeEnergy;
 				if (relativeEnergy > threshold || currentValue > previousValue + epsilon ) 
 					return false;
@@ -224,8 +226,8 @@ public class BodyPairContact {
 			if(!bodiesToUnmerge.contains(body2) && !body2.pinned)
 				bodiesToUnmerge.add(body2);
 		} else {
-			double metric1 = metricProcessor.getMetric(body1.parent, body1);
-			double metric2 = metricProcessor.getMetric(body2.parent, body2);
+			double metric1 = motionMetricProcessor.getMotionMetric(body1.parent, body1);
+			double metric2 = motionMetricProcessor.getMotionMetric(body2.parent, body2);
 			if(!bodiesToUnmerge.contains(body1) && !body1.pinned && metric1>metric2)
 				bodiesToUnmerge.add(body1);
 			else if (!bodiesToUnmerge.contains(body2) && !body2.pinned)

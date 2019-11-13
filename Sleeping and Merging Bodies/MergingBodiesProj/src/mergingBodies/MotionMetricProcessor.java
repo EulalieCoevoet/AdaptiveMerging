@@ -3,35 +3,35 @@ package mergingBodies;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import mergingBodies.RigidBodySystem.MetricType;
+import mergingBodies.RigidBodySystem.MotionMetricType;
 
 /**
  * This class is used for relative motion's calculations
  */
-public class MetricProcessor {	
+public class MotionMetricProcessor {	
 	
-	private MetricType metricType;
+	private MotionMetricType motionMetricType;
 	
-	public void setMetricType(int type) {
-		if(type ==  MetricType.LARGESTVELOCITY.ordinal())
-			metricType = MetricType.LARGESTVELOCITY;
-		else if(type ==  MetricType.RELATIVEKINETICENERGY.ordinal())
-			metricType = MetricType.RELATIVEKINETICENERGY;
-		else if(type ==  MetricType.VELOCITIESNORM.ordinal())
-			metricType = MetricType.VELOCITIESNORM;
+	public void setMotionMetricType(int type) {
+		if(type ==  MotionMetricType.LARGESTVELOCITY.ordinal())
+			motionMetricType = MotionMetricType.LARGESTVELOCITY;
+		else if(type ==  MotionMetricType.RELATIVEKINETICENERGY.ordinal())
+			motionMetricType = MotionMetricType.RELATIVEKINETICENERGY;
+		else if(type ==  MotionMetricType.VELOCITIESNORM.ordinal())
+			motionMetricType = MotionMetricType.VELOCITIESNORM;
 		else
 			System.err.println("[getMetric] metric type unknown");
 	}
 	
-	public double getMetric(RigidBody body1, RigidBody body2) {
+	public double getMotionMetric(RigidBody body1, RigidBody body2) {
 	
 			double metric = 0.;
 			
-			if (metricType == MetricType.VELOCITIESNORM)
+			if (motionMetricType == MotionMetricType.VELOCITIESNORM)
 				metric = getRelativeVelocitiesNorm(body1, body2);
-			else if (metricType == MetricType.RELATIVEKINETICENERGY) 
+			else if (motionMetricType == MotionMetricType.RELATIVEKINETICENERGY) 
 				metric = getRelativeKineticEnergy(body1, body2);
-			else if (metricType == MetricType.LARGESTVELOCITY)
+			else if (motionMetricType == MotionMetricType.LARGESTVELOCITY)
 				metric = getLargestVelocityNorm(body1, body2);
 			else
 				System.err.println("[getMetric] metric type unknown");
@@ -62,10 +62,28 @@ public class MetricProcessor {
 	
 	public double getLargestVelocityNorm(RigidBody body1, RigidBody body2) {
 		
-		Point2d COM = getCommonCOM(body1, body2);
-		double largestVelocityNorm = getLargestVelocityNorm(body1, COM);
-		largestVelocityNorm = Math.max(largestVelocityNorm, getLargestVelocityNorm(body2, COM));
+		RigidBody relative = new RigidBody();
+		relative.x = getCommonCOM(body1, body2);
+		relative.v = getRelativeLinearVelocity(body1, body2);
+		relative.omega = getRelativeAngularVelocity(body1, body2);
 		
+		double largestVelocityNorm1 = -Double.MAX_VALUE;
+		for (Point2d point : body1.boundingBoxB) {
+			final Vector2d rw = new Vector2d( -(point.y - relative.x.y), point.x - relative.x.x );
+			rw.scale( relative.omega );
+			rw.add( relative.v ); 
+			largestVelocityNorm1 = Math.max(largestVelocityNorm1, Math.sqrt(rw.lengthSquared()));
+		}
+		
+		double largestVelocityNorm2 = -Double.MAX_VALUE;
+		for (Point2d point : body2.boundingBoxB) {
+			final Vector2d rw = new Vector2d( -(point.y - relative.x.y), point.x - relative.x.x );
+			rw.scale( relative.omega );
+			rw.add( relative.v ); 
+			largestVelocityNorm2 = Math.max(largestVelocityNorm2, Math.sqrt(rw.lengthSquared()));
+		}
+		
+		double largestVelocityNorm = Math.max(largestVelocityNorm1, largestVelocityNorm2);
 		return largestVelocityNorm;
 	}
 	
@@ -113,24 +131,6 @@ public class MetricProcessor {
 		relativeLinearVelocity.sub( tmp2 );
 		
 		return relativeLinearVelocity;
-	}
-	
-	/**
-	 * Compute the relative linear velocity
-	 * @param body1
-	 * @param body2
-	 * @return relative linear velocity
-	 */
-	public double getLargestVelocityNorm(RigidBody body, Point2d COM) {
-		double largestVelocity = -Double.MAX_VALUE;
-		
-		for (Point2d point : body.boundingBoxB) {
-			final Vector2d rw = new Vector2d( -(point.y - COM.y), point.x - COM.x );
-			rw.scale( body.omega );
-			largestVelocity = Math.max(largestVelocity, Math.sqrt(rw.lengthSquared()));
-		}
-		
-		return largestVelocity;
 	}
 	
 	protected Point2d getCommonCOM(RigidBody body1, RigidBody body2) {

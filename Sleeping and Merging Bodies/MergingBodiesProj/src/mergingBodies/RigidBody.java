@@ -76,14 +76,19 @@ public class RigidBody {
 	 * collection exists
 	 */
 	RigidTransform transformC2B = new RigidTransform();
-
-	public Vector2d v = new Vector2d(0.,0.); /** Linear velocity */
-	public double omega = 0.; /** Angular velocity in radians per second */
 	
-	public Point2d x = new Point2d(); /** Position of center of mass in the world frame */
-	public Point2d x0 = new Point2d(); /** Initial position of center of mass in the world frame */
-	public double theta = 0.; /** Orientation angle in radians */
-	public ArrayList<Point2d> boundingBoxB = new ArrayList<Point2d>(); /** bounding box, in the body frame */
+	/** Linear velocity */
+	public Vector2d v = new Vector2d(0.,0.); 
+	 /** Angular velocity in radians per second */
+	public double omega = 0.;
+	/** Position of center of mass in the world frame */
+	public Point2d x = new Point2d(); 
+	/** Initial position of center of mass in the world frame */
+	public Point2d x0 = new Point2d(); 
+	/** Orientation angle in radians */
+	public double theta = 0.; 
+	/** bounding box, in the body frame */
+	public ArrayList<Point2d> boundingBoxB = new ArrayList<Point2d>(); 
 
 	/** inverse of the linear mass, or zero if pinned */
 	double minv;

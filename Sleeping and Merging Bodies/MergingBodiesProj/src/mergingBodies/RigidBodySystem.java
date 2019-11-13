@@ -905,7 +905,7 @@ public class RigidBodySystem {
 	
 	public MergeParameters mergeParams = new MergeParameters();
 	
-	enum MetricType {LARGESTVELOCITY, RELATIVEKINETICENERGY, VELOCITIESNORM};
+	enum MotionMetricType {LARGESTVELOCITY, RELATIVEKINETICENERGY, VELOCITIESNORM};
 	
 	public class MergeParameters {
 		public MergeParameters() {}
@@ -919,13 +919,13 @@ public class RigidBodySystem {
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging - contact normal condition", true);
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", false);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
-		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", false);
+		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 50, 0, 200 );
-		public DoubleParameter threshold = new DoubleParameter("merging/unmerging threshold", 1e-5, 1e-10, 1 );
-		public OptionParameter metricType = new OptionParameter("metric used", 2, 
-				MetricType.LARGESTVELOCITY.toString(),
-				MetricType.RELATIVEKINETICENERGY.toString(),
-				MetricType.VELOCITIESNORM.toString());
+		public DoubleParameter threshold = new DoubleParameter("merging/unmerging threshold", 1e-1, 0, 1000 );
+		public OptionParameter motionMetricType = new OptionParameter("motion metric used", 0, 
+				MotionMetricType.LARGESTVELOCITY.toString(),
+				MotionMetricType.RELATIVEKINETICENERGY.toString(),
+				MotionMetricType.VELOCITIESNORM.toString());
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	}
 
@@ -988,8 +988,8 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.updateContactsInCollections.getControls() );
 		vfpm.add( mergeParams.applyPGSResultsToUnmerge.getControls() );
 		vfpm.add( mergeParams.stepAccum.getSliderControls() );
-		vfpm.add( mergeParams.threshold.getSliderControls(true) );
-		vfpm.add( mergeParams.metricType.getControls() );
+		vfpm.add( mergeParams.threshold.getSliderControls(false) );
+		vfpm.add( mergeParams.motionMetricType.getControls() );
         JButton umergeButton = new JButton("unmerge all");
         vfpm.add( umergeButton);
         umergeButton.addActionListener( new ActionListener() {
@@ -1068,7 +1068,7 @@ public class RigidBodySystem {
 
 	public void generateBody() {
 		
-		//get an unpinned random rigidbody
+		//get an unpinned random RigidBody
 		RigidBody body = new RigidBody(bodies.get(0));
 		RigidBody backup_body = new RigidBody(bodies.get(0));
 
