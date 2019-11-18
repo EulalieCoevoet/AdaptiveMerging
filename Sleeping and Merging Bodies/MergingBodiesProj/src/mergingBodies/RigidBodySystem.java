@@ -318,7 +318,7 @@ public class RigidBodySystem {
 			// check for merge condition
 			if (!mergeParams.enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
 			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
-			mergeCondition = (mergeCondition && bpc.checkRelativeKineticEnergy(mergeParams));
+			mergeCondition = (mergeCondition && bpc.checkMotionMetric(mergeParams));
 			if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable(mergeParams));
 			if (mergeParams.enableMergeCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkContactsCycle(mergeParams));
 			if (bpc.body1.isSleeping && bpc.body2.isSleeping && sleepParams.enableSleeping.getValue()) mergeCondition = true;

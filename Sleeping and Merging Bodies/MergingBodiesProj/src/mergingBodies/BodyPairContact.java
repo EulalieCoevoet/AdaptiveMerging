@@ -101,13 +101,12 @@ public class BodyPairContact {
 	 * Check if:
 	 * <p><ul> 
 	 * <li> 1. the two bodies have been in contact for at least "sleepAccum" number of time steps
-	 * <li> 2. the relative kinetic energy (without the mass) has been non-increasing 
+	 * <li> 2. the motion metric has been non-increasing 
 	 * <li> 3. and lower than a threshold over CollisionProcessor.sleepAccum time steps.
-	 * PGK: what does without the mass mean?
 	 * </ul><p>
 	 * @return true or false
 	 */
-	public boolean checkRelativeKineticEnergy(MergeParameters mergeParams) {
+	public boolean checkMotionMetric(MergeParameters mergeParams) {
 
 		double epsilon = 5e-4;
 

@@ -112,16 +112,19 @@ public class RigidCollection extends RigidBody{
 		tmp1.sub( newCom, body.x );
 		tmp1.scale( body.omega );
 		tmp2.set( -tmp1.y, tmp1.x );
-		tmp3.set(body.v);
+		tmp2.add(body.v);
+		tmp2.scale(body.massLinear);
 		tmp3.add(tmp2);
+		
 		
 		tmp1.sub( newCom, x );
 		tmp1.scale( omega );
 		tmp2.set( -tmp1.y, tmp1.x );
-		tmp3.add(v);
+		tmp2.add(v);
+		tmp2.scale(massLinear);
 		tmp3.add(tmp2);
 		
-		tmp3.scale(0.5);
+		tmp3.scale(1/(body.massLinear+massLinear));
 		
 		v.set(tmp3);
 	}
