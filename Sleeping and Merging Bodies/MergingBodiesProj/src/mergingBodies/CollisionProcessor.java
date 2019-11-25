@@ -8,6 +8,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Point2d;
+import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector2d;
 
 import mintools.parameters.BooleanParameter;
@@ -425,7 +426,13 @@ public class CollisionProcessor {
 		if (body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
 			narrowCollection(body1, body2);
 		} else {
-			findCollisions(body1.root, body2.root, body1, body2);
+			if ( body1 instanceof PlaneRigidBody ) {
+				findCollisionsWithPlane( body2.root, body2, (PlaneRigidBody) body1 ); 
+			} else if (body2 instanceof PlaneRigidBody ) {
+				findCollisionsWithPlane( body1.root, body1, (PlaneRigidBody) body2 );
+			} else {
+				findCollisions(body1.root, body2.root, body1, body2);
+			}
 		}
 	}
 
@@ -446,6 +453,36 @@ public class CollisionProcessor {
 				findCollisions(body1.root, b.root, body1, b);
 			}
 		}
+	}
+	
+	private void findCollisionsWithPlane( BVNode node1, RigidBody body1, PlaneRigidBody planeBody ) {
+		if(node1.visitID != visitID) {
+			node1.visitID = visitID;
+			node1.boundingDisc.updatecW();
+		}
+		// check bounding disc with plane
+		Tuple2d c = node1.boundingDisc.cW;
+		Tuple2d n = planeBody.n;
+		double d = n.x*c.x + n.y*c.y + planeBody.d - node1.boundingDisc.r;
+		if ( d < 0 ) {
+			if ( node1.isLeaf() ) {
+				// create a collision here!
+				
+				// contact position in world coordinates will be the closest point on the plane
+				// using the temp working variable normal, but don't get confused by the name!!!
+				//  just computing p = c-n (n \cdot (c-x))
+				normal.sub( c, planeBody.p ); 
+				double val = normal.dot( planeBody.n );
+				normal.scale( val, planeBody.n );
+				contactW.sub( c, normal );
+				Contact contact = new Contact(body1, planeBody, contactW, planeBody.n, node1.leafBlock, planeBody.dummyBlock, d - Block.radius );				
+				// put contact into a preliminary list that will be filtered in BroadPhase
+				tmpContacts.add( contact );
+			} else {
+				findCollisionsWithPlane( node1.child1, body1,planeBody );
+				findCollisionsWithPlane( node1.child2, body1,planeBody );
+			}
+		}		
 	}
 	
 	/** 
@@ -534,7 +571,7 @@ public class CollisionProcessor {
 			normal.normalize();
 			
 			Contact contact = null;
-			contact = new Contact(body1, body2, contactW, normal, b1, b2, distance);
+			contact = new Contact(body1, body2, contactW, normal, b1, b2, distance - Block.radius * 2 );
 			
 			// put contact into a preliminary list that will be filtered in BroadPhase
 			tmpContacts.add( contact );

@@ -99,13 +99,16 @@ public class Contact {
 	public ArrayList<Double> body2ContactTorqueHistory = new ArrayList<Double>();
 	
 	/**
-	 * Creates a new contact, and assigns it an index
+	 *  Creates a new contact, and assigns it an index
 	 * @param body1
 	 * @param body2
 	 * @param contactW
 	 * @param normal
+	 * @param b1
+	 * @param b2
+	 * @param interpenetration
 	 */
-	public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2, double distance) {
+	public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2, double interpenetration) {
 		
 		this.body1 = body1;
 		this.body2 = body2;
@@ -114,7 +117,7 @@ public class Contact {
 		block1 = b1;
 		block2 = b2;
 		double offset  = CollisionProcessor.constraintOffset.getValue();
-		constraintViolation =  (distance - 2*Block.radius) + offset;
+		constraintViolation =  interpenetration + offset;
 		index = nextContactIndex++;        
 
 		computeJacobian(false);
