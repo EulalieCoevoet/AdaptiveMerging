@@ -106,7 +106,7 @@ public class Contact {
 	 * @param normal
 	 * @param b1
 	 * @param b2
-	 * @param interpenetration
+	 * @param interpenetration  TODo: is this positive or negative?!
 	 */
 	public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2, double interpenetration) {
 		

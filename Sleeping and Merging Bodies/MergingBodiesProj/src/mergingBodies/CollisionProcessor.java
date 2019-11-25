@@ -446,11 +446,23 @@ public class CollisionProcessor {
 			}
 		} else if (body1 instanceof RigidCollection) {
 			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
-				findCollisions(b.root, body2.root, b, body2);
+				if ( b instanceof PlaneRigidBody ) {
+					findCollisionsWithPlane( body2.root, body2, (PlaneRigidBody) b ); 
+				} else if (body2 instanceof PlaneRigidBody ) {
+					findCollisionsWithPlane( b.root, b, (PlaneRigidBody) body2 );
+				} else {
+					findCollisions(b.root, body2.root, b, body2);
+				}
 			}
 		} else if (body2 instanceof RigidCollection) {
 			for (RigidBody b: ((RigidCollection) body2).collectionBodies) {
-				findCollisions(body1.root, b.root, body1, b);
+				if ( b instanceof PlaneRigidBody ) {
+					findCollisionsWithPlane( body1.root, body1, (PlaneRigidBody) b ); 
+				} else if (body1 instanceof PlaneRigidBody ) {
+					findCollisionsWithPlane( b.root, b, (PlaneRigidBody) body1 );
+				} else {
+					findCollisions(body1.root, b.root, body1, b);
+				}
 			}
 		}
 	}
@@ -475,7 +487,9 @@ public class CollisionProcessor {
 				double val = normal.dot( planeBody.n );
 				normal.scale( val, planeBody.n );
 				contactW.sub( c, normal );
-				Contact contact = new Contact(body1, planeBody, contactW, planeBody.n, node1.leafBlock, planeBody.dummyBlock, d - Block.radius );				
+				normal.scale( -1, planeBody.n );
+				
+				Contact contact = new Contact(body1, planeBody, contactW, normal, node1.leafBlock, planeBody.dummyBlock, -( d - Block.radius ) );				// sign unpleasant for interpenetration? TODO: fix... still wrong :(
 				// put contact into a preliminary list that will be filtered in BroadPhase
 				tmpContacts.add( contact );
 			} else {

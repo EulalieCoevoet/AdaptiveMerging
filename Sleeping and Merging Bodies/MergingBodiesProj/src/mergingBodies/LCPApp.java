@@ -29,6 +29,7 @@ import javax.swing.border.TitledBorder;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
@@ -348,8 +349,23 @@ public class LCPApp implements SceneGraphNode, Interactor {
         vfp.add( whiteEpsilon.getSliderControls(false) );
         vfp.add( factory.getControls() );
         
+        JButton makePlaneBody = new JButton("make plane body" );
+        vfp.add( planePy.getSliderControls(false));
+        vfp.add( planeNx.getSliderControls(false));
+        vfp.add( makePlaneBody );
+        makePlaneBody.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				system.add( new PlaneRigidBody(new Point2d(0, planePy.getValue()), new Vector2d(planeNx.getValue(), -1)) );
+			}
+		});
+        
         return vfp.getPanel();
     }
+    
+    private DoubleParameter planePy = new DoubleParameter( "plane y position", 0, -100, 100 );
+    private DoubleParameter planeNx = new DoubleParameter( "plane normal x compoent", 0, -1, 1 );
+
     
     protected DoubleParameter whiteEpsilon = new DoubleParameter( "white epsilon", 0.05, 0, 1 );
         

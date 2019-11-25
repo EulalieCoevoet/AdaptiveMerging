@@ -295,12 +295,13 @@ public class RigidCollection extends RigidBody{
 		Point2d tmp = new Point2d(0, 0);
 		Point2d zero = new Point2d(0, 0);
 		for (RigidBody body: collectionBodies) {
-			
-			for ( Block block : body.blocks ) {
-				double mass = block.getColourMass();
-				tmp.set(block.pB);
-				body.transformB2C.transform(tmp);
-				inertia += mass*tmp.distanceSquared(zero);
+			if (!(body instanceof PlaneRigidBody)) {
+				for ( Block block : body.blocks ) {
+					double mass = block.getColourMass();
+					tmp.set(block.pB);
+					body.transformB2C.transform(tmp);
+					inertia += mass*tmp.distanceSquared(zero);
+				}
 			}
 		}
 		massAngular = inertia;
@@ -386,9 +387,8 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void applyVelocitiesTo(RigidBody body) {
 		if(pinned || temporarilyPinned) {
-			body.v.set(0.,0.);
-			body.omega = 0.;
-			return;
+			if(v.lengthSquared() > 1e-14 || omega > 1e-14)
+				System.err.println("[applyVelocitiesTo] velocities of pinned body is not zero.");
 		}
 		
     	final Vector2d rw = new Vector2d( -(body.x.y - x.y), body.x.x - x.x );

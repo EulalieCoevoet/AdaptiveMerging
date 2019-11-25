@@ -909,7 +909,7 @@ public class RigidBodySystem {
 		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 50, 0, 200 );
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 1 );
-		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1e-3, 1e-10, 1 );
+		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1e-2, 1e-10, 1 );
 		public OptionParameter motionMetricType = new OptionParameter("motion metric used", 0, 
 				MotionMetricType.LARGESTVELOCITY.toString(),
 				MotionMetricType.RELATIVEKINETICENERGY.toString(),
