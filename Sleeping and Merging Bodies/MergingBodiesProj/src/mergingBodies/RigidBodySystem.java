@@ -557,6 +557,9 @@ public class RigidBodySystem {
 	public RigidBody pickBody( Point2d p ) {
 		for ( RigidBody body : bodies ) {
 			//must also check if intersects a collection
+			if(body instanceof PlaneRigidBody)
+				continue;
+			
 			if(body instanceof RigidCollection) {
 				RigidBody b = collectionPick((RigidCollection) body, p);
 				if (b!= null) return b;
@@ -576,6 +579,9 @@ public class RigidBodySystem {
 	private RigidBody collectionPick(RigidCollection body, Point2d p) {
 		for (RigidBody b: body.collectionBodies ) {
 
+			if(b instanceof PlaneRigidBody)
+				continue;
+			
 			if (b.intersect(p)) {
 				return b;
 			}

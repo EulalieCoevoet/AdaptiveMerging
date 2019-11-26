@@ -32,7 +32,7 @@ public class BVNode {
     int visitID;
     
     /**
-     * Create a bounding volume node from a list of blocks.  An axis aligned
+     * Create a bounding volume node from a list of blocks. An axis aligned
      * bounding box is computed for the blocks, and the blocks are split in 
      * the axis aligned direction in which they are most spread out.
      * @param blocks

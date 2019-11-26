@@ -489,7 +489,7 @@ public class CollisionProcessor {
 				contactW.sub( c, normal );
 				normal.scale( -1, planeBody.n );
 				
-				Contact contact = new Contact(body1, planeBody, contactW, normal, node1.leafBlock, planeBody.dummyBlock, -( d - Block.radius ) );				// sign unpleasant for interpenetration? TODO: fix... still wrong :(
+				Contact contact = new Contact(body1, planeBody, contactW, normal, node1.leafBlock, planeBody.dummyBlock, d);
 				// put contact into a preliminary list that will be filtered in BroadPhase
 				tmpContacts.add( contact );
 			} else {
