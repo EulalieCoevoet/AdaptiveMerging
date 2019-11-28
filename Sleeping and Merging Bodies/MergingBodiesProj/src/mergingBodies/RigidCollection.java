@@ -127,6 +127,8 @@ public class RigidCollection extends RigidBody{
 		tmp3.scale(1/(body.massLinear+massLinear));
 		
 		v.set(tmp3);
+		
+		omega = (omega*massAngular+body.omega*body.massAngular)/(body.massAngular+massAngular);
 	}
 	
 	@Override

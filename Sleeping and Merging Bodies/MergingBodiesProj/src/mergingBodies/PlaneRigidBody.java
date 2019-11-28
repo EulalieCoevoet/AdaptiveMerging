@@ -15,29 +15,33 @@ import com.jogamp.opengl.GLAutoDrawable;
 public class PlaneRigidBody extends RigidBody {
 
 	/**
-	 * Default normal for the plane
+	 * Normal for the plane
 	 */
-	Vector2d n = new Vector2d(0,1);
+	Vector2d n;
+	
 	/**
-	 * d parameter of plane equation (computed in construtor, i.e., n_x x + n_y y + d = 0)
+	 * Point for the plane
+	 */
+	Point2d p; 
+	
+	/**
+	 * d parameter of plane equation (computed in constructor, i.e., n_x x + n_y y + d = 0)
 	 */
 	double d;
-	
-	Point2d p = new Point2d( 0, -20); 
 	
 	/** Used for warm starting contacts with this plane */
 	Block dummyBlock = new Block(0,0, new Color3f());
 	
 	public PlaneRigidBody() {
-		pinned = true;
-		d = - (p.x*n.x + p.y*n.y);
+		this(new Point2d(0, -20), new Vector2d(0, 1));
 	}
 	
 	public PlaneRigidBody( Point2d p, Vector2d n ) {
-		pinned = true;
 		n.normalize();
-		this.n.set(n);
-		this.p.set(p);
+		this.n = new Vector2d(n);
+		this.p = new Point2d(p);
+
+		pinned = true;
 		d = - (p.x*n.x + p.y*n.y);
 	}
 	
