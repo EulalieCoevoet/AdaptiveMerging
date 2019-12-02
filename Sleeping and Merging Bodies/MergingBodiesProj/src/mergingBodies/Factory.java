@@ -135,13 +135,13 @@ public class Factory {
     }
     
     /** Specifies the width of the zone from which new objects will be dropped */
-    DoubleParameter spread = new DoubleParameter("drop zone width", 30, 0, 60 );
+    DoubleParameter spread = new DoubleParameter("drop zone width", 15, 0, 60 );
 
     /** When run is true, the factory will create objects at a regular interval */
     BooleanParameter run = new BooleanParameter("run factory", true );
     
     /** Interval between body creation events */
-    DoubleParameter interval = new DoubleParameter("delay", 10, 0.2, 10);
+    DoubleParameter interval = new DoubleParameter("delay", 5, 0.2, 10);
 
     /** Downward velocity of new bodies */
     DoubleParameter downVelocity = new DoubleParameter( "down velocity", 10, 0.1, 20 );
@@ -154,7 +154,7 @@ public class Factory {
 
     
     /** Clears all bodies below this y value*/
-    DoubleParameter minY = new DoubleParameter( "Min y value", 60 , -200, 200 );
+    DoubleParameter minY = new DoubleParameter( "Min y value", 300 , -300, 500 );
 
     
     /**

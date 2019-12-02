@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -925,10 +924,10 @@ public class RigidBodySystem {
 	private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
 	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	
-	private BooleanParameter drawDeltaV = new BooleanParameter("draw DeltaV", true);
-	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true);
-	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true);
-	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true);
+	private BooleanParameter drawDeltaV = new BooleanParameter("draw DeltaV", false );
+	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", false );
+	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", false );
+	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", false );
 	private IntParameter contactLocationSize = new IntParameter( "contact point size ", 5, 5, 20);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw internal histories", false );
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
@@ -959,10 +958,10 @@ public class RigidBodySystem {
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging - contact normal condition", true);
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", false);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
-		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", true);
-		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 50, 0, 200 );
-		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 1 );
-		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1e-2, 1e-10, 1 );
+		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", false);
+		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
+		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
+		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1e-2, 1e-10, 100 );
 		public OptionParameter motionMetricType = new OptionParameter("motion metric used", 0, 
 				MotionMetricType.LARGESTVELOCITY.toString(),
 				MotionMetricType.RELATIVEKINETICENERGY.toString(),
@@ -1029,8 +1028,8 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.updateContactsInCollections.getControls() );
 		vfpm.add( mergeParams.applyPGSResultsToUnmerge.getControls() );
 		vfpm.add( mergeParams.stepAccum.getSliderControls() );
-		vfpm.add( mergeParams.thresholdMerge.getSliderControls(true) );
-		vfpm.add( mergeParams.thresholdUnmerge.getSliderControls(true) );
+		vfpm.add( mergeParams.thresholdMerge.getSliderControls(false) );
+		vfpm.add( mergeParams.thresholdUnmerge.getSliderControls(false) );
 		vfpm.add( mergeParams.motionMetricType.getControls() );
         JButton umergeButton = new JButton("unmerge all");
         vfpm.add( umergeButton);
@@ -1128,6 +1127,7 @@ public class RigidBodySystem {
 				body = new RigidBody(b);
 			}
 		}
+		
 		//degenerate case
 		if (!found) {
 			body = backup_body;

@@ -226,14 +226,18 @@ public class RigidCollection extends RigidBody{
 	 */
 	protected void updateTheta() {
 
-		int N = collectionBodies.size()*4;
+		int N = 0;
 		Point2d meanPos = new Point2d();
 		
 		for ( RigidBody body : collectionBodies ) {
+			if(body instanceof PlaneRigidBody)
+				continue;
+			
 			for (Point2d point : body.boundingBoxB) {
 				Point2d p = new Point2d(point);
 				transformB2C.transform(p);
 				meanPos.add( p );
+				N++;
 			}
 		}
 		meanPos.scale( 1.0 / N );
@@ -241,6 +245,9 @@ public class RigidCollection extends RigidBody{
 		Vector2d v = new Vector2d();
 		Matrix2d covariance = new Matrix2d();
 		for ( RigidBody body : collectionBodies ) {
+			if(body instanceof PlaneRigidBody)
+				continue;
+			
 			for (Point2d point : body.boundingBoxB) {
 				Point2d p = new Point2d(point);
 				transformB2C.transform(p);
@@ -252,7 +259,8 @@ public class RigidCollection extends RigidBody{
 		covariance.evd();
 		Vector2d dir = covariance.v1;
 		dir.normalize();
-		theta = Math.acos(dir.x);
+		if (!Double.isNaN(Math.acos(dir.x)))
+			theta += Math.acos(dir.x);
 	}
 	
 	/** 
@@ -271,7 +279,10 @@ public class RigidCollection extends RigidBody{
 	protected void updateBB() {
 		Point2d bbmaxB = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); 
 		Point2d bbminB = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE);
-		for (RigidBody body : collectionBodies) {			
+		for (RigidBody body : collectionBodies) {
+			if (body instanceof PlaneRigidBody)
+				continue;
+			
 			for (Point2d point : body.boundingBoxB) { 
 				body.transformB2C.transform(point);
 				bbmaxB.x = Math.max(bbmaxB.x, point.x);

@@ -417,7 +417,7 @@ public class Contact {
 		gl.glEnd();
 	}
 
-	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.01, 1);
+	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.0001, 1);
 
 	/*
 	 * Variables that help with measuring the variance and average contact force
@@ -429,13 +429,13 @@ public class Contact {
 
 	Point2d max_x_1 = new Point2d();
 	Point2d max_y_1 = new Point2d();
-	Point2d min_x_1 = new Point2d();
-	Point2d min_y_1= new Point2d();
+	Point2d min_x_1 = new Point2d(); 
+	Point2d min_y_1 = new Point2d();
 
 	Point2d max_x_2 = new Point2d();
 	Point2d max_y_2 = new Point2d();
 	Point2d min_x_2 = new Point2d();
-	Point2d min_y_2= new Point2d();
+	Point2d min_y_2 = new Point2d();
 
 
 	public void getHistoryStatistics(){

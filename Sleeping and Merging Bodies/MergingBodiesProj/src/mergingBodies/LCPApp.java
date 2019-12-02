@@ -372,7 +372,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         return vfp.getPanel();
     }
     
-    private DoubleParameter planePy = new DoubleParameter( "plane y position", 35, -100, 100 );
+    private DoubleParameter planePy = new DoubleParameter( "plane y position", 35, -300, 300 );
     private DoubleParameter planeNx = new DoubleParameter( "plane normal x component", 0, -1, 1 );
 
     
