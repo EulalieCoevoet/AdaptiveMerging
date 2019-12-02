@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 
 import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 
 /**
  * Creates rigid bodies from an image
@@ -55,6 +56,7 @@ public class ImageBlocker {
             img.getRGB( 0, 0, width, height, imageData, 0, width );
             visited = new boolean[width][height];
             Color3f colour = new Color3f();
+            ArrayList<Point2d> cyanBlockList = new ArrayList<Point2d>();
             // sweep all pixels
             for ( int x = 0; x < width; x++ ) {
                 for ( int y = 0; y < height; y++ ) {
@@ -67,24 +69,41 @@ public class ImageBlocker {
                 	ArrayList<Block> blocks = new ArrayList<Block>();
                 	ArrayList<Block> boundaryBlocks = new ArrayList<Block>();
                 	searchConnected( x, y, blocks, boundaryBlocks );
-                	RigidBody body = new RigidBody( blocks, boundaryBlocks );
-                	
-                	for ( Block b : blocks ) {
-                		if ( isRed( b.c ) ) {
-                			Spring s = new Spring( b.pB, body );
-                			body.springs.add(s);                				
-                		}
-                		if ( isMagenta( b.c ) ) {
-                			Spring s = new Spring( b.pB, body );
-                			body.springs.add(s);
-                			controllableSprings.add(s);
-                			body.magneticBody = true;
-                		}
+                	if ( blocks.size() == 1 && isCyan( colour ) ) {
+                		// put this aside and make a PlaneRigidBody later...
+                		cyanBlockList.add( new Point2d(x,y) );
+                	} else {
+                		RigidBody body = new RigidBody( blocks, boundaryBlocks );                	
+	                	for ( Block b : blocks ) {
+	                		if ( isRed( b.c ) ) {
+	                			Spring s = new Spring( b.pB, body );
+	                			body.springs.add(s);                				
+	                		}
+	                		if ( isMagenta( b.c ) ) {
+	                			Spring s = new Spring( b.pB, body );
+	                			body.springs.add(s);
+	                			controllableSprings.add(s);
+	                			body.magneticBody = true;
+	                		}
+	                	}                	
+	                	bodies.add( body );
                 	}
-                	
-                	bodies.add( body );
                 }
             }
+            // if we had cyan isolate blocks, then make a plane for each pair
+            for ( int i = 0; i < cyanBlockList.size(); i+=2 ) {
+            	Point2d p1 = cyanBlockList.get(i);
+            	Point2d p2 = cyanBlockList.get(i+1);
+            	Vector2d n = new Vector2d();
+            	n.sub( p2, p1 );
+            	n.set( -n.y, n.x );
+            	if ( n.y > 0 ) {
+            		n.scale(-1); // make it a bottom surface, regarless the order of the points above
+            	}
+            	n.normalize();
+            	bodies.add( new PlaneRigidBody(p1, n) );
+            }
+            
         } 
         catch ( Exception e ) {
             System.err.println("Problems processing image "+ filename );
@@ -202,5 +221,15 @@ public class ImageBlocker {
         return colour.epsilonEquals(white, epsilon );
     }
 
+    /**
+     * @param colour
+     * @return true if the colour provided is white
+     */
+    private boolean isCyan( Color3f colour ) {
+        final Color3f cyan = new Color3f(0,1,1);
+        return colour.epsilonEquals(cyan, epsilon );
+    }
+
+    
     
 }
