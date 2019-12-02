@@ -154,7 +154,7 @@ public class RigidBodySystem {
 		
 		if (mergeParams.updateContactsInCollections.getValue()) {
 			// this should be done before advanceTime() so that external forces and velocities are of the same time step
-			collisionProcessor.updateContactsInCollections(dt);
+			collisionProcessor.updateInCollections(dt);
 		}
 
 		for (RigidBody b : bodies) {
@@ -166,8 +166,9 @@ public class RigidBodySystem {
 			mergeBodies(); 
 			checkIndex();
 		}
-
+		
 		if (mergeParams.enableUnmerging.getValue() || mergeParams.unmergeAll.getValue()) {
+			// this should be done after advanceTime() so that the relative velocity can be computed
 			unmergeBodies(dt);
 			checkIndex();
 		}
@@ -187,43 +188,7 @@ public class RigidBodySystem {
 		simulationTime += dt;
 		totalAccumulatedComputeTime += computeTime;
 		
-		
-
-	
-		if (LCPApp.openCSV.getValue()) {
-			//open file with merged if merge checkbox is checked
-			if (mergeParams.enableMerging.getValue() && stream == null) {
-				sceneName += "_merged";
-			}
-			File file = new File(sceneName + ".csv");
-			if (stream == null) {
-				try {
-					stream = new PrintStream(file);
-				} catch (FileNotFoundException e) {	}
-			}
-			if (stream != null && LCPApp.writeToCSV.getValue()) {
-				
-
-				stream.print(bodies.size()); stream.print(", ");
-				stream.print(collisionProcessor.contacts.size()); stream.print(", ");
-				stream.print(collisionProcessor.collisionDetectTime); stream.print(", ");
-				stream.print(collisionProcessor.collisionSolveTime); stream.print(", ");
-				stream.print(computeTime); stream.print("\n ");
-				//stream.close();
-			}
-			if (stream != null && LCPApp.closeCSV.getValue()) {
-				stream.close();
-				LCPApp.openCSV.setValue(false);
-			}
-		
-		}
-		
-    	
-		
-		
-	
-
-	//	stream.print("\n");
+		exportDataToFile();
 	}
 
 
@@ -734,6 +699,33 @@ public class RigidBodySystem {
 			}
 		}
 	}
+	
+	protected void exportDataToFile() {
+		if (LCPApp.openCSV.getValue()) {
+			//open file with merged if merge checkbox is checked
+			if (mergeParams.enableMerging.getValue() && stream == null) {
+				sceneName += "_merged";
+			}
+			File file = new File(sceneName + ".csv");
+			if (stream == null) {
+				try {
+					stream = new PrintStream(file);
+				} catch (FileNotFoundException e) {	}
+			}
+			if (stream != null && LCPApp.writeToCSV.getValue()) {
+				
+				stream.print(bodies.size()); stream.print(", ");
+				stream.print(collisionProcessor.contacts.size()); stream.print(", ");
+				stream.print(collisionProcessor.collisionDetectTime); stream.print(", ");
+				stream.print(collisionProcessor.collisionSolveTime); stream.print(", ");
+				stream.print(computeTime); stream.print("\n ");
+			}
+			if (stream != null && LCPApp.closeCSV.getValue()) {
+				stream.close();
+				LCPApp.openCSV.setValue(false);
+			}
+		}
+	}
 
 	/**
 	 * Draws all rigid bodies
@@ -975,7 +967,6 @@ public class RigidBodySystem {
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 50, 0, 200 );
 		public DoubleParameter threshold = new DoubleParameter("sleeping threshold", 1e-7, 1e-10, 1 );
 	}
-
 
 	/**
 	 * @return control panel for the system

@@ -144,7 +144,7 @@ public class CollisionProcessor {
 	 * Does one iteration of PGS to update contacts inside collections
 	 * @param dt
 	 */
-	public void updateContactsInCollections(double dt) {
+	public void updateInCollections(double dt) {
 
 		long now = System.nanoTime();
 		
@@ -593,7 +593,7 @@ public class CollisionProcessor {
 	}
 
 	public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
-	public DoubleParameter friction = new DoubleParameter("Coulomb friction coefficient", 1.5, 0, 2 );
+	public DoubleParameter friction = new DoubleParameter("Coulomb friction coefficient", 0.6, 0, 2 );
 	public IntParameter iterations = new IntParameter("iterations for PGS solve", 1000, 1, 5000);
 	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);

@@ -67,20 +67,20 @@ public class MotionMetricProcessor {
 		relative.v = getRelativeLinearVelocity(body1, body2);
 		relative.omega = getRelativeAngularVelocity(body1, body2);
 		
-		double largestVelocityNorm1 = -Double.MAX_VALUE;
+		double largestVelocityNorm1 = 0.;
 		for (Point2d point : body1.boundingBoxB) {
 			final Vector2d rw = new Vector2d( -(point.y - relative.x.y), point.x - relative.x.x );
 			rw.scale( relative.omega );
 			rw.add( relative.v ); 
-			largestVelocityNorm1 = Math.max(largestVelocityNorm1, Math.sqrt(rw.lengthSquared()));
+			largestVelocityNorm1 = Math.max(largestVelocityNorm1, rw.lengthSquared());
 		}
 		
-		double largestVelocityNorm2 = -Double.MAX_VALUE;
+		double largestVelocityNorm2 = 0.;
 		for (Point2d point : body2.boundingBoxB) {
 			final Vector2d rw = new Vector2d( -(point.y - relative.x.y), point.x - relative.x.x );
 			rw.scale( relative.omega );
 			rw.add( relative.v ); 
-			largestVelocityNorm2 = Math.max(largestVelocityNorm2, Math.sqrt(rw.lengthSquared()));
+			largestVelocityNorm2 = Math.max(largestVelocityNorm2, rw.lengthSquared());
 		}
 		
 		return Math.max(largestVelocityNorm1, largestVelocityNorm2);
