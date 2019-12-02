@@ -13,7 +13,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -235,6 +238,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private BooleanParameter run = new BooleanParameter( "simulate", false );
     private DoubleParameter stepsize = new DoubleParameter( "step size", 0.05, 1e-5, 1 );
     private IntParameter substeps = new IntParameter( "sub steps (integer)", 1, 1, 100);
+    public static BooleanParameter writeToCSV = new BooleanParameter( "write to CSV", false);
+    public static BooleanParameter closeCSV = new BooleanParameter( "close CSV", false);
     
     /** Creates a control panel for changing visualization and simulation parameters */
     @Override
@@ -328,6 +333,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         vfp.add( hideOverlay.getControls() );
         vfp.add( drawGraphs.getControls() );
+        vfp.add(writeToCSV.getControls());
+        vfp.add(closeCSV.getControls());
         
         vfp.add( run.getControls() );
         vfp.add( stepsize.getSliderControls(true) );
@@ -385,7 +392,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private Point2d mousePoint = new Point2d();    
     private MouseSpringForce mouseSpring = new MouseSpringForce( mousePoint );
     private MouseImpulse mouseImpulse = new MouseImpulse();
-    
+	PrintStream stream = null;
     /**
      * Loads the specified image, clearing the old system, and resets viewing parameters.
      * @param filename
@@ -402,6 +409,10 @@ public class LCPApp implements SceneGraphNode, Interactor {
         system.initialBodies = system.bodies;
     	system.collisionProcessor.bodyPairContacts.clear();
     	system.collisionProcessor.contacts.clear();
+    	system.sceneName = filename.substring(0, filename.length() - 4);
+    
+    	
+   
     }
     
     /**

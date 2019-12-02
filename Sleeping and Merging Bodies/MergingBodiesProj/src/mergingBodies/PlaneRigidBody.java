@@ -33,7 +33,7 @@ public class PlaneRigidBody extends RigidBody {
 	Block dummyBlock = new Block(0,0, new Color3f());
 	
 	public PlaneRigidBody() {
-		this(new Point2d(0, -20), new Vector2d(0, 1));
+		this(new Point2d(0,40), new Vector2d(0, -1));
 	}
 	
 	public PlaneRigidBody( Point2d p, Vector2d n ) {

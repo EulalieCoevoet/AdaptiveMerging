@@ -2,6 +2,10 @@ package mergingBodies;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
@@ -64,6 +68,10 @@ public class RigidBodySystem {
 	public boolean mergingEvent = false;
 	public boolean triggerMergingEvent = false;
 	
+	public PrintStream stream = null;
+	
+	public String sceneName = null;
+	
 	/**
 	 * Creates a new rigid body system
 	 */
@@ -109,6 +117,7 @@ public class RigidBodySystem {
 
 		long now = System.nanoTime();  
 		totalSteps++;
+		
 		
 		for (RigidBody body: bodies) {
 			body.clear();
@@ -178,6 +187,41 @@ public class RigidBodySystem {
 		computeTime = (System.nanoTime() - now) / 1e9;
 		simulationTime += dt;
 		totalAccumulatedComputeTime += computeTime;
+		
+		
+
+		//open file with merged if merge checkbox is checked
+		if (mergeParams.enableMerging.getValue() && stream == null) {
+			sceneName += "_merged";
+		}
+    	File file = new File(sceneName + ".csv");
+    	try {
+    		if (!file.exists())
+			file.createNewFile();
+		} catch (IOException e) {}
+		try {
+			if (stream == null) {
+				stream = new PrintStream(file);
+			}
+	
+		} catch (FileNotFoundException e) {	}
+	
+		if (stream != null && LCPApp.writeToCSV.getValue()) {
+			
+
+			stream.print(bodies.size()); stream.print(", ");
+			stream.print(collisionProcessor.contacts.size()); stream.print(", ");
+			stream.print(collisionProcessor.collisionDetectTime); stream.print(", ");
+			stream.print(collisionProcessor.collisionSolveTime); stream.print(", ");
+			stream.print(computeTime); stream.print("\n ");
+			//stream.close();
+		}
+		if (stream != null && LCPApp.closeCSV.getValue()) {
+			stream.close();
+		}
+		
+
+	//	stream.print("\n");
 	}
 
 
