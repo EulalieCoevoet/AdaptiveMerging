@@ -190,36 +190,39 @@ public class RigidBodySystem {
 		
 		
 
-		//open file with merged if merge checkbox is checked
-		if (mergeParams.enableMerging.getValue() && stream == null) {
-			sceneName += "_merged";
-		}
-    	File file = new File(sceneName + ".csv");
-    	try {
-    		if (!file.exists())
-			file.createNewFile();
-		} catch (IOException e) {}
-		try {
-			if (stream == null) {
-				stream = new PrintStream(file);
+	
+		if (LCPApp.openCSV.getValue()) {
+			//open file with merged if merge checkbox is checked
+			if (mergeParams.enableMerging.getValue() && stream == null) {
+				sceneName += "_merged";
 			}
-	
-		} catch (FileNotFoundException e) {	}
-	
-		if (stream != null && LCPApp.writeToCSV.getValue()) {
-			
+			File file = new File(sceneName + ".csv");
+			if (stream == null) {
+				try {
+					stream = new PrintStream(file);
+				} catch (FileNotFoundException e) {	}
+			}
+			if (stream != null && LCPApp.writeToCSV.getValue()) {
+				
 
-			stream.print(bodies.size()); stream.print(", ");
-			stream.print(collisionProcessor.contacts.size()); stream.print(", ");
-			stream.print(collisionProcessor.collisionDetectTime); stream.print(", ");
-			stream.print(collisionProcessor.collisionSolveTime); stream.print(", ");
-			stream.print(computeTime); stream.print("\n ");
-			//stream.close();
-		}
-		if (stream != null && LCPApp.closeCSV.getValue()) {
-			stream.close();
+				stream.print(bodies.size()); stream.print(", ");
+				stream.print(collisionProcessor.contacts.size()); stream.print(", ");
+				stream.print(collisionProcessor.collisionDetectTime); stream.print(", ");
+				stream.print(collisionProcessor.collisionSolveTime); stream.print(", ");
+				stream.print(computeTime); stream.print("\n ");
+				//stream.close();
+			}
+			if (stream != null && LCPApp.closeCSV.getValue()) {
+				stream.close();
+				LCPApp.openCSV.setValue(false);
+			}
+		
 		}
 		
+    	
+		
+		
+	
 
 	//	stream.print("\n");
 	}

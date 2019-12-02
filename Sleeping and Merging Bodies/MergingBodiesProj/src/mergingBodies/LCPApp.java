@@ -238,6 +238,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private BooleanParameter run = new BooleanParameter( "simulate", false );
     private DoubleParameter stepsize = new DoubleParameter( "step size", 0.05, 1e-5, 1 );
     private IntParameter substeps = new IntParameter( "sub steps (integer)", 1, 1, 100);
+    public static BooleanParameter openCSV = new BooleanParameter( "open CSV", false);
     public static BooleanParameter writeToCSV = new BooleanParameter( "write to CSV", false);
     public static BooleanParameter closeCSV = new BooleanParameter( "close CSV", false);
     
@@ -333,6 +334,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         vfp.add( hideOverlay.getControls() );
         vfp.add( drawGraphs.getControls() );
+        vfp.add(openCSV.getControls());
         vfp.add(writeToCSV.getControls());
         vfp.add(closeCSV.getControls());
         
