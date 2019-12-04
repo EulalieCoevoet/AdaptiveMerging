@@ -119,13 +119,13 @@ public class RigidBodySystem {
 		
 		for (RigidBody body: bodies) 
 			body.clear();
-
+		
 		applyExternalForces();
 		
 		/// COLLISION DETECTION AND WARM START ///
 		collisionProcessor.updateContactsHistory(mergeParams);
 		collisionProcessor.collisionDetection(dt); 
-		collisionProcessor.warmStart(); 
+		collisionProcessor.warmStart(); 		
 		collisionProcessor.updateBodyPairContacts(); 
 		
 		if (mergeParams.unmergeAll.getValue()) {
@@ -392,12 +392,16 @@ public class RigidBodySystem {
 	
 	protected void unmergeBodyPairContact(BodyPairContact bpc) {
 		if (!collisionProcessor.bodyPairContacts.contains(bpc)) {
+			collisionProcessor.bodyPairContacts.add(bpc);
 			bpc.inCollection = false;
 			bpc.contactStateHist.clear();
 			bpc.motionMetricHist.clear();
-			collisionProcessor.bodyPairContacts.add(bpc);
 			for (Contact contact : bpc.contactList) 
-				collisionProcessor.contacts.add(contact);
+				if (!collisionProcessor.contacts.contains(contact))
+						collisionProcessor.contacts.add(contact);
+		} else {
+			for (Contact contact : bpc.contactList) 
+				contact.computeJacobian(true);
 		}
 	}
 	

@@ -80,7 +80,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         systemDir = "datalcp/boatCraneSim.png";
         loadSystem(systemDir); 
         T.getBackingMatrix().setIdentity();
-        ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(540,480), new Dimension(640,480) );
+        ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(1280, 720), new Dimension(640,640) );
         ev.addInteractor(this); 
     }
     
