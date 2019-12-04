@@ -6,6 +6,7 @@ import javax.vecmath.Vector2d;
 
 import mergingBodies.Contact.ContactState;
 import mergingBodies.RigidBodySystem.MergeParameters;
+import mergingBodies.RigidBodySystem.SleepParameters;
 import mergingBodies.RigidBodySystem.MotionMetricType;
 
 
@@ -73,7 +74,7 @@ public class BodyPairContact {
 	}
 	
 	/**
-	 * Accumulate criteria for merge/unmerge condition
+	 * Accumulate criteria for merging/unmerging
 	 * @param contact
 	 */
 	public void accumulate(MergeParameters mergeParams) {
@@ -282,6 +283,21 @@ public class BodyPairContact {
 		if (body2.isInCollection() && body2.parent.bodyPairContactList.contains(this)) {
 			body2.parent.bodyPairContactList.remove(this);
 		}
+	}
+	
+	/**
+	 * Check merge condition
+	 * @return
+	 */
+	protected boolean checkMergeCondition(MergeParameters mergeParams, boolean checkCycle) {
+		boolean mergeCondition = true;			
+		if (!mergeParams.enableMergePinned.getValue() && (body1.pinned || body2.pinned)) mergeCondition = false;
+		if (body1.isInSameCollection(body2)) mergeCondition = false;
+		mergeCondition = (mergeCondition && checkMotionMetric(mergeParams));
+		if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && areContactsStable(mergeParams));
+		if (mergeParams.enableMergeCycleCondition.getValue() && checkCycle) mergeCondition = (mergeCondition && checkContactsCycle(mergeParams));
+		if (body1.isSleeping && body2.isSleeping) mergeCondition = true;
+		return mergeCondition;
 	}
 	
 	/**

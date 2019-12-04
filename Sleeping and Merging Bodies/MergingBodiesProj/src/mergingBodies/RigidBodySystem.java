@@ -117,59 +117,52 @@ public class RigidBodySystem {
 		long now = System.nanoTime();  
 		totalSteps++;
 		
-		
-		for (RigidBody body: bodies) {
+		for (RigidBody body: bodies) 
 			body.clear();
-		}
 
-		if (useGravity.getValue()) {
-			applyGravityForce();
-		}  
-
-		if (mouseSpring != null) {
-			mouseSpring.apply();
-			applySpringForces(); 
-		}
+		applyExternalForces();
 		
-		if (mouseImpulse != null) {
-			mouseImpulse.apply();
-		}
+		/// COLLISION DETECTION AND WARM START ///
+		collisionProcessor.updateContactsHistory(mergeParams);
+		collisionProcessor.collisionDetection(dt); 
+		collisionProcessor.warmStart(); 
+		collisionProcessor.updateBodyPairContacts(); 
 		
-		if (processCollisions.getValue()) {
-			collisionProcessor.collisionDetection(dt);
-		}
-		
-		if (sleepParams.enableSleeping.getValue()) {
-			sleep();
-		}
-		
-		if (sleepParams.enableSleeping.getValue()) {
-			wake();
-		}
-		
-		if (processCollisions.getValue()) {
-			collisionProcessor.solveLCP(dt); 
-			collisionProcessor.updateContactsHistory(mergeParams);
-		}
-		
-		if (mergeParams.updateContactsInCollections.getValue()) {
-			// this should be done before advanceTime() so that external forces and velocities are of the same time step
-			collisionProcessor.updateInCollections(dt);
-		}
-
-		for (RigidBody b : bodies) {
-			b.advanceTime(dt); 
-		}
-		
-		if (mergeParams.enableMerging.getValue()) {
-			// this should be done after advanceTime() so that the deltaVs are applied to each bodies before merging
-			mergeBodies(); 
+		if (mergeParams.unmergeAll.getValue()) {
+			unmergeAllBodies();
 			checkIndex();
 		}
 		
-		if (mergeParams.enableUnmerging.getValue() || mergeParams.unmergeAll.getValue()) {
-			// this should be done after advanceTime() so that the relative velocity can be computed
-			unmergeBodies(dt);
+		/// COLLECTION UPDATE /// this should be done before advanceTime() so that external forces and velocities are of the same time step
+		if (mergeParams.updateContactsInCollections.getValue()) 
+			collisionProcessor.updateInCollections(dt);
+		
+		/// UNMERGE (CONTACT CRITERIA) ///		
+		if (mergeParams.enableUnmerging.getValue() && (mergeParams.enableUnmergeNormalCondition.getValue() || mergeParams.enableUnmergeFrictionCondition.getValue())) {
+			unmergeBodiesContactConditions(dt);
+			checkIndex();
+		}
+		
+		/// LCP RESOLUTION ///
+		collisionProcessor.solveLCP(dt); 
+		collisionProcessor.clearBodyPairContacts();
+		
+		/// INTEGRATION ///
+		for (RigidBody b : bodies) 
+			b.advanceTime(dt); 
+		
+		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts)
+			bpc.accumulate(mergeParams);
+		
+		/// MERGE /// this should be done after advanceTime() so that the deltaVs are applied to each bodies before merging
+		if (mergeParams.enableMerging.getValue()) {
+			mergeBodies();
+			checkIndex();
+		}
+		
+		/// UNMERGE (RELATIVE MOTION CRITERION) /// this should be done after advanceTime() so that the relative velocity can be computed		
+		if (mergeParams.enableUnmerging.getValue() && mergeParams.enableUnmergeRelativeMotionCondition.getValue()) {
+			unmergeBodiesMotionCondition(dt); 
 			checkIndex();
 		}
 
@@ -190,13 +183,29 @@ public class RigidBodySystem {
 		
 		exportDataToFile();
 	}
-
-
+	
+	/**
+	 * Apply gravity, mouse spring and impulse
+	 */
+	protected void applyExternalForces() {
+		if (useGravity.getValue()) {
+			applyGravityForce();
+		}  
+	
+		if (mouseSpring != null) {
+			mouseSpring.apply();
+			applySpringForces(); 
+		}
+		
+		if (mouseImpulse != null) {
+			mouseImpulse.apply();
+		}
+	}
 
 	/**
 	 * Checks if we should put these bodies to sleep.
 	 * Conditions for sleeping are:
-	 * <p><p><ul>
+	 * <p><ul>
 	 * <li>1. All velocities in velocity history are below threshold. 
 	 * <li>2. Velocities in history are monotonically decreasing. 
 	 * </ul><p>
@@ -319,22 +328,10 @@ public class RigidBodySystem {
 	 */
 	public void mergeBodies() {
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
-
-		collisionProcessor.processBodyPairContacts(mergeParams);
 		
 		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 			
-			boolean mergeCondition = true;		
-
-			// check for merge condition
-			if (!mergeParams.enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
-			if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
-			mergeCondition = (mergeCondition && bpc.checkMotionMetric(mergeParams));
-			if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable(mergeParams));
-			if (mergeParams.enableMergeCycleCondition.getValue()) mergeCondition = (mergeCondition && bpc.checkContactsCycle(mergeParams));
-			if (bpc.body1.isSleeping && bpc.body2.isSleeping && sleepParams.enableSleeping.getValue()) mergeCondition = true;
-			
-			if (mergeCondition) {
+			if (bpc.checkMergeCondition(mergeParams, true)) {
 				mergingEvent = true;
 				bpc.inCollection = true;
 				if(!bpc.body1.isInCollection() && !bpc.body2.isInCollection()) {
@@ -396,85 +393,140 @@ public class RigidBodySystem {
 			collisionProcessor.bodyPairContacts.remove(element);
 		}
 	}
-
+	
+	protected void unmergeBodyPairContact(BodyPairContact bpc) {
+		if (!collisionProcessor.bodyPairContacts.contains(bpc)) {
+			bpc.contactStateHist.clear();
+			bpc.motionMetricHist.clear();
+			collisionProcessor.bodyPairContacts.add(bpc);
+			for (Contact contact : bpc.contactList) 
+				collisionProcessor.contacts.add(contact);
+		}
+	}
+	
 	/**
-	 * Method that deals with unmerging rigidBodies... because we will explore different solutions to
-	 * this problem, it will call different methods for each unmerging solution.
-	 * Goes through all bodies in each collection. 
-		If a body has enough force acting on it (over a threshold), separate just that body
-		from the rest of the collection. 
+	 * Unmerge all bodies
 	 */
-	private void unmergeBodies(double dt) {
+	private void unmergeAllBodies() {
+
 		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 		
 		for(RigidBody body : bodies) {
 			
-			if(body.isSleeping)
+			if (body instanceof RigidCollection) {
+				
+				RigidCollection collection = (RigidCollection) body;
+				
+				for (BodyPairContact bpc: collection.bodyPairContactList)
+					unmergeBodyPairContact(bpc);
+							
+				for (RigidBody b: collection.collectionBodies) {
+					collection.unmergeSingleBody(b);
+					additionQueue.add(b);
+				}
+
+				removalQueue.add(collection);
+			}
+		}
+
+		bodies.addAll(additionQueue);
+		bodies.removeAll(removalQueue);
+		
+		mergeParams.unmergeAll.setValue(false);
+	}
+
+	/**
+	 * Unmerge bodies that satisfy contact force criteria
+	 */
+	private void unmergeBodiesContactConditions(double dt) {
+		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
+		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
+		
+		for(RigidBody body : bodies) {
+			
+			if (body.isSleeping || body.temporarilyPinned)
 				continue;
 			
 			if (body instanceof RigidCollection) {
+				
 				RigidCollection collection = (RigidCollection) body;
-				if (!collection.temporarilyPinned) {
-					ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
-					for (BodyPairContact bpc: collection.bodyPairContactList) {
-						
-						if (!bpc.inCollection)
-							continue;
-						
-						if (mergeParams.unmergeAll.getValue()) {
-							bpc.addBodiesToUnmerge(unmergingBodies, true);
-						}
-						else {
-							boolean unmerged = false;
-							if(mergeParams.enableUnmergeRelativeMotionCondition.getValue() && bpc.body1.isInSameCollection(bpc.body2)){
-								if (!unmergingBodies.contains(bpc.body1) && collection.isMovingAway(bpc.body1, mergeParams)) {
-									unmerged = true;
-									bpc.checkCyclesToUnmerge(unmergingBodies);
-									unmergingBodies.add(bpc.body1);
-								}
-	
-								if (!unmergingBodies.contains(bpc.body2) && collection.isMovingAway(bpc.body2, mergeParams)) {
-									unmerged = true;
-									bpc.checkCyclesToUnmerge(unmergingBodies);
-									unmergingBodies.add(bpc.body2);
-								}
-							}
-							if (!unmerged && bpc.checkContactsState(dt, mergeParams)) {
-								bpc.checkCyclesToUnmerge(unmergingBodies);
-								bpc.addBodiesToUnmerge(unmergingBodies, false); 
-							}
-						}
-					}
+				ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
+				
+				for (BodyPairContact bpc: collection.bodyPairContactList) {
+					if (!bpc.inCollection)
+						continue;
 					
-					ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
-					if (!unmergingBodies.isEmpty()) {
-						unmergeSelectBodies(collection, unmergingBodies, newBodies, dt);				
-					}
-
-					if (!newBodies.isEmpty()) {
-						for (RigidBody bd: newBodies) {
-							additionQueue.add(bd);
-						}
-						removalQueue.add(collection);
-						newBodies.clear();
+					if (bpc.checkContactsState(dt, mergeParams)) {
+						bpc.checkCyclesToUnmerge(unmergingBodies);
+						bpc.addBodiesToUnmerge(unmergingBodies, false); 
 					}
 				}
 				
-				if (!mergeParams.applyPGSResultsToUnmerge.getValue()) // apply velocities of the collection instead of the one iteration PGS results 
-					collection.applyVelocitiesToBodies();
-				
+				ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
+				if (!unmergingBodies.isEmpty())
+					unmergeSelectBodies(collection, unmergingBodies, newBodies, dt);	
+
+				if (!newBodies.isEmpty()) {
+					additionQueue.addAll(newBodies);
+					removalQueue.add(collection);
+				}
 			}
 		}
-		for (RigidBody b: additionQueue) {
-			bodies.add(b);
-		}
-		for (RigidBody b: removalQueue) {
-			bodies.remove(b);
-		}
+		
+		bodies.addAll(additionQueue);
+		bodies.removeAll(removalQueue);
 		
 		processCollectionsColor();
-		mergeParams.unmergeAll.setValue(false);
+	}
+	
+	/**
+	 * Unmerge bodies that satisfy relative motion condition
+	 */
+	private void unmergeBodiesMotionCondition(double dt) {
+		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
+		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
+		
+		for(RigidBody body : bodies) {
+			
+			if(body.isSleeping || body.temporarilyPinned)
+				continue;
+			
+			if (body instanceof RigidCollection) {
+				
+				RigidCollection collection = (RigidCollection) body;
+				ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
+				
+				for (BodyPairContact bpc: collection.bodyPairContactList) {
+					if (!bpc.inCollection)
+						continue;
+						
+					if (!unmergingBodies.contains(bpc.body1) && collection.isMovingAway(bpc.body1, mergeParams)) {
+						bpc.checkCyclesToUnmerge(unmergingBodies);
+						unmergingBodies.add(bpc.body1);
+					}
+
+					if (!unmergingBodies.contains(bpc.body2) && collection.isMovingAway(bpc.body2, mergeParams)) {
+						bpc.checkCyclesToUnmerge(unmergingBodies);
+						unmergingBodies.add(bpc.body2);
+					}
+				}
+				
+				ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
+				if (!unmergingBodies.isEmpty()) 
+					unmergeSelectBodies(collection, unmergingBodies, newBodies, dt);	
+
+				if (!newBodies.isEmpty()) {
+					additionQueue.addAll(newBodies);
+					removalQueue.add(collection);
+				}
+			}
+		}
+		
+		bodies.addAll(additionQueue);
+		bodies.removeAll(removalQueue);
+		
+		processCollectionsColor();
 	}
 
 	private void unmergeSelectBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies, double dt) {
@@ -491,9 +543,6 @@ public class RigidBodySystem {
 		
 		ArrayList<BodyPairContact> clearedBodyPairContacts = new ArrayList<BodyPairContact>();
 		for (RigidBody body: unmergingBodies) {
-			if(!body.pinned && !body.temporarilyPinned && mergeParams.applyPGSResultsToUnmerge.getValue()) {
-				body.advancePositions(dt);
-			}
 			
 			ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 
@@ -528,20 +577,9 @@ public class RigidBodySystem {
 					}
 				}
 			}
-			body.bodyPairContactList.clear();
 			
-			for (BodyPairContact bpc: clearedBodyPairContacts) {
-				// Store in contacts map for warm start
-				for (Contact contact : bpc.contactList) {
-					if(!collisionProcessor.contacts.contains(contact))
-						collisionProcessor.contacts.add(contact);
-					Block block1 = contact.block1;
-					Block block2 = contact.block2;
-					collisionProcessor.lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
-				}
-				bpc.removeFromBodyLists();
-			}
-			
+			for (BodyPairContact bpc: clearedBodyPairContacts)
+				unmergeBodyPairContact(bpc);			
 		}		
 	}
 
@@ -661,8 +699,7 @@ public class RigidBodySystem {
 	private void checkIndex() {
 		int i = 0;
 		for(RigidBody body: bodies) {
-			body.index = i;
-			i++;
+			body.index = i++;
 		}
 	}
 
@@ -917,9 +954,9 @@ public class RigidBodySystem {
 	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	
 	private BooleanParameter drawDeltaV = new BooleanParameter("draw DeltaV", false );
-	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", false );
-	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", false );
-	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", false );
+	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true );
+	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true );
+	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true );
 	private IntParameter contactLocationSize = new IntParameter( "contact point size ", 5, 5, 20);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw internal histories", false );
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
@@ -931,8 +968,6 @@ public class RigidBodySystem {
 	private BooleanParameter drawBB = new BooleanParameter( "draw bounding box", false );
 	public static DoubleParameter deltaVVizScale = new DoubleParameter( "DeltaV viz scale", 10, 0, 100 );
 	public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
-	
-	private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
 	
 	public MergeParameters mergeParams = new MergeParameters();
 	
@@ -950,10 +985,9 @@ public class RigidBodySystem {
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging - contact normal condition", true);
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", false);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
-		public BooleanParameter applyPGSResultsToUnmerge = new BooleanParameter( "apply one iteration PGS results to unmerged body", false);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
-		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1e-2, 1e-10, 100 );
+		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 10, 1e-10, 100 );
 		public OptionParameter motionMetricType = new OptionParameter("motion metric used", 0, 
 				MotionMetricType.LARGESTVELOCITY.toString(),
 				MotionMetricType.RELATIVEKINETICENERGY.toString(),
@@ -1017,7 +1051,6 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.enableUnmergeNormalCondition.getControls() );
 		vfpm.add( mergeParams.enableUnmergeRelativeMotionCondition.getControls() );
 		vfpm.add( mergeParams.updateContactsInCollections.getControls() );
-		vfpm.add( mergeParams.applyPGSResultsToUnmerge.getControls() );
 		vfpm.add( mergeParams.stepAccum.getSliderControls() );
 		vfpm.add( mergeParams.thresholdMerge.getSliderControls(false) );
 		vfpm.add( mergeParams.thresholdUnmerge.getSliderControls(false) );
@@ -1043,7 +1076,6 @@ public class RigidBodySystem {
 		cpm.collapse();
 		vfp.add( cpm );
 
-		vfp.add( processCollisions.getControls() );		
 		vfp.add( collisionProcessor.getControls() );
 		
 		vfp.add( tempSleepCount.getSliderControls(false) );

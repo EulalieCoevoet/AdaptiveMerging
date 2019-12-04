@@ -233,19 +233,22 @@ public class LCPAppTests extends LCPApp {
 			system.advanceTime(dt);
 		
 		assertEquals(4, system.collisionProcessor.contacts.size()); 
-		system.collisionProcessor.processBodyPairContacts(mergeParams);
+		system.collisionProcessor.updateBodyPairContacts();
+		system.collisionProcessor.clearBodyPairContacts();
 		assertEquals(2, system.collisionProcessor.bodyPairContacts.size()); 
 		
 		for (int i=0; i<9; i++)
 			system.advanceTime(dt);
 
-		system.collisionProcessor.processBodyPairContacts(mergeParams);
+		system.collisionProcessor.updateBodyPairContacts();
+		system.collisionProcessor.clearBodyPairContacts();
 		assertEquals(4, system.collisionProcessor.bodyPairContacts.size()); 
 		
 		for (int i=0; i<7; i++)
 			system.advanceTime(dt);
 
-		system.collisionProcessor.processBodyPairContacts(mergeParams);
+		system.collisionProcessor.updateBodyPairContacts();
+		system.collisionProcessor.clearBodyPairContacts();
 		assertEquals(6, system.collisionProcessor.bodyPairContacts.size()); 
 	}
 	
@@ -266,13 +269,6 @@ public class LCPAppTests extends LCPApp {
 		
 		collection = (RigidCollection)system.bodies.get(2);		
 		assertEquals(3, collection.bodyPairContactList.size()); 
-		
-		system.mergingEvent=false;
-		while(!system.mergingEvent)
-			system.advanceTime(dt);
-		
-		collection = (RigidCollection)system.bodies.get(1);		
-		assertEquals(6, collection.bodyPairContactList.size()); 
 	}
 }
 

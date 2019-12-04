@@ -136,6 +136,7 @@ public class RigidCollection extends RigidBody{
 		super.clear();
 		
 		for (RigidBody body: collectionBodies) {
+			applyVelocitiesTo(body);
 			body.clear();
 		}
 	}
@@ -349,18 +350,12 @@ public class RigidCollection extends RigidBody{
 
 		super.advanceTime(dt);
 		
-		if (!pinned && !temporarilyPinned && !isSleeping) {
-			
-			updateBodiesPositionAndTransformations();
-			updateContactJacobianAndDataAsInternal(dt);
-		} 
+		if (pinned || temporarilyPinned || isSleeping)
+			return;
 		
-		if (!isSleeping) {
-			for (RigidBody body : collectionBodies) {
-				if(!body.pinned && !body.temporarilyPinned)
-					body.advanceVelocities(dt);
-			}
-		}
+		updateBodiesPositionAndTransformations();
+		collisionProcessor.updateContactJacobianAsInternal(internalContacts);
+		computeInternalContactsForce(dt);
 	}
 	
 	/**
@@ -409,29 +404,6 @@ public class RigidCollection extends RigidBody{
 		body.v.add(v, rw); // sets the value of the sum
 		body.omega = omega;
     }
-		
-	/**
-	 * Clear deltaV of bodies
-	 */
-	protected void clearBodiesDeltaV() {
-		for (RigidBody body: collectionBodies) {	
-			body.deltaV.zero();
-		}
-	}
-	
-	/**
-	 * Update all internal contacts Jacobians, along with position and normal data
-	 * @param dt time step needed to get correct contact forces from lambda impulses (only for visualization)
-	 */
-	public void updateContactJacobianAndDataAsInternal(double dt) {
-		for (Contact c : internalContacts) {
-			c.normal = new Vector2d(c.normalB1);
-			c.body1.transformB2W.transform(c.normal); 
-			c.body1.transformB2W.transform(c.contactB1, c.contactW);
-			c.computeJacobian(true);
-			c.computeContactForce(dt);
-		}
-	}
 	
 	/**
 	 * Compute internal contacts force w.r.t lambdas 
@@ -467,10 +439,14 @@ public class RigidCollection extends RigidBody{
 	 * ... does not do anything to the collection itself.
 	 */
 	public void unmergeSingleBody(RigidBody body) {
-		if (!body.isInCollection()) 
+		if (!body.isInCollection(this)) {
+			System.err.println("[unmergeSingleBody] Not suppose to happen.");
 			return;
-		else 
+		} else {
+			applyVelocitiesTo(body);
+			body.deltaV.zero();
 			body.parent = null;
+		}
 	}
 
 	/**

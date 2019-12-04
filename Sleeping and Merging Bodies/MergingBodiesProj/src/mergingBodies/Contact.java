@@ -135,6 +135,19 @@ public class Contact {
 		normalB2.scale(-1);
 	}
 	
+	public Contact(Contact contact) {
+		this.body1 = contact.body1;
+		this.body2 = contact.body2;
+		this.normal.set(contact.normal);   
+		normalB1.set(contact.normalB1);
+		normalB2.set(contact.normalB2);
+		contactW.set(contact.contactW);
+		jn.set(contact.jn);
+		jt.set(contact.jt);
+		lambda.set(contact.lambda);
+		constraintViolation = contact.constraintViolation;
+	}
+	
 	/**
 	 * Computes the Jacobian matrix of the contact.
 	 * In case of body in a collection, use COM of parent to compute the torque component of the Jacobian.

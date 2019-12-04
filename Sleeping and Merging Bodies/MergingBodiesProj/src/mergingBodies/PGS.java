@@ -1,7 +1,6 @@
 package mergingBodies;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import no.uib.cipr.matrix.DenseVector;
 
@@ -28,8 +27,6 @@ public class PGS {
 		compliance=0.;
 		contacts = null;
 		warmStart = false;
-		lastTimeStepMap = null;
-		confidentWarmStart = false;
 		computeInCollection = false;
 	}
 	
@@ -53,18 +50,9 @@ public class PGS {
 	
 	/** Special case for contacts in collections */
 	public boolean computeInCollection;
-	public boolean confidentWarmStart;
 	
 	/** Warm start option */
 	protected boolean warmStart;
-	protected HashMap<String, Contact> lastTimeStepMap = null;
-
-	
-	
-	public void enableWarmStart(HashMap<String, Contact> lastTimeStepMap){
-		warmStart = true;
-		this.lastTimeStepMap = lastTimeStepMap;
-	}
 	
 	public void disableWarmStart(){
 		warmStart = false;
@@ -86,10 +74,8 @@ public class PGS {
 			contact.computeJMinvJtDiagonal(computeInCollection);
 		}
 		
-		if (confidentWarmStart)
+		if (warmStart)
 			confidentWarmStart();
-		else if (warmStart && lastTimeStepMap != null) 
-			warmStart();
 		
 		int iter = iterations;
 		while(iter > 0) {
@@ -126,7 +112,8 @@ public class PGS {
 				//update delta V;
 				updateDeltaV(contact, 0., dLambda_t);
 				
-				contact.updateContactState(mu);
+				if (iter == 1)
+					contact.updateContactState(mu);
 			}
 			
 			iter--;
@@ -164,69 +151,6 @@ public class PGS {
 		dv2.add( 0, contact.jt.get(3) * m2inv * lambda_t );
 		dv2.add( 1, contact.jt.get(4) * m2inv * lambda_t );
 		dv2.add( 2, contact.jt.get(5) * j2inv * lambda_t );
-	}
-	
-	/**
-	 * Fills lambdas with values from previous time step
-	 */
-	protected void warmStart() {
-		for (Contact contact : contacts) {
-			Contact oldContact = getOldContact(contact);
-			if(oldContact != null) { 
-				
-				double oldLamda_n = oldContact.lambda.x;
-				double oldLamda_t = oldContact.lambda.y;
-
-				contact.lambda.x = oldLamda_n;
-				contact.lambda.y = oldLamda_t;
-				
-				updateDeltaV(contact, oldLamda_n, oldLamda_t);
-				
-				contact.body1ContactForceHistory.clear();
-				contact.body1ContactTorqueHistory.clear();
-				contact.body2ContactForceHistory.clear();
-				contact.body2ContactTorqueHistory.clear();
-				contact.body1ContactForceHistory.addAll(oldContact.body1ContactForceHistory);
-				contact.body1ContactTorqueHistory.addAll(oldContact.body1ContactTorqueHistory);
-				contact.body2ContactForceHistory.addAll(oldContact.body2ContactForceHistory);
-				contact.body2ContactTorqueHistory.addAll(oldContact.body2ContactTorqueHistory);
-			}
-		}
-	}
-	
-	/**
-	 * Checks if lastTimeStepMap (contact map of last time step) contains a similar contact and returns the corresponding contact. 
-	 * @param contact
-	 * @return oldContact
-	 */
-	protected Contact getOldContact(Contact contact) {
-		
-		Contact oldContact;
-		
-		Block block1 = contact.block1;
-		Block block2 = contact.block2;
-
-		if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))
-				|| lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
-
-			RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
-			RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
-
-			// if the old map contains this key, then get the lambda of the old map
-			oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
-			if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
-				oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
-			
-			RigidBody oldBody1 = (oldContact.body1.isInCollection())? oldContact.body1.parent: oldContact.body1;
-			RigidBody oldBody2 = (oldContact.body2.isInCollection())? oldContact.body2.parent: oldContact.body2;
-			
-			if ((oldBody1 != body1 && oldBody1 != body2) || (oldBody2 != body2 && oldBody2 != body1)) 
-				return null;
-		}
-		else
-			return null;
-		
-		return oldContact;
 	}
 	
 	/**

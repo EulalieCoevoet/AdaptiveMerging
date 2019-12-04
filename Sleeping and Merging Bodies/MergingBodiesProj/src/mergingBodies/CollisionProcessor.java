@@ -89,6 +89,7 @@ public class CollisionProcessor {
 	 * @param dt time step
 	 */
 	public void solveLCP( double dt ) {
+		
 		if(!contacts.isEmpty()) {
 	    	
 	    	if (shuffle.getValue()) 
@@ -99,8 +100,7 @@ public class CollisionProcessor {
 			solver.restitution = restitution.getValue();
 			solver.feedbackStiffness = feedbackStiffness.getValue();
 			solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
-			if (warmStart.getValue())
-				solver.enableWarmStart(lastTimeStepMap);
+			solver.warmStart = true;
 			solver.contacts = contacts;
 			
 			// solve contacts
@@ -114,26 +114,46 @@ public class CollisionProcessor {
 	}
 	
 	/**
-	 * Clears bodyPairContacts list
+	 * Updates bodyPairContacts list
 	 */
-	public void processBodyPairContacts(MergeParameters mergeParams) {
+	public void updateBodyPairContacts() {
 		
 		for (BodyPairContact bpc : bodyPairContacts) // clear contactList of existing bpc
 			bpc.contactList.clear();
 
-		for (Contact contact : contacts)
-			if (Math.abs(contact.lambda.x) > 1e-14) // store detected contact in existing or new bpc only if it is active (math.abs is for magnet)
-				storeInBodyPairContacts(contact);
+		for (Contact contact : contacts) // loop over all contacts between bodies
+			storeInBodyPairContacts(contact);
 		
+		removeEmptyBodyPairContacts();
+	}
+	
+	/**
+	 * Remove inactive contact from bodyPairContacts list
+	 */
+	public void clearBodyPairContacts() {
+		
+		for (BodyPairContact bpc : bodyPairContacts) {
+			ArrayList<Contact> tmpContacts = new ArrayList<Contact>();
+			for (Contact contact : bpc.contactList) 
+				if (Math.abs(contact.lambda.x) > 1e-14) // (math.abs is for magnet)
+					tmpContacts.add(contact);
+			bpc.contactList.clear();
+			bpc.contactList.addAll(tmpContacts);
+		}
+
+		removeEmptyBodyPairContacts();
+	}
+	
+	/**
+	 * Remove empty body pair contacts
+	 */
+	protected void removeEmptyBodyPairContacts() {
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
 		for (BodyPairContact bpc : bodyPairContacts) {
-			
-			if (!bpc.contactList.isEmpty()) { // if the contactList is empty we discard the bpc
+			if(!bpc.contactList.isEmpty())
 				tmpBodyPairContacts.add(bpc);
-				bpc.accumulate(mergeParams);
-			} else {
+			else
 				bpc.removeFromBodyLists();
-			}
 		}
 		
 		bodyPairContacts.clear();
@@ -149,89 +169,53 @@ public class CollisionProcessor {
 		long now = System.nanoTime();
 		
 		solver.init(friction.getValue(), iterationsInCollection.getValue());
-		solver.confidentWarmStart = true;
 		solver.computeInCollection = true;
+		solver.restitution = restitution.getValue();
 		solver.feedbackStiffness = feedbackStiffness.getValue();
-		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0. ;
-		boolean doneOnceForAllCollections = false;
+		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
+		solver.warmStart = true;
+		
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.isSleeping) {
 				
-				if (!doneOnceForAllCollections) {
-					doneOnceForAllCollections = true;
-					applyContactsAsExternalForces(dt);
-				}
-				
 				RigidCollection collection = (RigidCollection)body;
-
-				collection.applyVelocitiesToBodies();
-				collection.clearBodiesDeltaV();
-				collection.updateContactJacobianAndDataAsInternal(dt);
-				solver.contacts = collection.internalContacts;
+				
+				solver.contacts = new ArrayList<Contact>();
+				for (BodyPairContact bpc: collection.bodyPairContactList)
+					if (!bpc.inCollection) 
+						for (Contact contact : bpc.contactList)
+							solver.contacts.add(new Contact(contact));
+				solver.contacts.addAll(collection.internalContacts);
+				updateContactJacobianAsInternal(solver.contacts);
+				
 				solver.solve(dt);
 				
 				collection.computeInternalContactsForce(dt);
+				
+				for (RigidBody b : collection.collectionBodies)
+					if(!b.pinned && !b.temporarilyPinned)
+						b.advanceVelocities(dt);	
 			}
 		}
+		
+		for (RigidBody body: bodies) 
+			body.deltaV.zero();
 		
 		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
 	}
 	
 	/**
-	 * If a collection has external contacts, apply these contacts as
-	 * external forces to the corresponding real body that is in contact (meaning inside the collection). 
-	 * @param dt
+	 * Update all internal contacts Jacobians, along with position and normal data
+	 * @param dt time step needed to get correct contact forces from lambda impulses (only for visualization)
 	 */
-	protected void applyContactsAsExternalForces(double dt) {
-		
-		Vector2d force = new Vector2d();
-		double torque = 0.;
-		
-		for (Contact contact : contacts) {
-			// eulalie : to clean...
-			if (contact.body1.isInCollection() && !contact.body1.isInSameCollection(contact.body2)) {
-				
-				Vector2d tmp = new Vector2d(contact.normal);
-				contact.normal = new Vector2d(contact.normalB1);
-				contact.body1.transformB2W.transform(contact.normal); 
-				contact.body1.transformB2W.transform(contact.contactB1, contact.contactW);
-				contact.computeJacobian(true);
-				
-				force.set(contact.lambda.x*contact.jn.get(0) + contact.lambda.y*contact.jt.get(0), contact.lambda.x*contact.jn.get(1) + contact.lambda.y*contact.jt.get(1));
-				torque = contact.lambda.x*contact.jn.get(2) + contact.lambda.y*contact.jt.get(2);
-				
-				force.scale(1./dt);
-				torque /= dt;
-	
-				contact.body1.force.add(force);
-				contact.body1.torque += torque;	
-				
-				contact.normal = new Vector2d(tmp);
-				contact.computeJacobian(false);
-			}
-			if (contact.body2.isInCollection() && !contact.body2.isInSameCollection(contact.body1)) {
-				
-				Vector2d tmp = new Vector2d(contact.normal);
-				contact.normal = new Vector2d(contact.normalB1);
-				contact.body1.transformB2W.transform(contact.normal); 
-				contact.body1.transformB2W.transform(contact.contactB1, contact.contactW);
-				contact.computeJacobian(true);
-				
-				force.set(contact.lambda.x*contact.jn.get(3) + contact.lambda.y*contact.jt.get(3), contact.lambda.x*contact.jn.get(4) + contact.lambda.y*contact.jt.get(4));
-				torque = contact.lambda.x*contact.jn.get(5) + contact.lambda.y*contact.jt.get(5);
-			
-				force.scale(1./dt);
-				torque /= dt;
-	
-				contact.body2.force.add(force);
-				contact.body2.torque += torque;	
-	
-				contact.normal = new Vector2d(tmp);
-				contact.computeJacobian(false);
-			}
+	public void updateContactJacobianAsInternal(ArrayList<Contact> contacts) {
+		for (Contact c : contacts) {
+			c.normal.set(c.normalB1);
+			c.body1.transformB2W.transform(c.normal); 
+			c.body1.transformB2W.transform(c.contactB1, c.contactW);
+			c.computeJacobian(true);
 		}
 	}
-	
 	
 	protected void updateContactsMap() {
 		lastTimeStepMap.clear();
@@ -415,6 +399,54 @@ public class CollisionProcessor {
 		bpc.addToBodyLists();
 		bpc.addToBodyListsParent();
 		bpc.contactList.add(contact);
+	}
+	
+	/**
+	 * Fills lambdas with values from previous time step
+	 */
+	protected void warmStart() {
+		for (Contact contact : contacts) {
+			Contact oldContact = getOldContact(contact);
+			if(oldContact != null) { 
+				contact.lambda.x = oldContact.lambda.x;
+				contact.lambda.y = oldContact.lambda.y;
+			}
+		}
+	}
+	
+	/**
+	 * Checks if lastTimeStepMap (contact map of last time step) contains a similar contact and returns the corresponding contact. 
+	 * @param contact
+	 * @return oldContact
+	 */
+	protected Contact getOldContact(Contact contact) {
+		
+		Contact oldContact;
+		
+		Block block1 = contact.block1;
+		Block block2 = contact.block2;
+
+		if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))
+				|| lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
+
+			RigidBody body1 = (contact.body1.isInCollection())? contact.body1.parent: contact.body1;
+			RigidBody body2 = (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+
+			// if the old map contains this key, then get the lambda of the old map
+			oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
+			if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
+				oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
+			
+			RigidBody oldBody1 = (oldContact.body1.isInCollection())? oldContact.body1.parent: oldContact.body1;
+			RigidBody oldBody2 = (oldContact.body2.isInCollection())? oldContact.body2.parent: oldContact.body2;
+			
+			if ((oldBody1 != body1 && oldBody1 != body2) || (oldBody2 != body2 && oldBody2 != body1)) 
+				return null;
+		}
+		else
+			return null;
+		
+		return oldContact;
 	}
 		
 	/**

@@ -240,6 +240,9 @@ public class RigidBody {
 		index = nextIndex++;
 	}
 	
+	/**
+	 * Clear deltaV, force and torque
+	 */
 	public void clear() {
 		mergedThisTimeStep = false;
 		force.set(0, 0);
@@ -373,14 +376,7 @@ public class RigidBody {
 																	  // a bpc should only be part of one cycle
 				
 				// we only consider bodies that are ready to be merged
-				boolean mergeCondition = true;
-				if (!mergeParams.enableMergePinned.getValue() && (bpc.body1.pinned || bpc.body2.pinned)) mergeCondition = false;
-				if (bpc.body1.isInSameCollection(bpc.body2)) mergeCondition = false;
-				mergeCondition = (mergeCondition && bpc.checkMotionMetric(mergeParams));
-				if (mergeParams.enableMergeStableContactCondition.getValue()) mergeCondition = (mergeCondition && bpc.areContactsStable(mergeParams));
-				if (bpc.body1.isSleeping && bpc.body2.isSleeping) mergeCondition = true;
-			
-				if(mergeCondition) {
+				if(bpc.checkMergeCondition(mergeParams, false)) {
 			
 					RigidBody otherBody = bpc.getOtherBodyWithCollectionPerspective(this);
 	
