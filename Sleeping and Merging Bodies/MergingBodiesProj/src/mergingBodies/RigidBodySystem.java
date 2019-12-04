@@ -287,16 +287,14 @@ public class RigidBodySystem {
 			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
 			force.set( Math.cos( theta ), Math.sin(theta) );
 			force.scale( body.massLinear * gravityAmount.getValue() );
-			// gravity goes directly into the accumulator!  no torque!
-			body.force.add( force );
-			//apply force of gravity to all children as well
-			if( body instanceof RigidCollection) {
-				applyGravitySubBodies((RigidCollection) body, theta);
-			}
+			body.force.add( force ); // gravity goes directly into the accumulator, no torque
+			
+			if( body instanceof RigidCollection) 
+				applyGravityCollection((RigidCollection) body, theta);
 		}
 	}
 	
-	private void applyGravitySubBodies(RigidCollection collection, double theta) {
+	private void applyGravityCollection(RigidCollection collection, double theta) {
 		Vector2d force = new Vector2d();
 		for (RigidBody body : collection.collectionBodies) {
 			force.set( Math.cos( theta ), Math.sin(theta) );
@@ -328,19 +326,20 @@ public class RigidBodySystem {
 	 */
 	public void mergeBodies() {
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
-		
+
 		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 			
-			if (bpc.checkMergeCondition(mergeParams, true)) {
+			if (!bpc.inCollection && bpc.checkMergeCondition(mergeParams, true)) {
 				mergingEvent = true;
 				bpc.inCollection = true;
+				removalQueue.add(bpc); // bpc in now exclusively part of the collection
 				if(!bpc.body1.isInCollection() && !bpc.body2.isInCollection()) {
 					//both are not collections: make a new collection
 					bodies.remove(bpc.body1); 
 					bodies.remove(bpc.body2);
 					RigidCollection collection = new RigidCollection(bpc.body1, bpc.body2);
 					collection.addToInternalContact(bpc);
-					collection.addToBodyPairContacts(bpc);
+					collection.addBPCsToCollection(bpc);
 					bodies.add(collection);
 				}
 				else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() && !bpc.body1.isInSameCollection(bpc.body2)) {
@@ -354,8 +353,8 @@ public class RigidBodySystem {
 						bpc.body1.parent.internalContacts.addAll(bpc.body2.parent.internalContacts);
 						bpc.body1.parent.addCollection(bpc.body2.parent);
 						bpc.body1.parent.addToInternalContact(bpc);
-						bpc.body1.parent.addToBodyPairContacts(bpc);
 						bpc.body1.parent.addIncompleteCollectionContacts(bpc.body2.parent, removalQueue);
+						bpc.body1.parent.addBPCsToCollection(bpc);
 					}
 					else {
 						bodies.remove(bpc.body1.parent);
@@ -365,8 +364,8 @@ public class RigidBodySystem {
 						bpc.body2.parent.internalContacts.addAll(bpc.body1.parent.internalContacts);
 						bpc.body2.parent.addCollection(bpc.body1.parent);
 						bpc.body2.parent.addToInternalContact(bpc);
-						bpc.body2.parent.addToBodyPairContacts(bpc);
 						bpc.body2.parent.addIncompleteCollectionContacts(bpc.body1.parent, removalQueue);
+						bpc.body2.parent.addBPCsToCollection(bpc);
 					}
 				}
 				else if (bpc.body1.isInCollection()) {
@@ -374,28 +373,26 @@ public class RigidBodySystem {
 					bodies.remove(bpc.body2);
 					bpc.body1.parent.addBody(bpc.body2);
 					bpc.body1.parent.addToInternalContact(bpc);
-					bpc.body1.parent.addToBodyPairContacts(bpc);
 					bpc.body1.parent.addIncompleteContacts(bpc.body2, removalQueue);
+					bpc.body1.parent.addBPCsToCollection(bpc);
 				}
 				else if (bpc.body2.isInCollection()) {
 					//body2 is in a collection, body1 is not
 					bodies.remove(bpc.body1);
 					bpc.body2.parent.addBody(bpc.body1);
 					bpc.body2.parent.addToInternalContact(bpc);
-					bpc.body2.parent.addToBodyPairContacts(bpc);
 					bpc.body2.parent.addIncompleteContacts(bpc.body1, removalQueue);
+					bpc.body2.parent.addBPCsToCollection(bpc);
 				}
-				removalQueue.add(bpc); // bpc in now exclusively part of the collection
 			}
 		}
 		
-		for (BodyPairContact element : removalQueue) {
-			collisionProcessor.bodyPairContacts.remove(element);
-		}
+		collisionProcessor.bodyPairContacts.removeAll(removalQueue);
 	}
 	
 	protected void unmergeBodyPairContact(BodyPairContact bpc) {
 		if (!collisionProcessor.bodyPairContacts.contains(bpc)) {
+			bpc.inCollection = false;
 			bpc.contactStateHist.clear();
 			bpc.motionMetricHist.clear();
 			collisionProcessor.bodyPairContacts.add(bpc);
@@ -409,14 +406,15 @@ public class RigidBodySystem {
 	 */
 	private void unmergeAllBodies() {
 
-		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
+		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 		
 		for(RigidBody body : bodies) {
 			
 			if (body instanceof RigidCollection) {
 				
 				RigidCollection collection = (RigidCollection) body;
+				removalQueue.add(collection);
 				
 				for (BodyPairContact bpc: collection.bodyPairContactList)
 					unmergeBodyPairContact(bpc);
@@ -425,13 +423,11 @@ public class RigidBodySystem {
 					collection.unmergeSingleBody(b);
 					additionQueue.add(b);
 				}
-
-				removalQueue.add(collection);
 			}
 		}
 
-		bodies.addAll(additionQueue);
 		bodies.removeAll(removalQueue);
+		bodies.addAll(additionQueue);
 		
 		mergeParams.unmergeAll.setValue(false);
 	}
@@ -535,11 +531,11 @@ public class RigidBodySystem {
 		
 		ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
 
-		handledBodies.addAll((unmergingBodies));
 		for (RigidBody body: unmergingBodies) {
 			collection.unmergeSingleBody(body);
 			newBodies.add(body);
 		}
+		handledBodies.addAll(unmergingBodies);
 		
 		ArrayList<BodyPairContact> clearedBodyPairContacts = new ArrayList<BodyPairContact>();
 		for (RigidBody body: unmergingBodies) {
@@ -548,8 +544,9 @@ public class RigidBodySystem {
 
 			for (BodyPairContact bpc : body.bodyPairContactList) {
 				RigidBody otherBody = bpc.getOtherBody(body);
-				clearedBodyPairContacts.add(bpc);
-				bpc.removeFromBodyListsParent();
+				
+				if (!collisionProcessor.bodyPairContacts.contains(bpc))
+					clearedBodyPairContacts.add(bpc);
 				
 				if (bpc.inCollection) {
 					bpc.inCollection = false;
@@ -567,13 +564,13 @@ public class RigidBodySystem {
 							newCollection.color = new Color(collection.color);
 							collection.applyVelocitiesTo(newCollection);
 							newBodies.add(newCollection);
-							subBodies.clear();
-						} else if (subBodies.size() == 1) {
+						} else {
 							collection.unmergeSingleBody(subBodies.get(0));
 							collection.applyVelocitiesTo(body);
-							newBodies.add(subBodies.remove(0));
-							subBodies.clear();
+							newBodies.add(subBodies.get(0));
 						}
+						
+						subBodies.clear();
 					}
 				}
 			}
@@ -583,6 +580,12 @@ public class RigidBodySystem {
 		}		
 	}
 
+	/**
+	 * Fills subBodies list with bodies connected to given body in a same collection 
+	 * @param body
+	 * @param subBodies
+	 * @param handledBodies
+	 */
 	private void buildNeighborBody(RigidBody body, ArrayList<RigidBody> subBodies, ArrayList<RigidBody> handledBodies) {
 
 		for (BodyPairContact bpc : body.bodyPairContactList) {

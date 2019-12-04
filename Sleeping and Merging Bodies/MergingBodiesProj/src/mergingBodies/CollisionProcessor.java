@@ -185,6 +185,7 @@ public class CollisionProcessor {
 					if (!bpc.inCollection) 
 						for (Contact contact : bpc.contactList)
 							solver.contacts.add(new Contact(contact));
+						
 				solver.contacts.addAll(collection.internalContacts);
 				updateContactJacobianAsInternal(solver.contacts);
 				

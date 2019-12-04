@@ -331,14 +331,20 @@ public class RigidCollection extends RigidBody{
 			c.getHistoryStatistics();
 		}
 	
-		internalContacts.addAll(bpc.contactList);
+		for (Contact contact : bpc.contactList)
+			if (!internalContacts.contains(contact))
+				internalContacts.add(contact);
 	}
 	
-	public void addToBodyPairContacts(BodyPairContact bpc) {
+	/**
+	 * Add bpc and external bpc to the collection BodyPairContact
+	 * @param bpc
+	 */
+	public void addBPCsToCollection(BodyPairContact bpc) {
 		
 		bpc.addToBodyListsParent();
 		
-		// also add the external bpc to the collection bodyPairContactList
+		// add the external bpc to the collection bodyPairContactList
 		for (BodyPairContact bpcExt : bpc.body1.bodyPairContactList) 
 			bpcExt.addToBodyListsParent();
 		for (BodyPairContact bpcExt : bpc.body2.bodyPairContactList) 
@@ -483,15 +489,15 @@ public class RigidCollection extends RigidBody{
 			if (bpc.body1.isInSameCollection(bpc.body2) && !bpc.inCollection) {
 				bpc.inCollection = true;
 				body.parent.addToInternalContact(bpc);
-				body.parent.addToBodyPairContacts(bpc);
+				body.parent.addBPCsToCollection(bpc);
 				removalQueue.add(bpc);
 			}
 		}
 	}
 
 	/** input parameter is a collection being merged . we must add also all the incomplete contacts this parent has with other collections. */
-	public void addIncompleteCollectionContacts(RigidCollection parent, LinkedList<BodyPairContact> removalQueue) {
-		for (RigidBody body : parent.collectionBodies) {
+	public void addIncompleteCollectionContacts(RigidCollection collection, LinkedList<BodyPairContact> removalQueue) {
+		for (RigidBody body : collection.collectionBodies) {
 			addIncompleteContacts(body, removalQueue);
 		}
 	}	

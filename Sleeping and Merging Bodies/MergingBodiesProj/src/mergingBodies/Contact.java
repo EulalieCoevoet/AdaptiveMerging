@@ -110,6 +110,9 @@ public class Contact {
 	 */
 	public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal, Block b1, Block b2, double interpenetration) {
 				
+		if(body1 instanceof RigidCollection || body2 instanceof RigidCollection)
+			System.err.println("[Contact] Contact should never involve a collection.");
+		
 		this.body1 = body1;
 		this.body2 = body2;
 		this.contactW.set( contactW );
@@ -142,6 +145,8 @@ public class Contact {
 		normalB1.set(contact.normalB1);
 		normalB2.set(contact.normalB2);
 		contactW.set(contact.contactW);
+		contactB1.set(contact.contactB1);
+		contactB2.set(contact.contactB2);
 		jn.set(contact.jn);
 		jt.set(contact.jt);
 		lambda.set(contact.lambda);
