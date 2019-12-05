@@ -90,10 +90,9 @@ public class RigidCollection extends RigidBody{
 	 */
 	protected void addBodyInternalMethod(RigidBody body) {
 		body.parent = this;
-		body.mergedThisTimeStep = true;
 		collectionBodies.add(body);
 
-		updateVelocitiesFrom(body);		
+		updateVelocitiesFrom(body);	
 	}
 	
 	protected void updateVelocitiesFrom(RigidBody body) {
@@ -116,7 +115,6 @@ public class RigidCollection extends RigidBody{
 		tmp2.scale(body.massLinear);
 		tmp3.add(tmp2);
 		
-		
 		tmp1.sub( newCom, x );
 		tmp1.scale( omega );
 		tmp2.set( -tmp1.y, tmp1.x );
@@ -128,7 +126,7 @@ public class RigidCollection extends RigidBody{
 		
 		v.set(tmp3);
 		
-		omega = (omega*massAngular+body.omega*body.massAngular)/(body.massAngular+massAngular);
+		omega = ( omega*massAngular + body.omega*body.massAngular )/( body.massAngular + massAngular );
 	}
 	
 	@Override

@@ -129,8 +129,6 @@ public class RigidBody {
 	 */
 	public ArrayList<Double> metricHistory = new ArrayList<Double>();
 
-	public boolean mergedThisTimeStep = false;
-
 	DenseVector deltaV = new DenseVector(3);
 	
 	public RigidBody() {
@@ -244,7 +242,6 @@ public class RigidBody {
 	 * Clear deltaV, force and torque
 	 */
 	public void clear() {
-		mergedThisTimeStep = false;
 		force.set(0, 0);
 		torque = 0;
 		deltaV.zero();

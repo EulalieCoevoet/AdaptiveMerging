@@ -390,6 +390,10 @@ public class RigidBodySystem {
 		collisionProcessor.bodyPairContacts.removeAll(removalQueue);
 	}
 	
+	/**
+	 * Unmerge body pair contact
+	 * @param bpc
+	 */
 	protected void unmergeBodyPairContact(BodyPairContact bpc) {
 		if (!collisionProcessor.bodyPairContacts.contains(bpc)) {
 			collisionProcessor.bodyPairContacts.add(bpc);
@@ -1135,45 +1139,54 @@ public class RigidBodySystem {
 	public boolean generateBody = false;
 
 	public void generateBody() {
+
+		RigidBody genbody = null;
+		for( RigidBody body: bodies ) {
+			if ((body instanceof RigidCollection) || body.pinned) 
+				continue;
+			
+			if (body.index == index.getValue())
+				genbody = new RigidBody(body);
+		}
 		
 		//get an unpinned random RigidBody
-		RigidBody body = new RigidBody(bodies.get(0));
-		RigidBody backup_body = new RigidBody(bodies.get(0));
-
-		Boolean found = false;
-		for( RigidBody b: bodies) {
-			if (b.pinned) {
-				continue;
-			}
-			if (b.index  != index.getValue()) {
-				backup_body = new RigidBody(b);
-				continue;			
-			}
-			if (b.index == index.getValue()) {
-				found = true;
-				body = new RigidBody(b);
+		if (genbody == null) {
+			for (RigidBody body: bodies) {
+				if (!(body instanceof RigidCollection) && !body.pinned) {
+					genbody = new RigidBody(body);
+					break;
+				}
 			}
 		}
 		
-		//degenerate case
-		if (!found) {
-			body = backup_body;
+		if (genbody == null) {
+			if(bodies.get(0) instanceof RigidCollection) {
+				RigidCollection collection = (RigidCollection)bodies.get(0);
+				for (RigidBody body: collection.collectionBodies) {
+					if (!body.pinned) {
+						genbody = new RigidBody(body);
+						break;
+					}
+				}
+			}
 		}
-
+		
 		Point2d position = new Point2d(origin_x.getValue(), origin_y.getValue());
 		Vector2d velocity = new Vector2d(velocity_x.getValue(), velocity_y.getValue());
 
 		//also needs to scale the blocks of the body:
 		//   body.scale(scale.getValue());
-		body.x0.set(position);                        
-		body.x.set(position);            
-		body.theta = this.theta.getValue();
-		body.omega = this.omega.getValue();
-		body.v.set(velocity);
-		body.updateTransformations();
-		body.index = bodies.size();
-		body.created = true;
-		this.add(body);
+		if (genbody != null) {
+			genbody.x0.set(position);                        
+			genbody.x.set(position);            
+			genbody.theta = this.theta.getValue();
+			genbody.omega = this.omega.getValue();
+			genbody.v.set(velocity);
+			genbody.updateTransformations();
+			genbody.index = bodies.size();
+			genbody.created = true;
+			this.add(genbody);
+		}
 	}
 }
 
