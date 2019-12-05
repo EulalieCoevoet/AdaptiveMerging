@@ -360,8 +360,7 @@ public class RigidCollection extends RigidBody{
 			return;
 		
 		updateBodiesPositionAndTransformations();
-		collisionProcessor.updateContactJacobianAsInternal(internalContacts);
-		computeInternalContactsForce(dt);
+		computeInternalContactsForce(dt);		
 	}
 	
 	/**
@@ -417,7 +416,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void computeInternalContactsForce(double dt) { 
 		for (Contact c: internalContacts) {
-			c.computeContactForce(dt);
+			c.computeContactForce(true, dt);
 		}
 	}
 

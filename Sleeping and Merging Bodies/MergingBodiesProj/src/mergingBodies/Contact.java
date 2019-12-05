@@ -74,8 +74,14 @@ public class Contact {
 	/** Jacobian for normal direction */ 
 	DenseVector jn = new DenseVector(6);
 	
+	/** Jacobian for normal direction collection frame */ 
+	DenseVector jnc = new DenseVector(6);
+	
 	/** Jacobian for tangential direction */ 
 	DenseVector jt = new DenseVector(6);
+	
+	/** Jacobian for tangential direction collection frame */ 
+	DenseVector jtc = new DenseVector(6);
 
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent) */
 	Vector2d lambda = new Vector2d();
@@ -123,8 +129,6 @@ public class Contact {
 		constraintViolation =  interpenetration + offset;
 		index = nextContactIndex++;        
 
-		computeJacobian(false);
-
 		contactB1.set(contactW);
 		contactB2.set(contactW);
 		body1.transformW2B.transform(contactB1);
@@ -136,21 +140,9 @@ public class Contact {
 		body1.transformW2B.transform(normalB1);
 		body2.transformW2B.transform(normalB2);
 		normalB2.scale(-1);
-	}
-	
-	public Contact(Contact contact) {
-		this.body1 = contact.body1;
-		this.body2 = contact.body2;
-		this.normal.set(contact.normal);   
-		normalB1.set(contact.normalB1);
-		normalB2.set(contact.normalB2);
-		contactW.set(contact.contactW);
-		contactB1.set(contact.contactB1);
-		contactB2.set(contact.contactB2);
-		jn.set(contact.jn);
-		jt.set(contact.jt);
-		lambda.set(contact.lambda);
-		constraintViolation = contact.constraintViolation;
+		
+		computeJacobian(false);
+		computeJacobian(true);
 	}
 	
 	/**
@@ -158,10 +150,13 @@ public class Contact {
 	 * In case of body in a collection, use COM of parent to compute the torque component of the Jacobian.
 	 */
 	public void computeJacobian(boolean computeInCollection) {
-		
+				
 		RigidBody b1 = (body1.isInCollection() && !computeInCollection )? body1.parent: body1;
 		RigidBody b2 = (body2.isInCollection() && !computeInCollection )? body2.parent: body2;
 
+		body1.transformB2W.transform(contactB1, contactW);
+		body1.transformB2W.transform(normalB1, normal);
+		
 		Point2d radiusBody1 = new Point2d();
 		Point2d radiusBody2 = new Point2d();
 
@@ -170,18 +165,25 @@ public class Contact {
 
 		Vector2d r1 = new Vector2d(-radiusBody1.y, radiusBody1.x);
 		Vector2d r2 = new Vector2d(-radiusBody2.y, radiusBody2.x);
+		Vector2d tangent = new Vector2d(-normal.y, normal.x);
 		
+		DenseVector jn;
+		DenseVector jt;
+
+		jn = (b1 instanceof RigidCollection)? jnc: this.jn;
+		jt = (b1 instanceof RigidCollection)? jtc: this.jt;
 		jn.set(0, -normal.x); 
 		jn.set(1, -normal.y);
 		jn.set(2, -r1.dot(normal));
-		jn.set(3, normal.x);
-		jn.set(4, normal.y);
-		jn.set(5, r2.dot(normal)); 
-
-		Vector2d tangent = new Vector2d(-normal.y, normal.x);
 		jt.set(0, -tangent.x);
 		jt.set(1, -tangent.y);
 		jt.set(2, -r1.dot(tangent));
+
+		jn = (b2 instanceof RigidCollection)? jnc: this.jn;
+		jt = (b2 instanceof RigidCollection)? jtc: this.jt;
+		jn.set(3, normal.x);
+		jn.set(4, normal.y);
+		jn.set(5, r2.dot(normal)); 
 		jt.set(3, tangent.x);
 		jt.set(4, tangent.y);
 		jt.set(5, r2.dot(tangent));
@@ -191,11 +193,16 @@ public class Contact {
 	 * Stores contact forces and torques for visualization purposes
 	 * @param dt
 	 */
-	public void computeContactForce(double dt) {
+	public void computeContactForce(boolean computeInCollection, double dt) {
+
+		DenseVector jn;
+		DenseVector jt;
 		
 		Vector2d cForce = new Vector2d();
 		double cTorque = 0;
-		
+
+		jn = (body1.isInCollection() && !computeInCollection)? this.jnc: this.jn;
+		jt = (body1.isInCollection() && !computeInCollection)? this.jtc: this.jt;
 		cForce.set(lambda.x*jn.get(0) + lambda.y*jt.get(0),lambda.x*jn.get(1) + lambda.y*jt.get(1));
 		cTorque = lambda.x*jn.get(2) + lambda.y*jt.get(2);
 		cForce.scale(1/dt);
@@ -203,6 +210,8 @@ public class Contact {
 		contactForceB1.set(cForce);
 		contactTorqueB1 = cTorque;
 
+		jn = (body2.isInCollection() && !computeInCollection)? this.jnc: this.jn;
+		jt = (body2.isInCollection() && !computeInCollection)? this.jtc: this.jt;
 		cForce.set(lambda.x*jn.get(3) + lambda.y*jt.get(3),lambda.x*jn.get(4) + lambda.y*jt.get(4));
 		cTorque = lambda.x*jn.get(5) + lambda.y*jt.get(5);
 		cForce.scale(1/dt);
@@ -230,46 +239,48 @@ public class Contact {
 	 * @param dt
 	 * @param restitution
 	 * @param feedbackStiffness
-	 * @param computeInCollections
+	 * @param computeInCollection
 	 */
-	public void computeB(double dt, double restitution, double feedbackStiffness,  boolean computeInCollections) {
+	public void computeB(double dt, double restitution, double feedbackStiffness,  boolean computeInCollection) {
 		
-		RigidBody b1 = (body1.isInCollection() && !computeInCollections)? body1.parent: body1;
-		RigidBody b2 = (body2.isInCollection() && !computeInCollections)? body2.parent: body2;
+		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
 
 		double m1inv = (b1.temporarilyPinned)? 0: b1.minv; 
 		double m2inv = (b2.temporarilyPinned)? 0: b2.minv;
 		double j1inv = (b1.temporarilyPinned)? 0: b1.jinv;
 		double j2inv = (b2.temporarilyPinned)? 0: b2.jinv;
-	
-		// normal component		
-		// find all relevant values of u. (normal)
-		double u1xn =     (b1.v.x + b1.force.x * m1inv * dt) * jn.get(0);
-		double u1yn =     (b1.v.y + b1.force.y * m1inv * dt) * jn.get(1);
-		double u1omegan = (b1.omega + b1.torque * j1inv * dt) * jn.get(2);
+		
+		// add the Bounce vector to the u's over here, but don't need to do that just yet
+		if (computeInCollection)
+			restitution=0.;
+		
+		DenseVector j;
+		
+		j = (b1 instanceof RigidCollection)? this.jnc: this.jn;
+		double u1xn =     (b1.v.x + b1.force.x * m1inv * dt) * j.get(0);
+		double u1yn =     (b1.v.y + b1.force.y * m1inv * dt) * j.get(1);
+		double u1omegan = (b1.omega + b1.torque * j1inv * dt) * j.get(2);
+		double bBounce = restitution*(b1.v.x*j.get(0) + b1.v.y*j.get(1) + b1.omega*j.get(2));
 
-		double u2xn =     (b2.v.x + b2.force.x * m2inv * dt) * jn.get(3);
-		double u2yn =     (b2.v.y + b2.force.y * m2inv * dt) * jn.get(4);
-		double u2omegan = (b2.omega + b2.torque * j2inv * dt) * jn.get(5);
-	
-		// tangent component		
-		// find all relevant values of u. (tangential)
-		double u1xt =     (b1.v.x + b1.force.x * m1inv * dt) * jt.get(0);
-		double u1yt =     (b1.v.y + b1.force.y * m1inv * dt) * jt.get(1);
-		double u1omegat = (b1.omega + b1.torque * j1inv * dt) * jt.get(2);
+		j = (b1 instanceof RigidCollection)? this.jtc: this.jt;
+		double u1xt =     (b1.v.x + b1.force.x * m1inv * dt) * j.get(0);
+		double u1yt =     (b1.v.y + b1.force.y * m1inv * dt) * j.get(1);
+		double u1omegat = (b1.omega + b1.torque * j1inv * dt) * j.get(2);
+			
+		j = (b2 instanceof RigidCollection)? this.jnc: this.jn;
+		double u2xn =     (b2.v.x + b2.force.x * m2inv * dt) * j.get(3);
+		double u2yn =     (b2.v.y + b2.force.y * m2inv * dt) * j.get(4);
+		double u2omegan = (b2.omega + b2.torque * j2inv * dt) * j.get(5);
+		bBounce += restitution*(b2.v.x*j.get(3) + b2.v.y*j.get(4) + b2.omega*j.get(5));
 
-		double u2xt =     (b2.v.x + b2.force.x * m2inv * dt) * jt.get(3);
-		double u2yt =     (b2.v.y + b2.force.y * m2inv * dt) * jt.get(4);
-		double u2omegat = (b2.omega + b2.torque * j2inv * dt) * jt.get(5);
+		j = (b2 instanceof RigidCollection)? this.jtc: this.jt; 
+		double u2xt =     (b2.v.x + b2.force.x * m2inv * dt) * j.get(3);
+		double u2yt =     (b2.v.y + b2.force.y * m2inv * dt) * j.get(4);
+		double u2omegat = (b2.omega + b2.torque * j2inv * dt) * j.get(5);
 
 		// calculate Baumgarte Feedback (overlap of the two bodies)
 		double baumgarteFeedback = feedbackStiffness*constraintViolation;
-		
-		// add the Bounce vector to the u's over here, but don't need to do that just yet
-		if (computeInCollections)
-			restitution=0.;
-		double bBounce = restitution*(b1.v.x*jn.get(0) + b1.v.y*jn.get(1) + b1.omega*jn.get(2));
-		bBounce += restitution*(b2.v.x*jn.get(3) + b2.v.y*jn.get(4) + b2.omega*jn.get(5));
 		
 		// putting b together.
 		bn = u1xn + u2xn + u1yn + u2yn + u1omegan + u2omegan + bBounce + baumgarteFeedback;
@@ -278,37 +289,39 @@ public class Contact {
 	
 	/**
 	 * Compute Dii values and store in contact
-	 * @param computeInCollections
+	 * @param computeInCollection
 	 * @param compliance 
 	 */
-	public void computeJMinvJtDiagonal(boolean computeInCollections) {
+	public void computeJMinvJtDiagonal(boolean computeInCollection) {
 		
-		RigidBody b1 = (body1.isInCollection() && !computeInCollections)? body1.parent: body1;
-		RigidBody b2 = (body2.isInCollection() && !computeInCollections)? body2.parent: body2;
+		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
 		
 		double m1inv = (b1.temporarilyPinned)? 0: b1.minv; 
 		double m2inv = (b2.temporarilyPinned)? 0: b2.minv;
 		double j1inv = (b1.temporarilyPinned)? 0: b1.jinv;
 		double j2inv = (b2.temporarilyPinned)? 0: b2.jinv;
 		
-		// normal component		
+		DenseVector jn;
+		DenseVector jt;
+		
 		diin = 0.;
-		//first body component
+		diit = 0.;
+		
+		jn = (b1 instanceof RigidCollection)? this.jnc: this.jn;
+		jt = (b1 instanceof RigidCollection)? this.jtc: this.jt;
 		diin += jn.get(0) * m1inv * jn.get(0);
 		diin += jn.get(1) * m1inv * jn.get(1);
 		diin += jn.get(2) * j1inv * jn.get(2);
-		//second body component
-		diin += jn.get(3) * m2inv * jn.get(3);
-		diin += jn.get(4) * m2inv * jn.get(4);
-		diin += jn.get(5) * j2inv * jn.get(5);
-		
-		// tangent component
-		diit = 0.;
-		//first body component
 		diit += jt.get(0) * m1inv * jt.get(0);
 		diit += jt.get(1) * m1inv * jt.get(1);
 		diit += jt.get(2) * j1inv * jt.get(2);
-		//second body component
+		
+		jn = (b2 instanceof RigidCollection)? this.jnc: this.jn;
+		jt = (b2 instanceof RigidCollection)? this.jtc: this.jt;
+		diin += jn.get(3) * m2inv * jn.get(3);
+		diin += jn.get(4) * m2inv * jn.get(4);
+		diin += jn.get(5) * j2inv * jn.get(5);
 		diit += jt.get(3) * m2inv * jt.get(3);
 		diit += jt.get(4) * m2inv * jt.get(4);
 		diit += jt.get(5) * j2inv * jt.get(5);
@@ -316,20 +329,22 @@ public class Contact {
 	
 	/**
 	 * Returns Jdv values for normal component.
-	 * @param computeInCollections
+	 * @param computeInCollection
 	 */
-	public double getJdvn(boolean computeInCollections) {
+	public double getJdvn(boolean computeInCollection) {
 		
-		DenseVector dv1 = (body1.isInCollection() && !computeInCollections)? body1.parent.deltaV : body1.deltaV; 
-		DenseVector dv2 = (body2.isInCollection() && !computeInCollections)? body2.parent.deltaV : body2.deltaV; 
+		DenseVector dv1 = (body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
+		DenseVector dv2 = (body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
+		DenseVector jn;
 		
-		// normal component
 		double Jdvn = 0;  		
-		//first body
+		
+		jn = (body1.isInCollection() && !computeInCollection)? this.jnc: this.jn;
 		Jdvn += jn.get(0) * dv1.get(0);
 		Jdvn += jn.get(1) * dv1.get(1);
 		Jdvn += jn.get(2) * dv1.get(2);
-		//second body
+		
+		jn = (body2.isInCollection() && !computeInCollection)? this.jnc: this.jn;
 		Jdvn += jn.get(3) * dv2.get(0);
 		Jdvn += jn.get(4) * dv2.get(1);
 		Jdvn += jn.get(5) * dv2.get(2);
@@ -339,20 +354,24 @@ public class Contact {
 	
 	/**
 	 * Returns Jdv values for tangent component.
-	 * @param computeInCollections
+	 * @param computeInCollection
 	 */
-	public double getJdvt(boolean computeInCollections) {
+	public double getJdvt(boolean computeInCollection) {
 		
-		DenseVector dv1 = (body1.isInCollection() && !computeInCollections)? body1.parent.deltaV : body1.deltaV; 
-		DenseVector dv2 = (body2.isInCollection() && !computeInCollections)? body2.parent.deltaV : body2.deltaV; 
+		DenseVector dv1 = (body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
+		DenseVector dv2 = (body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
+		
+		DenseVector jt;
 		
 		// normal component
 		double Jdvt = 0;  		
-		//first body
+
+		jt = (body1.isInCollection() && !computeInCollection)? this.jtc: this.jt;
 		Jdvt += jt.get(0) * dv1.get(0);
 		Jdvt += jt.get(1) * dv1.get(1);
 		Jdvt += jt.get(2) * dv1.get(2);
-		//second body
+
+		jt = (body2.isInCollection() && !computeInCollection)? this.jtc: this.jt;
 		Jdvt += jt.get(3) * dv2.get(0);
 		Jdvt += jt.get(4) * dv2.get(1);
 		Jdvt += jt.get(5) * dv2.get(2);

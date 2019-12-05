@@ -102,6 +102,10 @@ public class CollisionProcessor {
 			solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 			solver.warmStart = true;
 			solver.contacts = contacts;
+
+			// eulalie: this can be optimized, only new collections need an update 
+			for (Contact contact: solver.contacts)
+				contact.computeJacobian(false);
 			
 			// solve contacts
 			long now = System.nanoTime();
@@ -175,47 +179,35 @@ public class CollisionProcessor {
 		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 		solver.warmStart = true;
 		
+		solver.contacts = new ArrayList<Contact>();
+		solver.contacts.addAll(contacts);
+		for (RigidBody body : bodies) {
+			if (body instanceof RigidCollection && !body.isSleeping) {
+				RigidCollection collection = (RigidCollection)body;
+				solver.contacts.addAll(collection.internalContacts);
+			}
+		}
+		
+		// eulalie: this can be optimized, only collections need an update 
+		for (Contact contact: solver.contacts) 
+			contact.computeJacobian(true);
+		
+		solver.solve(dt);
+		
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.isSleeping) {
 				
 				RigidCollection collection = (RigidCollection)body;
-				
-				solver.contacts = new ArrayList<Contact>();
-				for (BodyPairContact bpc: collection.bodyPairContactList)
-					if (!bpc.inCollection) 
-						for (Contact contact : bpc.contactList)
-							solver.contacts.add(new Contact(contact));
-						
-				solver.contacts.addAll(collection.internalContacts);
-				updateContactJacobianAsInternal(solver.contacts);
-				
-				solver.solve(dt);
-				
 				collection.computeInternalContactsForce(dt);
 				
 				for (RigidBody b : collection.collectionBodies)
 					if(!b.pinned && !b.temporarilyPinned)
 						b.advanceVelocities(dt);	
 			}
-		}
-		
-		for (RigidBody body: bodies) 
 			body.deltaV.zero();
+		}
 		
 		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
-	}
-	
-	/**
-	 * Update all internal contacts Jacobians, along with position and normal data
-	 * @param dt time step needed to get correct contact forces from lambda impulses (only for visualization)
-	 */
-	public void updateContactJacobianAsInternal(ArrayList<Contact> contacts) {
-		for (Contact c : contacts) {
-			c.normal.set(c.normalB1);
-			c.body1.transformB2W.transform(c.normal); 
-			c.body1.transformB2W.transform(c.contactB1, c.contactW);
-			c.computeJacobian(true);
-		}
 	}
 	
 	protected void updateContactsMap() {
@@ -251,7 +243,7 @@ public class CollisionProcessor {
 	 */
 	public void computeContactsForce(double dt) {
 		for (Contact c: contacts)
-			c.computeContactForce(dt);	
+			c.computeContactForce(false, dt);	
 	}
 
 	/**go through each element in contacts 2.

@@ -135,7 +135,7 @@ public class RigidBodySystem {
 		
 		/// COLLECTION UPDATE /// this should be done before advanceTime() so that external forces and velocities are of the same time step
 		if (mergeParams.updateContactsInCollections.getValue()) 
-			collisionProcessor.updateInCollections(dt);
+			collisionProcessor.updateInCollections(dt);		
 		
 		/// UNMERGE (CONTACT CRITERIA) ///		
 		if (mergeParams.enableUnmerging.getValue() && (mergeParams.enableUnmergeNormalCondition.getValue() || mergeParams.enableUnmergeFrictionCondition.getValue())) {
@@ -399,9 +399,6 @@ public class RigidBodySystem {
 			for (Contact contact : bpc.contactList) 
 				if (!collisionProcessor.contacts.contains(contact))
 						collisionProcessor.contacts.add(contact);
-		} else {
-			for (Contact contact : bpc.contactList) 
-				contact.computeJacobian(true);
 		}
 	}
 	
@@ -961,9 +958,9 @@ public class RigidBodySystem {
 	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	
 	private BooleanParameter drawDeltaV = new BooleanParameter("draw DeltaV", false );
-	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true );
-	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true );
-	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true );
+	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", false );
+	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", false );
+	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", false );
 	private IntParameter contactLocationSize = new IntParameter( "contact point size ", 5, 5, 20);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw internal histories", false );
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );

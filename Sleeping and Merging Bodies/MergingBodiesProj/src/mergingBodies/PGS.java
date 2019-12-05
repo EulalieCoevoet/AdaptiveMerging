@@ -134,23 +134,30 @@ public class PGS {
 		double j1inv = (body1.temporarilyPinned)? 0: body1.jinv;
 		double j2inv = (body2.temporarilyPinned)? 0: body2.jinv;
 		
-		//update delta V;
 		DenseVector dv1 = body1.deltaV; 
 		DenseVector dv2 = body2.deltaV;
+		DenseVector jn;
+		DenseVector jt;
 		
-		dv1.add( 0, contact.jn.get(0) * m1inv * lambda_n );
-		dv1.add( 1, contact.jn.get(1) * m1inv * lambda_n );
-		dv1.add( 2, contact.jn.get(2) * j1inv * lambda_n );
-		dv2.add( 0, contact.jn.get(3) * m2inv * lambda_n );
-		dv2.add( 1, contact.jn.get(4) * m2inv * lambda_n );
-		dv2.add( 2, contact.jn.get(5) * j2inv * lambda_n );
+		jn = (body1 instanceof RigidCollection)? contact.jnc: contact.jn;
+		jt = (body1 instanceof RigidCollection)? contact.jtc: contact.jt;
 		
-		dv1.add( 0, contact.jt.get(0) * m1inv * lambda_t );
-		dv1.add( 1, contact.jt.get(1) * m1inv * lambda_t );
-		dv1.add( 2, contact.jt.get(2) * j1inv * lambda_t );
-		dv2.add( 0, contact.jt.get(3) * m2inv * lambda_t );
-		dv2.add( 1, contact.jt.get(4) * m2inv * lambda_t );
-		dv2.add( 2, contact.jt.get(5) * j2inv * lambda_t );
+		dv1.add( 0, jn.get(0) * m1inv * lambda_n );
+		dv1.add( 1, jn.get(1) * m1inv * lambda_n );
+		dv1.add( 2, jn.get(2) * j1inv * lambda_n );		
+		dv1.add( 0, jt.get(0) * m1inv * lambda_t );
+		dv1.add( 1, jt.get(1) * m1inv * lambda_t );
+		dv1.add( 2, jt.get(2) * j1inv * lambda_t );
+		
+		jn = (body2 instanceof RigidCollection)? contact.jnc: contact.jn;
+		jt = (body2 instanceof RigidCollection)? contact.jtc: contact.jt;
+		
+		dv2.add( 0, jn.get(3) * m2inv * lambda_n );
+		dv2.add( 1, jn.get(4) * m2inv * lambda_n );
+		dv2.add( 2, jn.get(5) * j2inv * lambda_n );
+		dv2.add( 0, jt.get(3) * m2inv * lambda_t );
+		dv2.add( 1, jt.get(4) * m2inv * lambda_t );
+		dv2.add( 2, jt.get(5) * j2inv * lambda_t );
 	}
 	
 	/**
