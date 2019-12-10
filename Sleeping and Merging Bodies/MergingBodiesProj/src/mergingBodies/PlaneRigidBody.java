@@ -46,15 +46,11 @@ public class PlaneRigidBody extends RigidBody {
 	}
 	
 	@Override
-	public void display(GLAutoDrawable drawable) {
-		Color3f color = new Color3f(0f, 0f, 0f);
-		display(drawable, color);
-	}
-	
-	@Override
 	public void display(GLAutoDrawable drawable, Color3f color) {
 		GL2 gl = drawable.getGL().getGL2();
-		gl.glColor4f(color.x, color.y, color.z, Block.alpha);
+		
+		gl.glColor4f(0f, 0f, 0f, Block.alpha);
+		
 		double s = 1000;		
 		gl.glBegin(GL.GL_TRIANGLE_STRIP);
 		gl.glVertex2d( p.x - n.y*s, p.y + n.x*s );

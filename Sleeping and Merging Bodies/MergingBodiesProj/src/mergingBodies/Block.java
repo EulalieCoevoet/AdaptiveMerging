@@ -19,7 +19,7 @@ public class Block {
     /** Radius of circle that encloses this block */
     static double radius = Math.sqrt(2) * 0.5;// * 0.9; // 90% of the normal size... allow for some overlap?
     
-    /** Block pixel colour */
+    /** Block pixel color */
     Color3f c = new Color3f();
     
     /** row index in the original image */
@@ -47,10 +47,10 @@ public class Block {
     }
     
     /**
-     * Computes a mass based on the intensity, darker is heavier.  Uses standard colour to intensity conversion weights.
+     * Computes a mass based on the intensity, darker is heavier.  Uses standard color to intensity conversion weights.
      * @return a value between 0 and 1
      */
-    public double getColourMass() {
+    public double getColorMass() {
         return 1 - (0.3 * c.x + 0.59 * c.y + 0.11 * c.z);
     }
     
@@ -63,8 +63,9 @@ public class Block {
         GL2 gl = drawable.getGL().getGL2();
         if(color!=null)
         	gl.glColor4f( color.x, color.y, color.z, alpha );
-        else
+        else 
         	gl.glColor4f( c.x, c.y, c.z, alpha );
+        
         gl.glBegin(GL.GL_TRIANGLE_STRIP);
         gl.glVertex2d( pB.x - h, pB.y - h );
         gl.glVertex2d( pB.x - h, pB.y + h );

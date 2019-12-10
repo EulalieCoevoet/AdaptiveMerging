@@ -37,6 +37,7 @@ public class RigidCollection extends RigidBody{
 		// These bodies being added to the collection, with the collection being new,
 		// their state w.r.t the collection frame is unchanged as C2W and W2C are Identity
 		
+		myListID = -2;
 		color = new Color();
 		color.setRandomColor();
 		
@@ -309,7 +310,7 @@ public class RigidCollection extends RigidBody{
 		for (RigidBody body: collectionBodies) {
 			if (!(body instanceof PlaneRigidBody)) {
 				for ( Block block : body.blocks ) {
-					double mass = block.getColourMass();
+					double mass = block.getColorMass();
 					tmp.set(block.pB);
 					body.transformB2C.transform(tmp);
 					inertia += mass*tmp.distanceSquared(zero);
@@ -534,21 +535,28 @@ public class RigidCollection extends RigidBody{
 	 * displays the Body Collection in different color.
 	 * @param drawable
 	 */
-	public void displayCollection( GLAutoDrawable drawable, Color3f color) {
-		GL2 gl = drawable.getGL().getGL2();
-		gl.glEnable(GL2.GL_BLEND); 
-		gl.glBlendFunc(GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR);
-		gl.glBlendEquation(GL2.GL_FUNC_ADD);
-		gl.glBlendColor(color.x, color.y, color.z, Block.alpha);
+	public void displayCollection( GLAutoDrawable drawable) {
 		
-		for (RigidBody b: collectionBodies) {
-			//if (myListID == -1)
-			//	b.myListID = -1;
-			b.display(drawable, color);
+		if (myListID == -1) { // transparency change
+			for (RigidBody b: collectionBodies) 
+				b.display(drawable, null);
+			
+			myListID = -2;
+			
+		} else { // eulalie: transparency doesn't work, don't understand why
+			GL2 gl = drawable.getGL().getGL2(); // GL has no glBlendColor()
+			gl.glEnable(GL2.GL_BLEND);
+			gl.glBlendFuncSeparate(GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR, GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glBlendEquation(GL2.GL_FUNC_ADD);
+			gl.glBlendColor(color.x, color.y, color.z, Block.alpha);
+			
+			for (RigidBody b: collectionBodies)
+				b.display(drawable, color);
+			
+			// Back to initial set up
+			gl.glEnable(GL.GL_BLEND); 
+	        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);	
 		}
-		
-        gl.glEnable( GL.GL_BLEND );
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );	
     }
 
 	/**

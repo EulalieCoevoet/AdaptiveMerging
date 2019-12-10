@@ -62,7 +62,7 @@ public class ImageBlocker {
                 for ( int y = 0; y < height; y++ ) {
                     if ( visited[x][y] ) continue;
                     visited[x][y] = true;
-                    getColour( colour, x, y );
+                    getColor( colour, x, y );
                     if ( isWhite( colour ) ) continue;
                    
 	                // this is part of a new body!
@@ -130,16 +130,17 @@ public class ImageBlocker {
         List<Coord> Q = new LinkedList<Coord>();
         visited[x][y] = true;
         Q.add( new Coord(x,y) );
-        Color3f colour = new Color3f();
+        Color3f color = new Color3f();
         while ( ! Q.isEmpty() ) {            
             Coord p = Q.remove(0);
             x = p.x;
             y = p.y;
-            getColour( colour, x, y );
-            if ( isWhite(colour) ) continue;
+            getColor( color, x, y );
+            if ( isWhite(color) ) 
+            	continue;
             
-            if ( ! isYellow( colour) ) {
-	            Block b = new Block( y, x, colour );
+            if ( ! isYellow( color) ) {
+	            Block b = new Block( y, x, color );
 	            blocks.add( b );
 	            if ( isBoundary( x, y ) ) {
 	                boundaryBlocks.add( b );                
@@ -181,7 +182,7 @@ public class ImageBlocker {
         for ( int i = -1; i < 2; i++ ) {
             for ( int j = -1; j < 2; j++ ) {
                 if ( i==j ) continue;
-                getColour( colour, x+i, y+j );
+                getColor( colour, x+i, y+j );
                 if ( isWhite(colour) ) return true;
             }
         }   
@@ -193,7 +194,7 @@ public class ImageBlocker {
      * @param x
      * @param y
      */
-    private void getColour( Color3f colour, int x, int y ) {
+    private void getColor( Color3f colour, int x, int y ) {
         int data = imageData[y*width+x];
         colour.x = ((data >> 16) & 0x0ff) / 255.0f;
         colour.y = ((data >> 8) & 0x0ff) / 255.0f;

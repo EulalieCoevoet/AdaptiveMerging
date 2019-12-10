@@ -725,7 +725,7 @@ public class RigidBodySystem {
 	 * </ul><p>
 	 */
 	protected void processCollectionsColor() {
-		ArrayList<Color3f> colors = new ArrayList<Color3f>();
+		ArrayList<Color> colors = new ArrayList<Color>();
 		ArrayList<RigidCollection> collections = new ArrayList<RigidCollection>();
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection) {
@@ -784,22 +784,29 @@ public class RigidBodySystem {
 			RigidBody.clearDisplayLists( gl );
 			for ( RigidBody b : bodies ) {
 				b.myListID = -1;
+
+				if (b instanceof RigidCollection)
+					for (RigidBody sb : ((RigidCollection)b).collectionBodies)
+						sb.myListID = -1;
 			}
 		}  
 		
 		if ( drawBodies.getValue() ) {
 			
 			for ( RigidBody b : bodies ) {
+				
 				if ( b instanceof RigidCollection) {
 					RigidCollection collection = (RigidCollection)b;
 					if(drawCollections.getValue()) {
-						Color3f color = new Color3f(collection.color);
-						collection.displayCollection(drawable, color);
+						collection.displayCollection(drawable);
+					} else {
+						for (RigidBody sb : collection.collectionBodies)
+							sb.display(drawable, null);
 					}
 				} else {
-					b.display(drawable);
+					b.display(drawable, null);
 				}
-
+				
 				for (Spring s : b.springs) {
 					s.displaySpring(drawable);
 				}
@@ -930,25 +937,14 @@ public class RigidBodySystem {
 
 	private void displayVisitBoundaryCollection(RigidCollection b, GLAutoDrawable drawable) {
 		for (RigidBody body: b.collectionBodies) {
-			if (body instanceof RigidCollection) {
-				displayVisitBoundaryCollection((RigidCollection) body, drawable);
-			}
-			else {
-				body.root.displayVisitBoundary(drawable, collisionProcessor.visitID);
-			}
+			body.root.displayVisitBoundary(drawable, collisionProcessor.visitID);
 		}
 	}
 
 	private void displayCollectionBV(RigidCollection b, GLAutoDrawable drawable) {
 		for (RigidBody body: b.collectionBodies) {
-			if (body instanceof RigidCollection) {
-				displayCollectionBV((RigidCollection) body, drawable);
-			}
-			else {
-				body.root.display(drawable);
-			}
+			body.root.display(drawable);
 		}
-
 	}
 
 	private DoubleParameter transparency = new DoubleParameter("body block transparency", .5, 0, 1 );

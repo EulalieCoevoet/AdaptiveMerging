@@ -152,7 +152,7 @@ public class RigidBody {
 		Point2d bbminB = new Point2d(Double.MAX_VALUE, Double.MAX_VALUE);
 		// compute the mass and center of mass position
 		for (Block b : blocks) {
-			double mass = b.getColourMass();
+			double mass = b.getColorMass();
 			massLinear += mass;
 			x0.x += b.j * mass;
 			bbmaxB.x = Math.max(bbmaxB.x, b.j + b.h);
@@ -170,13 +170,13 @@ public class RigidBody {
 		// compute the rotational inertia
 		final Point2d zero = new Point2d(0, 0);
 		for (Block b : blocks) {
-			double mass = b.getColourMass();
+			double mass = b.getColorMass();
 			massAngular += mass * b.pB.distanceSquared(zero);
 		}
 		// prevent zero angular inertia in the case of a single block
 		if (blocks.size() == 1) {
 			Block b = blocks.get(0);
-			double mass = b.getColourMass();
+			double mass = b.getColorMass();
 			massAngular = mass * (1 + 1) / 12;
 		}
 		x.set(x0);
@@ -530,11 +530,8 @@ public class RigidBody {
 	 * Draws the blocks of a rigid body
 	 * 
 	 * @param drawable
+	 * @param color if null, takes the initial color of the block
 	 */
-	public void display(GLAutoDrawable drawable) {
-		display(drawable, null);
-	}
-
 	public void display(GLAutoDrawable drawable, Color3f color) {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glPushMatrix();
