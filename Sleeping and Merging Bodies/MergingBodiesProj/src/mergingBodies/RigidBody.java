@@ -10,6 +10,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import mergingBodies.Contact.ContactState;
 import mergingBodies.RigidBodySystem.MergeParameters;
 import mergingBodies.RigidBodySystem.SleepParameters;
+import mergingBodies.MotionMetricProcessor;
 import mintools.viewer.EasyViewer;
 import no.uib.cipr.matrix.DenseVector;
 
@@ -130,6 +131,8 @@ public class RigidBody {
 	public ArrayList<Double> metricHistory = new ArrayList<Double>();
 
 	DenseVector deltaV = new DenseVector(3);
+	
+	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	
 	public RigidBody() {
 	}
@@ -263,11 +266,28 @@ public class RigidBody {
 	 * Track metric over time steps
 	 */
 	public void accumulate(SleepParameters sleepParams) {
-		double metric = getMetric();
-		metricHistory.add(metric);
+		
+		RigidBody dummyBody = new RigidBody();
+		dummyBody.x.set(x);
+		dummyBody.theta = theta;
+		dummyBody.v.set(0.,0.);
+		dummyBody.omega = 0;
+		
+		motionMetricProcessor.setMotionMetricType(0);
+		metricHistory.add(motionMetricProcessor.getMotionMetric(this, dummyBody));
 		if (metricHistory.size() > sleepParams.stepAccum.getValue()) {
 			metricHistory.remove(0);	
 		}
+	}
+	
+	public void wake() {
+		if (isSleeping) {
+	    	isSleeping = false;
+	    	metricHistory.clear();
+	    }
+		
+		if (isInCollection() && parent.isSleeping)
+	    	parent.wake();
 	}
 
 	/**

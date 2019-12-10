@@ -52,6 +52,9 @@ public class MouseSpringForce {
      */
     public void apply() {
         if ( picked == null ) return;
+        
+        picked.wake();
+        
         Point2d grabPointW = new Point2d();
         Vector2d grabPointV = new Vector2d();
         picked.transformB2W.transform( grabPointB, grabPointW );

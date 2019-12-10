@@ -156,8 +156,10 @@ public class CollisionProcessor {
 		for (BodyPairContact bpc : bodyPairContacts) {
 			if(!bpc.contactList.isEmpty())
 				tmpBodyPairContacts.add(bpc);
-			else
+			else {
 				bpc.removeFromBodyLists();
+				bpc.removeFromBodyListsParent();
+			}
 		}
 		
 		bodyPairContacts.clear();

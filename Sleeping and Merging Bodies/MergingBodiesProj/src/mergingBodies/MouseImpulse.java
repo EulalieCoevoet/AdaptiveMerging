@@ -51,6 +51,8 @@ public class MouseImpulse {
     public void apply() {
         if ( pickedBody == null || !released) return;
         
+        pickedBody.wake();
+        
         double distance = endPoint.distance( pickedPoint );
         
         Vector2d force = new Vector2d();

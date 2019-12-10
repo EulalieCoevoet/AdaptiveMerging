@@ -170,11 +170,11 @@ public class LCPApp implements SceneGraphNode, Interactor {
         text += formatter.format( new Date() ) + "\n";
         text += "simulation time = " + system.simulationTime + "\n";
         text += "total compute time = " + system.totalAccumulatedComputeTime + "\n";
-        text += "compute time = " + system.computeTime + "\n";
         text += "total steps = " + system.totalSteps + "\n";
+        text += "compute time = " + system.computeTime + "\n";
         text += "collision detection = " + system.collisionProcessor.collisionDetectTime + "\n";
-        text += "collision processing = " + system.collisionProcessor.collisionSolveTime + "\n";
-        text += "collision update in collections = " + system.collisionProcessor.collectionUpdateTime + "\n";
+        text += "LCP solve = " + system.collisionProcessor.collisionSolveTime + "\n";
+        text += "Single iteration PGS = " + system.collisionProcessor.collectionUpdateTime + "\n";
         text += "h = " + stepsize.getValue() + " (with " + substeps.getValue() + " substeps)\n";
         text += "PGS iterations = " + system.collisionProcessor.iterations.getValue() + "\n";
         text += "PGS iterations in collection = " + system.collisionProcessor.iterationsInCollection.getValue() + "\n";

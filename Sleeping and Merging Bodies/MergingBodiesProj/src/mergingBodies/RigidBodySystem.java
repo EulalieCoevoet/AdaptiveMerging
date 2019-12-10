@@ -128,6 +128,10 @@ public class RigidBodySystem {
 		collisionProcessor.warmStart(); 		
 		collisionProcessor.updateBodyPairContacts(); 
 		
+		if (sleepParams.enableSleeping.getValue()) {
+			wake();
+		}
+		
 		if (mergeParams.unmergeAll.getValue()) {
 			unmergeAllBodies();
 			checkIndex();
@@ -158,6 +162,10 @@ public class RigidBodySystem {
 		if (mergeParams.enableMerging.getValue()) {
 			mergeBodies();
 			checkIndex();
+		}
+		
+		if (sleepParams.enableSleeping.getValue()) {
+			sleep();
 		}
 		
 		/// UNMERGE (RELATIVE MOTION CRITERION) /// this should be done after advanceTime() so that the relative velocity can be computed		
@@ -211,7 +219,7 @@ public class RigidBodySystem {
 	 * </ul><p>
 	 */
 	private void sleep() {
-		double sleepingThreshold = sleepParams.threshold.getValue();
+		double threshold = sleepParams.threshold.getValue();
 		for (RigidBody body : bodies) {
 			if (body.isSleeping)
 				continue;
@@ -229,7 +237,7 @@ public class RigidBodySystem {
 						sleep = false;
 						break;
 					}
-					if (metric > sleepingThreshold) {
+					if (metric > threshold) {
 						sleep = false;
 						break;
 					}
@@ -238,10 +246,6 @@ public class RigidBodySystem {
 			}
 			
 			body.isSleeping = sleep;
-			
-			if(body.isSleeping) {
-				body.clear();
-			}
 		}
 	}
 
@@ -253,26 +257,20 @@ public class RigidBodySystem {
 	 * total Force = sum of all forces (including contact forces)
 	 */
 	private void wake() {
-		double threshold = 1e-14;
 		for (RigidBody body: bodies) {
 			if (!body.isSleeping) 
 				continue;
 			
 			boolean wake = false;
-			if (Math.abs(body.force.x) > threshold || Math.abs(body.force.y) > threshold || Math.abs(body.torque) > threshold)
-				wake = true;
-			
 			for (BodyPairContact bpc : body.bodyPairContactList) {
-				if (!bpc.body1.isInSameCollection(bpc.body2)) 
+				if (!bpc.body1.isInSameCollection(bpc.body2)) {
 					wake = true;
-				if (wake)
 					break;
+				}
 			}
 			
-			if(wake) {
-				body.metricHistory.clear();
-				body.isSleeping = false;
-			}
+			if(wake)
+				body.wake();
 		}
 	}
 

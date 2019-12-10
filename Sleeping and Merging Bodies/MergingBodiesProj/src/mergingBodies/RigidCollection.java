@@ -100,29 +100,29 @@ public class RigidCollection extends RigidBody{
 		Point2d massCom2 = new Point2d();
 		massCom1.scale( body.massLinear, body.x );
 		massCom2.scale( massLinear, x );		
-		Point2d newCom = new Point2d();
-		newCom.add( massCom1, massCom2 );
-		newCom.scale( 1./(body.massLinear + massLinear) );
+		Point2d xCom = new Point2d();
+		xCom.add( massCom1, massCom2 );
+		xCom.scale( 1./(body.massLinear + massLinear) );
 
 		Vector2d tmp1 = new Vector2d();
 		Vector2d tmp2 = new Vector2d();
 		Vector2d tmp3 = new Vector2d();
 		
-		tmp1.sub( newCom, body.x );
+		tmp1.sub( xCom, body.x );
 		tmp1.scale( body.omega );
 		tmp2.set( -tmp1.y, tmp1.x );
 		tmp2.add(body.v);
 		tmp2.scale(body.massLinear);
 		tmp3.add(tmp2);
 		
-		tmp1.sub( newCom, x );
+		tmp1.sub( xCom, x );
 		tmp1.scale( omega );
 		tmp2.set( -tmp1.y, tmp1.x );
 		tmp2.add(v);
 		tmp2.scale(massLinear);
 		tmp3.add(tmp2);
 		
-		tmp3.scale(1/(body.massLinear+massLinear));
+		tmp3.scale(1./(body.massLinear+massLinear));
 		
 		v.set(tmp3);
 		
