@@ -293,7 +293,7 @@ public class BodyPairContact {
 		if (body1.isSleeping && body2.isSleeping) 
 			return true;
 				
-		if (mergeParams.enableMergeLetItBreatheCondition.getValue())
+		if (mergeParams.enableMergeLetItBreathe.getValue())
 			for (Contact contact: contactList)
 				if (Math.abs(contact.prevConstraintViolation - contact.constraintViolation)>mergeParams.thresholdBreath.getValue()) 
 					return false;

@@ -992,7 +992,7 @@ public class RigidBodySystem {
 		public BooleanParameter enableMergePinned = new BooleanParameter( "merging - pinned body", true);
 		public BooleanParameter enableMergeCycleCondition = new BooleanParameter( "merging - check cycle condition", false);
 		public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging - stable contact condition", true);
-		public BooleanParameter enableMergeLetItBreatheCondition = new BooleanParameter( "merging - let it breathe condition", true);
+		public BooleanParameter enableMergeLetItBreathe = new BooleanParameter( "merging - let it breathe condition", true);
 		public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
 		public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging - friction condition", true);
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging - contact normal condition", true);
@@ -1060,7 +1060,7 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.enableMergePinned.getControls() );
 		vfpm.add( mergeParams.enableMergeCycleCondition.getControls() );
 		vfpm.add( mergeParams.enableMergeStableContactCondition.getControls() );
-		vfpm.add( mergeParams.enableMergeLetItBreatheCondition.getControls() );
+		vfpm.add( mergeParams.enableMergeLetItBreathe.getControls() );
 		vfpm.add( mergeParams.enableUnmerging.getControls() );
 		vfpm.add( mergeParams.enableUnmergeFrictionCondition.getControls() );
 		vfpm.add( mergeParams.enableUnmergeNormalCondition.getControls() );
