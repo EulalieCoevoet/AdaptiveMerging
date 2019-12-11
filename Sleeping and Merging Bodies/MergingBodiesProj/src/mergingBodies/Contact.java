@@ -146,6 +146,24 @@ public class Contact {
 		computeJacobian(true);
 	}
 	
+	public Contact(Contact contact) {		
+		this.body1 = contact.body1;	
+		this.body2 = contact.body2;	
+		this.normal.set(contact.normal);   	
+		normalB1.set(contact.normalB1);	
+		normalB2.set(contact.normalB2);	
+		contactW.set(contact.contactW);	
+		contactB1.set(contact.contactB1);	
+		contactB2.set(contact.contactB2);	
+		jn.set(contact.jn);	
+		jt.set(contact.jt);	
+		jnc.set(contact.jnc);	
+		jtc.set(contact.jtc);	
+		lambda.set(contact.lambda);	
+		constraintViolation = contact.constraintViolation;	
+		prevConstraintViolation = contact.prevConstraintViolation;	
+	}
+	
 	/**
 	 * Computes the Jacobian matrix of the contact.
 	 * In case of body in a collection, use COM of parent to compute the torque component of the Jacobian.

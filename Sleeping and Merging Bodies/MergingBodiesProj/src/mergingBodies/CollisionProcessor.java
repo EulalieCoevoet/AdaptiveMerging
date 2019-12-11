@@ -182,13 +182,24 @@ public class CollisionProcessor {
 		solver.warmStart = true;
 		
 		solver.contacts = new ArrayList<Contact>();
-		solver.contacts.addAll(contacts);
+		
+		////// eulalie : here we should try to order the contacts list 
+		
+		// Copy the external contacts 
+		// This resolution is done with the Jacobians of the bodies (not the collection) 
+		// so not a good warm start for the LCP solve (we don't want to keep these values).
+		for ( Contact contact : contacts )
+			solver.contacts.add(new Contact(contact));
+		
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.isSleeping) {
 				RigidCollection collection = (RigidCollection)body;
+				// Update the internal contacts
 				solver.contacts.addAll(collection.internalContacts);
 			}
 		}
+		
+		//////
 		
 		// eulalie: this can be optimized, only collections need an update 
 		for (Contact contact: solver.contacts) 
@@ -202,10 +213,12 @@ public class CollisionProcessor {
 				RigidCollection collection = (RigidCollection)body;
 				collection.computeInternalContactsForce(dt);
 				
+				// Advance velocities for internal bodies
 				for (RigidBody b : collection.bodies)
 					if(!b.pinned && !b.temporarilyPinned)
 						b.advanceVelocities(dt);	
 			}
+			// Reset deltaV for LCP solve
 			body.deltaV.zero();
 		}
 		
