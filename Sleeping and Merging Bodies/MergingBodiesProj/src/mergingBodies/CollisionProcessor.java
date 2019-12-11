@@ -202,7 +202,7 @@ public class CollisionProcessor {
 				RigidCollection collection = (RigidCollection)body;
 				collection.computeInternalContactsForce(dt);
 				
-				for (RigidBody b : collection.collectionBodies)
+				for (RigidBody b : collection.bodies)
 					if(!b.pinned && !b.temporarilyPinned)
 						b.advanceVelocities(dt);	
 			}
@@ -301,7 +301,7 @@ public class CollisionProcessor {
 		
 		ArrayList<Contact> collectionContacts = new ArrayList<Contact>();
 		ArrayList<Contact> contacts = new ArrayList<Contact>();
-		for (RigidBody body : collection.collectionBodies) {
+		for (RigidBody body : collection.bodies) {
 			contacts.clear();
 			for (Contact contact : tmpContacts)
 				if (contact.withBody(body))
@@ -405,6 +405,7 @@ public class CollisionProcessor {
 			if(oldContact != null) { 
 				contact.lambda.x = oldContact.lambda.x;
 				contact.lambda.y = oldContact.lambda.y;
+				contact.prevConstraintViolation = oldContact.constraintViolation;
 			}
 		}
 	}
@@ -468,11 +469,11 @@ public class CollisionProcessor {
 	 */
 	private void narrowCollection(RigidBody body1, RigidBody body2) {
 		if (body1 instanceof RigidCollection && body2 instanceof RigidCollection) {
-			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
+			for (RigidBody b: ((RigidCollection) body1).bodies) {
 				narrowCollection(b, body2);
 			}
 		} else if (body1 instanceof RigidCollection) {
-			for (RigidBody b: ((RigidCollection) body1).collectionBodies) {
+			for (RigidBody b: ((RigidCollection) body1).bodies) {
 				if ( b instanceof PlaneRigidBody ) {
 					findCollisionsWithPlane( body2.root, body2, (PlaneRigidBody) b ); 
 				} else if (body2 instanceof PlaneRigidBody ) {
@@ -482,7 +483,7 @@ public class CollisionProcessor {
 				}
 			}
 		} else if (body2 instanceof RigidCollection) {
-			for (RigidBody b: ((RigidCollection) body2).collectionBodies) {
+			for (RigidBody b: ((RigidCollection) body2).bodies) {
 				if ( b instanceof PlaneRigidBody ) {
 					findCollisionsWithPlane( body1.root, body1, (PlaneRigidBody) b ); 
 				} else if (body1 instanceof PlaneRigidBody ) {
@@ -626,7 +627,7 @@ public class CollisionProcessor {
 	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
-	public static DoubleParameter constraintOffset = new DoubleParameter("constraintOffset", 0.05, -0.5, 0.5 );
+	public static DoubleParameter constraintOffset = new DoubleParameter("constraintOffset", 0.0, -0.5, 0.5 );
 	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
 	public static BooleanParameter  useContactGraph = new BooleanParameter("enable use of contact graph heuristic", false );

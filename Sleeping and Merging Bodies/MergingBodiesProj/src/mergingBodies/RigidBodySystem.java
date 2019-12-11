@@ -224,6 +224,16 @@ public class RigidBodySystem {
 			if (body.isSleeping)
 				continue;
 			
+			boolean externalContact = false;
+			for (BodyPairContact bpc : body.bodyPairContactList) {
+				if (!bpc.inCollection) {
+					externalContact = true;
+					break;
+				}
+			}
+			if (externalContact)
+				continue;
+			
 			body.accumulate(sleepParams);
 			
 			boolean sleep = true;
@@ -294,7 +304,7 @@ public class RigidBodySystem {
 	
 	private void applyGravityCollection(RigidCollection collection, double theta) {
 		Vector2d force = new Vector2d();
-		for (RigidBody body : collection.collectionBodies) {
+		for (RigidBody body : collection.bodies) {
 			force.set( Math.cos( theta ), Math.sin(theta) );
 			force.scale( body.massLinear * gravityAmount.getValue() );
 			body.force.add( force );
@@ -422,7 +432,7 @@ public class RigidBodySystem {
 				for (BodyPairContact bpc: collection.bodyPairContactList)
 					unmergeBodyPairContact(bpc);
 							
-				for (RigidBody b: collection.collectionBodies) {
+				for (RigidBody b: collection.bodies) {
 					collection.unmergeSingleBody(b);
 					additionQueue.add(b);
 				}
@@ -632,7 +642,7 @@ public class RigidBodySystem {
 	 * @param p
 	 */
 	private RigidBody collectionPick(RigidCollection body, Point2d p) {
-		for (RigidBody b: body.collectionBodies ) {
+		for (RigidBody b: body.bodies ) {
 
 			if(b instanceof PlaneRigidBody)
 				continue;
@@ -665,7 +675,7 @@ public class RigidBodySystem {
 			if (!b.created) {
 
 				if (b instanceof RigidCollection) {
-					for (RigidBody subBody: ((RigidCollection) b).collectionBodies) {
+					for (RigidBody subBody: ((RigidCollection) b).bodies) {
 						bodies.add(subBody);
 					}
 					bodies.remove(b);
@@ -786,7 +796,7 @@ public class RigidBodySystem {
 				b.myListID = -1;
 
 				if (b instanceof RigidCollection)
-					for (RigidBody sb : ((RigidCollection)b).collectionBodies)
+					for (RigidBody sb : ((RigidCollection)b).bodies)
 						sb.myListID = -1;
 			}
 		}  
@@ -800,7 +810,7 @@ public class RigidBodySystem {
 					if(drawCollections.getValue()) {
 						collection.displayCollection(drawable);
 					} else {
-						for (RigidBody sb : collection.collectionBodies)
+						for (RigidBody sb : collection.bodies)
 							sb.display(drawable, null);
 					}
 				} else {
@@ -936,13 +946,13 @@ public class RigidBodySystem {
 	}
 
 	private void displayVisitBoundaryCollection(RigidCollection b, GLAutoDrawable drawable) {
-		for (RigidBody body: b.collectionBodies) {
+		for (RigidBody body: b.bodies) {
 			body.root.displayVisitBoundary(drawable, collisionProcessor.visitID);
 		}
 	}
 
 	private void displayCollectionBV(RigidCollection b, GLAutoDrawable drawable) {
-		for (RigidBody body: b.collectionBodies) {
+		for (RigidBody body: b.bodies) {
 			body.root.display(drawable);
 		}
 	}
@@ -956,9 +966,9 @@ public class RigidBodySystem {
 	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	
 	private BooleanParameter drawDeltaV = new BooleanParameter("draw DeltaV", false );
-	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", false );
-	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", false );
-	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", false );
+	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true );
+	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true );
+	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true );
 	private IntParameter contactLocationSize = new IntParameter( "contact point size ", 5, 5, 20);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw internal histories", false );
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
@@ -982,6 +992,7 @@ public class RigidBodySystem {
 		public BooleanParameter enableMergePinned = new BooleanParameter( "merging - pinned body", true);
 		public BooleanParameter enableMergeCycleCondition = new BooleanParameter( "merging - check cycle condition", false);
 		public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging - stable contact condition", true);
+		public BooleanParameter enableMergeLetItBreatheCondition = new BooleanParameter( "merging - let it breathe condition", true);
 		public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true);
 		public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging - friction condition", true);
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging - contact normal condition", true);
@@ -990,6 +1001,7 @@ public class RigidBodySystem {
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 10, 1e-10, 100 );
+		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-5, 1e-10, 1e0 );
 		public OptionParameter motionMetricType = new OptionParameter("motion metric used", 0, 
 				MotionMetricType.LARGESTVELOCITY.toString(),
 				MotionMetricType.RELATIVEKINETICENERGY.toString(),
@@ -1048,6 +1060,7 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.enableMergePinned.getControls() );
 		vfpm.add( mergeParams.enableMergeCycleCondition.getControls() );
 		vfpm.add( mergeParams.enableMergeStableContactCondition.getControls() );
+		vfpm.add( mergeParams.enableMergeLetItBreatheCondition.getControls() );
 		vfpm.add( mergeParams.enableUnmerging.getControls() );
 		vfpm.add( mergeParams.enableUnmergeFrictionCondition.getControls() );
 		vfpm.add( mergeParams.enableUnmergeNormalCondition.getControls() );
@@ -1056,6 +1069,7 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.stepAccum.getSliderControls() );
 		vfpm.add( mergeParams.thresholdMerge.getSliderControls(false) );
 		vfpm.add( mergeParams.thresholdUnmerge.getSliderControls(false) );
+		vfpm.add( mergeParams.thresholdBreath.getSliderControls(true) );
 		vfpm.add( mergeParams.motionMetricType.getControls() );
         JButton umergeButton = new JButton("unmerge all");
         vfpm.add( umergeButton);
@@ -1156,7 +1170,7 @@ public class RigidBodySystem {
 		if (genbody == null) {
 			if(bodies.get(0) instanceof RigidCollection) {
 				RigidCollection collection = (RigidCollection)bodies.get(0);
-				for (RigidBody body: collection.collectionBodies) {
+				for (RigidBody body: collection.bodies) {
 					if (!body.pinned) {
 						genbody = new RigidBody(body);
 						break;

@@ -17,14 +17,14 @@ import mergingBodies.RigidBodySystem.MergeParameters;
 public class RigidCollection extends RigidBody{
 
 	/** List of RigidBody of the collection */
-	protected ArrayList<RigidBody> collectionBodies = new ArrayList<RigidBody>();
+	protected ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 	
 	/** List of Contact in the collection: Contact between RigidBody of the collection */
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 	
 	public Color color;
 
-	CollisionProcessor collisionProcessor = new CollisionProcessor(collectionBodies);
+	CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 
 	/**
@@ -78,7 +78,7 @@ public class RigidCollection extends RigidBody{
 	 * @param collection collection to add 
 	 */
 	public void addCollection(RigidCollection collection) {
-		for (RigidBody body : collection.collectionBodies)
+		for (RigidBody body : collection.bodies)
 			addBodyInternalMethod(body);
 		
 		updateCollectionState(collection);
@@ -91,7 +91,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	protected void addBodyInternalMethod(RigidBody body) {
 		body.parent = this;
-		collectionBodies.add(body);
+		bodies.add(body);
 
 		updateVelocitiesFrom(body);	
 	}
@@ -134,7 +134,7 @@ public class RigidCollection extends RigidBody{
 	public void clear() {
 		super.clear();
 		
-		for (RigidBody body: collectionBodies) {
+		for (RigidBody body: bodies) {
 			applyVelocitiesTo(body);
 			body.clear();
 		}
@@ -192,15 +192,15 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void updateMass() {
 		
-		double mass = 0;
-		for (RigidBody body: collectionBodies) {
-			mass += body.massLinear;
+		double massLinear = 0;
+		for (RigidBody body: bodies) {
+			massLinear += body.massLinear;
 		}
-		massLinear = mass;
+		this.massLinear = massLinear;
 		if (pinned)
 			minv = 0.;
 		else
-			minv = 1/mass;
+			minv = 1/massLinear;
 	}
 	
 	/**
@@ -213,7 +213,7 @@ public class RigidCollection extends RigidBody{
 		double totalMass = massLinear;
 		com.set(0,0);
 
-		for (RigidBody body: collectionBodies) {
+		for (RigidBody body: bodies) {
 			double ratio = body.massLinear/totalMass;
 			tmp.scale(ratio, body.x);
 			com.add(tmp);
@@ -229,7 +229,7 @@ public class RigidCollection extends RigidBody{
 		int N = 0;
 		Point2d meanPos = new Point2d();
 		
-		for ( RigidBody body : collectionBodies ) {
+		for ( RigidBody body : bodies ) {
 			if(body instanceof PlaneRigidBody)
 				continue;
 			
@@ -244,7 +244,7 @@ public class RigidCollection extends RigidBody{
 
 		Vector2d v = new Vector2d();
 		Matrix2d covariance = new Matrix2d();
-		for ( RigidBody body : collectionBodies ) {
+		for ( RigidBody body : bodies ) {
 			if(body instanceof PlaneRigidBody)
 				continue;
 			
@@ -268,7 +268,7 @@ public class RigidCollection extends RigidBody{
 	 * But also, make each body's x and theta in collection, relative to this x and theta
 	 */
 	public void updateBodiesTransformations() {		
-		for (RigidBody body: collectionBodies) {
+		for (RigidBody body: bodies) {
 			body.transformB2C.set(body.transformB2W);
 			body.transformB2C.leftMult(transformW2B);
 			body.transformC2B.set(body.transformB2C); 
@@ -279,7 +279,7 @@ public class RigidCollection extends RigidBody{
 	protected void updateBB() {
 		Point2d bbmaxB = new Point2d(-Double.MAX_VALUE,-Double.MAX_VALUE); 
 		Point2d bbminB = new Point2d(Double.MAX_VALUE,Double.MAX_VALUE);
-		for (RigidBody body : collectionBodies) {
+		for (RigidBody body : bodies) {
 			if (body instanceof PlaneRigidBody)
 				continue;
 			
@@ -307,7 +307,7 @@ public class RigidCollection extends RigidBody{
 		double inertia = 0;
 		Point2d tmp = new Point2d(0, 0);
 		Point2d zero = new Point2d(0, 0);
-		for (RigidBody body: collectionBodies) {
+		for (RigidBody body: bodies) {
 			if (!(body instanceof PlaneRigidBody)) {
 				for ( Block block : body.blocks ) {
 					double mass = block.getColorMass();
@@ -366,7 +366,7 @@ public class RigidCollection extends RigidBody{
 	 * Updates bodies position, orientation, and transformations
 	 */
 	protected void updateBodiesPositionAndTransformations() {
-		for (RigidBody body: collectionBodies) {
+		for (RigidBody body: bodies) {
 			
 			//reset position and orientation 
 			body.transformW2B.transform(body.x);
@@ -388,7 +388,7 @@ public class RigidCollection extends RigidBody{
 	 * Updates bodies velocities
 	 */
 	protected void applyVelocitiesToBodies() {
-		for (RigidBody body: collectionBodies) {	
+		for (RigidBody body: bodies) {	
 			applyVelocitiesTo(body);
 		}
 	}
@@ -422,7 +422,7 @@ public class RigidCollection extends RigidBody{
 	/** Applies springs on the body, to the collection */
 	private void addBodiesSpringsToCollection() {
 		springs.clear();
-		for ( RigidBody body : collectionBodies ) {
+		for ( RigidBody body : bodies ) {
 			springs.addAll( body.springs );
 		}
 	}
@@ -457,13 +457,13 @@ public class RigidCollection extends RigidBody{
 	 * Go through all bodies and makes sure all the BodyContacts of each body is in the collection
 	 */
 	public void fillInternalBodyContacts() {
-		for (RigidBody body: collectionBodies) {
+		for (RigidBody body: bodies) {
 			for (BodyPairContact bpc: body.bodyPairContactList) {
 				if (!bodyPairContactList.contains(bpc)) {
 					bodyPairContactList.add(bpc);
 					if(bpc.inCollection == true) {
 						RigidBody otherBody = bpc.getOtherBody(body);
-						if (body.parent.collectionBodies.contains(otherBody)) {
+						if (body.parent.bodies.contains(otherBody)) {
 							for (Contact contact : bpc.contactList) {
 								if (!internalContacts.contains(contact)) {
 									internalContacts.add(contact);
@@ -495,7 +495,7 @@ public class RigidCollection extends RigidBody{
 
 	/** input parameter is a collection being merged . we must add also all the incomplete contacts this parent has with other collections. */
 	public void addIncompleteCollectionContacts(RigidCollection collection, LinkedList<BodyPairContact> removalQueue) {
-		for (RigidBody body : collection.collectionBodies) {
+		for (RigidBody body : collection.bodies) {
 			addIncompleteContacts(body, removalQueue);
 		}
 	}	
@@ -538,7 +538,7 @@ public class RigidCollection extends RigidBody{
 	public void displayCollection( GLAutoDrawable drawable) {
 		
 		if (myListID == -1) { // transparency change
-			for (RigidBody b: collectionBodies) 
+			for (RigidBody b: bodies) 
 				b.display(drawable, null);
 			
 			myListID = -2;
@@ -550,7 +550,7 @@ public class RigidCollection extends RigidBody{
 			gl.glBlendEquation(GL2.GL_FUNC_ADD);
 			gl.glBlendColor(color.x, color.y, color.z, Block.alpha);
 			
-			for (RigidBody b: collectionBodies)
+			for (RigidBody b: bodies)
 				b.display(drawable, color);
 			
 			// Back to initial set up
@@ -595,7 +595,7 @@ public class RigidCollection extends RigidBody{
 		super.displayDeltaV(drawable, 10, color);
 		
 		Color4f c = new Color4f(color.x/2, color.y/2, color.z/2, color.w/2);
-		for (RigidBody b : collectionBodies) {
+		for (RigidBody b : bodies) {
 			b.displayDeltaV(drawable, size, c);
 		}
 	}
@@ -619,7 +619,7 @@ public class RigidCollection extends RigidBody{
 	@Override
 	public void displayBB(GLAutoDrawable drawable) {
 		super.displayBB(drawable);
-		for (RigidBody body : collectionBodies) {
+		for (RigidBody body : bodies) {
 			body.displayBB(drawable);
 		}
 	}
