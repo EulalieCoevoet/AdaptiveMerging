@@ -93,7 +93,7 @@ public class CollisionProcessor {
 		if(!contacts.isEmpty()) {
 	    	
 	    	if (shuffle.getValue()) 
-	    		knuthShuffle();
+	    		knuthShuffle(contacts);
 	    	
 	    	// set up contacts solver 
 			solver.init(friction.getValue(), iterations.getValue());
@@ -122,8 +122,15 @@ public class CollisionProcessor {
 	 */
 	public void updateBodyPairContacts() {
 		
-		for (BodyPairContact bpc : bodyPairContacts) // clear contactList of existing bpc
+		for (BodyPairContact bpc : bodyPairContacts) { // clear contactList of existing bpc
+			bpc.checked = false;
 			bpc.contactList.clear();
+		}
+		
+		for (RigidBody body: bodies) 
+			if (body instanceof RigidCollection) 
+				for (BodyPairContact bpc: body.bodyPairContacts)
+					bpc.checked = false;
 
 		for (Contact contact : contacts) // loop over all contacts between bodies
 			storeInBodyPairContacts(contact);
@@ -170,7 +177,7 @@ public class CollisionProcessor {
 	 * Does one iteration of PGS to update contacts inside collections
 	 * @param dt
 	 */
-	public void updateInCollections(double dt) {
+	public void updateInCollections(double dt, MergeParameters mergeParams) {
 
 		long now = System.nanoTime();
 		
@@ -183,23 +190,26 @@ public class CollisionProcessor {
 		
 		solver.contacts = new ArrayList<Contact>();
 		
-		////// eulalie : here we should try to order the contacts list 
-		
-		// Copy the external contacts 
-		// This resolution is done with the Jacobians of the bodies (not the collection) 
-		// so not a good warm start for the LCP solve (we don't want to keep these values).
-		for ( Contact contact : contacts )
-			solver.contacts.add(new Contact(contact));
-		
-		for (RigidBody body : bodies) {
-			if (body instanceof RigidCollection && !body.isSleeping) {
-				RigidCollection collection = (RigidCollection)body;
-				// Update the internal contacts
-				solver.contacts.addAll(collection.internalContacts);
+		if (mergeParams.organizeContacts.getValue())
+			getOrganizedContacts(solver.contacts);
+		else {
+			// Copy the external contacts 
+			// This resolution is done with the Jacobians of the bodies (not the collection) 
+			// so not a good warm start for the LCP solve (we don't want to keep these values).
+			for ( Contact contact : contacts )
+				solver.contacts.add(new Contact(contact));
+			
+			for (RigidBody body : bodies) {
+				if (body instanceof RigidCollection && !body.isSleeping) {
+					RigidCollection collection = (RigidCollection)body;
+					// Update the internal contacts
+					solver.contacts.addAll(collection.internalContacts);
+				}
 			}
+			
+			if (shuffle.getValue()) 
+	    		knuthShuffle(solver.contacts);
 		}
-		
-		//////
 		
 		// eulalie: this can be optimized, only collections need an update 
 		for (Contact contact: solver.contacts) 
@@ -223,6 +233,85 @@ public class CollisionProcessor {
 		}
 		
 		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
+	}
+	
+	/**
+	 * Reordering of the contacts list for the one iteration PGS as follows:
+	 * <p><ul>
+	 * <li> 1. New contacts 
+	 * <li> 2. For each new contact, add one level of contact neighbors
+	 * <li> 3. Continue until the end
+	 * </ul><p>
+	 */
+	protected void getOrganizedContacts(ArrayList<Contact> contacts) {
+
+		ArrayList<BodyPairContact> orderedBpcs = new ArrayList<BodyPairContact>();
+		
+		for ( BodyPairContact bpc : bodyPairContacts ) {
+			for ( Contact contact : bpc.contactList ) {
+				if (contact.newThisTimeStep) {
+					orderedBpcs.add(bpc);
+					bpc.checked = true;
+					break;
+				}
+			}
+		}
+
+		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+		tmpBodyPairContacts.addAll(orderedBpcs);
+		getNextLevel(tmpBodyPairContacts, orderedBpcs);
+		
+		for ( BodyPairContact bpc : bodyPairContacts ) {
+			if (!bpc.checked) {
+				orderedBpcs.add(bpc);
+				bpc.checked = true;
+			}
+		}
+		
+		for (RigidBody body : bodies) {
+			if (body instanceof RigidCollection && !body.isSleeping) {
+				RigidCollection collection = (RigidCollection)body;
+				for ( BodyPairContact bpc : collection.bodyPairContacts ) {
+					if (!bpc.checked) {
+						orderedBpcs.add(bpc);
+						bpc.checked = true;
+					}
+				}
+			}
+		}
+		
+		for ( BodyPairContact bpc : orderedBpcs ) {
+			for (Contact contact : bpc.contactList) {
+				if (bpc.inCollection)
+					contacts.add(contact);
+				else
+					contacts.add(new Contact(contact));
+			}
+		}
+	}	
+	
+	protected void getNextLevel(ArrayList<BodyPairContact> bodyPairContacts, ArrayList<BodyPairContact> orderedBpcs) {
+
+		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+		
+		for ( BodyPairContact bpc : bodyPairContacts ) {
+						
+			for ( BodyPairContact bpc1 : bpc.body1.bodyPairContacts )
+				if (!bpc1.checked) {
+					tmpBodyPairContacts.add(bpc1);
+					bpc1.checked = true;
+				}
+			for ( BodyPairContact bpc2 : bpc.body2.bodyPairContacts )
+				if (!bpc2.checked) {
+					tmpBodyPairContacts.add(bpc2);
+					bpc2.checked = true;
+				}
+		}	
+		
+		if (!tmpBodyPairContacts.isEmpty()) {
+			orderedBpcs.addAll(tmpBodyPairContacts);
+			getNextLevel(tmpBodyPairContacts, orderedBpcs);
+		}
 	}
 	
 	protected void updateContactsMap() {
@@ -267,7 +356,7 @@ public class CollisionProcessor {
 	* swap this element with that element at that index. 
 	* go to next element in contacts 2
 	*/
-	private void knuthShuffle() {
+	private void knuthShuffle(ArrayList<Contact> contacts) {
 		Collections.shuffle(contacts);
 		for (Contact c : contacts) {
 			c.index = contacts.indexOf(c);
@@ -419,6 +508,9 @@ public class CollisionProcessor {
 				contact.lambda.x = oldContact.lambda.x;
 				contact.lambda.y = oldContact.lambda.y;
 				contact.prevConstraintViolation = oldContact.constraintViolation;
+				contact.newThisTimeStep = false;
+			} else {
+				contact.newThisTimeStep = true;
 			}
 		}
 	}

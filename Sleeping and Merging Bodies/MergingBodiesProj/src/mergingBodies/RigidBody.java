@@ -119,7 +119,7 @@ public class RigidBody {
 	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
 	 * both internal and external bpc.
 	 **/
-	public ArrayList<BodyPairContact> bodyPairContactList = new ArrayList<BodyPairContact>();
+	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
 
 	/** list of springs attached to the body **/
 	public ArrayList<Spring> springs = new ArrayList<Spring>();
@@ -382,7 +382,7 @@ public class RigidBody {
 		}
 		
 		// if we come across a collection in the contact graph, we consider it as a body and check the external bpc 
-		ArrayList<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContactList : bodyPairContactList;
+		ArrayList<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContacts : bodyPairContacts;
 		
 		RigidBody otherBodyFrom = bpcFrom.getOtherBodyWithCollectionPerspective(this);		
 		
@@ -495,7 +495,7 @@ public class RigidBody {
 
 		transformB2C.T.setIdentity();
 		transformC2B.T.setIdentity();
-		bodyPairContactList.clear();
+		bodyPairContacts.clear();
 		isSleeping = false;
 		metricHistory.clear();
 		parent = null;

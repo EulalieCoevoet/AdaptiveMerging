@@ -139,7 +139,7 @@ public class RigidBodySystem {
 		
 		/// COLLECTION UPDATE /// this should be done before advanceTime() so that external forces and velocities are of the same time step
 		if (mergeParams.updateContactsInCollections.getValue()) 
-			collisionProcessor.updateInCollections(dt);		
+			collisionProcessor.updateInCollections(dt, mergeParams);		
 		
 		/// UNMERGE (CONTACT CRITERIA) ///		
 		if (mergeParams.enableUnmerging.getValue() && (mergeParams.enableUnmergeNormalCondition.getValue() || mergeParams.enableUnmergeFrictionCondition.getValue())) {
@@ -225,7 +225,7 @@ public class RigidBodySystem {
 				continue;
 			
 			boolean externalContact = false;
-			for (BodyPairContact bpc : body.bodyPairContactList) {
+			for (BodyPairContact bpc : body.bodyPairContacts) {
 				if (!bpc.inCollection) {
 					externalContact = true;
 					break;
@@ -272,7 +272,7 @@ public class RigidBodySystem {
 				continue;
 			
 			boolean wake = false;
-			for (BodyPairContact bpc : body.bodyPairContactList) {
+			for (BodyPairContact bpc : body.bodyPairContacts) {
 				if (!bpc.body1.isInSameCollection(bpc.body2)) {
 					wake = true;
 					break;
@@ -355,9 +355,9 @@ public class RigidBodySystem {
 					//take all the bodies in the least massive one and add them to the collection of the most massive
 					if (bpc.body1.parent.massLinear > bpc.body2.parent.massLinear) {
 						bodies.remove(bpc.body2.parent);
-						for (BodyPairContact bpccollection : bpc.body2.parent.bodyPairContactList)
-							if(!bpc.body1.parent.bodyPairContactList.contains(bpccollection))
-								bpc.body1.parent.bodyPairContactList.add(bpccollection);
+						for (BodyPairContact bpccollection : bpc.body2.parent.bodyPairContacts)
+							if(!bpc.body1.parent.bodyPairContacts.contains(bpccollection))
+								bpc.body1.parent.bodyPairContacts.add(bpccollection);
 						bpc.body1.parent.internalContacts.addAll(bpc.body2.parent.internalContacts);
 						bpc.body1.parent.addCollection(bpc.body2.parent);
 						bpc.body1.parent.addToInternalContact(bpc);
@@ -366,9 +366,9 @@ public class RigidBodySystem {
 					}
 					else {
 						bodies.remove(bpc.body1.parent);
-						for (BodyPairContact bpccollection : bpc.body1.parent.bodyPairContactList)
-							if(!bpc.body2.parent.bodyPairContactList.contains(bpccollection))
-								bpc.body2.parent.bodyPairContactList.add(bpccollection);
+						for (BodyPairContact bpccollection : bpc.body1.parent.bodyPairContacts)
+							if(!bpc.body2.parent.bodyPairContacts.contains(bpccollection))
+								bpc.body2.parent.bodyPairContacts.add(bpccollection);
 						bpc.body2.parent.internalContacts.addAll(bpc.body1.parent.internalContacts);
 						bpc.body2.parent.addCollection(bpc.body1.parent);
 						bpc.body2.parent.addToInternalContact(bpc);
@@ -429,7 +429,7 @@ public class RigidBodySystem {
 				RigidCollection collection = (RigidCollection) body;
 				removalQueue.add(collection);
 				
-				for (BodyPairContact bpc: collection.bodyPairContactList)
+				for (BodyPairContact bpc: collection.bodyPairContacts)
 					unmergeBodyPairContact(bpc);
 							
 				for (RigidBody b: collection.bodies) {
@@ -462,7 +462,7 @@ public class RigidBodySystem {
 				RigidCollection collection = (RigidCollection) body;
 				ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 				
-				for (BodyPairContact bpc: collection.bodyPairContactList) {
+				for (BodyPairContact bpc: collection.bodyPairContacts) {
 					if (!bpc.inCollection)
 						continue;
 					
@@ -506,7 +506,7 @@ public class RigidBodySystem {
 				RigidCollection collection = (RigidCollection) body;
 				ArrayList<RigidBody> unmergingBodies = new ArrayList<RigidBody>();
 				
-				for (BodyPairContact bpc: collection.bodyPairContactList) {
+				for (BodyPairContact bpc: collection.bodyPairContacts) {
 					if (!bpc.inCollection)
 						continue;
 						
@@ -555,7 +555,7 @@ public class RigidBodySystem {
 			
 			ArrayList<RigidBody> subBodies = new ArrayList<RigidBody>();
 
-			for (BodyPairContact bpc : body.bodyPairContactList) {
+			for (BodyPairContact bpc : body.bodyPairContacts) {
 				RigidBody otherBody = bpc.getOtherBody(body);
 				
 				if (!collisionProcessor.bodyPairContacts.contains(bpc))
@@ -601,7 +601,7 @@ public class RigidBodySystem {
 	 */
 	private void buildNeighborBody(RigidBody body, ArrayList<RigidBody> subBodies, ArrayList<RigidBody> handledBodies) {
 
-		for (BodyPairContact bpc : body.bodyPairContactList) {
+		for (BodyPairContact bpc : body.bodyPairContacts) {
 			if (!bpc.inCollection) 
 				continue;
 
@@ -998,6 +998,7 @@ public class RigidBodySystem {
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging - contact normal condition", true);
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", false);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
+		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 10, 1e-10, 100 );
@@ -1066,6 +1067,7 @@ public class RigidBodySystem {
 		vfpm.add( mergeParams.enableUnmergeNormalCondition.getControls() );
 		vfpm.add( mergeParams.enableUnmergeRelativeMotionCondition.getControls() );
 		vfpm.add( mergeParams.updateContactsInCollections.getControls() );
+		vfpm.add( mergeParams.organizeContacts.getControls() );
 		vfpm.add( mergeParams.stepAccum.getSliderControls() );
 		vfpm.add( mergeParams.thresholdMerge.getSliderControls(false) );
 		vfpm.add( mergeParams.thresholdUnmerge.getSliderControls(false) );
@@ -1127,13 +1129,13 @@ public class RigidBodySystem {
 	public static DoubleParameter origin_x = new DoubleParameter("x position new body", 100, -100, 200 );
 
 	/** y value of origin of pendulum */
-	public static DoubleParameter origin_y = new DoubleParameter("y position of new body", 40, -100, 100 );
+	public static DoubleParameter origin_y = new DoubleParameter("y position of new body", 35, -100, 100 );
 
 	/** theta value of origin of pendulum in degrees*/
 	private DoubleParameter theta = new DoubleParameter("angle of creation", 0, -180, 180 );
 
 	/** v_x value of origin of pendulum */
-	private DoubleParameter velocity_x = new DoubleParameter("velocity x", -20, -100, 100 );
+	private DoubleParameter velocity_x = new DoubleParameter("velocity x", -30, -100, 100 );
 
 	/** v_y value of origin of pendulum */
 	private DoubleParameter velocity_y = new DoubleParameter("velocity y", 0, -100, 100 );

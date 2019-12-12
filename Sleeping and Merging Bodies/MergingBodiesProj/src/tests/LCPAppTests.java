@@ -298,7 +298,7 @@ public class LCPAppTests extends LCPApp {
 			}
 				
 		assertTrue(collection != null); 		
-		assertEquals(3, collection.bodyPairContactList.size()); 
+		assertEquals(3, collection.bodyPairContacts.size()); 
 	}
 }
 

@@ -99,6 +99,8 @@ public class Contact {
 	double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
 	double prevConstraintViolation;
 	
+	boolean newThisTimeStep;
+	
 	/** history of the last (max N) time steps for this contact. */
 	public ArrayList<Vector2d> body1ContactForceHistory = new ArrayList<Vector2d>();
 	public ArrayList<Double> body1ContactTorqueHistory = new ArrayList<Double>();

@@ -344,9 +344,9 @@ public class RigidCollection extends RigidBody{
 		bpc.addToBodyListsParent();
 		
 		// add the external bpc to the collection bodyPairContactList
-		for (BodyPairContact bpcExt : bpc.body1.bodyPairContactList) 
+		for (BodyPairContact bpcExt : bpc.body1.bodyPairContacts) 
 			bpcExt.addToBodyListsParent();
-		for (BodyPairContact bpcExt : bpc.body2.bodyPairContactList) 
+		for (BodyPairContact bpcExt : bpc.body2.bodyPairContacts) 
 			bpcExt.addToBodyListsParent();
 	}
 
@@ -458,9 +458,9 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void fillInternalBodyContacts() {
 		for (RigidBody body: bodies) {
-			for (BodyPairContact bpc: body.bodyPairContactList) {
-				if (!bodyPairContactList.contains(bpc)) {
-					bodyPairContactList.add(bpc);
+			for (BodyPairContact bpc: body.bodyPairContacts) {
+				if (!bodyPairContacts.contains(bpc)) {
+					bodyPairContacts.add(bpc);
 					if(bpc.inCollection == true) {
 						RigidBody otherBody = bpc.getOtherBody(body);
 						if (body.parent.bodies.contains(otherBody)) {
@@ -483,7 +483,7 @@ public class RigidCollection extends RigidBody{
 	 * identified in this call can also be later removed. 
 	 */
 	public void addIncompleteContacts(RigidBody body, LinkedList<BodyPairContact> removalQueue) {
-		for (BodyPairContact bpc: body.bodyPairContactList) {
+		for (BodyPairContact bpc: body.bodyPairContacts) {
 			if (bpc.body1.isInSameCollection(bpc.body2) && !bpc.inCollection) {
 				bpc.inCollection = true;
 				body.parent.addToInternalContact(bpc);
@@ -507,7 +507,7 @@ public class RigidCollection extends RigidBody{
 
 	public void displayInternalContactForces(GLAutoDrawable drawable) {
 
-		for (BodyPairContact bpc: bodyPairContactList) {
+		for (BodyPairContact bpc: bodyPairContacts) {
 			if (!bpc.inCollection) 
 				continue;
 			for (Contact c: bpc.contactList) 
@@ -517,7 +517,7 @@ public class RigidCollection extends RigidBody{
 	
 	public void displayInternalContactLocations(GLAutoDrawable drawable, int size) {
 
-		for (BodyPairContact bpc: bodyPairContactList) {
+		for (BodyPairContact bpc: bodyPairContacts) {
 			if (!bpc.inCollection) 
 				continue;
 			for (Contact c: bpc.contactList) 
@@ -570,7 +570,7 @@ public class RigidCollection extends RigidBody{
 		// draw a line between the two bodies but only if they're both not pinned
 		Point2d p1 = new Point2d();
 		Point2d p2 = new Point2d();
-		for (BodyPairContact bpc: bodyPairContactList) {
+		for (BodyPairContact bpc: bodyPairContacts) {
 			if(bpc.inCollection) {
 				gl.glLineWidth(5);
 				gl.glColor4f(0.f, 0.f, 0.f, 1.0f);
@@ -606,7 +606,7 @@ public class RigidCollection extends RigidBody{
 	 */
 	public void displayCycles( GLAutoDrawable drawable, int size) {
 		
-		for(BodyPairContact bpc : bodyPairContactList) {
+		for(BodyPairContact bpc : bodyPairContacts) {
 			if (bpc.inCycle) {
 				if(bpc.contactList.isEmpty())
 					System.err.println("[displayCycles] The list of contact is empty. This should not happen. Probably due to an unwanted merge (concave?).");

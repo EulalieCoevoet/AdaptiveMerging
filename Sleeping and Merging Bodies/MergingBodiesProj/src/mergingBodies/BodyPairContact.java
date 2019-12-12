@@ -35,6 +35,8 @@ public class BodyPairContact {
 		
 	public boolean inCollection = false;
 	
+	public boolean checked = false;
+	
 	public BodyPairContact(RigidBody body1, RigidBody body2) {
 		this.body1 = body1;
 		this.body2 = body2;
@@ -242,11 +244,11 @@ public class BodyPairContact {
 	 * Add the BodyContact to bodyContactList of members body1 and body2  
 	 */
 	public void addToBodyLists() {
-		if (!body1.bodyPairContactList.contains(this)) {
-			body1.bodyPairContactList.add(this);
+		if (!body1.bodyPairContacts.contains(this)) {
+			body1.bodyPairContacts.add(this);
 		}
-		if (!body2.bodyPairContactList.contains(this)) {
-			body2.bodyPairContactList.add(this);
+		if (!body2.bodyPairContacts.contains(this)) {
+			body2.bodyPairContacts.add(this);
 		}
 	}
 	
@@ -254,11 +256,11 @@ public class BodyPairContact {
 	 * Add the BodyContact to bodyContactList of parent members body1 and body2  
 	 */
 	public void addToBodyListsParent() {		
-		if (body1.isInCollection() && !body1.parent.bodyPairContactList.contains(this)) {
-			body1.parent.bodyPairContactList.add(this);
+		if (body1.isInCollection() && !body1.parent.bodyPairContacts.contains(this)) {
+			body1.parent.bodyPairContacts.add(this);
 		}
-		if (body2.isInCollection() && !body2.parent.bodyPairContactList.contains(this)) {
-			body2.parent.bodyPairContactList.add(this);
+		if (body2.isInCollection() && !body2.parent.bodyPairContacts.contains(this)) {
+			body2.parent.bodyPairContacts.add(this);
 		}
 	}
 	
@@ -266,21 +268,21 @@ public class BodyPairContact {
 	 * Remove the BodyContact from bodyContactList of members body1 and body2
 	 */
 	public void removeFromBodyLists() {
-		if (body1.bodyPairContactList.contains(this))
-			body1.bodyPairContactList.remove(this);
-		if (body2.bodyPairContactList.contains(this))
-			body2.bodyPairContactList.remove(this);
+		if (body1.bodyPairContacts.contains(this))
+			body1.bodyPairContacts.remove(this);
+		if (body2.bodyPairContacts.contains(this))
+			body2.bodyPairContacts.remove(this);
 	}
 	
 	/**
 	 * Remove the BodyContact from bodyContactList of parent of members body1 and body2
 	 */
 	public void removeFromBodyListsParent() {
-		if (body1.isInCollection() && body1.parent.bodyPairContactList.contains(this)) {
-			body1.parent.bodyPairContactList.remove(this);
+		if (body1.isInCollection() && body1.parent.bodyPairContacts.contains(this)) {
+			body1.parent.bodyPairContacts.remove(this);
 		}
-		if (body2.isInCollection() && body2.parent.bodyPairContactList.contains(this)) {
-			body2.parent.bodyPairContactList.remove(this);
+		if (body2.isInCollection() && body2.parent.bodyPairContacts.contains(this)) {
+			body2.parent.bodyPairContacts.remove(this);
 		}
 	}
 	
@@ -365,7 +367,7 @@ public class BodyPairContact {
 	public void checkCyclesToUnmerge(ArrayList<RigidBody> bodiesToUnmerge) {
 		ArrayList<BodyPairContact> bpcToCheck = new ArrayList<BodyPairContact>();
 		
-		for (BodyPairContact bpc: body1.bodyPairContactList) { // check if body1 was part of a cycle
+		for (BodyPairContact bpc: body1.bodyPairContacts) { // check if body1 was part of a cycle
 			if (bpc.inCycle) {
 				bpc.addBodiesToUnmerge(bodiesToUnmerge, false); 
 				bpcToCheck.add(bpc);
@@ -377,7 +379,7 @@ public class BodyPairContact {
 			}
 		}
 		
-		for (BodyPairContact bpc: body2.bodyPairContactList) { // check if body2 was part of a cycle
+		for (BodyPairContact bpc: body2.bodyPairContacts) { // check if body2 was part of a cycle
 			if (bpc.inCycle) {
 				bpc.addBodiesToUnmerge(bodiesToUnmerge, false);
 				bpcToCheck.add(bpc);
