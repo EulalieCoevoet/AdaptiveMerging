@@ -56,10 +56,10 @@ public class RigidBodySystem {
 	public DoubleParameter globalViscousDecay = new DoubleParameter("global viscous decay", 1, 0.1, 1 );
 	
 	/**Stiffness of  spring*/
-	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 10, 1, 1e4 );
+	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
 
 	/**Viscous damping coefficient for the  spring*/
-	public DoubleParameter springDamping= new DoubleParameter("spring damping", 10, 0, 1000 );
+	public DoubleParameter springDamping= new DoubleParameter("spring damping", 1, 0, 1000 );
 
 	/**Viscous damping coefficient for the  spring*/
 	public static IntParameter springLength= new IntParameter("spring rest length", 1, 1, 100 );
@@ -140,7 +140,7 @@ public class RigidBodySystem {
 		/// COLLECTION UPDATE /// this should be done before advanceTime() so that external forces and velocities are of the same time step
 		if (mergeParams.updateContactsInCollections.getValue()) 
 			collisionProcessor.updateInCollections(dt, mergeParams);		
-		
+
 		/// UNMERGE (CONTACT CRITERIA) ///		
 		if (mergeParams.enableUnmerging.getValue() && (mergeParams.enableUnmergeNormalCondition.getValue() || mergeParams.enableUnmergeFrictionCondition.getValue())) {
 			unmergeBodiesContactConditions(dt);
@@ -468,7 +468,7 @@ public class RigidBodySystem {
 					
 					if (bpc.checkContactsState(dt, mergeParams)) {
 						bpc.checkCyclesToUnmerge(unmergingBodies);
-						bpc.addBodiesToUnmerge(unmergingBodies, false); 
+						bpc.addBodiesToUnmerge(unmergingBodies, true); // now that the LCP solve is done after this step, we cannot look at the relative velocity anymore 
 					}
 				}
 				
@@ -966,9 +966,9 @@ public class RigidBodySystem {
 	private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 	
 	private BooleanParameter drawDeltaV = new BooleanParameter("draw DeltaV", false );
-	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true );
-	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true );
-	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true );
+	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", false );
+	private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", false );
+	private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", false );
 	private IntParameter contactLocationSize = new IntParameter( "contact point size ", 5, 5, 20);
 	private BooleanParameter drawInternalHistories = new BooleanParameter("draw internal histories", false );
 	private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );

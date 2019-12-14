@@ -77,7 +77,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     public void setUp() {
         system.mouseSpring = mouseSpring;
         system.mouseImpulse = mouseImpulse;
-        systemDir = "datalcp/boatCraneSim.png";
+        systemDir = "datalcp/cargoShip.png";
         loadSystem(systemDir); 
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(1280, 720), new Dimension(640,640) );

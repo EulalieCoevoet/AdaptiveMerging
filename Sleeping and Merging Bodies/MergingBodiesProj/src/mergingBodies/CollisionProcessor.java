@@ -189,9 +189,10 @@ public class CollisionProcessor {
 		solver.warmStart = true;
 		
 		solver.contacts = new ArrayList<Contact>();
+		boolean compute = false; // set to true if there is a collection in the system
 		
 		if (mergeParams.organizeContacts.getValue())
-			getOrganizedContacts(solver.contacts);
+			compute = getOrganizedContacts(solver.contacts);
 		else {
 			// Copy the external contacts 
 			// This resolution is done with the Jacobians of the bodies (not the collection) 
@@ -201,6 +202,7 @@ public class CollisionProcessor {
 			
 			for (RigidBody body : bodies) {
 				if (body instanceof RigidCollection && !body.isSleeping) {
+					compute = true;
 					RigidCollection collection = (RigidCollection)body;
 					// Update the internal contacts
 					solver.contacts.addAll(collection.internalContacts);
@@ -211,25 +213,27 @@ public class CollisionProcessor {
 	    		knuthShuffle(solver.contacts);
 		}
 		
-		// eulalie: this can be optimized, only collections need an update 
-		for (Contact contact: solver.contacts) 
-			contact.computeJacobian(true);
-		
-		solver.solve(dt);
-		
-		for (RigidBody body : bodies) {
-			if (body instanceof RigidCollection && !body.isSleeping) {
-				
-				RigidCollection collection = (RigidCollection)body;
-				collection.computeInternalContactsForce(dt);
-				
-				// Advance velocities for internal bodies
-				for (RigidBody b : collection.bodies)
-					if(!b.pinned && !b.temporarilyPinned)
-						b.advanceVelocities(dt);	
+		if (compute) { // there is at least one collection in the system
+			// eulalie: this can be optimized, only collections need an update 
+			for (Contact contact: solver.contacts) 
+				contact.computeJacobian(true);
+			
+			solver.solve(dt);
+			
+			for (RigidBody body : bodies) {
+				if (body instanceof RigidCollection && !body.isSleeping) {
+					
+					RigidCollection collection = (RigidCollection)body;
+					collection.computeInternalContactsForce(dt);
+					
+					// Advance velocities for internal bodies
+					for (RigidBody b : collection.bodies)
+						if(!b.pinned && !b.temporarilyPinned)
+							b.advanceVelocities(dt);	
+				}
+				// Reset deltaV for LCP solve
+				body.deltaV.zero();
 			}
-			// Reset deltaV for LCP solve
-			body.deltaV.zero();
 		}
 		
 		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
@@ -243,7 +247,7 @@ public class CollisionProcessor {
 	 * <li> 3. Continue until the end
 	 * </ul><p>
 	 */
-	protected void getOrganizedContacts(ArrayList<Contact> contacts) {
+	protected boolean getOrganizedContacts(ArrayList<Contact> contacts) {
 
 		ArrayList<BodyPairContact> orderedBpcs = new ArrayList<BodyPairContact>();
 		
@@ -268,8 +272,10 @@ public class CollisionProcessor {
 			}
 		}
 		
+		boolean compute = false;
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.isSleeping) {
+				compute = true;
 				RigidCollection collection = (RigidCollection)body;
 				for ( BodyPairContact bpc : collection.bodyPairContacts ) {
 					if (!bpc.checked) {
@@ -288,6 +294,8 @@ public class CollisionProcessor {
 					contacts.add(new Contact(contact));
 			}
 		}
+		
+		return compute;
 	}	
 	
 	protected void getNextLevel(ArrayList<BodyPairContact> bodyPairContacts, ArrayList<BodyPairContact> orderedBpcs) {
@@ -729,8 +737,8 @@ public class CollisionProcessor {
 	public DoubleParameter friction = new DoubleParameter("Coulomb friction coefficient", 0.6, 0, 2 );
 	public IntParameter iterations = new IntParameter("iterations for PGS solve", 1000, 1, 5000);
 	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
-	private BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
-	private BooleanParameter warmStart = new BooleanParameter( "warm start", true);
+	public BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
+	public BooleanParameter warmStart = new BooleanParameter( "warm start", true);
 	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
 	public static DoubleParameter constraintOffset = new DoubleParameter("constraintOffset", 0.0, -0.5, 0.5 );
 	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );

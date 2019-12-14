@@ -68,14 +68,14 @@ public class PGS {
 			System.err.println("PGS.solve() method needs the list PGS.contacts to be filled.");
 			return;
 		}
+		
+		if (warmStart)
+			confidentWarmStart();
 
 		for (Contact contact: contacts) {
 			contact.computeB(dt, restitution, feedbackStiffness, computeInCollection);
 			contact.computeJMinvJtDiagonal(computeInCollection);
 		}
-		
-		if (warmStart)
-			confidentWarmStart();
 		
 		int iter = iterations;
 		while(iter > 0) {
@@ -164,7 +164,7 @@ public class PGS {
 	 * Warm start if the confidence that each contact already has a value for lambda
 	 */
 	protected void confidentWarmStart() {
-		for (Contact contact : contacts) {						
+		for (Contact contact : contacts) {		
 			updateDeltaV(contact, contact.lambda.x, contact.lambda.y);	
 		}
 	}
