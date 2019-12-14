@@ -130,10 +130,7 @@ public class RigidCollection extends RigidBody{
 		omega = ( omega*massAngular + body.omega*body.massAngular )/( body.massAngular + massAngular );
 	}
 	
-	@Override
-	public void clear() {
-		super.clear();
-		
+	public void clearBodies() {
 		for (RigidBody body: bodies) {
 			applyVelocitiesTo(body);
 			body.clear();

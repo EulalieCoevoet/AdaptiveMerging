@@ -117,9 +117,11 @@ public class RigidBodySystem {
 		long now = System.nanoTime();  
 		totalSteps++;
 		
-		for (RigidBody body: bodies) 
+		for (RigidBody body: bodies) {
 			body.clear();
-		
+			if (body instanceof RigidCollection)
+				((RigidCollection)body).clearBodies();
+		}
 		applyExternalForces();
 		
 		/// COLLISION DETECTION AND WARM START ///
@@ -140,12 +142,12 @@ public class RigidBodySystem {
 		/// COLLECTION UPDATE /// this should be done before advanceTime() so that external forces and velocities are of the same time step
 		if (mergeParams.updateContactsInCollections.getValue()) 
 			collisionProcessor.updateInCollections(dt, mergeParams);		
-
+		
 		/// UNMERGE (CONTACT CRITERIA) ///		
 		if (mergeParams.enableUnmerging.getValue() && (mergeParams.enableUnmergeNormalCondition.getValue() || mergeParams.enableUnmergeFrictionCondition.getValue())) {
 			unmergeBodiesContactConditions(dt);
 			checkIndex();
-		}
+		}		
 		
 		/// LCP RESOLUTION ///
 		collisionProcessor.solveLCP(dt); 
@@ -485,6 +487,12 @@ public class RigidBodySystem {
 		
 		bodies.addAll(additionQueue);
 		bodies.removeAll(removalQueue);
+		
+		if (!additionQueue.isEmpty()) {
+			for (RigidBody body: bodies) // when we unmerge, external forces (gravity, spring forces) have to be recalculated...
+				body.clear();
+			applyExternalForces();
+		}
 		
 		processCollectionsColor();
 	}
