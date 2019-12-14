@@ -153,9 +153,9 @@ public class RigidBodySystem {
 		
 		/// INTEGRATION ///
 		for (RigidBody b : bodies) 
-			b.advanceTime(dt); 
+			b.advanceTime(dt, mergeParams); 
 		
-		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts)
+		for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) 
 			bpc.accumulate(mergeParams);
 		
 		/// MERGE /// this should be done after advanceTime() so that the deltaVs are applied to each bodies before merging
@@ -474,7 +474,7 @@ public class RigidBodySystem {
 				
 				ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
 				if (!unmergingBodies.isEmpty())
-					unmergeSelectBodies(collection, unmergingBodies, newBodies, dt);	
+					unmergeSelectedBodies(collection, unmergingBodies, newBodies, dt);	
 
 				if (!newBodies.isEmpty()) {
 					additionQueue.addAll(newBodies);
@@ -523,7 +523,7 @@ public class RigidBodySystem {
 				
 				ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
 				if (!unmergingBodies.isEmpty()) 
-					unmergeSelectBodies(collection, unmergingBodies, newBodies, dt);	
+					unmergeSelectedBodies(collection, unmergingBodies, newBodies, dt);	
 
 				if (!newBodies.isEmpty()) {
 					additionQueue.addAll(newBodies);
@@ -538,7 +538,7 @@ public class RigidBodySystem {
 		processCollectionsColor();
 	}
 
-	private void unmergeSelectBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies, double dt) {
+	private void unmergeSelectedBodies(RigidCollection collection, ArrayList<RigidBody> unmergingBodies, ArrayList<RigidBody> newBodies, double dt) {
 
 		mergingEvent = true;
 		
@@ -569,6 +569,9 @@ public class RigidBodySystem {
 						handledBodies.add(otherBody);
 						buildNeighborBody(otherBody, subBodies, handledBodies);
 
+						for (RigidBody b: subBodies)
+							collection.unmergeSingleBody(b);
+						
 						if (subBodies.size() > 1) {
 							//make a new collection
 							RigidCollection newCollection = new RigidCollection(subBodies.remove(0), subBodies.remove(0));
@@ -578,8 +581,6 @@ public class RigidBodySystem {
 							collection.applyVelocitiesTo(newCollection);
 							newBodies.add(newCollection);
 						} else {
-							collection.unmergeSingleBody(subBodies.get(0));
-							collection.applyVelocitiesTo(body);
 							newBodies.add(subBodies.get(0));
 						}
 						

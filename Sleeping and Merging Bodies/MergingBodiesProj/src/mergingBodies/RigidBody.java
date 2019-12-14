@@ -325,7 +325,7 @@ public class RigidBody {
 	 * 
 	 * @param dt step size
 	 */
-	public void advanceTime(double dt) {
+	public void advanceTime(double dt, MergeParameters mergeParams) {
 		
 		if(temporarilyPinned && ++steps>=RigidBodySystem.tempSleepCount.getValue())
 			temporarilyPinned = !temporarilyPinned; 

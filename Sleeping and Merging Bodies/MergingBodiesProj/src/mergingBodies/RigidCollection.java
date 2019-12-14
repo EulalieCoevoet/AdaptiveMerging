@@ -150,6 +150,7 @@ public class RigidCollection extends RigidBody{
 		x.set(body.x);
 		theta = body.theta;
 		massLinear = body.massLinear;
+		massAngular = body.massAngular;
 	}
 	
 	/**
@@ -351,15 +352,24 @@ public class RigidCollection extends RigidBody{
 	}
 
 	@Override
-	public void advanceTime(double dt){
+	public void advanceTime(double dt, MergeParameters mergeParams){
 
-		super.advanceTime(dt);
+		super.advanceTime(dt, mergeParams);
 		
 		if (pinned || temporarilyPinned || isSleeping)
 			return;
 		
 		updateBodiesPositionAndTransformations();
-		computeInternalContactsForce(dt);		
+		computeInternalContactsForce(dt);	
+		
+		// Advance velocities for internal bodies
+		if (mergeParams.enableUnmergeRelativeMotionCondition.getValue()) {
+			for (RigidBody body : bodies)
+				if(!body.pinned && !body.temporarilyPinned)
+					body.advanceVelocities(dt);	
+		} else {
+			applyVelocitiesToBodies();
+		}
 	}
 	
 	/**
