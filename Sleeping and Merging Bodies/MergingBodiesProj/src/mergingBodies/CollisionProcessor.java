@@ -225,7 +225,10 @@ public class CollisionProcessor {
 					
 					RigidCollection collection = (RigidCollection)body;
 					collection.computeInternalContactsForce(dt);
-	
+					
+					for (RigidBody b : collection.bodies)
+						if(!b.pinned && !b.temporarilyPinned)
+							b.advanceVelocities(dt);	
 				}
 				// Reset deltaV for LCP solve
 				body.deltaV.zero();

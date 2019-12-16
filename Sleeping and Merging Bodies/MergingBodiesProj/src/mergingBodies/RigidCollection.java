@@ -360,13 +360,8 @@ public class RigidCollection extends RigidBody{
 		computeInternalContactsForce(dt);	
 		
 		// Advance velocities for internal bodies
-		if (mergeParams.enableUnmergeRelativeMotionCondition.getValue()) {
-			for (RigidBody body : bodies)
-				if(!body.pinned && !body.temporarilyPinned)
-					body.advanceVelocities(dt);	
-		} else {
+		if (!mergeParams.enableUnmergeRelativeMotionCondition.getValue()) 
 			applyVelocitiesToBodies();
-		}
 	}
 	
 	/**

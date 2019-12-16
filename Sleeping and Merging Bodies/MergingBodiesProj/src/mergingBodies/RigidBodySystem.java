@@ -470,7 +470,7 @@ public class RigidBodySystem {
 					
 					if (bpc.checkContactsState(dt, mergeParams)) {
 						bpc.checkCyclesToUnmerge(unmergingBodies);
-						bpc.addBodiesToUnmerge(unmergingBodies, true); // now that the LCP solve is done after this step, we cannot look at the relative velocity anymore 
+						bpc.addBodiesToUnmerge(unmergingBodies, false); // now that the LCP solve is done after this unmerge, the collection is one step behind... 
 					}
 				}
 				
