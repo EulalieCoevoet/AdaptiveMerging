@@ -6,7 +6,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import mintools.parameters.DoubleParameter;
-import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
 public class MouseImpulse {
@@ -62,6 +61,7 @@ public class MouseImpulse {
         direction.normalize();
         force.scale( scale.getValue()*distance, direction );
                 
+        //TODO: This won't work anymore... 
     	if (pickedBody.isInCollection()) pickedBody.parent.applyForceW( pickedPoint, force );
         pickedBody.applyForceW( pickedPoint, force );
         
@@ -82,8 +82,6 @@ public class MouseImpulse {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
         vfp.setBorder( new TitledBorder("Mouse Impulse Controls") );
         vfp.add( scale.getSliderControls(true) );
-        CollapsiblePanel cp = new CollapsiblePanel(vfp.getPanel());
-        cp.collapse();
-        return cp;
+        return vfp.getPanel();
     }
 }

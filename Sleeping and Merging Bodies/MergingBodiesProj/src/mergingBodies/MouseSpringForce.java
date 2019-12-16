@@ -6,7 +6,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import mintools.parameters.DoubleParameter;
-import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -99,9 +98,7 @@ public class MouseSpringForce {
         vfp.setBorder( new TitledBorder("Mouse Spring Controls") );
         vfp.add( stiffness.getSliderControls(true) );
         vfp.add( damping.getSliderControls(false) );
-        CollapsiblePanel cp = new CollapsiblePanel(vfp.getPanel());
-        cp.collapse();
-        return cp;
+        return vfp.getPanel();
     }
         
 }

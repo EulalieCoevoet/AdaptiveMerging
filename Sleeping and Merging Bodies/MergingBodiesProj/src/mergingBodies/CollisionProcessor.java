@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 import javax.vecmath.Point2d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector2d;
@@ -15,7 +14,7 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
-import mergingBodies.RigidBodySystem.MergeParameters;
+import mergingBodies.Merging.MergeParameters;
 
 /**
  * Class for detecting and resolving collisions. Currently this class uses penalty forces between rigid bodies.
@@ -179,6 +178,9 @@ public class CollisionProcessor {
 	 */
 	public void updateInCollections(double dt, MergeParameters mergeParams) {
 
+		if (!mergeParams.updateContactsInCollections.getValue())
+			return;
+		
 		long now = System.nanoTime();
 		
 		solver.init(friction.getValue(), iterationsInCollection.getValue());
@@ -302,17 +304,14 @@ public class CollisionProcessor {
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
 		
 		for ( BodyPairContact bpc : bodyPairContacts ) {
-						
-			for ( BodyPairContact bpc1 : bpc.body1.bodyPairContacts )
-				if (!bpc1.checked) {
-					tmpBodyPairContacts.add(bpc1);
-					bpc1.checked = true;
+			for (RigidBody body : bpc.bodies) {		
+				for ( BodyPairContact otherBpc : body.bodyPairContacts ) {
+					if (!otherBpc.checked) {
+						tmpBodyPairContacts.add(otherBpc);
+						otherBpc.checked = true;
+					}
 				}
-			for ( BodyPairContact bpc2 : bpc.body2.bodyPairContacts )
-				if (!bpc2.checked) {
-					tmpBodyPairContacts.add(bpc2);
-					bpc2.checked = true;
-				}
+			}
 		}	
 		
 		if (!tmpBodyPairContacts.isEmpty()) {
@@ -328,24 +327,6 @@ public class CollisionProcessor {
 			Block block2 = contact.block2;
 			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
 		} 
-	}
-	
-	public void updateContactsHistory(MergeParameters mergeParams) {
-		for (Contact c: contacts) {
-			c.body1ContactForceHistory.add(c.contactForceB1);
-			c.body1ContactTorqueHistory.add(c.contactTorqueB1);
-			if (c.body1ContactForceHistory.size() > mergeParams.stepAccum.getValue()) {
-				c.body1ContactForceHistory.remove(0);
-				c.body1ContactTorqueHistory.remove(0);
-			}
-	
-			c.body2ContactForceHistory.add(c.contactForceB2);
-			c.body2ContactTorqueHistory.add(c.contactTorqueB2);
-			if (c.body2ContactForceHistory.size() > mergeParams.stepAccum.getValue()) {
-				c.body2ContactForceHistory.remove(0);
-				c.body2ContactTorqueHistory.remove(0);
-			}
-		}
 	}
 
 	/**
@@ -390,6 +371,7 @@ public class CollisionProcessor {
 				narrowPhase( b1, b2 );
 				
 				if ( pruneContacts.getValue() && tmpContacts.size() > 2 ) {
+					//TODO: if both are RigidCollections....
 					if ( b1 instanceof RigidCollection ) {
 						RigidCollection collection = (RigidCollection) b1;
 						pruneCollection(collection);
@@ -411,13 +393,13 @@ public class CollisionProcessor {
 		ArrayList<Contact> collectionContacts = new ArrayList<Contact>();
 		ArrayList<Contact> contacts = new ArrayList<Contact>();
 		for (RigidBody body : collection.bodies) {
-			contacts.clear();
 			for (Contact contact : tmpContacts)
 				if (contact.withBody(body))
 					contacts.add(contact);
 			if (contacts.size()>2)
 				prune(contacts);
 			collectionContacts.addAll(contacts);
+			contacts.clear();
 		}
 		tmpContacts.clear();
 		tmpContacts.addAll(collectionContacts);
@@ -753,7 +735,6 @@ public class CollisionProcessor {
 	public JPanel getControls() {
 		VerticalFlowPanel vfp = new VerticalFlowPanel();
 		
-		vfp.setBorder( new TitledBorder("Collision Processing Controls") );
 		vfp.add( shuffle.getControls() );
 		vfp.add( pruneContacts.getControls() );
 		vfp.add( epsilonPruneConvexHull.getSliderControls(true) );

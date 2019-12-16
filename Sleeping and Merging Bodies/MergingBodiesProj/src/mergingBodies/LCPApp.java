@@ -30,14 +30,12 @@ import javax.swing.border.TitledBorder;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
-import mintools.swing.CollapsiblePanel;
 import mintools.swing.FileSelect;
 import mintools.swing.HorizontalFlowPanel;
 import mintools.swing.VerticalFlowPanel;
@@ -77,10 +75,15 @@ public class LCPApp implements SceneGraphNode, Interactor {
     public void setUp() {
         system.mouseSpring = mouseSpring;
         system.mouseImpulse = mouseImpulse;
-        systemDir = "datalcp/cargoShip.png";
+        systemDir = "datalcp/wallWideDenseHighV2.png";
         loadSystem(systemDir); 
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(1280, 720), new Dimension(640,640) );
+        ev.controlFrame.add("Display", system.display.getControls());
+        ev.controlFrame.add("Merging", system.merging.getControls());
+        ev.controlFrame.add("Sleeping", system.sleeping.getControls());
+        ev.controlFrame.add("Collision", system.collision.getControls());
+        ev.controlFrame.add("Factory", factory.getControls());
         ev.addInteractor(this); 
     }
     
@@ -113,7 +116,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         windowWidth = drawable.getSurfaceWidth();
         windowHeight = drawable.getSurfaceHeight();
-        if ( run.getValue() && (!system.mergingEvent || !system.triggerMergingEvent)) {
+        if ( run.getValue() && (!system.merging.mergingEvent || !system.merging.triggerMergingEvent)) {
             double dt = stepsize.getValue() / (int)substeps.getValue();
             for ( int i = 0; i < substeps.getValue(); i++ ) {
                 if ( factory.use ) factory.advanceTime( dt );
@@ -141,7 +144,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         gl.glMultMatrixd( T.asArray(),0 );
         
-        system.display( drawable );
+        system.display.display( drawable );
         //clears bodies when using contact graph heuristics
         
         if ( picked != null ) {
@@ -166,20 +169,20 @@ public class LCPApp implements SceneGraphNode, Interactor {
         gl.glColor4f(0,0,0,1);
         String text = "filename = " + system.name + "\n";
         text += "bodies = " + system.bodies.size() + "\n";        
-        text += "contacts = " + system.collisionProcessor.contacts.size() + "\n";
+        text += "contacts = " + system.collision.contacts.size() + "\n";
         text += formatter.format( new Date() ) + "\n";
         text += "simulation time = " + system.simulationTime + "\n";
         text += "total compute time = " + system.totalAccumulatedComputeTime + "\n";
         text += "total steps = " + system.totalSteps + "\n";
         text += "compute time = " + system.computeTime + "\n";
-        text += "collision detection = " + system.collisionProcessor.collisionDetectTime + "\n";
-        text += "LCP solve = " + system.collisionProcessor.collisionSolveTime + "\n";
-        text += "Single iteration PGS = " + system.collisionProcessor.collectionUpdateTime + "\n";
+        text += "collision detection = " + system.collision.collisionDetectTime + "\n";
+        text += "LCP solve = " + system.collision.collisionSolveTime + "\n";
+        text += "Single iteration PGS = " + system.collision.collectionUpdateTime + "\n";
         text += "h = " + stepsize.getValue() + " (with " + substeps.getValue() + " substeps)\n";
-        text += "PGS iterations = " + system.collisionProcessor.iterations.getValue() + "\n";
-        text += "PGS iterations in collection = " + system.collisionProcessor.iterationsInCollection.getValue() + "\n";
-        text += "mu = " + system.collisionProcessor.friction.getValue() + "\n";
-        text += "r = " + system.collisionProcessor.restitution.getValue() +"\n";
+        text += "PGS iterations = " + system.collision.iterations.getValue() + "\n";
+        text += "PGS iterations in collection = " + system.collision.iterationsInCollection.getValue() + "\n";
+        text += "mu = " + system.collision.friction.getValue() + "\n";
+        text += "r = " + system.collision.restitution.getValue() +"\n";
         
         if ( ! hideOverlay.getValue() ) {
         	EasyViewer.printTextLines( drawable, text, 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
@@ -332,9 +335,9 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         vfp.add( hideOverlay.getControls() );
         vfp.add( drawGraphs.getControls() );
-        vfp.add(openCSV.getControls());
-        vfp.add(writeToCSV.getControls());
-        vfp.add(closeCSV.getControls());
+        vfp.add( openCSV.getControls() );
+        vfp.add( writeToCSV.getControls() );
+        vfp.add( closeCSV.getControls() );
         
         vfp.add( run.getControls() );
         vfp.add( stepsize.getSliderControls(true) );
@@ -345,34 +348,16 @@ public class LCPApp implements SceneGraphNode, Interactor {
         vfp.add( mouseImpulse.getControls() );
         
         VerticalFlowPanel vfpv = new VerticalFlowPanel();
-        vfpv.setBorder( new TitledBorder("window content scaling controls") );
+        vfpv.setBorder( new TitledBorder("Window content scaling controls") );
         vfpv.add( scale.getSliderControls(true) );
         vfpv.add( posx.getSliderControls(false) );
         vfpv.add( posy.getSliderControls(false) );
-        CollapsiblePanel vcp = new CollapsiblePanel(vfpv.getPanel());
-        vcp.collapse();
-        vfp.add( vcp );
+        vfp.add( vfpv.getPanel() );
         
         vfp.add( whiteEpsilon.getSliderControls(false) );
-        vfp.add( factory.getControls() );
-        
-        JButton makePlaneBody = new JButton("make plane body" );
-        vfp.add( planePy.getSliderControls(false));
-        vfp.add( planeNx.getSliderControls(false));
-        vfp.add( makePlaneBody );
-        makePlaneBody.addActionListener( new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				system.add( new PlaneRigidBody(new Point2d(0, planePy.getValue()), new Vector2d(planeNx.getValue(), -1)) );
-			}
-		});
         
         return vfp.getPanel();
     }
-    
-    private DoubleParameter planePy = new DoubleParameter( "plane y position", 35, -300, 300 );
-    private DoubleParameter planeNx = new DoubleParameter( "plane normal x component", 0, -1, 1 );
-
     
     protected DoubleParameter whiteEpsilon = new DoubleParameter( "white epsilon", 0.05, 0, 1 );
         
@@ -407,12 +392,9 @@ public class LCPApp implements SceneGraphNode, Interactor {
         system.bodies.addAll(blocker.bodies);
         system.controllableSprings = blocker.controllableSprings;
         system.initialBodies = system.bodies;
-    	system.collisionProcessor.bodyPairContacts.clear();
-    	system.collisionProcessor.contacts.clear();
+    	system.collision.bodyPairContacts.clear();
+    	system.collision.contacts.clear();
     	system.sceneName = filename.substring(0, filename.length() - 4);
-    
-    	
-   
     }
     
     /**
@@ -548,8 +530,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
             	
                 if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
 
-                	if(system.triggerMergingEvent) {
-                    	system.triggerMergingEvent = false;
+                	if(system.merging.triggerMergingEvent) {
+                    	system.merging.triggerMergingEvent = false;
                         run.setValue(true); 
                 	} else {
                 		run.setValue( ! run.getValue() ); 
@@ -564,8 +546,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     stepped = true;
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_M ) {
-                	system.triggerMergingEvent = true;
-                	system.mergingEvent = false;
+                	system.merging.triggerMergingEvent = true;
+                	system.merging.mergingEvent = false;
                     run.setValue( true );       
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    

@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Vector2d;
 
 import mergingBodies.Contact.ContactState;
-import mergingBodies.RigidBodySystem.MergeParameters;
-import mergingBodies.RigidBodySystem.MotionMetricType;
+import mergingBodies.Merging.MergeParameters;
 
 
 /**
@@ -16,6 +15,7 @@ public class BodyPairContact {
 	
 	public RigidBody body1; 
 	public RigidBody body2;
+	public ArrayList<RigidBody> bodies;
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 	
@@ -35,11 +35,15 @@ public class BodyPairContact {
 		
 	public boolean inCollection = false;
 	
+	/**Used for contact ordering*/
 	public boolean checked = false;
 	
 	public BodyPairContact(RigidBody body1, RigidBody body2) {
 		this.body1 = body1;
 		this.body2 = body2;
+		bodies = new ArrayList<RigidBody>();
+		bodies.add(body1);
+		bodies.add(body2);
 	}
 
 	/**
@@ -83,7 +87,6 @@ public class BodyPairContact {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		motionMetricProcessor.setMotionMetricType(mergeParams.motionMetricType.getValue());
 		motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2));
 		
 		if (motionMetricHist.size() > mergeParams.stepAccum.getValue())
@@ -100,30 +103,51 @@ public class BodyPairContact {
 	}
 	
 	/**
+	 * Check merge condition
+	 * @return
+	 */
+	protected boolean checkMergeCondition(MergeParameters mergeParams, boolean checkCycle) {
+
+		if (body1.isSleeping && body2.isSleeping) 
+			return true;
+				
+		if (mergeParams.enableMergeLetItBreathe.getValue())
+			for (Contact contact: contactList)
+				if (Math.abs(contact.prevConstraintViolation - contact.constraintViolation)>mergeParams.thresholdBreath.getValue()) 
+					return false;
+		
+		if (!mergeParams.enableMergePinned.getValue() && (body1.pinned || body2.pinned)) 
+			return false;
+		
+		if (body1.isInSameCollection(body2)) 
+			return false;
+		
+		if (!checkMotionMetric(mergeParams))
+			return false;
+		
+		if (mergeParams.enableMergeStableContactCondition.getValue() && !areContactsStable(mergeParams))
+			return false;
+		
+		if (mergeParams.enableMergeCycleCondition.getValue() && checkCycle && !checkContactsCycle(mergeParams))
+			return false;
+			
+		return true;
+	}
+	
+	/**
 	 * Check if:
 	 * <p><ul> 
-	 * <li> 1. the two bodies have been in contact for at least "sleepAccum" number of time steps
-	 * <li> 2. the motion metric has been non-increasing 
-	 * <li> 3. and lower than a threshold over CollisionProcessor.sleepAccum time steps.
+	 * <li> 1. the two bodies have been in contact for at least "stepAccum" number of time steps
+	 * <li> 2. and lower than a threshold over "stepAccum" time steps.
 	 * </ul><p>
 	 * @return true or false
 	 */
 	public boolean checkMotionMetric(MergeParameters mergeParams) {
 
-		double epsilon = 5e-4;
-
 		if ((motionMetricHist.size() == mergeParams.stepAccum.getValue())) {
-			double previousValue = 0; 
-			double currentValue = 0;
 			for (Double metric : motionMetricHist) {
-				currentValue = metric;
 				if (metric > mergeParams.thresholdMerge.getValue())
 					return false;
-				
-				// I think the monotonically non-increasing metric has no meaning for the largest velocity case
-				if (mergeParams.motionMetricType.getValue() != MotionMetricType.LARGESTVELOCITY.ordinal() && currentValue > previousValue + epsilon)
-					return false;
-				previousValue = metric;
 			}
 		} else {
 			return false;
@@ -219,25 +243,14 @@ public class BodyPairContact {
 	/**
 	 * Add the BodyContact to bodyContactList of members body1 and body2  
 	 */
-	public void addBodiesToUnmerge(ArrayList<RigidBody> bodiesToUnmerge, boolean addBoth) {
+	public void addBpcToUnmerge(ArrayList<BodyPairContact> bpcsToUnmerge) {
 		if(!body1.isInCollection() || !body2.isInCollection() || !body1.isInSameCollection(body2)) {
 			System.err.println("[addBodiesToUnmerge] trying to unmerge a body that is not in a collection. This shouldn't happen?");
 			return;
 		}
 
-		if(addBoth) {
-			if(!bodiesToUnmerge.contains(body1) && !body1.pinned)
-				bodiesToUnmerge.add(body1);
-			if(!bodiesToUnmerge.contains(body2) && !body2.pinned)
-				bodiesToUnmerge.add(body2);
-		} else {
-			double metric1 = motionMetricProcessor.getMotionMetric(body1.parent, body1);
-			double metric2 = motionMetricProcessor.getMotionMetric(body2.parent, body2);
-			if(!bodiesToUnmerge.contains(body1) && !body1.pinned && metric1>metric2)
-				bodiesToUnmerge.add(body1);
-			else if (!bodiesToUnmerge.contains(body2) && !body2.pinned)
-				bodiesToUnmerge.add(body2);
-		}
+		if(!bpcsToUnmerge.contains(this))
+			bpcsToUnmerge.add(this);
 	}
 
 	/**
@@ -287,38 +300,6 @@ public class BodyPairContact {
 	}
 	
 	/**
-	 * Check merge condition
-	 * @return
-	 */
-	protected boolean checkMergeCondition(MergeParameters mergeParams, boolean checkCycle) {
-
-		if (body1.isSleeping && body2.isSleeping) 
-			return true;
-				
-		if (mergeParams.enableMergeLetItBreathe.getValue())
-			for (Contact contact: contactList)
-				if (Math.abs(contact.prevConstraintViolation - contact.constraintViolation)>mergeParams.thresholdBreath.getValue()) 
-					return false;
-		
-		if (!mergeParams.enableMergePinned.getValue() && (body1.pinned || body2.pinned)) 
-			return false;
-		
-		if (body1.isInSameCollection(body2)) 
-			return false;
-		
-		if (!checkMotionMetric(mergeParams))
-			return false;
-		
-		if (mergeParams.enableMergeStableContactCondition.getValue() && !areContactsStable(mergeParams))
-			return false;
-		
-		if (mergeParams.enableMergeCycleCondition.getValue() && checkCycle && !checkContactsCycle(mergeParams))
-			return false;
-			
-		return true;
-	}
-	
-	/**
 	 * Clear datas related to the cycle, and tag the other bpc in the cycle with input unmerge value 
 	 * @param unmerge
 	 */
@@ -364,34 +345,24 @@ public class BodyPairContact {
 		this.inCycle = true;
 	}
 	
-	public void checkCyclesToUnmerge(ArrayList<RigidBody> bodiesToUnmerge) {
+	public void checkCyclesToUnmerge(ArrayList<BodyPairContact> bpcsToUnmerge) {
 		ArrayList<BodyPairContact> bpcToCheck = new ArrayList<BodyPairContact>();
 		
-		for (BodyPairContact bpc: body1.bodyPairContacts) { // check if body1 was part of a cycle
-			if (bpc.inCycle) {
-				bpc.addBodiesToUnmerge(bodiesToUnmerge, false); 
-				bpcToCheck.add(bpc);
-				for (BodyPairContact bpcToUnmerge : bpc.othersInCycle) { // unmerge the others bodies
-					bpcToUnmerge.addBodiesToUnmerge(bodiesToUnmerge, false);
-					bpcToCheck.add(bpcToUnmerge);
+		for (RigidBody body: bodies) {
+			for (BodyPairContact bpc: body.bodyPairContacts) { // check if body was part of a cycle
+				if (bpc.inCycle) {
+					bpc.addBpcToUnmerge(bpcsToUnmerge);
+					bpcToCheck.add(bpc);
+					 for (BodyPairContact bpcToUnmerge : bpc.othersInCycle) { // unmerge the others bodies
+						bpcToUnmerge.addBpcToUnmerge(bpcsToUnmerge);
+						bpcToCheck.add(bpcToUnmerge);
+					 }
+					bpc.clearCycle();
 				}
-				bpc.clearCycle();
-			}
-		}
-		
-		for (BodyPairContact bpc: body2.bodyPairContacts) { // check if body2 was part of a cycle
-			if (bpc.inCycle) {
-				bpc.addBodiesToUnmerge(bodiesToUnmerge, false);
-				bpcToCheck.add(bpc);
-				 for (BodyPairContact bpcToUnmerge : bpc.othersInCycle) { // unmerge the others bodies
-					bpcToUnmerge.addBodiesToUnmerge(bodiesToUnmerge, false);
-					bpcToCheck.add(bpcToUnmerge);
-				 }
-				bpc.clearCycle();
 			}
 		}
 		
 		for (BodyPairContact bpc: bpcToCheck)
-			bpc.checkCyclesToUnmerge(bodiesToUnmerge);
+			bpc.checkCyclesToUnmerge(bpcsToUnmerge);
 	}
 }

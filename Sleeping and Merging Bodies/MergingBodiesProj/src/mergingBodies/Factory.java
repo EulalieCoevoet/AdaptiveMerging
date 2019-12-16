@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
-import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -131,7 +129,7 @@ public class Factory {
         body.v.x = (2*rand.nextDouble()-1) * linearVelocityScale.getValue();  
         body.v.y =  downVelocity.getValue();
         body.updateTransformations();
-        system.add( body );
+        system.bodies.add( body );
     }
     
     /** Specifies the width of the zone from which new objects will be dropped */
@@ -163,7 +161,6 @@ public class Factory {
      */
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
-        vfp.setBorder( new TitledBorder("Factory") );
         vfp.add( run.getControls() );
         vfp.add( interval.getSliderControls(true) );
         vfp.add( spread.getSliderControls(false) );
@@ -172,9 +169,7 @@ public class Factory {
         vfp.add( angularVelocityScale.getSliderControls(true) );
         vfp.add( minY.getSliderControls(false));
         
-        CollapsiblePanel cp = new CollapsiblePanel( vfp.getPanel());
-        cp.collapse();
-        return cp;
+        return vfp.getPanel();
     }
     
 }

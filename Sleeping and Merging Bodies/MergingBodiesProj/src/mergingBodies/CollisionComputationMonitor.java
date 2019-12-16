@@ -124,10 +124,10 @@ public class CollisionComputationMonitor {
 
 	public void monitor( RigidBodySystem system ) {
 		int nb = system.bodies.size(); 
-		int nc = system.collisionProcessor.contacts.size();
-		double tcs = system.collisionProcessor.collisionSolveTime;
-		double tcd = system.collisionProcessor.collisionDetectTime;
-		double tcu = system.collisionProcessor.collectionUpdateTime;
+		int nc = system.collision.contacts.size();
+		double tcs = system.collision.collisionSolveTime;
+		double tcd = system.collision.collisionDetectTime;
+		double tcu = system.collision.collectionUpdateTime;
 
 		CD.add( nb, tcd );
 		CP.add( nc, tcs );

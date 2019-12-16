@@ -8,14 +8,12 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import mergingBodies.Contact.ContactState;
-import mergingBodies.RigidBodySystem.MergeParameters;
-import mergingBodies.RigidBodySystem.SleepParameters;
+import mergingBodies.Merging.MergeParameters;
 import mergingBodies.MotionMetricProcessor;
 import mintools.viewer.EasyViewer;
 import no.uib.cipr.matrix.DenseVector;
 
 import javax.vecmath.Color3f;
-import javax.vecmath.Color4f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -260,24 +258,6 @@ public class RigidBody {
 	
 	public boolean isInCollection(RigidCollection collection) {
 		return (parent==collection);
-	}
-	
-	/**
-	 * Track metric over time steps
-	 */
-	public void accumulate(SleepParameters sleepParams) {
-		
-		RigidBody dummyBody = new RigidBody();
-		dummyBody.x.set(x);
-		dummyBody.theta = theta;
-		dummyBody.v.set(0.,0.);
-		dummyBody.omega = 0;
-		
-		motionMetricProcessor.setMotionMetricType(0);
-		metricHistory.add(motionMetricProcessor.getMotionMetric(this, dummyBody));
-		if (metricHistory.size() > sleepParams.stepAccum.getValue()) {
-			metricHistory.remove(0);	
-		}
 	}
 	
 	public void wake() {
@@ -557,25 +537,6 @@ public class RigidBody {
 		}
 		
 		gl.glPopMatrix();
-	}
-	
-	/**
-	 * Displays deltaV computed by LCP solve at each frame. Goes from each body's center of mass
-	 * outwards in the direction of deltaV
-	 */
-	public void displayDeltaV(GLAutoDrawable drawable, int size, Color4f color) {
-		GL2 gl = drawable.getGL().getGL2();
-
-		gl.glLineWidth(size);
-		
-		gl.glColor4f(color.x, color.y, color.z, color.w);
-		gl.glBegin( GL.GL_LINES );
-		double scale = RigidBodySystem.deltaVVizScale.getValue();
-		
-		gl.glVertex2d(x.x, x.y);
-		gl.glVertex2d(x.x + scale*deltaV.get(0), x.y+scale*deltaV.get(1));
-
-		gl.glEnd();
 	}
 
 	/**

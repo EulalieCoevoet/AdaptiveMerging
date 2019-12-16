@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 import mergingBodies.LCPApp;
 import mergingBodies.RigidBody;
 import mergingBodies.RigidBodySystem;
-import mergingBodies.RigidBodySystem.MergeParameters;
-import mergingBodies.RigidBodySystem.SleepParameters;
+import mergingBodies.Merging.MergeParameters;
+import mergingBodies.Sleeping.SleepParameters;
 import mergingBodies.RigidCollection;
 import mergingBodies.Contact;
 import javax.vecmath.Vector2d;
@@ -22,8 +22,8 @@ public class LCPAppTests extends LCPApp {
 	@Override
 	public void setUp() {
 		// Do nothing, we don't want to launch the app (2D viewer)
-		mergeParams = system.mergeParams;
-		sleepParams = system.sleepParams;
+		mergeParams = system.merging.params;
+		sleepParams = system.sleeping.params;
 	}
 
 	@Test
@@ -121,7 +121,7 @@ public class LCPAppTests extends LCPApp {
 		mergeParams.enableUnmerging.setValue(false);
 		mergeParams.updateContactsInCollections.setValue(true);
 		mergeParams.enableMergePinned.setValue(true);
-		while (!system.mergingEvent) 
+		while (!system.merging.mergingEvent) 
 			system.advanceTime(dt);
 
 		RigidCollection collection = null;
@@ -155,7 +155,7 @@ public class LCPAppTests extends LCPApp {
 		mergeParams.updateContactsInCollections.setValue(true);
 		mergeParams.enableMergeLetItBreathe.setValue(true);
 		mergeParams.enableMergePinned.setValue(true);
-		while (!system.mergingEvent) 
+		while (!system.merging.mergingEvent) 
 			system.advanceTime(dt);
 
 		RigidCollection collection = null;
@@ -188,7 +188,7 @@ public class LCPAppTests extends LCPApp {
 		mergeParams.updateContactsInCollections.setValue(true);
 		mergeParams.enableMergeLetItBreathe.setValue(true);
 		mergeParams.enableMergePinned.setValue(true);
-		while (!system.mergingEvent) 
+		while (!system.merging.mergingEvent) 
 			system.advanceTime(dt);
 
 		RigidCollection collection = null;
@@ -240,7 +240,7 @@ public class LCPAppTests extends LCPApp {
 		mergeParams.enableUnmerging.setValue(false);
 		mergeParams.enableMergePinned.setValue(true);
 		mergeParams.enableMergeCycleCondition.setValue(false);
-		while(!system.mergingEvent)
+		while(!system.merging.mergingEvent)
 			system.advanceTime(dt);
 		assertEquals(1, system.bodies.size()); 
 	}
@@ -257,24 +257,24 @@ public class LCPAppTests extends LCPApp {
 		for (int i=0; i<23; i++)
 			system.advanceTime(dt);
 		
-		assertEquals(4, system.collisionProcessor.contacts.size()); 
-		system.collisionProcessor.updateBodyPairContacts();
-		system.collisionProcessor.clearBodyPairContacts();
-		assertEquals(2, system.collisionProcessor.bodyPairContacts.size()); 
+		assertEquals(4, system.collision.contacts.size()); 
+		system.collision.updateBodyPairContacts();
+		system.collision.clearBodyPairContacts();
+		assertEquals(2, system.collision.bodyPairContacts.size()); 
 		
 		for (int i=0; i<9; i++)
 			system.advanceTime(dt);
 
-		system.collisionProcessor.updateBodyPairContacts();
-		system.collisionProcessor.clearBodyPairContacts();
-		assertEquals(4, system.collisionProcessor.bodyPairContacts.size()); 
+		system.collision.updateBodyPairContacts();
+		system.collision.clearBodyPairContacts();
+		assertEquals(4, system.collision.bodyPairContacts.size()); 
 		
 		for (int i=0; i<7; i++)
 			system.advanceTime(dt);
 
-		system.collisionProcessor.updateBodyPairContacts();
-		system.collisionProcessor.clearBodyPairContacts();
-		assertEquals(6, system.collisionProcessor.bodyPairContacts.size()); 
+		system.collision.updateBodyPairContacts();
+		system.collision.clearBodyPairContacts();
+		assertEquals(6, system.collision.bodyPairContacts.size()); 
 	}
 	
 	@Test
@@ -287,7 +287,7 @@ public class LCPAppTests extends LCPApp {
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableMergePinned.setValue(false);
 		
-		while(!system.mergingEvent)
+		while(!system.merging.mergingEvent)
 			system.advanceTime(dt);
 		
 		RigidCollection collection = null;

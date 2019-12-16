@@ -3,14 +3,13 @@ package mergingBodies;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import mergingBodies.RigidBodySystem.MotionMetricType;
-
 /**
  * This class is used for relative motion's calculations
  */
 public class MotionMetricProcessor {	
-	
-	private MotionMetricType motionMetricType;
+
+	enum MotionMetricType {LARGESTVELOCITY, RELATIVEKINETICENERGY, VELOCITIESNORM};
+	private MotionMetricType motionMetricType = MotionMetricType.LARGESTVELOCITY;
 	
 	public void setMotionMetricType(int type) {
 		if(type ==  MotionMetricType.LARGESTVELOCITY.ordinal())
