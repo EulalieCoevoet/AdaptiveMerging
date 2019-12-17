@@ -308,20 +308,15 @@ public class RigidBodySystem {
 	 */
 	public void clear() {
 		bodies.clear();
-		RigidBody.nextIndex = 0;
 		reset();
 	}
 	
 	public void generateBody() {
 
 		RigidBody genbody = null;
-		for( RigidBody body: bodies ) {
-			if ((body instanceof RigidCollection) || body.pinned) 
-				continue;
-			
-			if (body.index == index.getValue())
-				genbody = new RigidBody(body);
-		}
+		int index = this.index.getValue();
+		if( bodies.size() > index && !(bodies.get(index) instanceof RigidCollection) && !bodies.get(index).pinned) 
+			genbody = new RigidBody(bodies.get(index));
 		
 		//get an unpinned random RigidBody
 		if (genbody == null) {
@@ -357,7 +352,6 @@ public class RigidBodySystem {
 			genbody.omega = this.omega.getValue();
 			genbody.v.set(velocity);
 			genbody.updateTransformations();
-			genbody.index = bodies.size();
 			genbody.created = true;
 			bodies.add(genbody);
 		}
@@ -405,7 +399,7 @@ public class RigidBodySystem {
 	private DoubleParameter velocity_x = new DoubleParameter("velocity x", -30, -100, 100 );
 	private DoubleParameter velocity_y = new DoubleParameter("velocity y", 0, -100, 100 );
 	private DoubleParameter omega = new DoubleParameter("angular velocity", 0, -10, 10 );
-	private IntParameter index = new IntParameter("body index", 61, 0, 200);
+	private IntParameter index = new IntParameter("index", 0, 0, 1000 );
 
 	/**
 	 * @return control panel for the system
@@ -434,7 +428,7 @@ public class RigidBodySystem {
 		vfpv_2.add( velocity_x.getSliderControls(false) );
 		vfpv_2.add( velocity_y.getSliderControls(false) );
 		vfpv_2.add( omega.getSliderControls(false) );
-		vfpv_2.add( index.getSliderControls() );
+		vfpv_2.add( index.getControls() );
         CollapsiblePanel vcp = new CollapsiblePanel(vfpv_2.getPanel());
         vcp.collapse();
 

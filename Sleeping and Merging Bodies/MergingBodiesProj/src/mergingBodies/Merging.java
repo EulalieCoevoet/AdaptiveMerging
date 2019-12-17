@@ -130,7 +130,6 @@ public class Merging {
 		}
 		
 		collision.bodyPairContacts.removeAll(removalQueue);
-		checkIndex(bodies);
 	}
 
 	/**
@@ -164,7 +163,6 @@ public class Merging {
 		bodies.removeAll(removalQueue);
 		bodies.addAll(additionQueue);
 		
-		checkIndex(bodies);
 		params.unmergeAll.setValue(false);
 	}
 	
@@ -230,7 +228,6 @@ public class Merging {
 		bodies.removeAll(removalQueue);
 
 		processCollectionsColor(bodies);
-		checkIndex(bodies);
 	}
 
 	private void unmergeSelectedBpcs(RigidCollection collection, ArrayList<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
@@ -352,19 +349,6 @@ public class Merging {
 				bodies.add(otherBody);
 				buildNeighborBody(otherBody, bodies, handledBodies);
 			}
-		}
-	}
-
-	/**
-	 * if there are bodies with the index i, ups the index of all bodies greater than i to leave room 
-	 * for the new body about to be "reintroduced" to the scene
-	 * TODO: remove me?  Can we remove all body indices?
-	 */
-	@Deprecated
-	private void checkIndex(ArrayList<RigidBody> bodies) {
-		int i = 0;
-		for(RigidBody body: bodies) {
-			body.index = i++;
 		}
 	}
 	

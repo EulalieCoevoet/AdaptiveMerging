@@ -13,6 +13,7 @@ import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
+import mintools.viewer.EasyViewer;
 
 public class Display {
 	
@@ -193,7 +194,7 @@ public class Display {
 		
 		if ( params.drawIndex.getValue()) {
 			for (RigidBody b : bodies) {
-				b.displayIndex(drawable, GLUT.BITMAP_8_BY_13);
+				displayIndex(b, bodies.indexOf(b), drawable, GLUT.BITMAP_8_BY_13);
 			}
 		}
 	}
@@ -208,6 +209,14 @@ public class Display {
 		for (RigidBody body: b.bodies) {
 			body.root.display(drawable);
 		}
+	}
+	
+	public void displayIndex(RigidBody body, int index, GLAutoDrawable drawable, int font) {
+		GL2 gl = drawable.getGL().getGL2();
+		gl.glColor3f(1, 0, 0);
+		gl.glRasterPos2d(body.x.x, body.x.y);
+
+		EasyViewer.glut.glutBitmapString(font, Integer.toString(index));
 	}
 
 	/**

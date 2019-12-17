@@ -364,7 +364,7 @@ public class CollisionProcessor {
 		for ( RigidBody b1 : bodies ) {
 			for ( RigidBody b2 : bodies ) { // not so inefficient given the continue on the next line
 				
-				if ( b1.index >= b2.index ) continue;
+				if ( bodies.indexOf(b1) >= bodies.indexOf(b2) ) continue;
 				if ( (b1.pinned || b1.temporarilyPinned) && (b2.pinned || b2.temporarilyPinned) ) continue; 
 				
 				tmpContacts.clear();

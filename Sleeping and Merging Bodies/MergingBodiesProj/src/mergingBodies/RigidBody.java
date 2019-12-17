@@ -10,7 +10,6 @@ import com.jogamp.opengl.GLAutoDrawable;
 import mergingBodies.Contact.ContactState;
 import mergingBodies.Merging.MergeParameters;
 import mergingBodies.MotionMetricProcessor;
-import mintools.viewer.EasyViewer;
 import no.uib.cipr.matrix.DenseVector;
 
 import javax.vecmath.Color3f;
@@ -26,10 +25,6 @@ public class RigidBody {
 
 	/**Pointer to the parent of this body if it is merged*/
 	RigidCollection parent = null;
-	/** Unique identifier for this body */
-	public int index = 0;
-	/** Variable to keep track of identifiers that can be given to rigid bodies */
-	static public int nextIndex = 0;
 
 	/** visitID of this contact at this time step. */
 	boolean visited = false;
@@ -201,9 +196,6 @@ public class RigidBody {
 			minv = 1 / massLinear;
 			jinv = 1 / massAngular;
 		}
-
-		// set our index
-		index = nextIndex++;
 	}
 
 	/**
@@ -234,9 +226,6 @@ public class RigidBody {
 		jinv = body.jinv;
 		isSleeping = false;
 		rho = 0;
-		
-		// set our index
-		index = nextIndex++;
 	}
 	
 	/**
@@ -612,13 +601,5 @@ public class RigidBody {
 		gl.glBegin(GL.GL_POINTS);
 		gl.glVertex2d(x.x, x.y);
 		gl.glEnd();
-	}
-
-	public void displayIndex(GLAutoDrawable drawable, int font) {
-		GL2 gl = drawable.getGL().getGL2();
-		gl.glColor3f(1, 0, 0);
-		gl.glRasterPos2d(this.x.x, this.x.y);
-
-		EasyViewer.glut.glutBitmapString(font, Integer.toString(this.index));
 	}
 }
