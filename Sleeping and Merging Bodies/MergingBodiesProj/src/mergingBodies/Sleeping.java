@@ -1,7 +1,10 @@
 package mergingBodies;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import mintools.parameters.BooleanParameter;
@@ -17,6 +20,7 @@ public class Sleeping {
 		public BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
 		public DoubleParameter threshold = new DoubleParameter("sleeping threshold", 1e-7, 1e-10, 1 );
+		public BooleanParameter wakeAll = new BooleanParameter("wake all", false);
 	}
 	
 	public SleepParameters params = new SleepParameters();
@@ -47,7 +51,8 @@ public class Sleeping {
 			
 			boolean externalContact = false;
 			for (BodyPairContact bpc : body.bodyPairContacts) {
-				if (!bpc.inCollection) {
+						
+				if (!bpc.inCollection && !(bpc.body1.pinned || bpc.body2.pinned)) {
 					externalContact = true;
 					break;
 				}
@@ -98,7 +103,7 @@ public class Sleeping {
 			
 			boolean wake = false;
 			for (BodyPairContact bpc : body.bodyPairContacts) {
-				if (!bpc.body1.isInSameCollection(bpc.body2)) {
+				if (!bpc.body1.isInSameCollection(bpc.body2) && !(bpc.body1.pinned || bpc.body2.pinned)) {
 					wake = true;
 					break;
 				}
@@ -108,6 +113,20 @@ public class Sleeping {
 				body.wake();
 		}
 	}	
+	
+	/**
+	 * Wake all bodies
+	 */
+	public void wakeAll() {
+		
+		if (!params.wakeAll.getValue())
+			return;
+		
+		for (RigidBody body: bodies)
+			body.wake();
+
+		params.wakeAll.setValue(false);
+	}
 	
 	/**
 	 * Track metric over time steps
@@ -134,6 +153,14 @@ public class Sleeping {
 		vfp.add( params.enableSleeping.getControls() );
 		vfp.add( params.threshold.getSliderControls(true) );
 		vfp.add( params.stepAccum.getSliderControls() );
+        JButton wakeButton = new JButton("wake all");
+        vfp.add( wakeButton);
+        wakeButton.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	params.wakeAll.setValue(true);
+            }
+        });
 		return vfp.getPanel();
 	}
 }

@@ -556,7 +556,11 @@ public class RigidCollection extends RigidBody {
 			gl.glEnable(GL2.GL_BLEND);
 			gl.glBlendFuncSeparate(GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR, GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glBlendEquation(GL2.GL_FUNC_ADD);
-			gl.glBlendColor(color.x, color.y, color.z, Block.alpha);
+			
+			if (isSleeping)
+				gl.glBlendColor((color.x+1)/2, (color.y+1)/2, (color.z+1)/2, Block.alpha);
+			else
+				gl.glBlendColor(color.x, color.y, color.z, Block.alpha);
 
 			for (RigidBody b : bodies)
 				b.display(drawable, color);

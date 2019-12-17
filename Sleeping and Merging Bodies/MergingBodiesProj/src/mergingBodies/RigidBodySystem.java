@@ -99,6 +99,8 @@ public class RigidBodySystem {
 		collision.warmStart(); 		
 		collision.updateBodyPairContacts(); 
 		
+		sleeping.wakeAll();
+		
 		sleeping.wake();
 		
 		merging.unmergeAll();
@@ -120,11 +122,11 @@ public class RigidBodySystem {
 		
 		for (BodyPairContact bpc : collision.bodyPairContacts) 
 			bpc.accumulate(merging.params);
-		
+
 		merging.merge();
 		
 		sleeping.sleep();
-			
+		
 		merging.unmerge(MergeConditions.RELATIVEMOTION, dt); 
 
 		if (generateBody) {
