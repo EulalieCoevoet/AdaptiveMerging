@@ -371,16 +371,19 @@ public class CollisionProcessor {
 				narrowPhase( b1, b2 );
 				
 				if ( pruneContacts.getValue() && tmpContacts.size() > 2 ) {
-					//TODO: if both are RigidCollections....
+
 					if ( b1 instanceof RigidCollection ) {
 						RigidCollection collection = (RigidCollection) b1;
 						pruneCollection(collection);
-					} else if ( b2 instanceof RigidCollection ) {
+					} 
+					
+					if ( tmpContacts.size() > 2 && b2 instanceof RigidCollection ) {
 						RigidCollection collection = (RigidCollection) b2;
 						pruneCollection(collection);
-					} else {
+					} 
+					
+					if ( !(b1 instanceof RigidCollection) && !(b2 instanceof RigidCollection))
 						prune(tmpContacts);
-					}
 				}
 				
 				contacts.addAll(tmpContacts);
