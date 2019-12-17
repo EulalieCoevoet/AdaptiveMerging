@@ -16,8 +16,10 @@ public class MouseImpulse {
     
     private Point2d pickedPoint = new Point2d();
     
-    public boolean released = false;
+    private Vector2d force = new Vector2d();
     
+    public boolean released = false;
+   
     /**
      * Creates a new mouse impulse, where the provided point will be updated with movement of the mouse
      * @param pickedPoint
@@ -44,6 +46,18 @@ public class MouseImpulse {
     	return (pickedBody != null);
     }
     
+    public RigidBody getPickedBody() {
+    	return pickedBody;
+    }
+    
+    public Point2d getPickedPoint() {
+    	return pickedPoint;
+    }
+    
+    public Vector2d getForce() {
+    	return force;
+    }
+    
     /**
      * Applies the mouse impulse to the picked rigid body, or nothing if no body selected
      */
@@ -61,9 +75,9 @@ public class MouseImpulse {
         direction.normalize();
         force.scale( scale.getValue()*distance, direction );
                 
-        //TODO: This won't work anymore... 
     	if (pickedBody.isInCollection()) pickedBody.parent.applyForceW( pickedPoint, force );
         pickedBody.applyForceW( pickedPoint, force );
+        this.force.set(force);
         
         // Apply only once
         released = false;

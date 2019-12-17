@@ -40,7 +40,7 @@ public class RigidBodySystem {
 
 	public MouseSpringForce mouseSpring;
 	public MouseImpulse mouseImpulse;
-
+	public Impulse impulse = new Impulse();
 	
 	public PrintStream stream = null;
 	
@@ -158,8 +158,20 @@ public class RigidBodySystem {
 			applySpringForces(); 
 		}
 		
-		if (mouseImpulse != null) {
+		if (mouseImpulse != null && mouseImpulse.released) {
+			impulse.set(mouseImpulse.getPickedBody());
+			impulse.set(mouseImpulse.getPickedPoint());
 			mouseImpulse.apply();
+			impulse.set(mouseImpulse.getForce());
+		} else {
+			applyImpulse();
+		}
+	}
+	
+	protected void applyImpulse() {
+		if (impulse.isHoldingForce()) {
+			impulse.pickedBody.applyForceW(impulse.pickedPoint, impulse.force);
+			impulse.clear();
 		}
 	}
 
