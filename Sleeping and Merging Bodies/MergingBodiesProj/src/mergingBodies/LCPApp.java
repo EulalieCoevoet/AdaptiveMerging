@@ -26,6 +26,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
@@ -187,17 +188,25 @@ public class LCPApp implements SceneGraphNode, Interactor {
         text += "mu = " + system.collision.friction.getValue() + "\n";
         text += "r = " + system.collision.restitution.getValue() +"\n";
         
-        if ( ! hideOverlay.getValue() ) {
+        if ( ! system.display.params.hideOverlay.getValue() ) {
         	EasyViewer.printTextLines( drawable, text, 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
         }
+        
+        if (system.saveCSV.getValue()) {
+            gl.glColor4f(1,0,0,1);
+        	text = "Saving datas to " + system.sceneName + ".csv";
+			if (system.merging.params.enableMerging.getValue())
+				text = "Saving datas to " + system.sceneName + "_merged.csv";
+			EasyViewer.printTextLines( drawable, text, 10, drawable.getSurfaceHeight()-40, 10, GLUT.BITMAP_HELVETICA_10 );
+        }
+        
     	EasyViewer.endOverlay(drawable);
 
-        if ( drawGraphs.getValue() ) {
+        if ( system.display.params.drawGraphs.getValue() ) {
         	ccm.draw(drawable);
         }
         
         if ( run.getValue() || stepped ) {
-            ccm.monitor(system);
             stepped = false;        
             if ( record.getValue() ) {
                 // write the frame
@@ -237,14 +246,10 @@ public class LCPApp implements SceneGraphNode, Interactor {
     
     private NumberFormat format = new DecimalFormat("00000");
 
-    private BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", false );
-    private BooleanParameter drawGraphs = new BooleanParameter( "draw performance graphs", false );
     private BooleanParameter run = new BooleanParameter( "simulate", false );
     private DoubleParameter stepsize = new DoubleParameter( "step size", 0.05, 1e-5, 1 );
     private IntParameter substeps = new IntParameter( "sub steps (integer)", 1, 1, 100);
-    public static BooleanParameter openCSV = new BooleanParameter( "open CSV", false);
-    public static BooleanParameter writeToCSV = new BooleanParameter( "write to CSV", false);
-    public static BooleanParameter closeCSV = new BooleanParameter( "close CSV", false);
+    public BooleanParameter loadXML = new BooleanParameter( "load XML", true);
     
     /** Creates a control panel for changing visualization and simulation parameters */
     @Override
@@ -301,10 +306,18 @@ public class LCPApp implements SceneGraphNode, Interactor {
         });
         vfp.add( basicControls );
         
-        HorizontalFlowPanel hfp2 = new HorizontalFlowPanel();
-        hfp2.add( record.getControls() );
+		JToggleButton save = new JToggleButton("save CSV");
+        vfp.add( save);
+        save.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	system.saveCSV.setValue(!system.saveCSV.getValue());
+            }
+        });
+
+        JPanel windowsSizeControls = new JPanel( new GridLayout(1,3));
         JButton res1 = new JButton("640x360");
-        hfp2.add( res1);
+        windowsSizeControls.add( res1);
         res1.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -313,7 +326,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
             }
         });        
         JButton res2 = new JButton("1280x720");
-        hfp2.add( res2);
+        windowsSizeControls.add( res2);
         res2.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {                
@@ -322,9 +335,9 @@ public class LCPApp implements SceneGraphNode, Interactor {
 
             }
         });                
-        vfp.add( hfp2.getPanel() );
+        vfp.add( windowsSizeControls );
         JButton res3 = new JButton("2240x1280");
-        hfp2.add( res3);
+        windowsSizeControls.add( res3);
         res3.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {                
@@ -333,13 +346,13 @@ public class LCPApp implements SceneGraphNode, Interactor {
 
             }
         });                
+        vfp.add( windowsSizeControls );
+        
+        HorizontalFlowPanel hfp2 = new HorizontalFlowPanel();
+        hfp2.add( record.getControls() );
         vfp.add( hfp2.getPanel() );
         
-        vfp.add( hideOverlay.getControls() );
-        vfp.add( drawGraphs.getControls() );
-        vfp.add( openCSV.getControls() );
-        vfp.add( writeToCSV.getControls() );
-        vfp.add( closeCSV.getControls() );
+        vfp.add( loadXML.getControls() );
         
         vfp.add( run.getControls() );
         vfp.add( stepsize.getSliderControls(true) );
@@ -404,7 +417,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
     		body.restitution = system.collision.restitution.getValue();
     		body.friction = system.collision.friction.getValue();
     	}
-        xmlParser.parse(system, systemDir);
+    	if(loadXML.getValue())
+    		xmlParser.parse(system, systemDir);
     }
     
     /**
@@ -435,7 +449,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
         }
         
         loadSystem(systemDir);
-        xmlParser.parse(system, systemDir);
+    	if(loadXML.getValue())
+    		xmlParser.parse(system, systemDir);
         nextFrameNum = 0;
     }
     

@@ -360,31 +360,32 @@ public class RigidBodySystem {
 	}
 	
 	protected void exportDataToFile() {
-		if (LCPApp.openCSV.getValue()) {
-			//open file with merged if merge checkbox is checked
-			if (merging.params.enableMerging.getValue() && stream == null) {
-				sceneName += "_merged";
-			}
-			File file = new File(sceneName + ".csv");
+			
+		if (saveCSV.getValue()) {
 			if (stream == null) {
 				try {
+					String filename;
+					if (merging.params.enableMerging.getValue()) 
+						filename = new String(sceneName + "_merged.csv");
+					else
+						filename = new String(sceneName + ".csv");
+					File file = new File(filename);
 					stream = new PrintStream(file);
 				} catch (FileNotFoundException e) {	}
-			}
-			if (stream != null && LCPApp.writeToCSV.getValue()) {
-				
+			} else {
 				stream.print(bodies.size()); stream.print(", ");
 				stream.print(collision.contacts.size()); stream.print(", ");
 				stream.print(collision.collisionDetectTime); stream.print(", ");
 				stream.print(collision.collisionSolveTime); stream.print(", ");
 				stream.print(computeTime); stream.print("\n ");
 			}
-			if (stream != null && LCPApp.closeCSV.getValue()) {
-				stream.close();
-				LCPApp.openCSV.setValue(false);
-			}
+		} else if (stream != null) {
+			stream.close();
+			stream = null;
 		}
 	}
+	
+    public BooleanParameter saveCSV = new BooleanParameter( "save CSV", false);
 	
 	BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
 	DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );

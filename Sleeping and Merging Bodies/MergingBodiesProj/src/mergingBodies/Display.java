@@ -18,6 +18,10 @@ import mintools.viewer.EasyViewer;
 public class Display {
 	
 	public class DisplayParameters {
+
+	    public BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", false );
+	    public BooleanParameter drawGraphs = new BooleanParameter( "draw performance graphs", false );
+	    
 		private DoubleParameter transparency = new DoubleParameter("body block transparency", .5, 0, 1 );
 		private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
 		private BooleanParameter drawCollections = new BooleanParameter( "draw collections with different colors", true );
@@ -225,6 +229,10 @@ public class Display {
 	public JPanel getControls() {
 
 		VerticalFlowPanel vfp = new VerticalFlowPanel();
+		
+        vfp.add( params.hideOverlay.getControls() );
+        vfp.add( params.drawGraphs.getControls() );
+        
 		vfp.add( params.transparency.getSliderControls(false));
 		vfp.add( params.drawBodies.getControls() );
 		vfp.add( params.drawCollections.getControls() );
