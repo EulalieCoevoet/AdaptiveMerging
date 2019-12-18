@@ -38,12 +38,12 @@ public class XMLParser {
 		 
 		System.out.println("Load XML file");
 		System.out.println("-------------");
-		processCollision();
-		processBody();
+		parseCollision();
+		parseBody();
 		System.out.println("-------------");
 	}
 	
-	protected void processCollision() {
+	protected void parseCollision() {
 		NodeList nList = document.getElementsByTagName("collision");
 		for (int temp = 0; temp < nList.getLength(); temp++)
 		{
@@ -52,7 +52,7 @@ public class XMLParser {
 		}
 	}
 	
-	protected void processBody() {
+	protected void parseBody() {
 		NodeList nList = document.getElementsByTagName("body");
 		for (int temp = 0; temp < nList.getLength(); temp++)
 		{
@@ -99,7 +99,6 @@ public class XMLParser {
 						}
 					}
 				}
-				
 				
 				System.out.println("");
 			}
