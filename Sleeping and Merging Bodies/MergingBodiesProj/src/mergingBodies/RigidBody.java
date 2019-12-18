@@ -44,6 +44,7 @@ public class RigidBody {
 	double massAngular;
 	double massLinear;
 	double restitution;
+	double friction;
 
 	public boolean pinned = false;
 	/** option used to pinned object for a fixed amount of steps */

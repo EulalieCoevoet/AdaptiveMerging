@@ -77,8 +77,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
     public void setUp() {
         system.mouseSpring = mouseSpring;
         system.mouseImpulse = mouseImpulse;
-        systemDir = "datalcp/line.png";
-       	loadSystem(systemDir); 
+        String filename = "datalcp/line.png";
+       	loadSystem(filename); 
 
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(1280, 720), new Dimension(640,640) );
@@ -296,7 +296,6 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 File f = FileSelect.select("png", "image", "load", "datalcp/", true );
                 if ( f != null ) {
                     loadSystem( f.getPath() );
-                    systemDir = f.getPath();
                 }
             }
         });
@@ -390,17 +389,21 @@ public class LCPApp implements SceneGraphNode, Interactor {
         factory.use = false;        
         systemClear();
         system.name = filename;
+        systemDir = filename;
         ImageBlocker blocker = new ImageBlocker( filename, (float) (double) whiteEpsilon.getValue() );
         imageWidth  = blocker.width;
         imageHeight = blocker.height;
+        system.bodies.clear();
         system.bodies.addAll(blocker.bodies);
         system.controllableSprings = blocker.controllableSprings;
         system.initialBodies = system.bodies;
     	system.collision.bodyPairContacts.clear();
     	system.collision.contacts.clear();
     	system.sceneName = filename.substring(0, filename.length() - 4);
-    	for (RigidBody body: system.bodies)
+    	for (RigidBody body: system.bodies) {
     		body.restitution = system.collision.restitution.getValue();
+    		body.friction = system.collision.friction.getValue();
+    	}
         xmlParser.parse(system, systemDir);
     }
     
@@ -428,9 +431,10 @@ public class LCPApp implements SceneGraphNode, Interactor {
         if ( factory.use ) {
             factory.reset();
         } else {
-            system.reset();
+            system.reset(); // eulalie: I'm not sure why we do that?
         }
         
+        loadSystem(systemDir);
         xmlParser.parse(system, systemDir);
         nextFrameNum = 0;
     }

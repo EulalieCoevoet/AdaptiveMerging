@@ -1,0 +1,15 @@
+<root>
+
+    <body id="1">
+        <v>30. 0.</v>
+        <x>-15. 40.</x>
+        <temporarilyPinned>true</temporarilyPinned>
+    </body>
+
+    <body id="2">
+        <v>-30. 0.</v>
+        <x>100. 70.</x>
+        <temporarilyPinned>true</temporarilyPinned>
+    </body>
+
+</root>

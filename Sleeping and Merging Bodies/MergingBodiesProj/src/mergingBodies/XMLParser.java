@@ -51,7 +51,7 @@ public class XMLParser {
 			if (node.getNodeType() == Node.ELEMENT_NODE)
 			{
 				eElement = (Element) node;
-				String[] attributes = {"feedbackStiffness", "restitution"};
+				String[] attributes = {"feedbackStiffness", "restitution", "friction"};
 				for (String attribute : attributes) {
 					Node n = eElement.getElementsByTagName(attribute).item(0);
 					if ( n != null) {
@@ -65,6 +65,11 @@ public class XMLParser {
 								system.collision.restitution.setValue(Double.parseDouble(values[0]));
 								for (RigidBody body: system.bodies)
 									body.restitution = system.collision.restitution.getValue();
+								break;
+							case "friction":
+								system.collision.friction.setValue(Double.parseDouble(values[0]));
+								for (RigidBody body: system.bodies)
+									body.friction = system.collision.friction.getValue();
 								break;
 							default:
 						}
@@ -99,7 +104,7 @@ public class XMLParser {
 				System.out.println("Body id : "    + eElement.getAttribute("id"));
 
 				// TODO: look if there's a way to make correspond the attribute to the variable automatically
-				String[] attributes = {"x", "theta", "v", "omega", "restitution"};
+				String[] attributes = {"x", "theta", "v", "omega", "restitution", "temporarilyPinned", "friction"};
 				
 				for (String attribute : attributes) {
 					Node n = eElement.getElementsByTagName(attribute).item(0);
@@ -121,6 +126,12 @@ public class XMLParser {
 								break;
 							case "restitution":
 								body.restitution = Double.parseDouble(values[0]);
+								break;
+							case "friction":
+								body.friction = Double.parseDouble(values[0]);
+								break;
+							case "temporarilyPinned":
+								body.temporarilyPinned = Boolean.parseBoolean(values[0]);
 								break;
 							default:
 						}

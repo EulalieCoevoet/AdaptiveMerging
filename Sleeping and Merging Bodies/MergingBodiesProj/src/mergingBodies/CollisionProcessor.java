@@ -95,7 +95,7 @@ public class CollisionProcessor {
 	    		knuthShuffle(contacts);
 	    	
 	    	// set up contacts solver 
-			solver.init(friction.getValue(), iterations.getValue());
+			solver.init(iterations.getValue());
 			solver.feedbackStiffness = feedbackStiffness.getValue();
 			solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 			solver.warmStart = true;
@@ -182,7 +182,7 @@ public class CollisionProcessor {
 		
 		long now = System.nanoTime();
 		
-		solver.init(friction.getValue(), iterationsInCollection.getValue());
+		solver.init(iterationsInCollection.getValue());
 		solver.computeInCollection = true;
 		solver.feedbackStiffness = feedbackStiffness.getValue();
 		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;

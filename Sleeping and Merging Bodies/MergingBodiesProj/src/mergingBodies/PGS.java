@@ -12,15 +12,14 @@ import no.uib.cipr.matrix.DenseVector;
 public class PGS {
 	
 	public PGS() {
-		init(0.6, 200);
+		init(200);
 	}
 	
-	public PGS(double mu, int iterations) {
-		init(mu, iterations);
+	public PGS(int iterations) {
+		init(iterations);
 	}
 	
-	public void init(double mu, int iterations) {
-		this.mu=mu;
+	public void init(int iterations) {
 		this.iterations=iterations;
 		feedbackStiffness=0.;
 		compliance=0.;
@@ -31,9 +30,6 @@ public class PGS {
 	
 	/** List of contacts to solve */
 	public ArrayList<Contact> contacts = null;
-
-	/** Friction coefficient */
-	public double mu;
 	
 	/** Number of iterations */
 	public int iterations;
@@ -96,6 +92,16 @@ public class PGS {
 				double Jdvt = contact.getJdvt(computeInCollection);
 				double prevLambda_t = contact.lambda.y;
 				contact.lambda.y = (contact.lambda.y*contact.diit - contact.bt - Jdvt)/(contact.diit+compliance);
+				
+				double mu = 0.;
+				
+				// eulalie : we should assign material property to bodies and have a table for the corresponding friction coefficient...
+				if (contact.body1.friction<0.2 || contact.body2.friction<0.2) 
+					mu = Math.min(contact.body1.friction, contact.body2.friction);
+				else if (contact.body1.friction>1. || contact.body2.friction>1.) 
+					mu = Math.max(contact.body1.friction, contact.body2.friction);
+				else
+					mu = (contact.body1.friction + contact.body2.friction)/2.;
 				
 				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
 				if ((!contact.body1.magneticBody || !contact.body1.activateMagnet) && (!contact.body2.magneticBody || !contact.body2.activateMagnet)) {
