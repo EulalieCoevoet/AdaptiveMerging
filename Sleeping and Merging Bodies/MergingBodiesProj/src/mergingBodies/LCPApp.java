@@ -24,8 +24,8 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Matrix4d;
@@ -232,7 +232,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         mousePoint.y = tmp.y;    
     }
     
-    private BooleanParameter record = new BooleanParameter( "record (ENTER in canvas)", false );
+    private BooleanParameter record = new BooleanParameter( "record", false );
     
     /** 
      * boolean to signal that the system was stepped and that a 
@@ -248,7 +248,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
 
     private BooleanParameter run = new BooleanParameter( "simulate", false );
     private DoubleParameter stepsize = new DoubleParameter( "step size", 0.05, 1e-5, 1 );
-    private IntParameter substeps = new IntParameter( "sub steps (integer)", 1, 1, 100);
+    private IntParameter substeps = new IntParameter( " sub steps (integer)", 1, 1, 100);
     public BooleanParameter loadXML = new BooleanParameter( "load XML", true);
     
     /** Creates a control panel for changing visualization and simulation parameters */
@@ -256,19 +256,20 @@ public class LCPApp implements SceneGraphNode, Interactor {
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
         
-        JTextArea ta = new JTextArea(
-        		"   left mouse drag - mouse spring\n" +
-                "   shift + left mouse drag - mouse impulse\n" +
-                "   middle mouse drag - translate scene ? \n" +
-        		"   right mouse drag - zoom in and out ?\n" + 
-                "   mouse wheel = zoom in and out ? \n" +
-        		"   space - start and stop simulation\n" +
-        		"   enter - start and stop recording\n" +
-        		"   m - simulate up to next merge or unmerge \n" +
-        		"   l - load a file \n" +
-        		"   left - previous scene\n" +
-        		"   right - next scene\n" +
-        		"   1 -7 - left right up down spring up down and toggle magnet\n");                  
+        JEditorPane ta = new JEditorPane("text/html", 
+        		"   <b>KEYBOARD</b><br/>" +          		
+        		"   space : start and stop simulation <br/>" +
+        		"   enter : start and stop recording <br/> " +
+        		"   m : simulate up to next merge or unmerge <br/> " +
+        		"   l : load a file <br/> " +
+        		"   &larr : previous scene<br/> " +
+        		"   &rarr : next scene<br/> " +
+        		"   1-7 : left right up down spring up down and toggle magnet<br/> "+
+        		"   <b>MOUSE </b><br/>" +
+        		"   left drag : mouse spring<br/> " +
+                "   shift + left drag : mouse impulse<br/> " +
+                "   middle drag : translate scene <br/> " +
+        		"   right drag : zoom in and out <br/> ");    
         ta.setEditable(false);
         ta.setBorder( new TitledBorder("Keyboard and Mouse controls") );
         vfp.add( ta );
