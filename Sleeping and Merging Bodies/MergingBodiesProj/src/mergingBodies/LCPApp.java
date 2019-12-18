@@ -58,6 +58,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
    
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
     
+    private XMLParser xmlParser= new XMLParser(); 
+    
     /**
      * Entry point for application
      * @param args
@@ -75,8 +77,10 @@ public class LCPApp implements SceneGraphNode, Interactor {
     public void setUp() {
         system.mouseSpring = mouseSpring;
         system.mouseImpulse = mouseImpulse;
-        systemDir = "datalcp/wallWideDenseHighV2.png";
-        loadSystem(systemDir); 
+        systemDir = "datalcp/line.png";
+       	loadSystem(systemDir); 
+        xmlParser.parse(system, systemDir);
+
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(1280, 720), new Dimension(640,640) );
         ev.controlFrame.add("Display", system.display.getControls());
@@ -378,6 +382,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private MouseSpringForce mouseSpring = new MouseSpringForce( mousePoint );
     private MouseImpulse mouseImpulse = new MouseImpulse();
 	PrintStream stream = null;
+	
     /**
      * Loads the specified image, clearing the old system, and resets viewing parameters.
      * @param filename
@@ -387,8 +392,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
         systemClear();
         system.name = filename;
         ImageBlocker blocker = new ImageBlocker( filename, (float) (double) whiteEpsilon.getValue() );
-        imageWidth = blocker.width;
-        imageHeight= blocker.height;
+        imageWidth  = blocker.width;
+        imageHeight = blocker.height;
         system.bodies.addAll(blocker.bodies);
         system.controllableSprings = blocker.controllableSprings;
         system.initialBodies = system.bodies;
@@ -423,6 +428,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
         } else {
             system.reset();
         }
+        
+        xmlParser.parse(system, systemDir);
         nextFrameNum = 0;
     }
     
@@ -554,7 +561,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 	double px = posx.getValue();
                     double py = posy.getValue();
                     double s = scale.getValue();
-                	loadSystem(system.name);
+                    systemReset();
                 	posx.setValue(px);
                     posy.setValue(py);
                     scale.setValue(s);
