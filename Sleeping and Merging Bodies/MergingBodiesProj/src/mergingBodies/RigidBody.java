@@ -43,6 +43,7 @@ public class RigidBody {
 
 	double massAngular;
 	double massLinear;
+	double restitution;
 
 	public boolean pinned = false;
 	/** option used to pinned object for a fixed amount of steps */
@@ -187,7 +188,7 @@ public class RigidBody {
 		root = new BVNode(boundaryBlocks, this);
 
 		pinned = isAllBlueBlocks();
-		temporarilyPinned = hasGreenBlocks();
+		temporarilyPinned = hasGreenBlocks(); 
 
 		if (pinned) {
 			minv = 0;
@@ -208,6 +209,7 @@ public class RigidBody {
 		boundaryBlocks = new ArrayList<Block>(body.boundaryBlocks);
 		massLinear = body.massLinear;
 		massAngular = body.massAngular;
+		restitution = body.restitution;
 		x0.set(body.x0);
 		x.set(body.x);
 		boundingBoxB = new ArrayList<Point2d>(body.boundingBoxB);

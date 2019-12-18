@@ -96,7 +96,6 @@ public class CollisionProcessor {
 	    	
 	    	// set up contacts solver 
 			solver.init(friction.getValue(), iterations.getValue());
-			solver.restitution = restitution.getValue();
 			solver.feedbackStiffness = feedbackStiffness.getValue();
 			solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 			solver.warmStart = true;
@@ -185,7 +184,6 @@ public class CollisionProcessor {
 		
 		solver.init(friction.getValue(), iterationsInCollection.getValue());
 		solver.computeInCollection = true;
-		solver.restitution = restitution.getValue();
 		solver.feedbackStiffness = feedbackStiffness.getValue();
 		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 		solver.warmStart = true;
@@ -723,12 +721,11 @@ public class CollisionProcessor {
 	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
 	public BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	public BooleanParameter warmStart = new BooleanParameter( "warm start", true);
-	public static DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
-	public static DoubleParameter constraintOffset = new DoubleParameter("constraintOffset", 0.0, -0.5, 0.5 );
-	public static BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
-	public static DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
-	public static BooleanParameter  useContactGraph = new BooleanParameter("enable use of contact graph heuristic", false );
-	public static IntParameter collisionWake = new IntParameter("wake n neighbors", 2, 0, 10 );
+	public DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
+	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
+	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
+	public BooleanParameter  useContactGraph = new BooleanParameter("enable use of contact graph heuristic", false );
+	public IntParameter collisionWake = new IntParameter("wake n neighbors", 2, 0, 10 );
 	public BooleanParameter pruneContacts = new BooleanParameter( "prune contacts", true );
 	public DoubleParameter epsilonPruneConvexHull = new DoubleParameter( "epsilon for convex hull (prune contacts)", 1e-4, 1e-14, 10);
 
@@ -747,7 +744,6 @@ public class CollisionProcessor {
 		vfp.add( restitution.getSliderControls(false) );
 		vfp.add( friction.getSliderControls(false) );
 		vfp.add( feedbackStiffness.getSliderControls(false) );
-		vfp.add( constraintOffset.getSliderControls(false) );
 		vfp.add( enableCompliance.getControls() );
 		vfp.add( compliance.getSliderControls(true) );
 		vfp.add( useContactGraph.getControls() );

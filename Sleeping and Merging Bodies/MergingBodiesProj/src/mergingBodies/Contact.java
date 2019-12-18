@@ -120,8 +120,7 @@ public class Contact {
 		this.normal.set( normal );   
 		block1 = b1;
 		block2 = b2;
-		double offset  = CollisionProcessor.constraintOffset.getValue();
-		constraintViolation =  interpenetration + offset;
+		constraintViolation =  interpenetration;
 		index = nextContactIndex++;        
 
 		contactB1.set(contactW);
@@ -250,11 +249,10 @@ public class Contact {
 	/**
 	 * 
 	 * @param dt
-	 * @param restitution
 	 * @param feedbackStiffness
 	 * @param computeInCollection
 	 */
-	public void computeB(double dt, double restitution, double feedbackStiffness,  boolean computeInCollection) {
+	public void computeB(double dt, double feedbackStiffness,  boolean computeInCollection) {
 		
 		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
 		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
@@ -265,8 +263,10 @@ public class Contact {
 		double j2inv = (b2.temporarilyPinned)? 0: b2.jinv;
 		
 		// add the Bounce vector to the u's over here, but don't need to do that just yet
-		if (computeInCollection)
-			restitution=0.;
+		double restitution = 0.;
+		if (!computeInCollection) {
+			restitution=(body1.restitution+body2.restitution)/2.;
+		}
 		
 		DenseVector j;
 		

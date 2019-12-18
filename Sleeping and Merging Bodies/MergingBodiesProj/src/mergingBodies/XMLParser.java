@@ -38,7 +38,7 @@ public class XMLParser {
 		 
 		System.out.println("Load XML file");
 		System.out.println("-------------");
-		parseCollision();
+		parseCollision(); // done first because of restitution propagation
 		parseBody();
 		System.out.println("-------------");
 	}
@@ -47,8 +47,32 @@ public class XMLParser {
 		NodeList nList = document.getElementsByTagName("collision");
 		for (int temp = 0; temp < nList.getLength(); temp++)
 		{
-			System.out.println("Collision node not implemented yet");
-			System.out.println("");
+			Node node = nList.item(temp);
+			if (node.getNodeType() == Node.ELEMENT_NODE)
+			{
+				eElement = (Element) node;
+				String[] attributes = {"feedbackStiffness", "restitution"};
+				for (String attribute : attributes) {
+					Node n = eElement.getElementsByTagName(attribute).item(0);
+					if ( n != null) {
+						System.out.println(" "+attribute+" : "  + n.getTextContent());
+						String[] values = n.getTextContent().split("\\s+");
+						switch(attribute) {
+							case "feedbackStiffness":
+								system.collision.feedbackStiffness.setValue(Double.parseDouble(values[0]));
+								break;
+							case "restitution":
+								system.collision.restitution.setValue(Double.parseDouble(values[0]));
+								for (RigidBody body: system.bodies)
+									body.restitution = system.collision.restitution.getValue();
+								break;
+							default:
+						}
+					}
+				}
+				
+				System.out.println("");
+			}
 		}
 	}
 	
@@ -75,7 +99,7 @@ public class XMLParser {
 				System.out.println("Body id : "    + eElement.getAttribute("id"));
 
 				// TODO: look if there's a way to make correspond the attribute to the variable automatically
-				String[] attributes = {"x", "theta", "v", "omega"};
+				String[] attributes = {"x", "theta", "v", "omega", "restitution"};
 				
 				for (String attribute : attributes) {
 					Node n = eElement.getElementsByTagName(attribute).item(0);
@@ -94,6 +118,9 @@ public class XMLParser {
 								break;
 							case "omega":
 								body.omega = Double.parseDouble(values[0]);
+								break;
+							case "restitution":
+								body.restitution = Double.parseDouble(values[0]);
 								break;
 							default:
 						}

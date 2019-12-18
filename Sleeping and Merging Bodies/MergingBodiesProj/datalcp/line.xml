@@ -2,14 +2,25 @@
     <collision>
         <restitution>0.5</restitution>
     </collision>
+
     <body id="10">
-        <restitution>0.5</restitution>
     </body>
+
+    <body id="0">
+        <restitution>1.</restitution>
+        <v>0. 10.</v>
+    </body>
+
     <body id="1">
-        <restitution>0.5</restitution>
+        <restitution>1.</restitution>
         <v>0. 0.</v>
         <omega>2</omega>
         <x>100. -25.</x>
         <theta>0.5</theta>
+    </body>
+
+    <body id="3">
+        <restitution>0.75</restitution>
+        <v>0. 10.</v>
     </body>
 </root>

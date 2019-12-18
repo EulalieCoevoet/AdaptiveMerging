@@ -79,7 +79,6 @@ public class LCPApp implements SceneGraphNode, Interactor {
         system.mouseImpulse = mouseImpulse;
         systemDir = "datalcp/line.png";
        	loadSystem(systemDir); 
-        xmlParser.parse(system, systemDir);
 
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(1280, 720), new Dimension(640,640) );
@@ -400,6 +399,9 @@ public class LCPApp implements SceneGraphNode, Interactor {
     	system.collision.bodyPairContacts.clear();
     	system.collision.contacts.clear();
     	system.sceneName = filename.substring(0, filename.length() - 4);
+    	for (RigidBody body: system.bodies)
+    		body.restitution = system.collision.restitution.getValue();
+        xmlParser.parse(system, systemDir);
     }
     
     /**

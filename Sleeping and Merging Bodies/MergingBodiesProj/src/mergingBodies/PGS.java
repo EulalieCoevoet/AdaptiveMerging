@@ -22,7 +22,6 @@ public class PGS {
 	public void init(double mu, int iterations) {
 		this.mu=mu;
 		this.iterations=iterations;
-		restitution=0.;
 		feedbackStiffness=0.;
 		compliance=0.;
 		contacts = null;
@@ -44,9 +43,6 @@ public class PGS {
 	
 	/** Compliance */
 	public double compliance;
-	
-	/** Coefficient of restitution (bounce) */
-	public double restitution;
 	
 	/** Special case for contacts in collections */
 	public boolean computeInCollection;
@@ -73,7 +69,7 @@ public class PGS {
 			confidentWarmStart();
 
 		for (Contact contact: contacts) {
-			contact.computeB(dt, restitution, feedbackStiffness, computeInCollection);
+			contact.computeB(dt, feedbackStiffness, computeInCollection);
 			contact.computeJMinvJtDiagonal(computeInCollection);
 		}
 		

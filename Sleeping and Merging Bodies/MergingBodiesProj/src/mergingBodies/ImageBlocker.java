@@ -73,7 +73,7 @@ public class ImageBlocker {
                 		// put this aside and make a PlaneRigidBody later...
                 		cyanBlockList.add( new Point2d(x,y) );
                 	} else {
-                		RigidBody body = new RigidBody( blocks, boundaryBlocks );                	
+                		RigidBody body = new RigidBody( blocks, boundaryBlocks );   
 	                	for ( Block b : blocks ) {
 	                		if ( isRed( b.c ) ) {
 	                			Spring s = new Spring( b.pB, body );

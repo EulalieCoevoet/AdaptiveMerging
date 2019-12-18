@@ -122,7 +122,7 @@ public class Display {
 		}
 		
 		if ( params.drawContactGraph.getValue() ) {
-			if (CollisionProcessor.useContactGraph.getValue()) {
+			if (collisionProcessor.useContactGraph.getValue()) {
 				for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
 					for (Contact c : bpc.contactList) {
 						c.displayContactGraph(drawable);
