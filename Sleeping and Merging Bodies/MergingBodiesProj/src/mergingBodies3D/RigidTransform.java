@@ -3,6 +3,7 @@ package mergingBodies3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 /**
@@ -34,10 +35,12 @@ public class RigidTransform {
      * (i.e., points will be transformed by rotation followed by translation)
      * @param theta
      * @param p
-     */
-    public void set( Matrix3d R, Vector3d p ) {
+     */    
+    public void set( Matrix3d R, Tuple3d p ) {
     	T.set( R );
-    	T.set( p );
+    	T.m03 = p.x;
+    	T.m13 = p.x;
+    	T.m23 = p.x;
     }
     
     /**

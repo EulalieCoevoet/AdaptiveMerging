@@ -103,19 +103,24 @@ public class RigidBody {
         for ( Block b : blocks ) {
             b.pB.x = b.j - x0.x;
             b.pB.y = b.i - x0.y;
+            //b.pB.z = b.k - x0.z;
         }
         // compute the rotational inertia
-        final Point2d zero = new Point2d(0,0);
+        final Point3d zero = new Point3d(0,0,0);
         for ( Block b : blocks ) {
             double mass = b.getColourMass();
-            massAngular += mass*b.pB.distanceSquared(zero);
+            // TODO: 
+            //massAngular += mass*b.pB.distanceSquared(zero);
         }
+        massAngular.setIdentity(); // TODO: THIS IS WRONG!!! Compute the angular mass!
+        
         // prevent zero angular inertia in the case of a single block
-        if ( blocks.size() == 1 ) {
-            Block b = blocks.get(0);
-            double mass = b.getColourMass();
-            massAngular = mass * (1+1)/12;
-        }
+//        if ( blocks.size() == 1 ) {
+//            Block b = blocks.get(0);
+//            double mass = b.getColourMass();
+//            massAngular = mass * (1+1)/12;
+//        }
+       
         x.set(x0);        
         transformB2W.set( theta, x );
         transformW2B.set( theta, x );
@@ -127,10 +132,10 @@ public class RigidBody {
         
         if ( pinned ) {
             minv = 0;
-            jinv = 0;
+            jinv.setZero();
         } else {
             minv = 1/massLinear;
-            jinv = 1/massAngular;
+            jinv.invert(massAngular);
         }
         
         // set our index
@@ -196,12 +201,14 @@ public class RigidBody {
             
             v.x += 1.0 / massLinear * force.x * dt;
             v.y += 1.0 / massLinear * force.y * dt;
+            v.z += 1.0 / massLinear * force.z * dt;
             x.x += v.x * dt;
             x.y += v.y * dt;
+            x.z += v.z * dt;
             updateTransformations();
         }        
-        force.set(0,0);
-        torque = 0;
+        force.set(0,0,0);
+        torque.set(0,0,0);
     }
     
     /**
@@ -209,7 +216,9 @@ public class RigidBody {
      * @return the total kinetic energy
      */
     public double getKineticEnergy() {
-        return 0.5 * massLinear * v.lengthSquared() + 0.5 * massAngular * omega * omega; 
+    	Vector3d result = new Vector3d();
+    	massAngular.transform(omega,result);
+        return 0.5 * massLinear * v.lengthSquared() + 0.5 * result.dot( omega ); 
     }
     
     /** 
@@ -218,7 +227,7 @@ public class RigidBody {
      * @param contactPointW
      * @param result the velocity
      */
-    public void getSpatialVelocity( Point2d contactPointW, Vector2d result ) {
+    public void getSpatialVelocity( Point3d contactPointW, Vector3d result ) {
         result.sub( contactPointW, x );
         result.scale( omega );        
         double xpart = -result.y;

@@ -62,12 +62,13 @@ public class MouseSpringForce {
         double k = stiffness.getValue();
         double c = damping.getValue();
         
-        Vector2d force = new Vector2d();
-        Vector2d direction = new Vector2d();
+        Vector3d force = new Vector3d();
+        Vector3d direction = new Vector3d();
         direction.sub( point, grabPointW );
         if ( direction.lengthSquared() < 1e-3 ) return;
         direction.normalize();
         force.scale( distance * k, direction );
+        
         picked.applyContactForceW( grabPointW, force );
         
         // spring damping forces
