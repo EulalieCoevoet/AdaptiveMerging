@@ -5,8 +5,8 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
@@ -52,7 +52,7 @@ public class Factory {
                 unpinnedBodies.add(b);
             }
         }
-        seed.set( blocker.width*0.5, -blocker.height*0.2 );
+        seed.set( blocker.width*0.5, -blocker.height*0.2, 0 );
     }
         
     /**
@@ -73,7 +73,7 @@ public class Factory {
     private Random rand = new Random();
     
     /** seed location for creating new rigid bodies */
-    private Point2d seed = new Point2d(0,0);    
+    private Point3d seed = new Point3d(0,0,0);    
     
     /** a flag for requesting a new rigid body immediately */
     boolean createBodyRequest = false;
@@ -102,14 +102,18 @@ public class Factory {
      */
     private void generateBody() {     
         RigidBody body = new RigidBody( unpinnedBodies.get( rand.nextInt(unpinnedBodies.size())) );
-        Vector2d tmp = new Vector2d( seed );
+        Vector3d tmp = new Vector3d( seed );
         tmp.x += ((system.bodies.size()*2)%5 - 2) * spread.getValue();
         body.x0.set( tmp );                        
         body.x.set( tmp );            
-        body.theta = rand.nextDouble() * Math.PI*2;
-        body.omega = (2*rand.nextDouble() - 1) * angularVelocityScale.getValue();
+        //body.theta = rand.nextDouble() * Math.PI*2;
+        body.theta.setZero(); // TODO: do something more interesting!
+        body.omega.x = (2*rand.nextDouble() - 1) * angularVelocityScale.getValue();
+        body.omega.y = (2*rand.nextDouble() - 1) * angularVelocityScale.getValue();
+        body.omega.z = (2*rand.nextDouble() - 1) * angularVelocityScale.getValue();
         body.v.x = (2*rand.nextDouble()-1) * linearVelocityScale.getValue();  
         body.v.y =  downVelocity.getValue();
+        body.v.z =  (2*rand.nextDouble()-1) * linearVelocityScale.getValue();  
         body.updateTransformations();
         system.add( body );
     }
