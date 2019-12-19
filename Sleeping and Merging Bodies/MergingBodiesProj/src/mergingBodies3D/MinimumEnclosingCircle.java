@@ -39,7 +39,7 @@ public class MinimumEnclosingCircle {
     public class Circle {
         /** radius */
         public double radius;
-        /** centre */
+        /** center */
         public Point3d centre = new Point3d();
         /** empty constructor */
         public Circle() { /* do nothing */ }
@@ -67,31 +67,46 @@ public class MinimumEnclosingCircle {
     /** 
      * Creates a local copy of the collection of points 
      * @param points 
-     */
+     */    
+    // TODO: change this method
     public MinimumEnclosingCircle( Collection<Point3d> points ) {
-        try {
-            int count = 0;
-            this.points = new Point3d[points.size()];
-            for ( Point3d p : points ) {
-                this.points[count++] = p;            
-            }
-            calcMec();
-        } catch ( StackOverflowError e ) {
-            System.err.println("Welzl algo blowing the stack away (" + points.size() + " points), so building conservative AABB instead.");
-            Point3d min = new Point3d(Double.MAX_VALUE, Double.MAX_VALUE);
-            Point3d max = new Point3d(Double.MIN_VALUE, Double.MIN_VALUE);
-            for ( Point3d p : points ) {
-                min.x = Math.min( p.x, min.x );
-                min.y = Math.min( p.y, min.y );
-                max.x = Math.max( p.x, max.x );
-                max.y = Math.max( p.y, max.y );
-            }            
-            answer = new Circle();
-            answer.centre.interpolate( max, min, 0.5);
-            Vector3d tmp = new Vector3d();
-            tmp.sub( max, min );
-            answer.radius = 0.5 * Math.max( tmp.x, tmp.y ) * Math.sqrt(2);
-        }
+    	answer.centre = new Point3d(0.,0.,0.);
+    	for ( Point3d p : points ) 
+    		answer.centre.add(p);
+    	answer.centre.scale(1/points.size());
+        
+		Vector3d dir = new Vector3d(0.,0.,0.);
+		answer.radius = 0.;
+    	for ( Point3d p : points ) {
+    		dir.sub(answer.centre, p);
+    		double dist = Math.sqrt(dir.lengthSquared());
+    		if (dist>answer.radius) 
+    			answer.radius = dist;
+    	}
+
+//        try {
+//            int count = 0;
+//            this.points = new Point3d[points.size()];
+//            for ( Point3d p : points ) {
+//                this.points[count++] = p;            
+//            }
+//            calcMec();
+//        } catch ( StackOverflowError e ) {
+//            System.err.println("Welzl algo blowing the stack away (" + points.size() + " points), so building conservative AABB instead.");
+//            Point3d min = new Point3d(Double.MAX_VALUE, Double.MAX_VALUE);
+//            Point3d max = new Point3d(Double.MIN_VALUE, Double.MIN_VALUE);
+//            for ( Point3d p : points ) {
+//                min.x = Math.min( p.x, min.x );
+//                min.y = Math.min( p.y, min.y );
+//                max.x = Math.max( p.x, max.x );
+//                max.y = Math.max( p.y, max.y );
+//            }            
+//            answer = new Circle();
+//            answer.centre.interpolate( max, min, 0.5);
+//            Vector3d tmp = new Vector3d();
+//            tmp.sub( max, min );
+//            answer.radius = 0.5 * Math.max( tmp.x, tmp.y ) * Math.sqrt(2);
+//        }
     }
         
     /**
