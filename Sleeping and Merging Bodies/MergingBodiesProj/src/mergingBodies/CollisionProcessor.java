@@ -69,12 +69,9 @@ public class CollisionProcessor {
 	 * @param dt time step
 	 */
 	public void collisionDetection( double dt ) {
-
+		contacts.clear();
 		Contact.nextContactIndex = 0;
 		
-		contacts.clear();
-		
-		// detect contacts and fill contacts list
 		long now = System.nanoTime();
 		broadPhase(); 
 		collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
@@ -262,7 +259,7 @@ public class CollisionProcessor {
 
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
 		tmpBodyPairContacts.addAll(orderedBpcs);
-		getNextLevel(tmpBodyPairContacts, orderedBpcs);
+		getNextLayer(tmpBodyPairContacts, orderedBpcs);
 		
 		for ( BodyPairContact bpc : bodyPairContacts ) {
 			if (!bpc.checked) {
@@ -297,7 +294,7 @@ public class CollisionProcessor {
 		return compute;
 	}	
 	
-	protected void getNextLevel(ArrayList<BodyPairContact> bodyPairContacts, ArrayList<BodyPairContact> orderedBpcs) {
+	protected void getNextLayer(ArrayList<BodyPairContact> bodyPairContacts, ArrayList<BodyPairContact> orderedBpcs) {
 
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
 		
@@ -314,7 +311,7 @@ public class CollisionProcessor {
 		
 		if (!tmpBodyPairContacts.isEmpty()) {
 			orderedBpcs.addAll(tmpBodyPairContacts);
-			getNextLevel(tmpBodyPairContacts, orderedBpcs);
+			getNextLayer(tmpBodyPairContacts, orderedBpcs);
 		}
 	}
 	

@@ -1,13 +1,17 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import mergingBodies.BodyPairContact;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
@@ -21,12 +25,24 @@ import mintools.swing.VerticalFlowPanel;
 public class CollisionProcessor {
 
     private List<RigidBody> bodies;
-    
+
+	public HashMap<String, Contact> lastTimeStepMap = new HashMap<String, Contact>();
+	
     /**
      * The current contacts that resulted in the last call to process collisions
      */
     public ArrayList<Contact> contacts = new ArrayList<Contact>();
-    
+
+	/** PGS solver */
+	PGS solver = new PGS();
+	
+	/**
+	 * Default constructor
+	 */
+	public CollisionProcessor() {
+		bodies = null;
+	}
+	
     /**
      * Creates this collision processor with the provided set of bodies
      * @param bodies
@@ -40,12 +56,18 @@ public class CollisionProcessor {
     
     /** keeps track of the time used to solve the LCP based velocity update on the last call */
     double collisionSolveTime = 0;
+	
+	/** keeps track of the time used to update the contacts inside the collections on the last call */
+	double collectionUpdateTime = 0;
+	
+	/**list that keeps track of all the body pair contacts that occurred in this time step */
+	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
     
     /**
      * Processes all collisions 
      * @param dt time step
      */
-    public void processCollisions( double dt ) {
+    public void collisionDetection( double dt ) {
         contacts.clear();
         Contact.nextContactIndex = 0;
         
@@ -53,6 +75,9 @@ public class CollisionProcessor {
         broadPhase();
         collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
                 
+        if (contacts.isEmpty())
+			lastTimeStepMap.clear();
+        
         if ( contacts.size() > 0  && doLCP.getValue() ) {
             now = System.nanoTime();
 
@@ -60,10 +85,73 @@ public class CollisionProcessor {
             double mu = friction.getValue();
             // TODO: Compute velocity update with iterative solve of contact constraint matrix.
 
-            
             collisionSolveTime = (System.nanoTime() - now) * 1e-9;
         }
     }
+    
+	/**
+	 * Solve LCP
+	 * @param dt time step
+	 */
+	public void solveLCP( double dt ) {
+		
+		if(!contacts.isEmpty()) {
+	    	
+	    	if (shuffle.getValue()) 
+	    		knuthShuffle(contacts);
+	    	
+	    	// set up contacts solver 
+			solver.init(iterations.getValue());
+			solver.feedbackStiffness = feedbackStiffness.getValue();
+			solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
+			solver.warmStart = true;
+			solver.contacts = contacts;
+
+			// eulalie: this can be optimized, only new collections need an update 
+			for (Contact contact: solver.contacts)
+				contact.computeJacobian(false);
+			
+			// solve contacts
+			long now = System.nanoTime();
+			solver.solve(dt);
+			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
+			
+			updateContactsMap();
+			computeContactsForce(dt);	
+		}
+	}
+	
+	protected void updateContactsMap() {
+		lastTimeStepMap.clear();
+//		for (Contact contact : contacts) {
+//			Block block1 = contact.block1;
+//			Block block2 = contact.block2;
+//			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
+//		} 
+	}
+	
+	/**
+	 * Compute the contact force J*lambda.
+	 * @param dt
+	 */
+	public void computeContactsForce(double dt) {
+		for (Contact c: contacts)
+			c.computeContactForce(false, dt);	
+	}
+
+	/**go through each element in contacts 2.
+	* at each element, swap it for another random member of contacts2. 
+	* at each element, get a random index from i to contacts.size.
+	* swap this element with that element at that index. 
+	* go to next element in contacts 2
+	*/
+	private void knuthShuffle(ArrayList<Contact> contacts) {
+		Collections.shuffle(contacts);
+		for (Contact c : contacts) {
+			c.index = contacts.indexOf(c);
+		}
+	}
+
     
     /**
      * Checks for collisions between bodies.  Note that you can optionaly implement some broad
@@ -88,19 +176,22 @@ public class CollisionProcessor {
      * @param body1
      * @param body2
      */
-    private void narrowPhase( RigidBody body1, RigidBody body2 ) {
-        if ( ! useBVTree.getValue() ) {
-            for ( Block b1 : body1.blocks ) {
-                for ( Block b2 : body2.blocks ) {
-                    processCollision( body1, b1, body2, b2 );
-                }
-            }
-        } else {
-            // TODO: implement code to use hierarchical collision detection on body pairs
-
-        }
-    }
-    
+	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
+		if ( body1 instanceof PlaneRigidBody ) {
+			findCollisionsWithPlane( body2.root, body2, (PlaneRigidBody) body1 ); 
+		} else if (body2 instanceof PlaneRigidBody ) {
+			findCollisionsWithPlane( body1.root, body1, (PlaneRigidBody) body2 );
+		} else {
+			if ( ! useBVTree.getValue() ) {
+	            for ( Block b1 : body1.blocks ) {
+	                for ( Block b2 : body2.blocks ) {
+	                    processCollision( body1, b1, body2, b2 );
+	                }
+	            }
+	        }
+		}
+	}
+	
     /** 
      * The visitID is used to tag boundary volumes that are visited in 
      * a given time step.  Marking boundary volume nodes as visited during
@@ -109,6 +200,34 @@ public class CollisionProcessor {
      * (i.e., call a BVNode's updatecW method at most once on any given timestep)
      */
     int visitID = 0;
+	
+	private void findCollisionsWithPlane( BVNode node1, RigidBody body1, PlaneRigidBody planeBody ) {
+		if(node1.visitID != visitID) {
+			node1.visitID = visitID;
+			node1.boundingDisc.updatecW();
+		}
+		// check bounding disc with plane
+		Tuple3d c = node1.boundingDisc.cW;
+		Tuple3d n = planeBody.n;
+		double d = n.x*c.x + n.y*c.y + n.z*c.z + planeBody.d - node1.boundingDisc.r;
+		if ( d < 0 ) {
+			if ( node1.isLeaf() ) {
+				// create a collision here!
+				
+				// contact position in world coordinates will be the closest point on the plane
+				// using the temp working variable normal, but don't get confused by the name!!!
+				// just computing p = c-n (n \cdot (c-x))
+				normal.sub( c, planeBody.p ); 
+				double val = normal.dot( planeBody.n );
+				normal.scale( val, planeBody.n );
+				contactW.sub( c, normal );
+				normal.scale( -1, planeBody.n );
+			} else {
+				findCollisionsWithPlane( node1.child1, body1,planeBody );
+				findCollisionsWithPlane( node1.child2, body1,planeBody );
+			}
+		}		
+	}
     
     /**
      * Resets the state of the collision processor by clearing all
@@ -157,7 +276,7 @@ public class CollisionProcessor {
             normal.sub( tmp2, tmp1 );
             normal.normalize();
             // create the contact
-            Contact contact = new Contact( body1, body2, contactW, normal);
+            Contact contact = new Contact( body1, body2, contactW, normal, 0.);
             // simple option... add to contact list...
             contacts.add( contact );
             if ( ! doLCP.getValue() ) {
@@ -186,7 +305,12 @@ public class CollisionProcessor {
             }
         }
     }
-   
+
+	public BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
+	public DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
+	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
+	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
+	
     /** Stiffness of the contact penalty spring */
     private DoubleParameter contactSpringStiffness = new DoubleParameter("penalty contact stiffness", 1e3, 1, 1e5 );
     
@@ -217,17 +341,24 @@ public class CollisionProcessor {
     /** Flag for enabling the use of hierarchical collision detection for body pairs */
     private BooleanParameter useBVTree = new BooleanParameter( "use BVTree", false );
     
+    
     /**
      * @return controls for the collision processor
      */
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
         vfp.setBorder( new TitledBorder("Collision Processing Controls") );
+        
+		vfp.add( shuffle.getControls() );
+		
         vfp.add( useBVTree.getControls() );
         vfp.add( doLCP.getControls() );
         vfp.add( iterations.getSliderControls() );
         vfp.add( restitution.getSliderControls(false) );
         vfp.add( friction.getSliderControls(false) );
+		vfp.add( feedbackStiffness.getSliderControls(false) );
+		vfp.add( enableCompliance.getControls() );
+		vfp.add( compliance.getSliderControls(true) );
         
         VerticalFlowPanel vfp2 = new VerticalFlowPanel();
         vfp2.setBorder( new TitledBorder("penalty method controls") );

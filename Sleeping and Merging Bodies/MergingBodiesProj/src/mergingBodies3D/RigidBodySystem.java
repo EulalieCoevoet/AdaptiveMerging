@@ -103,7 +103,7 @@ public class RigidBodySystem {
         
         if ( processCollisions.getValue() ) {
             // process collisions, given the current time step
-            collisionProcessor.processCollisions( dt );
+            collisionProcessor.collisionDetection( dt );
         }
         // advance the system by the given time step
         for ( RigidBody b : bodies ) {

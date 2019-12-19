@@ -23,9 +23,8 @@ public class Contact {
 	/** Index of this contact, determines its rows in the Jacobian */
 	int index;
 	
-	/**    Used for unmerge condition, true if the contact changed (break or slide) during the time step  */
+	// Used for merge/unmerge condition
 	public ContactState state = ContactState.CLEAR;
-	
 	public enum ContactState {BROKEN, ONEDGE, CLEAR};
 	
 	/** First RigidBody in contact */
@@ -36,7 +35,6 @@ public class Contact {
 
 	//The two blocks within the bodies that caused the collision
 	Block block1;
-
 	Block block2;
 
 	/** Contact normal in world coordinates. GOES FROM BODY1 to BODY2*/
