@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jogamp.opengl.GLAutoDrawable;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 /**
  * Bounding volume node used to build bounding volume trees.
@@ -32,7 +32,7 @@ public class BVNode {
     int visitID;
     
     /**
-     * Create a bounding volume node from a list of blocks.  An axis aligned
+     * Create a bounding volume node from a list of blocks. An axis aligned
      * bounding box is computed for the blocks, and the blocks are split in 
      * the axis aligned direction in which they are most spread out.
      * @param blocks
@@ -48,20 +48,24 @@ public class BVNode {
         } else {        
             // find the distribution       
             Block b0 = blocks.get(0);
-            Point2d max = new Point2d( b0.pB );
-            Point2d min = new Point2d( b0.pB );            
+            Point3d max = new Point3d( b0.pB );
+            Point3d min = new Point3d( b0.pB );            
             for ( Block b : blocks ) {
                 max.x = Math.max( max.x, b.pB.x );
                 max.y = Math.max( max.y, b.pB.y );
+                max.z = Math.max( max.z, b.pB.z );
                 min.x = Math.min( min.x, b.pB.x );
                 min.y = Math.min( min.y, b.pB.y );
+                min.z = Math.min( min.z, b.pB.z );
             }
-            Vector2d diff = new Vector2d();
-            Point2d centre = new Point2d();
+            Vector3d diff = new Vector3d();
+            Point3d centre = new Point3d();
             diff.sub( max, min );
             centre.interpolate( max, min, 0.5 );
             ArrayList<Block> L1 = new ArrayList<Block>();
             ArrayList<Block> L2 = new ArrayList<Block>();
+            
+            // TODO: check the third direction
             for ( Block b : blocks ) {
                 if ( diff.y > diff.x ) {
                     if ( b.pB.y < centre.y ) {

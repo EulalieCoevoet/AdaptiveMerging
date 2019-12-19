@@ -3,8 +3,11 @@ package mergingBodies3D;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+
+import mintools.viewer.EasyViewer;
+
 import javax.vecmath.Color3f;
-import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
 
 /**
  * The Block class represents a single pixel in the original image.  A rigid body is
@@ -17,9 +20,9 @@ public class Block {
     static float alpha;
     
     /** Radius of circle that encloses this block */
-    static double radius = Math.sqrt(2) * 0.5;// * 0.9; // 90% of the normal size... allow for some overlap?
+    static double radius = Math.sqrt(2) * 0.5;
     
-    /** Block pixel colour */
+    /** Block pixel color */
     Color3f c = new Color3f();
     
     /** row index in the original image */
@@ -28,18 +31,23 @@ public class Block {
     /** column index in the original image */
     int j;
     
+    /** depth index */
+    int k;
+    
     /** position of block in the body frame */
-    Point2d pB = new Point2d(); 
+    Point3d pB = new Point3d(); 
  
     /**
      * Creates a new block
      * @param i
      * @param j
+     * @param k
      * @param c
      */
-    public Block( int i, int j, Color3f c ) {
+    public Block( int i, int j, int k, Color3f c ) {
         this.i = i;
         this.j = j;
+        this.k = k;
         this.c.set( c );
     }
     
@@ -58,13 +66,11 @@ public class Block {
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
         gl.glColor4f( c.x, c.y, c.z, alpha );
-        gl.glBegin(GL.GL_TRIANGLE_STRIP);
-        double h = 0.5;
-        gl.glVertex2d( pB.x - h, pB.y - h );
-        gl.glVertex2d( pB.x - h, pB.y + h );
-        gl.glVertex2d( pB.x + h, pB.y - h );
-        gl.glVertex2d( pB.x + h, pB.y + h );
-        gl.glEnd();
+
+        gl.glPushMatrix();
+        gl.glTranslated(pB.x, pB.y, pB.z);
+        EasyViewer.glut.glutSolidCube(1.f);
+        gl.glPopMatrix();
     }
     
 }
