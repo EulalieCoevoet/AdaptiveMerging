@@ -113,26 +113,32 @@ public class LCPApp implements SceneGraphNode, Interactor {
             }
         }
         
-        gl.glDisable( GL.GL_DEPTH_TEST );
-        EasyViewer.beginOverlay(drawable);
-
+        
+        
+        
+        
+//        gl.glDisable( GL.GL_DEPTH_TEST );
+//
+//        gl.glPushMatrix();
+//        double sw = scale.getValue() * windowWidth / imageWidth;
+//        double sh = scale.getValue() * windowHeight / imageHeight;
+//        double s = Math.min(sw,sh);        
+//        double x = posx.getValue(); // extra translation
+//        double y = posy.getValue();        
+//        
+//        // create this as a transform to use for mouse picking        
+//        Matrix4d M = T.getBackingMatrix();
+//        M.setIdentity();
+//        M.m00 = s;
+//        M.m11 = s;        
+//        M.m03 = x + windowWidth /2 - s * (imageWidth-1)/2 ;
+//        M.m13 = y + windowHeight/2 - s * (imageHeight-1)/2;
+//        
+//        gl.glMultMatrixd( T.asArray(),0 );
+        
         gl.glPushMatrix();
-        double sw = scale.getValue() * windowWidth / imageWidth;
-        double sh = scale.getValue() * windowHeight / imageHeight;
-        double s = Math.min(sw,sh);        
-        double x = posx.getValue(); // extra translation
-        double y = posy.getValue();        
-        
-        // create this as a transform to use for mouse picking        
-        Matrix4d M = T.getBackingMatrix();
-        M.setIdentity();
-        M.m00 = s;
-        M.m11 = s;        
-        M.m03 = x + windowWidth /2 - s * (imageWidth-1)/2 ;
-        M.m13 = y + windowHeight/2 - s * (imageHeight-1)/2;
-        
-        gl.glMultMatrixd( T.asArray(),0 );
-        
+        double s = 1e-3; // guess how to get images to show up nicely in 3D in a first approximation...
+        gl.glScaled( s,s,s );
         system.display( drawable );
         
        if ( picked != null ) {
@@ -153,9 +159,11 @@ public class LCPApp implements SceneGraphNode, Interactor {
 
         gl.glPopMatrix();
 
+      EasyViewer.beginOverlay(drawable);
+
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         gl.glColor4f(0,0,0,1);
-        String text = "YOUR NAME HERE\n" + system.name + "\n";
+        String text = system.name + "\n";
         text += "bodies = " + system.bodies.size() + "\n";        
         text += "contacts = " + system.collisionProcessor.contacts.size() + "\n";
         text += formatter.format( new Date() ) + "\n";
