@@ -2,10 +2,12 @@ package mergingBodies3D;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.parameters.DoubleParameter;
 import mintools.swing.CollapsiblePanel;
@@ -17,11 +19,13 @@ import mintools.swing.VerticalFlowPanel;
  */
 public class MouseSpringForce {
 
-    private RigidBody picked = null;
+    RigidBody picked = null;
     
     private Point3d grabPointB = new Point3d();
     
-    private Point3d point;
+    private Point3d grabPointW = new Point3d();
+
+    Point3d point;
     
     /**
      * Creates a new mouse spring, where the provided point will be updated with movement of the mouse
@@ -55,7 +59,6 @@ public class MouseSpringForce {
     public void apply() {
         if ( picked == null ) return;
         
-        Point3d grabPointW = new Point3d();
         Vector3d grabPointV = new Vector3d();
         picked.transformB2W.transform( grabPointB, grabPointW );
         double distance = grabPointW.distance( point );
@@ -98,6 +101,22 @@ public class MouseSpringForce {
         CollapsiblePanel cp = new CollapsiblePanel(vfp.getPanel());
         cp.collapse();
         return cp;
+    }
+    
+    /**
+     * Draws a transparent line between the points connected by this spring.
+     * @param drawable
+     */
+    public void display(GLAutoDrawable drawable) {
+    	GL2 gl = drawable.getGL().getGL2();
+    	gl.glDisable( GL2.GL_LIGHTING );
+    	gl.glColor4d( 1, 1, 1, 0.5 );
+    	gl.glLineWidth(3);
+        gl.glBegin(GL.GL_LINES);
+        gl.glVertex3d(point.x, point.y, point.z);
+        gl.glVertex3d( grabPointW.x, grabPointW.y, grabPointW.z);
+        gl.glEnd();
+        gl.glEnable( GL2.GL_LIGHTING );
     }
         
 }

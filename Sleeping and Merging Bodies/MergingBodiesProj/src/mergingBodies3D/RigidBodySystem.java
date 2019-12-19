@@ -174,7 +174,9 @@ public class RigidBodySystem {
             }
         }        
         if ( drawBodies.getValue() ) {
-            for ( RigidBody b : bodies ) {
+        	int i = 0;
+        	for ( RigidBody b : bodies ) {
+            	gl.glLoadName( i++ ); // for picking
                 b.display( drawable );
             }
         }
