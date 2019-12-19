@@ -2,8 +2,6 @@ package mergingBodies;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector2d;
-
 import mergingBodies.Contact.ContactState;
 import mergingBodies.Merging.MergeParameters;
 
@@ -11,6 +9,7 @@ import mergingBodies.Merging.MergeParameters;
 /**
  * This class holds info about two colliding bodies (list of contacts, relative velocity, if they are merged...).
  */
+
 public class BodyPairContact {
 	
 	public RigidBody body1; 
@@ -27,8 +26,6 @@ public class BodyPairContact {
 	public Color cycleColor = null;
 
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
-	Vector2d relativeLinearVelocity = new Vector2d();
-	double relativeAngularVelocity = 0;
 	
 	public ArrayList<Double> motionMetricHist = new ArrayList<Double>();
 	public ArrayList<Contact.ContactState> contactStateHist = new ArrayList<Contact.ContactState>();

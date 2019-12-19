@@ -29,7 +29,6 @@ public class RigidBodySystem {
 	public double simulationTime = 0;
 
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
-	public ArrayList<RigidBody> initialBodies = new ArrayList<RigidBody>();
 	
 	public ArrayList<Spring> controllableSprings = new ArrayList<Spring>();
 
@@ -48,11 +47,19 @@ public class RigidBodySystem {
 	
 	public boolean generateBody = false;
 	
+	/**Time in seconds to advance the system*/
+	public double computeTime;
+
+	/**Total time in seconds for computation since last reset*/
+	public double totalComputeTime;
+
+	/**Total number of steps performed*/
+	public int totalSteps = 0;
+	
 	/**
 	 * Creates a new rigid body system
 	 */
 	public RigidBodySystem() {
-		/* do nothing */
 	}
 
 	/**
@@ -68,15 +75,6 @@ public class RigidBodySystem {
 		}
 	}
 
-	/**Time in seconds to advance the system*/
-	public double computeTime;
-
-	/**Total time in seconds for computation since last reset*/
-	public double totalAccumulatedComputeTime;
-
-	/**Total number of steps performed*/
-	public int totalSteps = 0;
-	
 	/**
 	 * Advances the state of all rigid bodies
 	 * @param dt time step
@@ -142,7 +140,7 @@ public class RigidBodySystem {
 		
 		computeTime = (System.nanoTime() - now) / 1e9;
 		simulationTime += dt;
-		totalAccumulatedComputeTime += computeTime;
+		totalComputeTime += computeTime;
 		
 		exportDataToFile();
 	}
@@ -170,6 +168,9 @@ public class RigidBodySystem {
 		}
 	}
 	
+	/**
+	 * Apply stored impulse to the picked body
+	 */
 	protected void applyImpulse() {
 		if (impulse.isHoldingForce()) {
 			impulse.pickedBody.applyForceW(impulse.pickedPoint, impulse.force);
@@ -177,6 +178,9 @@ public class RigidBodySystem {
 		}
 	}
 
+	/**
+	 * Apply gravity to bodies, collections and bodies in collections
+	 */
 	private void applyGravityForce() {
 		Vector2d force = new Vector2d();
 		for ( RigidBody body : bodies ) {
@@ -195,6 +199,11 @@ public class RigidBodySystem {
 		}
 	}
 	
+	/**
+	 * Apply gravity to bodies in given collection
+	 * @param collection
+	 * @param theta
+	 */
 	private void applyGravityCollection(RigidCollection collection, double theta) {
 		Vector2d force = new Vector2d();
 		for (RigidBody body : collection.bodies) {
@@ -204,6 +213,9 @@ public class RigidBodySystem {
 		}
 	}
 
+	/**
+	 * Apply spring forces
+	 */
 	private void applySpringForces() {
 		for (RigidBody body: bodies){
 			if (body.isSleeping)
@@ -301,7 +313,7 @@ public class RigidBodySystem {
 
 		simulationTime = 0;
 		collision.reset();
-		totalAccumulatedComputeTime = 0; 
+		totalComputeTime = 0; 
 		totalSteps = 0;
 	}
 
@@ -313,6 +325,9 @@ public class RigidBodySystem {
 		reset();
 	}
 	
+	/**
+	 * Generate a body (called when N is pressed)
+	 */
 	public void generateBody() {
 
 		RigidBody genbody = null;
@@ -359,6 +374,9 @@ public class RigidBodySystem {
 		}
 	}
 	
+	/**
+	 * Export data to csv file
+	 */
 	protected void exportDataToFile() {
 			
 		if (saveCSV.getValue()) {
@@ -384,6 +402,7 @@ public class RigidBodySystem {
 			stream = null;
 		}
 	}
+	
 	
     public BooleanParameter saveCSV = new BooleanParameter( "save CSV", false);
 	

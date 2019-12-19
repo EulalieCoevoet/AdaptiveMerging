@@ -75,13 +75,13 @@ public class RigidBody {
 	
 	/** Linear velocity */
 	public Vector2d v = new Vector2d(0.,0.); 
-	 /** Angular velocity in radians per second */
+	 /** Angular velocity in radiant per second */
 	public double omega = 0.;
 	/** Position of center of mass in the world frame */
 	public Point2d x = new Point2d(); 
 	/** Initial position of center of mass in the world frame */
 	public Point2d x0 = new Point2d(); 
-	/** Orientation angle in radians */
+	/** Orientation angle in radiant */
 	public double theta = 0.; 
 	/** bounding box, in the body frame */
 	public ArrayList<Point2d> boundingBoxB = new ArrayList<Point2d>(); 

@@ -12,6 +12,11 @@ public class XMLParser {
 	private Document document = null;
 	private Element eElement;
 	
+	/**
+	 * Method to call to parse the XML file
+	 * @param system
+	 * @param filename
+	 */
 	public void parse(RigidBodySystem system, String filename) {
 		
        	String ext = filename.substring(filename.length()-3);
@@ -38,11 +43,14 @@ public class XMLParser {
 		 
 		System.out.println("Load XML file");
 		System.out.println("-------------");
-		parseCollision(); // done first because of restitution propagation
+		parseCollision(); // done first because of restitution and friction propagation
 		parseBody();
 		System.out.println("-------------");
 	}
 	
+	/**
+	 * Parse collision node
+	 */
 	protected void parseCollision() {
 		NodeList nList = document.getElementsByTagName("collision");
 		for (int temp = 0; temp < nList.getLength(); temp++)
@@ -81,6 +89,9 @@ public class XMLParser {
 		}
 	}
 	
+	/**
+	 * Parse body node
+	 */
 	protected void parseBody() {
 		NodeList nList = document.getElementsByTagName("body");
 		for (int temp = 0; temp < nList.getLength(); temp++)
@@ -104,7 +115,7 @@ public class XMLParser {
 				System.out.println("Body id : "    + eElement.getAttribute("id"));
 
 				// TODO: look if there's a way to make correspond the attribute to the variable automatically
-				String[] attributes = {"x", "theta", "v", "omega", "restitution", "temporarilyPinned", "friction"};
+				String[] attributes = {"x", "theta", "v", "omega", "restitution", "temporarilyPinned", "friction", "pinned"};
 				
 				for (String attribute : attributes) {
 					Node n = eElement.getElementsByTagName(attribute).item(0);
@@ -132,6 +143,9 @@ public class XMLParser {
 								break;
 							case "temporarilyPinned":
 								body.temporarilyPinned = Boolean.parseBoolean(values[0]);
+								break;
+							case "pinned":
+								body.pinned = Boolean.parseBoolean(values[0]);
 								break;
 							default:
 						}

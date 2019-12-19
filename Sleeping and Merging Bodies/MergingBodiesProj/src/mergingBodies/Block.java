@@ -72,6 +72,5 @@ public class Block {
         gl.glVertex2d( pB.x + h, pB.y - h );
         gl.glVertex2d( pB.x + h, pB.y + h );
         gl.glEnd();
-    }
-    
+    }   
 }

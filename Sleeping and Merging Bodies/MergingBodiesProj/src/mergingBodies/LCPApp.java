@@ -22,6 +22,7 @@ import java.util.Date;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
@@ -176,7 +177,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         text += "contacts = " + system.collision.contacts.size() + "\n";
         text += formatter.format( new Date() ) + "\n";
         text += "simulation time = " + system.simulationTime + "\n";
-        text += "total compute time = " + system.totalAccumulatedComputeTime + "\n";
+        text += "total compute time = " + system.totalComputeTime + "\n";
         text += "total steps = " + system.totalSteps + "\n";
         text += "compute time = " + system.computeTime + "\n";
         text += "collision detection = " + system.collision.collisionDetectTime + "\n";
@@ -217,7 +218,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
             }
         }
     }
-
+    
     /**
      * Converts from screen coordinates to image coordinates
      * @param x
@@ -410,7 +411,6 @@ public class LCPApp implements SceneGraphNode, Interactor {
         system.bodies.clear();
         system.bodies.addAll(blocker.bodies);
         system.controllableSprings = blocker.controllableSprings;
-        system.initialBodies = system.bodies;
     	system.collision.bodyPairContacts.clear();
     	system.collision.contacts.clear();
     	system.sceneName = filename.substring(0, filename.length() - 4);

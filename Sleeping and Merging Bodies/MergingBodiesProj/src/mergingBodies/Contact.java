@@ -70,6 +70,7 @@ public class Contact {
 	Point2d contactB2  = new Point2d();
 	
 	/** Jacobian for normal direction */ 
+	// TODO: change that one matrix for all
 	DenseVector jn = new DenseVector(6);
 	
 	/** Jacobian for normal direction collection frame */ 

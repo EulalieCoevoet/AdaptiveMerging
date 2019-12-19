@@ -131,6 +131,12 @@ public class MotionMetricProcessor {
 		return relativeLinearVelocity;
 	}
 	
+	/**
+	 * Compute common center of mass
+	 * @param body1
+	 * @param body2
+	 * @return
+	 */
 	protected Point2d getCommonCOM(RigidBody body1, RigidBody body2) {
 		Point2d massCOM1 = new Point2d(body1.x);
 		Point2d massCOM2 = new Point2d(body2.x);
