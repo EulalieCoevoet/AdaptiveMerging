@@ -3,15 +3,15 @@ package mergingBodies3D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
+import mintools.viewer.FlatMatrix4d;
 
 /**
  * Simple 2D rigid body based on image samples
@@ -228,11 +228,9 @@ public class RigidBody {
      * @param result the velocity
      */
     public void getSpatialVelocity( Point3d contactPointW, Vector3d result ) {
-        result.sub( contactPointW, x );
-        result.scale( omega );        
-        double xpart = -result.y;
-        double ypart =  result.x;
-        result.set( xpart, ypart );
+        Vector3d tmp = new Vector3d();
+    	tmp.sub( contactPointW, x );
+        result.cross( tmp, omega );
         result.add( v );
     }
     
@@ -252,9 +250,9 @@ public class RigidBody {
      * @param pW
      * @return true if intersection
      */
-    public boolean intersect( Point2d pW ) {
+    public boolean intersect( Point3d pW ) {
         if ( root.boundingDisc.isInDisc( pW ) ) {
-            Point2d pB = new Point2d();
+            Point3d pB = new Point3d();
             transformW2B.transform( pW, pB );
             for ( Block b : blocks ) {
                 if ( b.pB.distanceSquared( pB ) < Block.radius * Block.radius ) return true;
@@ -268,9 +266,9 @@ public class RigidBody {
      */
     public void reset() {
         x.set(x0);        
-        theta = 0;
-        v.set(0,0);
-        omega = 0;
+        theta.setZero();
+        v.set(0,0,0);
+        omega.set(0,0,0);
         transformB2W.set( theta, x );
         transformW2B.set( transformB2W );
         transformW2B.invert();
@@ -302,8 +300,12 @@ public class RigidBody {
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
         gl.glPushMatrix();
-        gl.glTranslated( x.x, x.y, 0 );
-        gl.glRotated(theta*180/Math.PI, 0,0,1);
+        
+        FlatMatrix4d M = new FlatMatrix4d();
+        M.setBackingMatrix( transformB2W.T );
+        
+        gl.glMultMatrixd( M.asArray(),0 );
+        
         if ( myListID == -1 ) {
             Integer ID = mapBlocksToDisplayList.get(blocks);
             if ( ID == null ) {
