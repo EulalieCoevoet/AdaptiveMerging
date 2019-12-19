@@ -1,6 +1,5 @@
 package mergingBodies3D;
 
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -15,12 +14,15 @@ import javax.vecmath.Point3d;
  * @author kry
  */
 public class Block {
-
+	
+    /** voxel size */
+    static double h = 0.5;
+    
     /** Transparency with which to draw all blocks */
     static float alpha;
     
     /** Radius of circle that encloses this block */
-    static double radius = Math.sqrt(2) * 0.5;
+    static double radius = Math.sqrt(2) * h;
     
     /** Block pixel color */
     Color3f c = new Color3f();

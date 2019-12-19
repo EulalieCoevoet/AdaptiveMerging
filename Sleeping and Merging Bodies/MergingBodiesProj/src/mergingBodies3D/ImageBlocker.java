@@ -46,14 +46,14 @@ public class ImageBlocker {
             imageData = new int[width*height];
             img.getRGB( 0, 0, width, height, imageData, 0, width );
             visited = new boolean[width][height];
-            Color3f colour = new Color3f();
+            Color3f color = new Color3f();
             // sweep all pixels
             for ( int x = 0; x < width; x++ ) {
                 for ( int y = 0; y < height; y++ ) {
                     if ( visited[x][y] ) continue;
                     visited[x][y] = true;
-                    getColour( colour, x, y );
-                    if ( isWhite( colour ) ) continue;
+                    getColour( color, x, y );
+                    if ( isWhite( color ) ) continue;
                     // this is part of a new body!
                     ArrayList<Block> blocks = new ArrayList<Block>();
                     ArrayList<Block> boundaryBlocks = new ArrayList<Block>();

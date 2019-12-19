@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -18,9 +19,6 @@ import mintools.viewer.FlatMatrix4d;
  * @author kry
  */
 public class RigidBody {
-
-    /** Unique identifier for this body */
-    public int index;
     
     /** Variable to keep track of identifiers that can be given to rigid bodies */
     static public int nextIndex = 0;
@@ -39,7 +37,7 @@ public class RigidBody {
     /** accumulator for torques acting on this body */
     Vector3d torque = new Vector3d();
     
-    Matrix3d massAngular;
+    Matrix3d massAngular = new Matrix3d();
     
     double massLinear;
         
@@ -70,7 +68,7 @@ public class RigidBody {
     Point3d x0 = new Point3d();
     
     /** orientation of the body TODO: refactor to be R later?? */
-    public Matrix3d theta;
+    public Matrix3d theta = new Matrix3d();
     
     /** angular velocity in radians per second */
     public Vector3d omega;
@@ -79,7 +77,10 @@ public class RigidBody {
     double minv;
     
     /** inverse of the angular mass, or zero if pinned */
-    Matrix3d jinv;
+    Matrix3d jinv = new Matrix3d();
+    
+	/** bounding box, in the body frame */
+	public ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>(); 
     
     /**
      * Creates a new rigid body from a collection of blocks
@@ -89,30 +90,57 @@ public class RigidBody {
     public RigidBody( ArrayList<Block> blocks, ArrayList<Block> boundaryBlocks ) {
 
         this.blocks = blocks;
-        this.boundaryBlocks = boundaryBlocks;        
+        this.boundaryBlocks = boundaryBlocks;   
+		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+		Point3d bbminB = new Point3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);     
         // compute the mass and center of mass position        
         for ( Block b : blocks ) {
             double mass = b.getColourMass();
             massLinear += mass;            
             x0.x += b.j * mass;
+			bbmaxB.x = Math.max(bbmaxB.x, b.j + Block.h);
+			bbminB.x = Math.min(bbminB.x, b.j - Block.h);
             x0.y += b.i * mass; 
-            x0.z = 0; // TODO: x0.z += b.k * mass; // if we were to have voxels...
+			bbmaxB.y = Math.max(bbmaxB.y, b.i + Block.h);
+			bbminB.y = Math.min(bbminB.y, b.i - Block.h);
+            x0.z += b.k * mass;
+			bbmaxB.z = Math.max(bbmaxB.z, b.k + Block.h);
+			bbminB.z = Math.min(bbminB.z, b.k - Block.h);
         }
+
         x0.scale ( 1 / massLinear );
         // set block positions in world and body coordinates 
         for ( Block b : blocks ) {
             b.pB.x = b.j - x0.x;
             b.pB.y = b.i - x0.y;
-            //b.pB.z = b.k - x0.z;
+            b.pB.z = b.k - x0.z;
         }
+        
+        x.set(x0);      
+        theta.setIdentity();
+        transformB2W.set( theta, x );
+        transformW2B.set( theta, x );
+        transformW2B.invert();		
+        
+        transformW2B.transform(bbmaxB);
+		transformW2B.transform(bbminB);
+		boundingBoxB.add(bbmaxB);
+		boundingBoxB.add(new Point3d(bbminB.x,bbmaxB.y,bbmaxB.z));
+		boundingBoxB.add(new Point3d(bbmaxB.x,bbminB.y,bbmaxB.z));
+		boundingBoxB.add(new Point3d(bbmaxB.x,bbmaxB.y,bbminB.z));
+		boundingBoxB.add(bbminB);
+		boundingBoxB.add(new Point3d(bbmaxB.x,bbminB.y,bbminB.z));
+		boundingBoxB.add(new Point3d(bbminB.x,bbmaxB.y,bbminB.z));
+		boundingBoxB.add(new Point3d(bbminB.x,bbminB.y,bbmaxB.z));
+        
         // compute the rotational inertia
-        final Point3d zero = new Point3d(0,0,0);
-        for ( Block b : blocks ) {
-            double mass = b.getColourMass();
-            // TODO: 
-            //massAngular += mass*b.pB.distanceSquared(zero);
-        }
-        massAngular.setIdentity(); // TODO: THIS IS WRONG!!! Compute the angular mass!
+        double l=bbmaxB.x-bbminB.x; 
+        double w=bbmaxB.y-bbminB.y;  
+        double h=bbmaxB.z-bbminB.z; 
+        massAngular.setZero();
+        massAngular.m00 = massLinear/12.*(w*w+h*h);
+        massAngular.m11 = massLinear/12.*(l*l+h*h);
+        massAngular.m22 = massLinear/12.*(w*w+l*l);
         
         // prevent zero angular inertia in the case of a single block
 //        if ( blocks.size() == 1 ) {
@@ -120,12 +148,7 @@ public class RigidBody {
 //            double mass = b.getColourMass();
 //            massAngular = mass * (1+1)/12;
 //        }
-       
-        x.set(x0);        
-        transformB2W.set( theta, x );
-        transformW2B.set( theta, x );
-        transformW2B.invert();
-                
+             
         root = new BVNode( boundaryBlocks, this );
         
         pinned = isAllBlueBlocks();
@@ -137,9 +160,6 @@ public class RigidBody {
             minv = 1/massLinear;
             jinv.invert(massAngular);
         }
-        
-        // set our index
-        index = nextIndex++;
     }
     
     /**
@@ -155,6 +175,7 @@ public class RigidBody {
         x.set( body.x );
         theta = body.theta;
         omega = body.omega;
+		boundingBoxB = new ArrayList<Point3d>(body.boundingBoxB);
         // we can share the blocks and boundary blocks...
         // no need to update them as they are in the correct body coordinates already        
         updateTransformations();
@@ -163,8 +184,6 @@ public class RigidBody {
         pinned = body.pinned;
         minv = body.minv;
         jinv = body.jinv;
-        // set our index
-        index = nextIndex++;
     }
     
     /**
