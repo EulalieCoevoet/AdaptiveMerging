@@ -6,9 +6,12 @@ import java.util.HashMap;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
 /**
  * Simple 2D rigid body based on image samples
@@ -31,12 +34,12 @@ public class RigidBody {
     BVNode root;
     
     /** accumulator for forces acting on this body */
-    Vector2d force = new Vector2d();
+    Vector3d force = new Vector3d();
     
     /** accumulator for torques acting on this body */
-    double torque;
+    Vector3d torque = new Vector3d();
     
-    double massAngular;
+    Matrix3d massAngular;
     
     double massLinear;
         
@@ -58,25 +61,25 @@ public class RigidBody {
     RigidTransform transformW2B = new RigidTransform();
     
     /** linear velocity */
-    public Vector2d v = new Vector2d();
+    public Vector3d v = new Vector3d();
     
     /** Position of center of mass in the world frame */
-    public Point2d x = new Point2d();
+    public Point3d x = new Point3d();
     
     /** initial position of center of mass in the world frame */
-    Point2d x0 = new Point2d();
+    Point3d x0 = new Point3d();
     
-    /** orientation angle in radians */
-    public double theta;
+    /** orientation of the body TODO: refactor to be R later?? */
+    public Matrix3d theta;
     
     /** angular velocity in radians per second */
-    public double omega;
+    public Vector3d omega;
 
     /** inverse of the linear mass, or zero if pinned */
     double minv;
     
     /** inverse of the angular mass, or zero if pinned */
-    double jinv;
+    Matrix3d jinv;
     
     /**
      * Creates a new rigid body from a collection of blocks
@@ -93,6 +96,7 @@ public class RigidBody {
             massLinear += mass;            
             x0.x += b.j * mass;
             x0.y += b.i * mass; 
+            x0.z = 0; // TODO: x0.z += b.k * mass; // if we were to have voxels...
         }
         x0.scale ( 1 / massLinear );
         // set block positions in world and body coordinates 
@@ -173,7 +177,7 @@ public class RigidBody {
      * @param contactPointW
      * @param contactForceW
      */
-    public void applyContactForceW( Point2d contactPointW, Vector2d contactForceW ) {
+    public void applyContactForceW( Point3d contactPointW, Vector3d contactForceW ) {
         force.add( contactForceW );
         // TODO: Compute the torque applied to the body 
         

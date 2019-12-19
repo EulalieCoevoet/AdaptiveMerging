@@ -1,9 +1,9 @@
 package mergingBodies3D;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Vector2d;
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 /**
  * 2D rigid transformation
@@ -11,8 +11,8 @@ import javax.vecmath.Vector2d;
  */
 public class RigidTransform {
 
-    /** homogeneous representation of 2D transformation */
-    Matrix3d T = new Matrix3d();
+    /** homogeneous representation of 3D transformation */
+    Matrix4d T = new Matrix4d();
     
     /** 
      * Creates a new identity transformation 
@@ -35,12 +35,9 @@ public class RigidTransform {
      * @param theta
      * @param p
      */
-    public void set( double theta, Tuple2d p ) {
-        double c = Math.cos(theta);
-        double s = Math.sin(theta);
-        T.m00 = c; T.m01 = -s; T.m02 = p.x;
-        T.m10 = s; T.m11 =  c; T.m12 = p.y;
-        T.m20 = 0; T.m21 =  0; T.m22 = 1;
+    public void set( Matrix3d R, Vector3d p ) {
+    	T.set( R );
+    	T.set( p );
     }
     
     /**
@@ -55,22 +52,16 @@ public class RigidTransform {
      * Transforms the given point
      * @param p
      */
-    public void transform( Point2d p ) {
-        double x = T.m00 * p.x + T.m01 * p.y + T.m02;
-        double y = T.m10 * p.x + T.m11 * p.y + T.m12;
-        p.x = x;
-        p.y = y;
+    public void transform( Point3d p ) {
+    	T.transform( p );
     }
  
     /**
      * Transforms the given vector
-     * @param p
+     * @param v
      */
-    public void transform( Vector2d p ) {
-        double x = T.m00 * p.x + T.m01 * p.y;
-        double y = T.m10 * p.x + T.m11 * p.y;
-        p.x = x;
-        p.y = y;
+    public void transform( Vector3d v ) {
+    	T.transform( v );
     }
 
     /**
@@ -78,9 +69,8 @@ public class RigidTransform {
      * @param p
      * @param result
      */
-    public void transform( Point2d p, Point2d result ) {
-        result.x = T.m00 * p.x + T.m01 * p.y + T.m02;
-        result.y = T.m10 * p.x + T.m11 * p.y + T.m12;
+    public void transform( Point3d p, Point3d result ) {
+    	T.transform( p, result );
     }
  
     /**
@@ -88,9 +78,8 @@ public class RigidTransform {
      * @param p
      * @param result
      */
-    public void transform( Vector2d p, Vector2d result ) {
-        result.x = T.m00 * p.x + T.m01 * p.y;
-        result.y = T.m10 * p.x + T.m11 * p.y;
+    public void transform( Vector3d v, Vector3d result ) {
+    	T.transform( v, result);
     }
 
 }
