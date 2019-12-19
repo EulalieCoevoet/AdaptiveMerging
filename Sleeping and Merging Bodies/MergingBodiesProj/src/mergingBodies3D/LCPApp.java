@@ -39,6 +39,8 @@ import mintools.swing.FileSelect;
 import mintools.swing.HorizontalFlowPanel;
 import mintools.swing.VerticalFlowPanel;
 import mintools.viewer.EasyViewer;
+import mintools.viewer.FancyArrow;
+import mintools.viewer.FancyAxis;
 import mintools.viewer.FlatMatrix4d;
 import mintools.viewer.Interactor;
 import mintools.viewer.SceneGraphNode;
@@ -135,11 +137,16 @@ public class LCPApp implements SceneGraphNode, Interactor {
 //        M.m13 = y + windowHeight/2 - s * (imageHeight-1)/2;
 //        
 //        gl.glMultMatrixd( T.asArray(),0 );
-        
+
+        FancyAxis fa = new FancyAxis();
+        fa.draw(gl);
+
         gl.glPushMatrix();
-        double s = 1e-3; // guess how to get images to show up nicely in 3D in a first approximation...
+        double s = 1e-2; // guess how to get images to show up nicely in 3D in a first approximation...
         gl.glScaled( s,s,s );
         system.display( drawable );
+       
+        fa.draw(gl);
         
        if ( picked != null ) {
     	   
