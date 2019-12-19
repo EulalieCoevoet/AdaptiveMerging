@@ -136,16 +136,19 @@ public class LCPApp implements SceneGraphNode, Interactor {
         system.display( drawable );
         
        if ( picked != null ) {
+    	   
+    	   // TODO Move PDControlApp picking things here...
+    	   
             // draw a line from the mouse to the body point
-            Point2d tmp = new Point2d();
-            picked.transformB2W.transform( grabPointB, tmp );
-            gl.glColor4f( 1,0,0,0.5f);
-            gl.glLineWidth( 5 );
-            gl.glBegin( GL.GL_LINES );
-            gl.glVertex2d( mousePoint.x, mousePoint.y );
-            gl.glVertex2d( tmp.x, tmp.y );
-            gl.glEnd();
-            gl.glLineWidth(1);
+//            Point2d tmp = new Point2d();
+//            picked.transformB2W.transform( grabPointB, tmp );
+//            gl.glColor4f( 1,0,0,0.5f);
+//            gl.glLineWidth( 5 );
+//            gl.glBegin( GL.GL_LINES );
+//            gl.glVertex2d( mousePoint.x, mousePoint.y );
+//            gl.glVertex2d( tmp.x, tmp.y );
+//            gl.glEnd();
+//            gl.glLineWidth(1);
         }
 
         gl.glPopMatrix();
@@ -188,19 +191,20 @@ public class LCPApp implements SceneGraphNode, Interactor {
         }
     }
 
-    /**
-     * Converts from screen coordinates to image coordinates
-     * @param x
-     * @param y
-     */
-    private void setPoint( int x, int y ) {
-        Point3d tmp = new Point3d(x,y,0);
-        Matrix4d M = new Matrix4d();
-        M.invert(T.getBackingMatrix());
-        M.transform( tmp );
-        mousePoint.x = tmp.x;
-        mousePoint.y = tmp.y;    
-    }
+    // TODO this should be using the PD control mouse spring stuff instead...
+//    /**
+//     * Converts from screen coordinates to image coordinates
+//     * @param x
+//     * @param y
+//     */
+//    private void setPoint( int x, int y ) {
+//        Point3d tmp = new Point3d(x,y,0);
+//        Matrix4d M = new Matrix4d();
+//        M.invert(T.getBackingMatrix());
+//        M.transform( tmp );
+//        mousePoint.x = tmp.x;
+//        mousePoint.y = tmp.y;    
+//    }
     
     private BooleanParameter record = new BooleanParameter( "record (ENTER in canvas)", false );
     
@@ -323,10 +327,14 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private Point prevMousePoint = new Point();
 
     // variables and objects for picking rigid body with the mouse
+    
+    
     private RigidBody picked = null;
-    private Point2d grabPointB = new Point2d();
-    private Point2d mousePoint = new Point2d();    
-    private MouseSpringForce mouseSpring = new MouseSpringForce( mousePoint );
+//    private Point2d grabPointB = new Point2d();
+   
+    // TODO: UPDATE WITH the PD Control
+    private Point3d mousePoint3d = new Point3d();      
+    private MouseSpringForce mouseSpring = new MouseSpringForce( mousePoint3d );
     
     /**
      * Loads the specified image, clearing the old system, and resets viewing parameters.
@@ -405,14 +413,16 @@ public class LCPApp implements SceneGraphNode, Interactor {
         });
         java.util.Arrays.sort(files);
         
+        // TODO: update based on the PD Control app stuff...
         component.addMouseMotionListener( new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                setPoint( e.getPoint().x, e.getPoint().y );
+            	
+                //setPoint( e.getPoint().x, e.getPoint().y );
                 if ( picked == null ) {
                     if ( (e.getModifiers() & InputEvent.BUTTON2_MASK) != 0) { // button3 ) {
-                        posx.setValue( posx.getValue() + e.getPoint().x - prevMousePoint.x );
-                        posy.setValue( posy.getValue() + e.getPoint().y - prevMousePoint.y );
+//                        posx.setValue( posx.getValue() + e.getPoint().x - prevMousePoint.x );
+//                        posy.setValue( posy.getValue() + e.getPoint().y - prevMousePoint.y );
                     }
                     if ( (e.getModifiers() & InputEvent.BUTTON3_MASK) != 0 ) {
                         scale.setValue( scale.getValue() * Math.pow(1.002, e.getPoint().y - prevMousePoint.y ));
@@ -425,19 +435,19 @@ public class LCPApp implements SceneGraphNode, Interactor {
             @Override
             public void mousePressed(MouseEvent e) {       
                 prevMousePoint.setLocation( e.getPoint() );
-                setPoint( e.getPoint().x, e.getPoint().y );
+                //setPoint( e.getPoint().x, e.getPoint().y );
                 if ( (e.getModifiers() & InputEvent.BUTTON1_MASK) != 0 ) {
-                    picked = system.pickBody( mousePoint );                
-                    if ( picked != null ) {
-                        picked.transformW2B.transform( mousePoint, grabPointB );                
-                    } 
+//                    picked = system.pickBody( mousePoint );                
+//                    if ( picked != null ) {
+//                        picked.transformW2B.transform( mousePoint, grabPointB );                
+//                    } 
                 }
-                mouseSpring.setPicked( picked, grabPointB );                
+                //mouseSpring.setPicked( picked, grabPointB );                
             }
             @Override
             public void mouseReleased(MouseEvent e) {
                 picked = null;                
-                mouseSpring.setPicked( picked, grabPointB );
+                //mouseSpring.setPicked( picked, grabPointB );
             }
         } );
         component.addKeyListener( new KeyAdapter() {
