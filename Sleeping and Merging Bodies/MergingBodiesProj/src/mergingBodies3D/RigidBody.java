@@ -3,6 +3,7 @@ package mergingBodies3D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -12,6 +13,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mintools.viewer.EasyViewer;
 import mintools.viewer.FlatMatrix4d;
 
 /**
@@ -71,7 +73,7 @@ public class RigidBody {
     public Matrix3d theta = new Matrix3d();
     
     /** angular velocity in radians per second */
-    public Vector3d omega;
+    public Vector3d omega = new Vector3d();
 
     /** inverse of the linear mass, or zero if pinned */
     double minv;
@@ -82,6 +84,12 @@ public class RigidBody {
 	/** bounding box, in the body frame */
 	public ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>(); 
     
+	/**
+	 * Default empty constructor
+	 */
+	public RigidBody() {
+	}
+	
     /**
      * Creates a new rigid body from a collection of blocks
      * @param blocks
@@ -93,7 +101,7 @@ public class RigidBody {
         this.boundaryBlocks = boundaryBlocks;   
 		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
 		Point3d bbminB = new Point3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);     
-        // compute the mass and center of mass position        
+        // compute the mass and center of mass position   
         for ( Block b : blocks ) {
             double mass = b.getColourMass();
             massLinear += mass;            
@@ -285,7 +293,7 @@ public class RigidBody {
      */
     public void reset() {
         x.set(x0);        
-        theta.setZero();
+        theta.setIdentity();
         v.set(0,0,0);
         omega.set(0,0,0);
         transformB2W.set( theta, x );
@@ -354,29 +362,11 @@ public class RigidBody {
      */
     public void displayCOM( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
-        if ( getKineticEnergy() > kineticEnergyThreshold ) {
-            gl.glPointSize(8);
-            gl.glColor3f(0,0,0.7f);
-            gl.glBegin( GL.GL_POINTS );
-            gl.glVertex2d(x.x, x.y);
-            gl.glEnd();
-            gl.glPointSize(4);
-            gl.glColor3f(1,1,1);
-            gl.glBegin( GL.GL_POINTS );
-            gl.glVertex2d(x.x, x.y);
-            gl.glEnd();
-        } else {
-            gl.glPointSize(8);
-            gl.glColor3f(0,0,0.7f);
-            gl.glBegin( GL.GL_POINTS );
-            gl.glVertex2d(x.x, x.y);
-            gl.glEnd();
-            gl.glPointSize(4);
-            gl.glColor3f(0,0,1);
-            gl.glBegin( GL.GL_POINTS );
-            gl.glVertex2d(x.x, x.y);
-            gl.glEnd();
-        }
+        
+        gl.glPushMatrix();
+        gl.glTranslated(x.x, x.y, x.z);
+        EasyViewer.glut.glutSolidSphere(1, 10, 10);
+        gl.glPopMatrix();
     }
     
 }

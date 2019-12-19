@@ -25,8 +25,6 @@ import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Matrix4d;
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -39,7 +37,6 @@ import mintools.swing.FileSelect;
 import mintools.swing.HorizontalFlowPanel;
 import mintools.swing.VerticalFlowPanel;
 import mintools.viewer.EasyViewer;
-import mintools.viewer.FancyArrow;
 import mintools.viewer.FancyAxis;
 import mintools.viewer.FlatMatrix4d;
 import mintools.viewer.Interactor;
@@ -139,14 +136,17 @@ public class LCPApp implements SceneGraphNode, Interactor {
 //        gl.glMultMatrixd( T.asArray(),0 );
 
         FancyAxis fa = new FancyAxis();
-        fa.draw(gl);
 
         gl.glPushMatrix();
         double s = 1e-2; // guess how to get images to show up nicely in 3D in a first approximation...
         gl.glScaled( s,s,s );
         system.display( drawable );
-       
+
+        gl.glPushMatrix();
+        gl.glScaled( 5,5,5 );
         fa.draw(gl);
+        gl.glPopMatrix();
+
         
        if ( picked != null ) {
     	   
@@ -166,7 +166,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
 
         gl.glPopMatrix();
 
-      EasyViewer.beginOverlay(drawable);
+        EasyViewer.beginOverlay(drawable);
 
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         gl.glColor4f(0,0,0,1);

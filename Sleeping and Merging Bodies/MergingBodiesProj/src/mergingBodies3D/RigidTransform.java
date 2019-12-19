@@ -39,8 +39,8 @@ public class RigidTransform {
     public void set( Matrix3d R, Tuple3d p ) {
     	T.set( R );
     	T.m03 = p.x;
-    	T.m13 = p.x;
-    	T.m23 = p.x;
+    	T.m13 = p.y;
+    	T.m23 = p.z;
     }
     
     /**

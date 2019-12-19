@@ -95,7 +95,7 @@ public class RigidBodySystem {
             	// TODO: Could probably get rid of the gravity angle??  Or do something different?  Seems silly in 3D
                 double theta = gravityAngle.getValue() / 180.0 * Math.PI;
                 force.set( Math.cos( theta ), Math.sin(theta), 0 );
-                force.scale( b.massLinear * gravityAmount.getValue() );
+                force.scale( - b.massLinear * gravityAmount.getValue() );
                 // gravity goes directly into the accumulator!  no torque!
                 b.force.add( force );
             }

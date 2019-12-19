@@ -1,5 +1,6 @@
 package mergingBodies3D;
 
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -68,6 +69,10 @@ public class Block {
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
         gl.glColor4f( c.x, c.y, c.z, alpha );
+        
+		float[] col = new float[] { c.x,c.y,c.z, Block.alpha };		
+		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
+
 
         gl.glPushMatrix();
         gl.glTranslated(pB.x, pB.y, pB.z);

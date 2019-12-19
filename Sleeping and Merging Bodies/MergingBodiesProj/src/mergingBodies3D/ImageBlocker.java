@@ -8,6 +8,9 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Color3f;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 
 /**
  * Creates rigid bodies from an image
@@ -46,23 +49,61 @@ public class ImageBlocker {
             imageData = new int[width*height];
             img.getRGB( 0, 0, width, height, imageData, 0, width );
             visited = new boolean[width][height];
-            Color3f color = new Color3f();
+            Color3f colour = new Color3f();
+            ArrayList<Point3d> cyanBlockList = new ArrayList<Point3d>();
             // sweep all pixels
             for ( int x = 0; x < width; x++ ) {
                 for ( int y = 0; y < height; y++ ) {
                     if ( visited[x][y] ) continue;
                     visited[x][y] = true;
-                    getColour( color, x, y );
-                    if ( isWhite( color ) ) continue;
-                    // this is part of a new body!
-                    ArrayList<Block> blocks = new ArrayList<Block>();
-                    ArrayList<Block> boundaryBlocks = new ArrayList<Block>();
-                    searchConnected( x, y, blocks, boundaryBlocks );
-                    RigidBody body = new RigidBody( blocks, boundaryBlocks );
-                    bodies.add( body );
+                    getColor( colour, x, y );
+                    if ( isWhite( colour ) ) continue;
+                   
+	                // this is part of a new body!
+                	ArrayList<Block> blocks = new ArrayList<Block>();
+                	ArrayList<Block> boundaryBlocks = new ArrayList<Block>();
+                	searchConnected( x, y, blocks, boundaryBlocks );
+                	if ( blocks.size() == 1 && isCyan( colour ) ) {
+                		// put this aside and make a PlaneRigidBody later...
+                		cyanBlockList.add( new Point3d(x,height - y,0) );
+                	} else {
+                		RigidBody body = new RigidBody( blocks, boundaryBlocks );   
+	                	for ( Block b : blocks ) {
+//	                		if ( isRed( b.c ) ) {
+//	                			Spring s = new Spring( b.pB, body );
+//	                			body.springs.add(s);                				
+//	                		}
+//	                		if ( isMagenta( b.c ) ) {
+//	                			Spring s = new Spring( b.pB, body );
+//	                			body.springs.add(s);
+//	                			controllableSprings.add(s);
+//	                			body.magneticBody = true;
+//	                		}
+	                	}                	
+	                	bodies.add( body );
+                	}
                 }
             }
-        } catch ( Exception e ) {
+            // if we had cyan isolate blocks, then make a plane for each pair
+            for ( int i = 0; i < cyanBlockList.size(); i+=2 ) {
+            	Point3d p1 = cyanBlockList.get(i);
+            	Point3d p2 = cyanBlockList.get(i+1);
+            	
+            	Vector3d diff = new Vector3d();
+            	Vector3d z = new Vector3d(0,0,1);
+            	diff.sub(p2,p1);
+            	Vector3d n = new Vector3d();
+            	n.cross(diff, z);
+            	
+            	if ( n.y > 0 ) {
+            		n.scale(-1); // make it a bottom surface, regardless the order of the points above
+            	}
+            	n.normalize();
+            	bodies.add( new PlaneRigidBody(p1, n) );
+            }
+            
+        } 
+        catch ( Exception e ) {
             System.err.println("Problems processing image "+ filename );
             e.printStackTrace();
         }
@@ -89,10 +130,10 @@ public class ImageBlocker {
         while ( ! Q.isEmpty() ) {            
             Coord p = Q.remove(0);
             x = p.x;
-            y = p.y;
-            getColour( colour, x, y );
+            y = p.y; // for nicer 3D things, with y up
+            getColor( colour, x, y );
             if ( isWhite(colour) ) continue;
-            Block b = new Block( y, x, 0, colour );
+            Block b = new Block( height - y, x, 0, colour );
             blocks.add( b );
             if ( isBoundary( x, y ) ) {
                 boundaryBlocks.add( b );                
@@ -122,7 +163,7 @@ public class ImageBlocker {
         for ( int i = -1; i < 2; i++ ) {
             for ( int j = -1; j < 2; j++ ) {
                 if ( i==j ) continue;
-                getColour( color, x+i, y+j );
+                getColor( color, x+i, y+j );
                 if ( isWhite(color) ) return true;
             }
         }   
@@ -130,11 +171,11 @@ public class ImageBlocker {
     }
     
     /** 
-     * Gets the color of the specified pixel
+     * Gets the colour of the specified pixel
      * @param x
      * @param y
      */
-    private void getColour( Color3f colour, int x, int y ) {
+    private void getColor( Color3f colour, int x, int y ) {
         int data = imageData[y*width+x];
         colour.x = ((data >> 16) & 0x0ff) / 255.0f;
         colour.y = ((data >> 8) & 0x0ff) / 255.0f;
@@ -145,12 +186,41 @@ public class ImageBlocker {
     private float epsilon = 0;
     
     /**
-     * @param color
-     * @return true if the color provided is white
+     * @param colour
+     * @return true if the colour provided is white
      */
-    private boolean isWhite( Color3f color ) {
+    private boolean isWhite( Color3f colour ) {
         final Color3f white = new Color3f(1,1,1);
-        return color.epsilonEquals(white, epsilon );
+        return colour.epsilonEquals(white, epsilon );
     }
+
+    /**
+     * @param colour
+     * @return true if the colour provided is white
+     */
+    private boolean isYellow( Color3f colour ) {
+        final Color3f white = new Color3f(1,1,0);
+        return colour.epsilonEquals(white, epsilon );
+    }
+
+    /**
+     * @param colour
+     * @return true if the colour provided is white
+     */
+    private boolean isCyan( Color3f colour ) {
+        final Color3f cyan = new Color3f(0,1,1);
+        return colour.epsilonEquals(cyan, epsilon );
+    }
+    
+
+	private boolean isRed(Color3f colour) {
+        final Color3f red= new Color3f(1,0,0);
+        return colour.epsilonEquals(red, epsilon );
+	}
+
+	private boolean isMagenta(Color3f colour) {
+        final Color3f red= new Color3f(1,0,1);
+        return colour.epsilonEquals(red, epsilon );
+	}
     
 }
