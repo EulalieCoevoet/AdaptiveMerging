@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
@@ -122,14 +122,14 @@ public class CollisionProcessor {
     }
     
     // some working variables for processing collisions
-    private Point2d tmp1 = new Point2d();
-    private Point2d tmp2 = new Point2d();
-    private Point2d contactW = new Point2d();
-    private Vector2d force = new Vector2d();
-    private Vector2d contactV1 = new Vector2d();
-    private Vector2d contactV2 = new Vector2d();
-    private Vector2d relativeVelocity = new Vector2d();
-    private Vector2d normal = new Vector2d();
+    private Point3d tmp1 = new Point3d();
+    private Point3d tmp2 = new Point3d();
+    private Point3d contactW = new Point3d();
+    private Vector3d force = new Vector3d();
+    private Vector3d contactV1 = new Vector3d();
+    private Vector3d contactV2 = new Vector3d();
+    private Vector3d relativeVelocity = new Vector3d();
+    private Vector3d normal = new Vector3d();
         
     /**
      * Processes a collision between two bodies for two given blocks that are colliding.

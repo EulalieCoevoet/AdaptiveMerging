@@ -107,7 +107,8 @@ public class Factory {
         body.x0.set( tmp );                        
         body.x.set( tmp );            
         //body.theta = rand.nextDouble() * Math.PI*2;
-        body.theta.setZero(); // TODO: do something more interesting!
+        body.theta.setIdentity(); // TODO: do something more interesting!
+        body.theta.rotZ(rand.nextDouble());
         body.omega.x = (2*rand.nextDouble() - 1) * angularVelocityScale.getValue();
         body.omega.y = (2*rand.nextDouble() - 1) * angularVelocityScale.getValue();
         body.omega.z = (2*rand.nextDouble() - 1) * angularVelocityScale.getValue();

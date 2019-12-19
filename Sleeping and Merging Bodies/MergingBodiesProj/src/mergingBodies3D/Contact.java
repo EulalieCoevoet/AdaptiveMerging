@@ -3,8 +3,8 @@ package mergingBodies3D;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 /**
  * Implementation of a contact constraint.
@@ -25,10 +25,10 @@ public class Contact {
     RigidBody body2;
     
     /** Contact normal in world coordinates */
-    Vector2d normal = new Vector2d();
+    Vector3d normal = new Vector3d();
     
     /** Position of contact point in world coordinates */
-    Point2d contactW = new Point2d();
+    Point3d contactW = new Point3d();
     
     /**
      * Creates a new contact, and assigns it an index
@@ -37,7 +37,7 @@ public class Contact {
      * @param contactW
      * @param normal
      */
-    public Contact( RigidBody body1, RigidBody body2, Point2d contactW, Vector2d normal ) {
+    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal ) {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW );
