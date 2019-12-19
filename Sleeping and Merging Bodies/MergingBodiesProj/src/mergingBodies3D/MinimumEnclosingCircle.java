@@ -19,8 +19,8 @@ package mergingBodies3D;
 
 import java.util.Collection;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 /**
  * Algorithm for computing Minimum Enclosing Circle using Welzl's algorithm based on Sunshine's implementation (www.sunshine2k.de)
@@ -28,9 +28,9 @@ import javax.vecmath.Vector2d;
  */
 public class MinimumEnclosingCircle {
     
-    private Point2d[] points;
+    private Point3d[] points;
     
-    private Point2d[] boundary = new Point2d[3];
+    private Point3d[] boundary = new Point3d[3];
         
     /**
      * Container for a circle
@@ -40,7 +40,7 @@ public class MinimumEnclosingCircle {
         /** radius */
         public double radius;
         /** centre */
-        public Point2d centre = new Point2d();
+        public Point3d centre = new Point3d();
         /** empty constructor */
         public Circle() { /* do nothing */ }
         /** 
@@ -48,7 +48,7 @@ public class MinimumEnclosingCircle {
          * @param radius 
          * @param centre 
          */
-        public Circle(double radius, Point2d centre ) {
+        public Circle(double radius, Point3d centre ) {
             this.radius = radius;
             this.centre.set( centre );
         }
@@ -56,7 +56,7 @@ public class MinimumEnclosingCircle {
          * @param p query point
          * @return true if point is in the circle
          */
-        public boolean isInCircle( Point2d p ) {
+        public boolean isInCircle( Point3d p ) {
             return ( p.distanceSquared( centre ) <= radius * radius );
         }
     }
@@ -68,19 +68,19 @@ public class MinimumEnclosingCircle {
      * Creates a local copy of the collection of points 
      * @param points 
      */
-    public MinimumEnclosingCircle( Collection<Point2d> points ) {
+    public MinimumEnclosingCircle( Collection<Point3d> points ) {
         try {
             int count = 0;
-            this.points = new Point2d[points.size()];
-            for ( Point2d p : points ) {
+            this.points = new Point3d[points.size()];
+            for ( Point3d p : points ) {
                 this.points[count++] = p;            
             }
             calcMec();
         } catch ( StackOverflowError e ) {
             System.err.println("Welzl algo blowing the stack away (" + points.size() + " points), so building conservative AABB instead.");
-            Point2d min = new Point2d(Double.MAX_VALUE, Double.MAX_VALUE);
-            Point2d max = new Point2d(Double.MIN_VALUE, Double.MIN_VALUE);
-            for ( Point2d p : points ) {
+            Point3d min = new Point3d(Double.MAX_VALUE, Double.MAX_VALUE);
+            Point3d max = new Point3d(Double.MIN_VALUE, Double.MIN_VALUE);
+            for ( Point3d p : points ) {
                 min.x = Math.min( p.x, min.x );
                 min.y = Math.min( p.y, min.y );
                 max.x = Math.max( p.x, max.x );
@@ -88,7 +88,7 @@ public class MinimumEnclosingCircle {
             }            
             answer = new Circle();
             answer.centre.interpolate( max, min, 0.5);
-            Vector2d tmp = new Vector2d();
+            Vector3d tmp = new Vector3d();
             tmp.sub( max, min );
             answer.radius = 0.5 * Math.max( tmp.x, tmp.y ) * Math.sqrt(2);
         }
@@ -101,7 +101,7 @@ public class MinimumEnclosingCircle {
         if (points.length == 0) return;        
         // random permutation of point set (perhaps unnecessary?)
         int pos;
-        Point2d temp;
+        Point3d temp;
         for (int i = 0; i < points.length; i++) {
             pos = (int)(Math.random() * points.length);
             temp = points[i];
@@ -147,7 +147,7 @@ public class MinimumEnclosingCircle {
      * @param p3 
      * @return The circle enclosing the three points.
      */
-    public Circle calcCircle3(Point2d p1, Point2d p2, Point2d p3) {
+    public Circle calcCircle3(Point3d p1, Point3d p2, Point3d p3) {
         double a = p2.x - p1.x;
         double b = p2.y - p1.y;     
         double c = p3.x - p1.x;
@@ -181,7 +181,7 @@ public class MinimumEnclosingCircle {
      * @param p2 
      * @return The circle enclosing the two points
      */
-    public Circle calcCircle2(Point2d p1, Point2d p2) {
+    public Circle calcCircle2(Point3d p1, Point3d p2) {
         Circle circle = new Circle();
         circle.centre.x = 0.5*(p1.x + p2.x);
         circle.centre.y = 0.5*(p1.y + p2.y);

@@ -10,7 +10,7 @@ import java.util.Collection;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
-import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
 
 /**
  * Circular disc for collision processing
@@ -18,11 +18,11 @@ import javax.vecmath.Point2d;
  */
 public class Disc {
 
-    /** centre of disc in body coordinates */
-    Point2d cB = new Point2d();
+    /** center of disc in body coordinates */
+    Point3d cB = new Point3d();
     
-    /** centre of disc in world coordinates */
-    Point2d cW = new Point2d();
+    /** center of disc in world coordinates */
+    Point3d cW = new Point3d();
     
     /** radius */
     double r;
@@ -38,9 +38,9 @@ public class Disc {
     public Disc( Collection<Block> blocks, RigidBody body ) {
         this.body = body;
         // We'll choose the minimum disc enclosing the centers and then add the block radius
-        ArrayList<Point2d> points = new ArrayList<Point2d>();
+        ArrayList<Point3d> points = new ArrayList<Point3d>();
         for ( Block b : blocks ) {
-            points.add( new Point2d( b.pB.x, b.pB.y ) );            
+            points.add( new Point3d( b.pB.x, b.pB.y, b.pB.z ) );            
         }
         MinimumEnclosingCircle mec = new MinimumEnclosingCircle( points );
         cB.set( mec.answer.centre );
@@ -85,7 +85,7 @@ public class Disc {
         body.transformB2W.transform(cB, cW);
         GL2 gl = drawable.getGL().getGL2();
         gl.glPushMatrix();
-        gl.glTranslated( cW.x, cW.y , 0 );
+        gl.glTranslated( cW.x, cW.y ,cW.z );
         gl.glScaled( r, r, r );
         gl.glColor4f(0.5f,0.0f,0.0f,0.5f);
         gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );     
@@ -99,7 +99,7 @@ public class Disc {
      * @param pW query point in world coordinates
      * @return true if point is in the disc
      */
-    public boolean isInDisc( Point2d pW ) {
+    public boolean isInDisc( Point3d pW ) {
         body.transformB2W.transform(cB, cW);
         return ( pW.distanceSquared( cW ) < r*r );
     }

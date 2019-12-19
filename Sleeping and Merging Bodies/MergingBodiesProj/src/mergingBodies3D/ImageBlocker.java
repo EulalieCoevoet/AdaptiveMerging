@@ -92,12 +92,12 @@ public class ImageBlocker {
             y = p.y;
             getColour( colour, x, y );
             if ( isWhite(colour) ) continue;
-            Block b = new Block( y, x, colour );
+            Block b = new Block( y, x, 0, colour );
             blocks.add( b );
             if ( isBoundary( x, y ) ) {
                 boundaryBlocks.add( b );                
             }
-            // search our 8 neighbours for connected components
+            // search our 8 neighbors for connected components
             for ( int i = -1; i < 2; i++ ) {
                 for ( int j = -1; j < 2; j++ ) {
                     if ( x+i >= 0 && x+i < width && y+j >= 0 && y+j < height && ! visited[x+i][y+j] ) {
@@ -111,26 +111,26 @@ public class ImageBlocker {
     
     /**
      * Checks if this block is on the boundary.  
-     * Boundary blocks have at least one white neighbour. 
+     * Boundary blocks have at least one white neighbor. 
      * @param x
      * @param y
      * @return true if on boundary of a rigid body
      */
     private boolean isBoundary( int x, int y ) {
         if ( x == 0 || x == width-1 || y == 0 || y == height - 1 ) return true;
-        Color3f colour = new Color3f();
+        Color3f color = new Color3f();
         for ( int i = -1; i < 2; i++ ) {
             for ( int j = -1; j < 2; j++ ) {
                 if ( i==j ) continue;
-                getColour( colour, x+i, y+j );
-                if ( isWhite(colour) ) return true;
+                getColour( color, x+i, y+j );
+                if ( isWhite(color) ) return true;
             }
         }   
         return false;
     }
     
     /** 
-     * Gets the colour of the specified pixel
+     * Gets the color of the specified pixel
      * @param x
      * @param y
      */
@@ -145,12 +145,12 @@ public class ImageBlocker {
     private float epsilon = 0;
     
     /**
-     * @param colour
-     * @return true if the colour provided is white
+     * @param color
+     * @return true if the color provided is white
      */
-    private boolean isWhite( Color3f colour ) {
+    private boolean isWhite( Color3f color ) {
         final Color3f white = new Color3f(1,1,1);
-        return colour.epsilonEquals(white, epsilon );
+        return color.epsilonEquals(white, epsilon );
     }
     
 }
