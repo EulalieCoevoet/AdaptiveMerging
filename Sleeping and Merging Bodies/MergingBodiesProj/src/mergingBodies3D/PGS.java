@@ -112,6 +112,16 @@ public class PGS {
 				Arow = contact.lambda.get(0)*contact.D.get(1,0)+ contact.lambda.get(1)*contact.D.get(1,1)+ contact.lambda.get(2)*contact.D.get(1,2);
 				contact.lambda.set(1, (Arow - contact.bt1 - Jdvt1)/(contact.D.get(1,1)+compliance));
 				
+				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
+				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
+					contact.lambda.set(1, Math.max(contact.lambda.get(1), -mu*contact.lambda.get(0)));
+					contact.lambda.set(1, Math.min(contact.lambda.get(1), mu*contact.lambda.get(0)));
+				}
+				
+				l.zero();
+				l.set(1, contact.lambda.get(1) - prevLambda_t1);
+				updateDeltaV(contact, l);
+				
 				// Tangential2 direction
 				double Jdvt2 = contact.getJdv(computeInCollection,2);
 				double prevLambda_t2 = contact.lambda.get(2);
@@ -121,20 +131,9 @@ public class PGS {
 				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
 					contact.lambda.set(2, Math.max(contact.lambda.get(2), -mu*contact.lambda.get(0)));
-					contact.lambda.set(2, Math.min(contact.lambda.get(2),  mu*contact.lambda.get(0)));
+					contact.lambda.set(2, Math.min(contact.lambda.get(2), mu*contact.lambda.get(0)));
 				}
-				
-				double norm = Math.sqrt(contact.lambda.get(1)*contact.lambda.get(1) + contact.lambda.get(2)*contact.lambda.get(2));
-			    if(norm > mu*contact.lambda.get(0))
-			    {
-			        contact.lambda.set(1, contact.lambda.get(1)* mu*contact.lambda.get(0)/norm);
-			        contact.lambda.set(2, contact.lambda.get(2)* mu*contact.lambda.get(0)/norm);
-			    }
-				
-				l.zero();
-				l.set(1, contact.lambda.get(1) - prevLambda_t1);
-				updateDeltaV(contact, l);
-				
+
 				l.zero();
 				l.set(2, contact.lambda.get(2) - prevLambda_t2);
 				updateDeltaV(contact, l);
