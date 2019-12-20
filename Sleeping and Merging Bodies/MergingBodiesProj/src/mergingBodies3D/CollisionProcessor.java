@@ -77,16 +77,6 @@ public class CollisionProcessor {
                 
         if (contacts.isEmpty())
 			lastTimeStepMap.clear();
-        
-        if ( contacts.size() > 0  && doLCP.getValue() ) {
-            now = System.nanoTime();
-
-            double bounce = restitution.getValue();
-            double mu = friction.getValue();
-            // TODO: Compute velocity update with iterative solve of contact constraint matrix.
-
-            collisionSolveTime = (System.nanoTime() - now) * 1e-9;
-        }
     }
     
 	/**
@@ -123,11 +113,62 @@ public class CollisionProcessor {
 	
 	protected void updateContactsMap() {
 		lastTimeStepMap.clear();
-//		for (Contact contact : contacts) {
-//			Block block1 = contact.block1;
-//			Block block2 = contact.block2;
-//			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
-//		} 
+		for (Contact contact : contacts) {
+			Block block1 = contact.block1;
+			Block block2 = contact.block2;
+			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
+		} 
+	}
+	
+	/**
+	 * Fills lambdas with values from previous time step
+	 */
+	protected void warmStart() {
+		for (Contact contact : contacts) {
+			Contact oldContact = getOldContact(contact);
+			if(oldContact != null) { 
+				contact.lambda.set(oldContact.lambda);
+				contact.prevConstraintViolation = oldContact.constraintViolation;
+				contact.newThisTimeStep = false;
+			} else {
+				contact.newThisTimeStep = true;
+			}
+		}
+	}
+	
+	/**
+	 * Checks if lastTimeStepMap (contact map of last time step) contains a similar contact and returns the corresponding contact. 
+	 * @param contact
+	 * @return oldContact
+	 */
+	protected Contact getOldContact(Contact contact) {
+		
+		Contact oldContact;
+		
+		Block block1 = contact.block1;
+		Block block2 = contact.block2;
+
+		if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))
+				|| lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
+
+			RigidBody body1 = contact.body1;//(contact.body1.isInCollection())? contact.body1.parent: contact.body1;
+			RigidBody body2 = contact.body2;// (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+
+			// if the old map contains this key, then get the lambda of the old map
+			oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
+			if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
+				oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
+			
+			RigidBody oldBody1 = oldContact.body1;//(oldContact.body1.isInCollection())? oldContact.body1.parent: oldContact.body1;
+			RigidBody oldBody2 = oldContact.body2;//(oldContact.body2.isInCollection())? oldContact.body2.parent: oldContact.body2;
+			
+			if ((oldBody1 != body1 && oldBody1 != body2) || (oldBody2 != body2 && oldBody2 != body1)) 
+				return null;
+		}
+		else
+			return null;
+		
+		return oldContact;
 	}
 	
 	/**
@@ -275,7 +316,7 @@ public class CollisionProcessor {
             normal.sub( tmp2, tmp1 );
             normal.normalize();
             // create the contact
-            Contact contact = new Contact( body1, body2, contactW, normal, 0.);
+            Contact contact = new Contact( body1, body2, contactW, normal, b1, b2, distance - Block.radius * 2);
             // simple option... add to contact list...
             contacts.add( contact );
             if ( ! doLCP.getValue() ) {
@@ -329,13 +370,13 @@ public class CollisionProcessor {
     public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
     
     /** Coulomb friction coefficient for contact constraint */
-    public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.33, 0, 2 );
+    public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.8, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
-    public IntParameter iterations = new IntParameter("iterations for GS solve", 10, 1, 500);
+    public IntParameter iterations = new IntParameter("iterations for PGS solve", 200, 1, 500);
     
     /** Flag for switching between penalty based contact and contact constraints */
-    private BooleanParameter doLCP = new BooleanParameter( "do LCP solve", false );
+    public BooleanParameter doLCP = new BooleanParameter( "do LCP solve", false );
     
     /** Flag for enabling the use of hierarchical collision detection for body pairs */
     private BooleanParameter useBVTree = new BooleanParameter( "use BVTree", false );

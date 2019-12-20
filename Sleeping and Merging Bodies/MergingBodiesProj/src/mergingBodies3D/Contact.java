@@ -29,6 +29,10 @@ public class Contact {
     /** Second RigidBody in contact */
     RigidBody body2;
     
+	//The two blocks within the bodies that caused the collision
+	Block block1;
+	Block block2;
+    
     /** Contact normal in body1 coordinates */
     Vector3d normalB = new Vector3d();
     
@@ -88,10 +92,12 @@ public class Contact {
      * @param contactW
      * @param normal
      */
-    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, double constraintViolation ) {
+    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, Block b1, Block b2, double constraintViolation ) {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW ); 
+		block1 = b1;
+		block2 = b2;
 		this.constraintViolation =  constraintViolation;     
         index = nextContactIndex++;     
         
@@ -113,10 +119,11 @@ public class Contact {
     }
     
 	public Contact(Contact contact) {		
-		this.body1 = contact.body1;	
-		this.body2 = contact.body2;	
-		this.normalB.set(contact.normalB);   	
-		normalB.set(contact.normalB);	
+		body1 = contact.body1;	
+		body2 = contact.body2;	
+		normalB.set(contact.normalB);   	
+		tangent1B.set(contact.tangent1B);   	
+		tangent2B.set(contact.tangent2B);	
 		contactW.set(contact.contactW);	
 		contactB.set(contact.contactB);	
 		j.set(contact.j);	
@@ -172,9 +179,9 @@ public class Contact {
 		j.set(0, 7, normal.y);
 		j.set(0, 8, normal.z);
 		
-		j.set(0, 9, -rn2.x);
-		j.set(0, 10, -rn2.y);
-		j.set(0, 11, -rn2.z);
+		j.set(0, 9, rn2.x);
+		j.set(0, 10, rn2.y);
+		j.set(0, 11, rn2.z);
 		
 		// Tangential direction for both bodies
 		Vector3d rt1 = new Vector3d();
@@ -196,9 +203,9 @@ public class Contact {
 		j.set(1, 7, tangent1.y);
 		j.set(1, 8, tangent1.z);
 		
-		j.set(1, 9, -rt2.x);
-		j.set(1, 10, -rt2.y);
-		j.set(1, 11, -rt2.z);
+		j.set(1, 9, rt2.x);
+		j.set(1, 10, rt2.y);
+		j.set(1, 11, rt2.z);
 		
 		rt1.cross(r1, tangent2);
 		rt2.cross(r2, tangent2);
@@ -217,9 +224,9 @@ public class Contact {
 		j.set(2, 7, tangent2.y);
 		j.set(2, 8, tangent2.z);
 		
-		j.set(2, 9, -rt2.x);
-		j.set(2, 10, -rt2.y);
-		j.set(2, 11, -rt2.z);
+		j.set(2, 9, rt2.x);
+		j.set(2, 10, rt2.y);
+		j.set(2, 11, rt2.z);
 	}
 	
 	/**
@@ -368,7 +375,6 @@ public class Contact {
 			for (int l=0; l>6; l++)
 				j.set(k, 6+l, j2.get(k, l));
 		
-
 		DenseMatrix MinvJT = new DenseMatrix(12,3);
 		Minv.transBmult(j, MinvJT);
 		j.mult(MinvJT, D);
