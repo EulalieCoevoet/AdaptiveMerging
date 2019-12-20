@@ -37,7 +37,10 @@ public class RigidBody {
     /** accumulator for torques acting on this body */
     Vector3d torque = new Vector3d();
     
-    Matrix3d massAngular = new Matrix3d();
+    /** rotational inertia in rest pose with rotation equal to identity */
+    private Matrix3d massAngular0 = new Matrix3d();
+    /** rotational inertia in the current pose */
+    private Matrix3d massAngular = new Matrix3d();
     
     double massLinear;
         
@@ -75,8 +78,10 @@ public class RigidBody {
     /** inverse of the linear mass, or zero if pinned */
     double minv;
     
-    /** inverse of the angular mass, or zero if pinned */
+    /** inverse of the angular mass, or zero if pinned, for current pose */
     Matrix3d jinv = new Matrix3d();
+    /** inverse of the angular mass, or zero if pinned, for REST pose */
+    Matrix3d jinv0 = new Matrix3d();
     
 	/** bounding box, in the body frame */
 	public ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>(); 
@@ -150,21 +155,48 @@ public class RigidBody {
 		boundingBoxB.add(new Point3d(bbminB.x,bbmaxB.y,bbminB.z));
 		boundingBoxB.add(new Point3d(bbminB.x,bbminB.y,bbmaxB.z));
         
-        // compute the rotational inertia
-        double l=bbmaxB.x-bbminB.x; 
-        double w=bbmaxB.y-bbminB.y;  
-        double h=bbmaxB.z-bbminB.z; 
-        massAngular.setZero();
-        massAngular.m00 = massLinear/12.*(w*w+h*h);
-        massAngular.m11 = massLinear/12.*(l*l+h*h);
-        massAngular.m22 = massLinear/12.*(w*w+l*l);
+//        // Approximate computation of the rotational inertia
+//        double l=bbmaxB.x-bbminB.x; 
+//        double w=bbmaxB.y-bbminB.y;  
+//        double h=bbmaxB.z-bbminB.z; 
+//        massAngular0.setZero();
+//        massAngular0.m00 = massLinear/12.*(w*w+h*h);
+//        massAngular0.m11 = massLinear/12.*(l*l+h*h);
+//        massAngular0.m22 = massLinear/12.*(w*w+l*l);
         
         // prevent zero angular inertia in the case of a single block
-//        if ( blocks.size() == 1 ) {
-//            Block b = blocks.get(0);
-//            double mass = b.getColourMass();
-//            massAngular = mass * (1+1)/12;
-//        }
+        if ( blocks.size() == 1 ) {
+            Block b = blocks.get(0);
+            double mass = b.getColourMass();
+            massAngular0.m00 = mass * (1+1)/12;
+            massAngular0.m11 = mass * (1+1)/12;
+            massAngular0.m22 = mass * (1+1)/12;
+        } else {
+        	// always prevent a zero angular inertia in 
+        	// whatever the smallest axis, if this is a
+        	// single row or column of blocks...
+        	massAngular0.m00 = (1+1)/12.0;
+            massAngular0.m11 = (1+1)/12.0;
+            massAngular0.m22 = (1+1)/12.0;
+        	for ( Block b : blocks ) {
+                double mass = b.getColourMass();
+        		double x = b.pB.x;
+        		double y = b.pB.y;
+        		double z = b.pB.z;
+           		massAngular0.m00 += mass * ( y*y + z*z );
+        		massAngular0.m11 += mass * ( x*x + z*z );
+        		massAngular0.m22 += mass * ( x*x + y*y );        	
+        		massAngular0.m01 += mass * x*y;
+        		massAngular0.m10 += mass * x*y;        		
+        		massAngular0.m02 += mass * x*z;
+        		massAngular0.m20 += mass * x*z;        		
+        		massAngular0.m12 += mass * y*z;
+        		massAngular0.m21 += mass * y*z;
+        	}
+	    }
+        jinv0.invert(massAngular0);
+        massAngular.set( massAngular );
+        jinv.set( jinv0 );
              
         root = new BVNode( boundaryBlocks, this );
         
@@ -175,7 +207,7 @@ public class RigidBody {
             jinv.setZero();
         } else {
             minv = 1/massLinear;
-            jinv.invert(massAngular);
+            jinv.invert(massAngular0);
         }
     }
     
@@ -187,7 +219,7 @@ public class RigidBody {
         blocks = body.blocks;
         boundaryBlocks = body.boundaryBlocks;
         massLinear = body.massLinear;
-        massAngular = body.massAngular;
+        massAngular0 = body.massAngular0;
         x0.set( body.x0 );
         x.set( body.x );
         theta = body.theta;
@@ -210,8 +242,17 @@ public class RigidBody {
         transformB2W.set( theta, x );
         transformW2B.set( theta, x );
         transformW2B.invert();
+        // might be done more often than necessary, but need to have 
+        // rotational inertia updated give we are storing information in a 
+        // world aligned frame
+        if ( ! pinned ) {
+	        jinv.mul( theta, jinv0 );
+	        Matrix3d RT = new Matrix3d();
+	        RT.transpose(theta);
+	        jinv.mul( RT );
+	        massAngular.invert(jinv); // otherwise could compute by composition.
+        } 
     }
-    
     
     /**
      * Apply a contact force specified in world coordinates
@@ -220,9 +261,25 @@ public class RigidBody {
      */
     public void applyContactForceW( Point3d contactPointW, Vector3d contactForceW ) {
         force.add( contactForceW );
-        // TODO: Compute the torque applied to the body 
-        
-        
+        Vector3d r = new Vector3d();
+        r.sub( contactPointW, x );
+        Vector3d torqueW = new Vector3d();
+        torqueW.cross( r,  contactForceW );
+        torque.add( torqueW );
+    }
+    
+    /**
+     * Adds to the torque a corriolis term (J omega) * omegacross
+     * TODO: Check that this is correct!! And make more efficient?
+     */
+    public void applyCoriollisTorque() {
+    	if ( !pinned ) {
+	    	Vector3d tmp = new Vector3d();
+	    	Vector3d tmp2 = new Vector3d();
+	    	massAngular.transform( omega, tmp );
+	    	tmp2.cross( tmp, omega );
+	    	torque.add(tmp2);
+    	}
     }
     
     /**
@@ -232,20 +289,69 @@ public class RigidBody {
      * @param dt step size
      */
     public void advanceTime( double dt ) {
-        if ( !pinned ) {            
-            // TODO: use torques to advance the angular state of the rigid body
-            
-            v.x += 1.0 / massLinear * force.x * dt;
-            v.y += 1.0 / massLinear * force.y * dt;
-            v.z += 1.0 / massLinear * force.z * dt;
+        if ( !pinned ) {
+        	Vector3d domega = new Vector3d();
+            jinv.transform( torque, domega );
+            domega.scale( dt );
+            omega.add( domega );
+
+            double t = omega.length()*dt;
+            domega.set(omega);
+            domega.normalize();
+            if ( t > 1e-8 ) {
+                Matrix3d dR = new Matrix3d();
+            	expRodrigues(dR, domega, t);
+            	dR.mul( theta );                
+            	theta.normalizeCP( dR ); // keep it clean!
+            }
+                        
+            v.x += minv * force.x * dt;
+            v.y += minv * force.y * dt;
+            v.z += minv * force.z * dt;
+
             x.x += v.x * dt;
             x.y += v.y * dt;
             x.z += v.z * dt;
+            
             updateTransformations();
         }        
         force.set(0,0,0);
         torque.set(0,0,0);
     }
+    
+	/**
+	 * Given normalized R^3 vector of rotation w, we compute exp([w]t) using
+	 * Rodrigues' formula:
+	 * 
+	 * exp([w]t) = I + [w] sin(t) + [w](1-cos(t)).
+	 * 
+	 * @param R :=
+	 *            exp([w]t)
+	 * @param w
+	 *            Normalized 3D vector.
+	 * @param t
+	 *            Step size (in radians).
+	 */
+	private static void expRodrigues(Matrix3d R, Vector3d w, double t) {
+		double wX = w.x;
+		double wY = w.y;
+		double wZ = w.z;
+		double c = Math.cos(t);
+		double s = Math.sin(t);
+		double c1 = 1 - c;
+
+		R.m00 = c + wX * wX * c1;
+		R.m10 = wZ * s + wX * wY * c1;
+		R.m20 = -wY * s + wX * wZ * c1;
+
+		R.m01 = -wZ * s + wX * wY * c1;
+		R.m11 = c + wY * wY * c1;
+		R.m21 = wX * s + wY * wZ * c1;
+
+		R.m02 = wY * s + wX * wZ * c1;
+		R.m12 = -wX * s + wY * wZ * c1;
+		R.m22 = c + wZ * wZ * c1;
+	}
     
     /**
      * Computes the total kinetic energy of the body.
@@ -253,7 +359,7 @@ public class RigidBody {
      */
     public double getKineticEnergy() {
     	Vector3d result = new Vector3d();
-    	massAngular.transform(omega,result);
+    	massAngular0.transform(omega,result);
         return 0.5 * massLinear * v.lengthSquared() + 0.5 * result.dot( omega ); 
     }
     
