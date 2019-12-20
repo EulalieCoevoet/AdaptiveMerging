@@ -221,10 +221,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         fa.draw(gl);
         gl.glPopMatrix();
     }
-
-    private void drawNonShadowable( GLAutoDrawable drawable ) {
-        // perhaps want to do something here? 
-    }
     
     /**
      * Selects the skeleton ODE body at the given mouse point

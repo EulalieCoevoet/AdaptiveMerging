@@ -3,14 +3,13 @@ package mergingBodies3D;
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
+
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;

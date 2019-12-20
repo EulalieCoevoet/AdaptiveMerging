@@ -3,13 +3,10 @@ package mergingBodies3D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
