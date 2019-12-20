@@ -71,7 +71,7 @@ public class PGS {
 
 		for (Contact contact: contacts) {
 			contact.computeB(dt, feedbackStiffness, computeInCollection);
-			contact.computeJMinvJtDiagonal(computeInCollection);
+			contact.computeJMinvJt(computeInCollection);
 		}
 
 		DenseVector l = new DenseVector(3);
@@ -85,7 +85,8 @@ public class PGS {
 				// Normal direction
 				double Jdvn = contact.getJdvn(computeInCollection);
 				double prevLambda_n = contact.lambda.get(0);
-				contact.lambda.set(0, (contact.lambda.get(0)*contact.diin - contact.bn - Jdvn)/(contact.diin+compliance));
+				double Arow = contact.lambda.get(0)*contact.D.get(0,0)+ contact.lambda.get(1)*contact.D.get(0,1)+ contact.lambda.get(2)*contact.D.get(0,2);
+				contact.lambda.set(0, (Arow - contact.bn - Jdvn)/(contact.D.get(0,0)+compliance));
 				
 				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active				
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) 
@@ -109,12 +110,14 @@ public class PGS {
 				// Tangential1 direction
 				double Jdvt1 = contact.getJdvt(computeInCollection);
 				double prevLambda_t1 = contact.lambda.get(1);
-				contact.lambda.set(1, (contact.lambda.get(1)*contact.diit - contact.bt - Jdvt1)/(contact.diit+compliance));
+				Arow = contact.lambda.get(0)*contact.D.get(1,0)+ contact.lambda.get(1)*contact.D.get(1,1)+ contact.lambda.get(2)*contact.D.get(1,2);
+				contact.lambda.set(1, (Arow - contact.bt1 - Jdvt1)/(contact.D.get(1,1)+compliance));
 				
 				// Tangential2 direction
 				double Jdvt2 = contact.getJdvt(computeInCollection);
 				double prevLambda_t2 = contact.lambda.get(2);
-				contact.lambda.set(2, (contact.lambda.get(2)*contact.diit - contact.bt - Jdvt2)/(contact.diit+compliance));
+				Arow = contact.lambda.get(0)*contact.D.get(2,0)+ contact.lambda.get(1)*contact.D.get(2,1)+ contact.lambda.get(2)*contact.D.get(2,2);
+				contact.lambda.set(2, (Arow - contact.bt2 - Jdvt2)/(contact.D.get(2,2)+compliance));
 				
 				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {

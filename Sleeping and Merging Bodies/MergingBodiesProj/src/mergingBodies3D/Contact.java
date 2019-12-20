@@ -75,6 +75,12 @@ public class Contact {
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent1, tangent2) */
 	DenseVector lambda = new DenseVector(3);
 	
+	// Values used in PGS resolution
+	double bn = 0; /** b value for normal component */
+	double bt1 = 0; /** b value for tangent1 component */
+	double bt2 = 0; /** b value for tangent2 component */
+	DenseMatrix D = new DenseMatrix(3,3); 
+	
     /**
      * Creates a new contact, and assigns it an index
      * @param body1
@@ -257,48 +263,65 @@ public class Contact {
 	 */
 	public void computeB(double dt, double feedbackStiffness,  boolean computeInCollection) {
 		
-//		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection)? body1.parent: body1;
-//		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection)? body2.parent: body2;
-//
-//		double m1inv = b1.minv;//(b1.temporarilyPinned)? 0: b1.minv; 
-//		double m2inv = b2.minv;//(b2.temporarilyPinned)? 0: b2.minv;
-//		Matrix3d j1inv = b1.jinv;//(b1.temporarilyPinned)? 0: b1.jinv;
-//		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
-//		
-//		// add the Bounce vector to the u's over here, but don't need to do that just yet
-//		double restitution = 0.;
-//		if (!computeInCollection) {
-//			restitution=(body1.restitution+body2.restitution)/2.;
-//		}
-//		
-//		DenseMatrix j;
-//		
-//		j = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;
-//		double u1xn =     (b1.v.x + b1.force.x * m1inv * dt) * j.get(0);
-//		double u1yn =     (b1.v.y + b1.force.y * m1inv * dt) * j.get(1);
-//		double u1omegan = (b1.omega + b1.torque * j1inv * dt) * j.get(2);
-//		double bBounce = restitution*(b1.v.x*j.get(0) + b1.v.y*j.get(1) + b1.omega*j.get(2));
-//
-//		double u1xt =     (b1.v.x + b1.force.x * m1inv * dt) * j.get(0);
-//		double u1yt =     (b1.v.y + b1.force.y * m1inv * dt) * j.get(1);
-//		double u1omegat = (b1.omega + b1.torque * j1inv * dt) * j.get(2);
-//
-//		j = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;
-//		double u2xn =     (b2.v.x + b2.force.x * m2inv * dt) * j.get(3);
-//		double u2yn =     (b2.v.y + b2.force.y * m2inv * dt) * j.get(4);
-//		double u2omegan = (b2.omega + b2.torque * j2inv * dt) * j.get(5);
-//		bBounce += restitution*(b2.v.x*j.get(3) + b2.v.y*j.get(4) + b2.omega*j.get(5));
-//
-//		double u2xt =     (b2.v.x + b2.force.x * m2inv * dt) * j.get(3);
-//		double u2yt =     (b2.v.y + b2.force.y * m2inv * dt) * j.get(4);
-//		double u2omegat = (b2.omega + b2.torque * j2inv * dt) * j.get(5);
-//
-//		// calculate Baumgarte Feedback (overlap of the two bodies)
-//		double baumgarteFeedback = feedbackStiffness*constraintViolation;
-//		
-//		// putting b together.
-//		bn = u1xn + u2xn + u1yn + u2yn + u1omegan + u2omegan + bBounce + baumgarteFeedback;
-//		bt = u1xt + u2xt + u1yt + u2yt + u1omegat + u2omegat;
+		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection)? body1.parent: body1;
+		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection)? body2.parent: body2;
+
+		double m1inv = b1.minv;//(b1.temporarilyPinned)? 0: b1.minv; 
+		double m2inv = b2.minv;//(b2.temporarilyPinned)? 0: b2.minv;
+		Matrix3d j1inv = b1.jinv;//(b1.temporarilyPinned)? 0: b1.jinv;
+		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
+		
+		// add the Bounce vector to the u's over here, but don't need to do that just yet
+		double restitution = 0.;
+		if (!computeInCollection) {
+			restitution=(body1.restitution+body2.restitution)/2.;
+		}
+		
+		DenseMatrix j;
+		Vector3d u = new Vector3d();
+		bn = 0; bt1 = 0; bt2 = 0;
+		
+		j = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;		
+		u.add(b1.v, b1.force);
+		u.scale(m1inv*dt);
+		bn += u.x*j.get(0,0) + u.y*j.get(0,1) + u.z*j.get(0,2);
+		bt1 += u.x*j.get(1,0) + u.y*j.get(1,1) + u.z*j.get(1,2);
+		bt2 += u.x*j.get(2,0) + u.y*j.get(2,1) + u.z*j.get(2,2);
+		u.set(b1.torque.x*j1inv.m00+b1.torque.y*j1inv.m01+b1.torque.z*j1inv.m02,
+			b1.torque.x*j1inv.m10+b1.torque.y*j1inv.m11+b1.torque.z*j1inv.m12,
+			b1.torque.x*j1inv.m20+b1.torque.y*j1inv.m21+b1.torque.z*j1inv.m22);
+		u.add(b1.v);
+		bn += u.x*j.get(0,3) + u.y*j.get(0,4) + u.z*j.get(0,5);
+		bt1 += u.x*j.get(1,3) + u.y*j.get(1,4) + u.z*j.get(1,5);
+		bt2 += u.x*j.get(2,3) + u.y*j.get(2,4) + u.z*j.get(2,5);
+		
+		double bBounce = (b1.v.x*j.get(0,0) + b1.v.y*j.get(0,1) + b1.v.z*j.get(0,2));
+		bBounce += (b1.omega.x*j.get(0,3) + b1.omega.y*j.get(0,4) + b1.omega.z*j.get(0,5));
+		bBounce *= restitution;
+		bn += bBounce;
+		
+		j = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;
+		u.add(b2.v, b2.force);
+		u.scale(m2inv*dt);		
+		bn += u.x*j.get(0,6) + u.y*j.get(0,7) + u.z*j.get(0,8);
+		bt1 += u.x*j.get(1,6) + u.y*j.get(1,7) + u.z*j.get(1,8);
+		bt2 += u.x*j.get(2,6) + u.y*j.get(2,7) + u.z*j.get(2,8);
+		u.set(b2.torque.x*j2inv.m00+b2.torque.y*j2inv.m01+b2.torque.z*j2inv.m02,
+			b2.torque.x*j2inv.m10+b2.torque.y*j2inv.m11+b2.torque.z*j2inv.m12,
+			b2.torque.x*j2inv.m20+b2.torque.y*j2inv.m21+b2.torque.z*j2inv.m22);
+		u.add(b2.v);
+		bn += u.x*j.get(0,9) + u.y*j.get(0,10) + u.z*j.get(0,11);
+		bt1 += u.x*j.get(1,9) + u.y*j.get(1,10) + u.z*j.get(1,11);
+		bt2 += u.x*j.get(2,9) + u.y*j.get(2,10) + u.z*j.get(2,11);
+
+		bBounce = (b2.v.x*j.get(0,6) + b2.v.y*j.get(0,7) + b2.v.z*j.get(0,8));
+		bBounce += (b2.omega.x*j.get(0,9) + b2.omega.y*j.get(0,10) + b2.omega.z*j.get(0,11));
+		bBounce *= restitution;
+		bn += bBounce;
+		
+		// calculate Baumgarte Feedback (overlap of the two bodies)
+		double baumgarteFeedback = feedbackStiffness*constraintViolation;
+		bn += baumgarteFeedback;
 	}
 	
 	/**
@@ -306,39 +329,49 @@ public class Contact {
 	 * @param computeInCollection
 	 * @param compliance 
 	 */
-	public void computeJMinvJtDiagonal(boolean computeInCollection) {
+	public void computeJMinvJt(boolean computeInCollection) {
 		
-//		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
-//		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
-//		
-//		double m1inv = (b1.temporarilyPinned)? 0: b1.minv; 
-//		double m2inv = (b2.temporarilyPinned)? 0: b2.minv;
-//		double j1inv = (b1.temporarilyPinned)? 0: b1.jinv;
-//		double j2inv = (b2.temporarilyPinned)? 0: b2.jinv;
-//		
-//		DenseVector jn;
-//		DenseVector jt;
-//		
-//		diin = 0.;
-//		diit = 0.;
-//		
-//		jn = (b1 instanceof RigidCollection)? this.jnc: this.jn;
-//		jt = (b1 instanceof RigidCollection)? this.jtc: this.jt;
-//		diin += jn.get(0) * m1inv * jn.get(0);
-//		diin += jn.get(1) * m1inv * jn.get(1);
-//		diin += jn.get(2) * j1inv * jn.get(2);
-//		diit += jt.get(0) * m1inv * jt.get(0);
-//		diit += jt.get(1) * m1inv * jt.get(1);
-//		diit += jt.get(2) * j1inv * jt.get(2);
-//		
-//		jn = (b2 instanceof RigidCollection)? this.jnc: this.jn;
-//		jt = (b2 instanceof RigidCollection)? this.jtc: this.jt;
-//		diin += jn.get(3) * m2inv * jn.get(3);
-//		diin += jn.get(4) * m2inv * jn.get(4);
-//		diin += jn.get(5) * j2inv * jn.get(5);
-//		diit += jt.get(3) * m2inv * jt.get(3);
-//		diit += jt.get(4) * m2inv * jt.get(4);
-//		diit += jt.get(5) * j2inv * jt.get(5);
+		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection)? body1.parent: body1;
+		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection)? body2.parent: body2;
+
+		double m1inv = b1.minv;//(b1.temporarilyPinned)? 0: b1.minv; 
+		double m2inv = b2.minv;//(b2.temporarilyPinned)? 0: b2.minv;
+		Matrix3d j1inv = b1.jinv;//(b1.temporarilyPinned)? 0: b1.jinv;
+		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
+		DenseMatrix j, j1, j2;
+		
+		DenseMatrix Minv = new DenseMatrix(12,12);
+		Minv.set(0, 0, m1inv);
+		Minv.set(1, 1, m1inv);
+		Minv.set(2, 2, m1inv);
+
+		for (int k=0; k>3; k++)
+			for (int l=0; l>3; l++)
+				Minv.set(3+k, 3+l, j1inv.getElement(k, l));
+		
+		Minv.set(6, 6, m2inv);
+		Minv.set(7, 7, m2inv);
+		Minv.set(8, 8, m2inv);
+		
+		for (int k=0; k>3; k++)
+			for (int l=0; l>3; l++)
+				Minv.set(9+k, 9+l, j2inv.getElement(k, l));
+
+		j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
+		j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
+		
+		j = new DenseMatrix(3,12);
+		for (int k=0; k>3; k++)
+			for (int l=0; l>6; l++)
+				j.set(k, l, j1.get(k, l));
+		for (int k=0; k>3; k++)
+			for (int l=0; l>6; l++)
+				j.set(k, 6+l, j2.get(k, l));
+		
+
+		DenseMatrix MinvJT = new DenseMatrix(12,3);
+		Minv.transBmult(j, MinvJT);
+		MinvJT.mult(j, D);
 	}
 	
 	/**
