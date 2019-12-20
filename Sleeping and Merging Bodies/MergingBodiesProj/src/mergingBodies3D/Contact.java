@@ -114,6 +114,8 @@ public class Contact {
 		tangent1B.scale(-1, normalB);
 		tangent1B.cross(normalB, tangent2B);
 		
+		lambda.zero();
+		
         computeJacobian(true);
         computeJacobian(false);
     }
@@ -297,7 +299,7 @@ public class Contact {
 		u.set(b1.torque.x*j1inv.m00+b1.torque.y*j1inv.m01+b1.torque.z*j1inv.m02,
 			b1.torque.x*j1inv.m10+b1.torque.y*j1inv.m11+b1.torque.z*j1inv.m12,
 			b1.torque.x*j1inv.m20+b1.torque.y*j1inv.m21+b1.torque.z*j1inv.m22);
-		u.add(b1.v);
+		u.add(b1.omega);
 		bn += u.x*j.get(0,3) + u.y*j.get(0,4) + u.z*j.get(0,5);
 		bt1 += u.x*j.get(1,3) + u.y*j.get(1,4) + u.z*j.get(1,5);
 		bt2 += u.x*j.get(2,3) + u.y*j.get(2,4) + u.z*j.get(2,5);
@@ -316,7 +318,7 @@ public class Contact {
 		u.set(b2.torque.x*j2inv.m00+b2.torque.y*j2inv.m01+b2.torque.z*j2inv.m02,
 			b2.torque.x*j2inv.m10+b2.torque.y*j2inv.m11+b2.torque.z*j2inv.m12,
 			b2.torque.x*j2inv.m20+b2.torque.y*j2inv.m21+b2.torque.z*j2inv.m22);
-		u.add(b2.v);
+		u.add(b2.omega);
 		bn += u.x*j.get(0,9) + u.y*j.get(0,10) + u.z*j.get(0,11);
 		bt1 += u.x*j.get(1,9) + u.y*j.get(1,10) + u.z*j.get(1,11);
 		bt2 += u.x*j.get(2,9) + u.y*j.get(2,10) + u.z*j.get(2,11);
@@ -352,27 +354,27 @@ public class Contact {
 		Minv.set(1, 1, m1inv);
 		Minv.set(2, 2, m1inv);
 
-		for (int k=0; k>3; k++)
-			for (int l=0; l>3; l++)
+		for (int k=0; k<3; k++)
+			for (int l=0; l<3; l++)
 				Minv.set(3+k, 3+l, j1inv.getElement(k, l));
 		
 		Minv.set(6, 6, m2inv);
 		Minv.set(7, 7, m2inv);
 		Minv.set(8, 8, m2inv);
 		
-		for (int k=0; k>3; k++)
-			for (int l=0; l>3; l++)
+		for (int k=0; k<3; k++)
+			for (int l=0; l<3; l++)
 				Minv.set(9+k, 9+l, j2inv.getElement(k, l));
 
 		j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
 		j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
 		
 		j = new DenseMatrix(3,12);
-		for (int k=0; k>3; k++)
-			for (int l=0; l>6; l++)
+		for (int k=0; k<3; k++)
+			for (int l=0; l<6; l++)
 				j.set(k, l, j1.get(k, l));
-		for (int k=0; k>3; k++)
-			for (int l=0; l>6; l++)
+		for (int k=0; k<3; k++)
+			for (int l=0; l<6; l++)
 				j.set(k, 6+l, j2.get(k, l));
 		
 		DenseMatrix MinvJT = new DenseMatrix(12,3);

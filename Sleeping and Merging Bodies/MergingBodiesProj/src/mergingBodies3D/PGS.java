@@ -63,6 +63,8 @@ public class PGS {
 		if (contacts == null) {
 			System.err.println("PGS.solve() method needs the list PGS.contacts to be filled.");
 			return;
+		} else if (contacts.isEmpty()) {
+			return;
 		}
 		
 		if (warmStart)
@@ -163,29 +165,29 @@ public class PGS {
 		DenseVector dv1 = body1.deltaV; 
 		DenseVector dv2 = body2.deltaV;
 		DenseMatrix j;
-		DenseVector jlambda = new DenseVector(12);
+		DenseVector JTlambda = new DenseVector(12);
 		
 		j = contact.j; //(body1 instanceof RigidCollection)? contact.jc: contact.j;
-		j.transMult(lambda, jlambda);
+		j.transMult(lambda, JTlambda);
 		
-		dv1.add( 0, jlambda.get(0) * m1inv);	
-		dv1.add( 1, jlambda.get(1) * m1inv);	
-		dv1.add( 2, jlambda.get(2) * m1inv);
+		dv1.add( 0, JTlambda.get(0) * m1inv);	
+		dv1.add( 1, JTlambda.get(1) * m1inv);	
+		dv1.add( 2, JTlambda.get(2) * m1inv);
 		
-		dv1.add( 3, jlambda.get(3) * j1inv.m00 + jlambda.get(4) * j1inv.m01 + jlambda.get(5) * j1inv.m02);
-		dv1.add( 4, jlambda.get(3) * j1inv.m10 + jlambda.get(4) * j1inv.m11 + jlambda.get(5) * j1inv.m12);	
-		dv1.add( 5, jlambda.get(3) * j1inv.m20 + jlambda.get(4) * j1inv.m21 + jlambda.get(5) * j1inv.m22);	
+		dv1.add( 3, JTlambda.get(3) * j1inv.m00 + JTlambda.get(4) * j1inv.m01 + JTlambda.get(5) * j1inv.m02);
+		dv1.add( 4, JTlambda.get(3) * j1inv.m10 + JTlambda.get(4) * j1inv.m11 + JTlambda.get(5) * j1inv.m12);	
+		dv1.add( 5, JTlambda.get(3) * j1inv.m20 + JTlambda.get(4) * j1inv.m21 + JTlambda.get(5) * j1inv.m22);	
 		
 		j = contact.j; //(body2 instanceof RigidCollection)? contact.jc: contact.j;
-		j.transMult(lambda, jlambda);
+		j.transMult(lambda, JTlambda);
 		
-		dv2.add( 0, jlambda.get(6) * m2inv);	
-		dv2.add( 1, jlambda.get(7) * m2inv);	
-		dv2.add( 2, jlambda.get(8) * m2inv);
+		dv2.add( 0, JTlambda.get(6) * m2inv);	
+		dv2.add( 1, JTlambda.get(7) * m2inv);	
+		dv2.add( 2, JTlambda.get(8) * m2inv);
 		
-		dv2.add( 3, jlambda.get(9) * j2inv.m00 + jlambda.get(10) * j2inv.m01 + jlambda.get(11) * j2inv.m02);
-		dv2.add( 4, jlambda.get(9) * j2inv.m10 + jlambda.get(10) * j2inv.m11 + jlambda.get(11) * j2inv.m12);	
-		dv2.add( 5, jlambda.get(9) * j2inv.m20 + jlambda.get(10) * j2inv.m21 + jlambda.get(11) * j2inv.m22);	
+		dv2.add( 3, JTlambda.get(9) * j2inv.m00 + JTlambda.get(10) * j2inv.m01 + JTlambda.get(11) * j2inv.m02);
+		dv2.add( 4, JTlambda.get(9) * j2inv.m10 + JTlambda.get(10) * j2inv.m11 + JTlambda.get(11) * j2inv.m12);	
+		dv2.add( 5, JTlambda.get(9) * j2inv.m20 + JTlambda.get(10) * j2inv.m21 + JTlambda.get(11) * j2inv.m22);	
 		
 	}
 	
