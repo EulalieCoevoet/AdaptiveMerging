@@ -696,12 +696,12 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 		if (b instanceof RigidCollection) {
                 			RigidCollection collection = (RigidCollection)b;
                 			for ( RigidBody sb : collection.bodies ) {
-                				if(sb.magneticBody)
+                				if(sb.magnetic)
                 					sb.activateMagnet = !sb.activateMagnet;
                 			}
                 		}
                 		
-                		if(b.magneticBody)
+                		if(b.magnetic)
                 			b.activateMagnet = !b.activateMagnet;
                 	}                    	
                 } 

@@ -226,7 +226,6 @@ public class Contact {
 	
 	/**
 	 * Update state of the contact: either BROKE, SLIDING or CLEAR
-	 * @param prevLambda_n
 	 * @param mu
 	 */
 	protected void updateContactState(double mu) {

@@ -5,10 +5,10 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.DenseVector;
 
-import javax.vecmath.Point2d;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 /**
@@ -73,7 +73,7 @@ public class Contact {
 	DenseMatrix jc = new DenseMatrix(3,12);
 	
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent1, tangent2) */
-	Vector3d lambda = new Vector3d();
+	DenseVector lambda = new DenseVector(3);
 	
     /**
      * Creates a new contact, and assigns it an index
@@ -225,30 +225,187 @@ public class Contact {
 		DenseMatrix j;
 
 		j = this.j; //(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
-		double f1 = lambda.x*j.get(0,0) + lambda.y*j.get(1,0) + lambda.z*j.get(2,0);
-		double f2 = lambda.x*j.get(0,1) + lambda.y*j.get(1,1) + lambda.z*j.get(2,1);
-		double f3 = lambda.x*j.get(0,2) + lambda.y*j.get(1,2) + lambda.z*j.get(2,2);
+		double f1 = lambda.get(0)*j.get(0,0) + lambda.get(1)*j.get(1,0) + lambda.get(2)*j.get(2,0);
+		double f2 = lambda.get(0)*j.get(0,1) + lambda.get(1)*j.get(1,1) + lambda.get(2)*j.get(2,1);
+		double f3 = lambda.get(0)*j.get(0,2) + lambda.get(1)*j.get(1,2) + lambda.get(2)*j.get(2,2);
 		forceB1.set(f1,f2,f3);
 		forceB1.scale(1/dt);
-		f1 = lambda.x*j.get(0,3) + lambda.y*j.get(1,3) + lambda.z*j.get(2,3);
-		f2 = lambda.x*j.get(0,4) + lambda.y*j.get(1,4) + lambda.z*j.get(2,4);
-		f3 = lambda.x*j.get(0,5) + lambda.y*j.get(1,5) + lambda.z*j.get(2,5);
+		f1 = lambda.get(0)*j.get(0,3) + lambda.get(1)*j.get(1,3) + lambda.get(2)*j.get(2,3);
+		f2 = lambda.get(0)*j.get(0,4) + lambda.get(1)*j.get(1,4) + lambda.get(2)*j.get(2,4);
+		f3 = lambda.get(0)*j.get(0,5) + lambda.get(1)*j.get(1,5) + lambda.get(2)*j.get(2,5);
 		torqueB1.set(f1,f2,f3);
 		torqueB1.scale(1/dt);
 
 		j = this.j; //(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
-		f1 = lambda.x*j.get(0,6) + lambda.y*j.get(1,6) + lambda.z*j.get(2,6);
-		f2 = lambda.x*j.get(0,7) + lambda.y*j.get(1,7) + lambda.z*j.get(2,7);
-		f3 = lambda.x*j.get(0,8) + lambda.y*j.get(1,8) + lambda.z*j.get(2,8);
+		f1 = lambda.get(0)*j.get(0,6) + lambda.get(1)*j.get(1,6) + lambda.get(2)*j.get(2,6);
+		f2 = lambda.get(0)*j.get(0,7) + lambda.get(1)*j.get(1,7) + lambda.get(2)*j.get(2,7);
+		f3 = lambda.get(0)*j.get(0,8) + lambda.get(1)*j.get(1,8) + lambda.get(2)*j.get(2,8);
 		forceB2.set(f1,f2,f3);
 		forceB2.scale(1/dt);
-		f1 = lambda.x*j.get(0,9) + lambda.y*j.get(1,9) + lambda.z*j.get(2,9);
-		f2 = lambda.x*j.get(0,10) + lambda.y*j.get(1,10) + lambda.z*j.get(2,10);
-		f3 = lambda.x*j.get(0,11) + lambda.y*j.get(1,11) + lambda.z*j.get(2,11);
+		f1 = lambda.get(0)*j.get(0,9) + lambda.get(1)*j.get(1,9) + lambda.get(2)*j.get(2,9);
+		f2 = lambda.get(0)*j.get(0,10) + lambda.get(1)*j.get(1,10) + lambda.get(2)*j.get(2,10);
+		f3 = lambda.get(0)*j.get(0,11) + lambda.get(1)*j.get(1,11) + lambda.get(2)*j.get(2,11);
 		torqueB2.set(f1,f2,f3);
 		torqueB2.scale(1/dt);
 	}
+	
+	/**
+	 * 
+	 * @param dt
+	 * @param feedbackStiffness
+	 * @param computeInCollection
+	 */
+	public void computeB(double dt, double feedbackStiffness,  boolean computeInCollection) {
+		
+//		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection)? body1.parent: body1;
+//		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection)? body2.parent: body2;
+//
+//		double m1inv = b1.minv;//(b1.temporarilyPinned)? 0: b1.minv; 
+//		double m2inv = b2.minv;//(b2.temporarilyPinned)? 0: b2.minv;
+//		Matrix3d j1inv = b1.jinv;//(b1.temporarilyPinned)? 0: b1.jinv;
+//		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
+//		
+//		// add the Bounce vector to the u's over here, but don't need to do that just yet
+//		double restitution = 0.;
+//		if (!computeInCollection) {
+//			restitution=(body1.restitution+body2.restitution)/2.;
+//		}
+//		
+//		DenseMatrix j;
+//		
+//		j = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;
+//		double u1xn =     (b1.v.x + b1.force.x * m1inv * dt) * j.get(0);
+//		double u1yn =     (b1.v.y + b1.force.y * m1inv * dt) * j.get(1);
+//		double u1omegan = (b1.omega + b1.torque * j1inv * dt) * j.get(2);
+//		double bBounce = restitution*(b1.v.x*j.get(0) + b1.v.y*j.get(1) + b1.omega*j.get(2));
+//
+//		double u1xt =     (b1.v.x + b1.force.x * m1inv * dt) * j.get(0);
+//		double u1yt =     (b1.v.y + b1.force.y * m1inv * dt) * j.get(1);
+//		double u1omegat = (b1.omega + b1.torque * j1inv * dt) * j.get(2);
+//
+//		j = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;
+//		double u2xn =     (b2.v.x + b2.force.x * m2inv * dt) * j.get(3);
+//		double u2yn =     (b2.v.y + b2.force.y * m2inv * dt) * j.get(4);
+//		double u2omegan = (b2.omega + b2.torque * j2inv * dt) * j.get(5);
+//		bBounce += restitution*(b2.v.x*j.get(3) + b2.v.y*j.get(4) + b2.omega*j.get(5));
+//
+//		double u2xt =     (b2.v.x + b2.force.x * m2inv * dt) * j.get(3);
+//		double u2yt =     (b2.v.y + b2.force.y * m2inv * dt) * j.get(4);
+//		double u2omegat = (b2.omega + b2.torque * j2inv * dt) * j.get(5);
+//
+//		// calculate Baumgarte Feedback (overlap of the two bodies)
+//		double baumgarteFeedback = feedbackStiffness*constraintViolation;
+//		
+//		// putting b together.
+//		bn = u1xn + u2xn + u1yn + u2yn + u1omegan + u2omegan + bBounce + baumgarteFeedback;
+//		bt = u1xt + u2xt + u1yt + u2yt + u1omegat + u2omegat;
+	}
+	
+	/**
+	 * Compute Dii values and store in contact
+	 * @param computeInCollection
+	 * @param compliance 
+	 */
+	public void computeJMinvJtDiagonal(boolean computeInCollection) {
+		
+//		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
+//		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
+//		
+//		double m1inv = (b1.temporarilyPinned)? 0: b1.minv; 
+//		double m2inv = (b2.temporarilyPinned)? 0: b2.minv;
+//		double j1inv = (b1.temporarilyPinned)? 0: b1.jinv;
+//		double j2inv = (b2.temporarilyPinned)? 0: b2.jinv;
+//		
+//		DenseVector jn;
+//		DenseVector jt;
+//		
+//		diin = 0.;
+//		diit = 0.;
+//		
+//		jn = (b1 instanceof RigidCollection)? this.jnc: this.jn;
+//		jt = (b1 instanceof RigidCollection)? this.jtc: this.jt;
+//		diin += jn.get(0) * m1inv * jn.get(0);
+//		diin += jn.get(1) * m1inv * jn.get(1);
+//		diin += jn.get(2) * j1inv * jn.get(2);
+//		diit += jt.get(0) * m1inv * jt.get(0);
+//		diit += jt.get(1) * m1inv * jt.get(1);
+//		diit += jt.get(2) * j1inv * jt.get(2);
+//		
+//		jn = (b2 instanceof RigidCollection)? this.jnc: this.jn;
+//		jt = (b2 instanceof RigidCollection)? this.jtc: this.jt;
+//		diin += jn.get(3) * m2inv * jn.get(3);
+//		diin += jn.get(4) * m2inv * jn.get(4);
+//		diin += jn.get(5) * j2inv * jn.get(5);
+//		diit += jt.get(3) * m2inv * jt.get(3);
+//		diit += jt.get(4) * m2inv * jt.get(4);
+//		diit += jt.get(5) * j2inv * jt.get(5);
+	}
+	
+	/**
+	 * Returns Jdv values for normal component.
+	 * @param computeInCollection
+	 */
+	public double getJdvn(boolean computeInCollection) {
+		
+//		DenseVector dv1 = (body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
+//		DenseVector dv2 = (body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
+//		DenseVector jn;
+		
+		double Jdvn = 0;  		
+		
+//		jn = (body1.isInCollection() && !computeInCollection)? this.jnc: this.jn;
+//		Jdvn += jn.get(0) * dv1.get(0);
+//		Jdvn += jn.get(1) * dv1.get(1);
+//		Jdvn += jn.get(2) * dv1.get(2);
+//		
+//		jn = (body2.isInCollection() && !computeInCollection)? this.jnc: this.jn;
+//		Jdvn += jn.get(3) * dv2.get(0);
+//		Jdvn += jn.get(4) * dv2.get(1);
+//		Jdvn += jn.get(5) * dv2.get(2);
+		
+		return Jdvn;
+	}
+	
+	/**
+	 * Returns Jdv values for tangent component.
+	 * @param computeInCollection
+	 */
+	public double getJdvt(boolean computeInCollection) {
+		
+//		DenseVector dv1 = (body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
+//		DenseVector dv2 = (body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
+//		
+//		DenseVector jt;
+		
+		// normal component
+		double Jdvt = 0;  		
+
+//		jt = (body1.isInCollection() && !computeInCollection)? this.jtc: this.jt;
+//		Jdvt += jt.get(0) * dv1.get(0);
+//		Jdvt += jt.get(1) * dv1.get(1);
+//		Jdvt += jt.get(2) * dv1.get(2);
+//
+//		jt = (body2.isInCollection() && !computeInCollection)? this.jtc: this.jt;
+//		Jdvt += jt.get(3) * dv2.get(0);
+//		Jdvt += jt.get(4) * dv2.get(1);
+//		Jdvt += jt.get(5) * dv2.get(2);
+		
+		return Jdvt;
+	}
     
+	/**
+	 * Update state of the contact: either BROKE, SLIDING or CLEAR
+	 * @param mu
+	 */
+	protected void updateContactState(double mu) {
+		if (Math.abs(lambda.get(0)) <= 1e-14) // (math.abs is for magnet)
+			state = ContactState.BROKEN;	
+		else if (Math.sqrt(lambda.get(1)*lambda.get(1) + lambda.get(2)*lambda.get(2)) == lambda.get(0)*mu) 
+			state = ContactState.ONEDGE;
+		else
+			state = ContactState.CLEAR;
+	}
+	
     /**
      * Draws the contact points
      * @param drawable

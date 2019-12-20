@@ -2,6 +2,12 @@ package mergingBodies3D;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
+import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.DenseVector;
+
 
 /**
  * Projected Gauss Seidel contact solver.
@@ -63,62 +69,80 @@ public class PGS {
 		if (warmStart)
 			confidentWarmStart();
 
-//		for (Contact contact: contacts) {
-//			contact.computeB(dt, feedbackStiffness, computeInCollection);
-//			contact.computeJMinvJtDiagonal(computeInCollection);
-//		}
-		
-//		int iter = iterations;
-//		while(iter > 0) {
-//			
-//			for (int i=0; i<contacts.size(); i++) {
-//				
-//				Contact contact = contacts.get(i);
-//					
-//				double Jdvn = contact.getJdvn(computeInCollection);
-//				double prevLambda_n = contact.lambda.x;
-//				contact.lambda.x = (contact.lambda.x*contact.diin - contact.bn - Jdvn)/(contact.diin+compliance);
-//				
-//				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active				
-//				if ((!contact.body1.magneticBody || !contact.body1.activateMagnet) && (!contact.body2.magneticBody || !contact.body2.activateMagnet)) 
-//					contact.lambda.x = Math.max(0., contact.lambda.x);
-//				
-//				double dLambda_n = contact.lambda.x - prevLambda_n;
-//				
-//				//update delta V;
-//				updateDeltaV(contact, dLambda_n, 0.);
-//				
-//				double Jdvt = contact.getJdvt(computeInCollection);
-//				double prevLambda_t = contact.lambda.y;
-//				contact.lambda.y = (contact.lambda.y*contact.diit - contact.bt - Jdvt)/(contact.diit+compliance);
-//				
-//				double mu = 0.;
-//				
-//				// eulalie : we should assign material property to bodies and have a table for the corresponding friction coefficient...
-//				if (contact.body1.friction<0.2 || contact.body2.friction<0.2) 
-//					mu = Math.min(contact.body1.friction, contact.body2.friction);
-//				else if (contact.body1.friction>1. || contact.body2.friction>1.) 
-//					mu = Math.max(contact.body1.friction, contact.body2.friction);
-//				else
-//					mu = (contact.body1.friction + contact.body2.friction)/2.;
-//				
-//				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
-//				if ((!contact.body1.magneticBody || !contact.body1.activateMagnet) && (!contact.body2.magneticBody || !contact.body2.activateMagnet)) {
-//					contact.lambda.y = Math.max(contact.lambda.y, -mu*contact.lambda.x);
-//					contact.lambda.y = Math.min(contact.lambda.y, mu*contact.lambda.x);
-//				}
-//				
-//				double dLambda_t = contact.lambda.y - prevLambda_t;
-//				
-//				//update delta V;
-//				updateDeltaV(contact, 0., dLambda_t);
-//				
-//				if (iter == 1)
-//					contact.updateContactState(mu);
-//			}
-//			
-//			iter--;
-//		}
+		for (Contact contact: contacts) {
+			contact.computeB(dt, feedbackStiffness, computeInCollection);
+			contact.computeJMinvJtDiagonal(computeInCollection);
+		}
+
+		DenseVector l = new DenseVector(3);
+		int iter = iterations;
+		while(iter > 0) {
+			
+			for (int i=0; i<contacts.size(); i++) {
+				
+				Contact contact = contacts.get(i);
+					
+				// Normal direction
+				double Jdvn = contact.getJdvn(computeInCollection);
+				double prevLambda_n = contact.lambda.get(0);
+				contact.lambda.set(0, (contact.lambda.get(0)*contact.diin - contact.bn - Jdvn)/(contact.diin+compliance));
+				
+				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active				
+				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) 
+					contact.lambda.set(0, Math.max(0., contact.lambda.get(0)));
+				
+				l.zero();
+				l.set(0, contact.lambda.get(0) - prevLambda_n);
+				updateDeltaV(contact, l);
+				
+				// Tangential directions
+				double mu = 0.;
+				
+				// eulalie : we should assign material property to bodies and have a table for the corresponding friction coefficient...
+				if (contact.body1.friction<0.2 || contact.body2.friction<0.2) 
+					mu = Math.min(contact.body1.friction, contact.body2.friction);
+				else if (contact.body1.friction>1. || contact.body2.friction>1.) 
+					mu = Math.max(contact.body1.friction, contact.body2.friction);
+				else
+					mu = (contact.body1.friction + contact.body2.friction)/2.;
+				
+				// Tangential1 direction
+				double Jdvt1 = contact.getJdvt(computeInCollection);
+				double prevLambda_t1 = contact.lambda.get(1);
+				contact.lambda.set(1, (contact.lambda.get(1)*contact.diit - contact.bt - Jdvt1)/(contact.diit+compliance));
+				
+				// Tangential2 direction
+				double Jdvt2 = contact.getJdvt(computeInCollection);
+				double prevLambda_t2 = contact.lambda.get(2);
+				contact.lambda.set(2, (contact.lambda.get(2)*contact.diit - contact.bt - Jdvt2)/(contact.diit+compliance));
+				
+				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
+				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
+					contact.lambda.set(2, Math.max(contact.lambda.get(2), -mu*contact.lambda.get(0)));
+					contact.lambda.set(2, Math.min(contact.lambda.get(2),  mu*contact.lambda.get(0)));
+				}
+				
+				double norm = Math.sqrt(contact.lambda.get(1)*contact.lambda.get(1) + contact.lambda.get(2)*contact.lambda.get(2));
+			    if(norm > mu*contact.lambda.get(0))
+			    {
+			        contact.lambda.set(1, contact.lambda.get(1)* mu*contact.lambda.get(0)/norm);
+			        contact.lambda.set(2, contact.lambda.get(2)* mu*contact.lambda.get(0)/norm);
+			    }
+				
+				l.zero();
+				l.set(1, contact.lambda.get(1) - prevLambda_t1);
+				updateDeltaV(contact, l);
+				
+				l.zero();
+				l.set(2, contact.lambda.get(2) - prevLambda_t2);
+				updateDeltaV(contact, l);
+				
+				if (iter == 1)
+					contact.updateContactState(mu);
+			}
+			
+			iter--;
+		}
 	}
 	
 	/**
@@ -126,39 +150,42 @@ public class PGS {
 	 * @param index
 	 * @param lambda
 	 */
-	protected void updateDeltaV(Contact contact, double lambda_n, double lambda_t) {
-//		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollection)? contact.body1.parent: contact.body1;
-//		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
-//
-//		double m1inv = (body1.temporarilyPinned)? 0: body1.minv; 
-//		double m2inv = (body2.temporarilyPinned)? 0: body2.minv;
-//		double j1inv = (body1.temporarilyPinned)? 0: body1.jinv;
-//		double j2inv = (body2.temporarilyPinned)? 0: body2.jinv;
-//		
-//		DenseVector dv1 = body1.deltaV; 
-//		DenseVector dv2 = body2.deltaV;
-//		DenseVector jn;
-//		DenseVector jt;
-//		
-//		jn = (body1 instanceof RigidCollection)? contact.jnc: contact.jn;
-//		jt = (body1 instanceof RigidCollection)? contact.jtc: contact.jt;
-//		
-//		dv1.add( 0, jn.get(0) * m1inv * lambda_n );
-//		dv1.add( 1, jn.get(1) * m1inv * lambda_n );
-//		dv1.add( 2, jn.get(2) * j1inv * lambda_n );		
-//		dv1.add( 0, jt.get(0) * m1inv * lambda_t );
-//		dv1.add( 1, jt.get(1) * m1inv * lambda_t );
-//		dv1.add( 2, jt.get(2) * j1inv * lambda_t );
-//		
-//		jn = (body2 instanceof RigidCollection)? contact.jnc: contact.jn;
-//		jt = (body2 instanceof RigidCollection)? contact.jtc: contact.jt;
-//		
-//		dv2.add( 0, jn.get(3) * m2inv * lambda_n );
-//		dv2.add( 1, jn.get(4) * m2inv * lambda_n );
-//		dv2.add( 2, jn.get(5) * j2inv * lambda_n );
-//		dv2.add( 0, jt.get(3) * m2inv * lambda_t );
-//		dv2.add( 1, jt.get(4) * m2inv * lambda_t );
-//		dv2.add( 2, jt.get(5) * j2inv * lambda_t );
+	protected void updateDeltaV(Contact contact, DenseVector lambda) {
+		RigidBody body1 = contact.body1; //(contact.body1.isInCollection() && !computeInCollection)? contact.body1.parent: contact.body1;
+		RigidBody body2 = contact.body2; //(contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
+
+		double m1inv = body1.minv; //(body1.temporarilyPinned)? 0: body1.minv; 
+		double m2inv = body2.minv; //(body2.temporarilyPinned)? 0: body2.minv;
+		Matrix3d j1inv = body1.jinv; //(body1.temporarilyPinned)? 0: body1.jinv;
+		Matrix3d j2inv = body2.jinv; //(body2.temporarilyPinned)? 0: body2.jinv;
+		
+		DenseVector dv1 = body1.deltaV; 
+		DenseVector dv2 = body2.deltaV;
+		DenseMatrix j;
+		DenseVector jlambda = new DenseVector(12);
+		
+		j = contact.j; //(body1 instanceof RigidCollection)? contact.jc: contact.j;
+		j.mult(lambda, jlambda);
+		
+		dv1.add( 0, jlambda.get(0) * m1inv);	
+		dv1.add( 1, jlambda.get(1) * m1inv);	
+		dv1.add( 2, jlambda.get(2) * m1inv);
+		
+		dv1.add( 3, jlambda.get(3) * j1inv.m00 + jlambda.get(4) * j1inv.m01 + jlambda.get(5) * j1inv.m02);
+		dv1.add( 4, jlambda.get(3) * j1inv.m10 + jlambda.get(4) * j1inv.m11 + jlambda.get(5) * j1inv.m12);	
+		dv1.add( 5, jlambda.get(3) * j1inv.m20 + jlambda.get(4) * j1inv.m21 + jlambda.get(5) * j1inv.m22);	
+		
+		j = contact.j; //(body2 instanceof RigidCollection)? contact.jc: contact.j;
+		j.mult(lambda, jlambda);
+		
+		dv2.add( 0, jlambda.get(6) * m2inv);	
+		dv2.add( 1, jlambda.get(7) * m2inv);	
+		dv2.add( 2, jlambda.get(8) * m2inv);
+		
+		dv2.add( 3, jlambda.get(9) * j2inv.m00 + jlambda.get(10) * j2inv.m01 + jlambda.get(11) * j2inv.m02);
+		dv2.add( 4, jlambda.get(9) * j2inv.m10 + jlambda.get(10) * j2inv.m11 + jlambda.get(11) * j2inv.m12);	
+		dv2.add( 5, jlambda.get(9) * j2inv.m20 + jlambda.get(10) * j2inv.m21 + jlambda.get(11) * j2inv.m22);	
+		
 	}
 	
 	/**
@@ -166,7 +193,7 @@ public class PGS {
 	 */
 	protected void confidentWarmStart() {
 		for (Contact contact : contacts) {		
-			updateDeltaV(contact, contact.lambda.x, contact.lambda.y);	
+			updateDeltaV(contact, contact.lambda);	
 		}
 	}
 }

@@ -15,6 +15,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.viewer.EasyViewer;
 import mintools.viewer.FlatMatrix4d;
+import no.uib.cipr.matrix.DenseVector;
 
 /**
  * Simple 2D rigid body based on image samples
@@ -50,15 +51,14 @@ public class RigidBody {
     /** TODO: should this even live here?  perhaps this should only be in the mouse spring */
     public Point3d selectedPoint = new Point3d();
     
-    /**
-     * Transforms points in Body coordinates to World coordinates
-     */
+    /** Transforms points in Body coordinates to World coordinates */
     RigidTransform transformB2W = new RigidTransform();
     
-    /**
-     * Transforms points in World coordinates to Body coordinates
-     */
+    /** Transforms points in World coordinates to Body coordinates */
     RigidTransform transformW2B = new RigidTransform();
+    
+    /** DeltaV for PGS resolution */
+    DenseVector deltaV = new DenseVector(6);
     
     /** linear velocity */
     public Vector3d v = new Vector3d();
@@ -83,6 +83,18 @@ public class RigidBody {
     
 	/** bounding box, in the body frame */
 	public ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>(); 
+	
+	/** Friction coefficient */
+	public double friction; 
+	
+	/** Restitution coefficient */
+	public double restitution; 
+	
+	/** true if body is a magnetic */
+	public boolean magnetic = false;
+	
+	/** true if magnetic field is activate */
+	public boolean activateMagnet = false;
     
 	/**
 	 * Default empty constructor

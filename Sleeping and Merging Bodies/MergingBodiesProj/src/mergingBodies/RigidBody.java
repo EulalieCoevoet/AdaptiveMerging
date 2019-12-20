@@ -100,14 +100,10 @@ public class RigidBody {
 	 **/
 	public double rho;
 	
-	/**
-	 * true if body is a magnetic body
-	 */
-	public boolean magneticBody = false;
+	/** true if body is a magnetic */
+	public boolean magnetic = false;
 	
-	/**
-	 * true if magnetic field is activated
-	 */
+	/** true if magnetic field is activate */
 	public boolean activateMagnet = false;
 
 	/**

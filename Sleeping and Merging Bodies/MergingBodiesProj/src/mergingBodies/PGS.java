@@ -81,13 +81,10 @@ public class PGS {
 				contact.lambda.x = (contact.lambda.x*contact.diin - contact.bn - Jdvn)/(contact.diin+compliance);
 				
 				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active				
-				if ((!contact.body1.magneticBody || !contact.body1.activateMagnet) && (!contact.body2.magneticBody || !contact.body2.activateMagnet)) 
+				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) 
 					contact.lambda.x = Math.max(0., contact.lambda.x);
 				
-				double dLambda_n = contact.lambda.x - prevLambda_n;
-				
-				//update delta V;
-				updateDeltaV(contact, dLambda_n, 0.);
+				updateDeltaV(contact, contact.lambda.x - prevLambda_n, 0.);
 				
 				double Jdvt = contact.getJdvt(computeInCollection);
 				double prevLambda_t = contact.lambda.y;
@@ -104,15 +101,12 @@ public class PGS {
 					mu = (contact.body1.friction + contact.body2.friction)/2.;
 				
 				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
-				if ((!contact.body1.magneticBody || !contact.body1.activateMagnet) && (!contact.body2.magneticBody || !contact.body2.activateMagnet)) {
+				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
 					contact.lambda.y = Math.max(contact.lambda.y, -mu*contact.lambda.x);
 					contact.lambda.y = Math.min(contact.lambda.y, mu*contact.lambda.x);
 				}
 				
-				double dLambda_t = contact.lambda.y - prevLambda_t;
-				
-				//update delta V;
-				updateDeltaV(contact, 0., dLambda_t);
+				updateDeltaV(contact, 0., contact.lambda.y - prevLambda_t);
 				
 				if (iter == 1)
 					contact.updateContactState(mu);
