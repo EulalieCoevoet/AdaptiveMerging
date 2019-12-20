@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
@@ -124,7 +125,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                 system.advanceTime( dt );                
             }
         }
- 
+
         if ( ! drawWithShadows.getValue() ) {
             drawAllObjects(drawable);
         } else {                    
@@ -135,18 +136,36 @@ public class LCPApp implements SceneGraphNode, Interactor {
             drawAllObjects( drawable);
             shadowMap.endShadowMapping( drawable, ev.trackBall );
         }        
-       if ( picked != null ) {
-    	   int h = drawable.getSurfaceHeight();
-			Point3d p = mouseSpring.point;
-			unproject( drawable, mousePressedPoint.x, h-mousePressedPoint.y, zClosest, p );
-			gl.glPushMatrix();
-			gl.glTranslated( p.x, p.y, p.z );
-			gl.glColor3f(1, 0, 0);
-			EasyViewer.glut.glutSolidSphere(0.025,16,16);
-			gl.glPopMatrix();
-			mouseSpring.display(drawable);
-        }
+        if ( mouseSpring.picked != null ) {
+        	gl.glPushMatrix();
+        	gl.glScaled( sceneScale,sceneScale,sceneScale );
+            gl.glTranslated( sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
 
+        	int h = drawable.getSurfaceHeight();
+        	Point3d p1 = mouseSpring.pointW;
+        	Point3d p2 = mouseSpring.grabPointBW;
+        	unproject( drawable, mousePressedPoint.x, h-mousePressedPoint.y, zClosest, p1 );
+
+        	mouseSpring.display(drawable);
+
+    		float[] red = new float[] { 1, 0, 0, 1 };		
+    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0 );
+        	gl.glPushMatrix();
+        	gl.glTranslated( p1.x, p1.y, p1.z );
+        	gl.glColor3f(1, 0, 0);
+        	EasyViewer.glut.glutSolidSphere(0.5,16,16);        
+        	gl.glPopMatrix();
+
+        	gl.glPushMatrix();
+        	gl.glTranslated( p2.x, p2.y, p2.z );
+        	gl.glColor3f(1, 0, 0);
+        	EasyViewer.glut.glutSolidSphere(0.5,16,16);        
+        	gl.glPopMatrix();
+
+        	
+        	gl.glPopMatrix();
+        }
+       
         EasyViewer.beginOverlay(drawable);
 
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -193,8 +212,9 @@ public class LCPApp implements SceneGraphNode, Interactor {
     	GL2 gl = drawable.getGL().getGL2();
         
         gl.glPushMatrix();
-        double s = 1e-1; // guess how to get images to show up nicely in 3D in a first approximation...
-        gl.glScaled( s,s,s );
+        gl.glScaled( sceneScale,sceneScale,sceneScale );
+        gl.glTranslated( sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
+        
         system.display( drawable );
 
         gl.glScaled( 5,5,5 );
@@ -297,12 +317,16 @@ public class LCPApp implements SceneGraphNode, Interactor {
 	        if ( pickIndex == -1 ) {
 	        	System.out.println("seemed to pick something else?");
 	        } else {
-	        	unproject( drawable, p.x, h-p.y, zClosest, mouseSpring.point );
+	        	unproject( drawable, p.x, h-p.y, zClosest, mouseSpring.pointW );
                 mouseSpring.picked = system.bodies.get(pickIndex);
                 mouseSpring.picked.selected = true;
+                mouseSpring.pointW.scale( 1/sceneScale ); // gross to undo the other drawing stuff here... 
+                mouseSpring.pointW.sub( sceneTranslation);
+                
                 Matrix4d A = mouseSpring.picked.transformW2B.T;
-                A.transform(mouseSpring.point,  mouseSpring.picked.selectedPoint ) ;
-		        System.out.println(" unprojected on body = " +  mouseSpring.picked.selectedPoint  + " index " +  pickIndex );
+                A.transform(mouseSpring.pointW,  mouseSpring.grabPointB ) ;
+		        System.out.println(" unprojected in world = " +  mouseSpring.pointW  + " index " +  pickIndex );
+		        System.out.println(" unprojected on body = " +  mouseSpring.grabPointB  + " index " +  pickIndex );
 	        }
         }
     }
@@ -425,7 +449,8 @@ public class LCPApp implements SceneGraphNode, Interactor {
         vfp.add( whiteEpsilon.getSliderControls(false) );
         vfp.add( factory.getControls() );
         
-        vfp.add(drawWithShadows.getControls() );
+        vfp.add( drawWithShadows.getControls() );
+        vfp.add( shadowMap.getControls() );
         return vfp.getPanel();
     }
     
@@ -437,20 +462,12 @@ public class LCPApp implements SceneGraphNode, Interactor {
     private DoubleParameter scale = new DoubleParameter("scale scene",.9, 0.1, 10);
     private DoubleParameter posx = new DoubleParameter("x translation", 0, -1000, 1000 );
     private DoubleParameter posy = new DoubleParameter("y translation", 0, -1000, 1000 );
-//    private double windowWidth = 1.0;
-//    private double windowHeight= 1.0;
-//    private double imageWidth = 1.0;
-//    private double imageHeight = 1.0;
 
     // variables and objects for picking rigid body with the mouse
+    private MouseSpringForce mouseSpring = new MouseSpringForce();
     
-    
-    private RigidBody picked = null;
-//    private Point2d grabPointB = new Point2d();
-   
-    // TODO: UPDATE WITH the PD Control
-    private Point3d mousePoint3d = new Point3d();      
-    private MouseSpringForce mouseSpring = new MouseSpringForce( mousePoint3d );
+    private double sceneScale = 1e-1; // guess how to get images to show up nicely in 3D in a first approximation...
+    private Vector3d sceneTranslation = new Vector3d();
     
     /**
      * Loads the specified image, clearing the old system, and resets viewing parameters.
@@ -461,6 +478,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         systemClear();
         system.name = filename;
         ImageBlocker blocker = new ImageBlocker( filename, (float) (double) whiteEpsilon.getValue() );
+        sceneTranslation.set( - blocker.width/2, - blocker.height, 0 );
         system.bodies.addAll(blocker.bodies);
     }
     

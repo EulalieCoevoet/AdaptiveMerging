@@ -19,20 +19,23 @@ import mintools.swing.VerticalFlowPanel;
  */
 public class MouseSpringForce {
 
+	/** The selected body will be null if there is no mouse spring active */
     RigidBody picked = null;
     
-    private Point3d grabPointB = new Point3d();
+    /** Grab point on body in body coords */
+    Point3d grabPointB = new Point3d();
     
-    private Point3d grabPointW = new Point3d();
-
-    Point3d point;
+    /** Grab point on body in world coords */
+    Point3d grabPointBW = new Point3d();    
+    
+    /** Mouse point in world */
+    Point3d pointW = new Point3d();
     
     /**
      * Creates a new mouse spring, where the provided point will be updated with movement of the mouse
      * @param point
      */
-    public MouseSpringForce( Point3d point ) {
-        this.point = point;
+    public MouseSpringForce(  ) {
     }
     
     /**
@@ -60,24 +63,24 @@ public class MouseSpringForce {
         if ( picked == null ) return;
         
         Vector3d grabPointV = new Vector3d();
-        picked.transformB2W.transform( grabPointB, grabPointW );
-        double distance = grabPointW.distance( point );
+        picked.transformB2W.transform( grabPointB, grabPointBW );
+        double distance = grabPointBW.distance( pointW );
         double k = stiffness.getValue();
         double c = damping.getValue();
         
         Vector3d force = new Vector3d();
         Vector3d direction = new Vector3d();
-        direction.sub( point, grabPointW );
+        direction.sub( pointW, grabPointBW );
         if ( direction.lengthSquared() < 1e-3 ) return;
         direction.normalize();
         force.scale( distance * k, direction );
         
-        picked.applyContactForceW( grabPointW, force );
+        picked.applyContactForceW( grabPointBW, force );
         
         // spring damping forces
-        picked.getSpatialVelocity( grabPointW, grabPointV );
+        picked.getSpatialVelocity( grabPointBW, grabPointV );
         force.scale( - grabPointV.dot( direction ) * c, direction );
-        picked.applyContactForceW( grabPointW, force );        
+        picked.applyContactForceW( grabPointBW, force );        
     }
     
     /**
@@ -110,11 +113,12 @@ public class MouseSpringForce {
     public void display(GLAutoDrawable drawable) {
     	GL2 gl = drawable.getGL().getGL2();
     	gl.glDisable( GL2.GL_LIGHTING );
-    	gl.glColor4d( 1, 1, 1, 0.5 );
+    	gl.glColor4d( 1, 0,0, 0.5 );
     	gl.glLineWidth(3);
         gl.glBegin(GL.GL_LINES);
-        gl.glVertex3d(point.x, point.y, point.z);
-        gl.glVertex3d( grabPointW.x, grabPointW.y, grabPointW.z);
+        gl.glVertex3d( pointW.x, pointW.y, pointW.z );
+        picked.transformB2W.transform( grabPointB, grabPointBW );
+        gl.glVertex3d( grabPointBW.x, grabPointBW.y, grabPointBW.z);
         gl.glEnd();
         gl.glEnable( GL2.GL_LIGHTING );
     }

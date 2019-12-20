@@ -315,7 +315,7 @@ public class PDControlApp implements SceneGraphNode, Interactor {
                 //ODETools.setFlatMatrix(  odeSim.mouseSpring.body.body, ERBfromw );
                 Matrix4d A = ERBfromw.getBackingMatrix();
                 A.invert();
-                A.transform(mouseSpring.point,  mouseSpring.body.selectedPoint ) ;
+                //A.transform(mouseSpring.point,  mouseSpring.body.selectedPoint ) ;
 		        //System.out.println(" unprojected on body = " +  odeSim.mouseSpring.body.selectedPoint );
 	        }
         }
