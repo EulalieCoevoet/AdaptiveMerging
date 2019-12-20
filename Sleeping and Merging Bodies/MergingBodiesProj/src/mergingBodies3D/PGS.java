@@ -83,7 +83,7 @@ public class PGS {
 				Contact contact = contacts.get(i);
 					
 				// Normal direction
-				double Jdvn = contact.getJdvn(computeInCollection);
+				double Jdvn = contact.getJdv(computeInCollection,0);
 				double prevLambda_n = contact.lambda.get(0);
 				double Arow = contact.lambda.get(0)*contact.D.get(0,0)+ contact.lambda.get(1)*contact.D.get(0,1)+ contact.lambda.get(2)*contact.D.get(0,2);
 				contact.lambda.set(0, (Arow - contact.bn - Jdvn)/(contact.D.get(0,0)+compliance));
@@ -108,13 +108,13 @@ public class PGS {
 					mu = (contact.body1.friction + contact.body2.friction)/2.;
 				
 				// Tangential1 direction
-				double Jdvt1 = contact.getJdvt(computeInCollection);
+				double Jdvt1 = contact.getJdv(computeInCollection,1);
 				double prevLambda_t1 = contact.lambda.get(1);
 				Arow = contact.lambda.get(0)*contact.D.get(1,0)+ contact.lambda.get(1)*contact.D.get(1,1)+ contact.lambda.get(2)*contact.D.get(1,2);
 				contact.lambda.set(1, (Arow - contact.bt1 - Jdvt1)/(contact.D.get(1,1)+compliance));
 				
 				// Tangential2 direction
-				double Jdvt2 = contact.getJdvt(computeInCollection);
+				double Jdvt2 = contact.getJdv(computeInCollection,2);
 				double prevLambda_t2 = contact.lambda.get(2);
 				Arow = contact.lambda.get(0)*contact.D.get(2,0)+ contact.lambda.get(1)*contact.D.get(2,1)+ contact.lambda.get(2)*contact.D.get(2,2);
 				contact.lambda.set(2, (Arow - contact.bt2 - Jdvt2)/(contact.D.get(2,2)+compliance));

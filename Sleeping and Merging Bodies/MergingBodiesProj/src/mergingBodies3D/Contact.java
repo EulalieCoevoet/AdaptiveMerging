@@ -375,55 +375,35 @@ public class Contact {
 	}
 	
 	/**
-	 * Returns Jdv values for normal component.
+	 * Returns Jdv values for given component.
 	 * @param computeInCollection
+	 * @param index (0 for normal, 1 for tangent1, 2 for tangent2)
 	 */
-	public double getJdvn(boolean computeInCollection) {
+	public double getJdv(boolean computeInCollection, int index) {
 		
-//		DenseVector dv1 = (body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
-//		DenseVector dv2 = (body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
-//		DenseVector jn;
+		DenseVector dv1 = body1.deltaV;//(body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
+		DenseVector dv2 = body2.deltaV;//(body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
+		DenseMatrix j;
 		
-		double Jdvn = 0;  		
+		double Jdv = 0;  		
 		
-//		jn = (body1.isInCollection() && !computeInCollection)? this.jnc: this.jn;
-//		Jdvn += jn.get(0) * dv1.get(0);
-//		Jdvn += jn.get(1) * dv1.get(1);
-//		Jdvn += jn.get(2) * dv1.get(2);
-//		
-//		jn = (body2.isInCollection() && !computeInCollection)? this.jnc: this.jn;
-//		Jdvn += jn.get(3) * dv2.get(0);
-//		Jdvn += jn.get(4) * dv2.get(1);
-//		Jdvn += jn.get(5) * dv2.get(2);
-		
-		return Jdvn;
-	}
-	
-	/**
-	 * Returns Jdv values for tangent component.
-	 * @param computeInCollection
-	 */
-	public double getJdvt(boolean computeInCollection) {
-		
-//		DenseVector dv1 = (body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
-//		DenseVector dv2 = (body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
-//		
-//		DenseVector jt;
-		
-		// normal component
-		double Jdvt = 0;  		
+		j = this.j;//(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
+		Jdv += j.get(index,0) * dv1.get(0);
+		Jdv += j.get(index,1) * dv1.get(1);
+		Jdv += j.get(index,2) * dv1.get(2);
+		Jdv += j.get(index,3) * dv1.get(3);
+		Jdv += j.get(index,4) * dv1.get(4);
+		Jdv += j.get(index,5) * dv1.get(5);
 
-//		jt = (body1.isInCollection() && !computeInCollection)? this.jtc: this.jt;
-//		Jdvt += jt.get(0) * dv1.get(0);
-//		Jdvt += jt.get(1) * dv1.get(1);
-//		Jdvt += jt.get(2) * dv1.get(2);
-//
-//		jt = (body2.isInCollection() && !computeInCollection)? this.jtc: this.jt;
-//		Jdvt += jt.get(3) * dv2.get(0);
-//		Jdvt += jt.get(4) * dv2.get(1);
-//		Jdvt += jt.get(5) * dv2.get(2);
+		j = this.j;//(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
+		Jdv += j.get(index,6) * dv2.get(0);
+		Jdv += j.get(index,7) * dv2.get(1);
+		Jdv += j.get(index,8) * dv2.get(2);
+		Jdv += j.get(index,9) * dv2.get(3);
+		Jdv += j.get(index,10) * dv2.get(4);
+		Jdv += j.get(index,11) * dv2.get(5);
 		
-		return Jdvt;
+		return Jdv;
 	}
     
 	/**
