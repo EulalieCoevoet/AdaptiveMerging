@@ -3,7 +3,6 @@ package mergingBodies3D;
 import java.util.ArrayList;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
@@ -168,7 +167,7 @@ public class PGS {
 		DenseVector jlambda = new DenseVector(12);
 		
 		j = contact.j; //(body1 instanceof RigidCollection)? contact.jc: contact.j;
-		j.mult(lambda, jlambda);
+		j.transMult(lambda, jlambda);
 		
 		dv1.add( 0, jlambda.get(0) * m1inv);	
 		dv1.add( 1, jlambda.get(1) * m1inv);	
@@ -179,7 +178,7 @@ public class PGS {
 		dv1.add( 5, jlambda.get(3) * j1inv.m20 + jlambda.get(4) * j1inv.m21 + jlambda.get(5) * j1inv.m22);	
 		
 		j = contact.j; //(body2 instanceof RigidCollection)? contact.jc: contact.j;
-		j.mult(lambda, jlambda);
+		j.transMult(lambda, jlambda);
 		
 		dv2.add( 0, jlambda.get(6) * m2inv);	
 		dv2.add( 1, jlambda.get(7) * m2inv);	

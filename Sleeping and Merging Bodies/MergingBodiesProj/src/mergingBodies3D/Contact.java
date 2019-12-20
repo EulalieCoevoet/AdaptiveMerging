@@ -371,7 +371,7 @@ public class Contact {
 
 		DenseMatrix MinvJT = new DenseMatrix(12,3);
 		Minv.transBmult(j, MinvJT);
-		MinvJT.mult(j, D);
+		j.mult(MinvJT, D);
 	}
 	
 	/**
