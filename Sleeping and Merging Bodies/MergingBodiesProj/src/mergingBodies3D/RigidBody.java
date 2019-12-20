@@ -235,6 +235,15 @@ public class RigidBody {
         jinv = body.jinv;
     }
     
+	/**
+	 * Clear deltaV, force and torque
+	 */
+	public void clear() {
+		force.set(0., 0., 0.);
+		torque.set(0., 0., 0.);
+		deltaV.zero();
+	}
+    
     /**
      * Updates the B2W and W2B transformations
      */
@@ -290,34 +299,10 @@ public class RigidBody {
      * @param dt step size
      */
     public void advanceTime( double dt ) {
-        if ( !pinned ) {
-        	Vector3d domega = new Vector3d();
-            jinv.transform( torque, domega );
-            domega.scale( dt );
-            omega.add( domega );
-
-            double t = omega.length()*dt;
-            domega.set(omega);
-            domega.normalize();
-            if ( t > 1e-8 ) {
-                Matrix3d dR = new Matrix3d();
-            	expRodrigues(dR, domega, t);
-            	dR.mul( theta );                
-            	theta.normalizeCP( dR ); // keep it clean!
-            }
-                        
-            v.x += minv * force.x * dt;
-            v.y += minv * force.y * dt;
-            v.z += minv * force.z * dt;
-
-            x.x += v.x * dt;
-            x.y += v.y * dt;
-            x.z += v.z * dt;
-            
-            updateTransformations();
+        if ( !pinned ) {   
+			advanceVelocities(dt);
+			advancePositions(dt);
         }        
-        force.set(0,0,0);
-        torque.set(0,0,0);
     }
     
 	/**
@@ -353,6 +338,37 @@ public class RigidBody {
 		R.m12 = -wX * s + wY * wZ * c1;
 		R.m22 = c + wZ * wZ * c1;
 	}
+
+	public void advanceVelocities(double dt) {
+		v.x += force.x * dt * minv + deltaV.get(0);
+		v.y += force.y * dt * minv + deltaV.get(1);
+		v.z += force.z * dt * minv + deltaV.get(2);
+
+    	Vector3d domega = new Vector3d();
+        jinv.transform( torque, domega );
+        domega.scale( dt );
+        omega.add( domega );
+	}
+	
+	public void advancePositions(double dt) {
+		x.x += v.x * dt;
+		x.y += v.y * dt;
+		x.z += v.z * dt;
+		
+		double t = omega.length()*dt;
+    	Vector3d domega = new Vector3d();
+        domega.set(omega);
+        domega.normalize();
+        if ( t > 1e-8 ) {
+            Matrix3d dR = new Matrix3d();
+        	expRodrigues(dR, domega, t);
+        	dR.mul( theta );                
+        	theta.normalizeCP( dR ); // keep it clean!
+        }
+		
+        updateTransformations();
+	}	
+
     
     /**
      * Computes the total kinetic energy of the body.

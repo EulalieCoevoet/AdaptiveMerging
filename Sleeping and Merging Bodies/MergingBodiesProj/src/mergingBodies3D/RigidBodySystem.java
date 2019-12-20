@@ -28,7 +28,7 @@ public class RigidBodySystem {
     
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
     
-	public CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
+	public CollisionProcessor collision = new CollisionProcessor(bodies);
     
     public MouseSpringForce mouseSpring;
     
@@ -86,34 +86,109 @@ public class RigidBodySystem {
     public void advanceTime( double dt ) {
         long now = System.nanoTime();        
 
-        mouseSpring.apply();
-        // apply gravity to all bodies
-        if ( useGravity.getValue() ) {
-            Vector3d force = new Vector3d();
-            for ( RigidBody b : bodies ) {
-            	// TODO: Could probably get rid of the gravity angle??  Or do something different?  Seems silly in 3D
-                double theta = gravityAngle.getValue() / 180.0 * Math.PI;
-                force.set( Math.cos( theta ), Math.sin(theta), 0 );
-                force.scale( - b.massLinear * gravityAmount.getValue() );
-                // gravity goes directly into the accumulator!  no torque!
-                b.force.add( force );
-                b.applyCoriollisTorque(); // TODO: sadly, this appears to be buggy :(
-            }
-        }
+        for ( RigidBody b : bodies ) 
+            b.clear();
         
-        if ( processCollisions.getValue() ) {
-            // process collisions, given the current time step
-            collisionProcessor.collisionDetection( dt );
-        }
+		applyExternalForces();
+
+		collision.updateContactsMap();
+        collision.collisionDetection(dt);
+		collision.warmStart(); 	
+        
+        if ( collision.doLCP.getValue() ) 
+    		collision.solveLCP(dt); 
+        
         // advance the system by the given time step
-        for ( RigidBody b : bodies ) {
+        for ( RigidBody b : bodies ) 
             b.advanceTime(dt);
-        }
-        
+		
         computeTime = (System.nanoTime() - now) / 1e9;
         simulationTime += dt;
         totalAccumulatedComputeTime += computeTime;
     }
+    
+    /**
+	 * Apply gravity, mouse spring and impulse
+	 */
+	protected void applyExternalForces() {
+		if (useGravity.getValue()) {
+			applyGravityForce();
+		}  
+	
+		if (mouseSpring != null) {
+			mouseSpring.apply();
+			applySpringForces(); 
+		}
+		
+//		if (mouseImpulse != null && mouseImpulse.released) {
+//			impulse.set(mouseImpulse.getPickedBody());
+//			impulse.set(mouseImpulse.getPickedPoint());
+//			mouseImpulse.apply();
+//			impulse.set(mouseImpulse.getForce());
+//		} else {
+//			applyImpulse();
+//		}
+	}
+	
+	/**
+	 * Apply stored impulse to the picked body
+	 */
+//	protected void applyImpulse() {
+//		if (impulse.isHoldingForce()) {
+//			impulse.pickedBody.applyForceW(impulse.pickedPoint, impulse.force);
+//			impulse.clear();
+//		}
+//	}
+
+	/**
+	 * Apply gravity to bodies, collections and bodies in collections
+	 */
+	private void applyGravityForce() {
+		Vector3d force = new Vector3d();
+		for ( RigidBody body : bodies ) {
+			
+//			if (body.isSleeping)
+//				continue;
+			
+			//fully active, regular stepping
+			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
+			force.set( Math.cos( theta ), Math.sin(theta), 0 );
+			force.scale( - body.massLinear * gravityAmount.getValue() );
+			body.force.add( force ); // gravity goes directly into the accumulator, no torque
+            body.applyCoriollisTorque(); // TODO: sadly, this appears to be buggy :(
+			
+//			if( body instanceof RigidCollection) 
+//				applyGravityCollection((RigidCollection) body, theta);
+		}
+	}
+	
+	/**
+	 * Apply gravity to bodies in given collection
+	 * @param collection
+	 * @param theta
+	 */
+//	private void applyGravityCollection(RigidCollection collection, double theta) {
+//		Vector2d force = new Vector2d();
+//		for (RigidBody body : collection.bodies) {
+//			force.set( Math.cos( theta ), Math.sin(theta) );
+//			force.scale( body.massLinear * gravityAmount.getValue() );
+//			body.force.add( force );
+//		}
+//	}
+
+	/**
+	 * Apply spring forces
+	 */
+	private void applySpringForces() {
+//		for (RigidBody body: bodies){
+////			if (body.isSleeping)
+////				continue;
+//			for (Spring s: body.springs) {
+//				s.apply(springStiffness.getValue(), springDamping.getValue());
+//			}
+//		}
+	}
+
     
     /**
      * Finds the body which has a block that intersects the provided point.
@@ -145,7 +220,7 @@ public class RigidBodySystem {
             b.reset();
         }
         simulationTime = 0;
-        collisionProcessor.reset();
+        collision.reset();
         totalAccumulatedComputeTime = 0;        
     }
     
@@ -193,17 +268,17 @@ public class RigidBodySystem {
         }        
         if ( drawBoundingVolumesUsed.getValue() ) {
             for ( RigidBody b : bodies ) {
-                b.root.displayVisitBoundary( drawable, collisionProcessor.visitID );
+                b.root.displayVisitBoundary( drawable, collision.visitID );
             }
         }
         if ( drawContactGraph.getValue() ) {
-            for ( Contact c : collisionProcessor.contacts ) {
+            for ( Contact c : collision.contacts ) {
                 c.displayConnection(drawable);
             }
         }
         
         if ( drawContacts.getValue() ) {
-            for ( Contact c : collisionProcessor.contacts ) {
+            for ( Contact c : collision.contacts ) {
                 c.display(drawable);
             }
         }
@@ -222,8 +297,7 @@ public class RigidBodySystem {
     private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", false );
     private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", false );
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
-    private BooleanParameter processCollisions = new BooleanParameter( "process collisions", true );
-    
+
     /**
      * @return control panel for the system
      */
@@ -246,8 +320,7 @@ public class RigidBodySystem {
         cp.collapse();
         vfp.add( cp );
         
-        vfp.add( processCollisions.getControls() );
-        vfp.add( collisionProcessor.getControls() );
+        vfp.add( collision.getControls() );
         
         vfp.add( useGravity.getControls() );
         vfp.add( gravityAmount.getSliderControls(false) );

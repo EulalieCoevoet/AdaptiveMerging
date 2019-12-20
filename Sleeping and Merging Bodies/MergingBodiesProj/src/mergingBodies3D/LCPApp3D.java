@@ -172,17 +172,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         gl.glColor4f(0,0,0,1);
         String text = system.name + "\n";
         text += "bodies = " + system.bodies.size() + "\n";        
-        text += "contacts = " + system.collisionProcessor.contacts.size() + "\n";
+        text += "contacts = " + system.collision.contacts.size() + "\n";
         text += formatter.format( new Date() ) + "\n";
         text += "simulation time = " + system.simulationTime + "\n";
         text += "total compute time = " + system.totalAccumulatedComputeTime + "\n";
         text += "compute time = " + system.computeTime + "\n";
-        text += "collision detection = " + system.collisionProcessor.collisionDetectTime + "\n";
-        text += "collision processing = " + system.collisionProcessor.collisionSolveTime + "\n";
+        text += "collision detection = " + system.collision.collisionDetectTime + "\n";
+        text += "collision processing = " + system.collision.collisionSolveTime + "\n";
         text += "h = " + stepsize.getValue() + " (with " + substeps.getValue() + " substeps)\n";
-        text += "PGS iterations = " + system.collisionProcessor.iterations.getValue() + "\n";
-        text += "mu = " + system.collisionProcessor.friction.getValue() + "\n";
-        text += "r = " + system.collisionProcessor.restitution.getValue() +"\n";
+        text += "PGS iterations = " + system.collision.iterations.getValue() + "\n";
+        text += "mu = " + system.collision.friction.getValue() + "\n";
+        text += "r = " + system.collision.restitution.getValue() +"\n";
         
         if ( ! hideOverlay.getValue() ) {
         	EasyViewer.printTextLines( drawable, text, 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
@@ -476,6 +476,11 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         ImageBlocker blocker = new ImageBlocker( filename, (float) (double) whiteEpsilon.getValue() );
         sceneTranslation.set( - blocker.width/2, - blocker.height, 0 );
         system.bodies.addAll(blocker.bodies);
+        
+        for (RigidBody body: system.bodies) {
+        	body.friction = system.collision.friction.getValue();
+        	body.restitution = system.collision.restitution.getValue();
+        }
     }
     
     /**
