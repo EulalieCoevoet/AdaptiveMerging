@@ -51,7 +51,7 @@ import mintools.viewer.ShadowMap;
  * Main entry point for the application
  * @author kry
  */
-public class LCPApp implements SceneGraphNode, Interactor {
+public class LCPApp3D implements SceneGraphNode, Interactor {
 
     private EasyViewer ev;
 
@@ -72,13 +72,13 @@ public class LCPApp implements SceneGraphNode, Interactor {
      * @param args
      */
     public static void main(String[] args) {
-        new LCPApp();        
+        new LCPApp3D();        
     }
     
     /**
      * Creates the application / scene instance
      */
-    public LCPApp() {
+    public LCPApp3D() {
         system.mouseSpring = mouseSpring;
         loadSystem("datalcp/lcp.png"); // good default scene
         T.getBackingMatrix().setIdentity();
