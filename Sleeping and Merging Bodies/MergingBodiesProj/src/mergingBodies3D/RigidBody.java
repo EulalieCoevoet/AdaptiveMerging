@@ -261,6 +261,7 @@ public class RigidBody {
      */
     public void applyContactForceW( Point3d contactPointW, Vector3d contactForceW ) {
         force.add( contactForceW );
+        
         Vector3d r = new Vector3d();
         r.sub( contactPointW, x );
         Vector3d torqueW = new Vector3d();
@@ -278,7 +279,7 @@ public class RigidBody {
 	    	Vector3d tmp2 = new Vector3d();
 	    	massAngular.transform( omega, tmp );
 	    	tmp2.cross( tmp, omega );
-	    	torque.add(tmp2);
+	    	//torque.sub(tmp2); // seems like this should be added, but could also be a sign error. :(
     	}
     }
     

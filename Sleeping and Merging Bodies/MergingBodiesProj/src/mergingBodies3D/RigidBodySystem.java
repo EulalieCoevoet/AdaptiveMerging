@@ -97,7 +97,7 @@ public class RigidBodySystem {
                 force.scale( - b.massLinear * gravityAmount.getValue() );
                 // gravity goes directly into the accumulator!  no torque!
                 b.force.add( force );
-                b.applyCoriollisTorque();
+                b.applyCoriollisTorque(); // TODO: sadly, this appears to be buggy :(
             }
         }
         

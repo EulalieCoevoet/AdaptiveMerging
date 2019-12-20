@@ -80,6 +80,7 @@ public class MouseSpringForce {
         // spring damping forces
         picked.getSpatialVelocity( grabPointBW, grabPointV );
         force.scale( - grabPointV.dot( direction ) * c, direction );
+        
         picked.applyContactForceW( grabPointBW, force );        
     }
     
