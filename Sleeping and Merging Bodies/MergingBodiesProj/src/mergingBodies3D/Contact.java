@@ -38,6 +38,18 @@ public class Contact {
     /** Contact tangent2 in body1 coordinates */
     Vector3d tangent2B = new Vector3d();
     
+	/** Contact force being applied by this contact on body1*/
+	Vector3d forceB1 = new Vector3d();
+
+	/** Contact torque being applied by this contact on body1*/
+	Vector3d torqueB1 = new Vector3d();
+
+	/** Contact force being applied by this contact on body2*/
+	Vector3d forceB2 = new Vector3d();
+
+	/** Contact torque being applied by this contact on body2*/
+	Vector3d torqueB2 = new Vector3d();
+    
     /** Position of contact point in world coordinates */
     Point3d contactW = new Point3d();
     
@@ -208,31 +220,33 @@ public class Contact {
 	 * Stores contact forces and torques for visualization purposes
 	 * @param dt
 	 */
-	public void computeContactForce(boolean computeInCollection, double dt) {
+	public void computeForces(boolean computeInCollection, double dt) {
 
-//		DenseVector jn;
-//		DenseVector jt;
-//		
-//		Vector2d cForce = new Vector2d();
-//		double cTorque = 0;
-//
-//		jn = (body1.isInCollection() && !computeInCollection)? this.jnc: this.jn;
-//		jt = (body1.isInCollection() && !computeInCollection)? this.jtc: this.jt;
-//		cForce.set(lambda.x*jn.get(0) + lambda.y*jt.get(0),lambda.x*jn.get(1) + lambda.y*jt.get(1));
-//		cTorque = lambda.x*jn.get(2) + lambda.y*jt.get(2);
-//		cForce.scale(1/dt);
-//		cTorque/=dt;
-//		contactForceB1.set(cForce);
-//		contactTorqueB1 = cTorque;
-//
-//		jn = (body2.isInCollection() && !computeInCollection)? this.jnc: this.jn;
-//		jt = (body2.isInCollection() && !computeInCollection)? this.jtc: this.jt;
-//		cForce.set(lambda.x*jn.get(3) + lambda.y*jt.get(3),lambda.x*jn.get(4) + lambda.y*jt.get(4));
-//		cTorque = lambda.x*jn.get(5) + lambda.y*jt.get(5);
-//		cForce.scale(1/dt);
-//		cTorque/=dt;
-//		contactForceB2.set(cForce);
-//		contactTorqueB2 = cTorque;
+		DenseMatrix j;
+
+		j = this.j; //(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
+		double f1 = lambda.x*j.get(0,0) + lambda.y*j.get(1,0) + lambda.z*j.get(2,0);
+		double f2 = lambda.x*j.get(0,1) + lambda.y*j.get(1,1) + lambda.z*j.get(2,1);
+		double f3 = lambda.x*j.get(0,2) + lambda.y*j.get(1,2) + lambda.z*j.get(2,2);
+		forceB1.set(f1,f2,f3);
+		forceB1.scale(1/dt);
+		f1 = lambda.x*j.get(0,3) + lambda.y*j.get(1,3) + lambda.z*j.get(2,3);
+		f2 = lambda.x*j.get(0,4) + lambda.y*j.get(1,4) + lambda.z*j.get(2,4);
+		f3 = lambda.x*j.get(0,5) + lambda.y*j.get(1,5) + lambda.z*j.get(2,5);
+		torqueB1.set(f1,f2,f3);
+		torqueB1.scale(1/dt);
+
+		j = this.j; //(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
+		f1 = lambda.x*j.get(0,6) + lambda.y*j.get(1,6) + lambda.z*j.get(2,6);
+		f2 = lambda.x*j.get(0,7) + lambda.y*j.get(1,7) + lambda.z*j.get(2,7);
+		f3 = lambda.x*j.get(0,8) + lambda.y*j.get(1,8) + lambda.z*j.get(2,8);
+		forceB2.set(f1,f2,f3);
+		forceB2.scale(1/dt);
+		f1 = lambda.x*j.get(0,9) + lambda.y*j.get(1,9) + lambda.z*j.get(2,9);
+		f2 = lambda.x*j.get(0,10) + lambda.y*j.get(1,10) + lambda.z*j.get(2,10);
+		f3 = lambda.x*j.get(0,11) + lambda.y*j.get(1,11) + lambda.z*j.get(2,11);
+		torqueB2.set(f1,f2,f3);
+		torqueB2.scale(1/dt);
 	}
     
     /**

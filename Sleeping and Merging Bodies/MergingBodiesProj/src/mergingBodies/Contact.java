@@ -47,16 +47,16 @@ public class Contact {
 	Vector2d normalB2 = new Vector2d();
 
 	/** Contact force being applied by this contact on body1*/
-	Vector2d contactForceB1 = new Vector2d();
+	Vector2d forceB1 = new Vector2d();
 
 	/** Contact torque being applied by this contact on body1*/
-	double contactTorqueB1 = 0;
+	double torqueB1 = 0;
 
 	/** Contact force being applied by this contact on body2*/
-	Vector2d contactForceB2 = new Vector2d();
+	Vector2d forceB2 = new Vector2d();
 
 	/** Contact torque being applied by this contact on body2*/
-	double contactTorqueB2 = 0;
+	double torqueB2 = 0;
 
 	/** Position of contact point in world coordinates */
 	Point2d contactW = new Point2d();
@@ -204,31 +204,24 @@ public class Contact {
 	 * Stores contact forces and torques for visualization purposes
 	 * @param dt
 	 */
-	public void computeContactForce(boolean computeInCollection, double dt) {
+	public void computeForces(boolean computeInCollection, double dt) {
 
 		DenseVector jn;
 		DenseVector jt;
-		
-		Vector2d cForce = new Vector2d();
-		double cTorque = 0;
 
 		jn = (body1.isInCollection() && !computeInCollection)? this.jnc: this.jn;
 		jt = (body1.isInCollection() && !computeInCollection)? this.jtc: this.jt;
-		cForce.set(lambda.x*jn.get(0) + lambda.y*jt.get(0),lambda.x*jn.get(1) + lambda.y*jt.get(1));
-		cTorque = lambda.x*jn.get(2) + lambda.y*jt.get(2);
-		cForce.scale(1/dt);
-		cTorque/=dt;
-		contactForceB1.set(cForce);
-		contactTorqueB1 = cTorque;
+		forceB1.set(lambda.x*jn.get(0) + lambda.y*jt.get(0),lambda.x*jn.get(1) + lambda.y*jt.get(1));
+		torqueB1 = lambda.x*jn.get(2) + lambda.y*jt.get(2);
+		forceB1.scale(1/dt);
+		torqueB1/=dt;
 
 		jn = (body2.isInCollection() && !computeInCollection)? this.jnc: this.jn;
 		jt = (body2.isInCollection() && !computeInCollection)? this.jtc: this.jt;
-		cForce.set(lambda.x*jn.get(3) + lambda.y*jt.get(3),lambda.x*jn.get(4) + lambda.y*jt.get(4));
-		cTorque = lambda.x*jn.get(5) + lambda.y*jt.get(5);
-		cForce.scale(1/dt);
-		cTorque/=dt;
-		contactForceB2.set(cForce);
-		contactTorqueB2 = cTorque;
+		forceB2.set(lambda.x*jn.get(3) + lambda.y*jt.get(3),lambda.x*jn.get(4) + lambda.y*jt.get(4));
+		torqueB2 = lambda.x*jn.get(5) + lambda.y*jt.get(5);
+		forceB2.scale(1/dt);
+		torqueB2/=dt;
 	}
 	
 	/**
@@ -447,8 +440,8 @@ public class Contact {
 		gl.glBegin( GL.GL_LINES );
 
 		double scale = forceVizScale.getValue();
-		gl.glVertex2d(contactW.x + scale*contactForceB1.x, contactW.y+scale*contactForceB1.y);
-		gl.glVertex2d(contactW.x + scale*contactForceB2.x, contactW.y+scale*contactForceB2.y);
+		gl.glVertex2d(contactW.x + scale*forceB1.x, contactW.y+scale*forceB1.y);
+		gl.glVertex2d(contactW.x + scale*forceB2.x, contactW.y+scale*forceB2.y);
 		
 		gl.glEnd();
 	}

@@ -424,7 +424,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	public void computeInternalContactsForce(double dt) {
 		for (Contact c : internalContacts) {
-			c.computeContactForce(true, dt);
+			c.computeForces(true, dt);
 		}
 	}
 

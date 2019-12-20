@@ -136,7 +136,7 @@ public class CollisionProcessor {
 	 */
 	public void computeContactsForce(double dt) {
 		for (Contact c: contacts)
-			c.computeContactForce(false, dt);	
+			c.computeForces(false, dt);	
 	}
 
 	/**go through each element in contacts 2.
@@ -151,7 +151,6 @@ public class CollisionProcessor {
 			c.index = contacts.indexOf(c);
 		}
 	}
-
     
     /**
      * Checks for collisions between bodies.  Note that you can optionaly implement some broad

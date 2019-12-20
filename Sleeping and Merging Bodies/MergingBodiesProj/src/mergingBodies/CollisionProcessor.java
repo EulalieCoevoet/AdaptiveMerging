@@ -330,7 +330,7 @@ public class CollisionProcessor {
 	 */
 	public void computeContactsForce(double dt) {
 		for (Contact c: contacts)
-			c.computeContactForce(false, dt);	
+			c.computeForces(false, dt);	
 	}
 
 	/**go through each element in contacts 2.
