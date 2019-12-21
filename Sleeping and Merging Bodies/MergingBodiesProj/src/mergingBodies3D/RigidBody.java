@@ -259,6 +259,10 @@ public class RigidBody {
         jinv.transform( torque, domega );
         domega.scale( dt );
         omega.add( domega );
+        
+        omega.x += deltaV.get(3);
+        omega.y += deltaV.get(4);
+        omega.z += deltaV.get(5);
 	}
 	
 	public void advancePositions(double dt) {
