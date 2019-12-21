@@ -11,7 +11,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-import mergingBodies.BodyPairContact;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
@@ -60,8 +59,9 @@ public class CollisionProcessor {
 	/** keeps track of the time used to update the contacts inside the collections on the last call */
 	double collectionUpdateTime = 0;
 	
+	// TODO: uncomment this when we are ready... 
 	/**list that keeps track of all the body pair contacts that occurred in this time step */
-	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
+	//public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
     
     /**
      * Processes all collisions 
@@ -212,7 +212,6 @@ public class CollisionProcessor {
     
     /**
      * Checks for collision between boundary blocks on two rigid bodies.
-     * TODO: This needs to be improved as the n-squared block test is too slow!
      * @param body1
      * @param body2
      */
@@ -222,13 +221,7 @@ public class CollisionProcessor {
 		} else if (body2 instanceof PlaneRigidBody ) {
 			findCollisionsWithPlane( body1.root, body1, (PlaneRigidBody) body2 );
 		} else {
-			if ( ! useBVTree.getValue() ) {
-	            for ( Block b1 : body1.blocks ) {
-	                for ( Block b2 : body2.blocks ) {
-	                    processCollision( body1, b1, body2, b2 );
-	                }
-	            }
-	        }
+			findCollisions(body1.root, body2.root, body1, body2);
 		}
 	}
 	
@@ -267,6 +260,45 @@ public class CollisionProcessor {
 				findCollisionsWithPlane( node1.child2, body1,planeBody );
 			}
 		}		
+	}
+	
+	/** 
+	 * Recurses through all of body_1, then body_2
+	 * @param node1
+	 * @param node2
+	 * @param body1
+	 * @param body2
+	 */
+	private void findCollisions(BVNode node1, BVNode node2, RigidBody body1, RigidBody body2) {
+		
+		if(node1.visitID != visitID) {
+			node1.visitID = visitID;
+			node1.boundingDisc.updatecW();
+		}
+		if (node2.visitID != visitID) {
+			node2.visitID = visitID;
+			node2.boundingDisc.updatecW();
+		}
+
+		if (node1.boundingDisc.intersects(node2.boundingDisc)) {
+			if (node1.isLeaf() && node2.isLeaf()) {
+				Block leafBlock1 = node1.leafBlock;
+				Block leafBlock2 = node2.leafBlock;
+
+				processCollision(body1, leafBlock1, body2, leafBlock2);
+				
+			} else if(node1.isLeaf()|| node1.boundingDisc.r <= node2.boundingDisc.r){
+				//if they overlap, and body 1 is either a leaf or smaller than body_2, break down body_2
+
+				findCollisions(node1, node2.child1, body1, body2);
+				findCollisions(node1, node2.child2, body1, body2);
+			} else if(node2.isLeaf() || node2.boundingDisc.r <= node1.boundingDisc.r) {
+				//if they overlap, and body 2 is either a leaf or smaller than body_1, break down body_1
+
+				findCollisions(node1.child1, node2, body1, body2);
+				findCollisions(node1.child2, node2, body1, body2);
+			}
+		}
 	}
     
     /**
@@ -377,11 +409,7 @@ public class CollisionProcessor {
     
     /** Flag for switching between penalty based contact and contact constraints */
     public BooleanParameter doLCP = new BooleanParameter( "do LCP solve", false );
-    
-    /** Flag for enabling the use of hierarchical collision detection for body pairs */
-    private BooleanParameter useBVTree = new BooleanParameter( "use BVTree", false );
-    
-    
+     
     /**
      * @return controls for the collision processor
      */
@@ -391,7 +419,6 @@ public class CollisionProcessor {
         
 		vfp.add( shuffle.getControls() );
 		
-        vfp.add( useBVTree.getControls() );
         vfp.add( doLCP.getControls() );
         vfp.add( iterations.getSliderControls() );
         vfp.add( restitution.getSliderControls(false) );

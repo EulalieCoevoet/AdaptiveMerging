@@ -20,7 +20,6 @@ package mergingBodies3D;
 import java.util.Collection;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 /**
  * Algorithm for computing Minimum Enclosing Circle using Welzl's algorithm based on Sunshine's implementation (www.sunshine2k.de)
@@ -68,20 +67,15 @@ public class MinimumEnclosingCircle {
      * Creates a local copy of the collection of points 
      * @param points 
      */    
-    // TODO: change this method
     public MinimumEnclosingCircle( Collection<Point3d> points ) {
-    	answer.centre = new Point3d(0.,0.,0.);
-    	for ( Point3d p : points ) 
+    	// TODO: Naive loose bound for now... fix the tight bounds later if needed!
+    	for ( Point3d p : points ) { 
     		answer.centre.add(p);
-    	answer.centre.scale(1/points.size());
-        
-		Vector3d dir = new Vector3d(0.,0.,0.);
-		answer.radius = 0.;
+    	}
+    	answer.centre.scale(1.0/points.size()); // watch out for integer division!
+		answer.radius = 0;
     	for ( Point3d p : points ) {
-    		dir.sub(answer.centre, p);
-    		double dist = Math.sqrt(dir.lengthSquared());
-    		if (dist>answer.radius) 
-    			answer.radius = dist;
+    		answer.radius = Math.max( answer.radius,  p.distance( answer.centre) );
     	}
 
 //        try {

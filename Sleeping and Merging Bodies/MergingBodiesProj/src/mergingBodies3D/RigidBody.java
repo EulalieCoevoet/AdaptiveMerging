@@ -389,7 +389,7 @@ public class RigidBody {
     public void getSpatialVelocity( Point3d contactPointW, Vector3d result ) {
         Vector3d tmp = new Vector3d();
     	tmp.sub( contactPointW, x );
-        result.cross( tmp, omega );
+        result.cross( omega, tmp );
         result.add( v );
     }
     
