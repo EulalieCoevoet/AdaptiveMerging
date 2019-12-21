@@ -291,14 +291,16 @@ public class Contact {
 		bn = 0; bt1 = 0; bt2 = 0;
 		
 		j = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;		
-		u.add(b1.v, b1.force);
-		u.scale(m1inv*dt);
+		u.set(b1.force);
+		u.scale(m1inv*dt);	
+		u.add(b1.v);
 		bn += u.x*j.get(0,0) + u.y*j.get(0,1) + u.z*j.get(0,2);
 		bt1 += u.x*j.get(1,0) + u.y*j.get(1,1) + u.z*j.get(1,2);
 		bt2 += u.x*j.get(2,0) + u.y*j.get(2,1) + u.z*j.get(2,2);
 		u.set(b1.torque.x*j1inv.m00+b1.torque.y*j1inv.m01+b1.torque.z*j1inv.m02,
 			b1.torque.x*j1inv.m10+b1.torque.y*j1inv.m11+b1.torque.z*j1inv.m12,
 			b1.torque.x*j1inv.m20+b1.torque.y*j1inv.m21+b1.torque.z*j1inv.m22);
+		u.scale(dt);
 		u.add(b1.omega);
 		bn += u.x*j.get(0,3) + u.y*j.get(0,4) + u.z*j.get(0,5);
 		bt1 += u.x*j.get(1,3) + u.y*j.get(1,4) + u.z*j.get(1,5);
@@ -310,14 +312,16 @@ public class Contact {
 		bn += bBounce;
 		
 		j = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;
-		u.add(b2.v, b2.force);
-		u.scale(m2inv*dt);		
+		u.set(b2.force);
+		u.scale(m2inv*dt);	
+		u.add(b2.v);
 		bn += u.x*j.get(0,6) + u.y*j.get(0,7) + u.z*j.get(0,8);
 		bt1 += u.x*j.get(1,6) + u.y*j.get(1,7) + u.z*j.get(1,8);
 		bt2 += u.x*j.get(2,6) + u.y*j.get(2,7) + u.z*j.get(2,8);
 		u.set(b2.torque.x*j2inv.m00+b2.torque.y*j2inv.m01+b2.torque.z*j2inv.m02,
 			b2.torque.x*j2inv.m10+b2.torque.y*j2inv.m11+b2.torque.z*j2inv.m12,
 			b2.torque.x*j2inv.m20+b2.torque.y*j2inv.m21+b2.torque.z*j2inv.m22);
+		u.scale(dt);
 		u.add(b2.omega);
 		bn += u.x*j.get(0,9) + u.y*j.get(0,10) + u.z*j.get(0,11);
 		bt1 += u.x*j.get(1,9) + u.y*j.get(1,10) + u.z*j.get(1,11);
