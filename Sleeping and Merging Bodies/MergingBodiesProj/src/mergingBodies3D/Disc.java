@@ -48,6 +48,18 @@ public class Disc {
         r = mec.answer.radius + Block.radius;
     }
     
+    /** 
+     * Copies the disc but sets a different corresponding rigid body
+     * @param other
+     * @param body
+     */
+    public Disc( Disc other, RigidBody body ) {
+    	this.cB.set( other.cB );
+    	this.cW.set( other.cW );
+    	this.r = other.r;
+    	this.body = body;
+    }
+    
     /** number of points in the circle for drawing bounding circles */
     static private final int size = 30;
     static private FloatBuffer vertexBuffer;    

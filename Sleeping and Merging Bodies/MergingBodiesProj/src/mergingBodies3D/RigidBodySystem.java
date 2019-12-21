@@ -188,21 +188,6 @@ public class RigidBodySystem {
 //			}
 //		}
 	}
-
-    
-    /**
-     * Finds the body which has a block that intersects the provided point.
-     * @param p
-     * @return a body containing the given point
-     */
-    public RigidBody pickBody( Point3d p ) {
-        for ( RigidBody body : bodies ) {
-            if ( body.intersect( p ) ) {
-                return body;
-            }
-        }
-        return null;
-    }
     
     /**
      * Removes a rigid body from the system
@@ -243,9 +228,10 @@ public class RigidBodySystem {
             Block.alpha = (float) (double) transparency.getValue();
             // gross... need to rebuild display lists for the currently set transparency
             // which is potentially slow and bad news (memory thrashing) for openGL if we do this excessively!
-            RigidBody.clearDisplayLists( gl );
-            for ( RigidBody b : bodies ) {
-                b.myListID = -1;
+            // TODO: This display list stuff should probably be changed in 3D :/
+            RigidBodyGeom.clearDisplayLists( gl );
+            for ( RigidBody b : bodies ) {                
+            	b.geom.myListID = -1;
             }
         }        
         if ( drawBodies.getValue() ) {

@@ -1,0 +1,14 @@
+<root>
+
+    <body type="box" name="box1" dim="1 2 3">
+        <x> 0 10 0 </x>
+    </body>
+
+    <body type="sphere" name="sphere1" r="2">
+        <x> 0 10 0 </x>
+    </body>
+
+    <body type="plane" name="plane1" p="0 0 0" n="0 1 0">
+    </body>
+
+</root>

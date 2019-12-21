@@ -1,7 +1,6 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -23,11 +22,7 @@ public class RigidBody {
     /** Variable to keep track of identifiers that can be given to rigid bodies */
     static public int nextIndex = 0;
     
-    /** Block approximation of geometry */
-    ArrayList<Block> blocks;
-    
-    /** Boundary blocks */
-    ArrayList<Block> boundaryBlocks;
+    RigidBodyGeom geom;
         
     BVNode root;
     
@@ -83,7 +78,11 @@ public class RigidBody {
     /** inverse of the angular mass, or zero if pinned, for REST pose */
     Matrix3d jinv0 = new Matrix3d();
     
-	/** bounding box, in the body frame */
+	/** 
+	 * bounding box, in the body frame (all 8 points)
+	 * TODO: the purpose of this is to bound maximum velocity relative to another
+	 * body so we might want to do something specific or different for special geometry.
+	 */
 	public ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>(); 
 	
 	/** Friction coefficient */
@@ -99,125 +98,38 @@ public class RigidBody {
 	public boolean activateMagnet = false;
     
 	/**
-	 * Default empty constructor
+	 * Constructs a new rigid body
+	 * @param massLinear  can be zero if pinned
+	 * @param massAngular can be null if pinned
+	 * @param pinned
+	 * @param boundingBoxB can be null if pinned
 	 */
-	public RigidBody() {
+	public RigidBody( double massLinear, Matrix3d massAngular, boolean pinned, ArrayList<Point3d> boundingBoxB ) {
+		this.pinned = pinned;
+        if ( pinned ) {
+        	this.massLinear = 0;
+        	this.minv = 0;
+        	this.massAngular.setZero();
+        	this.massAngular0.setZero();
+        	this.jinv0.setZero();
+        	this.jinv.setZero();        
+        } else {
+        	this.boundingBoxB.addAll( boundingBoxB );
+        	this.massLinear = massLinear;
+        	this.minv = 1.0 / massLinear;
+            this.massAngular0.set( massAngular );
+            this.massAngular.set( massAngular );            
+        	this.jinv0.invert(massAngular0);
+	        this.jinv.set( jinv0 );
+        } 
+        theta.setIdentity();
 	}
 	
-    /**
-     * Creates a new rigid body from a collection of blocks
-     * @param blocks
-     * @param boundaryBlocks
-     */
-    public RigidBody( ArrayList<Block> blocks, ArrayList<Block> boundaryBlocks ) {
-
-        this.blocks = blocks;
-        this.boundaryBlocks = boundaryBlocks;   
-		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-		Point3d bbminB = new Point3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);     
-        // compute the mass and center of mass position   
-        for ( Block b : blocks ) {
-            double mass = b.getColourMass();
-            massLinear += mass;            
-            x0.x += b.j * mass;
-			bbmaxB.x = Math.max(bbmaxB.x, b.j + Block.h);
-			bbminB.x = Math.min(bbminB.x, b.j - Block.h);
-            x0.y += b.i * mass; 
-			bbmaxB.y = Math.max(bbmaxB.y, b.i + Block.h);
-			bbminB.y = Math.min(bbminB.y, b.i - Block.h);
-            x0.z += b.k * mass;
-			bbmaxB.z = Math.max(bbmaxB.z, b.k + Block.h);
-			bbminB.z = Math.min(bbminB.z, b.k - Block.h);
-        }
-
-        x0.scale ( 1 / massLinear );
-        // set block positions in world and body coordinates 
-        for ( Block b : blocks ) {
-            b.pB.x = b.j - x0.x;
-            b.pB.y = b.i - x0.y;
-            b.pB.z = b.k - x0.z;
-        }
-        
-        x.set(x0);      
-        theta.setIdentity();
-        transformB2W.set( theta, x );
-        transformW2B.set( theta, x );
-        transformW2B.invert();		
-        
-        transformW2B.transform(bbmaxB);
-		transformW2B.transform(bbminB);
-		boundingBoxB.add(bbmaxB);
-		boundingBoxB.add(new Point3d(bbminB.x,bbmaxB.y,bbmaxB.z));
-		boundingBoxB.add(new Point3d(bbmaxB.x,bbminB.y,bbmaxB.z));
-		boundingBoxB.add(new Point3d(bbmaxB.x,bbmaxB.y,bbminB.z));
-		boundingBoxB.add(bbminB);
-		boundingBoxB.add(new Point3d(bbmaxB.x,bbminB.y,bbminB.z));
-		boundingBoxB.add(new Point3d(bbminB.x,bbmaxB.y,bbminB.z));
-		boundingBoxB.add(new Point3d(bbminB.x,bbminB.y,bbmaxB.z));
-        
-//        // Approximate computation of the rotational inertia
-//        double l=bbmaxB.x-bbminB.x; 
-//        double w=bbmaxB.y-bbminB.y;  
-//        double h=bbmaxB.z-bbminB.z; 
-//        massAngular0.setZero();
-//        massAngular0.m00 = massLinear/12.*(w*w+h*h);
-//        massAngular0.m11 = massLinear/12.*(l*l+h*h);
-//        massAngular0.m22 = massLinear/12.*(w*w+l*l);
-        
-        // prevent zero angular inertia in the case of a single block
-        if ( blocks.size() == 1 ) {
-            Block b = blocks.get(0);
-            double mass = b.getColourMass();
-            massAngular0.m00 = mass * (1+1)/12;
-            massAngular0.m11 = mass * (1+1)/12;
-            massAngular0.m22 = mass * (1+1)/12;
-        } else {
-        	// always prevent a zero angular inertia in 
-        	// whatever the smallest axis, if this is a
-        	// single row or column of blocks...
-        	massAngular0.m00 = (1+1)/12.0;
-            massAngular0.m11 = (1+1)/12.0;
-            massAngular0.m22 = (1+1)/12.0;
-        	for ( Block b : blocks ) {
-                double mass = b.getColourMass();
-        		double x = b.pB.x;
-        		double y = b.pB.y;
-        		double z = b.pB.z;
-           		massAngular0.m00 += mass * ( y*y + z*z );
-        		massAngular0.m11 += mass * ( x*x + z*z );
-        		massAngular0.m22 += mass * ( x*x + y*y );        	
-        		massAngular0.m01 += mass * x*y;
-        		massAngular0.m10 += mass * x*y;        		
-        		massAngular0.m02 += mass * x*z;
-        		massAngular0.m20 += mass * x*z;        		
-        		massAngular0.m12 += mass * y*z;
-        		massAngular0.m21 += mass * y*z;
-        	}
-	    }
-        jinv0.invert(massAngular0);
-        massAngular.set( massAngular );
-        jinv.set( jinv0 );
-             
-        root = new BVNode( boundaryBlocks, this );
-        
-        pinned = isAllBlueBlocks();
-        
-        if ( pinned ) {
-            minv = 0;
-            jinv.setZero();
-        } else {
-            minv = 1/massLinear;
-            jinv.invert(massAngular0);
-        }
-    }
-    
     /**
      * Creates a copy of the provided rigid body 
      * @param body
      */
     public RigidBody( RigidBody body ) {
-        blocks = body.blocks;
-        boundaryBlocks = body.boundaryBlocks;
         massLinear = body.massLinear;
         massAngular0 = body.massAngular0;
         x0.set( body.x0 );
@@ -228,8 +140,7 @@ public class RigidBody {
         // we can share the blocks and boundary blocks...
         // no need to update them as they are in the correct body coordinates already        
         updateTransformations();
-        // We do need our own bounding volumes!  can't share!
-        root = new BVNode( boundaryBlocks, this );        
+        root = new BVNode( body.root, this ); // create a copy
         pinned = body.pinned;
         minv = body.minv;
         jinv = body.jinv;
@@ -369,7 +280,6 @@ public class RigidBody {
         updateTransformations();
 	}	
 
-    
     /**
      * Computes the total kinetic energy of the body.
      * @return the total kinetic energy
@@ -392,34 +302,7 @@ public class RigidBody {
         result.cross( omega, tmp );
         result.add( v );
     }
-    
-    /**
-     * Checks if all blocks are shades of blue
-     * @return true if all blue
-     */
-    boolean isAllBlueBlocks() {
-        for ( Block b : blocks ) {
-            if ( ! (b.c.x == b.c.y && b.c.x < b.c.z) ) return false;
-        }
-        return true;
-    }
-
-    /**
-     * Checks to see if the point intersects the body in its current position
-     * @param pW
-     * @return true if intersection
-     */
-    public boolean intersect( Point3d pW ) {
-        if ( root.boundingDisc.isInDisc( pW ) ) {
-            Point3d pB = new Point3d();
-            transformW2B.transform( pW, pB );
-            for ( Block b : blocks ) {
-                if ( b.pB.distanceSquared( pB ) < Block.radius * Block.radius ) return true;
-            }
-        }
-        return false;
-    }
-    
+        
     /**
      * Resets this rigid body to its initial position and zero velocity, recomputes transforms
      */
@@ -432,56 +315,21 @@ public class RigidBody {
         transformW2B.set( transformB2W );
         transformW2B.invert();
     }
-    
-    /** Map to keep track of display list IDs for drawing our rigid bodies efficiently */
-    static private HashMap<ArrayList<Block>,Integer> mapBlocksToDisplayList = new HashMap<ArrayList<Block>,Integer>();
-    
-    /** display list ID for this rigid body */
-    int myListID = -1;
-    
-    /**
-     * Deletes all display lists.
-     * This is called when clearing all rigid bodies from the simulation, or when display lists need to be updated due to 
-     * changing transparency of the blocks.
-     * @param gl
-     */
-    static public void clearDisplayLists( GL2 gl ) {
-        for ( int id : mapBlocksToDisplayList.values() ) {
-            gl.glDeleteLists(id, 1);
-        }
-        mapBlocksToDisplayList.clear();
-    }
-    
+   
     /** 
      * Draws the blocks of a rigid body
      * @param drawable
      */
     public void display( GLAutoDrawable drawable ) {
+    	
         GL2 gl = drawable.getGL().getGL2();
-        gl.glPushMatrix();
-        
+        gl.glPushMatrix();        
         FlatMatrix4d M = new FlatMatrix4d();
-        M.setBackingMatrix( transformB2W.T );
-        
+        M.setBackingMatrix( transformB2W.T );        
         gl.glMultMatrixd( M.asArray(),0 );
         
-        if ( myListID == -1 ) {
-            Integer ID = mapBlocksToDisplayList.get(blocks);
-            if ( ID == null ) {
-                myListID = gl.glGenLists(1);
-                gl.glNewList( myListID, GL2.GL_COMPILE_AND_EXECUTE );
-                for ( Block b : blocks ) {
-                    b.display( drawable );
-                }
-                gl.glEndList();
-                mapBlocksToDisplayList.put( blocks, myListID );
-            } else {
-                myListID = ID;
-                gl.glCallList(myListID);
-            }
-        } else {
-            gl.glCallList(myListID);
-        }
+        geom.display( drawable );
+    	
         gl.glPopMatrix();
     }
     

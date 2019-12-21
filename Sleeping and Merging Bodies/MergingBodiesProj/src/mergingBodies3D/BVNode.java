@@ -31,6 +31,18 @@ public class BVNode {
     /** The visitID keeps track of when this node was last visited */
     int visitID;
     
+    /** 
+     * Copies the subtree and sets the given body as the associated rigid body.
+     * @param n
+     * @param body
+     */
+    public BVNode( BVNode n, RigidBody body ) {
+    	boundingDisc = new Disc( n.boundingDisc, body );
+    	if ( n.child1 != null ) child1 = new BVNode( child1, body );
+    	if ( n.child2 != null ) child2 = new BVNode( child2, body );
+    	leafBlock = n.leafBlock; // This is sharable!    	
+    }
+    
     /**
      * Create a bounding volume node from a list of blocks. An axis aligned
      * bounding box is computed for the blocks, and the blocks are split in 

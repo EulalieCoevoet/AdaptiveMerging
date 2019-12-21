@@ -110,11 +110,11 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         
         if ( deleteDisplayListRequest ) {
             deleteDisplayListRequest = false;
-            RigidBody.clearDisplayLists( gl );
+            RigidBodyGeom.clearDisplayLists( gl );
             // if by chance, this request is made when there are bodies,
             // the bodies will need their listsIDs reset
             for ( RigidBody b : system.bodies ) {
-                b.myListID = -1;
+                b.geom.myListID = -1;
             }
         }
         

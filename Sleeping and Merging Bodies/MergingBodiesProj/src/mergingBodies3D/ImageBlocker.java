@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Color3f;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -67,8 +68,8 @@ public class ImageBlocker {
                 		// put this aside and make a PlaneRigidBody later...
                 		cyanBlockList.add( new Point3d(x,height - y,0) );
                 	} else {
-                		RigidBody body = new RigidBody( blocks, boundaryBlocks );   
-	                	for ( Block b : blocks ) {
+                		RigidBody body = createRigidBodyFromBlocks( blocks, boundaryBlocks );   
+//	                	for ( Block b : blocks ) {
 //	                		if ( isRed( b.c ) ) {
 //	                			Spring s = new Spring( b.pB, body );
 //	                			body.springs.add(s);                				
@@ -79,7 +80,7 @@ public class ImageBlocker {
 //	                			controllableSprings.add(s);
 //	                			body.magneticBody = true;
 //	                		}
-	                	}                	
+//	                	}                	
 	                	bodies.add( body );
                 	}
                 }
@@ -150,6 +151,108 @@ public class ImageBlocker {
         }        
     }
     
+    private RigidBody createRigidBodyFromBlocks( ArrayList<Block> blocks, ArrayList<Block> boundaryBlocks ) {
+		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+		Point3d bbminB = new Point3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);     
+        // compute the mass and center of mass position   
+		double massLinear = 0;
+		Point3d x0 = new Point3d();
+		Matrix3d theta = new Matrix3d();
+        for ( Block b : blocks ) {
+            double mass = b.getColourMass();
+            massLinear += mass;            
+            x0.x += b.j * mass;
+			bbmaxB.x = Math.max(bbmaxB.x, b.j + Block.h);
+			bbminB.x = Math.min(bbminB.x, b.j - Block.h);
+            x0.y += b.i * mass; 
+			bbmaxB.y = Math.max(bbmaxB.y, b.i + Block.h);
+			bbminB.y = Math.min(bbminB.y, b.i - Block.h);
+            x0.z += b.k * mass;
+			bbmaxB.z = Math.max(bbmaxB.z, b.k + Block.h);
+			bbminB.z = Math.min(bbminB.z, b.k - Block.h);
+        }
+
+        x0.scale ( 1 / massLinear );
+        // set block positions in world and body coordinates 
+        for ( Block b : blocks ) {
+            b.pB.x = b.j - x0.x;
+            b.pB.y = b.i - x0.y;
+            b.pB.z = b.k - x0.z;
+        }
+        
+        theta.setIdentity();
+        RigidTransform transformB2W = new RigidTransform();
+        RigidTransform transformW2B = new RigidTransform();
+        
+        transformB2W.set( theta, x0 );
+        transformW2B.set( theta, x0 );
+        transformW2B.invert();		
+        
+        transformW2B.transform(bbmaxB);
+		transformW2B.transform(bbminB);
+		ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>();
+		boundingBoxB.add(bbmaxB);
+		boundingBoxB.add(new Point3d(bbminB.x,bbmaxB.y,bbmaxB.z));
+		boundingBoxB.add(new Point3d(bbmaxB.x,bbminB.y,bbmaxB.z));
+		boundingBoxB.add(new Point3d(bbmaxB.x,bbmaxB.y,bbminB.z));
+		boundingBoxB.add(bbminB);
+		boundingBoxB.add(new Point3d(bbmaxB.x,bbminB.y,bbminB.z));
+		boundingBoxB.add(new Point3d(bbminB.x,bbmaxB.y,bbminB.z));
+		boundingBoxB.add(new Point3d(bbminB.x,bbminB.y,bbmaxB.z));
+                
+		Matrix3d massAngular0 = new Matrix3d();
+        // prevent zero angular inertia in the case of a single block
+        if ( blocks.size() == 1 ) {
+            Block b = blocks.get(0);
+            double mass = b.getColourMass();
+            massAngular0.m00 = mass * (1+1)/12;
+            massAngular0.m11 = mass * (1+1)/12;
+            massAngular0.m22 = mass * (1+1)/12;
+        } else {
+        	// always prevent a zero angular inertia in 
+        	// whatever the smallest axis, if this is a
+        	// single row or column of blocks...
+        	massAngular0.m00 = (1+1)/12.0;
+            massAngular0.m11 = (1+1)/12.0;
+            massAngular0.m22 = (1+1)/12.0;
+        	for ( Block b : blocks ) {
+                double mass = b.getColourMass();
+        		double x = b.pB.x;
+        		double y = b.pB.y;
+        		double z = b.pB.z;
+           		massAngular0.m00 += mass * ( y*y + z*z );
+        		massAngular0.m11 += mass * ( x*x + z*z );
+        		massAngular0.m22 += mass * ( x*x + y*y );        	
+        		massAngular0.m01 += mass * x*y;
+        		massAngular0.m10 += mass * x*y;        		
+        		massAngular0.m02 += mass * x*z;
+        		massAngular0.m20 += mass * x*z;        		
+        		massAngular0.m12 += mass * y*z;
+        		massAngular0.m21 += mass * y*z;
+        	}
+	    }
+
+        boolean pinned = isAllBlueBlocks( blocks );
+        RigidBody body = new RigidBody( massLinear, massAngular0, pinned, boundingBoxB );
+        body.x0.set( x0 );
+        body.x.set( x0 );
+        body.updateTransformations();
+        body.root = new BVNode( boundaryBlocks, body );
+        body.geom = new RigidBodyGeomBlocks( blocks );
+        
+        return body;
+    }
+    
+    /**
+     * Checks if all blocks are shades of blue
+     * @return true if all blue
+     */
+    private boolean isAllBlueBlocks( ArrayList<Block> blocks ) {
+        for ( Block b : blocks ) {
+            if ( ! (b.c.x == b.c.y && b.c.x < b.c.z) ) return false;
+        }
+        return true;
+    }
     /**
      * Checks if this block is on the boundary.  
      * Boundary blocks have at least one white neighbor. 
@@ -198,29 +301,28 @@ public class ImageBlocker {
      * @param colour
      * @return true if the colour provided is white
      */
-    private boolean isYellow( Color3f colour ) {
-        final Color3f white = new Color3f(1,1,0);
-        return colour.epsilonEquals(white, epsilon );
-    }
-
-    /**
-     * @param colour
-     * @return true if the colour provided is white
-     */
     private boolean isCyan( Color3f colour ) {
         final Color3f cyan = new Color3f(0,1,1);
         return colour.epsilonEquals(cyan, epsilon );
     }
     
-
-	private boolean isRed(Color3f colour) {
-        final Color3f red= new Color3f(1,0,0);
-        return colour.epsilonEquals(red, epsilon );
-	}
-
-	private boolean isMagenta(Color3f colour) {
-        final Color3f red= new Color3f(1,0,1);
-        return colour.epsilonEquals(red, epsilon );
-	}
+//    /**
+//     * @param colour
+//     * @return true if the colour provided is white
+//     */
+//    private boolean isYellow( Color3f colour ) {
+//        final Color3f white = new Color3f(1,1,0);
+//        return colour.epsilonEquals(white, epsilon );
+//    }
+//
+//	private boolean isRed(Color3f colour) {
+//        final Color3f red= new Color3f(1,0,0);
+//        return colour.epsilonEquals(red, epsilon );
+//	}
+//
+//	private boolean isMagenta(Color3f colour) {
+//        final Color3f red= new Color3f(1,0,1);
+//        return colour.epsilonEquals(red, epsilon );
+//	}
     
 }

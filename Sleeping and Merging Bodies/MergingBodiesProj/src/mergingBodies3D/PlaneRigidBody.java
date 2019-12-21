@@ -44,36 +44,40 @@ public class PlaneRigidBody extends RigidBody {
 	}
 	
 	public PlaneRigidBody( Point3d p, Vector3d n ) {
+		super( 0, null, true, null );
 		n.normalize();
 		this.n = new Vector3d(n);
 		this.p = new Point3d(p);
-
 		pinned = true;
 		d = - (p.x*n.x + p.y*n.y + p.z*n.z);
+		geom = new PlaneRigidBodyGeom();
 	}
 	
-	@Override
-	public void display(GLAutoDrawable drawable) {
-		GL2 gl = drawable.getGL().getGL2();
-		
-		gl.glColor4f(0f, 0f, 0f, Block.alpha);
-		
-		float[] col = new float[] { 0,0,1, Block.alpha };		
-		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
-		
-		float s = size;		
-		
-		Vector3d tmp = new Vector3d(0,-1,0);
-		Vector3d axis = new Vector3d();
-		axis.cross( tmp, n );
-		double angle = tmp.angle(n);
-		
-		gl.glPushMatrix();
-		gl.glTranslated(p.x, p.y + Block.h, p.z);
-		gl.glRotated(angle, axis.x, axis.y, axis.z);
-		gl.glScaled(s, 1, s);
-		EasyViewer.glut.glutSolidCube(1);
+	private class PlaneRigidBodyGeom extends RigidBodyGeom {
+		@Override
+		public void drawGeom(GLAutoDrawable drawable) {
+			GL2 gl = drawable.getGL().getGL2();
+			
+			gl.glColor4f(0f, 0f, 0f, Block.alpha);
+			
+			float[] col = new float[] { 0,0,1, Block.alpha };		
+			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
+			
+			float s = size;		
+			
+			Vector3d tmp = new Vector3d(0,-1,0);
+			Vector3d axis = new Vector3d();
+			axis.cross( tmp, n );
+			double angle = tmp.angle(n);
+			
+			gl.glPushMatrix();
+			gl.glTranslated(p.x, p.y + Block.h, p.z);
+			gl.glRotated(angle, axis.x, axis.y, axis.z);
+			gl.glScaled(s, 1, s);
+			EasyViewer.glut.glutSolidCube(1);
 
-		gl.glPopMatrix();
+			gl.glPopMatrix();			
+		}
 	}
+	
 }
