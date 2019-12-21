@@ -83,6 +83,7 @@ public class Contact {
 	double bn = 0; /** b value for normal component */
 	double bt1 = 0; /** b value for tangent1 component */
 	double bt2 = 0; /** b value for tangent2 component */
+
 	DenseMatrix D = new DenseMatrix(3,3); 
 	
     /**
@@ -229,6 +230,7 @@ public class Contact {
 		j.set(2, 9, rt2.x);
 		j.set(2, 10, rt2.y);
 		j.set(2, 11, rt2.z);
+		
 	}
 	
 	/**
@@ -244,24 +246,24 @@ public class Contact {
 		double f2 = lambda.get(0)*j.get(0,1) + lambda.get(1)*j.get(1,1) + lambda.get(2)*j.get(2,1);
 		double f3 = lambda.get(0)*j.get(0,2) + lambda.get(1)*j.get(1,2) + lambda.get(2)*j.get(2,2);
 		forceB1.set(f1,f2,f3);
-		forceB1.scale(1/dt);
+		forceB1.scale(1./dt);
 		f1 = lambda.get(0)*j.get(0,3) + lambda.get(1)*j.get(1,3) + lambda.get(2)*j.get(2,3);
 		f2 = lambda.get(0)*j.get(0,4) + lambda.get(1)*j.get(1,4) + lambda.get(2)*j.get(2,4);
 		f3 = lambda.get(0)*j.get(0,5) + lambda.get(1)*j.get(1,5) + lambda.get(2)*j.get(2,5);
 		torqueB1.set(f1,f2,f3);
-		torqueB1.scale(1/dt);
+		torqueB1.scale(1./dt);
 
 		j = this.j; //(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
 		f1 = lambda.get(0)*j.get(0,6) + lambda.get(1)*j.get(1,6) + lambda.get(2)*j.get(2,6);
 		f2 = lambda.get(0)*j.get(0,7) + lambda.get(1)*j.get(1,7) + lambda.get(2)*j.get(2,7);
 		f3 = lambda.get(0)*j.get(0,8) + lambda.get(1)*j.get(1,8) + lambda.get(2)*j.get(2,8);
 		forceB2.set(f1,f2,f3);
-		forceB2.scale(1/dt);
-		f1 = lambda.get(0)*j.get(0,9) + lambda.get(1)*j.get(1,9) + lambda.get(2)*j.get(2,9);
+		forceB2.scale(1./dt);
+		f1 = lambda.get(0)*j.get(0,9)  + lambda.get(1)*j.get(1,9) +  lambda.get(2)*j.get(2,9);
 		f2 = lambda.get(0)*j.get(0,10) + lambda.get(1)*j.get(1,10) + lambda.get(2)*j.get(2,10);
 		f3 = lambda.get(0)*j.get(0,11) + lambda.get(1)*j.get(1,11) + lambda.get(2)*j.get(2,11);
 		torqueB2.set(f1,f2,f3);
-		torqueB2.scale(1/dt);
+		torqueB2.scale(1./dt);
 	}
 	
 	/**
@@ -294,15 +296,15 @@ public class Contact {
 		u.set(b1.force);
 		u.scale(m1inv*dt);	
 		u.add(b1.v);
-		bn += u.x*j.get(0,0) + u.y*j.get(0,1) + u.z*j.get(0,2);
+		bn  += u.x*j.get(0,0) + u.y*j.get(0,1) + u.z*j.get(0,2);
 		bt1 += u.x*j.get(1,0) + u.y*j.get(1,1) + u.z*j.get(1,2);
 		bt2 += u.x*j.get(2,0) + u.y*j.get(2,1) + u.z*j.get(2,2);
-		u.set(b1.torque.x*j1inv.m00+b1.torque.y*j1inv.m01+b1.torque.z*j1inv.m02,
-			b1.torque.x*j1inv.m10+b1.torque.y*j1inv.m11+b1.torque.z*j1inv.m12,
-			b1.torque.x*j1inv.m20+b1.torque.y*j1inv.m21+b1.torque.z*j1inv.m22);
+		u.set(b1.torque.x*j1inv.m00 + b1.torque.y*j1inv.m01 + b1.torque.z*j1inv.m02,
+			  b1.torque.x*j1inv.m10 + b1.torque.y*j1inv.m11 + b1.torque.z*j1inv.m12,
+			  b1.torque.x*j1inv.m20 + b1.torque.y*j1inv.m21 + b1.torque.z*j1inv.m22);
 		u.scale(dt);
 		u.add(b1.omega);
-		bn += u.x*j.get(0,3) + u.y*j.get(0,4) + u.z*j.get(0,5);
+		bn  += u.x*j.get(0,3) + u.y*j.get(0,4) + u.z*j.get(0,5);
 		bt1 += u.x*j.get(1,3) + u.y*j.get(1,4) + u.z*j.get(1,5);
 		bt2 += u.x*j.get(2,3) + u.y*j.get(2,4) + u.z*j.get(2,5);
 		
@@ -315,15 +317,15 @@ public class Contact {
 		u.set(b2.force);
 		u.scale(m2inv*dt);	
 		u.add(b2.v);
-		bn += u.x*j.get(0,6) + u.y*j.get(0,7) + u.z*j.get(0,8);
+		bn  += u.x*j.get(0,6) + u.y*j.get(0,7) + u.z*j.get(0,8);
 		bt1 += u.x*j.get(1,6) + u.y*j.get(1,7) + u.z*j.get(1,8);
 		bt2 += u.x*j.get(2,6) + u.y*j.get(2,7) + u.z*j.get(2,8);
-		u.set(b2.torque.x*j2inv.m00+b2.torque.y*j2inv.m01+b2.torque.z*j2inv.m02,
-			b2.torque.x*j2inv.m10+b2.torque.y*j2inv.m11+b2.torque.z*j2inv.m12,
-			b2.torque.x*j2inv.m20+b2.torque.y*j2inv.m21+b2.torque.z*j2inv.m22);
+		u.set(b2.torque.x*j2inv.m00 + b2.torque.y*j2inv.m01 + b2.torque.z*j2inv.m02,
+			  b2.torque.x*j2inv.m10 + b2.torque.y*j2inv.m11 + b2.torque.z*j2inv.m12,
+			  b2.torque.x*j2inv.m20 + b2.torque.y*j2inv.m21 + b2.torque.z*j2inv.m22);
 		u.scale(dt);
 		u.add(b2.omega);
-		bn += u.x*j.get(0,9) + u.y*j.get(0,10) + u.z*j.get(0,11);
+		bn  += u.x*j.get(0,9) + u.y*j.get(0,10) + u.z*j.get(0,11);
 		bt1 += u.x*j.get(1,9) + u.y*j.get(1,10) + u.z*j.get(1,11);
 		bt2 += u.x*j.get(2,9) + u.y*j.get(2,10) + u.z*j.get(2,11);
 
@@ -354,6 +356,8 @@ public class Contact {
 		DenseMatrix j, j1, j2;
 		
 		DenseMatrix Minv = new DenseMatrix(12,12);
+		
+		//eulalie: could be optimized
 		Minv.set(0, 0, m1inv);
 		Minv.set(1, 1, m1inv);
 		Minv.set(2, 2, m1inv);
