@@ -4,22 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jogamp.opengl.GLAutoDrawable;
+
+import javax.management.RuntimeErrorException;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 /**
  * Bounding volume node used to build bounding volume trees.
  * The tree is constructed such that every interior node has two children.
- * Either there are two children, or this is a leaf node and the leafBlock 
- * member stores the block at this leaf.
- * (Note that it is actually a bounding area, but it is probably easier to 
- * stick with the 3D terminology)
+ * Either there are two children, or this is a leaf node.
  * @author kry
  */
 public class BVNode {
 
     /** Bounding disc for all leaves in this subtree */
-    Disc boundingDisc;
+    BVSphere boundingSphere;
     
     BVNode child1;
     
@@ -34,7 +33,7 @@ public class BVNode {
      * @param body
      */
     public BVNode( BVNode n, RigidBody body ) {
-    	boundingDisc = new Disc( n.boundingDisc, body );
+    	boundingSphere = new BVSphere( n.boundingSphere, body );
     	if ( n.child1 != null ) child1 = new BVNode( child1, body );
     	if ( n.child2 != null ) child2 = new BVNode( child2, body );
     }
@@ -44,8 +43,8 @@ public class BVNode {
      * @param r radius of bouding disc
      * @param b
      */
-    public BVNode( Disc d ) {
-    	this.boundingDisc = d;    	
+    public BVNode( BVSphere d ) {
+    	this.boundingSphere = d;    	
     }
     
     /**
@@ -55,66 +54,58 @@ public class BVNode {
      * @param blocks
      * @param body
      */
-    public BVNode( List<Block> blocks, RigidBody body ) {
-        
-        // create our own bounding disc
-        boundingDisc = new Disc(blocks, body);
-        
-        if ( blocks.size() > 1 ) {
-            // find the distribution       
-            Block b0 = blocks.get(0);
-            Point3d max = new Point3d( b0.pB );
-            Point3d min = new Point3d( b0.pB );            
-            for ( Block b : blocks ) {
-                max.x = Math.max( max.x, b.pB.x );
-                max.y = Math.max( max.y, b.pB.y );
-                max.z = Math.max( max.z, b.pB.z );
-                min.x = Math.min( min.x, b.pB.x );
-                min.y = Math.min( min.y, b.pB.y );
-                min.z = Math.min( min.z, b.pB.z );
+    public BVNode( List<BVSphere> discs, RigidBody body ) {
+        if ( discs.size() == 0 ) {
+        	throw new RuntimeErrorException(new Error("can't build a BVTree from nothing"));
+        } else if ( discs.size() == 1 ) {
+        	boundingSphere = discs.get(0);
+        } else { // if ( blocks.size() > 1 ) {
+            // find the distribution     
+        	boundingSphere = new BVSphere(discs);
+            BVSphere b0 = discs.get(0);
+            Point3d max = new Point3d( b0.cB );
+            Point3d min = new Point3d( b0.cB );            
+            for ( BVSphere b : discs ) {
+                max.x = Math.max( max.x, b.cB.x );
+                max.y = Math.max( max.y, b.cB.y );
+                max.z = Math.max( max.z, b.cB.z );
+                min.x = Math.min( min.x, b.cB.x );
+                min.y = Math.min( min.y, b.cB.y );
+                min.z = Math.min( min.z, b.cB.z );
             }
             Vector3d diff = new Vector3d();
             Point3d centre = new Point3d();
             diff.sub( max, min );
             centre.interpolate( max, min, 0.5 );
-            ArrayList<Block> L1 = new ArrayList<Block>();
-            ArrayList<Block> L2 = new ArrayList<Block>();
+            ArrayList<BVSphere> L1 = new ArrayList<BVSphere>();
+            ArrayList<BVSphere> L2 = new ArrayList<BVSphere>();
             
             int axis = 0;
-            if ( diff.y > diff.x && diff.y > diff.z ) {
+            if ( diff.y >= diff.x && diff.y >= diff.z ) {
             	axis = 1;
-            } else if ( diff.z > diff.y && diff.z > diff.x ) {
+            } else if ( diff.z >= diff.y && diff.z >= diff.x ) {
             	axis = 2;
             }
             double[] bpB = new double[3];
             double[] c = new double[3];
             centre.get(c);
             
-            // TODO: check the third direction
-            for ( Block b : blocks ) {
-            	b.pB.get( bpB );
+            for ( BVSphere b : discs ) {
+            	b.cB.get( bpB );
             	if ( bpB[axis] < c[axis] ) {
             		L1.add(b);
             	} else {
             		L2.add(b);
             	}
-//            	
-//            	if ( diff.y > diff.x ) {
-//                    if ( b.pB.y < centre.y ) {
-//                        L1.add( b );
-//                    } else {
-//                        L2.add( b );
-//                    }
-//                } else {
-//                    if ( b.pB.x < centre.x ) {
-//                        L1.add( b );
-//                    } else {
-//                        L2.add( b );
-//                    }
-//                }
             }
-            child1 = new BVNode(L1, body);
-            child2 = new BVNode(L2, body);            
+            if ( L1.size() > 1 && L2.size() == 0 ) {
+            	System.out.println(" is this happening?  If so this is bad!");
+            }
+            if ( L2.size() > 1 && L1.size() == 0 ) {
+            	System.out.println(" is this happening?  If so this is bad!");
+            }
+            if ( L1.size() > 0 ) child1 = new BVNode(L1, body);
+            if ( L2.size() > 0 ) child2 = new BVNode(L2, body);            
         }
     }
 
@@ -130,7 +121,7 @@ public class BVNode {
      * @param drawable
      */
     public void display( GLAutoDrawable drawable ) {
-        boundingDisc.display(drawable);
+        boundingSphere.display(drawable);
         if ( child1 != null ) child1.display(drawable);
         if ( child2 != null ) child2.display(drawable);
     }
@@ -142,9 +133,9 @@ public class BVNode {
      */
     public void displayVisitBoundary( GLAutoDrawable drawable, int visit ) {
         if ( isLeaf() ) {
-            boundingDisc.display(drawable);    
+            boundingSphere.display(drawable);    
         } else if ( child1.visitID != visit ) { // both children are visited, or not, never one or the other
-            boundingDisc.display(drawable);
+            boundingSphere.display(drawable);
         } else {
             child1.displayVisitBoundary(drawable, visit);
             child2.displayVisitBoundary(drawable, visit);

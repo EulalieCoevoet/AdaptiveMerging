@@ -16,7 +16,7 @@ import javax.vecmath.Point3d;
  * Circular disc for collision processing
  * @author kry
  */
-public class Disc {
+public class BVSphere {
 
     /** center of disc in body coordinates */
     Point3d cB = new Point3d();
@@ -35,20 +35,41 @@ public class Disc {
      * @param blocks
      * @param body
      */
-    public Disc( Collection<Block> blocks, RigidBody body ) {
+    public BVSphere( Collection<Block> blocks, RigidBody body ) {
         this.body = body;
         // We'll choose the minimum disc enclosing the centers and then add the block radius
         ArrayList<Point3d> points = new ArrayList<Point3d>();
         for ( Block b : blocks ) {
             points.add( new Point3d( b.pB.x, b.pB.y, b.pB.z ) );            
         }
-        MinimumEnclosingCircle mec = new MinimumEnclosingCircle( points );
+        MinimumEnclosingSphere mec = new MinimumEnclosingSphere( points );
         cB.set( mec.answer.centre );
-        body.transformB2W.transform(cB, cW);
+        //body.transformB2W.transform(cB, cW);
         r = mec.answer.radius + Block.radius;
     }
     
-    public Disc( Point3d pB, double r, RigidBody b ) {
+    /**
+     * Builds a Disc that encloses the given Discs
+     * ASSUMES THAT ALL DISCS HAVE THE SAME SIZE!!
+     * (if ever the discs have different sizes, then should use maximum radius to grow the disc)
+     * @param blocks
+     * @param body
+     */
+    public BVSphere( Collection<BVSphere> discs ) {
+        this.body = discs.iterator().next().body;
+        double commonDiscRadius = discs.iterator().next().r;
+        // We'll choose the minimum disc enclosing the centers and then add the block radius
+        ArrayList<Point3d> points = new ArrayList<Point3d>();
+        for ( BVSphere b : discs ) {
+            points.add( new Point3d( b.cB.x, b.cB.y, b.cB.z ) );            
+        }
+        MinimumEnclosingSphere mec = new MinimumEnclosingSphere( points );
+        cB.set( mec.answer.centre );
+        //body.transformB2W.transform(cB, cW);
+        r = mec.answer.radius + commonDiscRadius;
+    }
+    
+    public BVSphere( Point3d pB, double r, RigidBody b ) {
     	this.cB.set(pB);
     	this.r = r;
     	this.body = b;
@@ -59,7 +80,7 @@ public class Disc {
      * @param other
      * @param body
      */
-    public Disc( Disc other, RigidBody body ) {
+    public BVSphere( BVSphere other, RigidBody body ) {
     	this.cB.set( other.cB );
     	this.cW.set( other.cW );
     	this.r = other.r;
@@ -109,7 +130,14 @@ public class Disc {
         gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );     
         gl.glVertexPointer( 2, GL.GL_FLOAT, 0, vertexBuffer );      
         gl.glDrawElements( GL.GL_LINE_LOOP, size, GL.GL_UNSIGNED_SHORT, indexBuffer );            
-        gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );        
+
+        gl.glRotated(90,1,0,0);
+        gl.glDrawElements( GL.GL_LINE_LOOP, size, GL.GL_UNSIGNED_SHORT, indexBuffer );            
+
+        gl.glRotated(90,0,1,0);
+        gl.glDrawElements( GL.GL_LINE_LOOP, size, GL.GL_UNSIGNED_SHORT, indexBuffer );            
+        
+        gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
         gl.glPopMatrix();
     }
     
@@ -136,7 +164,7 @@ public class Disc {
      * @param d
      * @return true if intersection
      */
-    public boolean intersects( Disc d ) {
+    public boolean intersects( BVSphere d ) {
         return cW.distanceSquared(d.cW) < (r + d.r)*(r + d.r);
     }
     

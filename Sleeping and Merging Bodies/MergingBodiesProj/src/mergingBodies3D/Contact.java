@@ -30,9 +30,9 @@ public class Contact {
     RigidBody body2;
     
 	/** Bounding volume that caused the collision */
-	Disc bv1;
+	BVSphere bv1;
 	/** Bounding volume that caused the collision */
-	Disc bv2;
+	BVSphere bv2;
     
     /** Contact normal in body1 coordinates */
     Vector3d normalB = new Vector3d();
@@ -94,7 +94,7 @@ public class Contact {
      * @param contactW
      * @param normal
      */
-    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, Disc disc1, Disc disc2, double constraintViolation ) {
+    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, double constraintViolation ) {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW ); 

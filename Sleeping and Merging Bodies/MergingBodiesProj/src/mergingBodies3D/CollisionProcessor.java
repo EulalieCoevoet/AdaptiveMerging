@@ -114,8 +114,8 @@ public class CollisionProcessor {
 	protected void updateContactsMap() {
 		lastTimeStepMap.clear();
 		for (Contact contact : contacts) {
-			Disc bv1 = contact.bv1;
-			Disc bv2 = contact.bv2;
+			BVSphere bv1 = contact.bv1;
+			BVSphere bv2 = contact.bv2;
 			lastTimeStepMap.put("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode()), contact);
 		} 
 	}
@@ -145,8 +145,8 @@ public class CollisionProcessor {
 		
 		Contact oldContact;
 		
-		Disc bv1 = contact.bv1;
-		Disc bv2 = contact.bv2;
+		BVSphere bv1 = contact.bv1;
+		BVSphere bv2 = contact.bv2;
 
 		if(lastTimeStepMap.containsKey("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode() ))
 				|| lastTimeStepMap.containsKey("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode() ))) {
@@ -237,12 +237,12 @@ public class CollisionProcessor {
 	private void findCollisionsWithPlane( BVNode node1, RigidBody body1, PlaneRigidBody planeBody ) {
 		if(node1.visitID != visitID) {
 			node1.visitID = visitID;
-			node1.boundingDisc.updatecW();
+			node1.boundingSphere.updatecW();
 		}
 		// check bounding disc with plane
-		Tuple3d c = node1.boundingDisc.cW;
+		Tuple3d c = node1.boundingSphere.cW;
 		Tuple3d n = planeBody.n;
-		double d = n.x*c.x + n.y*c.y + n.z*c.z + planeBody.d - node1.boundingDisc.r;
+		double d = n.x*c.x + n.y*c.y + n.z*c.z + planeBody.d - node1.boundingSphere.r;
 		if ( d < 0 ) {
 			if ( node1.isLeaf() ) {
 				// create a collision here!
@@ -273,26 +273,26 @@ public class CollisionProcessor {
 		
 		if(node1.visitID != visitID) {
 			node1.visitID = visitID;
-			node1.boundingDisc.updatecW();
+			node1.boundingSphere.updatecW();
 		}
 		if (node2.visitID != visitID) {
 			node2.visitID = visitID;
-			node2.boundingDisc.updatecW();
+			node2.boundingSphere.updatecW();
 		}
 
-		if (node1.boundingDisc.intersects(node2.boundingDisc)) {
+		if (node1.boundingSphere.intersects(node2.boundingSphere)) {
 			if (node1.isLeaf() && node2.isLeaf()) {
-				Disc leafBV1 = node1.boundingDisc;
-				Disc leafBV2 = node2.boundingDisc;
+				BVSphere leafBV1 = node1.boundingSphere;
+				BVSphere leafBV2 = node2.boundingSphere;
 
 				processCollision(body1, leafBV1, body2, leafBV2);
 				
-			} else if(node1.isLeaf()|| node1.boundingDisc.r <= node2.boundingDisc.r){
+			} else if(node1.isLeaf()|| node1.boundingSphere.r <= node2.boundingSphere.r){
 				//if they overlap, and body 1 is either a leaf or smaller than body_2, break down body_2
 
 				findCollisions(node1, node2.child1, body1, body2);
 				findCollisions(node1, node2.child2, body1, body2);
-			} else if(node2.isLeaf() || node2.boundingDisc.r <= node1.boundingDisc.r) {
+			} else if(node2.isLeaf() || node2.boundingSphere.r <= node1.boundingSphere.r) {
 				//if they overlap, and body 2 is either a leaf or smaller than body_1, break down body_1
 
 				findCollisions(node1.child1, node2, body1, body2);
@@ -328,7 +328,7 @@ public class CollisionProcessor {
      * @param body2
      * @param bv2
      */
-    private void processCollision( RigidBody body1, Disc bv1, RigidBody body2, Disc bv2 ) {        
+    private void processCollision( RigidBody body1, BVSphere bv1, RigidBody body2, BVSphere bv2 ) {        
         double k = contactSpringStiffness.getValue();
         double c1 = contactSpringDamping.getValue();
         double threshold = separationVelocityThreshold.getValue();

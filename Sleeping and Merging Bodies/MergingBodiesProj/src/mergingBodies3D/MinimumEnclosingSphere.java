@@ -25,7 +25,7 @@ import javax.vecmath.Point3d;
  * Algorithm for computing Minimum Enclosing Circle using Welzl's algorithm based on Sunshine's implementation (www.sunshine2k.de)
  * @author kry
  */
-public class MinimumEnclosingCircle {
+public class MinimumEnclosingSphere {
     
     private Point3d[] points;
     
@@ -67,7 +67,7 @@ public class MinimumEnclosingCircle {
      * Creates a local copy of the collection of points 
      * @param points 
      */    
-    public MinimumEnclosingCircle( Collection<Point3d> points ) {
+    public MinimumEnclosingSphere( Collection<Point3d> points ) {
     	// TODO: Naive loose bound for now... fix the tight bounds later if needed!
     	for ( Point3d p : points ) { 
     		answer.centre.add(p);

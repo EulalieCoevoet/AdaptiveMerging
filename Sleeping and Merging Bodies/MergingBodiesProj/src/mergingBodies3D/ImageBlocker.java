@@ -237,7 +237,14 @@ public class ImageBlocker {
         body.x0.set( x0 );
         body.x.set( x0 );
         body.updateTransformations();
-        body.root = new BVNode( boundaryBlocks, body );
+        
+    	// first create leaf Discs and put them in a list
+    	ArrayList<BVSphere> L = new ArrayList<BVSphere>();
+    	for ( Block b : blocks ) {
+    		L.add( new BVSphere( b.pB, Block.radius, body ) );
+    	}
+         
+        body.root = new BVNode( L, body );
         body.geom = new RigidBodyGeomBlocks( blocks );
         
         return body;

@@ -60,7 +60,7 @@ public class PlaneRigidBody extends RigidBody {
 			
 			gl.glColor4f(0f, 0f, 0f, Block.alpha);
 			
-			float[] col = new float[] { 0,0,1, Block.alpha };		
+			float[] col = new float[] { 0.75f,0.75f,1, Block.alpha };		
 			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
 			
 			float s = size;		

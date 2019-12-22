@@ -224,6 +224,8 @@ public class RigidBodySystem {
      */
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
+        float[] ambient = new float[] { 0.3f,0.3f,0.3f,1 };
+        gl.glLightModelfv( GL2.GL_LIGHT_MODEL_AMBIENT, ambient, 0 );
         if ( Block.alpha != (float) (double) transparency.getValue()) {
             Block.alpha = (float) (double) transparency.getValue();
             // gross... need to rebuild display lists for the currently set transparency
@@ -244,16 +246,19 @@ public class RigidBodySystem {
         gl.glLineWidth(1);
         if ( drawBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {
-                b.root.boundingDisc.display(drawable);
+            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
+                b.root.boundingSphere.display(drawable);
             }
         }
         if ( drawAllBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {
+            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
                 b.root.display( drawable );
             }
         }        
         if ( drawBoundingVolumesUsed.getValue() ) {
             for ( RigidBody b : bodies ) {
+            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
                 b.root.displayVisitBoundary( drawable, collision.visitID );
             }
         }
