@@ -411,7 +411,7 @@ public class CollisionProcessor {
     public IntParameter iterations = new IntParameter("iterations for PGS solve", 200, 1, 500);
     
     /** Flag for switching between penalty based contact and contact constraints */
-    public BooleanParameter doLCP = new BooleanParameter( "do LCP solve", false );
+    public BooleanParameter doLCP = new BooleanParameter( "do LCP solve", true );
      
     /**
      * @return controls for the collision processor
