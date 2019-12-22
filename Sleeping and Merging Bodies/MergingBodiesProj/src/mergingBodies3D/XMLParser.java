@@ -164,7 +164,7 @@ public class XMLParser {
             		p.x = -s.x/2 + radius + i*2*radius;
             		p.y = -s.y/2 + radius + j*2*radius;
             		p.z = -s.z/2 + radius + k*2*radius;
-            		L.add( new BVSphere( p, radius, body ) );
+            		L.add( new BVSphere( p, radius * Math.sqrt(2) , body ) ); // should probably be sqrt 3... but balance what is in and what is out/
         		}
         	}
         }

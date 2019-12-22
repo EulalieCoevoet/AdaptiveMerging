@@ -5,7 +5,6 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import com.jogamp.opengl.GL2;
@@ -224,8 +223,6 @@ public class RigidBodySystem {
      */
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
-        float[] ambient = new float[] { 0.3f,0.3f,0.3f,1 };
-        gl.glLightModelfv( GL2.GL_LIGHT_MODEL_AMBIENT, ambient, 0 );
         if ( Block.alpha != (float) (double) transparency.getValue()) {
             Block.alpha = (float) (double) transparency.getValue();
             // gross... need to rebuild display lists for the currently set transparency

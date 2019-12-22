@@ -41,7 +41,6 @@ import mintools.swing.FileSelect;
 import mintools.swing.HorizontalFlowPanel;
 import mintools.swing.VerticalFlowPanel;
 import mintools.viewer.EasyViewer;
-import mintools.viewer.FancyAxis;
 import mintools.viewer.FlatMatrix4d;
 import mintools.viewer.Interactor;
 import mintools.viewer.SceneGraphNode;
@@ -72,7 +71,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      * @param args
      */
     public static void main(String[] args) {
-        new LCPApp3D();        
+        new LCPApp3D();    
     }
     
     /**
@@ -88,13 +87,15 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      
     @Override
     public void init(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glEnable( GL.GL_BLEND );
         gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL.GL_LINE_SMOOTH );
         gl.glEnable( GL2.GL_POINT_SMOOTH );
         shadowMap.init(drawable); 
         gl.glClearColor(1,1,1,1);
+        float[] ambient = new float[] { 0.3f,0.3f,0.3f,1 };
+        gl.glLightModelfv( GL2.GL_LIGHT_MODEL_AMBIENT, ambient, 0 );
     }
                 
     private FlatMatrix4d T = new FlatMatrix4d();
@@ -206,7 +207,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         }
     }
     
-	private final FancyAxis fa = new FancyAxis();
+	//private final FancyAxis fa = new FancyAxis();
 
     private void drawAllObjects( GLAutoDrawable drawable ) {
     	GL2 gl = drawable.getGL().getGL2();
@@ -217,8 +218,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         
         system.display( drawable );
 
-        gl.glScaled( 5,5,5 );
-        fa.draw(gl);
+        //gl.glScaled( 5,5,5 );
+        //fa.draw(gl);
         gl.glPopMatrix();
     }
     

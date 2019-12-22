@@ -59,7 +59,11 @@ public class BVNode {
         	throw new RuntimeErrorException(new Error("can't build a BVTree from nothing"));
         } else if ( discs.size() == 1 ) {
         	boundingSphere = discs.get(0);
-        } else { // if ( blocks.size() > 1 ) {
+        } else if ( discs.size() == 2 ) {
+        	boundingSphere = new BVSphere(discs);
+        	child1 = new BVNode( discs.get(0) );
+        	child2 = new BVNode( discs.get(1) );        	
+        } else { // if ( blocks.size() > 2 ) {        
             // find the distribution     
         	boundingSphere = new BVSphere(discs);
             BVSphere b0 = discs.get(0);
@@ -98,10 +102,7 @@ public class BVNode {
             		L2.add(b);
             	}
             }
-            if ( L1.size() > 1 && L2.size() == 0 ) {
-            	System.out.println(" is this happening?  If so this is bad!");
-            }
-            if ( L2.size() > 1 && L1.size() == 0 ) {
+            if ( L1.size() * L2.size() == 0 ) {
             	System.out.println(" is this happening?  If so this is bad!");
             }
             if ( L1.size() > 0 ) child1 = new BVNode(L1, body);

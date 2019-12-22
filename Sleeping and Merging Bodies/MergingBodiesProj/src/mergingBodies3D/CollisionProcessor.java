@@ -235,7 +235,7 @@ public class CollisionProcessor {
     int visitID = 0;
 	
 	private void findCollisionsWithPlane( BVNode node1, RigidBody body1, PlaneRigidBody planeBody ) {
-		if(node1.visitID != visitID) {
+		if ( node1.visitID != visitID ) {
 			node1.visitID = visitID;
 			node1.boundingSphere.updatecW();
 		}
@@ -255,6 +255,11 @@ public class CollisionProcessor {
 				normal.scale( val, planeBody.n );
 				contactW.sub( c, normal );
 				normal.scale( -1, planeBody.n );
+				
+	            Contact contact = new Contact( body1, planeBody, contactW, normal, node1.boundingSphere, planeBody.dummyBV, d);
+	            // simple option... add to contact list...
+	            contacts.add( contact );
+				
 			} else {
 				findCollisionsWithPlane( node1.child1, body1,planeBody );
 				findCollisionsWithPlane( node1.child2, body1,planeBody );
@@ -270,11 +275,10 @@ public class CollisionProcessor {
 	 * @param body2
 	 */
 	private void findCollisions(BVNode node1, BVNode node2, RigidBody body1, RigidBody body2) {
-		
-		if(node1.visitID != visitID) {
+		if (node1.visitID != visitID) {
 			node1.visitID = visitID;
 			node1.boundingSphere.updatecW();
-		}
+		}	
 		if (node2.visitID != visitID) {
 			node2.visitID = visitID;
 			node2.boundingSphere.updatecW();
@@ -284,17 +288,18 @@ public class CollisionProcessor {
 			if (node1.isLeaf() && node2.isLeaf()) {
 				BVSphere leafBV1 = node1.boundingSphere;
 				BVSphere leafBV2 = node2.boundingSphere;
-
 				processCollision(body1, leafBV1, body2, leafBV2);
-				
-			} else if(node1.isLeaf()|| node1.boundingSphere.r <= node2.boundingSphere.r){
-				//if they overlap, and body 1 is either a leaf or smaller than body_2, break down body_2
-
+			} else if ( node1.isLeaf() ) {
 				findCollisions(node1, node2.child1, body1, body2);
 				findCollisions(node1, node2.child2, body1, body2);
-			} else if(node2.isLeaf() || node2.boundingSphere.r <= node1.boundingSphere.r) {
-				//if they overlap, and body 2 is either a leaf or smaller than body_1, break down body_1
-
+			} else if ( node2.isLeaf() ) {
+				findCollisions(node1.child1, node2, body1, body2);
+				findCollisions(node1.child2, node2, body1, body2);				
+			} else if ( node1.boundingSphere.r <= node2.boundingSphere.r ) {
+				// if we have the choice, descend subtree with larger sphere
+				findCollisions(node1, node2.child1, body1, body2);
+				findCollisions(node1, node2.child2, body1, body2);
+			} else {
 				findCollisions(node1.child1, node2, body1, body2);
 				findCollisions(node1.child2, node2, body1, body2);
 			}
@@ -335,9 +340,6 @@ public class CollisionProcessor {
         boolean useSpring = enableContactSpring.getValue();
         boolean useDamping = enableContactDamping.getValue();
         
-//        body1.transformB2W.transform( b1.pB, tmp1 );
-//        body2.transformB2W.transform( b2.pB, tmp2 );
-//        double distance = tmp1.distance(tmp2);
         double distance = bv1.cW.distance( bv2.cW );
         double distanceBetweenCenters = bv2.r + bv1.r;
         if ( distance < distanceBetweenCenters ) {
