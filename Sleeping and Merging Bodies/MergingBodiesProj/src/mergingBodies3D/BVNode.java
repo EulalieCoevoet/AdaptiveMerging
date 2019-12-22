@@ -25,9 +25,6 @@ public class BVNode {
     
     BVNode child2;
     
-    /** The block at this node if it is a leaf, null otherwise */
-    //private Block leafBlock;
-    
     /** The visitID keeps track of when this node was last visited */
     int visitID;
     
@@ -40,17 +37,15 @@ public class BVNode {
     	boundingDisc = new Disc( n.boundingDisc, body );
     	if ( n.child1 != null ) child1 = new BVNode( child1, body );
     	if ( n.child2 != null ) child2 = new BVNode( child2, body );
-    	//leafBlock = n.leafBlock; // This is sharable!    	
     }
     
     /** 
-     * Creates a BVNode leaf with this node.
-     * Note that the Disc knows it's rigid body.
-     * @param d
+     * Creates a BVNode leaf with the provided disc
+     * @param r radius of bouding disc
      * @param b
      */
-    public BVNode( Disc d, RigidBody b ) {
-    	this.boundingDisc = d;
+    public BVNode( Disc d ) {
+    	this.boundingDisc = d;    	
     }
     
     /**
@@ -65,10 +60,7 @@ public class BVNode {
         // create our own bounding disc
         boundingDisc = new Disc(blocks, body);
         
-        if ( blocks.size() == 1 ) {
-            // do nothing... the disc can instead identify the leaf position
-        	//leafBlock = blocks.get(0);
-        } else {        
+        if ( blocks.size() > 1 ) {
             // find the distribution       
             Block b0 = blocks.get(0);
             Point3d max = new Point3d( b0.pB );
@@ -88,21 +80,38 @@ public class BVNode {
             ArrayList<Block> L1 = new ArrayList<Block>();
             ArrayList<Block> L2 = new ArrayList<Block>();
             
+            int axis = 0;
+            if ( diff.y > diff.x && diff.y > diff.z ) {
+            	axis = 1;
+            } else if ( diff.z > diff.y && diff.z > diff.x ) {
+            	axis = 2;
+            }
+            double[] bpB = new double[3];
+            double[] c = new double[3];
+            centre.get(c);
+            
             // TODO: check the third direction
             for ( Block b : blocks ) {
-                if ( diff.y > diff.x ) {
-                    if ( b.pB.y < centre.y ) {
-                        L1.add( b );
-                    } else {
-                        L2.add( b );
-                    }
-                } else {
-                    if ( b.pB.x < centre.x ) {
-                        L1.add( b );
-                    } else {
-                        L2.add( b );
-                    }
-                }
+            	b.pB.get( bpB );
+            	if ( bpB[axis] < c[axis] ) {
+            		L1.add(b);
+            	} else {
+            		L2.add(b);
+            	}
+//            	
+//            	if ( diff.y > diff.x ) {
+//                    if ( b.pB.y < centre.y ) {
+//                        L1.add( b );
+//                    } else {
+//                        L2.add( b );
+//                    }
+//                } else {
+//                    if ( b.pB.x < centre.x ) {
+//                        L1.add( b );
+//                    } else {
+//                        L2.add( b );
+//                    }
+//                }
             }
             child1 = new BVNode(L1, body);
             child2 = new BVNode(L2, body);            
@@ -114,7 +123,6 @@ public class BVNode {
      */    
     public boolean isLeaf() {
     	return (child1 == null) && (child2 == null ); 
-    	// return leafBlock != null;
     }
     
     /**

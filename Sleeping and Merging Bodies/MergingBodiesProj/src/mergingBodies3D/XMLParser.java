@@ -145,10 +145,13 @@ public class XMLParser {
 		bbB.add( new Point3d(  r, -r,  r ) );
 		bbB.add( new Point3d(  r,  r, -r ) );
 		bbB.add( new Point3d(  r,  r,  r ) );		
+		// seems stupid to have a set of bounding box points for a sphere, but 
+		// it is needed for how we currently do relative velocity bounds.
 		RigidBody body = new RigidBody(massLinear, angularMass, false, bbB );
 		setCommonAttributes( body, eElement );
 		body.updateTransformations();
-        //body.root = new BVNode( , body );
+		Disc disc = new Disc( new Point3d(), r, body );
+        body.root = new BVNode( disc );
         body.geom = new RigidBodyGeomSphere( r );		
 	}
 

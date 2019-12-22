@@ -48,6 +48,12 @@ public class Disc {
         r = mec.answer.radius + Block.radius;
     }
     
+    public Disc( Point3d pB, double r, RigidBody b ) {
+    	this.cB.set(pB);
+    	this.r = r;
+    	this.body = b;
+    }
+    
     /** 
      * Copies the disc but sets a different corresponding rigid body
      * @param other
