@@ -387,7 +387,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         });
         
-        JButton load = new JButton("Load");
+        JButton load = new JButton("Load PNG");
         basicControls.add( load );
         load.addActionListener( new ActionListener() {
             @Override
@@ -398,7 +398,20 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 }
             }
         });
+        JButton loadxml = new JButton("Load XML");
+        basicControls.add( loadxml );
+        loadxml.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                File f = FileSelect.select("xml", "xml", "load", "scenes3d/", true );
+                if ( f != null ) {
+                    loadXMLSystem( f.getPath() );
+                }
+            }
+        });
+
         vfp.add( basicControls );
+        
         
         HorizontalFlowPanel hfp2 = new HorizontalFlowPanel();
         hfp2.add( record.getControls() );
@@ -477,6 +490,24 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         sceneTranslation.set( - blocker.width/2, - blocker.height, 0 );
         system.bodies.addAll(blocker.bodies);
         
+        for (RigidBody body: system.bodies) {
+        	body.friction = system.collision.friction.getValue();
+        	body.restitution = system.collision.restitution.getValue();
+        }
+    }
+    
+    /**
+     * Loads the specified image, clearing the old system, and resets viewing parameters.
+     * @param filename
+     */
+    private void loadXMLSystem( String filename ) {
+        factory.use = false;        
+        systemClear();
+        system.name = filename;
+        XMLParser parser = new XMLParser();
+        parser.parse( system, filename );
+        sceneTranslation.set( 0 ,0, 0 );
+        // TODO: dont'override these values later... for now set!
         for (RigidBody body: system.bodies) {
         	body.friction = system.collision.friction.getValue();
         	body.restitution = system.collision.restitution.getValue();

@@ -3,10 +3,13 @@ package mergingBodies3D;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import javax.xml.parsers.*;
 import java.io.*;
+import java.util.ArrayList;
 
 public class XMLParser {
 	
@@ -118,12 +121,35 @@ public class XMLParser {
 	}
 
 	private void createPlane( String name, Element eElement ) {
-		
-		//RigidBody b = new PlaneRigidBody(p, n);
+		Point3d p = new Point3d();
+		Vector3d n = new Vector3d();
+		p.set( t3d( eElement.getAttribute("p") ) );
+		n.set( t3d( eElement.getAttribute("n") ) );
+		RigidBody b = new PlaneRigidBody(p, n); // ALWAYS pinned, 
+		setCommonAttributes( b, eElement ); // can still adjust friction and restitution
+		system.bodies.add( b );
 	}
 
 	private void createSphere( String name, Element eElement ) {
-
+		double r = Double.parseDouble( eElement.getAttribute("r") );
+		Matrix3d angularMass = new Matrix3d();
+		angularMass.setIdentity();
+		double massLinear = 4/3*Math.PI*r*r*r;
+		angularMass.mul( 2/5*massLinear*r*r );
+		ArrayList<Point3d> bbB = new ArrayList<Point3d>();
+		bbB.add( new Point3d( -r, -r, -r ) );
+		bbB.add( new Point3d( -r, -r,  r ) );
+		bbB.add( new Point3d( -r,  r, -r ) );
+		bbB.add( new Point3d( -r,  r,  r ) );
+		bbB.add( new Point3d(  r, -r, -r ) );
+		bbB.add( new Point3d(  r, -r,  r ) );
+		bbB.add( new Point3d(  r,  r, -r ) );
+		bbB.add( new Point3d(  r,  r,  r ) );		
+		RigidBody body = new RigidBody(massLinear, angularMass, false, bbB );
+		setCommonAttributes( body, eElement );
+		body.updateTransformations();
+        //body.root = new BVNode( , body );
+        body.geom = new RigidBodyGeomSphere( r );		
 	}
 
 	/**
@@ -166,5 +192,14 @@ public class XMLParser {
 		v.z = Double.parseDouble(values[2]);
 		return v;
 	}
-	
+
+	private Tuple3d t3d( String s ) {
+		Vector3d v = new Vector3d();
+        String[] values = s.split("\\s+");        
+		v.x = Double.parseDouble(values[0]);
+		v.y = Double.parseDouble(values[1]);
+		v.z = Double.parseDouble(values[2]);
+		return v;
+	}
+
 }

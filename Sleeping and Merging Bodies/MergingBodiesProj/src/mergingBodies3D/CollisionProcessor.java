@@ -114,9 +114,9 @@ public class CollisionProcessor {
 	protected void updateContactsMap() {
 		lastTimeStepMap.clear();
 		for (Contact contact : contacts) {
-			Block block1 = contact.block1;
-			Block block2 = contact.block2;
-			lastTimeStepMap.put("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()), contact);
+			Disc bv1 = contact.bv1;
+			Disc bv2 = contact.bv2;
+			lastTimeStepMap.put("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode()), contact);
 		} 
 	}
 	
@@ -145,19 +145,19 @@ public class CollisionProcessor {
 		
 		Contact oldContact;
 		
-		Block block1 = contact.block1;
-		Block block2 = contact.block2;
+		Disc bv1 = contact.bv1;
+		Disc bv2 = contact.bv2;
 
-		if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode() ))
-				|| lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() ))) {
+		if(lastTimeStepMap.containsKey("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode() ))
+				|| lastTimeStepMap.containsKey("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode() ))) {
 
 			RigidBody body1 = contact.body1;//(contact.body1.isInCollection())? contact.body1.parent: contact.body1;
 			RigidBody body2 = contact.body2;// (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
 
 			// if the old map contains this key, then get the lambda of the old map
-			oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block1.hashCode()) + "_" + Integer.toString(block2.hashCode()));
-			if(lastTimeStepMap.containsKey("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode() )))
-				oldContact = lastTimeStepMap.get("contact:" + Integer.toString(block2.hashCode()) + "_" + Integer.toString(block1.hashCode()));
+			oldContact = lastTimeStepMap.get("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode()));
+			if(lastTimeStepMap.containsKey("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode() )))
+				oldContact = lastTimeStepMap.get("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode()));
 			
 			RigidBody oldBody1 = oldContact.body1;//(oldContact.body1.isInCollection())? oldContact.body1.parent: oldContact.body1;
 			RigidBody oldBody2 = oldContact.body2;//(oldContact.body2.isInCollection())? oldContact.body2.parent: oldContact.body2;
@@ -282,10 +282,10 @@ public class CollisionProcessor {
 
 		if (node1.boundingDisc.intersects(node2.boundingDisc)) {
 			if (node1.isLeaf() && node2.isLeaf()) {
-				Block leafBlock1 = node1.leafBlock;
-				Block leafBlock2 = node2.leafBlock;
+				Disc leafBV1 = node1.boundingDisc;
+				Disc leafBV2 = node2.boundingDisc;
 
-				processCollision(body1, leafBlock1, body2, leafBlock2);
+				processCollision(body1, leafBV1, body2, leafBV2);
 				
 			} else if(node1.isLeaf()|| node1.boundingDisc.r <= node2.boundingDisc.r){
 				//if they overlap, and body 1 is either a leaf or smaller than body_2, break down body_2
@@ -313,8 +313,6 @@ public class CollisionProcessor {
     }
     
     // some working variables for processing collisions
-    private Point3d tmp1 = new Point3d();
-    private Point3d tmp2 = new Point3d();
     private Point3d contactW = new Point3d();
     private Vector3d force = new Vector3d();
     private Vector3d contactV1 = new Vector3d();
@@ -326,29 +324,31 @@ public class CollisionProcessor {
      * Processes a collision between two bodies for two given blocks that are colliding.
      * Currently this implements a penalty force
      * @param body1
-     * @param b1
+     * @param bv1
      * @param body2
-     * @param b2
+     * @param bv2
      */
-    private void processCollision( RigidBody body1, Block b1, RigidBody body2, Block b2 ) {        
+    private void processCollision( RigidBody body1, Disc bv1, RigidBody body2, Disc bv2 ) {        
         double k = contactSpringStiffness.getValue();
         double c1 = contactSpringDamping.getValue();
         double threshold = separationVelocityThreshold.getValue();
         boolean useSpring = enableContactSpring.getValue();
         boolean useDamping = enableContactDamping.getValue();
         
-        body1.transformB2W.transform( b1.pB, tmp1 );
-        body2.transformB2W.transform( b2.pB, tmp2 );
-        double distance = tmp1.distance(tmp2);
-        if ( distance < Block.radius * 2 ) {
+//        body1.transformB2W.transform( b1.pB, tmp1 );
+//        body2.transformB2W.transform( b2.pB, tmp2 );
+//        double distance = tmp1.distance(tmp2);
+        double distance = bv1.cW.distance( bv2.cW );
+        double distanceBetweenCenters = bv2.r + bv1.r;
+        if ( distance < distanceBetweenCenters ) {
             // contact point at halfway between points 
             // NOTE: this assumes that the two blocks have the same radius!
-            contactW.interpolate( tmp1, tmp2, .5 );
+            contactW.interpolate( bv1.cW, bv2.cW, .5 );
             // contact normal
-            normal.sub( tmp2, tmp1 );
+            normal.sub( bv2.cW, bv1.cW );
             normal.normalize();
             // create the contact
-            Contact contact = new Contact( body1, body2, contactW, normal, b1, b2, distance - Block.radius * 2);
+            Contact contact = new Contact( body1, body2, contactW, normal, bv1, bv2, distance - distanceBetweenCenters);
             // simple option... add to contact list...
             contacts.add( contact );
             if ( ! doLCP.getValue() ) {
@@ -356,10 +356,11 @@ public class CollisionProcessor {
                 body1.getSpatialVelocity( contactW, contactV1 );
                 body2.getSpatialVelocity( contactW, contactV2 );
                 relativeVelocity.sub( contactV1, contactV2 );
-                if ( -relativeVelocity.dot( normal ) < threshold ) {
+                double normalRelVel = -relativeVelocity.dot( normal );
+                if (  normalRelVel < threshold ) {
                     if ( useSpring ) {
                         // spring force
-                        double interpenetration = distance - Block.radius * 2; // a negative quantity
+                        double interpenetration = distance - distanceBetweenCenters; // a negative quantity
                         force.scale( -interpenetration * k, normal );
                         body2.applyContactForceW(contactW, force);
                         force.scale(-1);

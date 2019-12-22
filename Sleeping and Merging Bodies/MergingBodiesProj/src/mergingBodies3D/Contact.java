@@ -29,9 +29,10 @@ public class Contact {
     /** Second RigidBody in contact */
     RigidBody body2;
     
-	//The two blocks within the bodies that caused the collision
-	Block block1;
-	Block block2;
+	/** Bounding volume that caused the collision */
+	Disc bv1;
+	/** Bounding volume that caused the collision */
+	Disc bv2;
     
     /** Contact normal in body1 coordinates */
     Vector3d normalB = new Vector3d();
@@ -93,12 +94,12 @@ public class Contact {
      * @param contactW
      * @param normal
      */
-    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, Block b1, Block b2, double constraintViolation ) {
+    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, Disc disc1, Disc disc2, double constraintViolation ) {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW ); 
-		block1 = b1;
-		block2 = b2;
+		bv1 = disc1;
+		bv2 = disc2;
 		this.constraintViolation =  constraintViolation;     
         index = nextContactIndex++;     
         

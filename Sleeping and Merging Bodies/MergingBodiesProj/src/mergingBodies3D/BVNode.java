@@ -26,7 +26,7 @@ public class BVNode {
     BVNode child2;
     
     /** The block at this node if it is a leaf, null otherwise */
-    Block leafBlock;
+    //private Block leafBlock;
     
     /** The visitID keeps track of when this node was last visited */
     int visitID;
@@ -40,7 +40,17 @@ public class BVNode {
     	boundingDisc = new Disc( n.boundingDisc, body );
     	if ( n.child1 != null ) child1 = new BVNode( child1, body );
     	if ( n.child2 != null ) child2 = new BVNode( child2, body );
-    	leafBlock = n.leafBlock; // This is sharable!    	
+    	//leafBlock = n.leafBlock; // This is sharable!    	
+    }
+    
+    /** 
+     * Creates a BVNode leaf with this node.
+     * Note that the Disc knows it's rigid body.
+     * @param d
+     * @param b
+     */
+    public BVNode( Disc d, RigidBody b ) {
+    	this.boundingDisc = d;
     }
     
     /**
@@ -56,7 +66,8 @@ public class BVNode {
         boundingDisc = new Disc(blocks, body);
         
         if ( blocks.size() == 1 ) {
-            leafBlock = blocks.get(0);
+            // do nothing... the disc can instead identify the leaf position
+        	//leafBlock = blocks.get(0);
         } else {        
             // find the distribution       
             Block b0 = blocks.get(0);
@@ -102,7 +113,8 @@ public class BVNode {
      * @return true if this node is a leaf
      */    
     public boolean isLeaf() {
-        return leafBlock != null;
+    	return (child1 == null) && (child2 == null ); 
+    	// return leafBlock != null;
     }
     
     /**
