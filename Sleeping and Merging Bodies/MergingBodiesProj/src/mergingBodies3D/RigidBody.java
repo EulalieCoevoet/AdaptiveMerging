@@ -43,9 +43,6 @@ public class RigidBody {
     
     public boolean selected;
     
-    /** TODO: should this even live here?  perhaps this should only be in the mouse spring */
-    //public Point3d selectedPoint = new Point3d();
-    
     /** Transforms points in Body coordinates to World coordinates */
     RigidTransform transformB2W = new RigidTransform();
     

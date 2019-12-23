@@ -221,7 +221,7 @@ public class RigidBodySystem {
      * Draws all rigid bodies
      * @param drawable
      */
-    public void display( GLAutoDrawable drawable ) {
+    public void display( GLAutoDrawable drawable, boolean picking ) {
         GL2 gl = drawable.getGL().getGL2();
         if ( Block.alpha != (float) (double) transparency.getValue()) {
             Block.alpha = (float) (double) transparency.getValue();
@@ -236,10 +236,14 @@ public class RigidBodySystem {
         if ( drawBodies.getValue() ) {
         	int i = 0;
         	for ( RigidBody b : bodies ) {
-            	gl.glLoadName( i++ ); // for picking
+        		if ( picking ) {
+        			LCPApp3D.setColorWithID( gl, i++ );
+        		}
+            	//gl.glLoadName( i++ ); // for picking
                 b.display( drawable );
             }
         }
+        if ( picking ) return;
         gl.glLineWidth(1);
         if ( drawBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {

@@ -68,10 +68,9 @@ public class Block {
      */
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
-        gl.glColor4f( c.x, c.y, c.z, alpha );
         
         // lighter block colour as black isn't a great material color in 3D.
-		float[] col = new float[] { .5f+.5f*c.x,.5f+.5f*c.y,.5f+.5f*c.z, Block.alpha };		
+		float[] col = new float[] { .75f+.25f*c.x,.75f+.25f*c.y,.75f+.25f*c.z, Block.alpha };		
 		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
 
 

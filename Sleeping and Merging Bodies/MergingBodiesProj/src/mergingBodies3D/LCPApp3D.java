@@ -13,6 +13,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -26,7 +27,6 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -96,6 +96,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         gl.glClearColor(1,1,1,1);
         float[] ambient = new float[] { 0.3f,0.3f,0.3f,1 };
         gl.glLightModelfv( GL2.GL_LIGHT_MODEL_AMBIENT, ambient, 0 );
+        gl.glEnable( GL.GL_CULL_FACE );
     }
                 
     private FlatMatrix4d T = new FlatMatrix4d();
@@ -103,10 +104,11 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
-        
+        	
         if ( selectRequest ) {
         	selectRequest = false;
     		select(drawable, mousePressedPoint );
+        	gl.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT );
         }
         
         if ( deleteDisplayListRequest ) {
@@ -128,13 +130,13 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         }
 
         if ( ! drawWithShadows.getValue() ) {
-            drawAllObjects(drawable);
+            drawAllObjects( drawable, false );
         } else {                    
             shadowMap.beginLightPass( drawable, ev.trackBall );
-            drawAllObjects(drawable);        
+            drawAllObjects( drawable, false );        
             shadowMap.endLightPass( drawable, ev.trackBall );
             shadowMap.beginShadowMapping(drawable, ev.trackBall); 
-            drawAllObjects( drawable);
+            drawAllObjects( drawable, false );
             shadowMap.endShadowMapping( drawable, ev.trackBall );
         }        
         if ( mouseSpring.picked != null ) {
@@ -209,125 +211,81 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     
 	//private final FancyAxis fa = new FancyAxis();
 
-    private void drawAllObjects( GLAutoDrawable drawable ) {
+    private void drawAllObjects( GLAutoDrawable drawable, boolean picking ) {
     	GL2 gl = drawable.getGL().getGL2();
         
         gl.glPushMatrix();
         gl.glScaled( sceneScale,sceneScale,sceneScale );
         gl.glTranslated( sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
         
-        system.display( drawable );
+        system.display( drawable, picking );
 
         //gl.glScaled( 5,5,5 );
         //fa.draw(gl);
         gl.glPopMatrix();
     }
     
-    /**
-     * Selects the skeleton ODE body at the given mouse point
-     * The mouse spring is updated with the selected body, and the 
-     * selected body has a selected point unprojected from screen space 
-     * mapped to body coordinates.
-     * Selection only works for one skeleton!
-     * @param drawable
-     * @param p
-     */
-    private void select( GLAutoDrawable drawable, Point p ) {
+    /** For reading the depth of a visible pixel */
+    private IntBuffer depthPixels = IntBuffer.allocate( 1 );
+	private static ByteBuffer colorPixels = ByteBuffer.allocate( 4 );
 
+	static public void setColorWithID( GL2 gl, int ID ) {
+    	gl.glColor3f( (ID & 0xff)/255f, ((ID >> 8) & 0xff)/255f, ((ID>> 16) & 0xff)/255f);
+	}
+	
+	static public int getIDFromColor( ByteBuffer colorPixels ) {
+		int r, g, b;
+		colorPixels.rewind();
+		r = colorPixels.get() & 0xff;
+		g = colorPixels.get() & 0xff;
+		b = colorPixels.get() & 0xff;
+		colorPixels.rewind();
+		return r + (g << 8) + (b << 16);		
+	}
+	
+    private void select( GLAutoDrawable drawable, Point p ) {
     	GL2 gl = drawable.getGL().getGL2();
 
-    	int pickWindowRadius = 1;
-    	int h = drawable.getSurfaceHeight(); // should really be viewport
-		int xl = p.x - pickWindowRadius;
-		int xh = p.x + pickWindowRadius;
-		int yl = (h - p.y) - pickWindowRadius;
-		int yh = (h - p.y) + pickWindowRadius;
-		
-    	// clear selection
-    	for ( RigidBody b : system.bodies ) {
-    		b.selected = false;
-    	}
+    	gl.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT );
+    	gl.glDisable( GL2.GL_LIGHTING );
+    	gl.glDisable( GL.GL_BLEND );
+    	drawAllObjects( drawable, true );
+    	gl.glEnable( GL2.GL_LIGHTING );
+    	gl.glEnable( GL.GL_BLEND );
     	
-    	if ( selectionBuffer == null ) {
-	        int pickbufferSize = 10000;
-	        selectionBuffer = Buffers.newDirectIntBuffer(pickbufferSize);	        
-	        if ( selectionBuffer == null ) {
-	            System.out.println("problems allocating pick buffer :-(");
-	            return;
-	        }
-	    }
-	    
-	    final int[] viewport = new int[4];
-	    gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
-	    //System.out.println( "viewport = " + viewport[0] + " "+ viewport[1] + " "+ viewport[2] + " "+ viewport[3] );
-	    final double[] currentProjectionMatrix = new double[16];
-	    gl.glGetDoublev( GL2.GL_PROJECTION_MATRIX, currentProjectionMatrix, 0 );
-	    
-	    gl.glSelectBuffer( selectionBuffer.capacity(), selectionBuffer );
-	    gl.glRenderMode( GL2.GL_SELECT );
-	    gl.glInitNames(); // clear name stack
-	    gl.glPushName(-1);  // I don't think we want this, do we? safety!
+    	int h = drawable.getSurfaceHeight();
+		int x = p.x;
+		int y = h - p.y;
 
-	    // set up the projection matrix for picking
-	    gl.glMatrixMode( GL2.GL_PROJECTION );
-	    gl.glLoadIdentity();
-	    glu.gluPickMatrix((xl+xh)/2f, (yl+yh)/2f, xh-xl, yh-yl, viewport, 0);
-	    gl.glMultMatrixd(currentProjectionMatrix, 0);
-	    gl.glMatrixMode(GL2.GL_MODELVIEW); // Draw the model vertices
-    
-	    // DRAW IT!
-        gl.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT );
-
-        drawAllObjects(drawable);
-	       
-        // Restore OpenGL state
-	    gl.glMatrixMode(GL2.GL_PROJECTION);
-	    gl.glLoadMatrixd(currentProjectionMatrix, 0);
-	    gl.glMatrixMode(GL2.GL_MODELVIEW); // back again in default mode
-	
-	    // Restores the rendering mode back to GL_RENDER mode
-	    int selectionHits = gl.glRenderMode(GL2.GL_RENDER);
-
-	    // process hits
-	    // System.out.println("---------------------------------");
-	    //System.out.println(" HITS: " + selectionHits);
-	    if ( selectionHits !=0 ) {
-	    	
-	        // Buffer:
-	        // 0=#names, 1=z1, 2=z2, 3=name[1], 4=name[2], ... name[#names]
-	    	
-    		//int nnames = selectionBuffer.get(0);
-    		//System.out.println( "#names = " + nnames );
-	        zClosest = 2; // anything past 1 is farther than far
-	        int pickIndex = -1; // -1 should not be an assigned name!
-	        for (int i = 0; i < selectionHits; i++) {
-	        	int index = selectionBuffer.get(4 * i + 3);
-		        long zL = Integer.toUnsignedLong( selectionBuffer.get(4 * i + 1) );
-		        float z = ( (float) zL ) / 0xffffffffL; // convert to [0,1] interval for comparison and unproject
-	        	//System.out.println(" hit: " + selectionBuffer.get(4 * i + 3) + " distance " + selectionBuffer.get(4 + i + 1) );
-		        if ( z < zClosest ) { 
-		        	pickIndex = index;
-	                zClosest = z;
-	            }
-	        }
-	        //System.out.println( "Picked name = " + pickedIndex );
-	        if ( pickIndex == -1 ) {
-	        	System.out.println("seemed to pick something else?");
-	        } else {
-	        	unproject( drawable, p.x, h-p.y, zClosest, mouseSpring.pointW );
-                mouseSpring.picked = system.bodies.get(pickIndex);
-                mouseSpring.picked.selected = true;
-                mouseSpring.pointW.scale( 1/sceneScale ); // gross to undo the other drawing stuff here... 
-                mouseSpring.pointW.sub( sceneTranslation);
-                
-                Matrix4d A = mouseSpring.picked.transformW2B.T;
-                A.transform(mouseSpring.pointW,  mouseSpring.grabPointB ) ;
-		        System.out.println(" unprojected in world = " +  mouseSpring.pointW  + " index " +  pickIndex );
-		        System.out.println(" unprojected on body = " +  mouseSpring.grabPointB  + " index " +  pickIndex );
-	        }
-        }
+		colorPixels.rewind();
+		gl.glReadPixels( x, y, 1, 1, GL2.GL_RGB, GL.GL_UNSIGNED_BYTE, colorPixels );
+		colorPixels.rewind();		
+		int ID = getIDFromColor( colorPixels );
+		if ( ID > system.bodies.size() ) {
+//			System.out.println("picked non-body ID " + ID );
+			return;
+		}
+		
+		depthPixels.rewind();
+		gl.glReadPixels( x, y, 1, 1, GL2.GL_DEPTH_COMPONENT, GL.GL_UNSIGNED_INT, depthPixels );
+		depthPixels.rewind();
+		int zint = depthPixels.get(0);
+		// System.out.println(Integer.toHexString(zint));
+		// convert to [0,1] interval for unproject
+        long zL = Integer.toUnsignedLong( zint );
+        zClosest = ( (float) zL ) / 0xffffffffL; 
+        unproject( drawable, p.x, h-p.y, zClosest, mouseSpring.pointW );
+    	mouseSpring.picked = system.bodies.get( ID );
+    	mouseSpring.picked.selected = true;
+    	mouseSpring.pointW.scale( 1/sceneScale ); // gross to undo the other drawing stuff here... 
+    	mouseSpring.pointW.sub( sceneTranslation);
+    	
+    	Matrix4d A = mouseSpring.picked.transformW2B.T;
+    	A.transform(mouseSpring.pointW,  mouseSpring.grabPointB ) ;
+//    	System.out.println(" unprojected in world = " +  mouseSpring.pointW  + " index " +  ID );
+//    	System.out.println(" unprojected on body = " +  mouseSpring.grabPointB  + " index " +  ID );
     }
-
+    
     private void unproject( GLAutoDrawable drawable, float x, float y, float z, Point3d p ) {
 	    final int[] viewport = new int[4];
     	final float[] modelview = new float[16];
@@ -360,7 +318,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private BooleanParameter run = new BooleanParameter( "simulate", false );
     private DoubleParameter stepsize = new DoubleParameter( "step size", 0.05, 1e-5, 1 );
     private IntParameter substeps = new IntParameter( "sub steps (integer)", 1, 1, 100);
-    
+        
     /**
      * Creates a control panel for changing visualization and simulation parameters
      */
@@ -565,10 +523,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private boolean selectRequest = false;
     
     /** [0,1] z position from opengl picking to use with unproject */
-    float zClosest;
+    private float zClosest;
    
-    /** Selection buffer for openGL picking */
-    private IntBuffer selectionBuffer;
    
     private GLU glu = new GLU();
     
