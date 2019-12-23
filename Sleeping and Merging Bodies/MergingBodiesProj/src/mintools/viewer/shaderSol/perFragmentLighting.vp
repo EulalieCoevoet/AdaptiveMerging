@@ -1,0 +1,14 @@
+// mostly a pass through vertex shader, but we'll also supply texture coordinate information.
+
+uniform mat4 lightProjection;
+
+varying vec3 N;  // surface normal in camera 
+varying vec3 v;  // surface fragment location in camera 
+varying vec4 vL; // surface fragment location in light view NDC
+
+void main() {	
+   vL = lightProjection * gl_ModelViewMatrix * gl_Vertex;
+   v = vec3(gl_ModelViewMatrix * gl_Vertex);       
+   N = normalize(gl_NormalMatrix * gl_Normal);
+   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; 
+}

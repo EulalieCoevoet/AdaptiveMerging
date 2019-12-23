@@ -79,10 +79,16 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      */
     public LCPApp3D() {
         system.mouseSpring = mouseSpring;
-        loadSystem("datalcp/lcp.png"); // good default scene
+        loadXMLSystem("scenes3D/boxesOnPlane.xml");
+        //System("datalcp/lcp.png"); // good default scene
         T.getBackingMatrix().setIdentity();
-        ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(540,480), new Dimension(640,480) );
-        ev.addInteractor(this);        
+        ev = new EasyViewer( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(540,480), new Dimension(640,480) );
+        ev.addInteractor(this);       
+        
+        //ev.trackBall.setFocalDistance(5);
+        //ev.trackBall.focalPointY.setValue(1);
+        ev.trackBall.near.setValue(2);
+        //ev.trackBall.far.setValue(15);
     }
      
     @Override
@@ -94,8 +100,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         gl.glEnable( GL2.GL_POINT_SMOOTH );
         shadowMap.init(drawable); 
         gl.glClearColor(1,1,1,1);
-        float[] ambient = new float[] { 0.3f,0.3f,0.3f,1 };
-        gl.glLightModelfv( GL2.GL_LIGHT_MODEL_AMBIENT, ambient, 0 );
         gl.glEnable( GL.GL_CULL_FACE );
     }
                 

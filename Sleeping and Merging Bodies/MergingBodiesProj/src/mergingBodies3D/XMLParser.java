@@ -3,6 +3,7 @@ package mergingBodies3D;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -232,6 +233,11 @@ public class XMLParser {
 			if ( attribute.equalsIgnoreCase("x") ) {
 				body.x.set( t3d( values ) );
 				body.x0.set( body.x );
+			} else if ( attribute.equalsIgnoreCase("R") ) {
+				AxisAngle4d aa = new AxisAngle4d();
+				aa.set( asDoubles(values) );
+				body.theta.set( aa );
+				body.theta0.set(aa );
 			} else if ( attribute.equalsIgnoreCase("v") ) {
 				body.v.set( t3d( values ) );
 			} else if ( attribute.equalsIgnoreCase("omega") ) {
@@ -264,6 +270,14 @@ public class XMLParser {
 		v.y = Double.parseDouble(values[1]);
 		v.z = Double.parseDouble(values[2]);
 		return v;
+	}
+	
+	private double[] asDoubles( String[] s ) {
+		double[] d = new double[s.length];
+		for ( int i = 0; i < s.length; i++ ) {
+			d[i] = Double.parseDouble(s[i]);
+		}
+		return d;
 	}
 
 }

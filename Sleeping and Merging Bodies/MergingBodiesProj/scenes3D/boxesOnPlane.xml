@@ -15,7 +15,7 @@
         <x> 0 10 0 </x>
     </body>
 
-    <body type="plane" name="plane1" p="0 -1 0" n="0 1 0">
+    <body type="plane" name="plane1" p="0 -10 0" n="0 1 0">
     </body>
 
 </root>

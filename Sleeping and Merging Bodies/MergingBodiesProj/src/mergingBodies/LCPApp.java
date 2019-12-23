@@ -83,7 +83,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
        	loadSystem(filename); 
 
         T.getBackingMatrix().setIdentity();
-        ev = new EasyViewer( "2D Rigid Body Collision Processing", this, new Dimension(1280, 720), new Dimension(640,640) );
+        ev = new EasyViewer( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(1280, 720), new Dimension(640,640) );
         ev.controlFrame.add("Display", system.display.getControls());
         ev.controlFrame.add("Merging", system.merging.getControls());
         ev.controlFrame.add("Sleeping", system.sleeping.getControls());

@@ -63,6 +63,9 @@ public class RigidBody {
     
     /** orientation of the body TODO: refactor to be R later?? */
     public Matrix3d theta = new Matrix3d();
+
+    /** orientation of the body TODO: refactor to be R later?? */
+    public Matrix3d theta0 = new Matrix3d();
     
     /** angular velocity in radians per second */
     public Vector3d omega = new Vector3d();
@@ -120,6 +123,7 @@ public class RigidBody {
 	        this.jinv.set( jinv0 );
         } 
         theta.setIdentity();
+        theta0.setIdentity();
 	}
 	
     /**
@@ -128,11 +132,12 @@ public class RigidBody {
      */
     public RigidBody( RigidBody body ) {
         massLinear = body.massLinear;
-        massAngular0 = body.massAngular0;
+        massAngular0.set( body.massAngular0 );
         x0.set( body.x0 );
         x.set( body.x );
-        theta = body.theta;
-        omega = body.omega;
+        theta.set( body.theta );
+        theta0.set( body.theta0 );        
+        omega.set( body.omega );
 		boundingBoxB = new ArrayList<Point3d>(body.boundingBoxB);
         // we can share the blocks and boundary blocks...
         // no need to update them as they are in the correct body coordinates already        
@@ -309,7 +314,7 @@ public class RigidBody {
      */
     public void reset() {
         x.set(x0);        
-        theta.setIdentity();
+        theta.set(theta0);
         v.set(0,0,0);
         omega.set(0,0,0);
         transformB2W.set( theta, x );
