@@ -85,7 +85,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         ev = new EasyViewer( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(540,480), new Dimension(640,480) );
         ev.addInteractor(this);       
         
-        //ev.trackBall.setFocalDistance(5);
+        ev.trackBall.setFocalDistance(10);
         //ev.trackBall.focalPointY.setValue(1);
         ev.trackBall.near.setValue(2);
         //ev.trackBall.far.setValue(15);
@@ -160,13 +160,13 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         	gl.glPushMatrix();
         	gl.glTranslated( p1.x, p1.y, p1.z );
         	gl.glColor3f(1, 0, 0);
-        	EasyViewer.glut.glutSolidSphere(0.5,16,16);        
+        	EasyViewer.glut.glutSolidSphere(0.1,16,16);        
         	gl.glPopMatrix();
 
         	gl.glPushMatrix();
         	gl.glTranslated( p2.x, p2.y, p2.z );
         	gl.glColor3f(1, 0, 0);
-        	EasyViewer.glut.glutSolidSphere(0.5,16,16);        
+        	EasyViewer.glut.glutSolidSphere(0.1,16,16);        
         	gl.glPopMatrix();
 
         	
@@ -438,7 +438,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     // variables and objects for picking rigid body with the mouse
     private MouseSpringForce mouseSpring = new MouseSpringForce();
     
-    private double sceneScale = 1e-1; // guess how to get images to show up nicely in 3D in a first approximation...
+    private double sceneScale = 0.1; // guess how to get images to show up nicely in 3D in a first approximation...
     private Vector3d sceneTranslation = new Vector3d();
     
     /**

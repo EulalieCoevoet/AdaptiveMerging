@@ -1,5 +1,14 @@
 <root>
 
+    <body type="box" name="platform" dim="20 1 20">
+        <x> 0 10 0 </x>
+        <spring pB="10 0.5 10"/>
+        <spring pB="10 0.5 -10"/>
+        <spring pB="-10 0.5 10"/>
+        <spring pB="-10 0.5 -10"/>
+    </body>
+
+
     <body type="box" name="box1" dim="1 2 3">
         <x> 0 20 0 </x>
     </body>
@@ -12,7 +21,7 @@
     </body>
 
     <body type="sphere" name="sphere1" r="2">
-        <x> 0 10 0 </x>
+        <x> 0 15 5 </x>
     </body>
 
     <body type="plane" name="plane1" p="0 -10 0" n="0 1 0">

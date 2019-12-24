@@ -353,31 +353,31 @@ public class CollisionProcessor {
             Contact contact = new Contact( body1, body2, contactW, normal, bv1, bv2, distance - distanceBetweenCenters);
             // simple option... add to contact list...
             contacts.add( contact );
-            if ( ! doLCP.getValue() ) {
+//            if ( ! doLCP.getValue() ) {
                 // compute relative body velocity at contact point
-                body1.getSpatialVelocity( contactW, contactV1 );
-                body2.getSpatialVelocity( contactW, contactV2 );
-                relativeVelocity.sub( contactV1, contactV2 );
-                double normalRelVel = -relativeVelocity.dot( normal );
-                if (  normalRelVel < threshold ) {
-                    if ( useSpring ) {
-                        // spring force
-                        double interpenetration = distance - distanceBetweenCenters; // a negative quantity
-                        force.scale( -interpenetration * k, normal );
-                        body2.applyContactForceW(contactW, force);
-                        force.scale(-1);
-                        body1.applyContactForceW(contactW, force);
-                    }
-                    if ( useDamping ) {
-                        // spring damping forces!
-                        // vertical
-                        force.scale( relativeVelocity.dot(normal) * c1, normal );                    
-                        body2.applyContactForceW( contactW, force );
-                        force.scale(-1);
-                        body1.applyContactForceW( contactW, force );
-                    }
-                }
-            }
+//                body1.getSpatialVelocity( contactW, contactV1 );
+//                body2.getSpatialVelocity( contactW, contactV2 );
+//                relativeVelocity.sub( contactV1, contactV2 );
+//                double normalRelVel = -relativeVelocity.dot( normal );
+//                if (  normalRelVel < threshold ) {
+//                    if ( useSpring ) {
+//                        // spring force
+//                        double interpenetration = distance - distanceBetweenCenters; // a negative quantity
+//                        force.scale( -interpenetration * k, normal );
+//                        body2.applyContactForceW(contactW, force);
+//                        force.scale(-1);
+//                        body1.applyContactForceW(contactW, force);
+//                    }
+//                    if ( useDamping ) {
+//                        // spring damping forces!
+//                        // vertical
+//                        force.scale( relativeVelocity.dot(normal) * c1, normal );                    
+//                        body2.applyContactForceW( contactW, force );
+//                        force.scale(-1);
+//                        body1.applyContactForceW( contactW, force );
+//                    }
+//                }
+//            }
         }
     }
 

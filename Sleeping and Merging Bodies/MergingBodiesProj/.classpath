@@ -5,7 +5,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="mergingBodies3D/collision/BoxBox.java" kind="src" path="src"/>
 	<classpathentry kind="lib" path="jars/vecmath.jar"/>
 	<classpathentry kind="lib" path="jars/jogamp-fat.jar" sourcepath="jars/jogamp-fat-java-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>

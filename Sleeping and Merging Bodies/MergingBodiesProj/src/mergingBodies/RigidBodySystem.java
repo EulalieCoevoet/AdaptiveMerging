@@ -403,7 +403,6 @@ public class RigidBodySystem {
 		}
 	}
 	
-	
     public BooleanParameter saveCSV = new BooleanParameter( "save CSV", false);
 	
 	BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
@@ -413,7 +412,6 @@ public class RigidBodySystem {
 	public DoubleParameter globalViscousDecay = new DoubleParameter("global viscous decay", 1, 0.1, 1 );
 	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
 	public DoubleParameter springDamping= new DoubleParameter("spring damping", 1, 0, 1000 );
-	public static IntParameter springLength= new IntParameter("spring rest length", 1, 1, 100 );
 
 	public static DoubleParameter origin_x = new DoubleParameter("x position new body", 100, -100, 200 );
 	public static DoubleParameter origin_y = new DoubleParameter("y position of new body", 35, -100, 100 );
@@ -438,7 +436,6 @@ public class RigidBodySystem {
 		vfp.add( globalViscousDecay.getSliderControls(false) );
 		vfp.add(springStiffness.getSliderControls(false));
 		vfp.add(springDamping.getSliderControls(false));
-		vfp.add(springLength.getSliderControls());
 
 		VerticalFlowPanel vfpv_2 = new VerticalFlowPanel();
 		vfpv_2.setBorder( new TitledBorder("New body creation controls") );
