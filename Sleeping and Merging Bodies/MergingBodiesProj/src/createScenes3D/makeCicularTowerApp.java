@@ -6,18 +6,24 @@ public class makeCicularTowerApp {
 
 	public static void main( String[] args ) {		
 		try {
-			PrintStream ps = new PrintStream("scenes3D/tower.xml");
+			PrintStream ps = new PrintStream("scenes3D/tower3.xml");
 			ps.println("<root>");
 			// rotate blocks about y as we go around a circle of a 
 			// given radius
 			double r = 10;
-			int layers = 4;
+			int layers = 10;
+//			int sx = 3;
+//			int sy = 2;
+//			int sz = 5; 
 			int sx = 2;
-			int sy = 2;
+			int sy = 1;
 			int sz = 4; 
+
 			int floory = -10;
 			String dim = "dim=\"" + asString(sx, sy, sz) + "\"";
-			ps.println("<body type=\"plane\" name=\"plane1\" p=\"0 "+floory+" 0\" n=\"0 1 0\"></body>");
+			// leave room to add a bouncy plane by hand...  ?
+ 			int space = 0;
+			ps.println("<body type=\"plane\" name=\"plane1\" p=\"0 "+(floory-space)+" 0\" n=\"0 1 0\"></body>");
 			// first layer of blocks above the floor, taking into account
 			// the sqrt2 bounding sphere that goes slightly outside blocks
 			float y = (float) ( floory + sy*0.5 + (Math.sqrt(2)-1) );

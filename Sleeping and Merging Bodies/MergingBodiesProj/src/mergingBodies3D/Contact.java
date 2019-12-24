@@ -3,6 +3,7 @@ package mergingBodies3D;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.sun.javafx.text.GlyphLayout;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
@@ -443,10 +444,15 @@ public class Contact {
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
         gl.glPointSize(3);
-        gl.glColor3f(.7f,0,0);
+        //gl.glColor4d(.7,0,0,0.15);
+        float[] col = new float[] { 1f, 0, 0, 0.25f };
+        gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
+        gl.glDisable( GL.GL_DEPTH_TEST );
         gl.glBegin( GL.GL_POINTS );
-        gl.glVertex2d(contactW.x, contactW.y);
+        gl.glVertex3d( contactW.x, contactW.y, contactW.z );
         gl.glEnd();
+        gl.glEnable( GL.GL_DEPTH_TEST );
+
     }
     
     /**
@@ -461,8 +467,8 @@ public class Contact {
             gl.glLineWidth(2);
             gl.glColor4f(0,.3f,0, 0.5f);
             gl.glBegin( GL.GL_LINES );
-            gl.glVertex2d(body1.x.x, body1.x.y);
-            gl.glVertex2d(body2.x.x, body2.x.y);
+            gl.glVertex3d(body1.x.x, body1.x.y, body1.x.z );
+            gl.glVertex3d(body2.x.x, body2.x.y, body2.x.z );
             gl.glEnd();
         }
     }

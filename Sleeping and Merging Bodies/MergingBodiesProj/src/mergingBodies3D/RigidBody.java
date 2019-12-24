@@ -6,6 +6,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -356,11 +357,21 @@ public class RigidBody {
      */
     public void displayCOM( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
+        gl.glDisable( GL2.GL_DEPTH_TEST );
+        float[] col = new float[] { 0, 0, 1f, 0.25f };
+        gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
+        gl.glPointSize(8);
+
+        gl.glBegin( GL.GL_POINTS );
+        gl.glVertex3d( x.x, x.y, x.z);
+        gl.glEnd();
         
-        gl.glPushMatrix();
-        gl.glTranslated(x.x, x.y, x.z);
-        EasyViewer.glut.glutSolidSphere(1, 10, 10);
-        gl.glPopMatrix();
+//        gl.glPushMatrix();
+//        gl.glTranslated(x.x, x.y, x.z);
+//        EasyViewer.glut.glutSolidSphere(0.25, 10, 10);
+//        gl.glPopMatrix();
+//        
+        gl.glEnable( GL2.GL_DEPTH_TEST );
     }
     
 }

@@ -275,14 +275,18 @@ public class RigidBodySystem {
             }
         }
         
-        float[] green = new float[] { 0, 1, 0, 0.5f };
+        // Should move this stuff below to a display non-shadowable function
+        float[] green = new float[] { 0, 1, 0, 0.25f };
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, green, 0);
-
+//        gl.glDisable(GL2.GL_DEPTH_TEST);
+        gl.glDepthFunc( GL2.GL_GREATER );
         if ( drawContactGraph.getValue() ) {
             for ( Contact c : collision.contacts ) {
                 c.displayConnection(drawable);
             }
         }
+        gl.glDepthFunc( GL2.GL_LESS);
+//        gl.glEnable(GL2.GL_DEPTH_TEST);
         
         if ( drawContacts.getValue() ) {
             for ( Contact c : collision.contacts ) {
