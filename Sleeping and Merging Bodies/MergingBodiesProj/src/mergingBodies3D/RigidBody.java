@@ -329,11 +329,12 @@ public class RigidBody {
     public void display( GLAutoDrawable drawable ) {
     	
         GL2 gl = drawable.getGL().getGL2();
+     
         gl.glPushMatrix();        
         FlatMatrix4d M = new FlatMatrix4d();
         M.setBackingMatrix( transformB2W.T );        
         gl.glMultMatrixd( M.asArray(),0 );
-        
+
         geom.display( drawable );
     	
         gl.glPopMatrix();

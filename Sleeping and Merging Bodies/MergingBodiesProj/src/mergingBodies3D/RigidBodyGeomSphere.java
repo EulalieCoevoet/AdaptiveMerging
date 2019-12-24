@@ -10,10 +10,12 @@ public class RigidBodyGeomSphere extends RigidBodyGeom {
 
 	double r;
 	
-	float[] colour = new float[] {0.9f,0.9f,0.9f,1};
+	
 
 	public RigidBodyGeomSphere( double r ) {
 		this.r = r;
+		float[] col= new float[] {0.9f,0.9f,0.9f,1};
+		this.colour = col;
 	}
     
     /** 

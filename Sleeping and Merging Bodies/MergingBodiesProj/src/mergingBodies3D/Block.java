@@ -62,7 +62,7 @@ public class Block {
         return 1 - (0.3 * c.x + 0.59 * c.y + 0.11 * c.z);
     }
     
-    /**
+    /**       
      * Draws the block in its body coordinates.
      * @param drawable
      */
@@ -72,8 +72,7 @@ public class Block {
         // lighter block colour as black isn't a great material color in 3D.
 		float[] col = new float[] { .75f+.25f*c.x,.75f+.25f*c.y,.75f+.25f*c.z, Block.alpha };		
 		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
-
-
+	
         gl.glPushMatrix();
         gl.glTranslated(pB.x, pB.y, pB.z);
         EasyViewer.glut.glutSolidCube(1.f);

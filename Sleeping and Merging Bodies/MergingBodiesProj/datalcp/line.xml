@@ -16,8 +16,6 @@
         <restitution>1.</restitution>
         <v>0. 0.</v>
         <omega>2</omega>
-        <x>100. -25.</x>
-        <theta>0.5</theta>
     </body>
 
     <body id="2">
