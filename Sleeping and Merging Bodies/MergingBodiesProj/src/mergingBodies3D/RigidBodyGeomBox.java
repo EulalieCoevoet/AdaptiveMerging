@@ -12,10 +12,11 @@ public class RigidBodyGeomBox extends RigidBodyGeom {
 
 	Vector3d size = new Vector3d();
 	
-	float[] colour = new float[] {0.9f,0.9f,0.9f,1};
 	
 	public RigidBodyGeomBox( Vector3d size ) {
 		this.size.set(size);
+		float[] col= new float[] {0.9f,0.9f,0.9f,1};
+		this.colour = col;
 	}
     
     /** 
