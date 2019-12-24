@@ -19,9 +19,18 @@ import no.uib.cipr.matrix.DenseVector;
  */
 public class RigidBody {
     
+	/** Bodies can have names, as specified in XML, but not needed for anything yet except conveience */
+	String name;
+	
     /** Variable to keep track of identifiers that can be given to rigid bodies */
     static public int nextIndex = 0;
     
+	/** 
+	 * list of springs attached to this body
+	 * TODO: can this not live at the system level?  This seems like a weird place to put it
+	 */
+	public ArrayList<Spring> springs = new ArrayList<Spring>();
+	
     RigidBodyGeom geom;
         
     BVNode root;
@@ -177,13 +186,12 @@ public class RigidBody {
     }
     
     /**
-     * Apply a contact force specified in world coordinates
+     * Apply a contact force specified in world coordinates at the specified point.
      * @param contactPointW
      * @param contactForceW
      */
-    public void applyContactForceW( Point3d contactPointW, Vector3d contactForceW ) {
-        force.add( contactForceW );
-        
+    public void applyForceW( Point3d contactPointW, Vector3d contactForceW ) {
+        force.add( contactForceW );        
         Vector3d r = new Vector3d();
         r.sub( contactPointW, x );
         Vector3d torqueW = new Vector3d();

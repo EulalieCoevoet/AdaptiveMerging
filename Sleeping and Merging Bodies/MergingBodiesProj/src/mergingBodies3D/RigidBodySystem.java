@@ -26,7 +26,7 @@ public class RigidBodySystem {
     public double simulationTime = 0;
     
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
-    
+	
 	public CollisionProcessor collision = new CollisionProcessor(bodies);
     
     public MouseSpringForce mouseSpring;
@@ -179,13 +179,13 @@ public class RigidBodySystem {
 	 * Apply spring forces
 	 */
 	private void applySpringForces() {
-//		for (RigidBody body: bodies){
-////			if (body.isSleeping)
-////				continue;
-//			for (Spring s: body.springs) {
-//				s.apply(springStiffness.getValue(), springDamping.getValue());
-//			}
-//		}
+		for (RigidBody body: bodies){
+//			if (body.isSleeping)
+//				continue;
+			for (Spring s: body.springs) {
+				s.apply(springStiffness.getValue(), springDamping.getValue());
+			}
+		}
 	}
     
     /**
@@ -241,10 +241,21 @@ public class RigidBodySystem {
         		}
             	//gl.glLoadName( i++ ); // for picking
                 b.display( drawable );
-            }
+        	}
         }
         if ( picking ) return;
+        
+        float[] red = new float[] { 1, 0, 0, 0.5f };
+        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
+        gl.glNormal3f(0,0,1);
+    	for ( RigidBody b : bodies ) {
+    		for (Spring s : b.springs) {
+				s.displaySpring(drawable);
+			}
+    	}        
         gl.glLineWidth(1);
+        float[] blue = new float[] { 0, 0, 1, 0.25f };
+        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);
         if ( drawBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {
             	if ( b.root == null ) continue; // rigid body planes don't have a BVH
@@ -263,6 +274,10 @@ public class RigidBodySystem {
                 b.root.displayVisitBoundary( drawable, collision.visitID );
             }
         }
+        
+        float[] green = new float[] { 0, 1, 0, 0.5f };
+        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, green, 0);
+
         if ( drawContactGraph.getValue() ) {
             for ( Contact c : collision.contacts ) {
                 c.displayConnection(drawable);
@@ -290,6 +305,9 @@ public class RigidBodySystem {
     private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", false );
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
 
+	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
+	public DoubleParameter springDamping= new DoubleParameter("spring damping", 1, 0, 1000 );
+	
     /**
      * @return control panel for the system
      */
@@ -317,7 +335,11 @@ public class RigidBodySystem {
         vfp.add( useGravity.getControls() );
         vfp.add( gravityAmount.getSliderControls(false) );
         vfp.add( gravityAngle.getSliderControls(false) );
-        return vfp.getPanel();
+        
+		vfp.add(springStiffness.getSliderControls(false));
+		vfp.add(springDamping.getSliderControls(false));
+
+		return vfp.getPanel();
     }
     
 }

@@ -48,7 +48,7 @@ public class ShadowMap {
     private BooleanParameter debugLightFrustum = new BooleanParameter( "debug light frustum" , false );
     private DoubleParameter near = new DoubleParameter( "near plane for light", 6.5, 0.5, 8 );    
     private DoubleParameter far = new DoubleParameter( "far plane for light" , 25, 8, 50 );    
-    private DoubleParameter fov = new DoubleParameter( "light fov" , 75, 30, 90 );    
+    private DoubleParameter fov = new DoubleParameter( "light fov" , 30, 25, 90 );    
     private DoubleParameter sigma = new DoubleParameter( "self shadowing offset", 0.0015, 0, 0.1 );
 	
     private ShaderState pflShaderState;

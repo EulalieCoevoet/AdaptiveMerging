@@ -22,10 +22,10 @@ import javax.vecmath.Vector2d;
  * @author kry
  */
 public class RigidBody {
-
+	
 	/**Pointer to the parent of this body if it is merged*/
 	RigidCollection parent = null;
-
+	
 	/** visitID of this contact at this time step. */
 	boolean visited = false;
 
@@ -268,21 +268,16 @@ public class RigidBody {
 	}
 
 	/**
-	 * Apply a contact force specified in world coordinates
-	 * 
+	 * Apply a force specified in world coordinates at a specified point. 
 	 * @param contactPointW
 	 * @param contactForceW
 	 */
 	public void applyForceW(Point2d contactPointW, Vector2d contactForceW) {
 		force.add(contactForceW);
-		// TODO: Objective 1: Compute the torque applied to the body
-
-		// holds r vector.
 		Vector2d r = new Vector2d(contactPointW);
 		Point2d tempX = new Point2d(x);
 		r.sub(tempX);
 		Vector2d ortho_r = new Vector2d(-r.y, r.x);
-
 		torque += ortho_r.dot(contactForceW);
 	}
 

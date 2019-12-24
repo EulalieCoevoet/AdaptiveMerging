@@ -1,23 +1,30 @@
 package mergingBodies3D;
 
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
-import javax.xml.parsers.*;
-import java.io.*;
-import java.util.ArrayList;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class XMLParser {
 	
 	private RigidBodySystem system;
 	private Document document = null;
 	private Element eElement;
-	
+		
 	/**
 	 * Method to call to parse the XML file
 	 * @param system
@@ -172,6 +179,7 @@ public class XMLParser {
         
         body.root = new BVNode( L, body );
 		system.bodies.add( body );
+		body.name = name;
 	}
 
 	private void createPlane( String name, Element eElement ) {
@@ -182,6 +190,7 @@ public class XMLParser {
 		RigidBody b = new PlaneRigidBody(p, n); // ALWAYS pinned, 
 		setCommonAttributes( b, eElement ); // can still adjust friction and restitution
 		system.bodies.add( b );
+		b.name = name;
 	}
 	
 	/**
@@ -209,11 +218,11 @@ public class XMLParser {
 		// it is needed for how we currently do relative velocity bounds.
 		RigidBody body = new RigidBody(massLinear, angularMass, false, bbB );
 		setCommonAttributes( body, eElement );
-		body.updateTransformations();
         body.geom = new RigidBodyGeomSphere( r );		
 		BVSphere bvSphere = new BVSphere( new Point3d(), r, body );
         body.root = new BVNode( bvSphere );
 		system.bodies.add( body );
+		body.name = name;
 	}
 
 	/**
@@ -227,30 +236,39 @@ public class XMLParser {
         	Node n = nodeList.item(i);
             // skip all text, just process the ELEMENT_NODEs
             if ( n.getNodeType() != Node.ELEMENT_NODE ) continue;
-            String attribute = n.getNodeName();
+            String tag = n.getNodeName();
             String[] values = n.getTextContent().trim().split("\\s+");        
-			System.out.println(" "+attribute+" : "  + n.getTextContent());
-			if ( attribute.equalsIgnoreCase("x") ) {
+			System.out.println(" "+tag+" : "  + n.getTextContent());
+			if ( tag.equalsIgnoreCase("x") ) {
 				body.x.set( t3d( values ) );
 				body.x0.set( body.x );
-			} else if ( attribute.equalsIgnoreCase("R") ) {
+				body.updateTransformations();
+			} else if ( tag.equalsIgnoreCase("R") ) {
 				AxisAngle4d aa = new AxisAngle4d();
 				aa.set( asDoubles(values) );
 				body.theta.set( aa );
-				body.theta0.set(aa );
-			} else if ( attribute.equalsIgnoreCase("v") ) {
+				body.theta0.set( aa );
+				body.updateTransformations();
+			} else if ( tag.equalsIgnoreCase("v") ) {
 				body.v.set( t3d( values ) );
-			} else if ( attribute.equalsIgnoreCase("omega") ) {
+			} else if ( tag.equalsIgnoreCase("omega") ) {
 				body.omega.set( t3d( values ) );
-			} else if ( attribute.equalsIgnoreCase("restitution") ) {
+			} else if ( tag.equalsIgnoreCase("restitution") ) {
 				body.restitution = Double.parseDouble(values[0]);
-			} else if ( attribute.equalsIgnoreCase("friction") ) {
+			} else if ( tag.equalsIgnoreCase("friction") ) {
 				body.friction = Double.parseDouble(values[0]);
-			} else if ( attribute.equalsIgnoreCase("temporarilyPinned") ) {			
+			} else if ( tag.equalsIgnoreCase("temporarilyPinned") ) {			
 				//body.temporarilyPinned = Boolean.parseBoolean(values[0]);
-			} else if ( attribute.equalsIgnoreCase("pinned") ) {	
+			} else if ( tag.equalsIgnoreCase("pinned") ) {	
 				body.pinned = Boolean.parseBoolean(values[0]);
-			} // could complain about unknown attributes here
+			} else if ( tag.equalsIgnoreCase("spring") ) {
+				Element e = (Element) n;
+				Point3d pB = new Point3d( t3d( e.getAttribute("pB") ) );
+				Spring s = new Spring( pB, body );
+				body.springs.add( s );
+				
+			}
+			// could complain about unknown attributes here
 		}		
 		System.out.println("");
 	}
