@@ -46,13 +46,17 @@ public class BoxCollisionTest2 implements SceneGraphNode{
 		gl.glDisable( GL2.GL_LIGHTING );
 
 		DVector3 p1 = new DVector3( pos1.x, pos1.y, pos1.z );
-		AxisAngle4d aa1 = new AxisAngle4d( axis1.x, axis1.y, axis1.z, angle1.getValue() );		
+		Vector3d a1 = new Vector3d( axis1.x, axis1.y, axis1.z );
+		a1.normalize();
+		AxisAngle4d aa1 = new AxisAngle4d( a1, angle1.getValue() );		
 		Matrix3d R1t = new Matrix3d();
 		R1t.set( aa1 );
 		DMatrix3 R1 = new DMatrix3();
 		
 		DVector3 p2 = new DVector3( pos2.x, pos2.y, pos2.z );
-		AxisAngle4d aa2 = new AxisAngle4d( axis2.x, axis2.y, axis2.z, angle2.getValue() );
+		Vector3d a2 = new Vector3d( axis2.x, axis2.y, axis2.z );
+		a2.normalize();
+		AxisAngle4d aa2 = new AxisAngle4d( a2, angle2.getValue() );
 		Matrix3d R2t = new Matrix3d();		
 		R2t.set( aa2 );
 		DMatrix3 R2 = new DMatrix3();
