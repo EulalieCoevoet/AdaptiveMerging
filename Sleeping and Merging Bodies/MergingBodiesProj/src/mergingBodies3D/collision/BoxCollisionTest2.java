@@ -68,7 +68,7 @@ public class BoxCollisionTest2 implements SceneGraphNode{
 		RefDouble depth = new RefDouble();
 		RefInt return_code = new RefInt();
 		int flags = 0xffff; // as many contacts as we can get!
-		int skip = 0; // only use skip if we want to dump other tests into the same arraylist
+		int skip = 1; // stride in the geom buffer... 
 		DContactGeomBuffer contacts = new DContactGeomBuffer(20);
 		
 		DVector3 side1 = new DVector3();
@@ -88,7 +88,10 @@ public class BoxCollisionTest2 implements SceneGraphNode{
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
 			gl.glVertex3d( c.pos.get0(), c.pos.get1(), c.pos.get(2) );
-			gl.glVertex3d( c.normal.get0() + c.pos.get0(), c.normal.get1() + c.pos.get1(), c.normal.get2() + c.pos.get2() );
+			double x = normal.get0();
+			double y = normal.get1();
+			double z = normal.get2();
+			gl.glVertex3d( x + c.pos.get0(), y + c.pos.get1(), z + c.pos.get2() );
 			gl.glEnd();
 		}
 		
@@ -109,6 +112,12 @@ public class BoxCollisionTest2 implements SceneGraphNode{
 		EasyViewer.glut.glutWireCube(1);
 		gl.glPopMatrix();
 		
+		String msg = "#contacts = " + cnum + "\n" +
+				"depth = " + depth.get() +"\n" +
+				"normal = " + normal.toString();
+		EasyViewer.beginOverlay(drawable);
+		EasyViewer.printTextLines(drawable, msg);
+		EasyViewer.endOverlay(drawable);
 	}
 	
 	@Override
