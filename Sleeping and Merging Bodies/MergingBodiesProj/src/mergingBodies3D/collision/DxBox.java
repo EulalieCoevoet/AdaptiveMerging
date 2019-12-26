@@ -777,9 +777,9 @@ public class DxBox {
 				sign = (dDOT14(normal,R1,j) > 0) ? (1.0) : (-1.0);
 				//for (i=0; i<3; i++) pa.v[i] += sign * A.v[j] * R1.v[i*4+j];
 				//for (i=0; i<3; i++) pa.add(i, sign * getComp(A,j) * R1.getElement(i, j) );
-				pa.x += sign * getComp(A,j) * R1.getElement(j,0);//, j);
-				pa.y += sign * getComp(A,j) * R1.getElement(j,1);//, j);
-				pa.z += sign * getComp(A,j) * R1.getElement(j,2);//, j);				
+				pa.x += sign * getComp(A,j) * R1.getElement(0, j);
+				pa.y += sign * getComp(A,j) * R1.getElement(1, j);
+				pa.z += sign * getComp(A,j) * R1.getElement(2, j);				
 			}
 
 			// find a point pb on the intersecting edge of box 2
@@ -791,9 +791,9 @@ public class DxBox {
 				sign = (dDOT14(normal,R2,j) > 0) ? (-1.0) : (1.0);
 				//for (i=0; i<3; i++) pb.v[i] += sign * B.v[j] * R2.v[i*4+j];
 				//for (i=0; i<3; i++) pb.add(i, sign * getComp(B,j) * R2.getElement(i, j) );
-				pb.x += sign * getComp(B,j) * R2.getElement(j,0);//, j);
-				pb.y +=	sign * getComp(B,j) * R2.getElement(j,1);//, j);
-				pb.z += sign * getComp(B,j) * R2.getElement(j,2);//, j);
+				pb.x += sign * getComp(B,j) * R2.getElement(0, j);
+				pb.y +=	sign * getComp(B,j) * R2.getElement(1, j);
+				pb.z += sign * getComp(B,j) * R2.getElement(2, j);
 			}
 
 			double[] alpha = new double[1];
@@ -801,10 +801,10 @@ public class DxBox {
 			Vector3d ua = new Vector3d(),ub = new Vector3d();
 			// Get direction of first edge
 			//for (i=0; i<3; i++) ua.set(i, R1.v[((tst._code)-7)/3 + i*4] );		
-			for (i=0; i<3; i++) setComp( ua, i, R1.getElement((tst._code-7)/3,i) ); // TODO matrix get calls depend on row or column storage :(
+			for (i=0; i<3; i++) setComp( ua, i, R1.getElement(i,(tst._code-7)/3) ); // TODO matrix get calls depend on row or column storage :(
 			// Get direction of second edge
 			//for (i=0; i<3; i++) ub.set(i, R2.v[((tst._code)-7)%3 + i*4] );
-			for (i=0; i<3; i++) setComp( ub, i, R2.getElement( (tst._code-7)%3,i) );
+			for (i=0; i<3; i++) setComp( ub, i, R2.getElement(i,(tst._code-7)%3) );
 			// Get closest points between edges (one at each)
 			dLineClosestApproach (pa,ua,pb,ub,alpha,beta);    
 //			for (i=0; i<3; i++) pa.v[i] += ua.v[i]*alpha.get();
@@ -904,10 +904,10 @@ public class DxBox {
 		Vector3d center = new Vector3d();
 		if ( getComp( nr, lanr ) < 0) {
 			//for (i=0; i<3; i++) center.set(i, pb.get(i) - pa.get(i) + Sb.get(lanr) * Rb.v[i*4+lanr] );
-			for (i=0; i<3; i++) setComp( center, i, getComp(pb,i) - getComp(pa,i) + getComp(Sb,lanr) * Rb.getElement(lanr,i) );//, lanr) );
+			for (i=0; i<3; i++) setComp( center, i, getComp(pb,i) - getComp(pa,i) + getComp(Sb,lanr) * Rb.getElement(i, lanr) );
 		} else {
 			//for (i=0; i<3; i++) center.set(i, pb.get(i) - pa.get(i) - Sb.get(lanr) * Rb.v[i*4+lanr] );
-			for (i=0; i<3; i++) setComp( center, i, getComp(pb,i) - getComp(pa,i) - getComp(Sb,lanr) * Rb.getElement(lanr,i) );//, lanr) );
+			for (i=0; i<3; i++) setComp( center, i, getComp(pb,i) - getComp(pa,i) - getComp(Sb,lanr) * Rb.getElement(i, lanr) );
 		}
 
 		// find the normal and non-normal axis numbers of the reference box
@@ -978,7 +978,7 @@ public class DxBox {
 			double k2 = -m21*(ret[j*2]-c1) + m11*(ret[j*2+1]-c2);
 			for (i=0; i<3; i++) point[cnum*3+i] =
 				//center.get(i) + k1*Rb.v[i*4+a1] + k2*Rb.v[i*4+a2];
-				getComp( center,i ) + k1*Rb.getElement(a1,i) + k2*Rb.getElement(a2,i); // swapped!
+				getComp( center,i ) + k1*Rb.getElement(i,a1) + k2*Rb.getElement(i,a2); 
 			dep[cnum] = getComp(Sa,codeN) - dDOT(normal2, point,cnum*3);
 			if (dep[cnum] >= 0) {
 				ret[cnum*2] = ret[j*2];

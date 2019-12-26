@@ -45,11 +45,15 @@ public class BoxCollisionTest implements SceneGraphNode{
 		gl.glDisable( GL2.GL_LIGHTING );
 
 		Vector3d p1 = new Vector3d( pos1.x, pos1.y, pos1.z );
-		AxisAngle4d aa1 = new AxisAngle4d( axis1.x, axis1.y, axis1.z, angle1.getValue() );
+		Vector3d a1 = new Vector3d( axis1.x, axis1.y, axis1.z );
+		a1.normalize();
+		AxisAngle4d aa1 = new AxisAngle4d( a1, angle1.getValue() );
 		Matrix3d R1 = new Matrix3d();
 		R1.set( aa1 );
 		Vector3d p2 = new Vector3d( pos2.x, pos2.y, pos2.z );
-		AxisAngle4d aa2 = new AxisAngle4d( axis2.x, axis2.y, axis2.z, angle2.getValue() );
+		Vector3d a2 = new Vector3d( axis2.x, axis2.y, axis2.z );
+		a2.normalize();
+		AxisAngle4d aa2 = new AxisAngle4d( a2, angle2.getValue() );
 		Matrix3d R2 = new Matrix3d();
 		R2.set( aa2 );
 		
@@ -58,9 +62,9 @@ public class BoxCollisionTest implements SceneGraphNode{
 		double[] depth = new double[1];
 		int[] return_code = new int[1];
 		int flags = 0xffff; // as many contacts as we can get!
-		int skip = 0; // only use skip if we want to dump other tests into the same arraylist
+		int skip = 1; // only use skip if we want to dump other tests into the same arraylist
 		
-		DxBox.dBoxBox( p1, R1, size1, p2, R2, size2, normal, depth, return_code, flags, contacts, skip );
+		int cnum = DxBox.dBoxBox( p1, R1, size1, p2, R2, size2, normal, depth, return_code, flags, contacts, skip );
 
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
@@ -71,6 +75,10 @@ public class BoxCollisionTest implements SceneGraphNode{
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
 			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
+			double x = normal.x;
+			double y = normal.y;
+			double z = normal.z;
+			gl.glVertex3d( x + c.pos.x, y + c.pos.y, z + c.pos.z );
 			gl.glVertex3d( c.normal.x + c.pos.x, c.normal.y + c.pos.y, c.normal.z + c.pos.z );
 			gl.glEnd();
 		}
@@ -92,6 +100,12 @@ public class BoxCollisionTest implements SceneGraphNode{
 		EasyViewer.glut.glutWireCube(1);
 		gl.glPopMatrix();
 		
+		String msg = "#contacts = " + cnum + "\n" +
+				"depth = " + depth[0] +"\n" +
+				"normal = " + normal.toString();
+		EasyViewer.beginOverlay(drawable);
+		EasyViewer.printTextLines(drawable, msg);
+		EasyViewer.endOverlay(drawable);
 	}
 	
 	@Override
