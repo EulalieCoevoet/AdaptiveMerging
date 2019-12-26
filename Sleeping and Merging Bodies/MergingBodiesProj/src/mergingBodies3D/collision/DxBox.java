@@ -181,6 +181,7 @@ public class DxBox {
 		return v1.dot(b);
 	}
 
+	// TODO: remove this (it is wrong!)
 	private static double dMULTIPLY0_331(Vector3d A, Matrix3d B, Vector3d C) {
 		Vector3d v1 = new Vector3d();
 		B.transform( C, v1 );
@@ -488,7 +489,7 @@ public class DxBox {
 			tst1._normalR_col = norm_O; 
 			tst1._invert_normal = ((expr1_val) < 0); 
 			tst1._code = (cc); 
-			if (!CONTACTS_UNIMPORTANT) {
+			if (CONTACTS_UNIMPORTANT) {
 				tst1._break = true;
 				return true;
 			}
@@ -512,7 +513,7 @@ public class DxBox {
 				tst2._normalC.set( (n1)/l, (n2)/l, (n3)/l ); 
 				tst2._invert_normal = ((expr1_val) < 0); 
 				tst2._code = (cc); 
-				if (!CONTACTS_UNIMPORTANT) {
+				if (CONTACTS_UNIMPORTANT) {
 					tst2._break = true;
 					return true;
 				}
@@ -753,7 +754,8 @@ public class DxBox {
 			//normal.set(tst._normalR_M.viewCol(tst._normalR_col));
 			tst._normalR_M.getColumn( tst._normalR_col, normal );
 		} else {
-			dMULTIPLY0_331 (normal,R1,tst._normalC);
+			R1.transform( tst._normalC, normal );
+			//dMULTIPLY0_331 (normal,R1,tst._normalC);
 		}
 		if (tst._invert_normal) {
 			//	    normal[0] = -normal[0];
@@ -814,9 +816,11 @@ public class DxBox {
 			pb.scaleAdd(beta[0], ub, pb);
 			// Set the contact point as halfway between the 2 closest points
 			//for (i=0; i<3; i++) contact[0].pos[i] = (0.5)*(pa[i]+pb[i]);
-			contacts.get(0).pos.add(pa, pb);
-			contacts.get(0).pos.scale(0.5);
-			contacts.get(0).depth = depth[0];
+			DContactGeom con = new DContactGeom();
+			contacts.add( con );
+			con.pos.add(pa, pb);
+			con.pos.scale(0.5);
+			con.depth = depth[0];
 			return_code[0] = tst._code;
 			return 1;
 		}
@@ -1031,7 +1035,9 @@ public class DxBox {
 
 			for (j=0; j < maxc; j++) {
 				//dContactGeom *con = CONTACT(contact,skip*j);
-				DContactGeom con = contacts.get(skip*j);
+				//DContactGeom con = contacts.get(skip*j);
+				DContactGeom con = new DContactGeom();
+				contacts.add( con );
 				for (i=0; i<3; i++) setComp( con.pos, i, point[iret[j]*3+i] + getComp( pa, i ) );
 				con.depth = dep[iret[j]];
 			}
