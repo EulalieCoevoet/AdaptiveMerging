@@ -1,50 +1,0 @@
-10
-
-dir
-2783
-svn+ssh://kry@svn.cs.mcgill.ca/xtra/cg/svn/mintools2/src/mintools
-svn+ssh://kry@svn.cs.mcgill.ca/xtra/cg/svn
-
-
-
-2012-04-03T18:58:24.553310Z
-2783
-kry
-
-
-svn:special svn:externals svn:needs-lock
-
-
-
-
-
-
-
-
-
-
-
-40b4a5ea-fa21-dd11-855e-0007e924b298
-
-
-
-
-
-
-0
-
-examples
-dir
-
-parameters
-dir
-
-swing
-dir
-
-util
-dir
-
-viewer
-dir
-
