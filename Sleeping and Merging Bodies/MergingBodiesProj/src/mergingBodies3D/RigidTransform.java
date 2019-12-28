@@ -85,4 +85,14 @@ public class RigidTransform {
     	T.transform( v, result);
     }
 
+//    /**
+//     * Transforms the given point by the inverse of this 
+//     * @param p
+//     * @param result
+//     */
+//    public void inverseTransform( Point3d p, Point3d result ) {
+//    	// R^T p - R^T t
+//    	
+//    }
+    
 }

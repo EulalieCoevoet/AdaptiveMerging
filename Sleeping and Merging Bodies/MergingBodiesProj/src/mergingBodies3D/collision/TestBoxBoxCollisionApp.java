@@ -18,21 +18,16 @@ import mintools.viewer.EasyViewer;
 import mintools.viewer.SceneGraphNode;
 
 /**
- * This is a quick test of a port of the box box collision detection of a java port of ODE,
- * but seems my attempt to extract just this test is not so successful...   
- * 
- * Perhaps can try again with the full ode4j jar ??
- * 
+ * This is a quick test of a port of the box box collision detection of a java port of ODE, now working!
  * @author kry
- *
  */
-public class BoxCollisionTest implements SceneGraphNode{
+public class TestBoxBoxCollisionApp implements SceneGraphNode{
 
 	public static void main( String[] args ) {
-		new EasyViewer("test box collision", new BoxCollisionTest() );
+		new EasyViewer("test box box collision", new TestBoxBoxCollisionApp() );
 	}
 	
-	public BoxCollisionTest() {
+	public TestBoxBoxCollisionApp() {
 		// not much to do here
 	}
 	
@@ -64,7 +59,7 @@ public class BoxCollisionTest implements SceneGraphNode{
 		int flags = 0xffff; // as many contacts as we can get!
 		int skip = 1; // only use skip if we want to dump other tests into the same arraylist
 		
-		int cnum = DxBox.dBoxBox( p1, R1, size1, p2, R2, size2, normal, depth, return_code, flags, contacts, skip );
+		int cnum = BoxBox.dBoxBox( p1, R1, size1, p2, R2, size2, normal, depth, return_code, flags, contacts, skip );
 
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
@@ -81,6 +76,10 @@ public class BoxCollisionTest implements SceneGraphNode{
 			gl.glVertex3d( x + c.pos.x, y + c.pos.y, z + c.pos.z );
 			gl.glVertex3d( c.normal.x + c.pos.x, c.normal.y + c.pos.y, c.normal.z + c.pos.z );
 			gl.glEnd();
+//			gl.glRasterPos3d( c.pos.x, c.pos.y, c.pos.z );
+//			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, c.side1 + " " + c.side2 ); 
+			// side is unused :(  but doesn't need to be... 
+			// thus we are somewhat on our own for warmstarts..
 		}
 		
 		gl.glColor3f(1,1,1);
@@ -101,8 +100,9 @@ public class BoxCollisionTest implements SceneGraphNode{
 		gl.glPopMatrix();
 		
 		String msg = "#contacts = " + cnum + "\n" +
-				"depth = " + depth[0] +"\n" +
-				"normal = " + normal.toString();
+				"depth = " + depth[0] + "\n" +
+				"normal = " + normal.toString() + "\n" +
+				"code = " + return_code[0];
 		EasyViewer.beginOverlay(drawable);
 		EasyViewer.printTextLines(drawable, msg);
 		EasyViewer.endOverlay(drawable);

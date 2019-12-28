@@ -1,7 +1,4 @@
 package mergingBodies3D.collision;
-/*
- * Adapted from the ODE port to Java, DxBox class, see license info below 
- */
 
 import static org.ode4j.ode.internal.Common.dRecip;
 
@@ -9,8 +6,11 @@ import java.util.ArrayList;
 
 import javax.management.RuntimeErrorException;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+/*************************************************************************
+ * Adapted from the ODE port to Java DxBox class, see license info below 
 /*************************************************************************
  *                                                                       *
  * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
@@ -42,101 +42,13 @@ import javax.vecmath.Vector3d;
  * the rule is that only the low level primitive collision functions should set
  * dContactGeom::g1 and dContactGeom::g2.
  */
-public class DxBox {
+public class BoxBox {
 
 	private static void ASSERT( boolean b ) {
 		if (b) {
 			throw new RuntimeErrorException( new Error("avenge my death!") );
 		}
 	}
-	//****************************************************************************
-	// box public API
-
-	//	struct dxBox : public dxGeom {
-
-	//	Vector3d side = new Vector3d();	// side lengths (x,y,z)
-	
-	//	  dxBox (dSpace space, dReal lx, dReal ly, dReal lz);
-	//	  void computeAABB();
-	//	};
-
-	
-	
-	
-//	DxBox ( double lx, double ly, double lz ) //: dxGeom (space,1)
-//	{
-//		ASSERT (lx >= 0 && ly >= 0 && lz >= 0);
-////		side.v[0] = lx;
-////		side.v[1] = ly;
-////		side.v[2] = lz;
-//		side.set(lx, ly, lz);
-//		//updateZeroSizedFlag(!lx || !ly || !lz);
-//		//updateZeroSizedFlag(lx==0 || ly==0 || lz==0);
-//	}
-
-
-//	@Override
-//	void computeAABB()
-//	{
-//		//	  final dMatrix3& R = final_posr.R;
-//		//	  final Vector3d& pos = final_posr.pos;
-//		Matrix3d R = final_posr().R();
-//		Vector3d pos = final_posr().pos();
-//
-//		double xrange = 0.5 * ( dFabs (R.get00() * side.x) +
-//				dFabs (R.get01() * side.y) + dFabs (R.get02() * side.z) );
-//		double yrange = 0.5 * ( dFabs (R.get10() * side.x) +
-//				dFabs (R.get11() * side.y) + dFabs (R.get12() * side.z) );
-//		double zrange = 0.5 * ( dFabs (R.get20() * side.x) +
-//				dFabs (R.get21() * side.y) + dFabs (R.get22() * side.z) );
-////		_aabb.v[0] = pos.v[0] - xrange;
-////		_aabb.v[1] = pos.v[0] + xrange;
-////		_aabb.v[2] = pos.v[1] - yrange;
-////		_aabb.v[3] = pos.v[1] + yrange;
-////		_aabb.v[4] = pos.v[2] - zrange;
-////		_aabb.v[5] = pos.v[2] + zrange;
-//		_aabb.set( pos.x - xrange,
-//				pos.x + xrange,
-//				pos.y - yrange,
-//				pos.y + yrange,
-//				pos.z - zrange,
-//				pos.z + zrange);
-//	}
-//
-//
-//	public static DxBox dCreateBox (DxSpace space, double lx, double ly, double lz)
-//	{
-//		return new DxBox (space,lx,ly,lz);
-//	}
-
-
-////	void dGeomBoxSetLengths (dGeom g, double lx, double ly, double lz)
-//	public void dGeomBoxSetLengths (Vector3d l)
-//	{
-////		dUASSERT (g!=null && ((dxGeom)g).type == dBoxClass,"argument not a box");
-//		ASSERT (l.x >= 0 && l.y >= 0 && l.z >= 0);
-////		dxBox b = (dxBox) g;
-////		b.side.v[0] = lx;
-////		b.side.v[1] = ly;
-////		b.side.v[2] = lz;
-//		side.set(l);
-//		//b.updateZeroSizedFlag(!lx || !ly || !lz);
-//		//updateZeroSizedFlag(l.x==0 || l.y==0 || l.z==0);
-//		//dGeomMoved ();
-//	}
-
-
-//	/**
-//	 * Get the side lengths of a box.
-//	 *
-//	 * @param result  the returned side lengths
-//	 *
-//	 * @see #dGeomBoxSetLengths(Vector3d)
-//	 * @ingroup collide_box
-//	 */
-//	public void dGeomBoxGetLengths (Vector3d result) {
-//		result.set(side);
-//	}
 
 	private static double getComp( Vector3d v, int i ) {
 		if ( i == 0 ) return v.x;
@@ -144,7 +56,7 @@ public class DxBox {
 		return v.z;
 	}
 	
-	private static void setComp( Vector3d v, int i, double val ) {
+	private static void setComp( Tuple3d v, int i, double val ) {
 		if ( i == 0 ) {
 			v.x = val;
 		} else if (i == 1 ) {
@@ -180,23 +92,6 @@ public class DxBox {
 		a.getColumn(o1,v1);
 		return v1.dot(b);
 	}
-
-	// TODO: remove this (it is wrong!)
-	private static double dMULTIPLY0_331(Vector3d A, Matrix3d B, Vector3d C) {
-		Vector3d v1 = new Vector3d();
-		B.transform( C, v1 );
-		return A.dot(v1);
-	}
-	
-//	/**
-//	 * A = B*C matrix multiply
-//	 * @param A
-//	 * @param B
-//	 * @param C
-//	 */
-//	private static void dMULTIPLY0_333( Matrix3d A, Matrix3d B, Matrix3d C) {
-//		A.mul(B,C);
-//	}
 	
 	private static double dDOT( Vector3d a, double[] b, int o2 ) {
 		return a.x*b[0+o2] + a.y*b[1+o2] + a.z*b[2+o2];
@@ -218,99 +113,6 @@ public class DxBox {
 		b.getColumn( o2, v1 );
 		return a.dot(v1);
 	}
-
-//	
-//	Matrix3d _final_posrR = new Matrix3d();
-//	Vector3d _final_posrpos = new Vector3d();
-//	
-//	Matrix3d bodyposrR = new Matrix3d();
-//	Vector3d bodyposrpos = new Vector3d();
-//	Vector3d offset_posrpos = new Vector3d();
-//	Matrix3d offset_posrR = new Matrix3d();
-//
-//	//	double dGeomBoxPointDepth (dxGeom g, double x, double y, double z)
-//	public double dGeomBoxPointDepth (double x, double y, double z)
-//	{
-////		dUASSERT (g!=null && ((dxGeom)g).type == dBoxClass,"argument not a box");
-//		//recomputePosr();
-//		
-//		// TODO: should to check if this is already done for efficiency!
-//		dMULTIPLY0_331 ( _final_posrpos, bodyposrR, offset_posrpos );
-////		_final_posr.pos.v[0] += body._posr.pos.v[0];
-////		_final_posr.pos.v[1] += body._posr.pos.v[1];
-////		_final_posr.pos.v[2] += body._posr.pos.v[2];
-//		_final_posrpos.add( bodyposrpos );
-//		dMULTIPLY0_333 ( _final_posrR, bodyposrR, offset_posrR );
-//		
-//		
-//		//dxBox b = (dxBox) g;
-//
-//		// Set p = (x,y,z) relative to box center
-//		//
-//		// This will be (0,0,0) if the point is at (side[0]/2,side[1]/2,side[2]/2)
-//
-//		Vector3d p = new Vector3d();
-//		Vector3d q = new Vector3d();
-//
-////		p.v[0] = x - b._final_posr.pos.v[0];
-////		p.v[1] = y - b._final_posr.pos.v[1];
-////		p.v[2] = z - b._final_posr.pos.v[2];
-//		p.set(x, y, z);
-//		p.sub(_final_posrpos);
-//
-//		// Rotate p into box's coordinate frame, so we can
-//		// treat the OBB as an AABB
-//
-//		dMULTIPLY1_331( q, _final_posrR, p );
-//
-//		// Record distance from point to each successive box side, and see
-//		// if the point is inside all six sides
-//
-//		double[] dist = new double[6];
-//		int   i;
-//
-//		boolean inside = true;
-//
-//		for (i=0; i < 3; i++) {
-//			double sideX = getComp(side,i) * (0.5);
-//
-//			dist[i  ] = sideX - getComp(q,i);
-//			dist[i+3] = sideX + getComp(q,i);
-//
-//			if ((dist[i] < 0) || (dist[i+3] < 0)) {
-//				inside = false;
-//			}
-//		}
-//
-//		// If point is inside the box, the depth is the smallest positive distance
-//		// to any side
-//
-//		if (inside) {
-//			//TZ double smallest_dist = (double) (unsigned) -1;
-//			double smallest_dist = -1;
-//
-//			for (i=0; i < 6; i++) {
-//				if (dist[i] < smallest_dist) smallest_dist = dist[i];
-//			}
-//
-//			return smallest_dist;
-//		}
-//
-//		// Otherwise, if point is outside the box, the depth is the largest
-//		// distance to any side.  This is an approximation to the 'proper'
-//		// solution (the proper solution may be larger in some cases).
-//
-//		double largest_dist = 0;
-//
-//		for (i=0; i < 6; i++) {
-//			if (dist[i] > largest_dist) largest_dist = dist[i];
-//		}
-//
-//		return -largest_dist;
-//	}
-
-	
-	
 	
 	//****************************************************************************
 	// box-box collision utility
@@ -416,12 +218,10 @@ public class DxBox {
 		if (n==1) {
 			cx = p[0];
 			cy = p[1];
-		}
-		else if (n==2) {
+		} else if (n==2) {
 			cx = (0.5)*(p[0] + p[2]);
 			cy = (0.5)*(p[1] + p[3]);
-		}
-		else {
+		} else {
 			a = 0;
 			cx = 0;
 			cy = 0;
@@ -557,27 +357,21 @@ public class DxBox {
 			double[] alpha, double[] beta)
 	{
 		Vector3d p = new Vector3d();
-//		p.v[0] = pb.get0() - pa.get0();
-//		p.v[1] = pb.get1() - pa.get1();
-//		p.v[2] = pb.get2() - pa.get2();
 		p.sub( pb, pa );
 		double uaub = ua.dot(ub);
 		double q1 =  ua.dot(p);
 		double q2 = -ub.dot(p);
 		double d = 1-uaub*uaub;
-		if (d <= (0.0001)) {
-			// @@@ this needs to be made more robust
+		if (d <= (0.0001)) { // @@@ this needs to be made more robust
 			alpha[0] = 0;
 			beta[0]= 0;
-		}
-		else {
+		} else {
 			d = dRecip(d);
 			alpha[0] = ( (q1 + uaub*q2)*d);
 			beta[0] = ( (uaub*q1 + q2)*d);
 		}
 	}
 	
-
 	/** 
 	 * given two boxes (p1,R1,side1) and (p2,R2,side2), collide them together and
 	 * generate contact points. this returns 0 if there is no contact otherwise
@@ -619,23 +413,12 @@ public class DxBox {
 		//RefInt code = new RefInt();
 
 		// get vector from centers of box 1 to box 2, relative to box 1
-		//	  p[0] = p2[0] - p1[0];
-		//	  p[1] = p2[1] - p1[1];
-		//	  p[2] = p2[2] - p1[2];
-		p.sub(p2,p1);//p.eqDiff(p2, p1);
+		p.sub(p2,p1);
 		dMULTIPLY1_331 (pp,R1,p);		// get pp = p relative to body 1
 
 		// get side lengths / 2
-		//	  A[0] = side1[0]*(0.5);
-		//	  A[1] = side1[1]*(0.5);
-		//	  A[2] = side1[2]*(0.5);
-		A.set(side1);
-		A.scale(0.5);
-		//	  B[0] = side2[0]*(0.5);
-		//	  B[1] = side2[1]*(0.5);
-		//	  B[2] = side2[2]*(0.5);
-		B.set(side2);
-		B.scale(0.5);
+		A.scale( 0.5, side1 );
+		B.scale( 0.5, side2 );
 
 		// Rij is R1'*R2, i.e. the relative rotation between R1 and R2
 		R11 = dDOT44(R1,0,R2,0); R12 = dDOT44(R1,0,R2,1); R13 = dDOT44(R1,0,R2,2);
@@ -758,9 +541,6 @@ public class DxBox {
 			//dMULTIPLY0_331 (normal,R1,tst._normalC);
 		}
 		if (tst._invert_normal) {
-			//	    normal[0] = -normal[0];
-			//	    normal[1] = -normal[1];
-			//	    normal[2] = -normal[2];
 			normal.scale(-1);
 		}
 		depth[0] = -tst._s;
@@ -771,8 +551,6 @@ public class DxBox {
 			// An edge from box 1 touches an edge from box 2.
 			// find a point pa on the intersecting edge of box 1
 			double sign;
-			// Copy p1 into pa
-			//for (i=0; i<3; i++) pa[i] = p1[i]; // why no memcpy?
 			Vector3d pa = new Vector3d(p1);
 			// Get world position of p2 into pa
 			for (j=0; j<3; j++) {
@@ -785,8 +563,6 @@ public class DxBox {
 			}
 
 			// find a point pb on the intersecting edge of box 2
-			// Copy p2 into pb
-			//for (i=0; i<3; i++) pb[i] = p2[i]; // why no memcpy?
 			Vector3d pb = new Vector3d(p2);
 			// Get world position of p2 into pb
 			for (j=0; j<3; j++) {
@@ -803,7 +579,7 @@ public class DxBox {
 			Vector3d ua = new Vector3d(),ub = new Vector3d();
 			// Get direction of first edge
 			//for (i=0; i<3; i++) ua.set(i, R1.v[((tst._code)-7)/3 + i*4] );		
-			for (i=0; i<3; i++) setComp( ua, i, R1.getElement(i,(tst._code-7)/3) ); // TODO matrix get calls depend on row or column storage :(
+			for (i=0; i<3; i++) setComp( ua, i, R1.getElement(i,(tst._code-7)/3) ); 
 			// Get direction of second edge
 			//for (i=0; i<3; i++) ub.set(i, R2.v[((tst._code)-7)%3 + i*4] );
 			for (i=0; i<3; i++) setComp( ub, i, R2.getElement(i,(tst._code-7)%3) );
@@ -822,6 +598,8 @@ public class DxBox {
 			con.pos.scale(0.5);
 			con.depth = depth[0];
 			return_code[0] = tst._code;
+			// TODO: Add information to help with warm starts?  This edge edge case will be trivial
+			// to match up as it only generates one contact between two bodies!
 			return 1;
 		}
 
@@ -840,8 +618,7 @@ public class DxBox {
 			pb = p2; // Center (location) of 'b'
 			Sa = A;  // Side Lenght of 'a'
 			Sb = B;  // Side Lenght of 'b'
-		}
-		else { // One of the faces of box 2 is the reference face
+		} else { // One of the faces of box 2 is the reference face
 			Ra = R2; // Rotation of 'a'
 			Rb = R1; // Rotation of 'b'
 			pa = p2; // Center (location) of 'a'
@@ -860,22 +637,12 @@ public class DxBox {
 		Vector3d nr = new Vector3d();
 		Vector3d anr = new Vector3d();
 		if (tst._code <= 3) {
-			//	    normal2[0] = normal[0];
-			//	    normal2[1] = normal[1];
-			//	    normal2[2] = normal[2];
 			normal2.set(normal);
 		} else {
-			//	    normal2[0] = -normal[0];
-			//	    normal2[1] = -normal[1];
-			//	    normal2[2] = -normal[2];
-			normal2.set(normal);
-			normal2.scale(-1);
+			normal2.scale( -1, normal );
 		}
 		// Rotate normal2 in incident box opposite direction
 		dMULTIPLY1_331 (nr,Rb,normal2);
-//		anr.v[0] = dFabs (nr.v[0]);
-//		anr.v[1] = dFabs (nr.v[1]);
-//		anr.v[2] = dFabs (nr.v[2]);
 		anr.absolute(nr);
 
 		// find the largest compontent of anr: this corresponds to the normal
@@ -997,6 +764,7 @@ public class DxBox {
 		}
 
 		// we can't generate more contacts than we actually have
+		// (Actually, now shouldn't generate more than requested as they are allocated here... )
 		int maxc = flags & NUMC_MASK;
 		if (maxc > cnum) maxc = cnum;
 		// Even though max count must not be zero this check is kept for backward 
@@ -1048,25 +816,4 @@ public class DxBox {
 		return cnum;
 	}
 	
-	
-	
-	
-	// ****************************************
-	// dBox API
-	// ****************************************
-
-//	public void setLengths (double lx, double ly, double lz)
-//	    { dGeomBoxSetLengths (new Vector3d(lx, ly, lz)); }
-//	public void getLengths (Vector3d result) 
-//    { dGeomBoxGetLengths (result); }
-//	public void setLengths (Vector3d sides)
-//    { dGeomBoxSetLengths (sides); }
-//	public Vector3d getLengths () 
-//    { return side; }
-
-
-//	public double getPointDepth(Vector3d p) {
-//		return dGeomBoxPointDepth( p.x, p.y, p.z );
-//	}
-
 }

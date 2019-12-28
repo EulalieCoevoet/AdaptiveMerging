@@ -116,6 +116,7 @@ public class CollisionProcessor {
 		for (Contact contact : contacts) {
 			BVSphere bv1 = contact.bv1;
 			BVSphere bv2 = contact.bv2;
+			// TODO: hash codes are not perfectly unique... :/
 			lastTimeStepMap.put("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode()), contact);
 		} 
 	}

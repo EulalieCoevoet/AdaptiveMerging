@@ -30,9 +30,9 @@ public class Contact {
     /** Second RigidBody in contact */
     RigidBody body2;
     
-	/** Bounding volume that caused the collision */
+	/** Bounding volume that caused the collision... this is only used to track contact identity for warm starts */
 	BVSphere bv1;
-	/** Bounding volume that caused the collision */
+	/** Bounding volume that caused the collision... this is only used to track contact identity for warm starts  */
 	BVSphere bv2;
     
     /** Contact normal in body1 coordinates */

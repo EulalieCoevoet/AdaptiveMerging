@@ -25,18 +25,16 @@ import mintools.viewer.EasyViewer;
 import mintools.viewer.SceneGraphNode;
 
 /**
- * This is a quick test of glue to the box box collision detection of a java port of ODE,
- * 
+ * Quick test to compare box box collision detection ported code directly to ODE4j
  * @author kry
- *
  */
-public class BoxCollisionTest2 implements SceneGraphNode{
+public class TestBoxBoxCollisionApp2 implements SceneGraphNode{
 
 	public static void main( String[] args ) {
-		new EasyViewer("test box collision", new BoxCollisionTest2() );
+		new EasyViewer("test box box collision", new TestBoxBoxCollisionApp2() );
 	}
 	
-	public BoxCollisionTest2() {
+	public TestBoxBoxCollisionApp2() {
 		// not much to do here
 	}
 	
@@ -94,7 +92,7 @@ public class BoxCollisionTest2 implements SceneGraphNode{
 		int cnum2 = 0;
 		boolean died = false;
 		try {
-			cnum2 = DxBox.dBoxBox( p1v, R1t, size1, p2v, R2t, size2, normal2, depth2, return_code2, flags, contacts2, skip );
+			cnum2 = BoxBox.dBoxBox( p1v, R1t, size1, p2v, R2t, size2, normal2, depth2, return_code2, flags, contacts2, skip );
 		} catch ( Exception e ) {
 			died = true;
 		}
