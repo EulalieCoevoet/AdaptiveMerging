@@ -2,7 +2,6 @@ package mergingBodies3D.collision;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 

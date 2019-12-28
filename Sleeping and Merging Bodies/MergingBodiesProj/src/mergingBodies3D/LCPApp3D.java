@@ -36,6 +36,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
+import mintools.parameters.Vec3Parameter;
 import mintools.swing.CollapsiblePanel;
 import mintools.swing.FileSelect;
 import mintools.swing.HorizontalFlowPanel;
@@ -222,8 +223,21 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         gl.glScaled( sceneScale,sceneScale,sceneScale );
         gl.glTranslated( sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
         
+        if ( useClipPlane.getValue() ) {
+        	Vector3d cpn = new Vector3d( clipPlaneNormal.x, clipPlaneNormal.y, clipPlaneNormal.z );
+        	cpn.normalize();
+	        double[] planeEquation = new double[] { cpn.x, cpn.y, cpn.z, clipPlaneD.getValue() }; 
+	        gl.glClipPlane( GL2.GL_CLIP_PLANE0, planeEquation, 0 );
+	        gl.glEnable( GL2.GL_CLIP_PLANE0 );
+        }
+        
         system.display( drawable, picking );
 
+        if ( useClipPlane.getValue() ) {
+            gl.glDisable( GL2.GL_CLIP_PLANE0 );
+        }
+        
+        
         //gl.glScaled( 5,5,5 );
         //fa.draw(gl);
         gl.glPopMatrix();
@@ -322,7 +336,11 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private BooleanParameter run = new BooleanParameter( "simulate", false );
     private DoubleParameter stepsize = new DoubleParameter( "step size", 0.05, 1e-5, 1 );
     private IntParameter substeps = new IntParameter( "sub steps (integer)", 1, 1, 100);
-        
+    
+    private BooleanParameter useClipPlane = new BooleanParameter( "use clip plane", false );
+    private Vec3Parameter clipPlaneNormal = new Vec3Parameter( "clip plane normal", 0, 1, 1);
+    private DoubleParameter clipPlaneD = new DoubleParameter( " clip plane D", 0, -10, 10 );
+    
     /**
      * Creates a control panel for changing visualization and simulation parameters
      */
@@ -374,7 +392,11 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         });
 
         vfp.add( basicControls );
-        
+       
+        vfp.add( useClipPlane.getControls() );
+        vfp.add( clipPlaneNormal );
+        vfp.add( clipPlaneD.getSliderControls(false) );
+       
         
         HorizontalFlowPanel hfp2 = new HorizontalFlowPanel();
         hfp2.add( record.getControls() );

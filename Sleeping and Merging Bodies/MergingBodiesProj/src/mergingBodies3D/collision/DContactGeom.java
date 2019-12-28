@@ -14,6 +14,7 @@ public class DContactGeom {
 		this.pos.set(pos);
 		this.normal.set(normal);
 		this.depth = depth;
+		this.info = info;
 	}
 	
 	public Point3d pos = new Point3d();          ///< contact position
@@ -24,7 +25,7 @@ public class DContactGeom {
 //	public int side1;       ///< (to be documented)
 //	public int side2;
 	
-	/** Should do this in some other better way */
+	/** Should do this in some other better way, but we want a good way to identify the contact for warm starts */
 	public int info; 
 }
 

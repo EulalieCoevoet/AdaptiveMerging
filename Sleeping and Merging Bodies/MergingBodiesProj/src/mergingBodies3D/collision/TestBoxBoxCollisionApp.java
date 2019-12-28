@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.util.gl2.GLUT;
 
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.Vec3Parameter;
@@ -63,8 +64,10 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
-		gl.glColor3f(1, 0, 0);
+		int i = 0; 
 		for ( DContactGeom c : contacts ) {
+			c.info = i++; // cheap way to keep track of contacts for warm starts?
+			gl.glColor3f(1, 0, 0);
 			gl.glBegin(GL.GL_POINTS);
 			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
 			gl.glEnd();
@@ -76,13 +79,15 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 			gl.glVertex3d( x + c.pos.x, y + c.pos.y, z + c.pos.z );
 			gl.glVertex3d( c.normal.x + c.pos.x, c.normal.y + c.pos.y, c.normal.z + c.pos.z );
 			gl.glEnd();
-//			gl.glRasterPos3d( c.pos.x, c.pos.y, c.pos.z );
+			gl.glColor3f( 1,1,1 );
+			gl.glRasterPos3d( c.pos.x, c.pos.y, c.pos.z );
+			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info ); 
 //			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, c.side1 + " " + c.side2 ); 
 			// side is unused :(  but doesn't need to be... 
 			// thus we are somewhat on our own for warmstarts..
 		}
 		
-		gl.glColor3f(1,1,1);
+		gl.glColor4f(1,1,1,0.5f);
 		gl.glLineWidth(1);
 	
 		gl.glPushMatrix();
@@ -99,6 +104,8 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 		EasyViewer.glut.glutWireCube(1);
 		gl.glPopMatrix();
 		
+		gl.glColor4f(1,1,1,1);
+
 		String msg = "#contacts = " + cnum + "\n" +
 				"depth = " + depth[0] + "\n" +
 				"normal = " + normal.toString() + "\n" +
@@ -120,10 +127,10 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 		return vfp.getPanel();
 	}
 	
-	Vec3Parameter pos1 = new Vec3Parameter("pos1", 0,  5, 0 );
-	Vec3Parameter pos2 = new Vec3Parameter("pos2", 0, -5, 0 );
-	Vec3Parameter axis1 = new Vec3Parameter("axis1", 0,  5, 0 );
-	Vec3Parameter axis2 = new Vec3Parameter("axis2", 0, -5, 0 );
+	Vec3Parameter pos1 = new Vec3Parameter("pos1", 0,  1, 0 );
+	Vec3Parameter pos2 = new Vec3Parameter("pos2", 0, -1, 0 );
+	Vec3Parameter axis1 = new Vec3Parameter("axis1", 0,  1, 0 );
+	Vec3Parameter axis2 = new Vec3Parameter("axis2", 0,  1, 0 );
 	DoubleParameter angle1 = new DoubleParameter("angle1", 0, -3.14, 3.14 );
 	DoubleParameter angle2 = new DoubleParameter("angle2", 0, -3.14, 3.14 );
 	

@@ -233,16 +233,20 @@ public class RigidBodySystem {
             	b.geom.myListID = -1;
             }
         }        
+        // TODO: perhaps do clipping planes here instead to only clip bodies?
+        // TODO: perhaps also have cull face options?  think we want to cull to better see contacts after clipping
         if ( drawBodies.getValue() ) {
         	int i = 0;
         	for ( RigidBody b : bodies ) {
         		if ( picking ) {
         			LCPApp3D.setColorWithID( gl, i++ );
         		}
-            	//gl.glLoadName( i++ ); // for picking
                 b.display( drawable );
         	}
         }
+        // TODO: end clipping here to continue to see other debug visualizations un-clipped..
+        // again, perhaps an option to end clipping here or at the end of all of this!
+        
         if ( picking ) return;
         
         float[] red = new float[] { 1, 0, 0, 0.5f };

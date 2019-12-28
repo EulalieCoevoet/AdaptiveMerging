@@ -6,7 +6,7 @@
  * @author Paul Kry
  */
 
-package mintools.viewer;
+package mintools.viewer.util;
 
 import javax.vecmath.Color3f;
 

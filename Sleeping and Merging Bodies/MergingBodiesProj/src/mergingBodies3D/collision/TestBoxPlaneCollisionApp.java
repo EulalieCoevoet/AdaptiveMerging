@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.util.gl2.GLUT;
 
 import mergingBodies3D.RigidTransform;
 import mintools.parameters.DoubleParameter;
@@ -62,8 +62,8 @@ public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 				
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
-		gl.glColor3f(1, 0, 0);
 		for ( DContactGeom c : contacts ) {
+			gl.glColor3f(1, 0, 0);
 			gl.glBegin(GL.GL_POINTS);
 			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
 			gl.glEnd();
@@ -75,9 +75,12 @@ public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 			gl.glVertex3d( x + c.pos.x, y + c.pos.y, z + c.pos.z );
 			gl.glVertex3d( c.normal.x + c.pos.x, c.normal.y + c.pos.y, c.normal.z + c.pos.z );
 			gl.glEnd();
+			gl.glColor3f( 1,1,1 );
+			gl.glRasterPos3d( c.pos.x, c.pos.y, c.pos.z );
+			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info ); 			
 		}
 		
-		gl.glColor3f(1,1,1);
+		gl.glColor4f(1,1,1,0.5f);
 		gl.glLineWidth(1);
 	
 		gl.glPushMatrix();
@@ -93,9 +96,10 @@ public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 //		EasyViewer.glut.glutWireSphere( r, 10, 10 );
 //		gl.glPopMatrix();
 
+		gl.glColor4f(1,1,1,1);
 		String msg = "#contacts = 0\n";
 		if ( cnum > 0 ) {
-			DContactGeom c = contacts.get(0);
+			//DContactGeom c = contacts.get(0);
 			msg = "#contacts = " + cnum + "\n";
 		}
 		EasyViewer.beginOverlay(drawable);
