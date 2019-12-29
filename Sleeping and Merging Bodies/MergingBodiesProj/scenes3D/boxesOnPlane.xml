@@ -16,8 +16,13 @@
     <body type="box" name="box1" dim="2 1 3">
         <x> 4 20 0 </x>
     </body>
-    <body type="box" name="box1" dim="3 2 1">
-        <x> 0 20 4 </x>
+    
+    Here are how obj and sph files are paired... could rename to make things match better make sense, or keep this as reference...
+    String[] fname = {"data/scaledtorso10.obj","data/scaledeightloop10.obj","data/scaledround-octa10.obj","data/scaledhand10.obj"};
+    String[] sname = {"data/torso_flux.sph","data/eight_flux.sph","data/roundocta_hierarchy.sph","data/hand_hierarchy.sph"};
+    
+    <body type="mesh" name="eight" scale="1" obj="data/scaledeightloop10.obj" st="data/eight_flux.sph">
+        <x> 0 20 10 </x>
     </body>
 
     <body type="sphere" name="sphere1" r="2">

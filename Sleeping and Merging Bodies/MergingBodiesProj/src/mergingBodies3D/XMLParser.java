@@ -1,8 +1,10 @@
 package mergingBodies3D;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -18,6 +20,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import tools.moments.PolygonSoup;
+import tools.moments.Polyhedron;
+import tools.moments.Vertex;
+import tools.moments.VolInt;
 
 public class XMLParser {
 	
@@ -119,6 +126,8 @@ public class XMLParser {
 					createPlane( name, eElement );
 				} else if ( type.equalsIgnoreCase("sphere") ) {
 					createSphere( name, eElement );
+				} else if ( type.equalsIgnoreCase("mesh") ) {
+					createMesh( name, eElement );
 				}
 			}
 		}
@@ -213,7 +222,7 @@ public class XMLParser {
 		bbB.add( new Point3d(  r, -r, -r ) );
 		bbB.add( new Point3d(  r, -r,  r ) );
 		bbB.add( new Point3d(  r,  r, -r ) );
-		bbB.add( new Point3d(  r,  r,  r ) );		
+		bbB.add( new Point3d(  r,  r,  r ) );
 		// seems stupid to have a set of bounding box points for a sphere, but 
 		// it is needed for how we currently do relative velocity bounds.
 		RigidBody body = new RigidBody(massLinear, angularMass, false, bbB );
@@ -223,6 +232,94 @@ public class XMLParser {
         body.root = new BVNode( bvSphere );
 		system.bodies.add( body );
 		body.name = name;
+	}
+	
+	private void createMesh( String name, Element eElement ) {
+		double scale = Double.parseDouble( eElement.getAttribute("scale") );
+		double density = 1;
+		String objfname = eElement.getAttribute("obj");
+		String stfname = eElement.getAttribute("st");
+		
+		PolygonSoup soup = new PolygonSoup( objfname );
+		for ( Vertex v : soup.vertexList ) {
+			v.p.scale( scale );
+		}
+		Polyhedron poly = soup.getPolyhedron();
+		Matrix3d inertia = new Matrix3d();
+		Vector3d com = new Vector3d();
+		double mass = VolInt.computeMassProperties( poly, density, inertia, com );
+        if ( mass < 0 ) {
+        	mass = -mass;
+        	System.err.println( "mesh " + objfname + " appears to be inside out" );
+        }
+        // translate mesh to COM
+		for ( Vertex v : soup.vertexList ) {
+			v.p.sub( com );
+		}
+
+		// compute the axis aligned bounding box
+	    Vector3d ll = new Vector3d( Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE );
+	    Vector3d ur = new Vector3d( Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE );
+		for ( Vertex v : soup.vertexList ) {
+			ll.x = Math.min( v.p.x, ll.x );
+			ll.y = Math.min( v.p.y, ll.y );
+			ll.z = Math.min( v.p.z, ll.z );
+			ur.x = Math.max( v.p.x, ur.x );
+			ur.y = Math.max( v.p.y, ur.y );
+			ur.z = Math.max( v.p.z, ur.z );			
+		}
+		ArrayList<Point3d> bbB = new ArrayList<Point3d>();
+		bbB.add( new Point3d( ll.x, ll.y, ll.z ) );
+		bbB.add( new Point3d( ll.x, ll.y, ur.z ) );
+		bbB.add( new Point3d( ll.x, ur.y, ll.z ) );
+		bbB.add( new Point3d( ll.x, ur.y, ur.z ) );
+		bbB.add( new Point3d( ur.x, ll.y, ll.z ) );
+		bbB.add( new Point3d( ur.x, ll.y, ur.z ) );
+		bbB.add( new Point3d( ur.x, ur.y, ll.z ) );
+		bbB.add( new Point3d( ur.x, ur.y, ur.z ) );
+		
+		RigidBody body = new RigidBody( mass, inertia, false, bbB );
+		setCommonAttributes( body, eElement );
+        body.geom = new RigidBodyGeomMesh( soup );		
+		
+		// load the corresponding sphere tree and note that you 
+        ArrayList<BVNode> spheres = new ArrayList<BVNode>();
+        int numSpheres = 0;                
+        try {
+            Scanner s = new Scanner( new FileInputStream( stfname ) );            
+            String line = s.nextLine();
+            Scanner s2 = new Scanner( line );
+            numSpheres = s2.nextInt();            
+            for ( int i = 0; i < numSpheres; i++ ) {
+                line = s.nextLine();            
+                s2 = new Scanner( line );
+                Point3d pB = new Point3d( s2.nextDouble(), s2.nextDouble(), s2.nextDouble() );
+                pB.scale( scale );
+                pB.sub( com );
+                double radius = s2.nextDouble();
+                radius *= scale;                
+                BVSphere bvSphere = new BVSphere(pB, radius, body);
+                BVNode sphere = new BVNode( bvSphere );
+                spheres.add( sphere );
+            }            
+            while ( s.hasNextLine() ) {
+                line = s.nextLine();
+                s2 = new Scanner( line );
+                int parent = s2.nextInt();
+                int count = s2.nextInt();
+                BVNode sphere = spheres.get( parent -1 );
+                sphere.children = new BVNode[count];
+                for ( int i = 0; i < count; i++ ) {
+                    sphere.children[i] = spheres.get( s2.nextInt() - 1 );
+                }
+            }
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }    
+        body.root = spheres.get(0);
+		
+		system.bodies.add( body );
+		body.name = name;		
 	}
 
 	/**

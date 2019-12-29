@@ -6,6 +6,7 @@ package tools.moments;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
 
@@ -114,6 +115,26 @@ public class Polyhedron {
         addFaceHelper(f);
     }
 
+    /**
+     * Add a face to this polyhedron
+     * @param p1
+     * @param p2
+     * @param p3
+     */
+    public void addFace(Point3d p1, Point3d p2, Point3d p3) {        
+        Face f = new Face();
+        f.verts[0][X] = p1.x;
+        f.verts[0][Y] = p1.y;
+        f.verts[0][Z] = p1.z;
+        f.verts[1][X] = p2.x;
+        f.verts[1][Y] = p2.y;
+        f.verts[1][Z] = p2.z;
+        f.verts[2][X] = p3.x;
+        f.verts[2][Y] = p3.y;
+        f.verts[2][Z] = p3.z;
+        addFaceHelper(f);
+    }
+    
     /**
      * Add a face to this polyhedron
      * @param p1
