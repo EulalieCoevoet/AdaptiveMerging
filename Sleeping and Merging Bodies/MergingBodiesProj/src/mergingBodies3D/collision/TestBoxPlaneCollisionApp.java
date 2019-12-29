@@ -89,12 +89,21 @@ public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 		gl.glScaled( size1.x, size1.y, size1.z );
 		EasyViewer.glut.glutWireCube(1);
 		gl.glPopMatrix();
+				
+		// TODO: this is really dumb and slow... 
+		Vector3d tmp = new Vector3d(0,0,1);
+		Vector3d axis = new Vector3d();
+		axis.cross( tmp, n );
+		double angle = tmp.angle(n);
 		
-		// if we really care about this test, could draw the plane...
-//		gl.glPushMatrix();
-//		gl.glTranslated( pos2.x, pos2.y, pos2.z );
-//		EasyViewer.glut.glutWireSphere( r, 10, 10 );
-//		gl.glPopMatrix();
+		gl.glPushMatrix();
+		// need a point on the plane... chose p.x and p.z zero and solve n.y * p.y = -d
+		// which is fine for most y normalish planes... but otherwise can fail badly..
+		gl.glTranslated(0,-d/n.y,0);
+		gl.glRotated(angle*180/Math.PI, axis.x, axis.y, axis.z);
+		gl.glScaled( 1, 1, 0 );
+		EasyViewer.glut.glutWireSphere( 10, 10, 10 );
+		gl.glPopMatrix();
 
 		gl.glColor4f(1,1,1,1);
 		String msg = "#contacts = 0\n";

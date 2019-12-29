@@ -25,16 +25,16 @@ public class BoxPlane {
 		Point3d q = new Point3d();
 		int numContacts = contacts.size();
 		double s;
-		// TODO: need to store the corner ID for warm starts... 
-		// as it is easier than tyring to match points after the fact...
-		q.set(  p.x,  p.y,  p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 1 ) contacts.add( new DContactGeom(q,n,s,0) );	
-		q.set(  p.x,  p.y, -p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 1 ) contacts.add( new DContactGeom(q,n,s,1) );	
-		q.set(  p.x, -p.y,  p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 1 ) contacts.add( new DContactGeom(q,n,s,2) );	
-		q.set(  p.x, -p.y, -p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 1 ) contacts.add( new DContactGeom(q,n,s,3) );	
-		q.set( -p.x,  p.y,  p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 1 ) contacts.add( new DContactGeom(q,n,s,4) );	
-		q.set( -p.x,  p.y, -p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 1 ) contacts.add( new DContactGeom(q,n,s,5) );	
-		q.set( -p.x, -p.y,  p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 1 ) contacts.add( new DContactGeom(q,n,s,6) );	
-		q.set( -p.x, -p.y, -p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 1 ) contacts.add( new DContactGeom(q,n,s,7) );			
+		// we store the corner ID for warm starts...
+		// NOTE: could this be more efficient by transforming the plane to box coordinates?
+		q.set(  p.x,  p.y,  p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 0 ) contacts.add( new DContactGeom(q,n,-s,0) );	
+		q.set(  p.x,  p.y, -p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 0 ) contacts.add( new DContactGeom(q,n,-s,1) );	
+		q.set(  p.x, -p.y,  p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 0 ) contacts.add( new DContactGeom(q,n,-s,2) );	
+		q.set(  p.x, -p.y, -p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 0 ) contacts.add( new DContactGeom(q,n,-s,3) );	
+		q.set( -p.x,  p.y,  p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 0 ) contacts.add( new DContactGeom(q,n,-s,4) );	
+		q.set( -p.x,  p.y, -p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 0 ) contacts.add( new DContactGeom(q,n,-s,5) );	
+		q.set( -p.x, -p.y,  p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 0 ) contacts.add( new DContactGeom(q,n,-s,6) );	
+		q.set( -p.x, -p.y, -p.z ); TB2W.transform(q); s = dot(q,n) + d; if ( s < 0 ) contacts.add( new DContactGeom(q,n,-s,7) );			
 		return contacts.size() - numContacts;
 	}
 	

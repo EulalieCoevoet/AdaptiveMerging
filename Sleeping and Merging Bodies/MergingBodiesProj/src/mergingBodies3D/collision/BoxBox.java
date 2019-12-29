@@ -378,7 +378,7 @@ public class BoxBox {
 	 * generate contact points. this returns 0 if there is no contact otherwise
 	 * it returns the number of contacts generated.		<br>
 	 * `normal' returns the contact normal.				<br>
-	 * `depth' returns the maximum penetration depth along that normal.	<br>
+	 * `depth' returns the maximum penetration depth (positive) along that normal.	<br>
 	 * `return_code' returns a number indicating the type of contact that was
 	 * detected:<br>
 	 *        1,2,3 = box 2 intersects with a face of box 1		<br>

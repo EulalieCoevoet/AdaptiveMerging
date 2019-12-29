@@ -99,6 +99,7 @@ public class BoxSphere {
 			TB2W1.transform( contact.pos );
 			TB2W1.transform( contact.normal );
 			contacts.add( contact );
+			contact.depth = -contact.depth; // swap the sign as we did everything as separation distance!
 			return 1;
 		}
 		return 0;

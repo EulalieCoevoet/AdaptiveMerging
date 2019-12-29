@@ -17,15 +17,25 @@ public class DContactGeom {
 		this.info = info;
 	}
 	
-	public Point3d pos = new Point3d();          ///< contact position
-	public Vector3d normal = new Vector3d();       ///< normal vector
-	public double depth;           ///< penetration depth
-	//public DGeom g1;         ///< the colliding geoms
-	//public DGeom g2;
-//	public int side1;       ///< (to be documented)
-//	public int side2;
+	/**
+	 * Position of this contact in world coordinates
+	 */
+	public Point3d pos = new Point3d();
 	
-	/** Should do this in some other better way, but we want a good way to identify the contact for warm starts */
+	/**
+	 * Normal of this contact in world coordinates, points from body 1 to body 2
+	 */
+	public Vector3d normal = new Vector3d();       ///< normal vector
+	
+	/**
+	 * Penetration depth, a positive number when there is interpenetration 
+	 */
+	public double depth;
+	
+	/** 
+	 * Information for matching contacts across simulation time steps for warm starts.
+	 * Can be left zero if it is unused (e.g., box-sphere)
+	 */ 
 	public int info; 
 }
 
