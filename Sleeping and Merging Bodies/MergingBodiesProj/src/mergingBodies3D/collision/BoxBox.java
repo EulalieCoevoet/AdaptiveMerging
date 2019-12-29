@@ -50,7 +50,7 @@ public class BoxBox {
 		}
 	}
 
-	private static double getComp( Vector3d v, int i ) {
+	private static double getComp( Tuple3d v, int i ) {
 		if ( i == 0 ) return v.x;
 		if ( i == 1 ) return v.y;
 		return v.z;
@@ -281,7 +281,8 @@ public class BoxBox {
 		double expr1_val = (expr1); /* Avoid duplicate evaluation of expr1 */ 
 		double s2 = Math.abs(expr1_val) - (expr2); 
 		if (s2 > 0) return false; 
-		if (s2 > tst1._s) { 
+		if (s2 > tst1._s + 1e-5) { // NOTE: we put a tiny buffer to better encourage consistent contact numbering!
+			// Not sure what the rigth number is here, but 1e-5 seems reasonable for the scale of objects we have here
 			tst1._s = s2; 
 //			tst1._normalR_A = norm_A.v; 
 //			tst1._normalR_O = norm_O; 
@@ -395,8 +396,8 @@ public class BoxBox {
 	//		     const dMatrix3 R2, const Vector3d side2,
 	//		     Vector3d normal, dReal *depth, int *return_code,
 	//		     int flags, dContactGeom *contact, int skip)
-	public static int dBoxBox (final Vector3d p1, final Matrix3d R1,
-			final Vector3d side1, final Vector3d p2,
+	public static int dBoxBox (final Tuple3d p1, final Matrix3d R1,
+			final Vector3d side1, final Tuple3d p2,
 			final Matrix3d R2, final Vector3d side2,
 			Vector3d normal, double[] depth, int[] return_code,
 			int flags, ArrayList<DContactGeom> contacts, int skip )
@@ -610,7 +611,7 @@ public class BoxBox {
 		// Note: Unmodified parameter values are being used here
 		//final double *Ra,*Rb,*pa,*pb,*Sa,*Sb;
 		Matrix3d Ra, Rb;
-		Vector3d pa, pb, Sa, Sb;
+		Tuple3d pa, pb, Sa, Sb;
 		if (tst._code <= 3) { // One of the faces of box 1 is the reference face
 			Ra = R1; // Rotation of 'a'
 			Rb = R2; // Rotation of 'b'

@@ -81,7 +81,7 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 			gl.glEnd();
 			gl.glColor3f( 1,1,1 );
 			gl.glRasterPos3d( c.pos.x, c.pos.y, c.pos.z );
-			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info ); 
+			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info + " " + c.depth ); 
 //			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, c.side1 + " " + c.side2 ); 
 			// side is unused :(  but doesn't need to be... 
 			// thus we are somewhat on our own for warmstarts..

@@ -77,7 +77,7 @@ public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 			gl.glEnd();
 			gl.glColor3f( 1,1,1 );
 			gl.glRasterPos3d( c.pos.x, c.pos.y, c.pos.z );
-			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info ); 			
+			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info + " " + c.depth); 			
 		}
 		
 		gl.glColor4f(1,1,1,0.5f);

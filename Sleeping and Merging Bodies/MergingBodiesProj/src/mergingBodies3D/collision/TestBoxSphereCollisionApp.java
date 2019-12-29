@@ -60,6 +60,7 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 		TW2B1.invert();
 		
 		int cnum = BoxSphere.dBoxSphere(TB2W1, TW2B1, size1, p2, r, contacts);
+		boolean test = BoxSphere.dBoxSphereTest(TB2W1, TW2B1, size1, p2, r );
 				
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
@@ -93,7 +94,7 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 		EasyViewer.glut.glutWireSphere( r, 10, 10 );
 		gl.glPopMatrix();
 
-		String msg = "#contacts = 0\n";
+		String msg = "#contacts = 0, test result = " + test + "\n";
 		if ( cnum > 0 ) {
 			DContactGeom c = contacts.get(0);
 			msg = "#contacts = " + cnum + "\n" +
@@ -115,9 +116,9 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 		return vfp.getPanel();
 	}
 	
-	Vec3Parameter pos1 = new Vec3Parameter("pos1", 0,  5, 0 );
-	Vec3Parameter pos2 = new Vec3Parameter("pos2", 0, -5, 0 );
-	Vec3Parameter axis1 = new Vec3Parameter("axis1", 0,  5, 0 );
+	Vec3Parameter pos1 = new Vec3Parameter("pos1", -0.5,  1, 0 ); // funny test case
+	Vec3Parameter pos2 = new Vec3Parameter("pos2", 0, -1, 0 );
+	Vec3Parameter axis1 = new Vec3Parameter("axis1", 0,  1, 0 );
 	DoubleParameter angle1 = new DoubleParameter("angle1", 0, -3.14, 3.14 );
 	DoubleParameter radius = new DoubleParameter("radius", 1, 0.1, 3);
 	
