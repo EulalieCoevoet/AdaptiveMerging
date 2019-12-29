@@ -262,8 +262,11 @@ public class CollisionProcessor {
 	            contacts.add( contact );
 				
 			} else {
-				findCollisionsWithPlane( node1.child1, body1,planeBody );
-				findCollisionsWithPlane( node1.child2, body1,planeBody );
+				for ( BVNode child : node1.children ) {
+					findCollisionsWithPlane( child, body1,planeBody );					
+				}
+//				findCollisionsWithPlane( node1.child1, body1,planeBody );
+//				findCollisionsWithPlane( node1.child2, body1,planeBody );
 			}
 		}		
 	}
@@ -291,18 +294,30 @@ public class CollisionProcessor {
 				BVSphere leafBV2 = node2.boundingSphere;
 				processCollision(body1, leafBV1, body2, leafBV2);
 			} else if ( node1.isLeaf() ) {
-				findCollisions(node1, node2.child1, body1, body2);
-				findCollisions(node1, node2.child2, body1, body2);
+				for ( BVNode child : node2.children ) {
+					findCollisions(node1, child, body1, body2);					
+				}
+//				findCollisions(node1, node2.child1, body1, body2);
+//				findCollisions(node1, node2.child2, body1, body2);
 			} else if ( node2.isLeaf() ) {
-				findCollisions(node1.child1, node2, body1, body2);
-				findCollisions(node1.child2, node2, body1, body2);				
+				for ( BVNode child : node1.children ) {
+					findCollisions(child, node2, body1, body2);					
+				}
+//				findCollisions(node1.child1, node2, body1, body2);
+//				findCollisions(node1.child2, node2, body1, body2);				
 			} else if ( node1.boundingSphere.r <= node2.boundingSphere.r ) {
 				// if we have the choice, descend subtree with larger sphere
-				findCollisions(node1, node2.child1, body1, body2);
-				findCollisions(node1, node2.child2, body1, body2);
+				for ( BVNode child : node2.children ) {
+					findCollisions(node1, child, body1, body2);					
+				}
+//				findCollisions(node1, node2.child1, body1, body2);
+//				findCollisions(node1, node2.child2, body1, body2);
 			} else {
-				findCollisions(node1.child1, node2, body1, body2);
-				findCollisions(node1.child2, node2, body1, body2);
+				for ( BVNode child : node1.children ) {
+					findCollisions(child, node2, body1, body2);					
+				}
+//				findCollisions(node1.child1, node2, body1, body2);
+//				findCollisions(node1.child2, node2, body1, body2);
 			}
 		}
 	}

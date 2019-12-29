@@ -20,9 +20,13 @@ public class BVNode {
     /** Bounding disc for all leaves in this subtree */
     BVSphere boundingSphere;
     
-    BVNode child1;
+    /**
+     * In many cases we will will have binary trees, but in some cases we will not
+     */
+    BVNode[] children;
     
-    BVNode child2;
+//    BVNode child1;
+//    BVNode child2;
     
     /** The visitID keeps track of when this node was last visited */
     int visitID;
@@ -34,8 +38,14 @@ public class BVNode {
      */
     public BVNode( BVNode n, RigidBody body ) {
     	boundingSphere = new BVSphere( n.boundingSphere, body );
-    	if ( n.child1 != null ) child1 = new BVNode( child1, body );
-    	if ( n.child2 != null ) child2 = new BVNode( child2, body );
+    	if ( n.children != null ) {
+    		children = new BVNode[n.children.length];
+    		for ( int i = 0; i < n.children.length; i++ ) {
+    			children[i] = new BVNode( n.children[i], body );
+    		}
+    	}
+//    	if ( n.child1 != null ) child1 = new BVNode( child1, body );
+//    	if ( n.child2 != null ) child2 = new BVNode( child2, body );
     }
     
     /** 
@@ -51,6 +61,7 @@ public class BVNode {
      * Create a bounding volume node from a list of blocks. An axis aligned
      * bounding box is computed for the blocks, and the blocks are split in 
      * the axis aligned direction in which they are most spread out.
+     * This method builds a binary (mostly-balanced) tree.
      * @param blocks
      * @param body
      */
@@ -61,8 +72,11 @@ public class BVNode {
         	boundingSphere = discs.get(0);
         } else if ( discs.size() == 2 ) {
         	boundingSphere = new BVSphere(discs);
-        	child1 = new BVNode( discs.get(0) );
-        	child2 = new BVNode( discs.get(1) );        	
+        	children = new BVNode[2];
+        	children[0] = new BVNode( discs.get(0) );
+        	children[1] = new BVNode( discs.get(1) );          			
+//                	child1 = new BVNode( discs.get(0) );
+//                	child2 = new BVNode( discs.get(1) );        	
         } else { // if ( blocks.size() > 2 ) {        
             // find the distribution     
         	boundingSphere = new BVSphere(discs);
@@ -103,10 +117,13 @@ public class BVNode {
             	}
             }
             if ( L1.size() * L2.size() == 0 ) {
-            	System.out.println(" is this happening?  If so this is bad!");
+            	System.err.println(" is this happening?  If so this is bad!  Both lists should be non-empty!");
             }
-            if ( L1.size() > 0 ) child1 = new BVNode(L1, body);
-            if ( L2.size() > 0 ) child2 = new BVNode(L2, body);            
+            children = new BVNode[2];
+            children[0] = new BVNode(L1, body);
+            children[1] = new BVNode(L2, body);            
+//            if ( L1.size() > 0 ) child1 = new BVNode(L1, body);
+//            if ( L2.size() > 0 ) child2 = new BVNode(L2, body);            
         }
     }
 
@@ -114,7 +131,8 @@ public class BVNode {
      * @return true if this node is a leaf
      */    
     public boolean isLeaf() {
-    	return (child1 == null) && (child2 == null ); 
+    	return ( children == null );
+//    	return (child1 == null) && (child2 == null ); 
     }
     
     /**
@@ -123,8 +141,12 @@ public class BVNode {
      */
     public void display( GLAutoDrawable drawable ) {
         boundingSphere.display(drawable);
-        if ( child1 != null ) child1.display(drawable);
-        if ( child2 != null ) child2.display(drawable);
+        if ( children == null ) return;
+        for ( BVNode c : children ) {
+        	c.display(drawable);
+        }
+//        if ( child1 != null ) child1.display(drawable);
+//        if ( child2 != null ) child2.display(drawable);
     }
     
     /**
@@ -135,12 +157,19 @@ public class BVNode {
     public void displayVisitBoundary( GLAutoDrawable drawable, int visit ) {
         if ( isLeaf() ) {
             boundingSphere.display(drawable);    
-        } else if ( child1.visitID != visit ) { // both children are visited, or not, never one or the other
-            boundingSphere.display(drawable);
+        } else if ( children[0].visitID != visit ) { // ALL children are visited or not, not just one or some...
+            boundingSphere.display(drawable);        	
         } else {
-            child1.displayVisitBoundary(drawable, visit);
-            child2.displayVisitBoundary(drawable, visit);
-        }
+        	for ( BVNode c : children ) {
+        		c.displayVisitBoundary(drawable, visit);
+        	}
+        }        
+//        else if ( child1.visitID != visit ) { // both children are visited, or not, never one or the other
+//            boundingSphere.display(drawable);
+//        } else {
+//            child1.displayVisitBoundary(drawable, visit);
+//            child2.displayVisitBoundary(drawable, visit);
+//        }
     }
     
 }
