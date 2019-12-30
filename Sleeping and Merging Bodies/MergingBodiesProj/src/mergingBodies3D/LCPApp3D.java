@@ -177,33 +177,52 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
        
         EasyViewer.beginOverlay(drawable);
 
-        final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         gl.glColor4f(0,0,0,1);
-        String text = system.name + "\n";
-        text += "bodies = " + system.bodies.size() + "\n";        
-        text += "contacts = " + system.collision.contacts.size() + "\n";
-        text += formatter.format( new Date() ) + "\n";
-        text += "simulation time = " + system.simulationTime + "\n";
-        text += "total compute time = " + system.totalAccumulatedComputeTime + "\n";
-        text += "compute time = " + system.computeTime + "\n";
-        text += "collision detection = " + system.collision.collisionDetectTime + "\n";
-        text += "collision processing = " + system.collision.collisionSolveTime + "\n";
-        text += "h = " + stepsize.getValue() + " (with " + substeps.getValue() + " substeps)\n";
-        text += "PGS iterations = " + system.collision.iterations.getValue() + "\n";
-        text += "mu = " + system.collision.friction.getValue() + "\n";
-        text += "r = " + system.collision.restitution.getValue() +"\n";
+        // perhaps goofy to do this as it is just going to get tokenized afterwards to put it on the screen.
+        stringBuilder.delete(0, stringBuilder.length());
+        stringBuilder.append( system.name ); stringBuilder.append( '\n' );
+        stringBuilder.append( "bodies = "); stringBuilder.append( system.bodies.size()); stringBuilder.append( '\n' );        
+        stringBuilder.append( "contacts = "); stringBuilder.append( system.collision.contacts.size()); stringBuilder.append( '\n' );
+        stringBuilder.append( formatter.format( new Date() )); stringBuilder.append( '\n' );
+        stringBuilder.append( "simulation time = "); stringBuilder.append( system.simulationTime); stringBuilder.append( '\n' );
+        stringBuilder.append( "total compute time = "); stringBuilder.append( system.totalAccumulatedComputeTime); stringBuilder.append( '\n' );
+        stringBuilder.append( "compute time = "); stringBuilder.append( system.computeTime); stringBuilder.append( '\n' );
+        stringBuilder.append( "collision detection = "); stringBuilder.append( system.collision.collisionDetectTime); stringBuilder.append( '\n' );
+        stringBuilder.append( "collision processing = "); stringBuilder.append( system.collision.collisionSolveTime); stringBuilder.append( '\n' );
+        stringBuilder.append( "h = "); 
+        stringBuilder.append( stepsize.getValue()); 
+        stringBuilder.append( " (with "); 
+        stringBuilder.append( substeps.getValue()); 
+        stringBuilder.append( " substeps)\n" );
+        stringBuilder.append( "PGS iterations = "); stringBuilder.append( system.collision.iterations.getValue()); stringBuilder.append( '\n' );
+        stringBuilder.append( "mu = "); stringBuilder.append( system.collision.friction.getValue()); stringBuilder.append( '\n' );
+        stringBuilder.append( "r = "); stringBuilder.append( system.collision.restitution.getValue()); stringBuilder.append( '\n' );
         
         Runtime rt = Runtime.getRuntime();
         long usedMem = (rt.totalMemory() - rt.freeMemory()) / 1024; // / 1024;
-        text += "MEMORY USED = " + usedMem + " KB \n";
+        stringBuilder.append( "MEMORY USED = "); stringBuilder.append( usedMem ); stringBuilder.append( " KB \n" );
+        double alpha = 0.01;
+        memDelta = 0;
+        if ( lastUsedMem != -1) {
+        	memDelta = usedMem - lastUsedMem;
+        	filteredUsedMem = alpha * ( usedMem - lastUsedMem ) + (1-alpha)*filteredUsedMem;
+        }
+        lastUsedMem = usedMem;
+        stringBuilder.append( "MEMORY USED = "); stringBuilder.append( usedMem ); stringBuilder.append( " KB \n" );
+        stringBuilder.append( "Filterd memory delta = "); stringBuilder.append( (int) filteredUsedMem ); stringBuilder.append( " KB \n" );
         
+    	memMonitor.add( memDelta );
+
         if ( ! hideOverlay.getValue() ) {
-        	EasyViewer.printTextLines( drawable, text, 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
+        	EasyViewer.printTextLines( drawable, stringBuilder.toString(), 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
         }
     	EasyViewer.endOverlay(drawable);
 
         if ( drawGraphs.getValue() ) {
         	ccm.draw(drawable);
+        }
+        if ( drawMemoryMonitor.getValue() ) {
+        	memMonitor.draw( drawable, 0 );
         }
         
         if ( run.getValue() || stepped ) {
@@ -218,6 +237,13 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         }
     }
+    
+    private MemoryMonitor memMonitor = new MemoryMonitor( "memory", "step");
+    private long lastUsedMem = -1;
+    private double filteredUsedMem = 0;
+    private long memDelta = 0;
+    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private final StringBuilder stringBuilder = new StringBuilder();
     
 	//private final FancyAxis fa = new FancyAxis();
 
@@ -347,6 +373,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 
     private BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", false );
     private BooleanParameter drawGraphs = new BooleanParameter("draw performance graphs", false );
+    private BooleanParameter drawMemoryMonitor = new BooleanParameter("draw memory delta", false );
     private BooleanParameter run = new BooleanParameter( "simulate", false );
     private DoubleParameter stepsize = new DoubleParameter( "step size", 0.05, 1e-5, 1 );
     private IntParameter substeps = new IntParameter( "sub steps (integer)", 1, 1, 100);
@@ -437,6 +464,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         
         vfp.add( hideOverlay.getControls() );
         vfp.add( drawGraphs.getControls() );
+        vfp.add( drawMemoryMonitor.getControls() );
         
         vfp.add( run.getControls() );
         vfp.add( stepsize.getSliderControls(true) );
@@ -537,6 +565,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         } else {
             system.reset();
         }
+        memMonitor.reset();
     }
     
     private boolean deleteDisplayListRequest = false;

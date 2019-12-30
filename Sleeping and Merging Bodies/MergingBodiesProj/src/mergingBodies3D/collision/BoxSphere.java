@@ -13,6 +13,27 @@ import mergingBodies3D.RigidTransform;
  */
 public class BoxSphere {
 
+	/** 
+	 * query point, i.e., to hold corners of cube in world coords, and allocated once to reuse	
+	 */
+	private static Point3d q = new Point3d(); 	
+	
+	/**
+	 * Sphere center in box body coordinates
+	 */
+	private static Point3d cB = new Point3d();
+
+	/** 
+	 * upper right corder of box (half the size)
+	 * Could probably just be stored in the geometry as it is recomputed often
+	 */
+	private static Vector3d p = new Vector3d(); 
+
+	/**
+	 * Helper vector for queries and setting the normal
+	 */
+	private static Vector3d v = new Vector3d();
+
 	/**
 	 * Check for collision between box and sphere and collect contacts
 	 * @param TB2W1  box body to world transform
@@ -24,10 +45,7 @@ public class BoxSphere {
 	 * @return 			number of contacts (zero or one)
 	 */
 	public static int dBoxSphere( RigidTransform TB2W1, RigidTransform TW2B1, Vector3d size, Point3d c, double r, ArrayList<DContactGeom> contacts ) {
-		Vector3d p = new Vector3d(); 
 		p.scale( 0.5, size );
-		Point3d q = new Point3d(); // to hold corners of cube in world coords		
-		Point3d cB = new Point3d(); // sphere center in the box body coordinates
 		TW2B1.transform( c, cB );
 		DContactGeom contact = null;
 		
@@ -42,7 +60,6 @@ public class BoxSphere {
 		q.set( -p.x, -p.y, -p.z ); contact = test1( contact, q, cB, r );
 
 		double s;
-		Vector3d v = new Vector3d();
 
 		// The tests below are not so pretty compared to the above tests... can it be cleaner / simpler??
 
@@ -129,10 +146,7 @@ public class BoxSphere {
 	 * @return 			number of contacts (zero or one)
 	 */
 	public static boolean dBoxSphereTest( RigidTransform TB2W1, RigidTransform TW2B1, Vector3d size, Point3d c, double r ) {
-		Vector3d p = new Vector3d(); 
 		p.scale( 0.5, size );
-		Point3d q = new Point3d(); // to hold corners of cube in world coords		
-		Point3d cB = new Point3d(); // sphere center in the box body coordinates
 		TW2B1.transform( c, cB );
 
 		if ( distanceToOrigin(cB) > p.length() + r ) return false; // quick exit
@@ -156,8 +170,6 @@ public class BoxSphere {
 		q.set( -p.x,  p.y, -p.z ); if ( cB.distance(q)-r < 0) return true;
 		q.set( -p.x, -p.y,  p.z ); if ( cB.distance(q)-r < 0) return true;
 		q.set( -p.x, -p.y, -p.z ); if ( cB.distance(q)-r < 0) return true;
-
-		Vector3d v = new Vector3d();
 
 		// The tests below are not so pretty compared to the above tests... can it be cleaner / simpler??
 
@@ -209,7 +221,6 @@ public class BoxSphere {
 		return false;
 	}
 
-	
 	private static DContactGeom test1( DContactGeom contact, Point3d q, Point3d cB, double r ) {
 		double s = cB.distance(q)-r;
 		if ( s > 0 ) return contact;

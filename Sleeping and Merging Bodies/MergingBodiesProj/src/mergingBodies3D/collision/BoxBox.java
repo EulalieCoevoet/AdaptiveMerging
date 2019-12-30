@@ -276,8 +276,8 @@ public class BoxBox {
 	}
 
 	private static boolean CONTACTS_UNIMPORTANT = false; // we care about contacts! 
-	public static final int NUMC_MASK = 0xffff;  //TODO long?
-
+	public static final int NUMC_MASK = 0xffff;  // this is a rather large number... 
+	
 	//#define TST(expr1,expr2,norm,cc) 
 	private static boolean TST1(double expr1, double expr2, Matrix3d norm_A, int norm_O, int cc, TstClass tst1) {
 		double expr1_val = (expr1); /* Avoid duplicate evaluation of expr1 */ 
