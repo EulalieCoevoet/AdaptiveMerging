@@ -11,10 +11,13 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import mergingBodies3D.collision.BoxBox;
+import mergingBodies3D.collision.BoxPlane;
+import mergingBodies3D.collision.BoxSphere;
+import mergingBodies3D.collision.DContactGeom;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
-import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -25,7 +28,8 @@ public class CollisionProcessor {
 
     private List<RigidBody> bodies;
 
-	public HashMap<String, Contact> lastTimeStepMap = new HashMap<String, Contact>();
+	// public HashMap<String, Contact> lastTimeStepMap = new HashMap<String, Contact>();
+    HashMap<Contact,Contact> lastTimeStepContacts = new HashMap<Contact,Contact>();
 	
     /**
      * The current contacts that resulted in the last call to process collisions
@@ -75,8 +79,10 @@ public class CollisionProcessor {
         broadPhase();
         collisionDetectTime = ( System.nanoTime() - now ) * 1e-9;
                 
-        if (contacts.isEmpty())
-			lastTimeStepMap.clear();
+        if (contacts.isEmpty()) {
+        	//	lastTimeStepMap.clear();
+        	lastTimeStepContacts.clear();
+        }
     }
     
 	/**
@@ -112,13 +118,17 @@ public class CollisionProcessor {
 	}
 	
 	protected void updateContactsMap() {
-		lastTimeStepMap.clear();
-		for (Contact contact : contacts) {
-			BVSphere bv1 = contact.bv1;
-			BVSphere bv2 = contact.bv2;
-			// TODO: hash codes are not perfectly unique... :/
-			lastTimeStepMap.put("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode()), contact);
-		} 
+		lastTimeStepContacts.clear();
+		for ( Contact contact : contacts ) {
+			lastTimeStepContacts.put( contact, contact );
+		}
+//		lastTimeStepMap.clear();
+//		for (Contact contact : contacts) {
+//			BVSphere bv1 = contact.bv1;
+//			BVSphere bv2 = contact.bv2;
+//			// TODO: hash codes are not perfectly unique... :/
+//			lastTimeStepMap.put("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode()), contact);
+//		} 
 	}
 	
 	/**
@@ -142,34 +152,35 @@ public class CollisionProcessor {
 	 * @param contact
 	 * @return oldContact
 	 */
-	protected Contact getOldContact(Contact contact) {
+	protected Contact getOldContact(Contact contact) {		
+		return lastTimeStepContacts.get( contact );
 		
-		Contact oldContact;
-		
-		BVSphere bv1 = contact.bv1;
-		BVSphere bv2 = contact.bv2;
-
-		if(lastTimeStepMap.containsKey("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode() ))
-				|| lastTimeStepMap.containsKey("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode() ))) {
-
-			RigidBody body1 = contact.body1;//(contact.body1.isInCollection())? contact.body1.parent: contact.body1;
-			RigidBody body2 = contact.body2;// (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
-
-			// if the old map contains this key, then get the lambda of the old map
-			oldContact = lastTimeStepMap.get("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode()));
-			if(lastTimeStepMap.containsKey("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode() )))
-				oldContact = lastTimeStepMap.get("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode()));
-			
-			RigidBody oldBody1 = oldContact.body1;//(oldContact.body1.isInCollection())? oldContact.body1.parent: oldContact.body1;
-			RigidBody oldBody2 = oldContact.body2;//(oldContact.body2.isInCollection())? oldContact.body2.parent: oldContact.body2;
-			
-			if ((oldBody1 != body1 && oldBody1 != body2) || (oldBody2 != body2 && oldBody2 != body1)) 
-				return null;
-		}
-		else
-			return null;
-		
-		return oldContact;
+//		Contact oldContact;
+//		
+//		BVSphere bv1 = contact.bv1;
+//		BVSphere bv2 = contact.bv2;
+//
+//		if(lastTimeStepMap.containsKey("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode() ))
+//				|| lastTimeStepMap.containsKey("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode() ))) {
+//
+//			RigidBody body1 = contact.body1;//(contact.body1.isInCollection())? contact.body1.parent: contact.body1;
+//			RigidBody body2 = contact.body2;// (contact.body2.isInCollection())? contact.body2.parent: contact.body2;
+//
+//			// if the old map contains this key, then get the lambda of the old map
+//			oldContact = lastTimeStepMap.get("contact:" + Integer.toString(bv1.hashCode()) + "_" + Integer.toString(bv2.hashCode()));
+//			if(lastTimeStepMap.containsKey("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode() )))
+//				oldContact = lastTimeStepMap.get("contact:" + Integer.toString(bv2.hashCode()) + "_" + Integer.toString(bv1.hashCode()));
+//			
+//			RigidBody oldBody1 = oldContact.body1;//(oldContact.body1.isInCollection())? oldContact.body1.parent: oldContact.body1;
+//			RigidBody oldBody2 = oldContact.body2;//(oldContact.body2.isInCollection())? oldContact.body2.parent: oldContact.body2;
+//			
+//			if ((oldBody1 != body1 && oldBody1 != body2) || (oldBody2 != body2 && oldBody2 != body1)) 
+//				return null;
+//		}
+//		else
+//			return null;
+//		
+//		return oldContact;
 	}
 	
 	/**
@@ -210,7 +221,11 @@ public class CollisionProcessor {
             }
         }        
     }
-    
+
+    private ArrayList<DContactGeom> dcontacts = new ArrayList<DContactGeom>();
+    double[] depth = new double[1];
+    int [] rc = new int[1];
+
     /**
      * Checks for collision between boundary blocks on two rigid bodies.
      * @param body1
@@ -218,12 +233,61 @@ public class CollisionProcessor {
      */
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
 		if ( body1 instanceof PlaneRigidBody ) {
-			findCollisionsWithPlane( body2.root, body2, (PlaneRigidBody) body1 ); 
-		} else if (body2 instanceof PlaneRigidBody ) {
-			findCollisionsWithPlane( body1.root, body1, (PlaneRigidBody) body2 );
-		} else {
-			findCollisions(body1.root, body2.root, body1, body2);
+			PlaneRigidBody b1 = (PlaneRigidBody) body1;
+			if ( body2 instanceof PlaneRigidBody ) {
+				System.err.println("plane plane collision is impossible!");
+			} else if ( body2.geom instanceof RigidBodyGeomBox ) {
+				// box plane
+				RigidBodyGeomBox g2 = (RigidBodyGeomBox) body2.geom;
+				dcontacts.clear();
+				BoxPlane.dBoxPlane(body2.transformB2W, g2.size, b1.n, b1.d, dcontacts);
+				for ( DContactGeom dc : dcontacts ) {
+		            Contact contact = new Contact( body1, body2, dc.pos, b1.n, null, null, dc.info, -dc.depth);
+		            contacts.add( contact );
+				}
+			} else { 
+				// spheretree plane
+				collideSphereTreeAndPlane( body2.root, body2, (PlaneRigidBody) body1 ); 
+			}
+		} else if ( body1.geom instanceof RigidBodyGeomBox ) {
+			RigidBodyGeomBox g1 = (RigidBodyGeomBox) body1.geom;
+			if ( body2 instanceof PlaneRigidBody ) {
+				// box plane
+				PlaneRigidBody b2 = (PlaneRigidBody) body2;
+				dcontacts.clear();
+				BoxPlane.dBoxPlane(body1.transformB2W, g1.size, b2.n, b2.d, dcontacts);
+				for ( DContactGeom dc : dcontacts ) {
+		            Contact contact = new Contact( body2, body1, dc.pos, b2.n, null, null, dc.info, -dc.depth);
+		            contacts.add( contact );
+		        }					
+			} else if ( body2.geom instanceof RigidBodyGeomBox ) {
+				RigidBodyGeomBox g2 = (RigidBodyGeomBox) body2.geom;
+				dcontacts.clear();
+				int flags = 0xffff; // this is effectively unused, and could be factored out.  We want all contacts!
+				BoxBox.dBoxBox(body1.x,body1.theta,g1.size,body2.x, body2.theta, g2.size, normal, depth, rc, flags, dcontacts, 1 );
+				int count = 0;
+				for ( DContactGeom dc : dcontacts ) {
+					// the info hasn't been set, but we'll just use their order for their identity
+					Contact contact = new Contact( body1, body2, dc.pos, normal, null, null, count++, -dc.depth);
+		            contacts.add( contact );
+				}					
+			} else {
+				// box spheretree
+				collideBoxAndSphereTree( g1, body2.root, body1, body2 );
+			}
+		} else { // all others have a sphere tree
+			if ( body2 instanceof PlaneRigidBody ) {
+				collideSphereTreeAndPlane( body1.root, body1, (PlaneRigidBody) body2 );
+			} else if ( body2.geom instanceof RigidBodyGeomBox ) {
+				// box spheretree
+				collideBoxAndSphereTree( (RigidBodyGeomBox) body2.geom, body1.root, body2, body1 );
+			} else {
+				collideSphereTrees(body1.root, body2.root, body1, body2);
+			}
 		}
+		// NOTE: might be easier to handle this flow control structure with a check on the first parameter 
+		// and calling appropriate functions that check the second parameter, filtering the result down
+		// to the appropriate pair of primitives?		
 	}
 	
     /** 
@@ -235,7 +299,7 @@ public class CollisionProcessor {
      */
     int visitID = 0;
 	
-	private void findCollisionsWithPlane( BVNode node1, RigidBody body1, PlaneRigidBody planeBody ) {
+	private void collideSphereTreeAndPlane( BVNode node1, RigidBody body1, PlaneRigidBody planeBody ) {
 		if ( node1.visitID != visitID ) {
 			node1.visitID = visitID;
 			node1.boundingSphere.updatecW();
@@ -257,18 +321,43 @@ public class CollisionProcessor {
 				contactW.sub( c, normal );
 				normal.scale( -1, planeBody.n );
 				
-	            Contact contact = new Contact( body1, planeBody, contactW, normal, node1.boundingSphere, planeBody.dummyBV, d);
+				// only 1 contact (per leaf) if there is a contact, so we set info to zero
+	            Contact contact = new Contact( body1, planeBody, contactW, normal, node1.boundingSphere, planeBody.dummyBV, 0, d);
 	            // simple option... add to contact list...
 	            contacts.add( contact );
-				
 			} else {
 				for ( BVNode child : node1.children ) {
-					findCollisionsWithPlane( child, body1,planeBody );					
+					collideSphereTreeAndPlane( child, body1,planeBody );					
 				}
-//				findCollisionsWithPlane( node1.child1, body1,planeBody );
-//				findCollisionsWithPlane( node1.child2, body1,planeBody );
 			}
 		}		
+	}
+	
+	private void collideBoxAndSphereTree( RigidBodyGeomBox geom1, BVNode node2, RigidBody body1, RigidBody body2 ) {
+		if ( node2.visitID != visitID ) {
+			node2.visitID = visitID;
+			node2.boundingSphere.updatecW();
+		}
+		if ( !BoxSphere.dBoxSphereTest( body1.transformB2W, body1.transformW2B, geom1.size, node2.boundingSphere.cW, node2.boundingSphere.r ) ) return;
+		if ( !node2.isLeaf() ) {
+			for ( BVNode child : node2.children ) {
+				collideBoxAndSphereTree( geom1, child, body1, body2 );
+			}
+		} else { // this is a leaf! we are colliding for real!
+			dcontacts.clear();
+			BoxSphere.dBoxSphere(body1.transformB2W, body1.transformW2B, geom1.size, node2.boundingSphere.cW, node2.boundingSphere.r, dcontacts );
+			// there will only ever be one contact in this case... 
+			// and this should probably *always* happen if the test above is checking all cases, but would still
+			// fail if we let the test above be a bit more conservative...
+			int count = 0;
+			for ( DContactGeom dc : dcontacts ) {
+				if ( count == 1 ) {
+					System.err.println("WARNING: box-spheretree generating more than one contact?");
+				}
+				Contact contact = new Contact( body1, body2, dc.pos, dc.normal, null, null, count++, -dc.depth);
+	            contacts.add( contact );
+			}
+		}
 	}
 	
 	/** 
@@ -278,7 +367,7 @@ public class CollisionProcessor {
 	 * @param body1
 	 * @param body2
 	 */
-	private void findCollisions(BVNode node1, BVNode node2, RigidBody body1, RigidBody body2) {
+	private void collideSphereTrees(BVNode node1, BVNode node2, RigidBody body1, RigidBody body2) {
 		if (node1.visitID != visitID) {
 			node1.visitID = visitID;
 			node1.boundingSphere.updatecW();
@@ -295,29 +384,21 @@ public class CollisionProcessor {
 				processCollision(body1, leafBV1, body2, leafBV2);
 			} else if ( node1.isLeaf() ) {
 				for ( BVNode child : node2.children ) {
-					findCollisions(node1, child, body1, body2);					
+					collideSphereTrees(node1, child, body1, body2);					
 				}
-//				findCollisions(node1, node2.child1, body1, body2);
-//				findCollisions(node1, node2.child2, body1, body2);
 			} else if ( node2.isLeaf() ) {
 				for ( BVNode child : node1.children ) {
-					findCollisions(child, node2, body1, body2);					
+					collideSphereTrees(child, node2, body1, body2);					
 				}
-//				findCollisions(node1.child1, node2, body1, body2);
-//				findCollisions(node1.child2, node2, body1, body2);				
 			} else if ( node1.boundingSphere.r <= node2.boundingSphere.r ) {
 				// if we have the choice, descend subtree with larger sphere
 				for ( BVNode child : node2.children ) {
-					findCollisions(node1, child, body1, body2);					
+					collideSphereTrees(node1, child, body1, body2);					
 				}
-//				findCollisions(node1, node2.child1, body1, body2);
-//				findCollisions(node1, node2.child2, body1, body2);
 			} else {
 				for ( BVNode child : node1.children ) {
-					findCollisions(child, node2, body1, body2);					
+					collideSphereTrees(child, node2, body1, body2);					
 				}
-//				findCollisions(node1.child1, node2, body1, body2);
-//				findCollisions(node1.child2, node2, body1, body2);
 			}
 		}
 	}
@@ -335,10 +416,6 @@ public class CollisionProcessor {
     
     // some working variables for processing collisions
     private Point3d contactW = new Point3d();
-    private Vector3d force = new Vector3d();
-    private Vector3d contactV1 = new Vector3d();
-    private Vector3d contactV2 = new Vector3d();
-    private Vector3d relativeVelocity = new Vector3d();
     private Vector3d normal = new Vector3d();
         
     /**
@@ -350,12 +427,6 @@ public class CollisionProcessor {
      * @param bv2
      */
     private void processCollision( RigidBody body1, BVSphere bv1, RigidBody body2, BVSphere bv2 ) {        
-        double k = contactSpringStiffness.getValue();
-        double c1 = contactSpringDamping.getValue();
-        double threshold = separationVelocityThreshold.getValue();
-        boolean useSpring = enableContactSpring.getValue();
-        boolean useDamping = enableContactDamping.getValue();
-        
         double distance = bv1.cW.distance( bv2.cW );
         double distanceBetweenCenters = bv2.r + bv1.r;
         if ( distance < distanceBetweenCenters ) {
@@ -365,35 +436,10 @@ public class CollisionProcessor {
             // contact normal
             normal.sub( bv2.cW, bv1.cW );
             normal.normalize();
-            // create the contact
-            Contact contact = new Contact( body1, body2, contactW, normal, bv1, bv2, distance - distanceBetweenCenters);
+            // create the contact, and again info is zero as we only generate one contact per pair of leaves
+            Contact contact = new Contact( body1, body2, contactW, normal, bv1, bv2, 0, distance - distanceBetweenCenters);
             // simple option... add to contact list...
             contacts.add( contact );
-//            if ( ! doLCP.getValue() ) {
-                // compute relative body velocity at contact point
-//                body1.getSpatialVelocity( contactW, contactV1 );
-//                body2.getSpatialVelocity( contactW, contactV2 );
-//                relativeVelocity.sub( contactV1, contactV2 );
-//                double normalRelVel = -relativeVelocity.dot( normal );
-//                if (  normalRelVel < threshold ) {
-//                    if ( useSpring ) {
-//                        // spring force
-//                        double interpenetration = distance - distanceBetweenCenters; // a negative quantity
-//                        force.scale( -interpenetration * k, normal );
-//                        body2.applyContactForceW(contactW, force);
-//                        force.scale(-1);
-//                        body1.applyContactForceW(contactW, force);
-//                    }
-//                    if ( useDamping ) {
-//                        // spring damping forces!
-//                        // vertical
-//                        force.scale( relativeVelocity.dot(normal) * c1, normal );                    
-//                        body2.applyContactForceW( contactW, force );
-//                        force.scale(-1);
-//                        body1.applyContactForceW( contactW, force );
-//                    }
-//                }
-//            }
         }
     }
 
@@ -401,22 +447,7 @@ public class CollisionProcessor {
 	public DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
-	
-    /** Stiffness of the contact penalty spring */
-    private DoubleParameter contactSpringStiffness = new DoubleParameter("penalty contact stiffness", 1e3, 1, 1e5 );
-    
-    /** Viscous damping coefficient for the contact penalty spring */
-    private DoubleParameter contactSpringDamping = new DoubleParameter("penalty contact damping", 10, 1, 1e4 );
-    
-    /** Threshold for the relative velocity in the normal direction, for determining if spring force will be applied. */
-    private DoubleParameter separationVelocityThreshold = new DoubleParameter( "penalty separation velocity threshold (controls bounce)", 1e-9, 1e-9, 1e3 );
-    
-    /** Enables the contact penalty spring */
-    private BooleanParameter enableContactSpring = new BooleanParameter("enable penalty contact spring", true );
-    
-    /** Enables damping of the contact penalty spring */
-    private BooleanParameter enableContactDamping = new BooleanParameter("enable penalty contact damping", true );
-    
+	    
     /** Restitution parameter for contact constraints */
     public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
     
@@ -446,17 +477,6 @@ public class CollisionProcessor {
 		vfp.add( enableCompliance.getControls() );
 		vfp.add( compliance.getSliderControls(true) );
         
-        VerticalFlowPanel vfp2 = new VerticalFlowPanel();
-        vfp2.setBorder( new TitledBorder("penalty method controls") );
-        vfp2.add( contactSpringStiffness.getSliderControls(true) );
-        vfp2.add( contactSpringDamping.getSliderControls(true) );
-        vfp2.add( separationVelocityThreshold.getSliderControls( true ) );
-        vfp2.add( enableContactDamping.getControls() );
-        vfp2.add( enableContactSpring.getControls() );
-        
-        CollapsiblePanel cp = new CollapsiblePanel(vfp2.getPanel());
-        cp.collapse();
-        vfp.add( cp );        
         return vfp.getPanel();
     }
     

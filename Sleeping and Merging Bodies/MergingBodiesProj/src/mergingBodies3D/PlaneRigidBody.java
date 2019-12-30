@@ -88,9 +88,7 @@ public class PlaneRigidBody extends RigidBody {
     }
 	
 	private class PlaneRigidBodyGeom extends RigidBodyGeom {
-		
-
-	    
+			    
 		@Override
 		public void drawGeom(GLAutoDrawable drawable) {
 			GL2 gl = drawable.getGL().getGL2();

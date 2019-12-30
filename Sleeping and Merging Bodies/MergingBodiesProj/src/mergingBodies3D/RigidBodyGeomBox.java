@@ -10,8 +10,7 @@ import mintools.viewer.EasyViewer;
 
 public class RigidBodyGeomBox extends RigidBodyGeom {
 
-	Vector3d size = new Vector3d();
-	
+	public Vector3d size = new Vector3d();
 	
 	public RigidBodyGeomBox( Vector3d size ) {
 		this.size.set(size);

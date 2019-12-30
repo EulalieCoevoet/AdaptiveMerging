@@ -34,6 +34,8 @@ public class Contact {
 	BVSphere bv1;
 	/** Bounding volume that caused the collision... this is only used to track contact identity for warm starts  */
 	BVSphere bv2;
+	/** Information to help in warm starts by allowing contacts between bodies across time steps to be matche */
+	int info;
     
     /** Contact normal in body1 coordinates */
     Vector3d normalB = new Vector3d();
@@ -95,12 +97,13 @@ public class Contact {
      * @param contactW
      * @param normal
      */
-    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, double constraintViolation ) {
+    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW ); 
 		bv1 = disc1;
 		bv2 = disc2;
+		this.info = info;
 		this.constraintViolation =  constraintViolation;     
         index = nextContactIndex++;     
         
@@ -473,4 +476,38 @@ public class Contact {
         }
     }
     
+    /**
+     * Returns a hash code which matches even if the contact was created with
+     * the two rigid bodies swapped
+     */
+    @Override
+    public int hashCode() {
+    	int b1h = hashcode(body1);
+    	int b2h = hashcode(body2);
+    	int bv1h = hashcode(bv1);
+    	int bv2h = hashcode(bv2);
+    	// hashing primes from https://planetmath.org/goodhashtableprimes
+    	if ( b1h < b2h ) {
+    		return 53 * bv1h + 97 * bv2h + 193 * b1h + 389 * b2h + info; 
+    	}
+        return 53 * bv2h + 97 * bv1h + 193 * b2h + 389 * b1h + info; 
+    }
+
+    private static int hashcode(Object o) {
+        return o == null ? 0 : o.hashCode();
+    }
+
+    /**
+     * Compare contacts for warm starting across time steps
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Contact)) return false;
+        if (this == obj) return true;
+        Contact c = (Contact) obj;
+        if ( info != c.info ) return false;
+        return body1 == c.body1 && bv1 == c.bv1 && body2 == c.body2 && bv2 == c.bv2 ||
+        		body2 == c.body1 && bv2 == c.bv1 && body1 == c.body2 && bv1 == c.bv2;    
+    }
+
 }
