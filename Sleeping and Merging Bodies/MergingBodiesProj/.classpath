@@ -9,7 +9,7 @@
 	<classpathentry kind="lib" path="jars/vecmath.jar"/>
 	<classpathentry kind="lib" path="jars/jogamp-fat.jar" sourcepath="jars/jogamp-fat-java-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
-	<classpathentry kind="lib" path="jars/mtj.jar"/>
+	<classpathentry kind="lib" path="jars/mtj.jar" sourcepath="jars/mtjsrc.zip"/>
 	<classpathentry kind="lib" path="jars/ode4j.jar" sourcepath="jars/ode4j-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
