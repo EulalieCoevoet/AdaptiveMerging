@@ -53,6 +53,7 @@ public class Spring {
 	 * Applies the spring force by adding a force and a torque to the body.
 	 * If this body is in a collection, then it applies the force to *BOTH* the sub-body 
 	 * and the collection.
+	 * TODO: MEMORY: consider eliminating memory allocation here
 	 */
 	public void apply(double k, double c) {
 		//l0 = RigidBodySystem.springLength.getValue();
@@ -66,10 +67,6 @@ public class Spring {
 		if ( displacement.length() < 1e-3 ) return;  // hmm... should just give it some rest length?
 
 		body.getSpatialVelocity( pbw, velocity );
-//		velocity.set( -pb.y, pb.x );
-//		velocity.scale( body.omega );
-//		body.transformB2W.transform( velocity );
-//		velocity.add( body.v );
 		
 		double scale = 
 				- (k * (displacement.length()  - l0) - 	c * (velocity.dot(displacement) / displacement.length())) 

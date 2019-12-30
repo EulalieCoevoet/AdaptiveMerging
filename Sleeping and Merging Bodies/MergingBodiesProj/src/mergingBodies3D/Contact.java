@@ -15,6 +15,8 @@ import no.uib.cipr.matrix.DenseVector;
 
 /**
  * Implementation of a contact constraint.
+ * TODO: MEMORY: Consider pooling contacts to avoid reallocation all the time... 
+ * This is one of a few larger objects that will be created VERY OFTEN!
  * @author kry
  */
 public class Contact {
@@ -22,7 +24,7 @@ public class Contact {
     /** Next available contact index, used for determining which rows of the jacobian a contact uses */
     static public int nextContactIndex = 0;
     
-    /** Index of this contact, determines its rows in the jacobian */
+    /** Index of this contact, determines its (effective) rows in the jacobian (unassembled)*/
     int index;
     
     /** First RigidBody in contact */
@@ -35,7 +37,7 @@ public class Contact {
 	BVSphere bv1;
 	/** Bounding volume that caused the collision... this is only used to track contact identity for warm starts  */
 	BVSphere bv2;
-	/** Information to help in warm starts by allowing contacts between bodies across time steps to be matche */
+	/** Information to help in warm starts by allowing contacts between bodies across time steps to be matched */
 	int info;
     
     /** Contact normal in body1 coordinates */
@@ -69,26 +71,29 @@ public class Contact {
 	double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
 	double prevConstraintViolation;
 	
-	// Used for merge/unmerge condition
+	/** Used for merge/unmerge condition */
 	public ContactState state = ContactState.CLEAR;
 	public enum ContactState {BROKEN, ONEDGE, CLEAR};
 	
 	boolean newThisTimeStep;
 	
-	/** Jacobian matrix */
+	/** Jacobian matrix, packed as trans rot trans rot on each row */
 	DenseMatrix j = new DenseMatrix(3,12);
 	
-	/** Jacobian matrix, collection frame */
+	/** Jacobian matrix, collection frame, packed as trans rot trans rot on each row */
 	DenseMatrix jc = new DenseMatrix(3,12);
 	
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent1, tangent2) */
 	DenseVector lambda = new DenseVector(3);
 	
-	// Values used in PGS resolution
-	double bn = 0; /** b value for normal component */
-	double bt1 = 0; /** b value for tangent1 component */
-	double bt2 = 0; /** b value for tangent2 component */
-
+	/** b value for normal component (used in PGS resolution) */
+	double bn = 0; 
+	/** b value for tangent1 component (used in PGS resolution) */
+	double bt1 = 0; 
+	/** b value for tangent2 component (used in PGS resolution) */
+	double bt2 = 0; 
+	
+	/** Diagonals of J Minv J^T TODO: should be a vector (or array size 3) since we only want the diagonals!! */
 	DenseMatrix D = new DenseMatrix(3,3); 
 	
     /**
@@ -114,6 +119,9 @@ public class Contact {
 		normalB.set(normal);
 		body1.transformW2B.transform(normalB);
 		
+		// TODO: FIX ME this will fail for vector (1,1,1) normalized... 
+		// instead choose min component and cross with x y or z accordingly
+		// TODO: MEMORY
 		tangent1B = new Vector3d(normalB.z, normalB.x, normalB.y);
 		tangent2B = new Vector3d();
 		tangent2B.cross(normalB, tangent1B);
@@ -151,7 +159,7 @@ public class Contact {
 		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection )? body1.parent: body1;
 		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection )? body2.parent: body2;
 
-	    Vector3d normal = new Vector3d();
+	    Vector3d normal = new Vector3d(); // TODO MEMORY (here and below)
 	    Vector3d tangent1 = new Vector3d();
 	    Vector3d tangent2 = new Vector3d();
 		
@@ -185,7 +193,7 @@ public class Contact {
 
 		j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
 		j.set(0, 6, normal.x);
-		j.set(0, 7, normal.y);
+		j.set(0, 7, normal.y);  // HELP... is this getting overridden somewhere?  I'm seeing some funy signs in this matrix later on...
 		j.set(0, 8, normal.z);
 		
 		j.set(0, 9, rn2.x);
@@ -363,7 +371,8 @@ public class Contact {
 		
 		DenseMatrix Minv = new DenseMatrix(12,12);
 		
-		//eulalie: could be optimized
+		// TODO: SLOW: eulalie: could be optimized
+		
 		Minv.set(0, 0, m1inv);
 		Minv.set(1, 1, m1inv);
 		Minv.set(2, 2, m1inv);
@@ -387,13 +396,16 @@ public class Contact {
 		for (int k=0; k<3; k++)
 			for (int l=0; l<6; l++)
 				j.set(k, l, j1.get(k, l));
-		for (int k=0; k<3; k++)
-			for (int l=0; l<6; l++)
-				j.set(k, 6+l, j2.get(k, l));
-		
+		for (int k=0; k<3; k++) {
+			for (int l=0; l<6; l++) {
+				//j.set(k, 6+l, j2.get(k, l));  // BUG? don't we want 6+l? or do we really want l ?
+				j.set(k, 6+l, j2.get(k, 6+l));  
+			}
+		}
+	
 		DenseMatrix MinvJT = new DenseMatrix(12,3);
 		Minv.transBmult(j, MinvJT);
-		j.mult(MinvJT, D);
+		j.mult(MinvJT, D); // TODO: SLOW: only want diagonals... compute them properly!
 	}
 	
 	/**

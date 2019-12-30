@@ -58,6 +58,7 @@ public class MouseSpringForce {
     
     /**
      * Applies the mouse spring force to the picked rigid body, or nohting if no body selected
+     * TODO: MEMORY: Consider eliminating memory allocation here!
      */
     public void apply() {
         if ( picked == null ) return;

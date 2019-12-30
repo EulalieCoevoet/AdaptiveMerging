@@ -10,7 +10,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import mintools.viewer.FlatMatrix4d;
+import mintools.viewer.FancyAxis;
 import no.uib.cipr.matrix.DenseVector;
 
 /**
@@ -168,20 +168,27 @@ public class RigidBody {
     
     /**
      * Updates the B2W and W2B transformations
+     * TODO: FIX: THIS HAPPENS OFTEN ENOUGH... so should probably be optimized... 
+     * 1) get rid of invert calls that to LU decomp and form the matrices
+     *   with R^T and -R^Tp or by composition.
+     * 2) one might hope that JIT will make some working variables local, but 
+     *   may of these calls make a vector here or there and probably end up 
+     *   being slow for it. :(
+     * 
      */
     public void updateTransformations() {
         transformB2W.set( theta, x );
         transformW2B.set( theta, x );
-        transformW2B.invert();
+        transformW2B.invert(); // TODO: INVERT
         // might be done more often than necessary, but need to have 
         // rotational inertia updated give we are storing information in a 
         // world aligned frame
         if ( ! pinned ) {
 	        jinv.mul( theta, jinv0 );
-	        Matrix3d RT = new Matrix3d();
+	        Matrix3d RT = new Matrix3d(); // TODO: MEMORY
 	        RT.transpose(theta);
 	        jinv.mul( RT );
-	        massAngular.invert(jinv); // otherwise could compute by composition.
+	        massAngular.invert(jinv); // TODO: INVERT... should compute by composition.
         } 
     }
     
@@ -265,7 +272,7 @@ public class RigidBody {
 		v.y += force.y * dt * minv + deltaV.get(1);
 		v.z += force.z * dt * minv + deltaV.get(2);
 
-    	Vector3d domega = new Vector3d();
+    	Vector3d domega = new Vector3d(); // TODO: MEMORY
         jinv.transform( torque, domega );
         domega.scale( dt );
         omega.add( domega );
@@ -281,11 +288,11 @@ public class RigidBody {
 		x.z += v.z * dt;
 		
 		double t = omega.length()*dt;
-    	Vector3d domega = new Vector3d();
+    	Vector3d domega = new Vector3d(); // TODO: MEMORY
         domega.set(omega);
         domega.normalize();
         if ( t > 1e-8 ) {
-            Matrix3d dR = new Matrix3d();
+            Matrix3d dR = new Matrix3d(); // TODO: MEMORY
         	expRodrigues(dR, domega, t);
         	dR.mul( theta );                
         	theta.normalizeCP( dR ); // keep it clean!
@@ -335,16 +342,18 @@ public class RigidBody {
      * @param drawable
      */
     public void display( GLAutoDrawable drawable ) {
-    	
         GL2 gl = drawable.getGL().getGL2();
-     
         gl.glPushMatrix();        
-        FlatMatrix4d M = new FlatMatrix4d();
-        M.setBackingMatrix( transformB2W.T );        
-        gl.glMultMatrixd( M.asArray(),0 );
-
+        gl.glMultMatrixd( transformB2W.Tflat.asArray(),0 );
         geom.display( drawable );
-    	
+        gl.glPopMatrix();
+    }
+    
+    public void displayFrame( GLAutoDrawable drawable ) {
+        GL2 gl = drawable.getGL().getGL2();
+        gl.glPushMatrix();        
+        gl.glMultMatrixd( transformB2W.Tflat.asArray(),0 );
+        FancyAxis.draw(drawable);
         gl.glPopMatrix();
     }
     

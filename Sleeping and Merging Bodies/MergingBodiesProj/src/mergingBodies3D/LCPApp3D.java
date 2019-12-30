@@ -193,6 +193,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         text += "mu = " + system.collision.friction.getValue() + "\n";
         text += "r = " + system.collision.restitution.getValue() +"\n";
         
+        Runtime rt = Runtime.getRuntime();
+        long usedMem = (rt.totalMemory() - rt.freeMemory()) / 1024; // / 1024;
+        text += "MEMORY USED = " + usedMem + " KB \n";
+        
         if ( ! hideOverlay.getValue() ) {
         	EasyViewer.printTextLines( drawable, text, 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
         }

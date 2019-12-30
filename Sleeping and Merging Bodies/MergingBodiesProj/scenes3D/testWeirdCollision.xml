@@ -1,0 +1,16 @@
+<root>
+
+    <body type="box" name="platform2" dim="20 1 20">
+        <x> 0 0  0 </x>
+        <spring pB="10 0.5 10"/>
+        <spring pB="10 0.5 -10"/>
+        <spring pB="-10 0.5 10"/>
+        <spring pB="-10 0.5 -10"/>
+        <pinned> true </pinned>
+    </body>
+    
+    <body type="sphere" name="sphere1" r="2">
+        <x> 0 15 0 </x>
+    </body>
+
+</root>

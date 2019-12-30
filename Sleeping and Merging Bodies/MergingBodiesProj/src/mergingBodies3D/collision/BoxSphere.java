@@ -7,6 +7,10 @@ import javax.vecmath.Vector3d;
 
 import mergingBodies3D.RigidTransform;
 
+/**
+ * TODO: MEMORY: Consider preallocation of working variables
+ * @author kry
+ */
 public class BoxSphere {
 
 	/**

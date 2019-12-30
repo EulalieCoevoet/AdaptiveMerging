@@ -83,6 +83,9 @@ public class PGS {
 				
 				Contact contact = contacts.get(i);
 					
+				// TODO: SPEED: could avoid all the MTJ bounds checking by simply having 3 lambdas and 3 D member variables and access them directly
+				// i.e., not even a java array (which also does bounds checking)! 
+				
 				// Normal direction
 				double Jdvn = contact.getJdv(computeInCollection,0);
 				double prevLambda_n = contact.lambda.get(0);
@@ -94,12 +97,14 @@ public class PGS {
 				
 				l.zero();
 				l.set(0, contact.lambda.get(0) - prevLambda_n);
+				// TODO: SLOW!!: should only update the 12 components of delta v based on what just 
+				// got updated... this approach is very slow!
 				updateDeltaV(contact, l);
 				
 				// Tangential directions
 				double mu = 0.;
 				
-				// eulalie : we should assign material property to bodies and have a table for the corresponding friction coefficient...
+				// TODO: eulalie : we should assign material property to bodies and have a table for the corresponding friction coefficient...
 				if (contact.body1.friction<0.2 || contact.body2.friction<0.2) 
 					mu = Math.min(contact.body1.friction, contact.body2.friction);
 				else if (contact.body1.friction>1. || contact.body2.friction>1.) 
@@ -137,7 +142,7 @@ public class PGS {
 				l.set(2, contact.lambda.get(2) - prevLambda_t2);
 				updateDeltaV(contact, l);
 				
-				if (iter == 1)
+				if (iter == 1) // TODO: weird way to do a post process?
 					contact.updateContactState(mu);
 			}
 			
@@ -162,8 +167,11 @@ public class PGS {
 		DenseVector dv1 = body1.deltaV; 
 		DenseVector dv2 = body2.deltaV;
 		DenseMatrix j;
-		DenseVector JTlambda = new DenseVector(12);
+		DenseVector JTlambda = new DenseVector(12);  // TODO: MEMORY: OUCH!
 		
+		//JTlambda.zero();
+		// TODO: watchout... if JTlambda becomes a working variable, then it can 
+		// get polluted with NAN as transMult doesn't do exactly what you might think!
 		j = contact.j; //(body1 instanceof RigidCollection)? contact.jc: contact.j;
 		j.transMult(lambda, JTlambda);
 		
@@ -175,8 +183,9 @@ public class PGS {
 		dv1.add( 4, JTlambda.get(3) * j1inv.m10 + JTlambda.get(4) * j1inv.m11 + JTlambda.get(5) * j1inv.m12);	
 		dv1.add( 5, JTlambda.get(3) * j1inv.m20 + JTlambda.get(4) * j1inv.m21 + JTlambda.get(5) * j1inv.m22);	
 		
-		j = contact.j; //(body2 instanceof RigidCollection)? contact.jc: contact.j;
-		j.transMult(lambda, JTlambda);
+		// TODO: WHY IS THIS DONE TWICE?  it is the same computation :/
+//		j = contact.j; //(body2 instanceof RigidCollection)? contact.jc: contact.j;
+//		j.transMult(lambda, JTlambda);
 		
 		dv2.add( 0, JTlambda.get(6) * m2inv);	
 		dv2.add( 1, JTlambda.get(7) * m2inv);	

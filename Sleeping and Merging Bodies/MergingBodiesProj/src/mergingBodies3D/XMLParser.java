@@ -358,6 +358,9 @@ public class XMLParser {
 				//body.temporarilyPinned = Boolean.parseBoolean(values[0]);
 			} else if ( tag.equalsIgnoreCase("pinned") ) {	
 				body.pinned = Boolean.parseBoolean(values[0]);
+				body.minv = 0;
+				body.jinv0.setZero();
+				body.jinv.setZero();
 			} else if ( tag.equalsIgnoreCase("spring") ) {
 				Element e = (Element) n;
 				Point3d pB = new Point3d( t3d( e.getAttribute("pB") ) );

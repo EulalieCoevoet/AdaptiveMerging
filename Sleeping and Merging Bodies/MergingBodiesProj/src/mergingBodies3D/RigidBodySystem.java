@@ -242,17 +242,19 @@ public class RigidBodySystem {
     			}
             }
         }
-        if ( drawCOMs.getValue() ) {
-            for ( RigidBody b : bodies ) {
-                b.displayCOM(drawable);
-            }
-        }
+//        if ( drawCOMs.getValue() ) {
+//            for ( RigidBody b : bodies ) {
+//                b.displayCOM(drawable);
+//            }
+//        }
         gl.glEnable(GL2.GL_DEPTH_TEST);
     }
     
     /** Might want to allow for different coloured blocks?? but for now, in 3D this is easiest */
     private float[] colourPinned = new float[] { 0.75f,0.75f,1, 1 };		        			
 	private float[] colour = new float[] { 0.9f,0.9f,0.9f, 1 };        			
+    private float[] red = new float[] { 1, 0, 0, 0.5f };
+    private float[] blue = new float[] { 0, 0, 1, 0.25f };
 
     /**
      * Draws all rigid bodies
@@ -260,21 +262,14 @@ public class RigidBodySystem {
      */
     public void display( GLAutoDrawable drawable, boolean picking ) {
         GL2 gl = drawable.getGL().getGL2();
-
-        // no need to rebuild display lists for transparency...
         
-        //        if ( Block.alpha != (float) (double) transparency.getValue()) {
-//            Block.alpha = (float) (double) transparency.getValue();
-//            // gross... need to rebuild display lists for the currently set transparency
-//            // which is potentially slow and bad news (memory thrashing) for openGL if we do this excessively!
-//            // TODO: This display list stuff should probably be changed in 3D :/
-//            RigidBodyGeom.clearDisplayLists( gl );
-//            for ( RigidBody b : bodies ) {                
-//            	b.geom.myListID = -1;
-//            }
-//        }
+        if ( drawCOMs.getValue() && ! picking ) {
+        	for ( RigidBody b : bodies ) {
+        		b.displayFrame(drawable);
+        	}
+        }
         
-     // TODO: perhaps do clipping planes here instead to only clip bodies?
+        // TODO: perhaps do clipping planes here instead to only clip bodies?
         // TODO: perhaps also have cull face options?  think we want to cull to better see contacts after clipping
         if ( drawBodies.getValue() ) {
         	int i = 0;
@@ -292,12 +287,12 @@ public class RigidBodySystem {
                 b.display( drawable );
         	}
         }
+       
         
         // TODO: end clipping here to continue to see other debug visualizations un-clipped..
         // again, perhaps an option to end clipping here or at the end of all of this!
         
         if ( ! picking ) {
-	        float[] red = new float[] { 1, 0, 0, 0.5f };
 	        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
 	        gl.glNormal3f(0,0,1);
 	    	for ( RigidBody b : bodies ) {
@@ -306,7 +301,6 @@ public class RigidBodySystem {
 				}
 	    	}        
 	        gl.glLineWidth(1);
-	        float[] blue = new float[] { 0, 0, 1, 0.25f };
 	        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);
 	        if ( drawBoundingVolumes.getValue() ) {
 	            for ( RigidBody b : bodies ) {
@@ -358,12 +352,10 @@ public class RigidBodySystem {
         vfpv.add( drawAllBoundingVolumes.getControls() );
         vfpv.add( drawBoundingVolumesUsed.getControls() );
         vfpv.add( drawCOMs.getControls() );
-        vfpv.add( drawContacts.getControls() );
         vfpv.add( drawContactGraph.getControls() );
+        vfpv.add( drawContacts.getControls() );
         vfpv.add( drawContactForces.getControls() );
 		vfpv.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
-
-        
         CollapsiblePanel cp = new CollapsiblePanel(vfpv.getPanel());
         cp.collapse();
         vfp.add( cp );

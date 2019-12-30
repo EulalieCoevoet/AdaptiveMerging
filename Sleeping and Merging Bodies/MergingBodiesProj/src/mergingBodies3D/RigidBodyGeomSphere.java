@@ -16,7 +16,7 @@ public class RigidBodyGeomSphere extends RigidBodyGeom {
      * Draws the blocks of a rigid body
      * @param drawable
      */
-    public void drawGeom( GLAutoDrawable drawable ) {    
+    public void drawGeom( GLAutoDrawable drawable ) {   
     	EasyViewer.glut.glutSolidSphere(r, 32, 32);
     }
 }

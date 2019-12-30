@@ -6,19 +6,30 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import mintools.viewer.FlatMatrix4d;
+
 /**
  * 2D rigid transformation
  * @author kry
  */
 public class RigidTransform {
+	
+	/** 
+	 * Flat matrix wrapper for transformation matrix to use with opengl 
+	 * Alternatively, we could have a toarray in this class if ever we 
+	 * wanted to split the transform into rotational and translation parts...
+	 * but they are already split into parts R and x in the rigid body.
+	 */
+	FlatMatrix4d Tflat = new FlatMatrix4d();
 
-    /** homogeneous representation of 3D transformation */
-    Matrix4d T = new Matrix4d();
+    /** homogeneous representation of 3D transformation */	
+	Matrix4d T;
     
     /** 
      * Creates a new identity transformation 
      */
     public RigidTransform() {
+    	T = Tflat.getBackingMatrix();
         T.setIdentity();
     }
     
@@ -27,6 +38,7 @@ public class RigidTransform {
      * @param R
      */
     public void set( RigidTransform R ) {
+    	T = Tflat.getBackingMatrix();
         T.set(R.T);
     }
     

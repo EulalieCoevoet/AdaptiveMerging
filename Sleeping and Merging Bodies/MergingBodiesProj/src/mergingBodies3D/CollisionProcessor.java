@@ -103,7 +103,7 @@ public class CollisionProcessor {
 			solver.warmStart = true;
 			solver.contacts = contacts;
 
-			// eulalie: this can be optimized, only new collections need an update 
+			// TODO: eulalie: this can be optimized, only new collections need an update 
 			for (Contact contact: solver.contacts)
 				contact.computeJacobian(false);
 			
@@ -137,7 +137,10 @@ public class CollisionProcessor {
 	protected void warmStart() {
 		for (Contact contact : contacts) {
 			Contact oldContact = getOldContact(contact);
-			if(oldContact != null) { 
+			if (oldContact != null) {
+				if ( oldContact.body1 != contact.body1 ) {
+					System.err.println("this is happening!");
+				}
 				contact.lambda.set(oldContact.lambda);
 				contact.prevConstraintViolation = oldContact.constraintViolation;
 				contact.newThisTimeStep = false;
@@ -228,6 +231,7 @@ public class CollisionProcessor {
 
     /**
      * Checks for collision between boundary blocks on two rigid bodies.
+     * TODO: could eliminate dcontacts by having the new CD methods create contacts directly
      * @param body1
      * @param body2
      */
@@ -354,7 +358,7 @@ public class CollisionProcessor {
 				if ( count == 1 ) {
 					System.err.println("WARNING: box-spheretree generating more than one contact?");
 				}
-				Contact contact = new Contact( body1, body2, dc.pos, dc.normal, null, null, count++, -dc.depth);
+				Contact contact = new Contact( body1, body2, dc.pos, dc.normal, null, node2.boundingSphere, count++, -dc.depth);
 	            contacts.add( contact );
 			}
 		}

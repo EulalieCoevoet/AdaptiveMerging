@@ -1,12 +1,12 @@
 <root>
 
     <body type="box" name="platform" dim="20 1 20">
-        <x> 0 10 0 </x>
+        <x> 0 0 0 </x>
         <spring pB="10 0.5 10"/>
         <spring pB="10 0.5 -10"/>
         <spring pB="-10 0.5 10"/>
         <spring pB="-10 0.5 -10"/>
-        <pinned> false </pinned>
+        <pinned> true </pinned>
     </body>
 
 
@@ -18,6 +18,7 @@
     <body type="mesh" name="torso" scale="0.75" obj="data/scaledtorso10.obj" st="data/torso_flux.sph">
         <x> 0 30 0 </x>
         <R> -1 0 0 1.57 </R>
+        <pinned> true </pinned>
     </body>
     
     <body type="sphere" name="sphere1" r="2">

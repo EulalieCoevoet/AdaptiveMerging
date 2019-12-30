@@ -11,6 +11,8 @@ import javax.vecmath.Vector3d;
 
 /*************************************************************************
  * Adapted from the ODE port to Java DxBox class, see license info below 
+ * TODO: MEMORY: consider having this class hold worker variables as 
+ * members rather than allocating on each test (memory/garbage issues?)
 /*************************************************************************
  *                                                                       *
  * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
