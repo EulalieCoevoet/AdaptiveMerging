@@ -143,7 +143,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             shadowMap.beginShadowMapping(drawable, ev.trackBall); 
             drawAllObjects( drawable, false );
             shadowMap.endShadowMapping( drawable, ev.trackBall );
-        }        
+        }
+        displayAllObjectsNonShadowable( drawable );
         if ( mouseSpring.picked != null ) {
         	gl.glPushMatrix();
         	gl.glScaled( sceneScale,sceneScale,sceneScale );
@@ -237,11 +238,20 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             gl.glDisable( GL2.GL_CLIP_PLANE0 );
         }
         
-        
         //gl.glScaled( 5,5,5 );
         //fa.draw(gl);
         gl.glPopMatrix();
     }
+    
+    private void displayAllObjectsNonShadowable( GLAutoDrawable drawable ) {
+    	GL2 gl = drawable.getGL().getGL2();
+        gl.glPushMatrix();
+        gl.glScaled( sceneScale,sceneScale,sceneScale );
+        gl.glTranslated( sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
+        system.displayNonShadowable(drawable);
+        gl.glPopMatrix();
+    }
+    
     
     /** For reading the depth of a visible pixel */
     private IntBuffer depthPixels = IntBuffer.allocate( 1 );

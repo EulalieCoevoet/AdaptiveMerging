@@ -6,6 +6,7 @@
         <spring pB="10 0.5 -10"/>
         <spring pB="-10 0.5 10"/>
         <spring pB="-10 0.5 -10"/>
+        <pinned> false </pinned>
     </body>
 
 

@@ -10,7 +10,6 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import mintools.viewer.EasyViewer;
 import mintools.viewer.FlatMatrix4d;
 import no.uib.cipr.matrix.DenseVector;
 

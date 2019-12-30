@@ -93,11 +93,6 @@ public class PlaneRigidBody extends RigidBody {
 		public void drawGeom(GLAutoDrawable drawable) {
 			GL2 gl = drawable.getGL().getGL2();
 			
-			gl.glColor4f(0f, 0f, 0f, Block.alpha);
-			
-			float[] col = new float[] { 0.75f,0.75f,1, Block.alpha };		
-			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
-			
 			float s = radius;		
 			
 			// TODO: this is really dumb and slow... 

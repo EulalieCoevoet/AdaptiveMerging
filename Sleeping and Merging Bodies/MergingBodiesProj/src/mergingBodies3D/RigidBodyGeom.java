@@ -13,9 +13,6 @@ public abstract class RigidBodyGeom {
     /** display list ID for this rigid body */
     protected int myListID = -1;
     
-    /** Colour of geometry  */
-	protected float[] colour;
-    
     /** 
      * Draws the rigid body geometry, and uses display lists to make things reasonably fast
      * @param drawable

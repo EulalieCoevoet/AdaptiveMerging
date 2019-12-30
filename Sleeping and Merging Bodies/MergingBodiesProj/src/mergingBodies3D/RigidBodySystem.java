@@ -5,8 +5,10 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+import javax.vecmath.Color3f;
 import javax.vecmath.Vector3d;
 
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -217,91 +219,114 @@ public class RigidBodySystem {
         reset();
     }
     
-    /**
-     * Draws all rigid bodies
-     * @param drawable
-     */
-    public void display( GLAutoDrawable drawable, boolean picking ) {
-        GL2 gl = drawable.getGL().getGL2();
-        if ( Block.alpha != (float) (double) transparency.getValue()) {
-            Block.alpha = (float) (double) transparency.getValue();
-            // gross... need to rebuild display lists for the currently set transparency
-            // which is potentially slow and bad news (memory thrashing) for openGL if we do this excessively!
-            // TODO: This display list stuff should probably be changed in 3D :/
-            RigidBodyGeom.clearDisplayLists( gl );
-            for ( RigidBody b : bodies ) {                
-            	b.geom.myListID = -1;
-            }
-        }        
-        // TODO: perhaps do clipping planes here instead to only clip bodies?
-        // TODO: perhaps also have cull face options?  think we want to cull to better see contacts after clipping
-        if ( drawBodies.getValue() ) {
-        	int i = 0;
-        	for ( RigidBody b : bodies ) {
-        		if ( picking ) {
-        			LCPApp3D.setColorWithID( gl, i++ );
-        		}
-                b.display( drawable );
-        	}
-        }
-        // TODO: end clipping here to continue to see other debug visualizations un-clipped..
-        // again, perhaps an option to end clipping here or at the end of all of this!
-        
-        if ( picking ) return;
-        
-        float[] red = new float[] { 1, 0, 0, 0.5f };
-        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
-        gl.glNormal3f(0,0,1);
-    	for ( RigidBody b : bodies ) {
-    		for (Spring s : b.springs) {
-				s.displaySpring(drawable);
-			}
-    	}        
-        gl.glLineWidth(1);
-        float[] blue = new float[] { 0, 0, 1, 0.25f };
-        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);
-        if ( drawBoundingVolumes.getValue() ) {
-            for ( RigidBody b : bodies ) {
-            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
-                b.root.boundingSphere.display(drawable);
-            }
-        }
-        if ( drawAllBoundingVolumes.getValue() ) {
-            for ( RigidBody b : bodies ) {
-            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
-                b.root.display( drawable );
-            }
-        }        
-        if ( drawBoundingVolumesUsed.getValue() ) {
-            for ( RigidBody b : bodies ) {
-            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
-                b.root.displayVisitBoundary( drawable, collision.visitID );
-            }
-        }
-        
-        // Should move this stuff below to a display non-shadowable function
+    public void displayNonShadowable( GLAutoDrawable drawable ) {
+    	GL2 gl = drawable.getGL().getGL2();
+        gl.glDisable(GL2.GL_DEPTH_TEST);
+
+    	// Should move this stuff below to a display non-shadowable function
         float[] green = new float[] { 0, 1, 0, 0.25f };
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, green, 0);
-//        gl.glDisable(GL2.GL_DEPTH_TEST);
-        gl.glDepthFunc( GL2.GL_GREATER );
+//        gl.glDepthFunc( GL2.GL_GREATER );
         if ( drawContactGraph.getValue() ) {
             for ( Contact c : collision.contacts ) {
                 c.displayConnection(drawable);
             }
         }
-        gl.glDepthFunc( GL2.GL_LESS);
-//        gl.glEnable(GL2.GL_DEPTH_TEST);
+  //      gl.glDepthFunc( GL2.GL_LESS);
         
         if ( drawContacts.getValue() ) {
             for ( Contact c : collision.contacts ) {
                 c.display(drawable);
+    			if (drawContactForces.getValue()) {
+    				c.displayContactForce(drawable, new Color3f(1,0,0));
+    			}
             }
         }
         if ( drawCOMs.getValue() ) {
             for ( RigidBody b : bodies ) {
                 b.displayCOM(drawable);
             }
-        }        
+        }
+        gl.glEnable(GL2.GL_DEPTH_TEST);
+    }
+    
+    /** Might want to allow for different coloured blocks?? but for now, in 3D this is easiest */
+    private float[] colourPinned = new float[] { 0.75f,0.75f,1, 1 };		        			
+	private float[] colour = new float[] { 0.9f,0.9f,0.9f, 1 };        			
+
+    /**
+     * Draws all rigid bodies
+     * @param drawable
+     */
+    public void display( GLAutoDrawable drawable, boolean picking ) {
+        GL2 gl = drawable.getGL().getGL2();
+
+        // no need to rebuild display lists for transparency...
+        
+        //        if ( Block.alpha != (float) (double) transparency.getValue()) {
+//            Block.alpha = (float) (double) transparency.getValue();
+//            // gross... need to rebuild display lists for the currently set transparency
+//            // which is potentially slow and bad news (memory thrashing) for openGL if we do this excessively!
+//            // TODO: This display list stuff should probably be changed in 3D :/
+//            RigidBodyGeom.clearDisplayLists( gl );
+//            for ( RigidBody b : bodies ) {                
+//            	b.geom.myListID = -1;
+//            }
+//        }
+        
+     // TODO: perhaps do clipping planes here instead to only clip bodies?
+        // TODO: perhaps also have cull face options?  think we want to cull to better see contacts after clipping
+        if ( drawBodies.getValue() ) {
+        	int i = 0;
+        	for ( RigidBody b : bodies ) {
+        		if ( picking ) {
+        			LCPApp3D.setColorWithID( gl, i++ );
+        		} else {
+        			// let's control the colour of geometry here as it will let us 
+        			// decide when we want to override this colour (e.g., if we have a 
+        			// rigid body collection)
+        			colour[3] = transparency.getFloatValue();
+        			colourPinned[3] = transparency.getFloatValue();
+        	    	gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, b.pinned ? colourPinned: colour, 0 );
+        		}
+                b.display( drawable );
+        	}
+        }
+        
+        // TODO: end clipping here to continue to see other debug visualizations un-clipped..
+        // again, perhaps an option to end clipping here or at the end of all of this!
+        
+        if ( ! picking ) {
+	        float[] red = new float[] { 1, 0, 0, 0.5f };
+	        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
+	        gl.glNormal3f(0,0,1);
+	    	for ( RigidBody b : bodies ) {
+	    		for (Spring s : b.springs) {
+					s.displaySpring(drawable);
+				}
+	    	}        
+	        gl.glLineWidth(1);
+	        float[] blue = new float[] { 0, 0, 1, 0.25f };
+	        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);
+	        if ( drawBoundingVolumes.getValue() ) {
+	            for ( RigidBody b : bodies ) {
+	            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
+	                b.root.boundingSphere.display(drawable);
+	            }
+	        }
+	        if ( drawAllBoundingVolumes.getValue() ) {
+	            for ( RigidBody b : bodies ) {
+	            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
+	                b.root.display( drawable );
+	            }
+	        }        
+	        if ( drawBoundingVolumesUsed.getValue() ) {
+	            for ( RigidBody b : bodies ) {
+	            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
+	                b.root.displayVisitBoundary( drawable, collision.visitID );
+	            }
+	        }	        
+        }
     }
 
     private DoubleParameter transparency = new DoubleParameter("body block transparency", 1, 0, 1 );
@@ -316,6 +341,8 @@ public class RigidBodySystem {
 	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
 	public DoubleParameter springDamping= new DoubleParameter("spring damping", 1, 0, 1000 );
 	
+	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", false );
+
     /**
      * @return control panel for the system
      */
@@ -333,6 +360,9 @@ public class RigidBodySystem {
         vfpv.add( drawCOMs.getControls() );
         vfpv.add( drawContacts.getControls() );
         vfpv.add( drawContactGraph.getControls() );
+        vfpv.add( drawContactForces.getControls() );
+		vfpv.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
+
         
         CollapsiblePanel cp = new CollapsiblePanel(vfpv.getPanel());
         cp.collapse();

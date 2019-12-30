@@ -1,16 +1,17 @@
 package mergingBodies3D;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GLAutoDrawable;
-import com.sun.javafx.text.GlyphLayout;
-
-import no.uib.cipr.matrix.DenseMatrix;
-import no.uib.cipr.matrix.DenseVector;
-
+import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+
+import mintools.parameters.DoubleParameter;
+import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.DenseVector;
 
 /**
  * Implementation of a contact constraint.
@@ -450,14 +451,34 @@ public class Contact {
         //gl.glColor4d(.7,0,0,0.15);
         float[] col = new float[] { 1f, 0, 0, 0.25f };
         gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
-        gl.glDisable( GL.GL_DEPTH_TEST );
+        //gl.glDisable( GL.GL_DEPTH_TEST );
         gl.glBegin( GL.GL_POINTS );
         gl.glVertex3d( contactW.x, contactW.y, contactW.z );
         gl.glEnd();
-        gl.glEnable( GL.GL_DEPTH_TEST );
-
+        //gl.glEnable( GL.GL_DEPTH_TEST );
     }
     
+	/**
+	 * Draws the connections between bodies to visualize the 
+	 * the adjacency structure of the matrix as a graph.
+	 * @param drawable
+	 */
+	public void displayContactForce( GLAutoDrawable drawable, Color3f color ) {
+		GL2 gl = drawable.getGL().getGL2();
+		gl.glLineWidth(2);
+		if (state == ContactState.ONEDGE)
+			gl.glColor4f(0, 0, 0, 1);
+		else
+			gl.glColor4f(color.x, color.y, color.z, 1);
+		gl.glBegin( GL.GL_LINES );
+		double scale = forceVizScale.getValue();
+		gl.glVertex3d(contactW.x + scale*forceB1.x, contactW.y+scale*forceB1.y, contactW.z+scale*forceB1.z );
+		gl.glVertex3d(contactW.x + scale*forceB2.x, contactW.y+scale*forceB2.y, contactW.z+scale*forceB2.z );		
+		gl.glEnd();
+	}
+    
+	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.0001, 1);
+
     /**
      * Draws the connections between bodies to visualize the 
      * the adjacency structure of the matrix as a graph.
