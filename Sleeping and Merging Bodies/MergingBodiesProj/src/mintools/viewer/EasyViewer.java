@@ -76,7 +76,7 @@ public class EasyViewer implements GLEventListener {
      */
     public static boolean antialiasing = false;
     
-    public static int antialiasingSamples = 2;
+    public static int antialiasingSamples = 4;
 
     /**
      * Device used for full screen mode
