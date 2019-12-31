@@ -84,17 +84,24 @@ public class Contact {
 	DenseMatrix jc = new DenseMatrix(3,12);
 	
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent1, tangent2) */
-	DenseVector lambda = new DenseVector(3);
+	//DenseVector lambda = new DenseVector(3);
+	double lambda0;
+	double lambda1;
+	double lambda2;
+	
 	
 	/** b value for normal component (used in PGS resolution) */
-	double bn = 0; 
+	double bn; 
 	/** b value for tangent1 component (used in PGS resolution) */
-	double bt1 = 0; 
+	double bt1; 
 	/** b value for tangent2 component (used in PGS resolution) */
-	double bt2 = 0; 
+	double bt2; 
 	
 	/** Diagonals of J Minv J^T TODO: should be a vector (or array size 3) since we only want the diagonals!! */
-	DenseMatrix D = new DenseMatrix(3,3); 
+	//DenseMatrix D = new DenseMatrix(3,3); 
+	double D00;
+	double D11;
+	double D22;
 	
     /**
      * Creates a new contact, and assigns it an index
@@ -129,7 +136,10 @@ public class Contact {
 		tangent1B.scale(-1, normalB);
 		tangent1B.cross(normalB, tangent2B);
 		
-		lambda.zero();
+		//lambda.zero();
+		lambda0 = 0; 
+		lambda1 = 0;
+		lambda2 = 0;
 		
         computeJacobian(true);
         computeJacobian(false);
@@ -145,7 +155,10 @@ public class Contact {
 		contactB.set(contact.contactB);	
 		j.set(contact.j);	
 		jc.set(contact.jc);	
-		lambda.set(contact.lambda);	
+		lambda0 = contact.lambda0;
+		lambda1 = contact.lambda1;
+		lambda2 = contact.lambda2;
+		//lambda.set(contact.lambda);	
 		constraintViolation = contact.constraintViolation;	
 		prevConstraintViolation = contact.prevConstraintViolation;	
 	}
@@ -256,26 +269,26 @@ public class Contact {
 		DenseMatrix j;
 
 		j = this.j; //(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
-		double f1 = lambda.get(0)*j.get(0,0) + lambda.get(1)*j.get(1,0) + lambda.get(2)*j.get(2,0);
-		double f2 = lambda.get(0)*j.get(0,1) + lambda.get(1)*j.get(1,1) + lambda.get(2)*j.get(2,1);
-		double f3 = lambda.get(0)*j.get(0,2) + lambda.get(1)*j.get(1,2) + lambda.get(2)*j.get(2,2);
+		double f1 = lambda0*j.get(0,0) + lambda1*j.get(1,0) + lambda2*j.get(2,0);
+		double f2 = lambda0*j.get(0,1) + lambda1*j.get(1,1) + lambda2*j.get(2,1);
+		double f3 = lambda0*j.get(0,2) + lambda1*j.get(1,2) + lambda2*j.get(2,2);
 		forceB1.set(f1,f2,f3);
 		forceB1.scale(1./dt);
-		f1 = lambda.get(0)*j.get(0,3) + lambda.get(1)*j.get(1,3) + lambda.get(2)*j.get(2,3);
-		f2 = lambda.get(0)*j.get(0,4) + lambda.get(1)*j.get(1,4) + lambda.get(2)*j.get(2,4);
-		f3 = lambda.get(0)*j.get(0,5) + lambda.get(1)*j.get(1,5) + lambda.get(2)*j.get(2,5);
+		f1 = lambda0*j.get(0,3) + lambda1*j.get(1,3) + lambda2*j.get(2,3);
+		f2 = lambda0*j.get(0,4) + lambda1*j.get(1,4) + lambda2*j.get(2,4);
+		f3 = lambda0*j.get(0,5) + lambda1*j.get(1,5) + lambda2*j.get(2,5);
 		torqueB1.set(f1,f2,f3);
 		torqueB1.scale(1./dt);
 
 		j = this.j; //(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
-		f1 = lambda.get(0)*j.get(0,6) + lambda.get(1)*j.get(1,6) + lambda.get(2)*j.get(2,6);
-		f2 = lambda.get(0)*j.get(0,7) + lambda.get(1)*j.get(1,7) + lambda.get(2)*j.get(2,7);
-		f3 = lambda.get(0)*j.get(0,8) + lambda.get(1)*j.get(1,8) + lambda.get(2)*j.get(2,8);
+		f1 = lambda0*j.get(0,6) + lambda1*j.get(1,6) + lambda2*j.get(2,6);
+		f2 = lambda0*j.get(0,7) + lambda1*j.get(1,7) + lambda2*j.get(2,7);
+		f3 = lambda0*j.get(0,8) + lambda1*j.get(1,8) + lambda2*j.get(2,8);
 		forceB2.set(f1,f2,f3);
 		forceB2.scale(1./dt);
-		f1 = lambda.get(0)*j.get(0,9)  + lambda.get(1)*j.get(1,9) +  lambda.get(2)*j.get(2,9);
-		f2 = lambda.get(0)*j.get(0,10) + lambda.get(1)*j.get(1,10) + lambda.get(2)*j.get(2,10);
-		f3 = lambda.get(0)*j.get(0,11) + lambda.get(1)*j.get(1,11) + lambda.get(2)*j.get(2,11);
+		f1 = lambda0*j.get(0,9)  + lambda1*j.get(1,9) +  lambda2*j.get(2,9);
+		f2 = lambda0*j.get(0,10) + lambda1*j.get(1,10) + lambda2*j.get(2,10);
+		f3 = lambda0*j.get(0,11) + lambda1*j.get(1,11) + lambda2*j.get(2,11);
 		torqueB2.set(f1,f2,f3);
 		torqueB2.scale(1./dt);
 	}
@@ -353,6 +366,11 @@ public class Contact {
 		bn += baumgarteFeedback;
 	}
 	
+	
+	/** THREADS: not threadsafe, but feels gross to allocate more temporary computation objects into the object itself */
+	static private Vector3d tmp1 = new Vector3d();
+	static private Vector3d tmp2 = new Vector3d();
+	
 	/**
 	 * Compute Dii values and store in contact
 	 * @param computeInCollection
@@ -367,45 +385,84 @@ public class Contact {
 		double m2inv = b2.minv;//(b2.temporarilyPinned)? 0: b2.minv;
 		Matrix3d j1inv = b1.jinv;//(b1.temporarilyPinned)? 0: b1.jinv;
 		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
-		DenseMatrix j, j1, j2;
 		
-		DenseMatrix Minv = new DenseMatrix(12,12);
-		
-		// TODO: SLOW: eulalie: could be optimized
-		
-		Minv.set(0, 0, m1inv);
-		Minv.set(1, 1, m1inv);
-		Minv.set(2, 2, m1inv);
+		DenseMatrix j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
+		DenseMatrix j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
 
-		for (int k=0; k<3; k++)
-			for (int l=0; l<3; l++)
-				Minv.set(3+k, 3+l, j1inv.getElement(k, l));
-		
-		Minv.set(6, 6, m2inv);
-		Minv.set(7, 7, m2inv);
-		Minv.set(8, 8, m2inv);
-		
-		for (int k=0; k<3; k++)
-			for (int l=0; l<3; l++)
-				Minv.set(9+k, 9+l, j2inv.getElement(k, l));
+		// Code below could have been done in a loop, but unrolled like this we
+		// can also avoid the bounds checking (not j should probably be broken down into basic variables 
+		tmp1.set( j1.get(0,0), j1.get(0,1), j1.get(0,2) );
+		D00 = m1inv * tmp1.dot(tmp1);
+		tmp1.set( j1.get(0,3), j1.get(0,4), j1.get(0,5) );
+		j1inv.transform(tmp1, tmp2);
+		D00 += tmp1.dot( tmp2 );
+		tmp1.set( j2.get(0,6), j2.get(0,7), j2.get(0,8) );
+		D00 += m2inv * tmp1.dot(tmp1);
+		tmp1.set( j2.get(0,9), j2.get(0,10), j2.get(0,11) );
+		j2inv.transform(tmp1, tmp2);
+		D00 += tmp1.dot( tmp2 );
 
-		j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
-		j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
+		tmp1.set( j1.get(1,0), j1.get(1,1), j1.get(1,2) );
+		D11 = m1inv * tmp1.dot(tmp1);
+		tmp1.set( j1.get(1,3), j1.get(1,4), j1.get(1,5) );
+		j1inv.transform(tmp1, tmp2);
+		D11 += tmp1.dot( tmp2 );
+		tmp1.set( j2.get(1,6), j2.get(1,7), j2.get(1,8) );
+		D11 += m2inv * tmp1.dot(tmp1);
+		tmp1.set( j2.get(1,9), j2.get(1,10), j2.get(1,11) );
+		j2inv.transform(tmp1, tmp2);
+		D11 += tmp1.dot( tmp2 );
+
+		tmp1.set( j1.get(2,0), j1.get(2,1), j1.get(2,2) );
+		D22 = m1inv * tmp1.dot(tmp1);
+		tmp1.set( j1.get(2,3), j1.get(2,4), j1.get(2,5) );
+		j1inv.transform(tmp1, tmp2);
+		D22 += tmp1.dot( tmp2 );
+		tmp1.set( j2.get(2,6), j2.get(2,7), j2.get(2,8) );
+		D22 += m2inv * tmp1.dot(tmp1);
+		tmp1.set( j2.get(2,9), j2.get(2,10), j2.get(2,11) );
+		j2inv.transform(tmp1, tmp2);
+		D22 += tmp1.dot( tmp2 );
 		
-		j = new DenseMatrix(3,12);
-		for (int k=0; k<3; k++)
-			for (int l=0; l<6; l++)
-				j.set(k, l, j1.get(k, l));
-		for (int k=0; k<3; k++) {
-			for (int l=0; l<6; l++) {
-				//j.set(k, 6+l, j2.get(k, l));  // BUG? don't we want 6+l? or do we really want l ?
-				j.set(k, 6+l, j2.get(k, 6+l));  
-			}
-		}
-	
-		DenseMatrix MinvJT = new DenseMatrix(12,3);
-		Minv.transBmult(j, MinvJT);
-		j.mult(MinvJT, D); // TODO: SLOW: only want diagonals... compute them properly!
+//		DenseMatrix j, j1, j2;
+//		
+//		DenseMatrix Minv = new DenseMatrix(12,12);
+//		
+//		// TODO: SLOW: eulalie: could be optimized
+//		
+//		Minv.set(0, 0, m1inv);
+//		Minv.set(1, 1, m1inv);
+//		Minv.set(2, 2, m1inv);
+//
+//		for (int k=0; k<3; k++)
+//			for (int l=0; l<3; l++)
+//				Minv.set(3+k, 3+l, j1inv.getElement(k, l));
+//		
+//		Minv.set(6, 6, m2inv);
+//		Minv.set(7, 7, m2inv);
+//		Minv.set(8, 8, m2inv);
+//		
+//		for (int k=0; k<3; k++)
+//			for (int l=0; l<3; l++)
+//				Minv.set(9+k, 9+l, j2inv.getElement(k, l));
+//
+//		j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
+//		j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
+//		
+//		j = new DenseMatrix(3,12);
+//		for (int k=0; k<3; k++)
+//			for (int l=0; l<6; l++)
+//				j.set(k, l, j1.get(k, l));
+//		for (int k=0; k<3; k++) {
+//			for (int l=0; l<6; l++) {
+//				//j.set(k, 6+l, j2.get(k, l));  // BUG? don't we want 6+l? or do we really want l ?
+//				j.set(k, 6+l, j2.get(k, 6+l));  
+//			}
+//		}
+//	
+//		DenseMatrix MinvJT = new DenseMatrix(12,3);
+//		Minv.transBmult(j, MinvJT);
+//		j.mult(MinvJT, D); // TODO: SLOW: only want diagonals... compute them properly!
 	}
 	
 	/**
@@ -445,9 +502,9 @@ public class Contact {
 	 * @param mu
 	 */
 	protected void updateContactState(double mu) {
-		if (Math.abs(lambda.get(0)) <= 1e-14) // (math.abs is for magnet)
+		if (Math.abs(lambda0) <= 1e-14) // (math.abs is for magnet)
 			state = ContactState.BROKEN;	
-		else if (Math.sqrt(lambda.get(1)*lambda.get(1) + lambda.get(2)*lambda.get(2)) == lambda.get(0)*mu) 
+		else if (Math.sqrt(lambda1*lambda1 + lambda2*lambda2) == lambda0*mu) 
 			state = ContactState.ONEDGE;
 		else
 			state = ContactState.CLEAR;

@@ -141,7 +141,10 @@ public class CollisionProcessor {
 				if ( oldContact.body1 != contact.body1 ) {
 					System.err.println("this is happening!");
 				}
-				contact.lambda.set(oldContact.lambda);
+				contact.lambda0 = oldContact.lambda0;
+				contact.lambda1 = oldContact.lambda1;
+				contact.lambda2 = oldContact.lambda2;
+//				contact.lambda.set(oldContact.lambda);
 				contact.prevConstraintViolation = oldContact.constraintViolation;
 				contact.newThisTimeStep = false;
 			} else {

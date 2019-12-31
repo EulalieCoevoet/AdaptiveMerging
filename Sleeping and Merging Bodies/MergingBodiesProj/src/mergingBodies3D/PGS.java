@@ -88,15 +88,15 @@ public class PGS {
 				
 				// Normal direction
 				double Jdvn = contact.getJdv(computeInCollection,0);
-				double prevLambda_n = contact.lambda.get(0);
-				contact.lambda.set(0, (contact.D.get(0,0)*contact.lambda.get(0) - contact.bn - Jdvn)/(contact.D.get(0,0)+compliance));
+				double prevLambda_n = contact.lambda0;
+				contact.lambda0 = (contact.D00 * contact.lambda0 - contact.bn - Jdvn)/(contact.D00+compliance);
 				
 				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active				
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) 
-					contact.lambda.set(0, Math.max(0., contact.lambda.get(0)));
+					contact.lambda0 = Math.max( 0, contact.lambda0 );
 				
 				l.zero();
-				l.set(0, contact.lambda.get(0) - prevLambda_n);
+				l.set(0, contact.lambda0 - prevLambda_n);
 				// TODO: SLOW!!: should only update the 12 components of delta v based on what just 
 				// got updated... this approach is very slow!
 				updateDeltaV(contact, l);
@@ -114,32 +114,32 @@ public class PGS {
 				
 				// Tangential1 direction
 				double Jdvt1 = contact.getJdv(computeInCollection,1);
-				double prevLambda_t1 = contact.lambda.get(1);
-				contact.lambda.set(1, (contact.D.get(1,1)*contact.lambda.get(1) - contact.bt1 - Jdvt1)/(contact.D.get(1,1)+compliance));
+				double prevLambda_t1 = contact.lambda1;
+				contact.lambda1 = (contact.D11*contact.lambda1 - contact.bt1 - Jdvt1)/(contact.D11+compliance);
 				
 				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
-					contact.lambda.set(1, Math.max(contact.lambda.get(1), -mu*contact.lambda.get(0)));
-					contact.lambda.set(1, Math.min(contact.lambda.get(1), mu*contact.lambda.get(0)));
+					contact.lambda1 = Math.max(contact.lambda1, -mu*contact.lambda0);
+					contact.lambda1 = Math.min(contact.lambda1, mu*contact.lambda0);
 				}
 				
 				l.zero();
-				l.set(1, contact.lambda.get(1) - prevLambda_t1);
+				l.set(1, contact.lambda1 - prevLambda_t1);
 				updateDeltaV(contact, l);
 				
 				// Tangential2 direction
 				double Jdvt2 = contact.getJdv(computeInCollection,2);
-				double prevLambda_t2 = contact.lambda.get(2);
-				contact.lambda.set(2, (contact.D.get(2,2)*contact.lambda.get(2) - contact.bt2 - Jdvt2)/(contact.D.get(2,2)+compliance));
+				double prevLambda_t2 = contact.lambda2;
+				contact.lambda2 = (contact.D22*contact.lambda2 - contact.bt2 - Jdvt2)/(contact.D22+compliance);
 				
 				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
-					contact.lambda.set(2, Math.max(contact.lambda.get(2), -mu*contact.lambda.get(0)));
-					contact.lambda.set(2, Math.min(contact.lambda.get(2), mu*contact.lambda.get(0)));
+					contact.lambda2 = Math.max(contact.lambda2, -mu*contact.lambda0);
+					contact.lambda2 = Math.min(contact.lambda2, mu*contact.lambda0);
 				}
 
 				l.zero();
-				l.set(2, contact.lambda.get(2) - prevLambda_t2);
+				l.set(2, contact.lambda2 - prevLambda_t2);
 				updateDeltaV(contact, l);
 				
 				if (iter == 1) // TODO: weird way to do a post process?
@@ -201,8 +201,12 @@ public class PGS {
 	 * Warm start if the confidence that each contact already has a value for lambda
 	 */
 	protected void confidentWarmStart() {
-		for (Contact contact : contacts) {		
-			updateDeltaV(contact, contact.lambda);	
+		DenseVector l = new DenseVector(3);
+		for (Contact contact : contacts) {	
+			l.set(0, contact.lambda0 );
+			l.set(1, contact.lambda1 );
+			l.set(2, contact.lambda2 );
+			updateDeltaV( contact, l );	// TODO: update this to 3 calls to update each individually...
 		}
 	}
 }
