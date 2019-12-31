@@ -40,35 +40,29 @@ public class Contact {
 	/** Information to help in warm starts by allowing contacts between bodies across time steps to be matched */
 	int info;
     
-	// TODO: SLOTH: Why are these quantites in body coordinates?  
-	// They are known in the world and I'm not sure they are ever needed in body coordinates!  :(
-	
     /** Contact normal in body1 coordinates */
-	private Vector3d normalB = new Vector3d();
+	private Vector3d normalW = new Vector3d();
     
     /** Contact tangent1 in body1 coordinates */
-    private Vector3d tangent1B = new Vector3d();
+    private Vector3d tangent1W = new Vector3d();
     
     /** Contact tangent2 in body1 coordinates */
-    private Vector3d tangent2B = new Vector3d();
+    private Vector3d tangent2W = new Vector3d();
     
-	/** Contact force being applied by this contact on body1*/
-    private Vector3d forceB1 = new Vector3d();
+	/** Contact force being applied by this contact on body1 (note this is world aligned at body COM) */
+    private Vector3d forceW1 = new Vector3d();
 
-	/** Contact torque being applied by this contact on body1*/
-    private Vector3d torqueB1 = new Vector3d();
+	/** Contact torque being applied by this contact on body1 */
+    private Vector3d torqueW1 = new Vector3d();
 
-	/** Contact force being applied by this contact on body2*/
-    private Vector3d forceB2 = new Vector3d();
+	/** Contact force being applied by this contact on body2 (note this is world aligned at body COM) */
+    private Vector3d forceW2 = new Vector3d();
 
-	/** Contact torque being applied by this contact on body2*/
-    private Vector3d torqueB2 = new Vector3d();
+	/** Contact torque being applied by this contact on body2 */
+    private Vector3d torqueW2 = new Vector3d();
     
     /** Position of contact point in world coordinates */
     private Point3d contactW = new Point3d();
-    
-    /** Position of contact point in body1 coordinates */
-    private Point3d contactB = new Point3d();
     
 	/** vector points from body 2 to body 1, magnitude is the amount of overlap.*/
 	double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
@@ -98,8 +92,7 @@ public class Contact {
 	/** b value for tangent2 component (used in PGS resolution) */
 	double bt2; 
 	
-	/** Diagonals of J Minv J^T TODO: should be a vector (or array size 3) since we only want the diagonals!! */
-	//DenseMatrix D = new DenseMatrix(3,3); 
+	/** Diagonals of J Minv J^T  */
 	double D00;
 	double D11;
 	double D22;
@@ -108,8 +101,8 @@ public class Contact {
      * Creates a new contact, and assigns it an index
      * @param body1
      * @param body2
-     * @param contactW
-     * @param normal
+     * @param contactW	in world coordinates
+     * @param normal	in world woordinates
      */
     public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {
         this.body1 = body1;
@@ -121,26 +114,23 @@ public class Contact {
 		this.constraintViolation =  constraintViolation;     
         index = nextContactIndex++;     
         
-        contactB.set(contactW);
-        body1.transformW2B.transform(contactB);
-        
-		normalB.set(normal);
-		body1.transformW2B.transform(normalB);
+		this.normalW.set(normal);
 
+		double anx = Math.abs( normalW.x );
+		double any = Math.abs( normalW.y );
+		double anz = Math.abs( normalW.z );
+		if ( anx < any && anx < anz ) {
+			tangent1W.set( 1, 0, 0 );
+		} else if ( any < anz ) {
+			tangent1W.set( 0, 1, 0 );
+		} else {
+			tangent1W.set( 0, 0, 1 );
+		}
 		
-		
-		// TODO: FIX ME this will fail for vector (1,1,1) normalized... 
-		// instead choose min component and cross with x y or z accordingly
-		// TODO: MEMORY
-		
-		tangent1B.set( normalB.z, normalB.x, normalB.y );
-		tangent2B = new Vector3d();
-		tangent2B.cross(normalB, tangent1B);
-		tangent2B.normalize();
-		tangent1B.scale(-1, normalB);
-		tangent1B.cross(normalB, tangent2B);
-		
-		//lambda.zero();
+		tangent2W.cross( normalW, tangent1W );
+		tangent2W.normalize();
+		tangent1W.cross( tangent2W,  normalW );  // and doesn't need normalization 
+
 		lambda0 = 0; 
 		lambda1 = 0;
 		lambda2 = 0;
@@ -148,24 +138,6 @@ public class Contact {
         computeJacobian(true);
         computeJacobian(false);
     }
-    
-	public Contact(Contact contact) {		
-		body1 = contact.body1;	
-		body2 = contact.body2;	
-		normalB.set(contact.normalB);   	
-		tangent1B.set(contact.tangent1B);   	
-		tangent2B.set(contact.tangent2B);	
-		contactW.set(contact.contactW);	
-		contactB.set(contact.contactB);	
-		j.set(contact.j);	
-		jc.set(contact.jc);	
-		lambda0 = contact.lambda0;
-		lambda1 = contact.lambda1;
-		lambda2 = contact.lambda2;
-		//lambda.set(contact.lambda);	
-		constraintViolation = contact.constraintViolation;	
-		prevConstraintViolation = contact.prevConstraintViolation;	
-	}
     
     /**
 	 * Computes the Jacobian matrix of the contact.
@@ -175,96 +147,73 @@ public class Contact {
 				
 		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection )? body1.parent: body1;
 		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection )? body2.parent: body2;
-
-	    Vector3d normal = new Vector3d(); // TODO MEMORY (here and below)
-	    Vector3d tangent1 = new Vector3d();
-	    Vector3d tangent2 = new Vector3d();
+	    
+		r1.sub( contactW, b1.x );
+		r2.sub( contactW, b2.x );
 		
-	    
-	    // these were all in world coordinates before... why are in they in body coords now :(
-	    
-		body1.transformB2W.transform(contactB, contactW);
-		body1.transformB2W.transform(normalB, normal);
-		body1.transformB2W.transform(tangent1B, tangent1);
-		body1.transformB2W.transform(tangent2B, tangent2);
-
 		// Normal direction for both bodies
-		Vector3d r1 = new Vector3d();
-		Vector3d r2 = new Vector3d();
-
-		r1.sub(contactW, b1.x);
-		r2.sub(contactW, b2.x);
+				
+		DenseMatrix j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
+		j.set(0, 0, -normalW.x);
+		j.set(0, 1, -normalW.y);
+		j.set(0, 2, -normalW.z);
 		
-		Vector3d rn1 = new Vector3d();
-		Vector3d rn2 = new Vector3d();
-		rn1.cross(r1, normal);
-		rn2.cross(r2, normal);
-		
-		DenseMatrix j;
-		
-		j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
-		j.set(0, 0, -normal.x);
-		j.set(0, 1, -normal.y);
-		j.set(0, 2, -normal.z);
-		
-		j.set(0, 3, -rn1.x);
-		j.set(0, 4, -rn1.y);
-		j.set(0, 5, -rn1.z);
+		tmp1.cross( r1,  normalW );
+		j.set(0, 3, -tmp1.x);
+		j.set(0, 4, -tmp1.y);
+		j.set(0, 5, -tmp1.z);
 
 		j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
-		j.set(0, 6, normal.x);
-		j.set(0, 7, normal.y);  // HELP... is this getting overridden somewhere?  I'm seeing some funy signs in this matrix later on...
-		j.set(0, 8, normal.z);
+		j.set(0, 6, normalW.x);
+		j.set(0, 7, normalW.y);  // HELP... is this getting overridden somewhere?  I'm seeing some funy signs in this matrix later on...
+		j.set(0, 8, normalW.z);
 		
-		j.set(0, 9, rn2.x);
-		j.set(0, 10, rn2.y);
-		j.set(0, 11, rn2.z);
+		tmp1.cross(r2, normalW);
+		j.set(0, 9, tmp1.x);
+		j.set(0, 10, tmp1.y);
+		j.set(0, 11, tmp1.z);
 		
 		// Tangential direction for both bodies
-		Vector3d rt1 = new Vector3d();
-		Vector3d rt2 = new Vector3d();
-		rt1.cross(r1, tangent1);
-		rt2.cross(r2, tangent1);
 		
 		j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
-		j.set(1, 0, -tangent1.x);
-		j.set(1, 1, -tangent1.y);
-		j.set(1, 2, -tangent1.z);
+		j.set(1, 0, -tangent1W.x);
+		j.set(1, 1, -tangent1W.y);
+		j.set(1, 2, -tangent1W.z);
 		
-		j.set(1, 3, -rt1.x);
-		j.set(1, 4, -rt1.y);
-		j.set(1, 5, -rt1.z);
+		tmp1.cross(r1, tangent1W);
+		j.set(1, 3, -tmp1.x);
+		j.set(1, 4, -tmp1.y);
+		j.set(1, 5, -tmp1.z);
 
 		j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
-		j.set(1, 6, tangent1.x);
-		j.set(1, 7, tangent1.y);
-		j.set(1, 8, tangent1.z);
+		j.set(1, 6, tangent1W.x);
+		j.set(1, 7, tangent1W.y);
+		j.set(1, 8, tangent1W.z);
 		
-		j.set(1, 9, rt2.x);
-		j.set(1, 10, rt2.y);
-		j.set(1, 11, rt2.z);
-		
-		rt1.cross(r1, tangent2);
-		rt2.cross(r2, tangent2);
+		tmp1.cross(r2, tangent1W);		
+		j.set(1, 9, tmp1.x);
+		j.set(1, 10, tmp1.y);
+		j.set(1, 11, tmp1.z);
 		
 		j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
-		j.set(2, 0, -tangent2.x);
-		j.set(2, 1, -tangent2.y);
-		j.set(2, 2, -tangent2.z);
-		
-		j.set(2, 3, -rt1.x);
-		j.set(2, 4, -rt1.y);
-		j.set(2, 5, -rt1.z);
+		j.set(2, 0, -tangent2W.x);
+		j.set(2, 1, -tangent2W.y);
+		j.set(2, 2, -tangent2W.z);
+
+		tmp1.cross(r1, tangent2W);
+		j.set(2, 3, -tmp1.x);
+		j.set(2, 4, -tmp1.y);
+		j.set(2, 5, -tmp1.z);
 
 		j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
-		j.set(2, 6, tangent2.x);
-		j.set(2, 7, tangent2.y);
-		j.set(2, 8, tangent2.z);
-		
-		j.set(2, 9, rt2.x);
-		j.set(2, 10, rt2.y);
-		j.set(2, 11, rt2.z);
-		
+		j.set(2, 6, tangent2W.x);
+		j.set(2, 7, tangent2W.y);
+		j.set(2, 8, tangent2W.z);
+
+		tmp1.cross(r2, tangent2W);		
+		j.set(2, 9, tmp1.x);
+		j.set(2, 10, tmp1.y);
+		j.set(2, 11, tmp1.z);
 	}
 	
 	/**
@@ -279,25 +228,25 @@ public class Contact {
 		double f1 = lambda0*j.get(0,0) + lambda1*j.get(1,0) + lambda2*j.get(2,0);
 		double f2 = lambda0*j.get(0,1) + lambda1*j.get(1,1) + lambda2*j.get(2,1);
 		double f3 = lambda0*j.get(0,2) + lambda1*j.get(1,2) + lambda2*j.get(2,2);
-		forceB1.set(f1,f2,f3);
-		forceB1.scale(1./dt);
+		forceW1.set(f1,f2,f3);
+		forceW1.scale(1./dt);
 		f1 = lambda0*j.get(0,3) + lambda1*j.get(1,3) + lambda2*j.get(2,3);
 		f2 = lambda0*j.get(0,4) + lambda1*j.get(1,4) + lambda2*j.get(2,4);
 		f3 = lambda0*j.get(0,5) + lambda1*j.get(1,5) + lambda2*j.get(2,5);
-		torqueB1.set(f1,f2,f3);
-		torqueB1.scale(1./dt);
+		torqueW1.set(f1,f2,f3);
+		torqueW1.scale(1./dt);
 
 		j = this.j; //(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
 		f1 = lambda0*j.get(0,6) + lambda1*j.get(1,6) + lambda2*j.get(2,6);
 		f2 = lambda0*j.get(0,7) + lambda1*j.get(1,7) + lambda2*j.get(2,7);
 		f3 = lambda0*j.get(0,8) + lambda1*j.get(1,8) + lambda2*j.get(2,8);
-		forceB2.set(f1,f2,f3);
-		forceB2.scale(1./dt);
+		forceW2.set(f1,f2,f3);
+		forceW2.scale(1./dt);
 		f1 = lambda0*j.get(0,9)  + lambda1*j.get(1,9) +  lambda2*j.get(2,9);
 		f2 = lambda0*j.get(0,10) + lambda1*j.get(1,10) + lambda2*j.get(2,10);
 		f3 = lambda0*j.get(0,11) + lambda1*j.get(1,11) + lambda2*j.get(2,11);
-		torqueB2.set(f1,f2,f3);
-		torqueB2.scale(1./dt);
+		torqueW2.set(f1,f2,f3);
+		torqueW2.scale(1./dt);
 	}
 	
 	/**
@@ -377,7 +326,9 @@ public class Contact {
 	/** THREADS: not threadsafe, but feels gross to allocate more temporary computation objects into the object itself */
 	static private Vector3d tmp1 = new Vector3d();
 	static private Vector3d tmp2 = new Vector3d();
-	
+	static private Vector3d r1 = new Vector3d();
+	static private Vector3d r2 = new Vector3d();
+
 	/**
 	 * Compute Dii values and store in contact
 	 * @param computeInCollection
@@ -508,8 +459,8 @@ public class Contact {
 			gl.glColor4f(color.x, color.y, color.z, 1);
 		gl.glBegin( GL.GL_LINES );
 		double scale = forceVizScale.getValue();
-		gl.glVertex3d(contactW.x + scale*forceB1.x, contactW.y+scale*forceB1.y, contactW.z+scale*forceB1.z );
-		gl.glVertex3d(contactW.x + scale*forceB2.x, contactW.y+scale*forceB2.y, contactW.z+scale*forceB2.z );		
+		gl.glVertex3d(contactW.x + scale*forceW1.x, contactW.y+scale*forceW1.y, contactW.z+scale*forceW1.z );
+		gl.glVertex3d(contactW.x + scale*forceW2.x, contactW.y+scale*forceW2.y, contactW.z+scale*forceW2.z );		
 		gl.glEnd();
 	}
     
