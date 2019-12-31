@@ -14,7 +14,6 @@ import javax.vecmath.Vector3d;
 import mergingBodies3D.collision.BoxBox;
 import mergingBodies3D.collision.BoxPlane;
 import mergingBodies3D.collision.BoxSphere;
-import mergingBodies3D.collision.DContactGeom;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
@@ -193,13 +192,11 @@ public class CollisionProcessor {
         }        
     }
 
-    private ArrayList<DContactGeom> dcontacts = new ArrayList<DContactGeom>();
     double[] depth = new double[1];
     int [] rc = new int[1];
 
     /**
      * Checks for collision between boundary blocks on two rigid bodies.
-     * TODO: could eliminate dcontacts by having the new CD methods create contacts directly
      * @param body1
      * @param body2
      */
@@ -210,7 +207,6 @@ public class CollisionProcessor {
 				System.err.println("plane plane collision is impossible!");
 			} else if ( body2.geom instanceof RigidBodyGeomBox ) { // box plane
 				RigidBodyGeomBox g2 = (RigidBodyGeomBox) body2.geom;
-				dcontacts.clear();
 				BoxPlane.dBoxPlane(body2, g2.size, b1, b1.n, b1.d, contacts, contactPool );
 			} else {  // spheretree plane
 				collideSphereTreeAndPlane( body2.root, body2, (PlaneRigidBody) body1 ); 
@@ -219,13 +215,7 @@ public class CollisionProcessor {
 			RigidBodyGeomBox g1 = (RigidBodyGeomBox) body1.geom;
 			if ( body2 instanceof PlaneRigidBody ) { // box plane
 				PlaneRigidBody b2 = (PlaneRigidBody) body2;
-				dcontacts.clear();
 				BoxPlane.dBoxPlane(body1, g1.size, b2, b2.n, b2.d, contacts, contactPool );
-				for ( DContactGeom dc : dcontacts ) {
-		            Contact contact = contactPool.get(); 
-		            contact.set( body2, body1, dc.pos, b2.n, null, null, dc.info, -dc.depth);
-		            contacts.add( contact );
-		        }					
 			} else if ( body2.geom instanceof RigidBodyGeomBox ) {
 				RigidBodyGeomBox g2 = (RigidBodyGeomBox) body2.geom;
 				BoxBox.dBoxBox(body1,g1.size,body2, g2.size, normal, depth, rc, contacts, contactPool );
@@ -235,8 +225,7 @@ public class CollisionProcessor {
 		} else { // all others have a sphere tree
 			if ( body2 instanceof PlaneRigidBody ) {
 				collideSphereTreeAndPlane( body1.root, body1, (PlaneRigidBody) body2 );
-			} else if ( body2.geom instanceof RigidBodyGeomBox ) {
-				// box spheretree
+			} else if ( body2.geom instanceof RigidBodyGeomBox ) { // box spheretree
 				collideBoxAndSphereTree( (RigidBodyGeomBox) body2.geom, body1.root, body2, body1 );
 			} else {
 				collideSphereTrees(body1.root, body2.root, body1, body2);
@@ -302,20 +291,7 @@ public class CollisionProcessor {
 				collideBoxAndSphereTree( geom1, child, body1, body2 );
 			}
 		} else { // this is a leaf! we are colliding for real!
-			dcontacts.clear();
 			BoxSphere.dBoxSphere(body1, geom1.size, body2, node2.boundingSphere.cW, node2.boundingSphere.r, contacts, contactPool );
-//			// there will only ever be one contact in this case... 
-//			// and this should probably *always* happen if the test above is checking all cases, but would still
-//			// fail if we let the test above be a bit more conservative...
-//			int count = 0;
-//			for ( DContactGeom dc : dcontacts ) {
-//				if ( count == 1 ) {
-//					System.err.println("WARNING: box-spheretree generating more than one contact?");
-//				}
-//				Contact contact = contactPool.get(); 
-//	            contact.set( body1, body2, dc.pos, dc.normal, null, node2.boundingSphere, count++, -dc.depth);
-//	            contacts.add( contact );
-//			}
 		}
 	}
 	

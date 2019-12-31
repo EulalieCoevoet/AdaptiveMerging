@@ -95,7 +95,6 @@ public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 		EasyViewer.glut.glutWireCube(1);
 		gl.glPopMatrix();
 				
-		// TODO: this is really dumb and slow... 
 		Vector3d tmp = new Vector3d(0,0,1);
 		Vector3d axis = new Vector3d();
 		axis.cross( tmp, n );
