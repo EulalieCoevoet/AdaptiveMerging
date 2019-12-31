@@ -10,6 +10,9 @@ import mergingBodies3D.RigidTransform;
 
 public class BoxPlane {
 
+	private static Vector3d p = new Vector3d();
+	private static Point3d q = new Point3d();
+
 	/** 
 	 * Collides box with plane
 	 * @param TB2W  box's transform from body to world
@@ -20,9 +23,7 @@ public class BoxPlane {
 	 */
 	public static int dBoxPlane( RigidTransform TB2W, Vector3d size, Vector3d n, double d, ArrayList<DContactGeom> contacts ) {
 		//RigidTransform TB2W = new RigidTransform();
-		Vector3d p = new Vector3d();
 		p.scale( 0.5, size );
-		Point3d q = new Point3d();
 		int numContacts = contacts.size();
 		double s;
 		// we store the corner ID for warm starts...
