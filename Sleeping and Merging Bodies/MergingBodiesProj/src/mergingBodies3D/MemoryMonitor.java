@@ -22,11 +22,6 @@ public class MemoryMonitor {
 		this.title = title;
 		this.xLabel = xLabel;
 	}
-
-	public void reset() {
-		pos = 0;
-		max = 0;
-	}
 	
 	public void add( double v ) {
 		data[pos] = v;

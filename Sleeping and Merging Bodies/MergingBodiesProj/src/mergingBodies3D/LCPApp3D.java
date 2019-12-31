@@ -212,6 +212,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         stringBuilder.append( "Filterd memory delta = "); stringBuilder.append( (int) filteredUsedMem ); stringBuilder.append( " KB \n" );
         
     	memMonitor.add( memDelta );
+    	computeTimeMonitor.add( system.computeTime );
 
         if ( ! hideOverlay.getValue() ) {
         	EasyViewer.printTextLines( drawable, stringBuilder.toString(), 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
@@ -223,6 +224,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         }
         if ( drawMemoryMonitor.getValue() ) {
         	memMonitor.draw( drawable, 0 );
+        	computeTimeMonitor.draw( drawable, 1);
         }
         
         if ( run.getValue() || stepped ) {
@@ -239,6 +241,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     }
     
     private MemoryMonitor memMonitor = new MemoryMonitor( "memory", "step");
+    private MemoryMonitor computeTimeMonitor = new MemoryMonitor( "compute time", "step");
     private long lastUsedMem = -1;
     private double filteredUsedMem = 0;
     private long memDelta = 0;
@@ -565,7 +568,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         } else {
             system.reset();
         }
-        memMonitor.reset();
     }
     
     private boolean deleteDisplayListRequest = false;

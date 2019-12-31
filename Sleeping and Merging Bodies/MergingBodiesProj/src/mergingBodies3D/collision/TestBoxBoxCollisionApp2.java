@@ -92,7 +92,7 @@ public class TestBoxBoxCollisionApp2 implements SceneGraphNode{
 		int cnum2 = 0;
 		boolean died = false;
 		try {
-			cnum2 = BoxBox.dBoxBox( p1v, R1t, size1, p2v, R2t, size2, normal2, depth2, return_code2, flags, contacts2, skip );
+			cnum2 = BoxBox.dBoxBox( p1v, R1t, size1, p2v, R2t, size2, normal2, depth2, return_code2, contacts2, skip );
 		} catch ( Exception e ) {
 			died = true;
 		}

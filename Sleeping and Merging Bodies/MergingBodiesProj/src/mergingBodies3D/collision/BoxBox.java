@@ -81,16 +81,17 @@ public class BoxBox {
 		v1.z = R.m02*v2.x + R.m12*v2.y + R.m22*v2.z;
 	}
 	
+	/** Working variables for various DOT routines */
+	private static Vector3d v1 = new Vector3d(); 
+	private static Vector3d v2 = new Vector3d();
+
 	private static double dDOT44(Matrix3d a, int o1, Matrix3d b, int o2) {
-		Vector3d v1 = new Vector3d(); // JIT should optimize this to be stack allocated.
-		Vector3d v2 = new Vector3d();
 		a.getColumn(o1, v1);
 		b.getColumn(o2, v2);
 		return v1.dot(v2);
 	}
 	
 	private static double dDOT41(Matrix3d a, int o1, Vector3d b) {
-		Vector3d v1 = new Vector3d();
 		a.getColumn(o1,v1);
 		return v1.dot(b);
 	}
@@ -111,7 +112,6 @@ public class BoxBox {
 	 * @return
 	 */
 	private static double dDOT14(Vector3d a, Matrix3d b, int o2)  {
-		Vector3d v1 = new Vector3d();
 		b.getColumn( o2, v1 );
 		return a.dot(v1);
 	}
@@ -119,6 +119,9 @@ public class BoxBox {
 	//****************************************************************************
 	// box-box collision utility
 
+
+	/** for intersectRectQuad */
+	private static double[] buffer = new double[16];
 
 	// find all the intersection points between the 2D rectangle with vertices
 	// at (+/-h[0],+/-h[1]) and the 2D quadrilateral with vertices (p[0],p[1]),
@@ -133,7 +136,6 @@ public class BoxBox {
 		// q (and r) contain nq (and nr) coordinate points for the current (and
 		// chopped) polygons
 		int nq=4,nr = 0;
-		double[] buffer = new double[16];
 		//  double *q = p;
 		//  double *r = ret;
 		double[] r = ret;
@@ -203,6 +205,10 @@ public class BoxBox {
 
 	private static boolean dNODEBUG = false;
 
+	/** For cullPoints */
+	private static double[] Acp = new double[8];
+	private static int[] avail = new int[8];
+
 	/**
 	 * given n points in the plane (array p, of size 2*n), generate m points that
 	 * best represent the whole set. the definition of 'best' here is not
@@ -240,17 +246,15 @@ public class BoxBox {
 		}
 
 		// compute the angle of each point w.r.t. the centroid
-		double[] A = new double[8];
-		for (i=0; i<n; i++) A[i] = Math.atan2(p[i*2+1]-cy,p[i*2]-cx);
+		for (i=0; i<n; i++) Acp[i] = Math.atan2(p[i*2+1]-cy,p[i*2]-cx);
 
 		// search for points that have angles closest to A[i0] + i*(2*pi/m).
-		int[] avail = new int[8];
 		for (i=0; i<n; i++) avail[i] = 1;
 		avail[i0] = 0;
 		iretA[iretP] = i0;//iret[0] = i0;
 		iretP++;//iret++;
 		for (j=1; j<m; j++) {
-			a = (double)((double)j*(2.*Math.PI/m) + A[i0]);
+			a = (double)((double)j*(2.*Math.PI/m) + Acp[i0]);
 			if (a > Math.PI) a -= (double)(2*Math.PI);
 			double maxdiff=1e9,diff;
 			if (!dNODEBUG) {//#ifndef dNODEBUG
@@ -258,7 +262,7 @@ public class BoxBox {
 			}//#endif
 			for (i=0; i<n; i++) {
 				if (avail[i]!=0) {
-					diff = Math.abs(A[i]-a);
+					diff = Math.abs(Acp[i]-a);
 					if (diff > Math.PI) diff = (double) (2*Math.PI - diff);
 					if (diff < maxdiff) {
 						maxdiff = diff;
@@ -344,6 +348,9 @@ public class BoxBox {
 		boolean _break = false;
 	}
 	
+	/** for line closest approach (LCP) */
+	private static Vector3d pLCP = new Vector3d();
+
 	/**
 	 * given two lines
 	 * qa = pa + alpha* ua
@@ -359,11 +366,10 @@ public class BoxBox {
 			final Vector3d pb, final Vector3d ub,
 			double[] alpha, double[] beta)
 	{
-		Vector3d p = new Vector3d();
-		p.sub( pb, pa );
+		pLCP.sub( pb, pa );
 		double uaub = ua.dot(ub);
-		double q1 =  ua.dot(p);
-		double q2 = -ub.dot(p);
+		double q1 =  ua.dot(pLCP);
+		double q2 = -ub.dot(pLCP);
 		double d = 1-uaub*uaub;
 		if (d <= (0.0001)) { // @@@ this needs to be made more robust
 			alpha[0] = 0;
@@ -393,6 +399,26 @@ public class BoxBox {
 	 * fields.
 	 */
 
+	/** for dBoxBox */
+	private static Vector3d p = new Vector3d();
+	private static Vector3d pp = new Vector3d();
+	private static Vector3d B = new Vector3d() ;//double A[3],B[3];
+	private static Vector3d A = new Vector3d();
+	private static TstClass tst = new TstClass(0xffff, 1.05);//fudge_factor); // we always collect all the contacts, so don't really need the flags!
+	private static Vector3d pa = new Vector3d();
+	private static Vector3d pb = new Vector3d();
+	private static double[] rect=new double[2];
+	private static double[] alpha = new double[1];
+	private static double[] beta = new double[1]; //RefDouble(0);
+	private static Vector3d ua = new Vector3d();
+	private static Vector3d ub = new Vector3d();
+	private static Vector3d normal2 = new Vector3d();
+	private static Vector3d nr = new Vector3d();
+	private static Vector3d anr = new Vector3d();
+	private static Vector3d center = new Vector3d();
+	private static int[] iret=new int[8];
+
+
 	//	int dBoxBox (const Vector3d p1, const dMatrix3 R1,
 	//		     const Vector3d side1, const Vector3d p2,
 	//		     const dMatrix3 R2, const Vector3d side2,
@@ -401,15 +427,13 @@ public class BoxBox {
 	public static int dBoxBox (final Tuple3d p1, final Matrix3d R1,
 			final Vector3d side1, final Tuple3d p2,
 			final Matrix3d R2, final Vector3d side2,
-			Vector3d normal, double[] depth, int[] return_code,
-			int flags, ArrayList<DContactGeom> contacts, int skip )
+			Vector3d normal, double[] depth, int[] return_code, ArrayList<DContactGeom> contacts, int skip )
 	{
 		//TZ final double fudge_factor = (1.05);
-		Vector3d p = new Vector3d(),pp = new Vector3d();//,normalC=new Vector3d(0,0,0);
+		//,normalC=new Vector3d(0,0,0);
 		//final double *normalR = 0;
 		//final Vector3d normalR;
-		Vector3d A = new Vector3d();
-		Vector3d B = new Vector3d() ;//double A[3],B[3];
+
 		double R11,R12,R13,R21,R22,R23,R31,R32,R33,
 		       Q11,Q12,Q13,Q21,Q22,Q23,Q31,Q32,Q33;  //,s,s2,l,expr1_val;
 		int i,j;//,invert_normal;//,code;
@@ -443,7 +467,6 @@ public class BoxBox {
 		// set to a vector relative to body 1. invert_normal is 1 if the sign of
 		// the normal should be flipped.
 
-		TstClass tst = new TstClass(flags, 1.05);//fudge_factor);
 		do {
 			//	#define TST(expr1,expr2,norm,cc) \
 			//	    expr1_val = (expr1); /* Avoid duplicate evaluation of expr1 */ \
@@ -554,7 +577,7 @@ public class BoxBox {
 			// An edge from box 1 touches an edge from box 2.
 			// find a point pa on the intersecting edge of box 1
 			double sign;
-			Vector3d pa = new Vector3d(p1);
+			pa.set( p1 );
 			// Get world position of p2 into pa
 			for (j=0; j<3; j++) {
 				sign = (dDOT14(normal,R1,j) > 0) ? (1.0) : (-1.0);
@@ -566,7 +589,7 @@ public class BoxBox {
 			}
 
 			// find a point pb on the intersecting edge of box 2
-			Vector3d pb = new Vector3d(p2);
+			pb.set( p2 );
 			// Get world position of p2 into pb
 			for (j=0; j<3; j++) {
 				sign = (dDOT14(normal,R2,j) > 0) ? (-1.0) : (1.0);
@@ -577,9 +600,6 @@ public class BoxBox {
 				pb.z += sign * getComp(B,j) * R2.getElement(2, j);
 			}
 
-			double[] alpha = new double[1];
-			double[] beta = new double[1]; //RefDouble(0);
-			Vector3d ua = new Vector3d(),ub = new Vector3d();
 			// Get direction of first edge
 			//for (i=0; i<3; i++) ua.set(i, R1.v[((tst._code)-7)/3 + i*4] );		
 			for (i=0; i<3; i++) setComp( ua, i, R1.getElement(i,(tst._code-7)/3) ); 
@@ -636,9 +656,7 @@ public class BoxBox {
 		The normal is flipped if necessary so it always points outward from box 'a',
 		box 'b' is thus always the incident box
 		 */
-		Vector3d normal2 = new Vector3d();
-		Vector3d nr = new Vector3d();
-		Vector3d anr = new Vector3d();
+
 		if (tst._code <= 3) {
 			normal2.set(normal);
 		} else {
@@ -675,7 +693,6 @@ public class BoxBox {
 		}
 
 		// compute center point of incident face, in reference-face coordinates
-		Vector3d center = new Vector3d();
 		if ( getComp( nr, lanr ) < 0) {
 			//for (i=0; i<3; i++) center.set(i, pb.get(i) - pa.get(i) + Sb.get(lanr) * Rb.v[i*4+lanr] );
 			for (i=0; i<3; i++) setComp( center, i, getComp(pb,i) - getComp(pa,i) + getComp(Sb,lanr) * Rb.getElement(i, lanr) );
@@ -726,7 +743,6 @@ public class BoxBox {
 		}
 
 		// find the size of the reference face
-		double[] rect=new double[2];
 		rect[0] = getComp(Sa,code1);
 		rect[1] = getComp(Sa,code2);
 
@@ -759,7 +775,7 @@ public class BoxBox {
 				ret[cnum*2+1] = ret[j*2+1];
 				cnum++;
 				if ( CONTACTS_UNIMPORTANT ) break;
-				if (cnum == (flags & NUMC_MASK)) break;
+				//if (cnum == (flags & NUMC_MASK)) break;
 			}
 		}
 		if (cnum < 1) { 
@@ -768,7 +784,7 @@ public class BoxBox {
 
 		// we can't generate more contacts than we actually have
 		// (Actually, now shouldn't generate more than requested as they are allocated here... )
-		int maxc = flags & NUMC_MASK;
+		int maxc = 0xffff;// flags & NUMC_MASK;
 		if (maxc > cnum) maxc = cnum;
 		// Even though max count must not be zero this check is kept for backward 
 		// compatibility as this is a public function
@@ -801,7 +817,6 @@ public class BoxBox {
 				}
 			}
 
-			int[] iret=new int[8];
 			cullPoints (cnum,ret,maxc,i1,iret);
 
 			for (j=0; j < maxc; j++) {

@@ -57,10 +57,9 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 		Vector3d normal = new Vector3d();
 		double[] depth = new double[1];
 		int[] return_code = new int[1];
-		int flags = 0xffff; // as many contacts as we can get!
 		int skip = 1; // only use skip if we want to dump other tests into the same arraylist
 		
-		int cnum = BoxBox.dBoxBox( p1, R1, size1, p2, R2, size2, normal, depth, return_code, flags, contacts, skip );
+		int cnum = BoxBox.dBoxBox( p1, R1, size1, p2, R2, size2, normal, depth, return_code, contacts, skip );
 
 		gl.glPointSize(10);
 		gl.glLineWidth(3);

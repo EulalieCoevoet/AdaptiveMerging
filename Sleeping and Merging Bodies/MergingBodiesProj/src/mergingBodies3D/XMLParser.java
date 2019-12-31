@@ -313,6 +313,8 @@ public class XMLParser {
                     sphere.children[i] = spheres.get( s2.nextInt() - 1 );
                 }
             }
+            s.close();
+            s2.close();
         } catch ( Exception e ) {
             e.printStackTrace();
         }    

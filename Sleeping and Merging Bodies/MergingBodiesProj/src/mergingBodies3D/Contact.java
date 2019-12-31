@@ -40,32 +40,35 @@ public class Contact {
 	/** Information to help in warm starts by allowing contacts between bodies across time steps to be matched */
 	int info;
     
+	// TODO: SLOTH: Why are these quantites in body coordinates?  
+	// They are known in the world and I'm not sure they are ever needed in body coordinates!  :(
+	
     /** Contact normal in body1 coordinates */
-    Vector3d normalB = new Vector3d();
+	private Vector3d normalB = new Vector3d();
     
     /** Contact tangent1 in body1 coordinates */
-    Vector3d tangent1B = new Vector3d();
+    private Vector3d tangent1B = new Vector3d();
     
     /** Contact tangent2 in body1 coordinates */
-    Vector3d tangent2B = new Vector3d();
+    private Vector3d tangent2B = new Vector3d();
     
 	/** Contact force being applied by this contact on body1*/
-	Vector3d forceB1 = new Vector3d();
+    private Vector3d forceB1 = new Vector3d();
 
 	/** Contact torque being applied by this contact on body1*/
-	Vector3d torqueB1 = new Vector3d();
+    private Vector3d torqueB1 = new Vector3d();
 
 	/** Contact force being applied by this contact on body2*/
-	Vector3d forceB2 = new Vector3d();
+    private Vector3d forceB2 = new Vector3d();
 
 	/** Contact torque being applied by this contact on body2*/
-	Vector3d torqueB2 = new Vector3d();
+    private Vector3d torqueB2 = new Vector3d();
     
     /** Position of contact point in world coordinates */
-    Point3d contactW = new Point3d();
+    private Point3d contactW = new Point3d();
     
     /** Position of contact point in body1 coordinates */
-    Point3d contactB = new Point3d();
+    private Point3d contactB = new Point3d();
     
 	/** vector points from body 2 to body 1, magnitude is the amount of overlap.*/
 	double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
@@ -84,11 +87,9 @@ public class Contact {
 	DenseMatrix jc = new DenseMatrix(3,12);
 	
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent1, tangent2) */
-	//DenseVector lambda = new DenseVector(3);
 	double lambda0;
 	double lambda1;
 	double lambda2;
-	
 	
 	/** b value for normal component (used in PGS resolution) */
 	double bn; 
@@ -125,11 +126,14 @@ public class Contact {
         
 		normalB.set(normal);
 		body1.transformW2B.transform(normalB);
+
+		
 		
 		// TODO: FIX ME this will fail for vector (1,1,1) normalized... 
 		// instead choose min component and cross with x y or z accordingly
 		// TODO: MEMORY
-		tangent1B = new Vector3d(normalB.z, normalB.x, normalB.y);
+		
+		tangent1B.set( normalB.z, normalB.x, normalB.y );
 		tangent2B = new Vector3d();
 		tangent2B.cross(normalB, tangent1B);
 		tangent2B.normalize();
@@ -176,6 +180,9 @@ public class Contact {
 	    Vector3d tangent1 = new Vector3d();
 	    Vector3d tangent2 = new Vector3d();
 		
+	    
+	    // these were all in world coordinates before... why are in they in body coords now :(
+	    
 		body1.transformB2W.transform(contactB, contactW);
 		body1.transformB2W.transform(normalB, normal);
 		body1.transformB2W.transform(tangent1B, tangent1);
@@ -423,46 +430,6 @@ public class Contact {
 		tmp1.set( j2.get(2,9), j2.get(2,10), j2.get(2,11) );
 		j2inv.transform(tmp1, tmp2);
 		D22 += tmp1.dot( tmp2 );
-		
-//		DenseMatrix j, j1, j2;
-//		
-//		DenseMatrix Minv = new DenseMatrix(12,12);
-//		
-//		// TODO: SLOW: eulalie: could be optimized
-//		
-//		Minv.set(0, 0, m1inv);
-//		Minv.set(1, 1, m1inv);
-//		Minv.set(2, 2, m1inv);
-//
-//		for (int k=0; k<3; k++)
-//			for (int l=0; l<3; l++)
-//				Minv.set(3+k, 3+l, j1inv.getElement(k, l));
-//		
-//		Minv.set(6, 6, m2inv);
-//		Minv.set(7, 7, m2inv);
-//		Minv.set(8, 8, m2inv);
-//		
-//		for (int k=0; k<3; k++)
-//			for (int l=0; l<3; l++)
-//				Minv.set(9+k, 9+l, j2inv.getElement(k, l));
-//
-//		j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
-//		j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
-//		
-//		j = new DenseMatrix(3,12);
-//		for (int k=0; k<3; k++)
-//			for (int l=0; l<6; l++)
-//				j.set(k, l, j1.get(k, l));
-//		for (int k=0; k<3; k++) {
-//			for (int l=0; l<6; l++) {
-//				//j.set(k, 6+l, j2.get(k, l));  // BUG? don't we want 6+l? or do we really want l ?
-//				j.set(k, 6+l, j2.get(k, 6+l));  
-//			}
-//		}
-//	
-//		DenseMatrix MinvJT = new DenseMatrix(12,3);
-//		Minv.transBmult(j, MinvJT);
-//		j.mult(MinvJT, D); // TODO: SLOW: only want diagonals... compute them properly!
 	}
 	
 	/**
@@ -510,6 +477,9 @@ public class Contact {
 			state = ContactState.CLEAR;
 	}
 	
+	/** Colour for drawing contacts */
+    private static final float[] col = new float[] { 1f, 0, 0, 0.25f };
+
     /**
      * Draws the contact points
      * @param drawable
@@ -518,13 +488,10 @@ public class Contact {
         GL2 gl = drawable.getGL().getGL2();
         gl.glPointSize(3);
         //gl.glColor4d(.7,0,0,0.15);
-        float[] col = new float[] { 1f, 0, 0, 0.25f };
         gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
-        //gl.glDisable( GL.GL_DEPTH_TEST );
         gl.glBegin( GL.GL_POINTS );
         gl.glVertex3d( contactW.x, contactW.y, contactW.z );
         gl.glEnd();
-        //gl.glEnable( GL.GL_DEPTH_TEST );
     }
     
 	/**

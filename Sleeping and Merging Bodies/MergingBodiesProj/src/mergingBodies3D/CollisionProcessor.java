@@ -270,8 +270,7 @@ public class CollisionProcessor {
 			} else if ( body2.geom instanceof RigidBodyGeomBox ) {
 				RigidBodyGeomBox g2 = (RigidBodyGeomBox) body2.geom;
 				dcontacts.clear();
-				int flags = 0xffff; // this is effectively unused, and could be factored out.  We want all contacts!
-				BoxBox.dBoxBox(body1.x,body1.theta,g1.size,body2.x, body2.theta, g2.size, normal, depth, rc, flags, dcontacts, 1 );
+				BoxBox.dBoxBox(body1.x,body1.theta,g1.size,body2.x, body2.theta, g2.size, normal, depth, rc, dcontacts, 1 );
 				int count = 0;
 				for ( DContactGeom dc : dcontacts ) {
 					// the info hasn't been set, but we'll just use their order for their identity
