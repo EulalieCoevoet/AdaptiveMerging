@@ -12,6 +12,9 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mergingBodies3D.Contact;
+import mergingBodies3D.ContactPool;
+import mergingBodies3D.RigidBody;
 import mergingBodies3D.RigidTransform;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.Vec3Parameter;
@@ -34,9 +37,11 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 	}
 	
 	Vector3d size1 = new Vector3d( 1,2,3 );
-	
-	RigidTransform TB2W1 = new RigidTransform();
-	RigidTransform TW2B1 = new RigidTransform();
+
+	ArrayList<Contact> contacts = new ArrayList<Contact>();
+	ContactPool pool = new ContactPool();
+	RigidBody b1 = new RigidBody( 0, null,true, null );
+	RigidBody b2 = new RigidBody( 0, null,true, null );
 
 	@Override
 	public void display(GLAutoDrawable drawable) {
@@ -53,29 +58,30 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 		R1.set( aa1 );
 		Point3d p2 = new Point3d( pos2.x, pos2.y, pos2.z );
 		
-		ArrayList<DContactGeom> contacts = new ArrayList<DContactGeom>();
 		
-		TB2W1.set( R1, p1 );
-		TW2B1.set( R1, p1 );
-		TW2B1.invert();
+		b1.transformB2W.set( R1, p1 );
+		b1.transformW2B.set( R1, p1 );
+		b1.transformW2B.invert();
 		
-		int cnum = BoxSphere.dBoxSphere(TB2W1, TW2B1, size1, p2, r, contacts);
-		boolean test = BoxSphere.dBoxSphereTest(TB2W1, TW2B1, size1, p2, r );
+		contacts.clear();
+		pool.swapPools();
+		
+		int cnum = BoxSphere.dBoxSphere( b1, size1, b2, p2, r, contacts, pool );
+		boolean test = BoxSphere.dBoxSphereTest(b1.transformB2W, b1.transformW2B, size1, p2, r );
 				
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
 		gl.glColor3f(1, 0, 0);
-		for ( DContactGeom c : contacts ) {
+		for ( Contact c : contacts ) {
 			gl.glBegin(GL.GL_POINTS);
-			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
+			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
-			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
-			double x = c.normal.x;
-			double y = c.normal.y;
-			double z = c.normal.z;
-			gl.glVertex3d( x + c.pos.x, y + c.pos.y, z + c.pos.z );
-			gl.glVertex3d( c.normal.x + c.pos.x, c.normal.y + c.pos.y, c.normal.z + c.pos.z );
+			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
+			double x = c.normalW.x;
+			double y = c.normalW.y;
+			double z = c.normalW.z;
+			gl.glVertex3d( x + c.contactW.x, y + c.contactW.y, z + c.contactW.z );
 			gl.glEnd();
 		}
 		
@@ -96,9 +102,9 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 
 		String msg = "#contacts = 0, test result = " + test + "\n";
 		if ( cnum > 0 ) {
-			DContactGeom c = contacts.get(0);
+			Contact c = contacts.get(0);
 			msg = "#contacts = " + cnum + "\n" +
-				"depth = " + c.depth + "\n";
+				"depth = " + c.constraintViolation + "\n";
 		}
 		EasyViewer.beginOverlay(drawable);
 		EasyViewer.printTextLines(drawable, msg);

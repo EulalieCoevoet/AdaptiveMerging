@@ -12,6 +12,9 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.gl2.GLUT;
 
+import mergingBodies3D.Contact;
+import mergingBodies3D.ContactPool;
+import mergingBodies3D.RigidBody;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.Vec3Parameter;
 import mintools.swing.VerticalFlowPanel;
@@ -35,6 +38,11 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 	Vector3d size1 = new Vector3d( 1,2,3 );
 	Vector3d size2 = new Vector3d( 2,3,4 );
 	
+	ArrayList<Contact> contacts = new ArrayList<Contact>();
+	ContactPool pool = new ContactPool();
+	RigidBody b1 = new RigidBody( 0, null,true, null );
+	RigidBody b2 = new RigidBody( 0, null,true, null );
+	
 	@Override
 	public void display(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
@@ -53,34 +61,40 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 		Matrix3d R2 = new Matrix3d();
 		R2.set( aa2 );
 		
-		ArrayList<DContactGeom> contacts = new ArrayList<DContactGeom>();
+		contacts.clear();
+		pool.swapPools();
+		
 		Vector3d normal = new Vector3d();
 		double[] depth = new double[1];
 		int[] return_code = new int[1];
-		int skip = 1; // only use skip if we want to dump other tests into the same arraylist
 		
-		int cnum = BoxBox.dBoxBox( p1, R1, size1, p2, R2, size2, normal, depth, return_code, contacts, skip );
+		b1.theta.set( R1 );
+		b1.x.set( p1 );
+		b2.theta.set( R2 );
+		b2.x.set( p2 );
+		int cnum = BoxBox.dBoxBox( b1, size1, b2, size2, normal, depth, return_code, contacts, pool );
 
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
 		int i = 0; 
-		for ( DContactGeom c : contacts ) {
+		for ( Contact c : contacts ) {
 			c.info = i++; // cheap way to keep track of contacts for warm starts?
 			gl.glColor3f(1, 0, 0);
+			
 			gl.glBegin(GL.GL_POINTS);
-			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
+			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
-			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
-			double x = normal.x;
-			double y = normal.y;
-			double z = normal.z;
-			gl.glVertex3d( x + c.pos.x, y + c.pos.y, z + c.pos.z );
-			gl.glVertex3d( c.normal.x + c.pos.x, c.normal.y + c.pos.y, c.normal.z + c.pos.z );
+			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
+			double x = c.normalW.x;
+			double y = c.normalW.y;
+			double z = c.normalW.z;
+			gl.glVertex3d( x + c.contactW.x, y + c.contactW.y, z + c.contactW.z );
 			gl.glEnd();
+	
 			gl.glColor3f( 1,1,1 );
-			gl.glRasterPos3d( c.pos.x, c.pos.y, c.pos.z );
-			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info + " " + c.depth ); 
+			gl.glRasterPos3d( c.contactW.x, c.contactW.y, c.contactW.z );
+			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info + " " + c.constraintViolation ); 
 //			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, c.side1 + " " + c.side2 ); 
 			// side is unused :(  but doesn't need to be... 
 			// thus we are somewhat on our own for warmstarts..

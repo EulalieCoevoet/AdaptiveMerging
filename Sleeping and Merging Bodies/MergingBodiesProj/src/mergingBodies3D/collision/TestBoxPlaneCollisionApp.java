@@ -12,6 +12,9 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.gl2.GLUT;
 
+import mergingBodies3D.Contact;
+import mergingBodies3D.ContactPool;
+import mergingBodies3D.RigidBody;
 import mergingBodies3D.RigidTransform;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.Vec3Parameter;
@@ -34,9 +37,11 @@ public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 	}
 	
 	Vector3d size1 = new Vector3d( 1,2,3 );
-	
-	RigidTransform TB2W1 = new RigidTransform();
-	RigidTransform TW2B1 = new RigidTransform();
+
+	ArrayList<Contact> contacts = new ArrayList<Contact>();
+	ContactPool pool = new ContactPool();
+	RigidBody b1 = new RigidBody( 0, null,true, null );
+	RigidBody b2 = new RigidBody( 0, null,true, null );
 
 	@Override
 	public void display(GLAutoDrawable drawable) {
@@ -53,31 +58,31 @@ public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 		R1.set( aa1 );
 		Vector3d n = new Vector3d( normal.x, normal.y, normal.z );
 		n.normalize();
+
+		contacts.clear();
+		pool.swapPools();
 		
-		ArrayList<DContactGeom> contacts = new ArrayList<DContactGeom>();
+		b1.transformB2W.set( R1, p1 );
 		
-		TB2W1.set( R1, p1 );
-		
-		int cnum = BoxPlane.dBoxPlane(TB2W1, size1, n, d, contacts);
+		int cnum = BoxPlane.dBoxPlane( b1, size1, b2, n, d, contacts, pool );
 				
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
-		for ( DContactGeom c : contacts ) {
+		for ( Contact c : contacts ) {
 			gl.glColor3f(1, 0, 0);
 			gl.glBegin(GL.GL_POINTS);
-			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
+			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
-			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
-			double x = c.normal.x;
-			double y = c.normal.y;
-			double z = c.normal.z;
-			gl.glVertex3d( x + c.pos.x, y + c.pos.y, z + c.pos.z );
-			gl.glVertex3d( c.normal.x + c.pos.x, c.normal.y + c.pos.y, c.normal.z + c.pos.z );
+			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
+			double x = c.normalW.x;
+			double y = c.normalW.y;
+			double z = c.normalW.z;
+			gl.glVertex3d( x + c.contactW.x, y + c.contactW.y, z + c.contactW.z );
 			gl.glEnd();
 			gl.glColor3f( 1,1,1 );
-			gl.glRasterPos3d( c.pos.x, c.pos.y, c.pos.z );
-			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info + " " + c.depth); 			
+			gl.glRasterPos3d( c.contactW.x, c.contactW.y, c.contactW.z );
+			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info + " " + c.constraintViolation); 			
 		}
 		
 		gl.glColor4f(1,1,1,0.5f);

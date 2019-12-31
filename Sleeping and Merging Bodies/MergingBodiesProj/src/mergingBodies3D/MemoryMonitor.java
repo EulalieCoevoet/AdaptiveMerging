@@ -16,7 +16,6 @@ public class MemoryMonitor {
 
 	String title;
 	String xLabel;
-	double max = 0;
 		
 	MemoryMonitor( String title, String xLabel ) {
 		this.title = title;
@@ -26,8 +25,15 @@ public class MemoryMonitor {
 	public void add( double v ) {
 		data[pos] = v;
 		pos = (pos+1)%N;
-		max = Math.max( max,  v );
-	}			
+	}	
+	
+	public double getMax() {
+		double max = 0;
+		for ( double d : data ) {
+			max = Math.max( max, d );
+		}
+		return max;
+	}
 		
 	public void draw( GLAutoDrawable drawable, int where ) {
 		int w = drawable.getSurfaceWidth();
@@ -55,7 +61,7 @@ public class MemoryMonitor {
 		gl.glVertex2d( 0,1 );
 		gl.glEnd();
 		
-		double maxY = (Math.floor(max*1000)+1)/1000;
+		double maxY = (Math.floor(getMax()*1000)+1)/1000;
 		gl.glRasterPos2d(-0.05,0.5);
 		EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "t" );
 		gl.glRasterPos2d(0,1);

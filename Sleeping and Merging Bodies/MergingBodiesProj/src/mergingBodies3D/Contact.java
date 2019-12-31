@@ -25,7 +25,7 @@ public class Contact {
     static public int nextContactIndex = 0;
     
     /** Index of this contact, determines its (effective) rows in the jacobian (unassembled)*/
-    int index;
+    int index; // TODO: can this index be removed?
     
     /** First RigidBody in contact */
     RigidBody body1;
@@ -37,17 +37,26 @@ public class Contact {
 	BVSphere bv1;
 	/** Bounding volume that caused the collision... this is only used to track contact identity for warm starts  */
 	BVSphere bv2;
-	/** Information to help in warm starts by allowing contacts between bodies across time steps to be matched */
-	int info;
+	/** Information to help in warm starts by allowing contacts between bodies across time steps to be matched 
+	 * ONLY PUBLIC FOR DEBUGGING
+	 */
+	public int info;
     
-    /** Contact normal in body1 coordinates */
-	private Vector3d normalW = new Vector3d();
+    /** Position of contact point in world coordinates 
+     * ONLY MADE PUBLIC FOR TESTING... can be private */
+    public Point3d contactW = new Point3d();
+    
+    /** Contact normal in body1 coordinates 
+     * ONLY PUBLIC FOR TESTING... CAN BE MADE PRIVATE */
+	public Vector3d normalW = new Vector3d();
     
     /** Contact tangent1 in body1 coordinates */
     private Vector3d tangent1W = new Vector3d();
     
     /** Contact tangent2 in body1 coordinates */
     private Vector3d tangent2W = new Vector3d();
+    
+    
     
 	/** Contact force being applied by this contact on body1 (note this is world aligned at body COM) */
     private Vector3d forceW1 = new Vector3d();
@@ -61,11 +70,10 @@ public class Contact {
 	/** Contact torque being applied by this contact on body2 */
     private Vector3d torqueW2 = new Vector3d();
     
-    /** Position of contact point in world coordinates */
-    private Point3d contactW = new Point3d();
+
     
 	/** vector points from body 2 to body 1, magnitude is the amount of overlap.*/
-	double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
+	public double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
 	double prevConstraintViolation;
 	
 	/** Used for merge/unmerge condition */
@@ -97,14 +105,19 @@ public class Contact {
 	double D11;
 	double D22;
 	
+	public Contact() {
+		// constructor for pre-allocation
+	}
+	
+	
     /**
-     * Creates a new contact, and assigns it an index
+     * Sets the contact, and assigns it an index
      * @param body1
      * @param body2
      * @param contactW	in world coordinates
      * @param normal	in world woordinates
      */
-    public Contact( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {
+    public void set( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW ); 
@@ -218,6 +231,9 @@ public class Contact {
 	
 	/**
 	 * Stores contact forces and torques for visualization purposes
+	 * TODO: is this ONLY done for visualization?  If so, more this code to the 
+	 * display method to free up memory in the contact data structure 
+	 * (i.e., waste computation in drawing, rather than wasting memory!!)
 	 * @param dt
 	 */
 	public void computeForces(boolean computeInCollection, double dt) {

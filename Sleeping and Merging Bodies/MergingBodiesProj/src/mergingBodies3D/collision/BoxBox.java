@@ -6,13 +6,16 @@ import java.util.ArrayList;
 
 import javax.management.RuntimeErrorException;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import mergingBodies3D.Contact;
+import mergingBodies3D.ContactPool;
+import mergingBodies3D.RigidBody;
+
 /*************************************************************************
  * Adapted from the ODE port to Java DxBox class, see license info below 
- * TODO: MEMORY: consider having this class hold worker variables as 
- * members rather than allocating on each test (memory/garbage issues?)
 /*************************************************************************
  *                                                                       *
  * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
@@ -331,18 +334,13 @@ public class BoxBox {
 
 	private static class TstClass {
 		int _code;
-		//TODO use RefInt?
-//		double[] _normalR_A;
-//		int _normalR_O;
 		Matrix3d _normalR_M;
 		int _normalR_col;
 		Vector3d _normalC = new Vector3d();
 		double _s;
 		double _fudge_factor;
-		//final int _flags;  
 		boolean _invert_normal;
-		TstClass(int flags, double fudge_factor) { // TODO: remove flags?  or put contacts_unimportant here.
-			//_flags = flags;
+		TstClass(int flags, double fudge_factor) { 
 			_fudge_factor = fudge_factor;
 		}
 		boolean _break = false;
@@ -416,6 +414,7 @@ public class BoxBox {
 	private static Vector3d nr = new Vector3d();
 	private static Vector3d anr = new Vector3d();
 	private static Vector3d center = new Vector3d();
+	private static Point3d pos = new Point3d();
 	private static int[] iret=new int[8];
 
 
@@ -424,11 +423,26 @@ public class BoxBox {
 	//		     const dMatrix3 R2, const Vector3d side2,
 	//		     Vector3d normal, dReal *depth, int *return_code,
 	//		     int flags, dContactGeom *contact, int skip)
-	public static int dBoxBox (final Tuple3d p1, final Matrix3d R1,
-			final Vector3d side1, final Tuple3d p2,
-			final Matrix3d R2, final Vector3d side2,
-			Vector3d normal, double[] depth, int[] return_code, ArrayList<DContactGeom> contacts, int skip )
+	public static int dBoxBox ( 
+			final RigidBody body1, 
+//			final Tuple3d p1, final Matrix3d R1,
+			final Vector3d side1, 
+			final RigidBody body2, 
+//			final Tuple3d p2,
+//			final Matrix3d R2, 
+			final Vector3d side2,
+			Vector3d normal, 
+			double[] depth, 
+			int[] return_code, 
+			ArrayList<Contact> contacts,
+			ContactPool pool )
 	{
+		final Tuple3d p1 = body1.x;
+		final Matrix3d R1 = body1.theta;
+		final Tuple3d p2 = body2.x;
+		final Matrix3d R2 = body2.theta;
+		int info = 0; // Contact ID for warm starts... simple ordering of creation works well enough.
+		
 		//TZ final double fudge_factor = (1.05);
 		//,normalC=new Vector3d(0,0,0);
 		//final double *normalR = 0;
@@ -615,14 +629,14 @@ public class BoxBox {
 			pb.scaleAdd(beta[0], ub, pb);
 			// Set the contact point as halfway between the 2 closest points
 			//for (i=0; i<3; i++) contact[0].pos[i] = (0.5)*(pa[i]+pb[i]);
-			DContactGeom con = new DContactGeom();
+
+			pos.add(pa,pb);
+			pos.scale(0.5);
+
+			Contact con = pool.get();
+			con.set(body1, body2, pos, normal, null, null, info++, -depth[0]);
 			contacts.add( con );
-			con.pos.add(pa, pb);
-			con.pos.scale(0.5);
-			con.depth = depth[0];
 			return_code[0] = tst._code;
-			// TODO: Add information to help with warm starts?  This edge edge case will be trivial
-			// to match up as it only generates one contact between two bodies!
 			return 1;
 		}
 
@@ -793,12 +807,13 @@ public class BoxBox {
 		if (cnum <= maxc) {
 			// we have less contacts than we need, so we use them all
 			for (j=0; j < cnum; j++) {
-				//dContactGeom *con = CONTACT(contact,skip*j);
-				DContactGeom con = new DContactGeom();
+				for (i=0; i<3; i++) setComp( pos, i, point[j*3+i] + getComp(pa,i) );
+				Contact con = pool.get();
+				con.set( body1, body2, pos, normal, null, null, info++, -dep[j] );
 				contacts.add( con );
+				//dContactGeom *con = CONTACT(contact,skip*j);
 				//DContactGeom con = contacts.get(skip*j);
-				for (i=0; i<3; i++) setComp( con.pos, i, point[j*3+i] + getComp(pa,i) );
-				con.depth = dep[j];
+//				con.depth = dep[j];
 			}
 		} else {
 			// cnum should be generated not greater than maxc so that "then" clause is executed
@@ -820,12 +835,14 @@ public class BoxBox {
 			cullPoints (cnum,ret,maxc,i1,iret);
 
 			for (j=0; j < maxc; j++) {
+				for (i=0; i<3; i++) setComp( pos, i, point[iret[j]*3+i] + getComp( pa, i ) );
+				Contact con = pool.get();
+				con.set(body1, body2, pos, normal, null, null, info++, dep[iret[j]]);
 				//dContactGeom *con = CONTACT(contact,skip*j);
 				//DContactGeom con = contacts.get(skip*j);
-				DContactGeom con = new DContactGeom();
-				contacts.add( con );
-				for (i=0; i<3; i++) setComp( con.pos, i, point[iret[j]*3+i] + getComp( pa, i ) );
-				con.depth = dep[iret[j]];
+//				DContactGeom con = new DContactGeom();
+//				contacts.add( con );
+//				con.depth = dep[iret[j]];
 			}
 			cnum = maxc;
 		}

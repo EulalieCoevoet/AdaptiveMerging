@@ -18,6 +18,9 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.gl2.GLUT;
 
+import mergingBodies3D.Contact;
+import mergingBodies3D.ContactPool;
+import mergingBodies3D.RigidBody;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.Vec3Parameter;
 import mintools.swing.VerticalFlowPanel;
@@ -41,6 +44,11 @@ public class TestBoxBoxCollisionApp2 implements SceneGraphNode{
 	Vector3d size1 = new Vector3d( 1,2,3 );
 	Vector3d size2 = new Vector3d( 2,3,4 );
 	
+	ArrayList<Contact> contacts2 = new ArrayList<Contact>();
+	ContactPool pool = new ContactPool();
+	RigidBody b1 = new RigidBody( 0, null,true, null );
+	RigidBody b2 = new RigidBody( 0, null,true, null );
+
 	@Override
 	public void display(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
@@ -85,14 +93,20 @@ public class TestBoxBoxCollisionApp2 implements SceneGraphNode{
 		
 		int cnum = org.ode4j.ode.internal.DxBox.dBoxBox( p1, R1, side1, p2, R2, side2, normal, depth, return_code, flags, contacts, skip );
 
+		contacts2.clear();
+		pool.swapPools();
+		
 		Vector3d normal2 = new Vector3d();
 		double[] depth2 = new double[1];
 		int[] return_code2 = new int[1];
-		ArrayList<DContactGeom>contacts2 = new ArrayList<DContactGeom>();
 		int cnum2 = 0;
 		boolean died = false;
+		b1.theta.set( R1t );
+		b1.x.set( p1v );
+		b2.theta.set( R2t );
+		b2.x.set( p2v );
 		try {
-			cnum2 = BoxBox.dBoxBox( p1v, R1t, size1, p2v, R2t, size2, normal2, depth2, return_code2, contacts2, skip );
+			cnum2 = BoxBox.dBoxBox( b1, size1, b2, size2, normal2, depth2, return_code2, contacts2, pool );
 		} catch ( Exception e ) {
 			died = true;
 		}
@@ -119,16 +133,16 @@ public class TestBoxBoxCollisionApp2 implements SceneGraphNode{
 		gl.glLineWidth(1);
 		gl.glColor3f(0, 1, 0);
 		for ( int i = 0; i < cnum2; i++ ) {
-			DContactGeom c = contacts2.get(i);
+			Contact c = contacts2.get(i);
 			gl.glBegin(GL.GL_POINTS);
-			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
+			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
-			gl.glVertex3d( c.pos.x, c.pos.y, c.pos.z );
+			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
 			double x = normal2.x;
 			double y = normal2.y;
 			double z = normal2.z;
-			gl.glVertex3d( x + c.pos.x, y + c.pos.y, z + c.pos.z );
+			gl.glVertex3d( x + c.contactW.x, y + c.contactW.y, z + c.contactW.z );
 			gl.glEnd();
 		}
 		gl.glEnable(GL.GL_DEPTH_TEST);

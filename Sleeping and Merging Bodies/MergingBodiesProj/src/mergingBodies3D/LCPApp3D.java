@@ -208,11 +208,19 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         	filteredUsedMem = alpha * ( usedMem - lastUsedMem ) + (1-alpha)*filteredUsedMem;
         }
         lastUsedMem = usedMem;
-        stringBuilder.append( "MEMORY USED = "); stringBuilder.append( usedMem ); stringBuilder.append( " KB \n" );
-        stringBuilder.append( "Filterd memory delta = "); stringBuilder.append( (int) filteredUsedMem ); stringBuilder.append( " KB \n" );
+        stringBuilder.append( "MEMORY DELTA = "); stringBuilder.append( memDelta ); stringBuilder.append( " KB \n" );
+        stringBuilder.append( "FILTERED DELTA = "); stringBuilder.append( (int) filteredUsedMem ); stringBuilder.append( " KB \n" );
         
     	memMonitor.add( memDelta );
-    	computeTimeMonitor.add( system.computeTime );
+    	
+    	long f2fTime = 0;
+		long now = System.nanoTime();
+    	if ( lastFrameTime != -1 ) {
+    		f2fTime = now-lastFrameTime;
+    	}
+		lastFrameTime = now;
+    	computeTimeMonitor.add( f2fTime / 1e6 );
+    	//computeTimeMonitor.add( system.computeTime * 1000 );
 
         if ( ! hideOverlay.getValue() ) {
         	EasyViewer.printTextLines( drawable, stringBuilder.toString(), 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
@@ -245,6 +253,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private long lastUsedMem = -1;
     private double filteredUsedMem = 0;
     private long memDelta = 0;
+    private long lastFrameTime = -1;
     private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     private final StringBuilder stringBuilder = new StringBuilder();
     

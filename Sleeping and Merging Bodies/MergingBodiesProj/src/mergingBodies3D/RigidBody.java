@@ -53,10 +53,10 @@ public class RigidBody {
     public boolean selected;
     
     /** Transforms points in Body coordinates to World coordinates */
-    RigidTransform transformB2W = new RigidTransform();
+    public RigidTransform transformB2W = new RigidTransform();
     
     /** Transforms points in World coordinates to Body coordinates */
-    RigidTransform transformW2B = new RigidTransform();
+    public RigidTransform transformW2B = new RigidTransform();
     
     /** DeltaV for PGS resolution */
     DenseVector deltaV = new DenseVector(6);
@@ -89,7 +89,7 @@ public class RigidBody {
     
 	/** 
 	 * bounding box, in the body frame (all 8 points)
-	 * TODO: the purpose of this is to bound maximum velocity relative to another
+	 * the purpose of this is to bound maximum velocity relative to another
 	 * body so we might want to do something specific or different for special geometry.
 	 */
 	public ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>(); 
@@ -216,6 +216,7 @@ public class RigidBody {
 	    	Vector3d tmp2 = new Vector3d();
 	    	massAngular.transform( omega, tmp );
 	    	tmp2.cross( tmp, omega );
+	    	// TODO: this is certainly broken :(
 	    	//torque.sub(tmp2); // seems like this should be added, but could also be a sign error. :(
     	}
     }
