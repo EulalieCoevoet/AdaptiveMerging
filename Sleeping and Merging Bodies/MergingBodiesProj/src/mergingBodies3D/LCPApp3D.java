@@ -236,8 +236,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         }
         
         if ( run.getValue() || stepped ) {
+        	if ( drawGraphs.getValue() ) {
             ccm.monitor(system);
-            stepped = false;        
+        	}
+        	stepped = false;        
             if ( record.getValue() ) {
                 // write the frame
                 File file = new File( "stills/" + dumpName + format.format(nextFrameNum) + ".png" );                                             

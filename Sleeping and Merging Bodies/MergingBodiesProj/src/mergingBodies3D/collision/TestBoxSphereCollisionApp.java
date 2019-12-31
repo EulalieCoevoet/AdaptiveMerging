@@ -15,7 +15,6 @@ import com.jogamp.opengl.GLAutoDrawable;
 import mergingBodies3D.Contact;
 import mergingBodies3D.ContactPool;
 import mergingBodies3D.RigidBody;
-import mergingBodies3D.RigidTransform;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.Vec3Parameter;
 import mintools.swing.VerticalFlowPanel;

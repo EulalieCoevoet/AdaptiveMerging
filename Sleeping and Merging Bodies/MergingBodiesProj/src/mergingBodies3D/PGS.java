@@ -185,12 +185,7 @@ public class PGS {
 	 * Warm start if the confidence that each contact already has a value for lambda
 	 */
 	protected void confidentWarmStart() {
-//		DenseVector l = new DenseVector(3);
 		for (Contact contact : contacts) {	
-//			l.set(0, contact.lambda0 );
-//			l.set(1, contact.lambda1 );
-//			l.set(2, contact.lambda2 );
-//			updateDeltaV( contact, l );	// TODO: update this to 3 calls to update each individually...
 			updateDeltaVwithLambdai( contact, contact.lambda0, 0 );
 			updateDeltaVwithLambdai( contact, contact.lambda1, 1 );
 			updateDeltaVwithLambdai( contact, contact.lambda2, 2 );

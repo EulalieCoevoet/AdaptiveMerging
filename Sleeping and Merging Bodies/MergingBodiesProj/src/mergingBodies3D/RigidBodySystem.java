@@ -140,12 +140,14 @@ public class RigidBodySystem {
 //			impulse.clear();
 //		}
 //	}
+	
+	/** Temporary working variable */
+	private Vector3d tmpForce = new Vector3d();
 
 	/**
 	 * Apply gravity to bodies, collections and bodies in collections
 	 */
 	private void applyGravityForce() {
-		Vector3d force = new Vector3d();
 		for ( RigidBody body : bodies ) {
 			
 //			if (body.isSleeping)
@@ -153,9 +155,9 @@ public class RigidBodySystem {
 			
 			//fully active, regular stepping
 			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
-			force.set( Math.cos( theta ), Math.sin(theta), 0 );
-			force.scale( - body.massLinear * gravityAmount.getValue() );
-			body.force.add( force ); // gravity goes directly into the accumulator, no torque
+			tmpForce.set( Math.cos( theta ), Math.sin(theta), 0 );
+			tmpForce.scale( - body.massLinear * gravityAmount.getValue() );
+			body.force.add( tmpForce ); // gravity goes directly into the accumulator, no torque
             body.applyCoriollisTorque(); // TODO: sadly, this appears to be buggy :(
 			
 //			if( body instanceof RigidCollection) 
@@ -218,21 +220,25 @@ public class RigidBodySystem {
         RigidBody.nextIndex = 0;
         reset();
     }
+        
+    /** Might want to allow for different coloured blocks?? but for now, in 3D this is easiest */
+    private float[] green = new float[] { 0, 1, 0, 0.25f };
+    private float[] colourPinned = new float[] { 0.75f,0.75f,1, 1 };		        			
+	private float[] colour = new float[] { 0.9f,0.9f,0.9f, 1 };        			
+    private float[] red = new float[] { 1, 0, 0, 0.5f };
+    private float[] blue = new float[] { 0, 0, 1, 0.25f };
     
     public void displayNonShadowable( GLAutoDrawable drawable ) {
     	GL2 gl = drawable.getGL().getGL2();
         gl.glDisable(GL2.GL_DEPTH_TEST);
 
     	// Should move this stuff below to a display non-shadowable function
-        float[] green = new float[] { 0, 1, 0, 0.25f };
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, green, 0);
-//        gl.glDepthFunc( GL2.GL_GREATER );
         if ( drawContactGraph.getValue() ) {
             for ( Contact c : collision.contacts ) {
                 c.displayConnection(drawable);
             }
         }
-  //      gl.glDepthFunc( GL2.GL_LESS);
         
         if ( drawContacts.getValue() ) {
             for ( Contact c : collision.contacts ) {
@@ -249,12 +255,6 @@ public class RigidBodySystem {
 //        }
         gl.glEnable(GL2.GL_DEPTH_TEST);
     }
-    
-    /** Might want to allow for different coloured blocks?? but for now, in 3D this is easiest */
-    private float[] colourPinned = new float[] { 0.75f,0.75f,1, 1 };		        			
-	private float[] colour = new float[] { 0.9f,0.9f,0.9f, 1 };        			
-    private float[] red = new float[] { 1, 0, 0, 0.5f };
-    private float[] blue = new float[] { 0, 0, 1, 0.25f };
 
     /**
      * Draws all rigid bodies

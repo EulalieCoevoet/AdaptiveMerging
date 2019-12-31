@@ -15,7 +15,6 @@ import com.jogamp.opengl.util.gl2.GLUT;
 import mergingBodies3D.Contact;
 import mergingBodies3D.ContactPool;
 import mergingBodies3D.RigidBody;
-import mergingBodies3D.RigidTransform;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.Vec3Parameter;
 import mintools.swing.VerticalFlowPanel;
@@ -95,6 +94,7 @@ public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 		EasyViewer.glut.glutWireCube(1);
 		gl.glPopMatrix();
 				
+		// this is dumb and slow... but just a test
 		Vector3d tmp = new Vector3d(0,0,1);
 		Vector3d axis = new Vector3d();
 		axis.cross( tmp, n );

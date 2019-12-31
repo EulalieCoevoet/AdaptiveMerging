@@ -48,6 +48,11 @@ public class Spring {
 	public Spring( Point3d pB, RigidBody body, Point3d pW ) {
 		
 	}
+
+	/** Temporary working variables */
+	private Vector3d displacement = new Vector3d();
+	private Vector3d velocity = new Vector3d(); // velocity of the point on the body
+	private Vector3d force = new Vector3d();
 	
 	/**
 	 * Applies the spring force by adding a force and a torque to the body.
@@ -58,9 +63,6 @@ public class Spring {
 	public void apply(double k, double c) {
 		//l0 = RigidBodySystem.springLength.getValue();
 		body.transformB2W.transform( pb, pbw );
-		Vector3d displacement = new Vector3d();
-		Vector3d velocity = new Vector3d(); // velocity of the point on the body
-		Vector3d force = new Vector3d();
 		displacement.sub( pw, pbw ); 
 
 		// Silly fix... the force should go gracefully to zero without giving NaNs :(

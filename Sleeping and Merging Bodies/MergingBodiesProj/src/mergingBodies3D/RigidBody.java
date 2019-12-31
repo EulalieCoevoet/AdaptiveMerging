@@ -6,7 +6,6 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -72,6 +71,10 @@ public class RigidBody {
     
     /** orientation of the body TODO: refactor to be R later?? */
     public Matrix3d theta = new Matrix3d();
+    /**
+     * inverse orientation (i.e., world to body)
+     */
+    public Matrix3d thetaT = new Matrix3d();
 
     /** orientation of the body TODO: refactor to be R later?? */
     public Matrix3d theta0 = new Matrix3d();
@@ -165,30 +168,26 @@ public class RigidBody {
 		torque.set(0., 0., 0.);
 		deltaV.zero();
 	}
-    
+    	
     /**
      * Updates the B2W and W2B transformations
-     * TODO: FIX: THIS HAPPENS OFTEN ENOUGH... so should probably be optimized... 
-     * 1) get rid of invert calls that to LU decomp and form the matrices
-     *   with R^T and -R^Tp or by composition.
-     * 2) one might hope that JIT will make some working variables local, but 
-     *   may of these calls make a vector here or there and probably end up 
-     *   being slow for it. :(
-     * 
      */
     public void updateTransformations() {
         transformB2W.set( theta, x );
-        transformW2B.set( theta, x );
-        transformW2B.invert(); // TODO: INVERT
+        thetaT.transpose( theta );
+        tmp.scale(-1,x);
+        thetaT.transform(tmp);
+        transformW2B.set( thetaT, tmp );
+
         // might be done more often than necessary, but need to have 
         // rotational inertia updated give we are storing information in a 
-        // world aligned frame
+        // world aligned frame... note that the non-inverted angular inertia
+        // used for energy computation and for the corriollis force (disabled)
         if ( ! pinned ) {
 	        jinv.mul( theta, jinv0 );
-	        Matrix3d RT = new Matrix3d(); // TODO: MEMORY
-	        RT.transpose(theta);
-	        jinv.mul( RT );
-	        massAngular.invert(jinv); // TODO: INVERT... should compute by composition.
+	        jinv.mul( thetaT );
+	        massAngular.mul( theta, massAngular0 );
+	        massAngular.mul( thetaT );
         } 
     }
     
@@ -199,11 +198,9 @@ public class RigidBody {
      */
     public void applyForceW( Point3d contactPointW, Vector3d contactForceW ) {
         force.add( contactForceW );        
-        Vector3d r = new Vector3d();
-        r.sub( contactPointW, x );
-        Vector3d torqueW = new Vector3d();
-        torqueW.cross( r,  contactForceW );
-        torque.add( torqueW );
+        tmp.sub( contactPointW, x );
+        tmp2.cross( tmp,  contactForceW );
+        torque.add( tmp2 );
     }
     
     /**
@@ -212,8 +209,6 @@ public class RigidBody {
      */
     public void applyCoriollisTorque() {
     	if ( !pinned ) {
-	    	Vector3d tmp = new Vector3d();
-	    	Vector3d tmp2 = new Vector3d();
 	    	massAngular.transform( omega, tmp );
 	    	tmp2.cross( tmp, omega );
 	    	// TODO: this is certainly broken :(
@@ -268,12 +263,17 @@ public class RigidBody {
 		R.m22 = c + wZ * wZ * c1;
 	}
 
+	/** worker variables, held to avoid memory thrashing */
+	private Vector3d domega = new Vector3d(); 
+	private Matrix3d dR = new Matrix3d();
+	private Vector3d tmp = new Vector3d();
+	private Vector3d tmp2 = new Vector3d();
+
 	public void advanceVelocities(double dt) {
 		v.x += force.x * dt * minv + deltaV.get(0);
 		v.y += force.y * dt * minv + deltaV.get(1);
 		v.z += force.z * dt * minv + deltaV.get(2);
 
-    	Vector3d domega = new Vector3d(); // TODO: MEMORY
         jinv.transform( torque, domega );
         domega.scale( dt );
         omega.add( domega );
@@ -289,11 +289,9 @@ public class RigidBody {
 		x.z += v.z * dt;
 		
 		double t = omega.length()*dt;
-    	Vector3d domega = new Vector3d(); // TODO: MEMORY
         domega.set(omega);
         domega.normalize();
         if ( t > 1e-8 ) {
-            Matrix3d dR = new Matrix3d(); // TODO: MEMORY
         	expRodrigues(dR, domega, t);
         	dR.mul( theta );                
         	theta.normalizeCP( dR ); // keep it clean!
@@ -307,9 +305,8 @@ public class RigidBody {
      * @return the total kinetic energy
      */
     public double getKineticEnergy() {
-    	Vector3d result = new Vector3d();
-    	massAngular0.transform(omega,result);
-        return 0.5 * massLinear * v.lengthSquared() + 0.5 * result.dot( omega ); 
+    	massAngular.transform(omega,tmp);
+        return 0.5 * massLinear * v.lengthSquared() + 0.5 * tmp.dot( omega ); 
     }
     
     /** 
@@ -319,7 +316,6 @@ public class RigidBody {
      * @param result the velocity
      */
     public void getSpatialVelocity( Point3d contactPointW, Vector3d result ) {
-        Vector3d tmp = new Vector3d();
     	tmp.sub( contactPointW, x );
         result.cross( omega, tmp );
         result.add( v );
@@ -360,28 +356,28 @@ public class RigidBody {
     
     static public double kineticEnergyThreshold = 1e-6;
     
-    /**
-     * Draws the center of mass position with a circle.  The circle will be 
-     * drawn differently if the block is at rest (i.e., close to zero kinetic energy)
-     * @param drawable
-     */
-    public void displayCOM( GLAutoDrawable drawable ) {
-        GL2 gl = drawable.getGL().getGL2();
-        gl.glDisable( GL2.GL_DEPTH_TEST );
-        float[] col = new float[] { 0, 0, 1f, 0.25f };
-        gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
-        gl.glPointSize(8);
-
-        gl.glBegin( GL.GL_POINTS );
-        gl.glVertex3d( x.x, x.y, x.z);
-        gl.glEnd();
-        
-//        gl.glPushMatrix();
-//        gl.glTranslated(x.x, x.y, x.z);
-//        EasyViewer.glut.glutSolidSphere(0.25, 10, 10);
-//        gl.glPopMatrix();
+//    /**
+//     * Draws the center of mass position with a circle.  The circle will be 
+//     * drawn differently if the block is at rest (i.e., close to zero kinetic energy)
+//     * @param drawable
+//     */
+//    public void displayCOM( GLAutoDrawable drawable ) {
+//        GL2 gl = drawable.getGL().getGL2();
+//        gl.glDisable( GL2.GL_DEPTH_TEST );
+//        float[] col = new float[] { 0, 0, 1f, 0.25f };
+//        gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
+//        gl.glPointSize(8);
+//
+//        gl.glBegin( GL.GL_POINTS );
+//        gl.glVertex3d( x.x, x.y, x.z);
+//        gl.glEnd();
 //        
-        gl.glEnable( GL2.GL_DEPTH_TEST );
-    }
+////        gl.glPushMatrix();
+////        gl.glTranslated(x.x, x.y, x.z);
+////        EasyViewer.glut.glutSolidSphere(0.25, 10, 10);
+////        gl.glPopMatrix();
+////        
+//        gl.glEnable( GL2.GL_DEPTH_TEST );
+//    }
     
 }

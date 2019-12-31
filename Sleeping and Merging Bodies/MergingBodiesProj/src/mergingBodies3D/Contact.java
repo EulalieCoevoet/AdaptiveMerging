@@ -288,24 +288,23 @@ public class Contact {
 		}
 		
 		DenseMatrix j;
-		Vector3d u = new Vector3d();
 		bn = 0; bt1 = 0; bt2 = 0;
 		
 		j = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;		
-		u.set(b1.force);
-		u.scale(m1inv*dt);	
-		u.add(b1.v);
-		bn  += u.x*j.get(0,0) + u.y*j.get(0,1) + u.z*j.get(0,2);
-		bt1 += u.x*j.get(1,0) + u.y*j.get(1,1) + u.z*j.get(1,2);
-		bt2 += u.x*j.get(2,0) + u.y*j.get(2,1) + u.z*j.get(2,2);
-		u.set(b1.torque.x*j1inv.m00 + b1.torque.y*j1inv.m01 + b1.torque.z*j1inv.m02,
+		tmp1.set(b1.force);
+		tmp1.scale(m1inv*dt);	
+		tmp1.add(b1.v);
+		bn  += tmp1.x*j.get(0,0) + tmp1.y*j.get(0,1) + tmp1.z*j.get(0,2);
+		bt1 += tmp1.x*j.get(1,0) + tmp1.y*j.get(1,1) + tmp1.z*j.get(1,2);
+		bt2 += tmp1.x*j.get(2,0) + tmp1.y*j.get(2,1) + tmp1.z*j.get(2,2);
+		tmp1.set(b1.torque.x*j1inv.m00 + b1.torque.y*j1inv.m01 + b1.torque.z*j1inv.m02,
 			  b1.torque.x*j1inv.m10 + b1.torque.y*j1inv.m11 + b1.torque.z*j1inv.m12,
 			  b1.torque.x*j1inv.m20 + b1.torque.y*j1inv.m21 + b1.torque.z*j1inv.m22);
-		u.scale(dt);
-		u.add(b1.omega);
-		bn  += u.x*j.get(0,3) + u.y*j.get(0,4) + u.z*j.get(0,5);
-		bt1 += u.x*j.get(1,3) + u.y*j.get(1,4) + u.z*j.get(1,5);
-		bt2 += u.x*j.get(2,3) + u.y*j.get(2,4) + u.z*j.get(2,5);
+		tmp1.scale(dt);
+		tmp1.add(b1.omega);
+		bn  += tmp1.x*j.get(0,3) + tmp1.y*j.get(0,4) + tmp1.z*j.get(0,5);
+		bt1 += tmp1.x*j.get(1,3) + tmp1.y*j.get(1,4) + tmp1.z*j.get(1,5);
+		bt2 += tmp1.x*j.get(2,3) + tmp1.y*j.get(2,4) + tmp1.z*j.get(2,5);
 		
 		double bBounce = (b1.v.x*j.get(0,0) + b1.v.y*j.get(0,1) + b1.v.z*j.get(0,2));
 		bBounce += (b1.omega.x*j.get(0,3) + b1.omega.y*j.get(0,4) + b1.omega.z*j.get(0,5));
@@ -313,20 +312,20 @@ public class Contact {
 		bn += bBounce;
 		
 		j = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;
-		u.set(b2.force);
-		u.scale(m2inv*dt);	
-		u.add(b2.v);
-		bn  += u.x*j.get(0,6) + u.y*j.get(0,7) + u.z*j.get(0,8);
-		bt1 += u.x*j.get(1,6) + u.y*j.get(1,7) + u.z*j.get(1,8);
-		bt2 += u.x*j.get(2,6) + u.y*j.get(2,7) + u.z*j.get(2,8);
-		u.set(b2.torque.x*j2inv.m00 + b2.torque.y*j2inv.m01 + b2.torque.z*j2inv.m02,
+		tmp1.set(b2.force);
+		tmp1.scale(m2inv*dt);	
+		tmp1.add(b2.v);
+		bn  += tmp1.x*j.get(0,6) + tmp1.y*j.get(0,7) + tmp1.z*j.get(0,8);
+		bt1 += tmp1.x*j.get(1,6) + tmp1.y*j.get(1,7) + tmp1.z*j.get(1,8);
+		bt2 += tmp1.x*j.get(2,6) + tmp1.y*j.get(2,7) + tmp1.z*j.get(2,8);
+		tmp1.set(b2.torque.x*j2inv.m00 + b2.torque.y*j2inv.m01 + b2.torque.z*j2inv.m02,
 			  b2.torque.x*j2inv.m10 + b2.torque.y*j2inv.m11 + b2.torque.z*j2inv.m12,
 			  b2.torque.x*j2inv.m20 + b2.torque.y*j2inv.m21 + b2.torque.z*j2inv.m22);
-		u.scale(dt);
-		u.add(b2.omega);
-		bn  += u.x*j.get(0,9) + u.y*j.get(0,10) + u.z*j.get(0,11);
-		bt1 += u.x*j.get(1,9) + u.y*j.get(1,10) + u.z*j.get(1,11);
-		bt2 += u.x*j.get(2,9) + u.y*j.get(2,10) + u.z*j.get(2,11);
+		tmp1.scale(dt);
+		tmp1.add(b2.omega);
+		bn  += tmp1.x*j.get(0,9) + tmp1.y*j.get(0,10) + tmp1.z*j.get(0,11);
+		bt1 += tmp1.x*j.get(1,9) + tmp1.y*j.get(1,10) + tmp1.z*j.get(1,11);
+		bt2 += tmp1.x*j.get(2,9) + tmp1.y*j.get(2,10) + tmp1.z*j.get(2,11);
 
 		bBounce = (b2.v.x*j.get(0,6) + b2.v.y*j.get(0,7) + b2.v.z*j.get(0,8));
 		bBounce += (b2.omega.x*j.get(0,9) + b2.omega.y*j.get(0,10) + b2.omega.z*j.get(0,11));

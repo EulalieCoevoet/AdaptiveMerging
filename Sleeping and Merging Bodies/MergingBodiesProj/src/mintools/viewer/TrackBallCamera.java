@@ -322,11 +322,13 @@ public class TrackBallCamera implements Interactor, MouseListener, MouseMotionLi
         trackball_v0.set( trackball_v1 );
         trackball_v0np.set( trackball_v1np );
     }
+    
+    /** Temporary work matrix */
+    private Matrix3d m = new Matrix3d();        
 
     public void mouseReleased(MouseEvent e) {
         // probably not necessary... but will avoid shearing if someone
         // plays with their trackball just a little too much.
-        Matrix3d m = new Matrix3d();        
         bakedTransformation.getRotationScale( m );
         m.normalizeCP();
         bakedTransformation.setRotationScale( m );
