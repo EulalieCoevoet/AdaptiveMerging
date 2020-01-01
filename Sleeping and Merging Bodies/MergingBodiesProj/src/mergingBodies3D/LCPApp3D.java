@@ -423,17 +423,18 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         });
         
-        JButton load = new JButton("Load PNG");
-        basicControls.add( load );
-        load.addActionListener( new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                File f = FileSelect.select("png", "image", "load", "datalcp/", true );
-                if ( f != null ) {
-                    loadSystem( f.getPath() );
-                }
-            }
-        });
+//        JButton load = new JButton("Load PNG");
+//        basicControls.add( load );
+//        load.addActionListener( new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                File f = FileSelect.select("png", "image", "load", "datalcp/", true );
+//                if ( f != null ) {
+//                    loadSystem( f.getPath() );
+//                }
+//            }
+//        });
+        
         JButton loadxml = new JButton("Load XML");
         basicControls.add( loadxml );
         loadxml.addActionListener( new ActionListener() {
@@ -499,8 +500,15 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         vfp.add( whiteEpsilon.getSliderControls(false) );
         vfp.add( factory.getControls() );
         
-        vfp.add( drawWithShadows.getControls() );
-        vfp.add( shadowMap.getControls() );
+        VerticalFlowPanel vfpsm = new VerticalFlowPanel();
+        vfpsm.setBorder(new TitledBorder("shadow map controls") );
+
+        vfpsm.add( drawWithShadows.getControls() );
+        vfpsm.add( shadowMap.getControls() );
+        CollapsiblePanel smcp = new CollapsiblePanel(vfpsm.getPanel());
+        smcp.collapse();
+        vfp.add( smcp );
+        
         return vfp.getPanel();
     }
     
@@ -519,23 +527,23 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private double sceneScale = 0.1; // guess how to get images to show up nicely in 3D in a first approximation...
     private Vector3d sceneTranslation = new Vector3d();
     
-    /**
-     * Loads the specified image, clearing the old system, and resets viewing parameters.
-     * @param filename
-     */
-    private void loadSystem( String filename ) {
-        factory.use = false;        
-        systemClear();
-        system.name = filename;
-        ImageBlocker blocker = new ImageBlocker( filename, (float) (double) whiteEpsilon.getValue() );
-        sceneTranslation.set( - blocker.width/2, - blocker.height, 0 );
-        system.bodies.addAll(blocker.bodies);
-        
-        for (RigidBody body: system.bodies) {
-        	body.friction = system.collision.friction.getValue();
-        	body.restitution = system.collision.restitution.getValue();
-        }
-    }
+//    /**
+//     * Loads the specified image, clearing the old system, and resets viewing parameters.
+//     * @param filename
+//     */
+//    private void loadSystem( String filename ) {
+//        factory.use = false;        
+//        systemClear();
+//        system.name = filename;
+//        ImageBlocker blocker = new ImageBlocker( filename, (float) (double) whiteEpsilon.getValue() );
+//        sceneTranslation.set( - blocker.width/2, - blocker.height, 0 );
+//        system.bodies.addAll(blocker.bodies);
+//        
+//        for (RigidBody body: system.bodies) {
+//        	body.friction = system.collision.friction.getValue();
+//        	body.restitution = system.collision.restitution.getValue();
+//        }
+//    }
     
     /**
      * Loads the specified image, clearing the old system, and resets viewing parameters.
@@ -562,9 +570,9 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private void loadFactorySystem( String filename ) {              
         factory.use = false;        
         systemClear();
+        loadXMLSystem( filename );
         system.name = filename + " factory";
-        ImageBlocker blocker = new ImageBlocker( filename, (float) (double) whiteEpsilon.getValue() );
-        factory.setImageBlocker(blocker);
+        factory.setSystem(system);
         factory.use = true;
         factory.reset();        
     }
@@ -591,7 +599,12 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         posx.setValue(0.0);
         posy.setValue(0.0);
         scale.setValue(0.9);
-        deleteDisplayListRequest = true;
+        // TODO: avoid rebuilding display lists if only resetting a factory
+        // also... awkward way to try to delete the display lists as the 
+        // display loop is not really going to get a chance to be called before
+        // the system.clear call...   In any case, not a big deal if we only 
+        // load systems occasionally.
+        deleteDisplayListRequest = true;  
         system.clear();
     }
     
@@ -616,11 +629,11 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     @Override
     public void attach(Component component) {
     
-        File directory = new File("datalcp");
+        File directory = new File("scenes3D");
         files = directory.listFiles(new FilenameFilter() {            
             @Override
             public boolean accept( File dir, String name ) {
-                return name.endsWith(".png");                
+                return name.endsWith(".xml");                
             }
         });
         java.util.Arrays.sort(files);
@@ -676,37 +689,37 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 } else if ( e.getKeyCode() == KeyEvent.VK_J ) {                   
                     system.jiggle();                                        
                 } else if ( e.getKeyCode() == KeyEvent.VK_G ) {                   
-                    File f = FileSelect.select("png", "image for factory", "load", "datalcp/", true );
+                    File f = FileSelect.select("xml", "xml scene for factory", "load", "scenes3D/", true );
                     if ( f != null ) {
                         loadFactorySystem( f.getPath() );
                     }   
-                } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
-                    loadFactorySystem( "datalcp/tetrisTube.png" );
-                    factory.spread.setValue(30);
-                    factory.interval.setValue(0.4);
-                    factory.downVelocity.setValue(10.0);
-                    factory.angularVelocityScale.setValue(0.5);
-                    factory.linearVelocityScale.setValue(2.5);
+//                } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
+//                    loadFactorySystem( "datalcp/tetrisTube.png" );
+//                    factory.spread.setValue(30);
+//                    factory.interval.setValue(0.4);
+//                    factory.downVelocity.setValue(10.0);
+//                    factory.angularVelocityScale.setValue(0.5);
+//                    factory.linearVelocityScale.setValue(2.5);
                 } else if ( e.getKeyCode() == KeyEvent.VK_PERIOD ) {                                       
                     factory.run.setValue ( ! factory.run.getValue() );
                 } else if ( e.getKeyCode() == KeyEvent.VK_COMMA ) {
                     factory.createBodyRequest = true;
                 } else if (  e.getKeyCode() == KeyEvent.VK_L ) {                    
-                    File f = FileSelect.select("png", "image", "load", "datalcp/", true );
+                    File f = FileSelect.select( "xml", "scene", "load", "scenes3d/", true );
                     if ( f != null ) {
-                        loadSystem( f.getPath() );
+                        loadXMLSystem( f.getPath() );
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_LEFT) {
                     if ( files != null && files.length >= 0 ) {
                         whichFile --;
                         if ( whichFile < 0 ) whichFile = files.length-1;
-                        loadSystem( files[whichFile].getPath() );                        
+                        loadXMLSystem( files[whichFile].getPath() );                        
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_RIGHT ) {
                     if ( files != null && files.length >= 0 ) {
                         whichFile ++;
                         if ( whichFile >= files.length ) whichFile = 0;
-                        loadSystem( files[whichFile].getPath() );
+                        loadXMLSystem( files[whichFile].getPath() );
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
                     ev.stop();

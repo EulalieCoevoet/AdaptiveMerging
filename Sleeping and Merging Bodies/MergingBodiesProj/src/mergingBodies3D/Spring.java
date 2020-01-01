@@ -53,6 +53,10 @@ public class Spring {
 	private Vector3d displacement = new Vector3d();
 	private Vector3d velocity = new Vector3d(); // velocity of the point on the body
 	private Vector3d force = new Vector3d();
+
+	public void reset() {
+		body.transformB2W.transform( pb, pbw );
+	}
 	
 	/**
 	 * Applies the spring force by adding a force and a torque to the body.

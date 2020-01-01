@@ -67,7 +67,7 @@ public class PolygonSoup {
                 }
             }
                 
-            System.out.println( soupStatistics );
+            //System.out.println( soupStatistics );
             
         } catch (IOException e) {
             e.printStackTrace();

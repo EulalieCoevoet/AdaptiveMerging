@@ -61,11 +61,8 @@ public class XMLParser {
 		 
 		document.getDocumentElement().normalize();
 		 
-		System.out.println("Load XML file");
-		System.out.println("-------------");
 		parseCollision(); 
 		parseBody();
-		System.out.println("-------------");
 	}
 	
 	/**
@@ -84,7 +81,6 @@ public class XMLParser {
 				for (String attribute : attributes) {
 					Node n = eElement.getElementsByTagName(attribute).item(0);
 					if ( n != null) {
-						System.out.println(" "+attribute+" : "  + n.getTextContent());
 						String[] values = n.getTextContent().split("\\s+");
 						switch(attribute) {
 							case "feedbackStiffness":
@@ -104,7 +100,6 @@ public class XMLParser {
 						}
 					}
 				}
-				System.out.println("");
 			}
 		}
 	}
@@ -159,34 +154,37 @@ public class XMLParser {
 		setCommonAttributes( body, eElement );
 		body.updateTransformations();
         body.geom = new RigidBodyGeomBox( s );	
-        // Seems silly to deal with boxes with spheres, but this is the quick solution for now... 
+        
+        // Silly to deal with boxes with spheres, but this is the quick solution for now... 
         // Assume unit size tiling, and choose centers along faces
+        // ... and now in comments because we have box-box collisions
         
-        double radius = 0.5;
-        int nx = (int) Math.ceil( s.x/2/radius );
-        int ny = (int) Math.ceil( s.y/2/radius );
-        int nz = (int) Math.ceil( s.z/2/radius );
+//        double radius = 0.5;
+//        int nx = (int) Math.ceil( s.x/2/radius );
+//        int ny = (int) Math.ceil( s.y/2/radius );
+//        int nz = (int) Math.ceil( s.z/2/radius );
+//        
+//        ArrayList<BVSphere> L = new ArrayList<BVSphere>();
+//        Point3d p = new Point3d();
+//        
+//        // stupid, but simple: loop over the volume, and only 
+//        // generate spheres at surface points
+//        for ( int i = 0; i < nx; i++ ) {
+//        	boolean iboundary = i == 0 || i == nx-1;
+//        	for ( int j = 0; j < ny; j++ ) {
+//            	boolean jboundary = j == 0 || j == ny-1;
+//        		for ( int k = 0; k < nz; k++ ) {
+//                	boolean kboundary = k == 0 || k == nz-1;
+//                	if ( !iboundary && !jboundary && !kboundary ) continue;
+//            		p.x = -s.x/2 + radius + i*2*radius;
+//            		p.y = -s.y/2 + radius + j*2*radius;
+//            		p.z = -s.z/2 + radius + k*2*radius;
+//            		L.add( new BVSphere( p, radius * Math.sqrt(2) , body ) ); // should probably be sqrt 3... but balance what is in and what is out/
+//        		}
+//        	}
+//        }        
+//        body.root = new BVNode( L, body );
         
-        ArrayList<BVSphere> L = new ArrayList<BVSphere>();
-        Point3d p = new Point3d();
-        // stupid, but simple: loop over the volume, and only 
-        // generate spheres at surface points
-        for ( int i = 0; i < nx; i++ ) {
-        	boolean iboundary = i == 0 || i == nx-1;
-        	for ( int j = 0; j < ny; j++ ) {
-            	boolean jboundary = j == 0 || j == ny-1;
-        		for ( int k = 0; k < nz; k++ ) {
-                	boolean kboundary = k == 0 || k == nz-1;
-                	if ( !iboundary && !jboundary && !kboundary ) continue;
-            		p.x = -s.x/2 + radius + i*2*radius;
-            		p.y = -s.y/2 + radius + j*2*radius;
-            		p.z = -s.z/2 + radius + k*2*radius;
-            		L.add( new BVSphere( p, radius * Math.sqrt(2) , body ) ); // should probably be sqrt 3... but balance what is in and what is out/
-        		}
-        	}
-        }
-        
-        body.root = new BVNode( L, body );
 		system.bodies.add( body );
 		body.name = name;
 	}
@@ -337,7 +335,6 @@ public class XMLParser {
             if ( n.getNodeType() != Node.ELEMENT_NODE ) continue;
             String tag = n.getNodeName();
             String[] values = n.getTextContent().trim().split("\\s+");        
-			System.out.println(" "+tag+" : "  + n.getTextContent());
 			if ( tag.equalsIgnoreCase("x") ) {
 				body.x.set( t3d( values ) );
 				body.x0.set( body.x );
@@ -365,6 +362,8 @@ public class XMLParser {
 					body.jinv0.setZero();
 					body.jinv.setZero();
 				}
+			} else if ( tag.equalsIgnoreCase("factorypart") ) {	
+				body.factoryPart = Boolean.parseBoolean(values[0]);
 			} else if ( tag.equalsIgnoreCase("spring") ) {
 				Element e = (Element) n;
 				Point3d pB = new Point3d( t3d( e.getAttribute("pB") ) );
@@ -374,7 +373,6 @@ public class XMLParser {
 			}
 			// could complain about unknown attributes here
 		}		
-		System.out.println("");
 	}
 	
 	private Tuple3d t3d( String[] values ) {

@@ -19,9 +19,9 @@ public class Vec3Parameter extends JPanel {
 	/** These values are updated when the paramter is changed */
 	public float x,y,z;
 	
-	public DoubleParameter xp = new DoubleParameter( "x", 0, -10, 10 );
-	public DoubleParameter yp = new DoubleParameter( "y", 0, -10, 10 );
-	public DoubleParameter zp = new DoubleParameter( "z", 0, -10, 10 );
+	public DoubleParameter xp;
+	public DoubleParameter yp;
+	public DoubleParameter zp;
 	
 	/**
 	 * Creates a new vec3 parameter control
@@ -34,6 +34,21 @@ public class Vec3Parameter extends JPanel {
 	 * @param zDefault
 	 */
 	public Vec3Parameter( String name, double xDefault, double yDefault, double zDefault ) {
+		this( name, xDefault, yDefault, zDefault, 10 );
+	}
+	
+	/**
+	 * Creates a new vec3 parameter with the specified -max to max range and default value.
+	 * @param name
+	 * @param xDefault
+	 * @param yDefault
+	 * @param zDefault
+	 * @param max
+	 */
+	public Vec3Parameter( String name, double xDefault, double yDefault, double zDefault, double max ) {
+		xp = new DoubleParameter( "x", 0, -max, max );
+		yp = new DoubleParameter( "y", 0, -max, max );
+		zp = new DoubleParameter( "z", 0, -max, max );
 		setLayout( new GridBagLayout() );
 		GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;

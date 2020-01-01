@@ -45,6 +45,13 @@ public class PlaneRigidBody extends RigidBody {
 		this(new Point3d(0,40,0), new Vector3d(0, -1, 0));
 	}
 	
+	public PlaneRigidBody( PlaneRigidBody body ) {
+		super( body );
+		this.n = body.n;
+		this.p = body.p;
+		d = - (p.x*n.x + p.y*n.y + p.z*n.z);
+	}
+	
 	public PlaneRigidBody( Point3d p, Vector3d n ) {
 		super( 0, null, true, null );
 		n.normalize();

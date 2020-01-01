@@ -30,23 +30,23 @@ public class BVSphere {
     /** body to which this disc is associated */
     RigidBody body;
     
-    /**
-     * Builds a Disc that encloses the given blocks
-     * @param blocks
-     * @param body
-     */
-    public BVSphere( Collection<Block> blocks, RigidBody body ) {
-        this.body = body;
-        // We'll choose the minimum disc enclosing the centers and then add the block radius
-        ArrayList<Point3d> points = new ArrayList<Point3d>();
-        for ( Block b : blocks ) {
-            points.add( new Point3d( b.pB.x, b.pB.y, b.pB.z ) );            
-        }
-        MinimumEnclosingSphere mec = new MinimumEnclosingSphere( points );
-        cB.set( mec.answer.centre );
-        //body.transformB2W.transform(cB, cW);
-        r = mec.answer.radius + Block.radius;
-    }
+//    /**
+//     * Builds a Disc that encloses the given blocks
+//     * @param blocks
+//     * @param body
+//     */
+//    public BVSphere( Collection<Block> blocks, RigidBody body ) {
+//        this.body = body;
+//        // We'll choose the minimum disc enclosing the centers and then add the block radius
+//        ArrayList<Point3d> points = new ArrayList<Point3d>();
+//        for ( Block b : blocks ) {
+//            points.add( new Point3d( b.pB.x, b.pB.y, b.pB.z ) );            
+//        }
+//        MinimumEnclosingSphere mec = new MinimumEnclosingSphere( points );
+//        cB.set( mec.answer.centre );
+//        //body.transformB2W.transform(cB, cW);
+//        r = mec.answer.radius + Block.radius;
+//    }
     
     /**
      * Builds a Disc that encloses the given Discs

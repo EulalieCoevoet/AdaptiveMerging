@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
+import mintools.parameters.Vec3Parameter;
 import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
@@ -37,22 +38,21 @@ public class Factory {
     }
 
     /**
-     * Sets the image blocker to use with this factory.
+     * Sets the system to use with this factory.
      * The free bodies will be created at regular intervals from
-     * a seed location above the top center of the image.
-     * @param blocker
+     * a seed location.
+     * @param system
      */
-    public void setImageBlocker( ImageBlocker blocker ) {
+    public void setSystem( RigidBodySystem system ) {
         pinnedBodies.clear();
         unpinnedBodies.clear();
-        for ( RigidBody b : blocker.bodies ) {
-            if ( b.pinned ) {
+        for ( RigidBody b : system.bodies ) {
+            if ( b.pinned || ! b.factoryPart ) {
                 pinnedBodies.add(b);
             } else {
                 unpinnedBodies.add(b);
             }
         }
-        seed.set( blocker.width*0.5, -blocker.height*0.2, 0 );
     }
         
     /**
@@ -63,18 +63,16 @@ public class Factory {
         rand.setSeed(0);
         system.clear();
         for ( RigidBody b : pinnedBodies ) {
-            system.bodies.add( new RigidBody(b) );
+        	system.bodies.add( b );
         }
+        system.reset();
     }
     
     /** keeps track of elapsed time since last rigid body creation */
     private double elapsed = 0;
     
     private Random rand = new Random();
-    
-    /** seed location for creating new rigid bodies */
-    private Point3d seed = new Point3d(0,0,0);    
-    
+        
     /** a flag for requesting a new rigid body immediately */
     boolean createBodyRequest = false;
     
@@ -102,7 +100,7 @@ public class Factory {
      */
     private void generateBody() {     
         RigidBody body = new RigidBody( unpinnedBodies.get( rand.nextInt(unpinnedBodies.size())) );
-        Vector3d tmp = new Vector3d( seed );
+        Vector3d tmp = new Vector3d( seed.x, seed.y, seed.z );
         tmp.x += ((system.bodies.size()*2)%5 - 2) * spread.getValue();
         body.x0.set( tmp );                        
         body.x.set( tmp );            
@@ -119,20 +117,23 @@ public class Factory {
         system.add( body );
     }
     
+    /** seed location for creating new rigid bodies */
+    Vec3Parameter seed = new Vec3Parameter( "seed location", 0, 50, 0, 75 );    
+
     /** Specifies the width of the zone from which new objects will be dropped */
-    DoubleParameter spread = new DoubleParameter("drop zone width", 30, 0, 60 );
+    DoubleParameter spread = new DoubleParameter("drop zone width", 3, 0, 60 );
 
     /** When run is true, the factory will create objects at a regular interval */
     BooleanParameter run = new BooleanParameter("run factory", true );
     
     /** Interval between body creation events */
-    DoubleParameter interval = new DoubleParameter("delay", 10, 0.2, 10);
+    DoubleParameter interval = new DoubleParameter("delay", 1, 0.2, 10);
 
     /** Downward velocity of new bodies */
-    DoubleParameter downVelocity = new DoubleParameter( "down velocity", 10, 0.1, 20 );
+    DoubleParameter downVelocity = new DoubleParameter( "down velocity", -1, -10, 10 );
 
     /** For controlling the initial linear velocity of new bodies */
-    DoubleParameter linearVelocityScale = new DoubleParameter( "linear velocity perturbation scale", 2.5, 0.1, 10 );
+    DoubleParameter linearVelocityScale = new DoubleParameter( "linear velocity perturbation scale", 0.5, 0.1, 5 );
     
     /** For controlling the initial angular velocity of new bodies */
     DoubleParameter angularVelocityScale = new DoubleParameter( "angular velocity perturbation scale", 0.3, 0.1, 10 );
@@ -144,11 +145,12 @@ public class Factory {
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
         vfp.setBorder( new TitledBorder("Factory") );
-        vfp.add( run.getControls() );
+        vfp.add( run.getControls() );       
         vfp.add( interval.getSliderControls(true) );
+        vfp.add( seed );
         vfp.add( spread.getSliderControls(false) );
         vfp.add( linearVelocityScale.getSliderControls(true) );
-        vfp.add( downVelocity.getSliderControls(true) );
+        vfp.add( downVelocity.getSliderControls(false) );
         vfp.add( angularVelocityScale.getSliderControls(true) );
         CollapsiblePanel cp = new CollapsiblePanel( vfp.getPanel());
         cp.collapse();
