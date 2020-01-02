@@ -155,6 +155,10 @@ public class XMLParser {
 		body.updateTransformations();
         body.geom = new RigidBodyGeomBox( s );	
         
+        Vector3d tmp = new Vector3d( s );
+        tmp.scale(0.5);        
+        body.radius = tmp.length();
+        
         // Silly to deal with boxes with spheres, but this is the quick solution for now... 
         // Assume unit size tiling, and choose centers along faces
         // ... and now in comments because we have box-box collisions

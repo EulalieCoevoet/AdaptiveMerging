@@ -113,6 +113,12 @@ public class RigidBody {
 	/** true if magnetic field is activate */
 	public boolean activateMagnet = false;
     
+	/** 
+	 * A trivial bounding sphere about the COM
+	 * currently only updated for box geometries!
+	 */
+	public double radius;
+	
 	public float[] col;
 	
 	/**
@@ -173,6 +179,7 @@ public class RigidBody {
         geom = body.geom; 
         friction = body.friction;
         restitution = body.restitution;
+        radius = this.radius;
         
         col = body.col; // this can be shared memory!
     }

@@ -161,11 +161,13 @@ public class BoxSphere {
 	 * @param contacts 
 	 * @return 			number of contacts (zero or one)
 	 */
-	public static boolean dBoxSphereTest( RigidTransform TB2W1, RigidTransform TW2B1, Vector3d size, Point3d c, double r ) {
+	public static boolean dBoxSphereTest( RigidBody body1, Vector3d size, Point3d c, double r ) {
+		if ( c.distance(body1.x) > body1.radius + r ) return false; // faster exit... 
+		
 		p.scale( 0.5, size );
+		RigidTransform TW2B1 = body1.transformW2B;
 		TW2B1.transform( c, cB );
 
-		if ( distanceToOrigin(cB) > p.length() + r ) return false; // quick exit
 		// quick exit based on distance to faces
 		if ( cB.x -  p.x > r ) return false;
 		if ( -p.x - cB.x > r ) return false;

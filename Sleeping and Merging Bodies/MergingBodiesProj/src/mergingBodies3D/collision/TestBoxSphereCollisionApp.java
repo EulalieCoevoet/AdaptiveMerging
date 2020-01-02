@@ -66,7 +66,7 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 		pool.swapPools();
 		
 		int cnum = BoxSphere.dBoxSphere( b1, size1, b2, p2, r, contacts, pool );
-		boolean test = BoxSphere.dBoxSphereTest(b1.transformB2W, b1.transformW2B, size1, p2, r );
+		boolean test = BoxSphere.dBoxSphereTest(b1, size1, p2, r );
 				
 		gl.glPointSize(10);
 		gl.glLineWidth(3);

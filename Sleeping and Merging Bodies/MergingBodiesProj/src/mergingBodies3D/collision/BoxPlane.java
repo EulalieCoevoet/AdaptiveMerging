@@ -25,7 +25,9 @@ public class BoxPlane {
 	 * @return the number of contact points
 	 */
 	public static int dBoxPlane( RigidBody body1, Vector3d size, RigidBody body2, Vector3d n, double d, ArrayList<Contact> contacts, ContactPool pool ) {
-		//RigidTransform TB2W = new RigidTransform();
+		// quick test of box origin with plane
+		if ( dot( body1.x, n ) + d > body1.radius ) return 0;
+
 		p.scale( 0.5, size );
 		int numContacts = contacts.size();
 		RigidTransform TB2W = body1.transformB2W;

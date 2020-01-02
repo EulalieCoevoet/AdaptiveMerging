@@ -455,6 +455,9 @@ public class BoxBox {
 
 		// get vector from centers of box 1 to box 2, relative to box 1
 		p.sub(p2,p1);
+		
+		if ( p.length() > body1.radius + body1.radius ) return 0; // quick exit before we do real work...
+		
 		dMULTIPLY1_331 (pp,R1,p);		// get pp = p relative to body 1
 
 		// get side lengths / 2

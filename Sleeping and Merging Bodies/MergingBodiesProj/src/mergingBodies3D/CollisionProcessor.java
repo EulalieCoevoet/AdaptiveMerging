@@ -25,7 +25,7 @@ import mintools.swing.VerticalFlowPanel;
  */
 public class CollisionProcessor {
 
-    private List<RigidBody> bodies;
+    private ArrayList<RigidBody> bodies;
 
     /**
      * We want warm starts to be very efficient so let's hope that the Contact hashing function is good
@@ -56,7 +56,7 @@ public class CollisionProcessor {
      * Creates this collision processor with the provided set of bodies
      * @param bodies
      */
-    public CollisionProcessor( List<RigidBody> bodies ) {
+    public CollisionProcessor( ArrayList<RigidBody> bodies ) {
         this.bodies = bodies;
     }
     
@@ -192,13 +192,22 @@ public class CollisionProcessor {
     private void broadPhase() {
         // Naive n squared body test.. might not be that bad for small number of bodies 
         visitID++;
-        for ( RigidBody b1 : bodies ) {
-            for ( RigidBody b2 : bodies ) { // not so inefficient given the continue on the next line
-                if ( bodies.indexOf(b1) >= bodies.indexOf(b2) ) continue;
-                if ( b1.pinned && b2.pinned ) continue;                
+        int N = bodies.size();
+        for ( int i = 0; i < N-1; i++ ) {
+        	RigidBody b1 = bodies.get(i);
+        	for ( int j = i+1; j < N; j++ ) {
+        		RigidBody b2 = bodies.get( j );
+                if ( b1.pinned && b2.pinned ) continue;
                 narrowPhase( b1, b2 );                
-            }
-        }        
+        	}
+        }
+//        for ( RigidBody b1 : bodies ) {
+//            for ( RigidBody b2 : bodies ) { // not so inefficient given the continue on the next line
+//                if ( bodies.indexOf(b1) >= bodies.indexOf(b2) ) continue;
+//                if ( b1.pinned && b2.pinned ) continue;
+//                narrowPhase( b1, b2 );                
+//            }
+//        }        
     }
 
     double[] depth = new double[1];
@@ -295,7 +304,7 @@ public class CollisionProcessor {
 			node2.visitID = visitID;
 			node2.boundingSphere.updatecW();
 		}
-		if ( !BoxSphere.dBoxSphereTest( body1.transformB2W, body1.transformW2B, geom1.size, node2.boundingSphere.cW, node2.boundingSphere.r ) ) return;
+		if ( !BoxSphere.dBoxSphereTest( body1, geom1.size, node2.boundingSphere.cW, node2.boundingSphere.r ) ) return;
 		if ( !node2.isLeaf() ) {
 			for ( BVNode child : node2.children ) {
 				collideBoxAndSphereTree( geom1, child, body1, body2 );
