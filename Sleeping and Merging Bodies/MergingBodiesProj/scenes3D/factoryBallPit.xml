@@ -1,0 +1,26 @@
+<root>
+
+	should set some factory parameters here!
+
+    <body type="sphere" name="s1" r="2">
+        <x> 0 5 0 </x>
+        <col> .4 .4 .4 </col>
+    </body>
+
+    <body type="sphere" name="s2" r="3">
+        <x> 2 10 -3 </x>
+        <R> 0 1 0 0.1 </R>
+        <col> .7 .7 .7 </col>
+    </body>
+
+    <body type="sphere" name="s2" r="3.5">
+        <x> 2 10 -3 </x>
+        <R> 0 1 0 0.1 </R>
+        <col> .4 .8 .5 </col>
+    </body>
+        
+    <body type="plane" name="plane1" p="0 -10 0" n="0 2 1"> </body>
+    <body type="plane" name="plane1" p="0 -10 0" n="1 2 0"> </body>
+    <body type="plane" name="plane1" p="0 -10 0" n="-.7 2 -.7"> </body>
+
+</root>

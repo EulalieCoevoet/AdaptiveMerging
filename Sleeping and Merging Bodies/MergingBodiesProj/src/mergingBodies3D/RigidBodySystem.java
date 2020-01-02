@@ -280,9 +280,14 @@ public class RigidBodySystem {
         			// let's control the colour of geometry here as it will let us 
         			// decide when we want to override this colour (e.g., if we have a 
         			// rigid body collection)
-        			colour[3] = transparency.getFloatValue();
-        			colourPinned[3] = transparency.getFloatValue();
-        	    	gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, b.pinned ? colourPinned: colour, 0 );
+        			float[] c = colour;
+        			if ( b.pinned ) {
+        				c = colourPinned;
+        			} else if ( b.col != null ) {
+        				c = b.col;
+        			}
+    				c[3] = transparency.getFloatValue();         			
+        			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
         		}
                 b.display( drawable );
         	}

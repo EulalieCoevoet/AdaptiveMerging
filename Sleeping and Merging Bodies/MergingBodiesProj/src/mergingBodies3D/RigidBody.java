@@ -113,6 +113,8 @@ public class RigidBody {
 	/** true if magnetic field is activate */
 	public boolean activateMagnet = false;
     
+	public float[] col;
+	
 	/**
 	 * Constructs a new rigid body
 	 * @param massLinear  can be zero if pinned
@@ -171,6 +173,8 @@ public class RigidBody {
         geom = body.geom; 
         friction = body.friction;
         restitution = body.restitution;
+        
+        col = body.col; // this can be shared memory!
     }
     
 	/**

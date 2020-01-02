@@ -369,7 +369,9 @@ public class XMLParser {
 				Point3d pB = new Point3d( t3d( e.getAttribute("pB") ) );
 				Spring s = new Spring( pB, body );
 				body.springs.add( s );
-				
+			} else if ( tag.equalsIgnoreCase("col")) {
+				double [] col = asDoubles( values );
+				body.col = new float[] { (float) col[0], (float) col[1], (float) col[2], 1 };
 			}
 			// could complain about unknown attributes here
 		}		

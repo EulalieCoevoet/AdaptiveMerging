@@ -27,14 +27,13 @@ public class CollisionProcessor {
 
     private List<RigidBody> bodies;
 
-	// public HashMap<String, Contact> lastTimeStepMap = new HashMap<String, Contact>();
     /**
      * We want warm starts to be very efficient so let's hope that the Contact hashing function is good
      * enough to avoid collisions, and likewise that the hash table for this map is large enough
      * to also avoid collisions.  This will grow dynamically, but we could likewise set the number
      * higher by default if we are running large simulations.
      */
-    private HashMap<Contact,Contact> lastTimeStepContacts = new HashMap<Contact,Contact>(2048);
+    private HashMap<Contact,Contact> lastTimeStepContacts = new HashMap<Contact,Contact>(8192);
 	
     /**
      * The current contacts that resulted in the last call to process collisions
@@ -136,6 +135,16 @@ public class CollisionProcessor {
 	 * Fills lambdas with values from previous time step
 	 */
 	protected void warmStart() {
+//		// check for hash collisions??
+//		for ( Contact c1 : contacts ) {
+//			for ( Contact c2 : contacts ) {
+//				if ( c2 == c1 ) continue;
+//				if ( c1.hashCode() == c2.hashCode() ) {
+//					System.out.println( "hash collision" );
+//				}
+//			}
+//		}
+		
 		for (Contact contact : contacts) {
 			Contact oldContact = lastTimeStepContacts.get( contact );
 			if (oldContact != null) {
@@ -233,7 +242,8 @@ public class CollisionProcessor {
 		}
 		// NOTE: might be easier to handle this flow control structure with a check on the first parameter 
 		// and calling appropriate functions that check the second parameter, filtering the result down
-		// to the appropriate pair of primitives?		
+		// to the appropriate pair of primitives?	
+		// That said.... this is certainly faster with if/else than with function/method calls
 	}
 	
     /** 

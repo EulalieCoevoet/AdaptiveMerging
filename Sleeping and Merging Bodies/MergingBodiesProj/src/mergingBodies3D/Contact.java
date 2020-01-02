@@ -55,8 +55,9 @@ public class Contact {
     
     /** Contact tangent2 in body1 coordinates */
     private Vector3d tangent2W = new Vector3d();
+   
     
-    
+    // TODO: I think these are only used for display!!! Move to the display call and use static members to save memory?
     
 	/** Contact force being applied by this contact on body1 (note this is world aligned at body COM) */
     private Vector3d forceW1 = new Vector3d();
