@@ -1,22 +1,23 @@
 package createScenes3D;
 
 import java.io.PrintStream;
+import java.util.Random;
 
 public class makeCicularTowerApp {
 
 	public static void main( String[] args ) {		
 		try {
-			PrintStream ps = new PrintStream("scenes3D/tower3.xml");
+			PrintStream ps = new PrintStream("scenes3D/tower25.xml");
 			ps.println("<root>");
 			// rotate blocks about y as we go around a circle of a 
 			// given radius
 			double r = 10;
-			int layers = 10;
+			int layers = 25;
 //			int sx = 3;
 //			int sy = 2;
 //			int sz = 5; 
 			int sx = 2;
-			int sy = 1;
+			int sy = 2;
 			int sz = 4; 
 
 			int floory = -10;
@@ -42,6 +43,8 @@ public class makeCicularTowerApp {
 					ps.println("<body type=\"box\" name=\""+name+"\" " + dim + ">" );
 					ps.println("    <x> " + asString(x,y,z) + " </x>" );
 					ps.println("    <R> 0 -1 0 " + radians + "</R>" );
+					int ind = rand.nextInt( col.length );
+					ps.println("    <col> " + col[ind] + "</col>" );
 					ps.println("</body>");
 				}
 				y = y + (float)(sy + (Math.sqrt(2)-1));
@@ -52,6 +55,16 @@ public class makeCicularTowerApp {
 			e.printStackTrace();
 		}
 	}
+	
+	static Random rand = new Random();
+	static String[] col = new String[] {
+		"0.8 0.5 0.5",
+		"0.5 0.5 0.8",
+		"0.5 0.8 0.5",
+		"0.8 0.8 0.5",
+		"0.5 0.8 0.8",
+		"0.8 0.5 0.8",
+	};
 	
 	public static String asString( double sx, double sy, double sz ) {
 		return  sx + "  " + sy + " " + sz; 

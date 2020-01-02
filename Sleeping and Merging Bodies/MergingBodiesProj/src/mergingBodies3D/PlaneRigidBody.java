@@ -31,7 +31,7 @@ public class PlaneRigidBody extends RigidBody {
 	/**
 	 * Size for the plane
 	 */
-	float radius = 100; 
+	float radius = 200; 
 	
 	/**
 	 * d parameter of plane equation (computed in constructor, i.e., n_x x + n_y y + n_z z + d = 0)
