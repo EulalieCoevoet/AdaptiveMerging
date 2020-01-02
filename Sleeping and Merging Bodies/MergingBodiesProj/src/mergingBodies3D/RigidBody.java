@@ -43,7 +43,7 @@ public class RigidBody {
     /** rotational inertia in rest pose with rotation equal to identity */
     private Matrix3d massAngular0 = new Matrix3d();
     /** rotational inertia in the current pose */
-    private Matrix3d massAngular = new Matrix3d();
+    Matrix3d massAngular = new Matrix3d();
     
     double massLinear;
         
@@ -124,7 +124,7 @@ public class RigidBody {
 	/**
 	 * Constructs a new rigid body
 	 * @param massLinear  can be zero if pinned
-	 * @param massAngular can be null if pinned
+	 * @param massAngular can be null if pinned (can also be null if you plan to fix it later, e.g., composite bodies)
 	 * @param pinned
 	 * @param boundingBoxB can be null if pinned
 	 */
@@ -141,10 +141,12 @@ public class RigidBody {
         	this.boundingBoxB.addAll( boundingBoxB );
         	this.massLinear = massLinear;
         	this.minv = 1.0 / massLinear;
-            this.massAngular0.set( massAngular );
-            this.massAngular.set( massAngular );            
-        	this.jinv0.invert(massAngular0);
-	        this.jinv.set( jinv0 );
+        	if ( massAngular != null ) {
+	            this.massAngular0.set( massAngular );
+	            this.massAngular.set( massAngular );            
+	            this.jinv0.invert(massAngular0);
+	            this.jinv.set( jinv0 );
+        	}
         } 
         theta.setIdentity();
         theta0.setIdentity();
@@ -179,7 +181,7 @@ public class RigidBody {
         geom = body.geom; 
         friction = body.friction;
         restitution = body.restitution;
-        radius = this.radius;
+        radius = body.radius;
         
         col = body.col; // this can be shared memory!
     }
@@ -207,6 +209,7 @@ public class RigidBody {
         // rotational inertia updated give we are storing information in a 
         // world aligned frame... note that the non-inverted angular inertia
         // used for energy computation and for the corriollis force (disabled)
+        // also used by composite boides at the time of their creation 
         if ( ! pinned ) {
 	        jinv.mul( theta, jinv0 );
 	        jinv.mul( thetaT );

@@ -42,6 +42,7 @@ import mintools.swing.FileSelect;
 import mintools.swing.HorizontalFlowPanel;
 import mintools.swing.VerticalFlowPanel;
 import mintools.viewer.EasyViewer;
+import mintools.viewer.EasyViewerAnim;
 import mintools.viewer.FlatMatrix4d;
 import mintools.viewer.Interactor;
 import mintools.viewer.SceneGraphNode;
@@ -53,7 +54,7 @@ import mintools.viewer.ShadowMap;
  */
 public class LCPApp3D implements SceneGraphNode, Interactor {
 
-    private EasyViewer ev;
+    private EasyViewerAnim ev;
 
     private RigidBodySystem system = new RigidBodySystem();
     
@@ -83,7 +84,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         loadXMLSystem("scenes3D/boxesOnPlane.xml");
         //System("datalcp/lcp.png"); // good default scene
         T.getBackingMatrix().setIdentity();
-        ev = new EasyViewer( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(540,480), new Dimension(640,480) );
+        ev = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(540,480), new Dimension(640,480) );
         ev.addInteractor(this);       
         
         ev.trackBall.setFocalDistance(10);
@@ -126,8 +127,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         }
         
+        double dt = stepsize.getValue() / substeps.getValue();
         if ( run.getValue() ) {
-            double dt = stepsize.getValue() / (int)substeps.getValue();
             for ( int i = 0; i < substeps.getValue(); i++ ) {
                 if ( factory.use ) factory.advanceTime( dt );
                 system.advanceTime( dt );                
@@ -144,7 +145,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             drawAllObjects( drawable, false );
             shadowMap.endShadowMapping( drawable, ev.trackBall );
         }
-        displayAllObjectsNonShadowable( drawable );
+        displayAllObjectsNonShadowable( drawable,dt );
         if ( mouseSpring.picked != null ) {
         	gl.glPushMatrix();
         	gl.glScaled( sceneScale,sceneScale,sceneScale );
@@ -287,12 +288,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         gl.glPopMatrix();
     }
     
-    private void displayAllObjectsNonShadowable( GLAutoDrawable drawable ) {
+    /**
+     * Non shadowable objects include contact force visualizaitons (which need dt) 
+     * @param drawable
+     * @param dt
+     */
+    private void displayAllObjectsNonShadowable( GLAutoDrawable drawable, double dt ) {
     	GL2 gl = drawable.getGL().getGL2();
         gl.glPushMatrix();
         gl.glScaled( sceneScale,sceneScale,sceneScale );
         gl.glTranslated( sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
-        system.displayNonShadowable(drawable);
+        system.displayNonShadowable(drawable, dt);
         gl.glPopMatrix();
     }
     
@@ -550,6 +556,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      * @param filename
      */
     private void loadXMLSystem( String filename ) {
+    	System.out.println("loading " + filename );
         factory.use = false;        
         systemClear();
         system.name = filename;

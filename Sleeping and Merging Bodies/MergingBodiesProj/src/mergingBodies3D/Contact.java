@@ -55,24 +55,7 @@ public class Contact {
     
     /** Contact tangent2 in body1 coordinates */
     private Vector3d tangent2W = new Vector3d();
-   
-    
-    // TODO: I think these are only used for display!!! Move to the display call and use static members to save memory?
-    
-	/** Contact force being applied by this contact on body1 (note this is world aligned at body COM) */
-    private Vector3d forceW1 = new Vector3d();
-
-	/** Contact torque being applied by this contact on body1 */
-    private Vector3d torqueW1 = new Vector3d();
-
-	/** Contact force being applied by this contact on body2 (note this is world aligned at body COM) */
-    private Vector3d forceW2 = new Vector3d();
-
-	/** Contact torque being applied by this contact on body2 */
-    private Vector3d torqueW2 = new Vector3d();
-    
-
-    
+      
 	/** vector points from body 2 to body 1, magnitude is the amount of overlap.*/
 	public double constraintViolation; // in this case the constraint violation is the amount of overlap two bodies have when they are determined to be in contact
 	double prevConstraintViolation;
@@ -228,42 +211,6 @@ public class Contact {
 		j.set(2, 9, tmp1.x);
 		j.set(2, 10, tmp1.y);
 		j.set(2, 11, tmp1.z);
-	}
-	
-	/**
-	 * Stores contact forces and torques for visualization purposes
-	 * TODO: is this ONLY done for visualization?  If so, more this code to the 
-	 * display method to free up memory in the contact data structure 
-	 * (i.e., waste computation in drawing, rather than wasting memory!!)
-	 * @param dt
-	 */
-	public void computeForces(boolean computeInCollection, double dt) {
-
-		DenseMatrix j;
-
-		j = this.j; //(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
-		double f1 = lambda0*j.get(0,0) + lambda1*j.get(1,0) + lambda2*j.get(2,0);
-		double f2 = lambda0*j.get(0,1) + lambda1*j.get(1,1) + lambda2*j.get(2,1);
-		double f3 = lambda0*j.get(0,2) + lambda1*j.get(1,2) + lambda2*j.get(2,2);
-		forceW1.set(f1,f2,f3);
-		forceW1.scale(1./dt);
-		f1 = lambda0*j.get(0,3) + lambda1*j.get(1,3) + lambda2*j.get(2,3);
-		f2 = lambda0*j.get(0,4) + lambda1*j.get(1,4) + lambda2*j.get(2,4);
-		f3 = lambda0*j.get(0,5) + lambda1*j.get(1,5) + lambda2*j.get(2,5);
-		torqueW1.set(f1,f2,f3);
-		torqueW1.scale(1./dt);
-
-		j = this.j; //(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
-		f1 = lambda0*j.get(0,6) + lambda1*j.get(1,6) + lambda2*j.get(2,6);
-		f2 = lambda0*j.get(0,7) + lambda1*j.get(1,7) + lambda2*j.get(2,7);
-		f3 = lambda0*j.get(0,8) + lambda1*j.get(1,8) + lambda2*j.get(2,8);
-		forceW2.set(f1,f2,f3);
-		forceW2.scale(1./dt);
-		f1 = lambda0*j.get(0,9)  + lambda1*j.get(1,9) +  lambda2*j.get(2,9);
-		f2 = lambda0*j.get(0,10) + lambda1*j.get(1,10) + lambda2*j.get(2,10);
-		f3 = lambda0*j.get(0,11) + lambda1*j.get(1,11) + lambda2*j.get(2,11);
-		torqueW2.set(f1,f2,f3);
-		torqueW2.scale(1./dt);
 	}
 	
 	/**
@@ -461,13 +408,66 @@ public class Contact {
         gl.glEnd();
     }
     
+    // I think these are only used for display!!! Move to the display call and use static members to save memory?
+	// Seems to likewise be the case for
+    
+	/** temporary Contact force being applied by this contact on body1 (note this is world aligned at body COM) */
+    static private Vector3d forceW1 = new Vector3d();
+
+//	/** Contact torque being applied by this contact on body1 */
+//    private Vector3d torqueW1 = new Vector3d();
+//
+//	/** Contact force being applied by this contact on body2 (note this is world aligned at body COM) */
+//    private Vector3d forceW2 = new Vector3d();
+//
+//	/** Contact torque being applied by this contact on body2 */
+//    private Vector3d torqueW2 = new Vector3d();
+
+	/**
+	 * Stores contact forces and torques for visualization purposes
+	 * TODO: is this ONLY done for visualization?  If so, more this code to the 
+	 * display method to free up memory in the contact data structure 
+	 * (i.e., waste computation in drawing, rather than wasting memory!!)
+	 * @param dt
+	 */
+	private void computeForces( boolean computeInCollection, double dt, Vector3d forceW1 ) {
+
+		DenseMatrix j;
+
+		j = this.j; //(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
+		double f1 = lambda0*j.get(0,0) + lambda1*j.get(1,0) + lambda2*j.get(2,0);
+		double f2 = lambda0*j.get(0,1) + lambda1*j.get(1,1) + lambda2*j.get(2,1);
+		double f3 = lambda0*j.get(0,2) + lambda1*j.get(1,2) + lambda2*j.get(2,2);
+		forceW1.set(f1,f2,f3);
+		forceW1.scale(1./dt);
+		
+//		f1 = lambda0*j.get(0,3) + lambda1*j.get(1,3) + lambda2*j.get(2,3);
+//		f2 = lambda0*j.get(0,4) + lambda1*j.get(1,4) + lambda2*j.get(2,4);
+//		f3 = lambda0*j.get(0,5) + lambda1*j.get(1,5) + lambda2*j.get(2,5);
+//		torqueW1.set(f1,f2,f3);
+//		torqueW1.scale(1./dt);
+//
+//		j = this.j; //(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
+//		f1 = lambda0*j.get(0,6) + lambda1*j.get(1,6) + lambda2*j.get(2,6);
+//		f2 = lambda0*j.get(0,7) + lambda1*j.get(1,7) + lambda2*j.get(2,7);
+//		f3 = lambda0*j.get(0,8) + lambda1*j.get(1,8) + lambda2*j.get(2,8);
+//		forceW2.set(f1,f2,f3);
+//		forceW2.scale(1./dt);
+//		f1 = lambda0*j.get(0,9)  + lambda1*j.get(1,9) +  lambda2*j.get(2,9);
+//		f2 = lambda0*j.get(0,10) + lambda1*j.get(1,10) + lambda2*j.get(2,10);
+//		f3 = lambda0*j.get(0,11) + lambda1*j.get(1,11) + lambda2*j.get(2,11);
+//		torqueW2.set(f1,f2,f3);
+//		torqueW2.scale(1./dt);
+	}
+	
 	/**
 	 * Draws the connections between bodies to visualize the 
 	 * the adjacency structure of the matrix as a graph.
 	 * @param drawable
 	 */
-	public void displayContactForce( GLAutoDrawable drawable, Color3f color ) {
+	public void displayContactForce( GLAutoDrawable drawable, Color3f color, double dt ) {
 		GL2 gl = drawable.getGL().getGL2();
+		computeForces(false, dt, forceW1); // This might seem wasteful (e.g., if sim not running), but only used for debug visualization!
 		gl.glLineWidth(2);
 		if (state == ContactState.ONEDGE)
 			gl.glColor4f(0, 0, 0, 1);
@@ -476,7 +476,7 @@ public class Contact {
 		gl.glBegin( GL.GL_LINES );
 		double scale = forceVizScale.getValue();
 		gl.glVertex3d(contactW.x + scale*forceW1.x, contactW.y+scale*forceW1.y, contactW.z+scale*forceW1.z );
-		gl.glVertex3d(contactW.x + scale*forceW2.x, contactW.y+scale*forceW2.y, contactW.z+scale*forceW2.z );		
+		gl.glVertex3d(contactW.x + -scale*forceW1.x, contactW.y+-scale*forceW1.y, contactW.z+-scale*forceW1.z );		
 		gl.glEnd();
 	}
     

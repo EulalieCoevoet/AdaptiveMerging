@@ -11,7 +11,8 @@ import mergingBodies3D.RigidBody;
 import mergingBodies3D.RigidTransform;
 
 /**
- * TODO: MEMORY: Consider preallocation of working variables
+ * Box-Sphere collision test with preallocation of working variables
+ * Code is perhaps not so pretty?
  * @author kry
  */
 public class BoxSphere {
@@ -140,15 +141,6 @@ public class BoxSphere {
 			return 1;
 		}
 		return 0;
-	}
-
-	/**
-	 * Because vecmath sucks sometimes... here is the distance from p to the origin
-	 * @param p
-	 * @return
-	 */
-	private static double distanceToOrigin( Point3d p ) {
-		return Math.sqrt( p.x*p.x + p.y*p.y + p.z*p.z ); 
 	}
 	
 	/**

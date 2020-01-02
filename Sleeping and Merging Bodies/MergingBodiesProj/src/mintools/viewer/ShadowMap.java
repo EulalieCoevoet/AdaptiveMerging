@@ -210,7 +210,7 @@ public class ShadowMap {
      * Prepares for drawing the light view
      * @param drawable
      */
-    public void beginLightPass( GLAutoDrawable drawable, TrackBallCamera tbc ) {        
+    public void beginLightPass( GLAutoDrawable drawable, Camera tbc ) {        
         GL2 gl = drawable.getGL().getGL2(); 
         
 		//////////////////////////////////////////////////////////////////
@@ -246,7 +246,7 @@ public class ShadowMap {
      * Finishes the light view drawing and prepares for normal camera view
      * @param drawable
      */
-    public void endLightPass( GLAutoDrawable drawable, TrackBallCamera tbc ) {
+    public void endLightPass( GLAutoDrawable drawable, Camera tbc ) {
         GL2 gl = drawable.getGL().getGL2();
 
         // grab a copy of the light projection matrix... could have been done elsewhere
@@ -261,7 +261,7 @@ public class ShadowMap {
      * Prepares for drawing with the shadow map depth test
      * @param drawable
      */
-    public void beginShadowMapping(GLAutoDrawable drawable, TrackBallCamera tbc ) {
+    public void beginShadowMapping(GLAutoDrawable drawable, Camera tbc ) {
         GL2 gl = drawable.getGL().getGL2();
         
 		//////////////////////////////////////////////////////////////////
@@ -287,7 +287,7 @@ public class ShadowMap {
      * Finishes drawing with the shadow map depth test
      * @param drawable
      */
-    public void endShadowMapping( GLAutoDrawable drawable, TrackBallCamera tbc ) {
+    public void endShadowMapping( GLAutoDrawable drawable, Camera tbc ) {
         GL2 gl = drawable.getGL().getGL2();
 		pflShaderState.useProgram(gl, false);
 		displayDebug(drawable);

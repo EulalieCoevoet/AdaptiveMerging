@@ -96,8 +96,7 @@ public class RigidBodySystem {
         collision.collisionDetection(dt);
 		collision.warmStart(); 	
         
-        if ( collision.doLCP.getValue() ) 
-    		collision.solveLCP(dt); 
+		collision.solveLCP(dt); 
         
         // advance the system by the given time step
         for ( RigidBody b : bodies ) 
@@ -228,7 +227,7 @@ public class RigidBodySystem {
     private float[] red = new float[] { 1, 0, 0, 0.5f };
     private float[] blue = new float[] { 0, 0, 1, 0.25f };
     
-    public void displayNonShadowable( GLAutoDrawable drawable ) {
+    public void displayNonShadowable( GLAutoDrawable drawable, double dt ) {
     	GL2 gl = drawable.getGL().getGL2();
         gl.glDisable(GL2.GL_DEPTH_TEST);
 
@@ -244,7 +243,7 @@ public class RigidBodySystem {
             for ( Contact c : collision.contacts ) {
                 c.display(drawable);
     			if (drawContactForces.getValue()) {
-    				c.displayContactForce(drawable, new Color3f(1,0,0));
+    				c.displayContactForce(drawable, new Color3f(1,0,0), dt );
     			}
             }
         }

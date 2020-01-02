@@ -10,10 +10,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.glu.GLU;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.vecmath.AxisAngle4d;
@@ -21,6 +17,11 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.glu.GLU;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
@@ -31,7 +32,7 @@ import mintools.swing.VerticalFlowPanel;
  * 
  * @author kry
  */
-public class TrackBallCamera implements Interactor, MouseListener, MouseMotionListener, Camera {
+public class TrackBallCameraAnim implements Interactor, MouseListener, MouseMotionListener, Camera {
     
 	private boolean enable = true;
 	
@@ -92,20 +93,20 @@ public class TrackBallCamera implements Interactor, MouseListener, MouseMotionLi
     private int currentAction;
     
     /**
-     * Our current transformation (always baked, it's smackball after all)
+     * Our current transformation (this is the target)
      */
     public Matrix4d bakedTransformation = new Matrix4d();
-    
-    /**
-     * A flat matrix for passing to opengl, backed by our transformation matrix
-     */
-    public FlatMatrix4d transformation = new FlatMatrix4d(bakedTransformation);
-            
+    Vector3d omega = new Vector3d();
+    public Matrix4d bakedTransformationp = new Matrix4d();
+    FlatMatrix4d transformationp = new FlatMatrix4d( bakedTransformationp );
+                
     /**
      * Create a new trackball with the default settings
      */
-    public TrackBallCamera() {
+    public TrackBallCameraAnim() {
         bakedTransformation.setIdentity();
+        bakedTransformationp.setIdentity();
+       
         createTrackBallParameters();
         createCameraParameters();
     }
@@ -213,15 +214,15 @@ public class TrackBallCamera implements Interactor, MouseListener, MouseMotionLi
         float deltaY = v0.y - v1.y;                 
         tmpVector3d.set(deltaX, deltaY, 0);
         tmpVector3d.scale( factor );
-        transformWithTranspose( bakedTransformation, tmpVector3d );
+        transformWithTranspose( bakedTransformation, tmpVector3d );  // todo use the current or target baked?
         tmpVector3d.scale(panRate.getValue());            
         applyFocalPointTranslation( tmpVector3d );
     }
     
-    private void applyAdvance( Vector3f v0, Vector3f v1, float factor ) {
+    private void applyAdvance( Vector3f v0, Vector3f v1, float factor ) { 
         float deltaY = v0.y - v1.y;
         tmpVector3d.set(0, 0, deltaY * factor);
-        transformWithTranspose( bakedTransformation, tmpVector3d );            
+        transformWithTranspose( bakedTransformation, tmpVector3d );    // todo use the current or target baked?        
         tmpVector3d.scale(advanceRate.getValue());
         applyFocalPointTranslation( tmpVector3d );
     }
@@ -332,6 +333,11 @@ public class TrackBallCamera implements Interactor, MouseListener, MouseMotionLi
         bakedTransformation.getRotationScale( m );
         m.normalizeCP();
         bakedTransformation.setRotationScale( m );
+        
+        // Occasionally clean up the integrated one too...
+        bakedTransformationp.getRotationScale( m );
+        m.normalizeCP();
+        bakedTransformationp.setRotationScale( m );
     }
 
     protected JPanel controlPanel;
@@ -365,6 +371,10 @@ public class TrackBallCamera implements Interactor, MouseListener, MouseMotionLi
         panel.add(trackballFit.getSliderControls(false));
         panel.add(trackballGain.getSliderControls(true));
         
+        panel.add( animationStepSize.getSliderControls( true ) );
+        panel.add( animationk1.getSliderControls( true ) );
+        panel.add( animationCDM.getSliderControls( false ) );
+
         controlPanel = panel.getPanel();
         return controlPanel;        
     }
@@ -387,8 +397,22 @@ public class TrackBallCamera implements Interactor, MouseListener, MouseMotionLi
     public DoubleParameter focalPointX;
     public DoubleParameter focalPointY;
     public DoubleParameter focalPointZ;
-
+    
+    // should totally do this with vectors...
+    double focalPointXv;
+    double focalPointXp;
+    double focalPointYv;
+    double focalPointYp;
+    double focalPointZv;
+    double focalPointZp;
+    
+    /** The target focal distance */
     public DoubleParameter focalDistance;
+    /** The velocity */
+    private double focalDistancev;
+    /** The actual focal Distance to use */
+    private double focalDistancep;
+    
     
     protected void createCameraParameters() {
         near = new DoubleParameter("Near distance", 10, Double.MIN_VALUE, Double.POSITIVE_INFINITY);
@@ -405,6 +429,11 @@ public class TrackBallCamera implements Interactor, MouseListener, MouseMotionLi
         focalPointY = new DoubleParameter("Focal point.y", 0f, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         focalPointZ = new DoubleParameter("Focal point.z", 0f, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         focalDistance = new DoubleParameter("Focal distance", 20, 0, Double.POSITIVE_INFINITY);
+        
+        focalDistancep = focalDistance.getValue();
+        focalPointXp = focalPointX.getValue();
+        focalPointYp = focalPointX.getValue();
+        focalPointZp = focalPointX.getValue();
     }
     
     private int[] viewportDimensions = new int[4];
@@ -431,35 +460,96 @@ public class TrackBallCamera implements Interactor, MouseListener, MouseMotionLi
         GL2 gl = drawable.getGL().getGL2();
 
         // Dolly back
-        gl.glTranslated(0, 0, -focalDistance.getValue());
+        gl.glTranslated(0, 0, -focalDistancep);//.getValue());
         // Zoom
         double zoom = magnification.getValue(); 
         gl.glScaled( zoom, zoom, zoom );
         // Apply orientation
-        gl.glMultMatrixd( transformation.asArray(), 0 );        
+        gl.glMultMatrixd( transformationp.asArray(), 0 );        
         // Move to focal point
-        gl.glTranslated(-focalPointX.getValue(), -focalPointY.getValue(), -focalPointZ.getValue());
+        //gl.glTranslated(-focalPointX.getValue(), -focalPointY.getValue(), -focalPointZ.getValue());
+        gl.glTranslated( -focalPointXp, -focalPointYp, -focalPointZp );
     }
     
     public void applyInverseViewTransformation(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
 
         // Move to focal point
-        gl.glTranslated(focalPointX.getValue(), focalPointY.getValue(), focalPointZ.getValue());
+        gl.glTranslated( focalPointXp, focalPointYp, focalPointZp );
+ //       gl.glTranslated(focalPointX.getValue(), focalPointY.getValue(), focalPointZ.getValue());
 
         // Apply orientation
-        transformation.getBackingMatrix().transpose();
-        gl.glMultMatrixd( transformation.asArray(), 0 );        
-        transformation.getBackingMatrix().transpose();
+        transformationp.getBackingMatrix().transpose();
+        gl.glMultMatrixd( transformationp.asArray(), 0 );        
+        transformationp.getBackingMatrix().transpose();
 
         // Zoom        
         double zoom = 1.0/magnification.getValue(); 
         gl.glScaled( zoom, zoom, zoom );
         
         // Dolly back
-        gl.glTranslated(0, 0, focalDistance.getValue());
+        gl.glTranslated(0, 0, focalDistancep );//.getValue());
     } 
 
+	private Matrix4d tmp = new Matrix4d();
+	private Matrix4d tmp2 = new Matrix4d();
+	private AxisAngle4d aa = new AxisAngle4d();
+	private Vector3d domega = new Vector3d();
+	
+	private DoubleParameter animationStepSize = new DoubleParameter( "Anim step size", 0.005, 1e-4, 1 );
+	private DoubleParameter animationk1= new DoubleParameter( "Anim stiffness", 1000, 1, 1e6 );
+	private DoubleParameter animationCDM = new DoubleParameter( "Anim critical damping multiplyer", 0.9, 0, 2);
+		
+    /** 
+	 * Updates the actual view from the target settings, but this should only be 
+     * called once per frame.
+     * If the parameter is true, then the system time elapsed will inform the 
+     * update, while false would be probably the preferred setting, especially if
+     * frames are being saved to disk to produce an animation.
+     * @param useRealTime
+     */
+    public void stepAnimation( boolean useRealTime ) {
+    	// xdd + b kd + k x = 0;
+    	double h = animationStepSize.getValue();
+    	double k1 = animationk1.getValue();
+    	// tiny bit underdamped and we don't notice!
+    	double k2 = 2*Math.sqrt(k1)*animationCDM.getValue(); // critical damping at sqrt(b^2- 4 k)
+
+    	double err = focalDistance.getValue() - focalDistancep;
+    	focalDistancev += h * ( k1 * err - k2 * focalDistancev);
+    	focalDistancep += h * focalDistancev;
+
+    	err = focalPointX.getValue() - focalPointXp;
+    	focalPointXv += h * ( k1 * err - k2 * focalPointXv);
+    	focalPointXp += h * focalPointXv;
+    	err = focalPointY.getValue() - focalPointYp;
+    	focalPointYv += h * ( k1 * err - k2 * focalPointYv);
+    	focalPointYp += h * focalPointYv;
+    	err = focalPointZ.getValue() - focalPointZp;
+    	focalPointZv += h * ( k1 * err - k2 * focalPointZv);
+    	focalPointZp += h * focalPointZv;
+
+       	// The error is the difference between the bakedtrasform and our bakedtransformp
+    	// This could be much more efficient given that these are rigid transformations :/
+
+    	tmp.transpose(bakedTransformation); // we know there is zero translation... this will be way faster... 
+    	tmp2.mul( bakedTransformationp, tmp );
+    	aa.set(tmp2);
+    	domega.set( aa.x, aa.y, aa.z );
+    	domega.scale( aa.angle * k1 );
+    	domega.scaleAdd( -k2, omega, domega );
+    	omega.scaleAdd( h, domega, omega );
+    	
+    	// use omega scaled by h to update the bakedtransformationp
+    	double angle = -omega.length() * h;
+    	if ( Math.abs(angle) < 1e-4 ) return;
+    	tmpVector3d.normalize( omega );
+    	aa.set( tmpVector3d, angle );
+    	tmp.set(aa);
+    	tmp2.mul( tmp, bakedTransformationp );
+    	bakedTransformationp.set( tmp2 );
+    }
+    
     /**
      * Sets up projection and modelview matrices with the current camera parameters.
      * Note that the current matrix values have no effect and are simply overwritten.

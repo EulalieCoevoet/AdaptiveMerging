@@ -9,10 +9,13 @@ import javax.vecmath.Vector3d;
 import mintools.viewer.FlatMatrix4d;
 
 /**
- * 2D rigid transformation
+ * 3D rigid transformation
  * @author kry
  */
 public class RigidTransform {
+	
+	// TODO: Really want to have this backed by a rotation matrix and translation vector...
+	// Then can implement our own inverse and adjoint transformations??
 	
 	/** 
 	 * Flat matrix wrapper for transformation matrix to use with opengl 

@@ -1,7 +1,5 @@
 package mergingBodies3D.collision;
 
-import static org.ode4j.ode.internal.Common.dRecip;
-
 import java.util.ArrayList;
 
 import javax.management.RuntimeErrorException;
@@ -373,7 +371,7 @@ public class BoxBox {
 			alpha[0] = 0;
 			beta[0]= 0;
 		} else {
-			d = dRecip(d);
+			d = 1.0/d;
 			alpha[0] = ( (q1 + uaub*q2)*d);
 			beta[0] = ( (uaub*q1 + q2)*d);
 		}
@@ -456,7 +454,7 @@ public class BoxBox {
 		// get vector from centers of box 1 to box 2, relative to box 1
 		p.sub(p2,p1);
 		
-		if ( p.length() > body1.radius + body1.radius ) return 0; // quick exit before we do real work...
+		if ( p.length() > body1.radius + body2.radius ) return 0; // quick exit before we do real work...
 		
 		dMULTIPLY1_331 (pp,R1,p);		// get pp = p relative to body 1
 

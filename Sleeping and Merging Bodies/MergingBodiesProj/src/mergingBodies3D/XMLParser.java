@@ -108,24 +108,149 @@ public class XMLParser {
 	 * Parse body node
 	 */
 	private void parseBody() {
-		NodeList nList = document.getElementsByTagName("body");
+		NodeList root = document.getElementsByTagName("root");
+		Node rootNode = root.item(0);
+		NodeList nList = rootNode.getChildNodes();
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			Node node = nList.item(temp);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
+			if ( node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equalsIgnoreCase("body") ) {
 				eElement = (Element) node;
 				String type = eElement.getAttribute("type");
 				String name = eElement.getAttribute("name");
 				if ( type.equalsIgnoreCase("box") ) {
-					createBox( name, eElement );
+					RigidBody body = createBox( name, eElement );
+					system.bodies.add( body );
 				} else if ( type.equalsIgnoreCase("plane") ) {
-					createPlane( name, eElement );
+					RigidBody body = createPlane( name, eElement );
+					system.bodies.add( body );
 				} else if ( type.equalsIgnoreCase("sphere") ) {
-					createSphere( name, eElement );
+					RigidBody body = createSphere( name, eElement );
+					system.bodies.add( body );
 				} else if ( type.equalsIgnoreCase("mesh") ) {
-					createMesh( name, eElement );
+					RigidBody body = createMesh( name, eElement );
+					system.bodies.add( body );
+				} else if ( type.equalsIgnoreCase("composite") ) {
+					RigidBody body = createComposite( name, eElement );
+					system.bodies.add( body );
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Probably want to use composites sparingly, as they will probably be more expensive for
+	 * collision detection... or might likewise want to make sure there is a bounding sphere 
+	 * at the COM for trivial tests.
+	 * Note that a possible extension would be to allow composites to reference bodies by name
+	 * for inclusion, to avoid reloading or recreating bodies in the case where many composites 
+	 * are desired?
+	 * 
+	 * @param name
+	 * @param eElement
+	 */
+	private RigidBody createComposite( String name, Element eElement ) {
+		RigidBodyGeomComposite compositeGeom = new RigidBodyGeomComposite();
+
+		// get the bodies, harvest their geometries, and compute the composite
+		//NodeList nodeList = eElement.getChildNodes();
+		NodeList nList = eElement.getChildNodes();
+
+		// we need to keep them to the end to properly compute inertia
+		// or likewise, it might be convenient to preserve this composite body
+		// list for the sake of easy drawing and collision detection
+		// ( i.e., store it with the geometry )
+		ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
+		
+		for (int temp = 0; temp < nList.getLength(); temp++) {
+			Node node = nList.item(temp);
+			if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equalsIgnoreCase("body") ) {
+				eElement = (Element) node;
+				String type = eElement.getAttribute("type");
+				String name2 = eElement.getAttribute("name");
+				RigidBody sbody = null;
+				if ( type.equalsIgnoreCase("box") ) {
+					sbody = createBox( name2, eElement );
+				} else if ( type.equalsIgnoreCase("plane") ) {
+					sbody = createPlane( name2, eElement );
+				} else if ( type.equalsIgnoreCase("sphere") ) {
+					sbody = createSphere( name2, eElement );
+				} else if ( type.equalsIgnoreCase("mesh") ) {
+					sbody = createMesh( name2, eElement );
+				}
+				if ( sbody != null ) {
+					bodies.add( sbody );
+				}			
+			}
+        }
+
+		Vector3d ll = new Vector3d();
+		Vector3d ur = new Vector3d();
+		double massLinear = 0;
+		Matrix3d massAngular = new Matrix3d();
+
+		Point3d com = new Point3d();
+		for ( RigidBody b : bodies ) {
+			massLinear += b.massLinear;		
+			com.scaleAdd( b.massLinear, b.x, com );
+			compositeGeom.bodies.add( b );
+		}
+		com.scale( 1.0/massLinear );
+		for ( RigidBody b : bodies ) {
+			b.x.sub(com);  // ensure it draws relative to the center of mass
+			b.x0.sub(com);
+			b.updateTransformations();
+			massAngular.add( b.massAngular );
+			// should certainly have a b.x squared type term for the mass being at a distance...
+//			I [p]    J  0    I   0 
+//			0  I    0 mI    [p] I
+//			I [p]   J   0
+//			0  I   m[p] 0
+//			J + I [p][p] in the upper left...
+		// recall lemma 2.3: [a] = a a^T - ||a||^2 I
+			double x = b.x.x;
+			double y = b.x.y;
+			double z = b.x.z;			
+			double x2 = x*x;
+			double y2 = y*y;
+			double z2 = z*z;
+			Matrix3d op = new Matrix3d();
+			op.m00 = y2+z2; op.m01 = x*y; op.m02 = x*z;
+			op.m10 = y*x; op.m11 = x2+z2; op.m12 = y*z;
+			op.m20 = z*x; op.m21 = z*y; op.m22 = x2 + y2;
+			op.mul( b.massLinear );
+			massAngular.add( op );			
+		}
+		
+		// TODO: THIS BOUNDING BOX IS POSSIBLY WRONG?
+		for ( RigidBody b : bodies ) {
+			for ( Point3d p : b.boundingBoxB ) {
+				p.sub(com);
+				ll.x = Math.min( p.x, ll.x );
+				ll.y = Math.min( p.y, ll.y );
+				ll.z = Math.min( p.z,  ll.z );
+				ur.x = Math.max( p.x, ur.x );
+				ur.y = Math.max( p.y, ur.y );
+				ur.z = Math.max( p.z,  ur.z );
+			}
+		}
+		
+		// set the stuff on the body now!
+		ArrayList<Point3d> bbB = new ArrayList<Point3d>();
+		bbB.add( new Point3d( ll.x, ll.y, ll.z ) );
+		bbB.add( new Point3d( ll.x, ll.y, ur.z ) );
+		bbB.add( new Point3d( ll.x, ur.y, ll.z ) );
+		bbB.add( new Point3d( ll.x, ur.y, ur.z ) );
+		bbB.add( new Point3d( ur.x, ll.y, ll.z ) );
+		bbB.add( new Point3d( ur.x, ll.y, ur.z ) );
+		bbB.add( new Point3d( ur.x, ur.y, ll.z ) );
+		bbB.add( new Point3d( ur.x, ur.y, ur.z ) );
+		
+		RigidBody body = new RigidBody( massLinear, massAngular, false, bbB );
+		setCommonAttributes( body, eElement );
+		body.updateTransformations();
+		body.geom = compositeGeom;
+		
+		return body;
 	}
 	
 	/**
@@ -133,7 +258,7 @@ public class XMLParser {
 	 * @param name
 	 * @param eElement
 	 */
-	private void createBox( String name, Element eElement ) {
+	private RigidBody createBox( String name, Element eElement ) {
 		Vector3d s = new Vector3d( t3d( eElement.getAttribute("dim") ) );
 		double density = 1;
 		double massLinear = s.x*s.y*s.z * density;
@@ -189,19 +314,19 @@ public class XMLParser {
 //        }        
 //        body.root = new BVNode( L, body );
         
-		system.bodies.add( body );
-		body.name = name;
+        body.name = name;
+		return body;
 	}
 
-	private void createPlane( String name, Element eElement ) {
+	private RigidBody createPlane( String name, Element eElement ) {
 		Point3d p = new Point3d();
 		Vector3d n = new Vector3d();
 		p.set( t3d( eElement.getAttribute("p") ) );
 		n.set( t3d( eElement.getAttribute("n") ) );
 		RigidBody b = new PlaneRigidBody(p, n); // ALWAYS pinned, 
 		setCommonAttributes( b, eElement ); // can still adjust friction and restitution
-		system.bodies.add( b );
 		b.name = name;
+		return b;
 	}
 	
 	/**
@@ -209,7 +334,7 @@ public class XMLParser {
 	 * @param name
 	 * @param eElement
 	 */
-	private void createSphere( String name, Element eElement ) {
+	private RigidBody createSphere( String name, Element eElement ) {
 		double r = Double.parseDouble( eElement.getAttribute("r") );
 		double density = 1;
 		double massLinear = 4.0/3*Math.PI*r*r*r * density;
@@ -232,11 +357,11 @@ public class XMLParser {
         body.geom = new RigidBodyGeomSphere( r );		
 		BVSphere bvSphere = new BVSphere( new Point3d(), r, body );
         body.root = new BVNode( bvSphere );
-		system.bodies.add( body );
 		body.name = name;
+		return body;
 	}
 	
-	private void createMesh( String name, Element eElement ) {
+	private RigidBody createMesh( String name, Element eElement ) {
 		double scale = Double.parseDouble( eElement.getAttribute("scale") );
 		double density = 1;
 		String objfname = eElement.getAttribute("obj");
@@ -321,9 +446,9 @@ public class XMLParser {
             e.printStackTrace();
         }    
         body.root = spheres.get(0);
-		
-		system.bodies.add( body );
-		body.name = name;		
+
+        body.name = name;	
+		return body;
 	}
 
 	/**

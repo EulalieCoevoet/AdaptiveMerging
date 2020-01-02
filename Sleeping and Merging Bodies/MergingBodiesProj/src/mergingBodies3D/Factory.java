@@ -5,7 +5,6 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import mintools.parameters.BooleanParameter;

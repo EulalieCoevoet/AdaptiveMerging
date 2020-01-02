@@ -3,7 +3,6 @@ package mergingBodies3D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
@@ -116,11 +115,15 @@ public class CollisionProcessor {
 			
 			// solve contacts
 			long now = System.nanoTime();
-			solver.solve(dt);
+			
+			if ( !skipSolve.getValue() ) {
+				solver.solve(dt);
+			}
+			
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
 			updateContactsMap();
-			computeContactsForce(dt);	// TODO: Is this ONLY done for drawing ???
+			// computeContactsForce(dt);	// this was ONLY done for drawing ???
 		}
 	}
 	
@@ -162,14 +165,18 @@ public class CollisionProcessor {
 		}
 	}
 	
-	/**
-	 * Compute the contact force J*lambda.
-	 * @param dt
-	 */
-	public void computeContactsForce(double dt) {
-		for (Contact c: contacts)
-			c.computeForces(false, dt);	
-	}
+	// computeContatForce is only used for viz, yes?  
+	// I note that internal and external forces are needed to update the b vectors for single
+	// cycles LCP solves, but this shouldn't cause a problem.  Leaving this in comments to be 
+	// removed in a future push, just in case this comment and code snippet are useful.
+//	/**
+//	 * Compute the contact force J*lambda.
+//	 * @param dt
+//	 */
+//	public void computeContactsForce(double dt) {
+//		for (Contact c: contacts)
+//			c.computeForces(false, dt);	
+//	}
 
 	/**go through each element in contacts 2.
 	* at each element, swap it for another random member of contacts2. 
@@ -190,7 +197,8 @@ public class CollisionProcessor {
      * Currently this does the naive n squared collision check.
      */
     private void broadPhase() {
-        // Naive n squared body test.. might not be that bad for small number of bodies 
+        // Naive n squared body test.. might not be that bad for even a larger number of bodies
+    	// as the LCP solve for large number of contacts is really the killer!
         visitID++;
         int N = bodies.size();
         for ( int i = 0; i < N-1; i++ ) {
@@ -200,14 +208,7 @@ public class CollisionProcessor {
                 if ( b1.pinned && b2.pinned ) continue;
                 narrowPhase( b1, b2 );                
         	}
-        }
-//        for ( RigidBody b1 : bodies ) {
-//            for ( RigidBody b2 : bodies ) { // not so inefficient given the continue on the next line
-//                if ( bodies.indexOf(b1) >= bodies.indexOf(b2) ) continue;
-//                if ( b1.pinned && b2.pinned ) continue;
-//                narrowPhase( b1, b2 );                
-//            }
-//        }        
+        }    
     }
 
     double[] depth = new double[1];
@@ -219,7 +220,22 @@ public class CollisionProcessor {
      * @param body2
      */
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
-		if ( body1 instanceof PlaneRigidBody ) {
+		if ( body1.geom instanceof RigidBodyGeomComposite ) {
+			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
+			for ( RigidBody b : g1.bodies ) {
+				// Need these collisions to be with the composite body rather than the child
+				// Need up update transforms of the children?
+				// This is all very much like an adaptively merged body...
+				
+				// narrowPhase( )
+				
+			}
+		} else if ( body2.geom instanceof RigidBodyGeomComposite ) {
+			RigidBodyGeomComposite g2 = (RigidBodyGeomComposite) body2.geom;
+			for ( RigidBody b : g2.bodies ) {
+				// same thing here... 
+			}			
+		} else if ( body1 instanceof PlaneRigidBody ) {
 			PlaneRigidBody b1 = (PlaneRigidBody) body1;
 			if ( body2 instanceof PlaneRigidBody ) {
 				System.err.println("plane plane collision is impossible!");
@@ -410,11 +426,10 @@ public class CollisionProcessor {
     public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.8, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
-    public IntParameter iterations = new IntParameter("iterations for PGS solve", 200, 1, 500);
+    public IntParameter iterations = new IntParameter("iterations for PGS solve", 20, 1, 500);
+        
+    private BooleanParameter skipSolve = new BooleanParameter(" skip LCP solve", false );
     
-    /** Flag for switching between penalty based contact and contact constraints */
-    public BooleanParameter doLCP = new BooleanParameter( "do LCP solve", true );
-     
     /**
      * @return controls for the collision processor
      */
@@ -424,7 +439,7 @@ public class CollisionProcessor {
         
 		vfp.add( shuffle.getControls() );
 		
-        vfp.add( doLCP.getControls() );
+        vfp.add( skipSolve.getControls() );
         vfp.add( iterations.getSliderControls() );
         vfp.add( restitution.getSliderControls(false) );
         vfp.add( friction.getSliderControls(false) );
