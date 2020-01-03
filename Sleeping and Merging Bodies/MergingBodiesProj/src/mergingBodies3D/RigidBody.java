@@ -59,6 +59,11 @@ public class RigidBody {
     
     public boolean selected;
     
+    // TODO:  RigidBody improvements... 
+    // Use a Vector6d for (v,omega)
+    // Update RigidTransform to take theta and x as backing memory, and have rigid body extend RigidTransform so as not to duplicate memory
+    // RigidTransform can have transform and inverseTransform methods for points, vectors, and 6D vectors
+    
     /** Transforms points in Body coordinates to World coordinates */
     public RigidTransform transformB2W = new RigidTransform();
     
@@ -383,31 +388,5 @@ public class RigidBody {
         FancyAxis.draw(drawable);
         gl.glPopMatrix();
     }
-    
-    static public double kineticEnergyThreshold = 1e-6;
-    
-//    /**
-//     * Draws the center of mass position with a circle.  The circle will be 
-//     * drawn differently if the block is at rest (i.e., close to zero kinetic energy)
-//     * @param drawable
-//     */
-//    public void displayCOM( GLAutoDrawable drawable ) {
-//        GL2 gl = drawable.getGL().getGL2();
-//        gl.glDisable( GL2.GL_DEPTH_TEST );
-//        float[] col = new float[] { 0, 0, 1f, 0.25f };
-//        gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
-//        gl.glPointSize(8);
-//
-//        gl.glBegin( GL.GL_POINTS );
-//        gl.glVertex3d( x.x, x.y, x.z);
-//        gl.glEnd();
-//        
-////        gl.glPushMatrix();
-////        gl.glTranslated(x.x, x.y, x.z);
-////        EasyViewer.glut.glutSolidSphere(0.25, 10, 10);
-////        gl.glPopMatrix();
-////        
-//        gl.glEnable( GL2.GL_DEPTH_TEST );
-//    }
-    
+
 }

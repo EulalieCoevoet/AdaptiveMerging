@@ -223,9 +223,7 @@ public class CollisionProcessor {
 				// Need these collisions to be with the composite body rather than the child
 				// Need up update transforms of the children?
 				// This is all very much like an adaptively merged body...
-				
-				// narrowPhase( )
-				
+				//narrowPhase( b, body2 );				
 			}
 		} else if ( body2.geom instanceof RigidBodyGeomComposite ) {
 			RigidBodyGeomComposite g2 = (RigidBodyGeomComposite) body2.geom;
