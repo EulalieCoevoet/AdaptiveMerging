@@ -148,12 +148,12 @@ public class XMLParser {
 	 * @param name
 	 * @param eElement
 	 */
-	private RigidBody createComposite( String name, Element eElement ) {
+	private RigidBody createComposite( String name, Element bodyNode ) {
 		RigidBodyGeomComposite compositeGeom = new RigidBodyGeomComposite();
 
 		// get the bodies, harvest their geometries, and compute the composite
 		//NodeList nodeList = eElement.getChildNodes();
-		NodeList nList = eElement.getChildNodes();
+		NodeList nList = bodyNode.getChildNodes();
 
 		// we need to keep them to the end to properly compute inertia
 		// or likewise, it might be convenient to preserve this composite body
@@ -246,7 +246,7 @@ public class XMLParser {
 		bbB.add( new Point3d( ur.x, ur.y, ur.z ) );
 		
 		RigidBody body = new RigidBody( massLinear, massAngular, false, bbB );
-		setCommonAttributes( body, eElement );
+		setCommonAttributes( body, bodyNode );
 		body.updateTransformations();
 		body.geom = compositeGeom;
 		

@@ -11,6 +11,19 @@
     	</body>
     </body>
     
+    <body type="composite" name="jack">
+		<x> 20 20 0 </x> 
+		<body type="box" name="x" dim="5   0.7 0.7"> <R> 1 0 0 0.78539816339 </R> </body>
+    	<body type="box" name="y" dim="0.7 5   0.7"> <R> 0 1 0 0.78539816339 </R> </body>
+    	<body type="box" name="z" dim="0.7 0.7 5">   <R> 0 0 1 0.78539816339 </R> </body>
+    	<body type="sphere" name="x+" r="1"> <x>  3  0  0 </x> </body>
+    	<body type="sphere" name="x-" r="1"> <x> -3  0  0 </x> </body>
+    	<body type="sphere" name="y+" r="1"> <x>  0  3  0 </x> </body>
+    	<body type="sphere" name="y-" r="1"> <x>  0 -3  0 </x> </body>
+    	<body type="sphere" name="z+" r="1"> <x>  0  0  3 </x> </body>
+    	<body type="sphere" name="z-" r="1"> <x>  0  0 -3 </x> </body>
+    </body>
+    
     <body type="plane" name="plane1" p="0 -0 0" n="0 1 0">
     </body>
 

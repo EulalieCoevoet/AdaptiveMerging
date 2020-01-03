@@ -243,7 +243,7 @@ public class RigidBodySystem {
             for ( Contact c : collision.contacts ) {
                 c.display(drawable);
     			if (drawContactForces.getValue()) {
-    				c.displayContactForce(drawable, new Color3f(1,0,0), dt );
+    				c.displayContactForce(drawable, dt );  // should let it draw its own colour
     			}
             }
         }

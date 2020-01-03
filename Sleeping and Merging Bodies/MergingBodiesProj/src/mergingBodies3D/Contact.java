@@ -393,7 +393,9 @@ public class Contact {
 	
 	/** Colour for drawing contacts */
     private static final float[] col = new float[] { 1f, 0, 0, 0.25f };
-
+    private static final float[] colNew = new float[] { 0, 0.5f, 0, 0.65f };
+    private static final float[] colOnEdge = new float[] { 0, 0, 0, 0.75f };
+    
     /**
      * Draws the contact points
      * @param drawable
@@ -401,7 +403,6 @@ public class Contact {
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
         gl.glPointSize(3);
-        //gl.glColor4d(.7,0,0,0.15);
         gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
         gl.glBegin( GL.GL_POINTS );
         gl.glVertex3d( contactW.x, contactW.y, contactW.z );
@@ -465,14 +466,20 @@ public class Contact {
 	 * the adjacency structure of the matrix as a graph.
 	 * @param drawable
 	 */
-	public void displayContactForce( GLAutoDrawable drawable, Color3f color, double dt ) {
+	public void displayContactForce( GLAutoDrawable drawable, double dt ) {
 		GL2 gl = drawable.getGL().getGL2();
 		computeForces(false, dt, forceW1); // This might seem wasteful (e.g., if sim not running), but only used for debug visualization!
-		gl.glLineWidth(2);
-		if (state == ContactState.ONEDGE)
-			gl.glColor4f(0, 0, 0, 1);
-		else
-			gl.glColor4f(color.x, color.y, color.z, 1);
+		gl.glLineWidth(0.75f);
+		if (state == ContactState.ONEDGE) {
+    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colOnEdge, 0 );
+		} else {
+			if ( newThisTimeStep ) {				
+				gl.glLineWidth(4f);
+	    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colNew, 0 );
+			} else {
+	    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
+			}
+		} 
 		gl.glBegin( GL.GL_LINES );
 		double scale = forceVizScale.getValue();
 		gl.glVertex3d(contactW.x + scale*forceW1.x, contactW.y+scale*forceW1.y, contactW.z+scale*forceW1.z );
