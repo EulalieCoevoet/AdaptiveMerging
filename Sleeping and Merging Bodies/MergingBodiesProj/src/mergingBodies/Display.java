@@ -21,6 +21,7 @@ public class Display {
 
 	    public BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", false );
 	    public BooleanParameter drawGraphs = new BooleanParameter( "draw performance graphs", false );
+	    public BooleanParameter drawMemGraphs = new BooleanParameter( "draw memory graphs", false );
 	    
 		private DoubleParameter transparency = new DoubleParameter("body block transparency", .5, 0, 1 );
 		private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
@@ -232,6 +233,7 @@ public class Display {
 		
         vfp.add( params.hideOverlay.getControls() );
         vfp.add( params.drawGraphs.getControls() );
+        vfp.add( params.drawMemGraphs.getControls() );
         
 		vfp.add( params.transparency.getSliderControls(false));
 		vfp.add( params.drawBodies.getControls() );

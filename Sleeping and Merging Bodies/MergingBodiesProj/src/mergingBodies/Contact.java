@@ -68,7 +68,10 @@ public class Contact {
 	Point2d contactB2  = new Point2d();
 	
 	/** Jacobian for normal direction */ 
-	// TODO: change that one matrix for all
+	// TODO: change that one matrix for all... actually, for better performance consider the following:
+	// Make these all variables like jna0 jna1 jna2 jnb0 jnb1 jna2 etc as the setters and getters
+	// on dense vectors all have range checking with extra overhead (eventually optimized by JIT).
+	// do the same for lambda.
 	DenseVector jn = new DenseVector(6);
 	
 	/** Jacobian for normal direction collection frame */ 
@@ -122,6 +125,8 @@ public class Contact {
 		constraintViolation =  interpenetration;
 		index = nextContactIndex++;        
 
+		// TODO: the body frame contacts are NEVER used... only transformed here from world to body, and then back to world later
+		// Not clear that the bodies move in the mean time, yes??  Consider eliminating these conversions and the body frame variables.
 		contactB1.set(contactW);
 		contactB2.set(contactW);
 		body1.transformW2B.transform(contactB1);

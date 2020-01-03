@@ -6,7 +6,6 @@ import javax.vecmath.Color3f;
 /**
  * This class extends Color3f to allow features like the generation of a random color
  * @author eulalie
- *
  */
 public class Color extends Color3f {
 
@@ -20,21 +19,26 @@ public class Color extends Color3f {
 		super();
 	}
 
+	private static Random rand = new Random();
+	
 	/**
 	 * Return a random color (not gray)
 	 * @return Color3f
 	 */
 	public void setRandomColor() {
-		
-		Float r = (new Random()).nextFloat();
-		Float g = (new Random()).nextFloat();
-		Float b = (new Random()).nextFloat();
-		
-		if (Math.abs(r - g) < 1.5e-1 && Math.abs(g - b) < 1.5e-1) // avoid gray
-			this.setRandomColor();
-		
-		this.x = r;
-		this.y = g;
-		this.z = b;
+		this.set( java.awt.Color.getHSBColor( rand.nextFloat(), 1f, 1f ) );
+
+//		Float r = rand.nextFloat();
+//		Float g = rand.nextFloat();
+//		Float b = rand.nextFloat();
+//		
+//		this.set( java.awt.Color.getHSBColor( rand.nextFloat(), 1f, 1f ) );
+//		
+//		if (Math.abs(r - g) < 1.5e-1 && Math.abs(g - b) < 1.5e-1) // avoid gray
+//			this.setRandomColor();
+//		
+//		this.x = r;
+//		this.y = g;
+//		this.z = b;
 	}
 }

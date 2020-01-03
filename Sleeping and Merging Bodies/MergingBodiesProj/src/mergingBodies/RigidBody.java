@@ -225,6 +225,8 @@ public class RigidBody {
 		jinv = body.jinv;
 		isSleeping = false;
 		rho = 0;
+		friction = body.friction;
+		restitution = body.restitution;
 	}
 	
 	/**

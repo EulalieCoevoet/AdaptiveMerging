@@ -20,10 +20,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
@@ -33,6 +29,9 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import mintools.parameters.BooleanParameter;
@@ -203,6 +202,31 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
     	EasyViewer.endOverlay(drawable);
 
+        Runtime rt = Runtime.getRuntime();
+        long usedMem = (rt.totalMemory() - rt.freeMemory()) / 1024; // / 1024;
+        double alpha = 0.01;
+        memDelta = 0;
+        if ( lastUsedMem != -1) {
+        	memDelta = usedMem - lastUsedMem;
+        	filteredUsedMem = alpha * ( usedMem - lastUsedMem ) + (1-alpha)*filteredUsedMem;
+        }
+        lastUsedMem = usedMem;
+        long f2fTime = 0;
+		long now = System.nanoTime();
+    	if ( lastFrameTime != -1 ) {
+    		f2fTime = now-lastFrameTime;
+    	}
+		lastFrameTime = now;
+    	
+		memMonitor.add( memDelta );
+    	//computeTimeMonitor.add( system.computeTime * 1000 );
+		computeTimeMonitor.add( f2fTime / 1e6 );
+    	
+    	if ( system.display.params.drawMemGraphs.getValue() ) {
+    		memMonitor.draw( drawable, 0 );
+        	computeTimeMonitor.draw( drawable, 1);
+    	}
+    	
         if ( system.display.params.drawGraphs.getValue() ) {
         	ccm.draw(drawable);
         }
@@ -218,6 +242,13 @@ public class LCPApp implements SceneGraphNode, Interactor {
             }
         }
     }
+    
+    private MemoryMonitor memMonitor = new MemoryMonitor( "memory", "step");
+    private MemoryMonitor computeTimeMonitor = new MemoryMonitor( "compute time", "step");
+    private long lastUsedMem = -1;
+    private double filteredUsedMem = 0;
+    private long memDelta = 0;
+    private long lastFrameTime = -1;
     
     /**
      * Converts from screen coordinates to image coordinates
