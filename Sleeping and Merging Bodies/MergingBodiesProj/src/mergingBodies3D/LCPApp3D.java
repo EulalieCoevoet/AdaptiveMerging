@@ -201,7 +201,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         
         Runtime rt = Runtime.getRuntime();
         long usedMem = (rt.totalMemory() - rt.freeMemory()) / 1024; // / 1024;
-        stringBuilder.append( "MEMORY USED = "); stringBuilder.append( usedMem ); stringBuilder.append( " KB \n" );
         double alpha = 0.01;
         memDelta = 0;
         if ( lastUsedMem != -1) {
@@ -209,20 +208,21 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         	filteredUsedMem = alpha * ( usedMem - lastUsedMem ) + (1-alpha)*filteredUsedMem;
         }
         lastUsedMem = usedMem;
-        stringBuilder.append( "MEMORY DELTA = "); stringBuilder.append( memDelta ); stringBuilder.append( " KB \n" );
-        stringBuilder.append( "FILTERED DELTA = "); stringBuilder.append( (int) filteredUsedMem ); stringBuilder.append( " KB \n" );
-        
-    	memMonitor.add( memDelta );
-    	
-    	long f2fTime = 0;
+        long f2fTime = 0;
 		long now = System.nanoTime();
     	if ( lastFrameTime != -1 ) {
     		f2fTime = now-lastFrameTime;
     	}
 		lastFrameTime = now;
-    	computeTimeMonitor.add( f2fTime / 1e6 );
+    	
+		memMonitor.add( memDelta );
     	//computeTimeMonitor.add( system.computeTime * 1000 );
-
+		computeTimeMonitor.add( f2fTime / 1e6 );
+        
+        stringBuilder.append( "MEMORY USED = "); stringBuilder.append( usedMem ); stringBuilder.append( " KB \n" );
+                stringBuilder.append( "MEMORY DELTA = "); stringBuilder.append( memDelta ); stringBuilder.append( " KB \n" );
+        stringBuilder.append( "FILTERED DELTA = "); stringBuilder.append( (int) filteredUsedMem ); stringBuilder.append( " KB \n" );
+        
         if ( ! hideOverlay.getValue() ) {
         	EasyViewer.printTextLines( drawable, stringBuilder.toString(), 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
         }

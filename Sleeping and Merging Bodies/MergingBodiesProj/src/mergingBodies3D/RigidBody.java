@@ -10,7 +10,6 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.viewer.FancyAxis;
-import no.uib.cipr.matrix.DenseVector;
 
 /**
  * Simple 2D rigid body based on image samples
@@ -20,6 +19,12 @@ public class RigidBody {
     
 	/** Bodies can have names, as specified in XML, but not needed for anything yet except conveience */
 	String name;
+	
+	/** 
+	 * Used for composite bodies and collections
+	 * TODO: either be careful or change out composites work once rigid collections are included in 3D... 
+	 */
+	RigidBody parent;
 	
     /** Variable to keep track of identifiers that can be given to rigid bodies */
     static public int nextIndex = 0;
@@ -61,7 +66,8 @@ public class RigidBody {
     public RigidTransform transformW2B = new RigidTransform();
     
     /** DeltaV for PGS resolution */
-    DenseVector deltaV = new DenseVector(6);
+    Vector3d deltaVx = new Vector3d();
+    Vector3d deltaVomega = new Vector3d();
     
     /** linear velocity */
     public Vector3d v = new Vector3d();
@@ -190,9 +196,10 @@ public class RigidBody {
 	 * Clear deltaV, force and torque
 	 */
 	public void clear() {
-		force.set(0., 0., 0.);
-		torque.set(0., 0., 0.);
-		deltaV.zero();
+		force.set(0,0,0);
+		torque.set(0,0,0);
+		deltaVx.set(0,0,0);
+		deltaVomega.set(0,0,0);
 	}
     	
     /**
@@ -297,17 +304,17 @@ public class RigidBody {
 	private Vector3d tmp2 = new Vector3d();
 
 	public void advanceVelocities(double dt) {
-		v.x += force.x * dt * minv + deltaV.get(0);
-		v.y += force.y * dt * minv + deltaV.get(1);
-		v.z += force.z * dt * minv + deltaV.get(2);
+		v.x += force.x * dt * minv + deltaVx.x;
+		v.y += force.y * dt * minv + deltaVx.y;
+		v.z += force.z * dt * minv + deltaVx.z;
 
         jinv.transform( torque, domega );
         domega.scale( dt );
         omega.add( domega );
         
-        omega.x += deltaV.get(3);
-        omega.y += deltaV.get(4);
-        omega.z += deltaV.get(5);
+        omega.x += deltaVomega.x;
+        omega.y += deltaVomega.y;
+        omega.z += deltaVomega.z;
 	}
 	
 	public void advancePositions(double dt) {

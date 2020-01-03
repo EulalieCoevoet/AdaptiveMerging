@@ -1,6 +1,5 @@
 package mergingBodies3D;
 
-import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -353,27 +352,31 @@ public class Contact {
 	 */
 	public double getJdv(boolean computeInCollection, int index) {
 		
-		DenseVector dv1 = body1.deltaV;//(body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
-		DenseVector dv2 = body2.deltaV;//(body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
+//		DenseVector dv1 = body1.deltaV;//(body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
+//		DenseVector dv2 = body2.deltaV;//(body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
+		Vector3d dv1x = body1.deltaVx; 
+		Vector3d dv1o = body1.deltaVomega; 
+		Vector3d dv2x = body2.deltaVx; 
+		Vector3d dv2o = body2.deltaVomega; 
 		DenseMatrix j;
 		
 		double Jdv = 0;  		
 		
 		j = this.j;//(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
-		Jdv += j.get(index,0) * dv1.get(0);
-		Jdv += j.get(index,1) * dv1.get(1);
-		Jdv += j.get(index,2) * dv1.get(2);
-		Jdv += j.get(index,3) * dv1.get(3);
-		Jdv += j.get(index,4) * dv1.get(4);
-		Jdv += j.get(index,5) * dv1.get(5);
+		Jdv += j.get(index,0) * dv1x.x;
+		Jdv += j.get(index,1) * dv1x.y;
+		Jdv += j.get(index,2) * dv1x.z;
+		Jdv += j.get(index,3) * dv1o.x;
+		Jdv += j.get(index,4) * dv1o.y;
+		Jdv += j.get(index,5) * dv1o.z;
 
 		j = this.j;//(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
-		Jdv += j.get(index,6) * dv2.get(0);
-		Jdv += j.get(index,7) * dv2.get(1);
-		Jdv += j.get(index,8) * dv2.get(2);
-		Jdv += j.get(index,9) * dv2.get(3);
-		Jdv += j.get(index,10) * dv2.get(4);
-		Jdv += j.get(index,11) * dv2.get(5);
+		Jdv += j.get(index,6) * dv2x.x;
+		Jdv += j.get(index,7) * dv2x.y;
+		Jdv += j.get(index,8) * dv2x.z;
+		Jdv += j.get(index,9) * dv2o.x;
+		Jdv += j.get(index,10) * dv2o.y;
+		Jdv += j.get(index,11) * dv2o.z;
 		
 		return Jdv;
 	}

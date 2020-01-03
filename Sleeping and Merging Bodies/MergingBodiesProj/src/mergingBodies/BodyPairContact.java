@@ -27,6 +27,8 @@ public class BodyPairContact {
 
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	
+	/** TODO: make these circular buffers for efficiency!
+	 * That is the remove(0) is linear time, while a linked list would be constant time it would thrash the GC */
 	public ArrayList<Double> motionMetricHist = new ArrayList<Double>();
 	public ArrayList<Contact.ContactState> contactStateHist = new ArrayList<Contact.ContactState>();
 		

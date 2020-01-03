@@ -3,9 +3,9 @@ package mergingBodies3D;
 import java.util.ArrayList;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
 import no.uib.cipr.matrix.DenseMatrix;
-import no.uib.cipr.matrix.DenseVector;
 
 
 /**
@@ -150,8 +150,13 @@ public class PGS {
 		double m2inv = body2.minv; //(body2.temporarilyPinned)? 0: body2.minv;
 		Matrix3d j1inv = body1.jinv; //(body1.temporarilyPinned)? 0: body1.jinv;
 		Matrix3d j2inv = body2.jinv; //(body2.temporarilyPinned)? 0: body2.jinv;
-		DenseVector dv1 = body1.deltaV; 
-		DenseVector dv2 = body2.deltaV;
+		//DenseVector dv1 = body1.deltaV; 
+		//DenseVector dv2 = body2.deltaV;
+		// TODO: MERGING: I note that in Contact, the dv is sometimes the parent and sometimes the body... perhaps the same here??  be careful!!
+		Vector3d dv1x = body1.deltaVx; 
+		Vector3d dv1o = body1.deltaVomega; 
+		Vector3d dv2x = body2.deltaVx; 
+		Vector3d dv2o = body2.deltaVomega; 
 		
 		DenseMatrix j = contact.j; //(body1 instanceof RigidCollection)? contact.jc: contact.j;
 		double jTli0 = j.get(i,0) * lambda;
@@ -160,12 +165,12 @@ public class PGS {
 		double jTli3 = j.get(i,3) * lambda;
 		double jTli4 = j.get(i,4) * lambda;
 		double jTli5 = j.get(i,5) * lambda;
-		dv1.add( 0, jTli0 * m1inv );	
-		dv1.add( 1, jTli1 * m1inv );	
-		dv1.add( 2, jTli2 * m1inv );
-		dv1.add( 3, jTli3 * j1inv.m00 + jTli4 * j1inv.m01 + jTli5 * j1inv.m02);
-		dv1.add( 4, jTli3 * j1inv.m10 + jTli4 * j1inv.m11 + jTli5 * j1inv.m12);	
-		dv1.add( 5, jTli3 * j1inv.m20 + jTli4 * j1inv.m21 + jTli5 * j1inv.m22);	
+		dv1x.x += jTli0 * m1inv;	
+		dv1x.y += jTli1 * m1inv;	
+		dv1x.z += jTli2 * m1inv;
+		dv1o.x += jTli3 * j1inv.m00 + jTli4 * j1inv.m01 + jTli5 * j1inv.m02;
+		dv1o.y += jTli3 * j1inv.m10 + jTli4 * j1inv.m11 + jTli5 * j1inv.m12;	
+		dv1o.z += jTli3 * j1inv.m20 + jTli4 * j1inv.m21 + jTli5 * j1inv.m22;	
 		// j = contact.j; //(body2 instanceof RigidCollection)? contact.jc: contact.j;
 		double jTli6 = j.get(i,6) * lambda;
 		double jTli7 = j.get(i,7) * lambda;
@@ -173,12 +178,12 @@ public class PGS {
 		double jTli9 = j.get(i,9) * lambda;
 		double jTli10 = j.get(i,10) * lambda;
 		double jTli11 = j.get(i,11) * lambda;	
-		dv2.add( 0, jTli6 * m2inv );	
-		dv2.add( 1, jTli7 * m2inv );	
-		dv2.add( 2, jTli8 * m2inv );		
-		dv2.add( 3, jTli9 * j2inv.m00 + jTli10 * j2inv.m01 + jTli11 * j2inv.m02 );
-		dv2.add( 4, jTli9 * j2inv.m10 + jTli10 * j2inv.m11 + jTli11 * j2inv.m12 );	
-		dv2.add( 5, jTli9 * j2inv.m20 + jTli10 * j2inv.m21 + jTli11 * j2inv.m22 );	
+		dv2x.x += jTli6 * m2inv;	
+		dv2x.y += jTli7 * m2inv;	
+		dv2x.z += jTli8 * m2inv;		
+		dv2o.x += jTli9 * j2inv.m00 + jTli10 * j2inv.m01 + jTli11 * j2inv.m02;
+		dv2o.y += jTli9 * j2inv.m10 + jTli10 * j2inv.m11 + jTli11 * j2inv.m12;	
+		dv2o.z += jTli9 * j2inv.m20 + jTli10 * j2inv.m21 + jTli11 * j2inv.m22;	
 	}
 	
 	/**
