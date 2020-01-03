@@ -6,7 +6,7 @@
         <spring pB="10 0.5 -10"/>
         <spring pB="-10 0.5 10"/>
         <spring pB="-10 0.5 -10"/>
-        <pinned> true </pinned>
+        <pinned> false </pinned>
     </body>
 
 
@@ -14,15 +14,9 @@
         <x> 0 20 0 </x>
     </body>
 
-       
-    <body type="mesh" name="torso" scale="0.75" obj="data/scaledtorso10.obj" st="data/torso_flux.sph">
-        <x> 0 30 0 </x>
-        <R> -1 0 0 1.57 </R>
-        <pinned> true </pinned>
-    </body>
-    
-    <body type="sphere" name="sphere1" r="2">
-        <x> 5 15 0 </x>
+    <body type="box" name="box2" dim="2 2 2">
+        <x> 0 10 5 </x>
+		<col> 1 0.5 0.5 </col>
     </body>
 
     <body type="plane" name="plane1" p="0 -10 0" n="0 1 0">

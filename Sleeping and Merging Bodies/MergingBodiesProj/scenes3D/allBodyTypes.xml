@@ -1,0 +1,47 @@
+<root>
+
+    <body type="box" name="platform" dim="20 1 20">
+        <x> 0 10 0 </x>
+        <spring pB="10 0.5 10" k="200" d="40"/>
+        <spring pB="10 0.5 -10" k="200" d="40"/>
+        <spring pB="-10 0.5 10" k="200" d="40"/>
+        <spring pB="-10 0.5 -10" k="200" d="40"/>
+    </body>
+
+
+    <body type="box" name="box1" dim="1 2 3">
+        <x> 0 20 0 </x>
+    </body>
+
+    <body type="box" name="box2" dim="2 1 3">
+        <x> -5 20 0 </x>
+    </body>
+    
+    <body type="mesh" name="hand" scale="0.5" obj="data/scaledhand10.obj" st="data/hand_hierarchy.sph">
+        <x> 5 20 5 </x>
+		<R> 1 0 0 1.57 </R>
+    </body>
+    
+    <body type="mesh" name="rocta" scale="0.3" obj="data/scaledround-octa10.obj" st="data/roundocta_hierarchy.sph">
+        <x> 0 20 5 </x>
+        <R> 1 0 0 1 </R>
+    </body>
+    
+    <body type="mesh" name="torso" scale="0.75" obj="data/scaledtorso10.obj" st="data/torso_flux.sph">
+        <x> 0 20 -5 </x>
+		<R> 1 0 0 -1.57 </R>
+    </body>
+    
+    
+    <body type="mesh" name="eight" scale="0.5" obj="data/scaledeightloop10.obj" st="data/eight_flux.sph">
+        <x> -5 20 5 </x>
+    </body>
+
+    <body type="sphere" name="sphere1" r="2">
+        <x> -5 20 -5 </x>
+    </body>
+
+    <body type="plane" name="plane1" p="0 -10 0" n="0 1 0">
+    </body>
+
+</root>
