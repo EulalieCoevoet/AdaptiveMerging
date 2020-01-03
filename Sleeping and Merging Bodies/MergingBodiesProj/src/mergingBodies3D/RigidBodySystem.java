@@ -5,7 +5,6 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Color3f;
 import javax.vecmath.Vector3d;
 
 import com.jogamp.opengl.GL;
@@ -186,7 +185,7 @@ public class RigidBodySystem {
 //			if (body.isSleeping)
 //				continue;
 			for (Spring s: body.springs) {
-				s.apply(springStiffness.getValue(), springDamping.getValue());
+				s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
 			}
 		}
 	}
@@ -336,8 +335,8 @@ public class RigidBodySystem {
     private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", false );
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
 
-	public DoubleParameter springStiffness = new DoubleParameter("spring stiffness", 100, 1, 1e4 );
-	public DoubleParameter springDamping= new DoubleParameter("spring damping", 1, 0, 1000 );
+	public DoubleParameter springStiffnessMod = new DoubleParameter("spring stiffness multiplier", 1, 0, 10 );
+	public DoubleParameter springDampingMod= new DoubleParameter("spring damping multiplier", 1, 0, 10 );
 	
 	private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", false );
 
@@ -370,8 +369,8 @@ public class RigidBodySystem {
         vfp.add( gravityAmount.getSliderControls(false) );
         vfp.add( gravityAngle.getSliderControls(false) );
         
-		vfp.add(springStiffness.getSliderControls(false));
-		vfp.add(springDamping.getSliderControls(false));
+		vfp.add(springStiffnessMod.getSliderControls(false));
+		vfp.add(springDampingMod.getSliderControls(false));
 
 		return vfp.getPanel();
     }

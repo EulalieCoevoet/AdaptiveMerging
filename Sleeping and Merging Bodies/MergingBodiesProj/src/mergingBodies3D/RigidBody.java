@@ -66,8 +66,7 @@ public class RigidBody {
     public RigidTransform transformW2B = new RigidTransform();
     
     /** DeltaV for PGS resolution */
-    Vector3d deltaVx = new Vector3d();
-    Vector3d deltaVomega = new Vector3d();
+    Vector6d deltaV = new Vector6d();
     
     /** linear velocity */
     public Vector3d v = new Vector3d();
@@ -198,8 +197,7 @@ public class RigidBody {
 	public void clear() {
 		force.set(0,0,0);
 		torque.set(0,0,0);
-		deltaVx.set(0,0,0);
-		deltaVomega.set(0,0,0);
+		deltaV.setZero();
 	}
     	
     /**
@@ -304,23 +302,18 @@ public class RigidBody {
 	private Vector3d tmp2 = new Vector3d();
 
 	public void advanceVelocities(double dt) {
-		v.x += force.x * dt * minv + deltaVx.x;
-		v.y += force.y * dt * minv + deltaVx.y;
-		v.z += force.z * dt * minv + deltaVx.z;
-
+		v.scaleAdd( dt*minv, force, v );
+		v.add( deltaV.v );
+		
         jinv.transform( torque, domega );
         domega.scale( dt );
         omega.add( domega );
         
-        omega.x += deltaVomega.x;
-        omega.y += deltaVomega.y;
-        omega.z += deltaVomega.z;
+        omega.add( deltaV.w );
 	}
 	
 	public void advancePositions(double dt) {
-		x.x += v.x * dt;
-		x.y += v.y * dt;
-		x.z += v.z * dt;
+		x.scaleAdd( dt, v, x );
 		
 		double t = omega.length()*dt;
         domega.set(omega);

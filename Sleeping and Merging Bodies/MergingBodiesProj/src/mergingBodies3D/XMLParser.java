@@ -498,6 +498,10 @@ public class XMLParser {
 				Point3d pB = new Point3d( t3d( e.getAttribute("pB") ) );
 				Spring s = new Spring( pB, body );
 				body.springs.add( s );
+				String k = e.getAttribute("k");
+				if ( !k.isEmpty() ) s.k = Double.parseDouble( k );
+				String d = e.getAttribute("d");
+				if ( !d.isEmpty() ) s.d = Double.parseDouble( d );
 			} else if ( tag.equalsIgnoreCase("col")) {
 				double [] col = asDoubles( values );
 				body.col = new float[] { (float) col[0], (float) col[1], (float) col[2], 1 };

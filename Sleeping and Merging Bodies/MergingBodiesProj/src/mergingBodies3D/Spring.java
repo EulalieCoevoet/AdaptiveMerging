@@ -19,6 +19,11 @@ public class Spring {
 	/** The point in the world to which this spring is attached */
 	private Point3d pw = new Point3d();
 
+	/** spring stiffness, set to a default value */
+	double k = 100; 
+	/** spring damping, set to a default value */
+	double d = 10;  
+	
 	/** 
 	 * Rest length of the spring 
 	 * TODO: better to make this a parameter.
@@ -62,9 +67,10 @@ public class Spring {
 	 * Applies the spring force by adding a force and a torque to the body.
 	 * If this body is in a collection, then it applies the force to *BOTH* the sub-body 
 	 * and the collection.
-	 * TODO: MEMORY: consider eliminating memory allocation here
+	 * @param ks modulates the spring's stiffness
+	 * @param cs modulates the spring's damping
 	 */
-	public void apply(double k, double c) {
+	public void apply(double ks, double ds) {
 		//l0 = RigidBodySystem.springLength.getValue();
 		body.transformB2W.transform( pb, pbw );
 		displacement.sub( pw, pbw ); 
@@ -75,7 +81,7 @@ public class Spring {
 		body.getSpatialVelocity( pbw, velocity );
 		
 		double scale = 
-				- (k * (displacement.length()  - l0) - 	c * (velocity.dot(displacement) / displacement.length())) 
+				- (k*ks * (displacement.length()  - l0) - 	d*ds * (velocity.dot(displacement) / displacement.length())) 
 				/ displacement.length();
 
 		force.scale( - scale, displacement );
@@ -84,7 +90,6 @@ public class Spring {
 //		if ( body.isInCollection() ) {
 //			body.parent.applyForceW( pbw, force );
 //		}
-		
 	}
 
 	/**

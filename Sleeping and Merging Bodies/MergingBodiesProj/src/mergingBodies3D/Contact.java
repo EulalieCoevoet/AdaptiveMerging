@@ -9,13 +9,9 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.parameters.DoubleParameter;
-import no.uib.cipr.matrix.DenseMatrix;
-import no.uib.cipr.matrix.DenseVector;
 
 /**
  * Implementation of a contact constraint.
- * TODO: MEMORY: Consider pooling contacts to avoid reallocation all the time... 
- * This is one of a few larger objects that will be created VERY OFTEN!
  * @author kry
  */
 public class Contact {
@@ -66,10 +62,17 @@ public class Contact {
 	boolean newThisTimeStep;
 	
 	/** Jacobian matrix, packed as trans rot trans rot on each row */
-	DenseMatrix j = new DenseMatrix(3,12);
+	//DenseMatrix j = new DenseMatrix(3,12);
+	Vector6d jna = new Vector6d();
+	Vector6d jnb = new Vector6d();
+	Vector6d jt1a = new Vector6d();
+	Vector6d jt1b = new Vector6d();
+	Vector6d jt2a = new Vector6d();
+	Vector6d jt2b = new Vector6d();
 	
 	/** Jacobian matrix, collection frame, packed as trans rot trans rot on each row */
-	DenseMatrix jc = new DenseMatrix(3,12);
+	// in comments as not yet used!
+	//DenseMatrix jc = new DenseMatrix(3,12);
 	
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent1, tangent2) */
 	double lambda0;
@@ -140,85 +143,41 @@ public class Contact {
 	 * In case of body in a collection, use COM of parent to compute the torque component of the Jacobian.
 	 */
 	public void computeJacobian(boolean computeInCollection) {
-				
 		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection )? body1.parent: body1;
 		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection )? body2.parent: body2;
-	    
 		r1.sub( contactW, b1.x );
 		r2.sub( contactW, b2.x );
 		
-		// Normal direction for both bodies
-				
-		DenseMatrix j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
-		j.set(0, 0, -normalW.x);
-		j.set(0, 1, -normalW.y);
-		j.set(0, 2, -normalW.z);
-		
-		tmp1.cross( r1,  normalW );
-		j.set(0, 3, -tmp1.x);
-		j.set(0, 4, -tmp1.y);
-		j.set(0, 5, -tmp1.z);
+		//Vector6d jna = this.jna;   // j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
+		//Vector6d jt1a = this.jt1a; // j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
+		//Vector6d jt2a = this.jt2a; // j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
+		//Vector6d jnb = this.jnb;   // j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
+		//Vector6d jt1b = this.jt1b; // j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
+		//Vector6d jt2b = this.jt2b; // j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
 
-		j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
-		j.set(0, 6, normalW.x);
-		j.set(0, 7, normalW.y);  // HELP... is this getting overridden somewhere?  I'm seeing some funy signs in this matrix later on...
-		j.set(0, 8, normalW.z);
+		jna.v.scale( -1, normalW );		
+		jna.w.cross( normalW, r1 ); // - r1 x nW
+		jnb.v.set( normalW );		
+		jnb.w.cross( r2, normalW );
 		
-		tmp1.cross(r2, normalW);
-		j.set(0, 9, tmp1.x);
-		j.set(0, 10, tmp1.y);
-		j.set(0, 11, tmp1.z);
+		jt1a.v.scale( -1, tangent1W );
+		jt1a.w.cross( tangent1W, r1 ); // -r1 x t1W
+		jt1b.v.set( tangent1W );		
+		jt1b.w.cross( r2, tangent1W );	
 		
-		// Tangential direction for both bodies
-		
-		j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
-		j.set(1, 0, -tangent1W.x);
-		j.set(1, 1, -tangent1W.y);
-		j.set(1, 2, -tangent1W.z);
-		
-		tmp1.cross(r1, tangent1W);
-		j.set(1, 3, -tmp1.x);
-		j.set(1, 4, -tmp1.y);
-		j.set(1, 5, -tmp1.z);
-
-		j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
-		j.set(1, 6, tangent1W.x);
-		j.set(1, 7, tangent1W.y);
-		j.set(1, 8, tangent1W.z);
-		
-		tmp1.cross(r2, tangent1W);		
-		j.set(1, 9, tmp1.x);
-		j.set(1, 10, tmp1.y);
-		j.set(1, 11, tmp1.z);
-		
-		j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
-		j.set(2, 0, -tangent2W.x);
-		j.set(2, 1, -tangent2W.y);
-		j.set(2, 2, -tangent2W.z);
-
-		tmp1.cross(r1, tangent2W);
-		j.set(2, 3, -tmp1.x);
-		j.set(2, 4, -tmp1.y);
-		j.set(2, 5, -tmp1.z);
-
-		j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
-		j.set(2, 6, tangent2W.x);
-		j.set(2, 7, tangent2W.y);
-		j.set(2, 8, tangent2W.z);
-
-		tmp1.cross(r2, tangent2W);		
-		j.set(2, 9, tmp1.x);
-		j.set(2, 10, tmp1.y);
-		j.set(2, 11, tmp1.z);
+		jt2a.v.scale( -1, tangent2W );
+		jt2a.w.cross( tangent2W, r1 ); // -r1 x t2W
+		jt2b.v.set( tangent2W );
+		jt2b.w.cross( r2, tangent2W );		
 	}
 	
 	/**
-	 * 
+	 * Computes the b vector, which is the constraint velocity at the next time step given current forces
 	 * @param dt
 	 * @param feedbackStiffness
 	 * @param computeInCollection
 	 */
-	public void computeB(double dt, double feedbackStiffness,  boolean computeInCollection) {
+	public void computeB(double dt, double feedbackStiffness, boolean computeInCollection) {
 		
 		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection)? body1.parent: body1;
 		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection)? body2.parent: body2;
@@ -234,48 +193,37 @@ public class Contact {
 			restitution=(body1.restitution+body2.restitution)/2.;
 		}
 		
-		DenseMatrix j;
 		bn = 0; bt1 = 0; bt2 = 0;
 		
-		j = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;		
-		tmp1.set(b1.force);
-		tmp1.scale(m1inv*dt);	
-		tmp1.add(b1.v);
-		bn  += tmp1.x*j.get(0,0) + tmp1.y*j.get(0,1) + tmp1.z*j.get(0,2);
-		bt1 += tmp1.x*j.get(1,0) + tmp1.y*j.get(1,1) + tmp1.z*j.get(1,2);
-		bt2 += tmp1.x*j.get(2,0) + tmp1.y*j.get(2,1) + tmp1.z*j.get(2,2);
-		tmp1.set(b1.torque.x*j1inv.m00 + b1.torque.y*j1inv.m01 + b1.torque.z*j1inv.m02,
-			  b1.torque.x*j1inv.m10 + b1.torque.y*j1inv.m11 + b1.torque.z*j1inv.m12,
-			  b1.torque.x*j1inv.m20 + b1.torque.y*j1inv.m21 + b1.torque.z*j1inv.m22);
-		tmp1.scale(dt);
-		tmp1.add(b1.omega);
-		bn  += tmp1.x*j.get(0,3) + tmp1.y*j.get(0,4) + tmp1.z*j.get(0,5);
-		bt1 += tmp1.x*j.get(1,3) + tmp1.y*j.get(1,4) + tmp1.z*j.get(1,5);
-		bt2 += tmp1.x*j.get(2,3) + tmp1.y*j.get(2,4) + tmp1.z*j.get(2,5);
+		// Vector6d jna,t1a,t2a = this.jna,t1a,t2a; // j = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
 		
-		double bBounce = (b1.v.x*j.get(0,0) + b1.v.y*j.get(0,1) + b1.v.z*j.get(0,2));
-		bBounce += (b1.omega.x*j.get(0,3) + b1.omega.y*j.get(0,4) + b1.omega.z*j.get(0,5));
+		tmp1.scaleAdd( m1inv*dt, b1.force, b1.v );	
+		bn  += tmp1.dot(jna.v);
+		bt1 += tmp1.dot(jt1a.v);
+		bt2 += tmp1.dot(jt2a.v);
+		j1inv.transform( b1.torque, tmp1 );
+		tmp1.scale( dt );
+		tmp1.add( b1.omega );
+		bn  += tmp1.dot( jna.w );
+		bt1 += tmp1.dot( jt1a.w );
+		bt2 += tmp1.dot( jt2a.w );
+		
+		double bBounce = b1.v.dot( jna.v ) + b1.omega.dot( jna.w );   
 		bBounce *= restitution;
 		bn += bBounce;
 		
-		j = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;
-		tmp1.set(b2.force);
-		tmp1.scale(m2inv*dt);	
-		tmp1.add(b2.v);
-		bn  += tmp1.x*j.get(0,6) + tmp1.y*j.get(0,7) + tmp1.z*j.get(0,8);
-		bt1 += tmp1.x*j.get(1,6) + tmp1.y*j.get(1,7) + tmp1.z*j.get(1,8);
-		bt2 += tmp1.x*j.get(2,6) + tmp1.y*j.get(2,7) + tmp1.z*j.get(2,8);
-		tmp1.set(b2.torque.x*j2inv.m00 + b2.torque.y*j2inv.m01 + b2.torque.z*j2inv.m02,
-			  b2.torque.x*j2inv.m10 + b2.torque.y*j2inv.m11 + b2.torque.z*j2inv.m12,
-			  b2.torque.x*j2inv.m20 + b2.torque.y*j2inv.m21 + b2.torque.z*j2inv.m22);
-		tmp1.scale(dt);
-		tmp1.add(b2.omega);
-		bn  += tmp1.x*j.get(0,9) + tmp1.y*j.get(0,10) + tmp1.z*j.get(0,11);
-		bt1 += tmp1.x*j.get(1,9) + tmp1.y*j.get(1,10) + tmp1.z*j.get(1,11);
-		bt2 += tmp1.x*j.get(2,9) + tmp1.y*j.get(2,10) + tmp1.z*j.get(2,11);
+		tmp1.scaleAdd( m2inv*dt, b2.force, b2.v );
+		bn  += tmp1.dot(jnb.v);
+		bt1 += tmp1.dot(jt1b.v);
+		bt2 += tmp1.dot(jt2b.v);
+		j2inv.transform( b2.torque, tmp1 );
+		tmp1.scale( dt );
+		tmp1.add( b2.omega );
+		bn  += tmp1.dot( jnb.w );
+		bt1 += tmp1.dot( jt1b.w ); 
+		bt2 += tmp1.dot( jt2b.w ); 
 
-		bBounce = (b2.v.x*j.get(0,6) + b2.v.y*j.get(0,7) + b2.v.z*j.get(0,8));
-		bBounce += (b2.omega.x*j.get(0,9) + b2.omega.y*j.get(0,10) + b2.omega.z*j.get(0,11));
+		bBounce = b2.v.dot( jnb.v ) + b2.omega.dot( jnb.w );
 		bBounce *= restitution;
 		bn += bBounce;
 		
@@ -306,43 +254,17 @@ public class Contact {
 		Matrix3d j1inv = b1.jinv;//(b1.temporarilyPinned)? 0: b1.jinv;
 		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
 		
-		DenseMatrix j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
-		DenseMatrix j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
-
-		// Code below could have been done in a loop, but unrolled like this we
-		// can also avoid the bounds checking (not j should probably be broken down into basic variables 
-		tmp1.set( j1.get(0,0), j1.get(0,1), j1.get(0,2) );
-		D00 = m1inv * tmp1.dot(tmp1);
-		tmp1.set( j1.get(0,3), j1.get(0,4), j1.get(0,5) );
-		j1inv.transform(tmp1, tmp2);
-		D00 += tmp1.dot( tmp2 );
-		tmp1.set( j2.get(0,6), j2.get(0,7), j2.get(0,8) );
-		D00 += m2inv * tmp1.dot(tmp1);
-		tmp1.set( j2.get(0,9), j2.get(0,10), j2.get(0,11) );
-		j2inv.transform(tmp1, tmp2);
-		D00 += tmp1.dot( tmp2 );
-
-		tmp1.set( j1.get(1,0), j1.get(1,1), j1.get(1,2) );
-		D11 = m1inv * tmp1.dot(tmp1);
-		tmp1.set( j1.get(1,3), j1.get(1,4), j1.get(1,5) );
-		j1inv.transform(tmp1, tmp2);
-		D11 += tmp1.dot( tmp2 );
-		tmp1.set( j2.get(1,6), j2.get(1,7), j2.get(1,8) );
-		D11 += m2inv * tmp1.dot(tmp1);
-		tmp1.set( j2.get(1,9), j2.get(1,10), j2.get(1,11) );
-		j2inv.transform(tmp1, tmp2);
-		D11 += tmp1.dot( tmp2 );
-
-		tmp1.set( j1.get(2,0), j1.get(2,1), j1.get(2,2) );
-		D22 = m1inv * tmp1.dot(tmp1);
-		tmp1.set( j1.get(2,3), j1.get(2,4), j1.get(2,5) );
-		j1inv.transform(tmp1, tmp2);
-		D22 += tmp1.dot( tmp2 );
-		tmp1.set( j2.get(2,6), j2.get(2,7), j2.get(2,8) );
-		D22 += m2inv * tmp1.dot(tmp1);
-		tmp1.set( j2.get(2,9), j2.get(2,10), j2.get(2,11) );
-		j2inv.transform(tmp1, tmp2);
-		D22 += tmp1.dot( tmp2 );
+		//DenseMatrix j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
+		//DenseMatrix j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
+		j1inv.transform( jna.w, tmp1 );
+		j2inv.transform( jnb.w, tmp2 );
+		D00 = m1inv * jna.v.dot( jna.v )   + jna.w.dot( tmp1 )  + m2inv * jnb.v.dot( jnb.v )   + jnb.w.dot( tmp2 );
+		j1inv.transform( jt1a.w, tmp1 );
+		j2inv.transform( jt1b.w, tmp2 );
+		D11 = m1inv * jt1a.v.dot( jt1a.v ) + jt1a.w.dot( tmp1 ) + m2inv * jt1b.v.dot( jt1b.v ) + jt1b.w.dot( tmp2 );
+		j1inv.transform( jt2a.w, tmp1 );
+		j2inv.transform( jt2b.w, tmp2 );
+		D22 = m1inv * jt2a.v.dot( jt2a.v ) + jt2a.w.dot( tmp1 ) + m2inv * jt2b.v.dot( jt2b.v ) + jt2b.w.dot( tmp2 );
 	}
 	
 	/**
@@ -354,30 +276,20 @@ public class Contact {
 		
 //		DenseVector dv1 = body1.deltaV;//(body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
 //		DenseVector dv2 = body2.deltaV;//(body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
-		Vector3d dv1x = body1.deltaVx; 
-		Vector3d dv1o = body1.deltaVomega; 
-		Vector3d dv2x = body2.deltaVx; 
-		Vector3d dv2o = body2.deltaVomega; 
-		DenseMatrix j;
+		Vector6d dv1 = body1.deltaV; 
+		Vector6d dv2 = body2.deltaV; 
 		
-		double Jdv = 0;  		
+		Vector6d ja = jna; // j = this.j;//(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
+		Vector6d jb = jnb;
+		if ( index == 1 ) {
+			ja = jt1a;
+			jb = jt1b;
+		} else if ( index == 2 ) {
+			ja = jt2a;
+			jb = jt2b;			
+		}
 		
-		j = this.j;//(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
-		Jdv += j.get(index,0) * dv1x.x;
-		Jdv += j.get(index,1) * dv1x.y;
-		Jdv += j.get(index,2) * dv1x.z;
-		Jdv += j.get(index,3) * dv1o.x;
-		Jdv += j.get(index,4) * dv1o.y;
-		Jdv += j.get(index,5) * dv1o.z;
-
-		j = this.j;//(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
-		Jdv += j.get(index,6) * dv2x.x;
-		Jdv += j.get(index,7) * dv2x.y;
-		Jdv += j.get(index,8) * dv2x.z;
-		Jdv += j.get(index,9) * dv2o.x;
-		Jdv += j.get(index,10) * dv2o.y;
-		Jdv += j.get(index,11) * dv2o.z;
-		
+		double Jdv = ja.dot( dv1 ) + jb.dot( dv2 );
 		return Jdv;
 	}
     
@@ -388,7 +300,7 @@ public class Contact {
 	protected void updateContactState(double mu) {
 		if (Math.abs(lambda0) <= 1e-14) // (math.abs is for magnet)
 			state = ContactState.BROKEN;	
-		else if (Math.sqrt(lambda1*lambda1 + lambda2*lambda2) == lambda0*mu) 
+		else if ( Math.abs(lambda1) == lambda0*mu || Math.abs(lambda2) == lambda0*mu ) 
 			state = ContactState.ONEDGE;
 		else
 			state = ContactState.CLEAR;
@@ -435,14 +347,11 @@ public class Contact {
 	 * @param dt
 	 */
 	private void computeForces( boolean computeInCollection, double dt, Vector3d forceW1 ) {
-
-		DenseMatrix j;
-
-		j = this.j; //(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
-		double f1 = lambda0*j.get(0,0) + lambda1*j.get(1,0) + lambda2*j.get(2,0);
-		double f2 = lambda0*j.get(0,1) + lambda1*j.get(1,1) + lambda2*j.get(2,1);
-		double f3 = lambda0*j.get(0,2) + lambda1*j.get(1,2) + lambda2*j.get(2,2);
-		forceW1.set(f1,f2,f3);
+		// Vector6d jna = this.jna; // j = this.j; //(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
+		
+		forceW1.scale( lambda0, jna.v );
+		forceW1.scaleAdd( lambda1, jt1a.v, forceW1 );
+		forceW1.scaleAdd( lambda2, jt2a.v, forceW1 );		
 		forceW1.scale(1./dt);
 		
 //		f1 = lambda0*j.get(0,3) + lambda1*j.get(1,3) + lambda2*j.get(2,3);
