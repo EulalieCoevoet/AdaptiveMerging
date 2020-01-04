@@ -308,6 +308,7 @@ public class Contact {
 	
 	/** Colour for drawing contacts */
     private static final float[] col = new float[] { 1f, 0, 0, 0.25f };
+    private static final float[] colInCollection = new float[] { 0, 0, 1, 0.25f };
     private static final float[] colNew = new float[] { 0, 0.5f, 0, 0.65f };
     private static final float[] colOnEdge = new float[] { 0, 0, 0, 0.75f };
     
@@ -315,7 +316,7 @@ public class Contact {
      * Draws the contact points
      * @param drawable
      */
-    public void display( GLAutoDrawable drawable ) {
+    public void display( GLAutoDrawable drawable, boolean inCollection ) {
         GL2 gl = drawable.getGL().getGL2();
         gl.glPointSize(3);
         gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
@@ -374,13 +375,14 @@ public class Contact {
 	}
 	
 	/**
-	 * Draws the connections between bodies to visualize the 
-	 * the adjacency structure of the matrix as a graph.
+	 * Draws the contact force
 	 * @param drawable
+	 * @param isInCollection  signals that this is an internal contact and should be drawn differently using the appropraite jacobian
+	 * @param dt
 	 */
-	public void displayContactForce( GLAutoDrawable drawable, double dt ) {
+	public void displayContactForce( GLAutoDrawable drawable, boolean isInCollection, double dt ) {
 		GL2 gl = drawable.getGL().getGL2();
-		computeForces(false, dt, forceW1); // This might seem wasteful (e.g., if sim not running), but only used for debug visualization!
+		computeForces( isInCollection, dt, forceW1); // This might seem wasteful (e.g., if sim not running), but only used for debug visualization!
 		gl.glLineWidth(0.75f);
 		if (state == ContactState.ONEDGE) {
     		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colOnEdge, 0 );
@@ -388,6 +390,8 @@ public class Contact {
 			if ( newThisTimeStep ) {				
 				gl.glLineWidth(4f);
 	    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colNew, 0 );
+			} else if ( isInCollection ){
+				gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colInCollection, 0 );
 			} else {
 	    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
 			}

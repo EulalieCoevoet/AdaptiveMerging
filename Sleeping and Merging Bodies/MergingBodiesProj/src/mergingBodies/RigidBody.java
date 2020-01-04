@@ -94,12 +94,6 @@ public class RigidBody {
 
 	public boolean isSleeping = false;
 	
-	/**
-	 * rho value, 0 if active, 1 if inactive, function of kinetic energy when in
-	 * transition
-	 **/
-	public double rho;
-	
 	/** true if body is a magnetic */
 	public boolean magnetic = false;
 	
@@ -224,7 +218,6 @@ public class RigidBody {
 		minv = body.minv;
 		jinv = body.jinv;
 		isSleeping = false;
-		rho = 0;
 		friction = body.friction;
 		restitution = body.restitution;
 	}

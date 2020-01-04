@@ -70,8 +70,9 @@ public class CollisionProcessor {
 	
 	// TODO: uncomment this when we are ready... 
 	// TODO: might want a memory pool for BodyPairContact too?  Could be complicated since bodyPairContacts have some dynamic internal memory??  
+	// TODO: Need to bring over a lot of code from the 2D collision processor...
 	/**list that keeps track of all the body pair contacts that occurred in this time step */
-	//public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
+	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
     
     /**
      * Processes all collisions 
@@ -217,20 +218,21 @@ public class CollisionProcessor {
      * @param body2
      */
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
-		if ( body1.geom instanceof RigidBodyGeomComposite ) {
-			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
-			for ( RigidBody b : g1.bodies ) {
-				// Need these collisions to be with the composite body rather than the child
-				// Need up update transforms of the children?
-				// This is all very much like an adaptively merged body...
-				//narrowPhase( b, body2 );				
-			}
-		} else if ( body2.geom instanceof RigidBodyGeomComposite ) {
-			RigidBodyGeomComposite g2 = (RigidBodyGeomComposite) body2.geom;
-			for ( RigidBody b : g2.bodies ) {
-				// same thing here... 
-			}			
-		} else if ( body1 instanceof PlaneRigidBody ) {
+//		if ( body1.geom instanceof RigidBodyGeomComposite ) {
+//			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
+//			for ( RigidBody b : g1.bodies ) {
+//				// Need these collisions to be with the composite body rather than the child
+//				// Need up update transforms of the children?
+//				// This is all very much like an adaptively merged body...
+//				//narrowPhase( b, body2 );				
+//			}
+//		} else if ( body2.geom instanceof RigidBodyGeomComposite ) {
+//			RigidBodyGeomComposite g2 = (RigidBodyGeomComposite) body2.geom;
+//			for ( RigidBody b : g2.bodies ) {
+//				// same thing here... 
+//			}			
+//		} else 
+		if ( body1 instanceof PlaneRigidBody ) {
 			PlaneRigidBody b1 = (PlaneRigidBody) body1;
 			if ( body2 instanceof PlaneRigidBody ) {
 				System.err.println("plane plane collision is impossible!");

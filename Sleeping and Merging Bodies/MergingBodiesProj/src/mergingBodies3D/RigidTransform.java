@@ -41,7 +41,6 @@ public class RigidTransform {
      * @param R
      */
     public void set( RigidTransform R ) {
-    	T = Tflat.getBackingMatrix();
         T.set(R.T);
     }
     
@@ -62,7 +61,7 @@ public class RigidTransform {
      * Inverts this transformation
      */
     public void invert() {
-        // gross but convenient... 
+        // TODO: UPDATE to do a proper rigid inverse... :(
         T.invert();
     }
     
@@ -98,6 +97,15 @@ public class RigidTransform {
      */
     public void transform( Vector3d v, Vector3d result ) {
     	T.transform( v, result);
+    }
+    
+    /**
+     * TODO: Consider making rigid transformations friendly to composition while staying efficient 
+     * Sets this transform to A * this
+     * @param A
+     */
+    public void leftMult( RigidTransform A ) {
+    	T.mul(A.T, this.T);
     }
 
 //    /**

@@ -1,18 +1,26 @@
-package mergingBodies;
+package mergingBodies3D;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import mergingBodies.Merging.MergeParameters;
+import mergingBodies3D.Merging.MergeParameters;
 
+/**
+ * Adapted from 2D verions... 
+ * 
+ * TODO: note for efficiency, should consider incremental updates to the inertia...
+ * that is at least if bodies are being added one at a time to a collection
+ * 
+ * @author kry
+ */
 public class RigidCollection extends RigidBody {
 
 	/** List of RigidBody of the collection */
@@ -24,11 +32,13 @@ public class RigidCollection extends RigidBody {
 	 */
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 
-	public Color color;
-
 	CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
+	
+	static MergeParameters mergeParams;
 
+	Color color = new Color();
+	
 	/**
 	 * Creates a RigidCollection from two RigidBody.
 	 * 
@@ -41,10 +51,11 @@ public class RigidCollection extends RigidBody {
 		// their state w.r.t the collection frame is unchanged as C2W and W2C are
 		// Identity
 
-		myListID = -2;
-		color = new Color();
 		color.setRandomColor();
-
+		col[0] = color.x;
+		col[1] = color.y;
+		col[2] = color.z;
+	
 		copyFrom(body1);
 
 		addBodyInternalMethod(body1);
@@ -96,45 +107,71 @@ public class RigidCollection extends RigidBody {
 	 * 
 	 * @param body body to add
 	 */
-	private void addBodyInternalMethod(RigidBody body) {
+	private void addBodyInternalMethod( RigidBody body ) {
 		body.parent = this;
 		bodies.add(body);
 
 		updateVelocitiesFrom(body);
 	}
 
+	/**
+	 * Update's the collection's velocity given a newly added body
+	 * The velocities should match... but we'll do a mass weighted
+	 * average in the new COM frame to make sure that things work out.
+	 * Note: this might not do what you expect if either body is pinned!!
+	 * 
+	 * CAREFUL this will set the velocity in the new COM frame!!  :/
+	 * 
+	 * @param body
+	 */
 	private void updateVelocitiesFrom(RigidBody body) {
-		Point2d massCom1 = new Point2d();
-		Point2d massCom2 = new Point2d();
+		Point3d massCom1 = new Point3d();
+		Point3d massCom2 = new Point3d();
 		massCom1.scale(body.massLinear, body.x);
 		massCom2.scale(massLinear, x);
-		Point2d xCom = new Point2d();
+		Point3d xCom = new Point3d();
 		xCom.add(massCom1, massCom2);
-		xCom.scale(1. / (body.massLinear + massLinear));
+		double oneOverTotalMass = 1. / (body.massLinear + massLinear);
+		xCom.scale( oneOverTotalMass );
 
-		Vector2d tmp1 = new Vector2d();
-		Vector2d tmp2 = new Vector2d();
-		Vector2d tmp3 = new Vector2d();
+		Vector3d r = new Vector3d();
+		Vector3d wxr = new Vector3d();
+		Vector3d tmp1 = new Vector3d();
+		Vector3d tmp2 = new Vector3d();
 
-		tmp1.sub(xCom, body.x);
-		tmp1.scale(body.omega);
-		tmp2.set(-tmp1.y, tmp1.x);
-		tmp2.add(body.v);
-		tmp2.scale(body.massLinear);
-		tmp3.add(tmp2);
+		r.sub(xCom, body.x);
+		wxr.cross( body.omega, r );
+		tmp1.add( wxr, v );
+		tmp1.scale( body.massLinear );
+//		tmp1.scale(body.omega);
+//		tmp2.set(-tmp1.y, tmp1.x);
+//		tmp2.add(body.v);		
+//		tmp2.scale(body.massLinear);
+//		tmp3.add(tmp2);
 
-		tmp1.sub(xCom, x);
-		tmp1.scale(omega);
-		tmp2.set(-tmp1.y, tmp1.x);
-		tmp2.add(v);
-		tmp2.scale(massLinear);
-		tmp3.add(tmp2);
+		r.sub( xCom, x );
+		wxr.cross( omega, r );
+		tmp2.add( wxr, v );
+		tmp2.scale( massLinear );
+		
+		tmp1.add( tmp2 );
+		tmp1.scale( oneOverTotalMass );
+		
+//		tmp1.sub(xCom, x);
+//		tmp1.scale(omega);
+//		tmp2.set(-tmp1.y, tmp1.x);
+//		tmp2.add(v);
+//		tmp2.scale(massLinear);
+//		tmp3.add(tmp2);
+//
+//		tmp3.scale(1. / (body.massLinear + massLinear));
 
-		tmp3.scale(1. / (body.massLinear + massLinear));
+		v.set(tmp1); 
 
-		v.set(tmp3);
-
-		omega = (omega * massAngular + body.omega * body.massAngular) / (body.massAngular + massAngular);
+		omega.scale( massLinear );
+		omega.scaleAdd( body.massLinear, body.omega, omega );
+		omega.scale( oneOverTotalMass );
+		//omega = (omega * massLinear + body.omega * body.massLinear) / (body.massLinear + massLinear);
 	}
 
 	/**
@@ -167,9 +204,9 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	private void updateCollectionState(RigidBody body) {
-		temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
-		body.temporarilyPinned = false;
-		steps = Math.max(body.steps, steps);
+//		temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
+//		body.temporarilyPinned = false;
+//		steps = Math.max(body.steps, steps);
 
 		pinned = (pinned || body.pinned);
 
@@ -179,57 +216,100 @@ public class RigidCollection extends RigidBody {
 
 	/**
 	 * Computes transforms, COM, mass, inertia, spring.
+	 * NOTE: velocity should already be updated into the COM frame at this point!
 	 */
 	private void updateCollection() {
 
-		if (pinned || temporarilyPinned) {
-			v.set(0., 0.);
-			omega = 0.;
+		if (pinned ) { //|| temporarilyPinned) {
+			v.set(0,0,0);
+			omega.set(0,0,0);
 		}
 
-		updateMass();
-		updateCOM();
-		updateTheta();
+		updateMassCOMInertia();
+//		updateMass();
+//		updateCOM();
+		
+		updateTheta(); // currently does nothing, but can help optimize the BB
 		updateTransformations();
 		updateBodiesTransformations();
 		updateBB();
-		updateInertia();
+		
+		//updateInertia();
+		
 		addBodiesSpringsToCollection();
 	}
 
-	/**
-	 * Compute mass of collection w.r.t bodies
-	 */
-	private void updateMass() {
-
+	private void updateMassCOMInertia() {
 		double massLinear = 0;
-		for (RigidBody body : bodies) {
-			massLinear += body.massLinear;
+		Matrix3d massAngular = new Matrix3d();
+
+		Point3d com = new Point3d();
+		for ( RigidBody b : bodies ) {
+			massLinear += b.massLinear;		
+			com.scaleAdd( b.massLinear, b.x, com );
 		}
-		this.massLinear = massLinear;
-		if (pinned)
-			minv = 0.;
-		else
-			minv = 1 / massLinear;
-	}
-
-	/**
-	 * Loops through all bodies in collectionBodies
-	 */
-	private void updateCOM() {
-
-		Point2d com = new Point2d();
-		Point2d tmp = new Point2d();
-		double totalMass = massLinear;
-		com.set(0, 0);
-
-		for (RigidBody body : bodies) {
-			double ratio = body.massLinear / totalMass;
-			tmp.scale(ratio, body.x);
-			com.add(tmp);
+		com.scale( 1.0/massLinear );
+		for ( RigidBody b : bodies ) {
+			massAngular.add( b.massAngular );
+			// should certainly have a b.x squared type term for the mass being at a distance...
+//			I [p]    J  0    I   0 
+//			0  I    0 mI    [p] I
+//			I [p]   J   0
+//			0  I   m[p] 0
+//			J + I [p][p] in the upper left...
+			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
+			double x = b.x.x;
+			double y = b.x.y;
+			double z = b.x.z;			
+			double x2 = x*x;
+			double y2 = y*y;
+			double z2 = z*z;
+			Matrix3d op = new Matrix3d();
+			op.m00 = y2+z2; op.m01 = x*y; op.m02 = x*z;
+			op.m10 = y*x; op.m11 = x2+z2; op.m12 = y*z;
+			op.m20 = z*x; op.m21 = z*y; op.m22 = x2 + y2;
+			op.mul( b.massLinear );
+			massAngular.add( op );			
 		}
-		x.set(com);
 	}
+	
+//	/**
+//	 * Compute mass of collection w.r.t bodies
+//	 */
+//	private void updateMass() {
+//
+//		double massLinear = 0;
+//		for (RigidBody body : bodies) {
+//			massLinear += body.massLinear;
+//		}
+//		this.massLinear = massLinear;
+//		if (pinned)
+//			minv = 0.;
+//		else
+//			minv = 1 / massLinear;
+//	}
+//
+//	/**
+//	 * Loops through all bodies in collectionBodies
+//	 */
+//	private void updateCOM() {
+//
+//		Point3d com = new Point3d();
+//		Point3d tmp = new Point3d();
+//		double totalMass = massLinear;
+//		com.set(0,0,0);
+//
+//		for (RigidBody body : bodies) {
+//			double ratio = body.massLinear / totalMass;
+//			tmp.scale(ratio, body.x);
+//			com.add(tmp);
+//		}
+//		x.set(com);   /// WHY! :(  
+	
+	// TODO:   COM update happens in several stages with side effects...   
+	// redoing this code will probably make it cleaner!
+	
+//	}
 
 	/**
 	 * Compute theta of the collection from convex hull informations
@@ -237,14 +317,14 @@ public class RigidCollection extends RigidBody {
 	private void updateTheta() {
 
 		int N = 0;
-		Point2d meanPos = new Point2d();
+		Point3d meanPos = new Point3d();
 
 		for (RigidBody body : bodies) {
 			if (body instanceof PlaneRigidBody)
 				continue;
 
-			for (Point2d point : body.boundingBoxB) {
-				Point2d p = new Point2d(point);
+			for (Point3d point : body.boundingBoxB) {
+				Point3d p = new Point3d(point);
 				transformB2C.transform(p);
 				meanPos.add(p);
 				N++;
@@ -252,25 +332,28 @@ public class RigidCollection extends RigidBody {
 		}
 		meanPos.scale(1.0 / N);
 
-		Vector2d v = new Vector2d();
-		Matrix2d covariance = new Matrix2d();
+		Vector3d v = new Vector3d();
+		MyMatrix3f covariance = new MyMatrix3f();
 		for (RigidBody body : bodies) {
-			if (body instanceof PlaneRigidBody)
-				continue;
-
-			for (Point2d point : body.boundingBoxB) {
-				Point2d p = new Point2d(point);
+			if (body instanceof PlaneRigidBody) continue;
+			for (Point3d point : body.boundingBoxB) {
+				Point3d p = new Point3d(point);
 				transformB2C.transform(p);
 				v.sub(p, meanPos);
-				covariance.rank1(1.0 / N, v);
+				// TODO: UNFINISHED: Need to do our own rank 1 update :(
+				
+				//covariance.rank1(1.0 / N, v);
+				
 			}
 		}
+		// Need to do our own EVD ?  :(
+		
+		// or use the code in MyMatrix (harvested from web)
+	
+		// TODO: UNFINISHED: set theta... and make sure it is a right handed coordinate system!!!
 
-		covariance.evd();
-		Vector2d dir = covariance.v1;
-		dir.normalize();
-		if (!Double.isNaN(Math.acos(dir.x)))
-			theta += Math.acos(dir.x);
+		theta.setIdentity();
+		
 	}
 
 	/**
@@ -288,52 +371,54 @@ public class RigidCollection extends RigidBody {
 	}
 
 	private void updateBB() {
-		Point2d bbmaxB = new Point2d(-Double.MAX_VALUE, -Double.MAX_VALUE);
-		Point2d bbminB = new Point2d(Double.MAX_VALUE, Double.MAX_VALUE);
+		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+		Point3d bbminB = new Point3d( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
 		for (RigidBody body : bodies) {
 			if (body instanceof PlaneRigidBody)
 				continue;
 
-			for (Point2d point : body.boundingBoxB) {
+			for (Point3d point : body.boundingBoxB) {
 				body.transformB2C.transform(point);
 				bbmaxB.x = Math.max(bbmaxB.x, point.x);
 				bbmaxB.y = Math.max(bbmaxB.y, point.y);
+				bbmaxB.z = Math.max(bbmaxB.z, point.z);
 				bbminB.x = Math.min(bbminB.x, point.x);
 				bbminB.y = Math.min(bbminB.y, point.y);
+				bbminB.z = Math.min(bbminB.z, point.z);
 				body.transformC2B.transform(point);
 			}
 		}
-		boundingBoxB = new ArrayList<Point2d>();
+		boundingBoxB = new ArrayList<Point3d>();
 		boundingBoxB.add(0, bbmaxB);
-		boundingBoxB.add(1, new Point2d(bbmaxB.x, bbminB.y));
+		boundingBoxB.add(1, new Point3d(bbmaxB.x, bbminB.y, bbminB.z));
 		boundingBoxB.add(2, bbminB);
-		boundingBoxB.add(3, new Point2d(bbminB.x, bbmaxB.y));
+		boundingBoxB.add(3, new Point3d(bbminB.x, bbmaxB.y, bbmaxB.z));
 	}
 
-	/**
-	 * Updates the angular inertia.
-	 */
-	private void updateInertia() {
-
-		double inertia = 0;
-		Point2d tmp = new Point2d(0, 0);
-		Point2d zero = new Point2d(0, 0);
-		for (RigidBody body : bodies) {
-			if (!(body instanceof PlaneRigidBody)) {
-				for (Block block : body.blocks) {
-					double mass = block.getColorMass();
-					tmp.set(block.pB);
-					body.transformB2C.transform(tmp);
-					inertia += mass * tmp.distanceSquared(zero);
-				}
-			}
-		}
-		massAngular = inertia;
-		if (pinned)
-			jinv = 0.;
-		else
-			jinv = 1. / inertia;
-	}
+//	/**
+//	 * Updates the angular inertia.
+//	 */
+//	private void updateInertia() {
+//
+//		double inertia = 0;
+//		Point3d tmp = new Point3d(0,0,0);
+//		Point3d zero = new Point3d(0,0,0);
+//		for (RigidBody body : bodies) {
+//			if (!(body instanceof PlaneRigidBody)) {
+//				for (Block block : body.blocks) {
+//					double mass = block.getColorMass();
+//					tmp.set(block.pB);
+//					body.transformB2C.transform(tmp);
+//					inertia += mass * tmp.distanceSquared(zero);
+//				}
+//			}
+//		}
+//		massAngular = inertia;
+//		if (pinned)
+//			jinv = 0.;
+//		else
+//			jinv = 1. / inertia;
+//	}
 
 	public void addToInternalContact(BodyPairContact bpc) {
 		for (Contact contact : bpc.contactList)
@@ -355,17 +440,17 @@ public class RigidCollection extends RigidBody {
 			for (BodyPairContact bpcExt : body.bodyPairContacts)
 				bpcExt.addToBodyListsParent();
 	}
-
+	
 	@Override
-	public void advanceTime(double dt, MergeParameters mergeParams) {
+	public void advanceTime( double dt ) {
 
-		super.advanceTime(dt, mergeParams);
+		super.advanceTime( dt );
 
-		if (pinned || temporarilyPinned || isSleeping)
+		if ( pinned || isSleeping ) // || temporarilyPinned )
 			return;
 
 		updateBodiesPositionAndTransformations();
-		computeInternalContactsForce(dt);
+		//computeInternalContactsForce(dt);
 
 		// Advance velocities for internal bodies
 		if (!mergeParams.enableUnmergeRelativeMotionCondition.getValue())
@@ -375,13 +460,18 @@ public class RigidCollection extends RigidBody {
 	/**
 	 * Updates bodies position, orientation, and transformations
 	 */
-	private void updateBodiesPositionAndTransformations() {
+	protected void updateBodiesPositionAndTransformations() {
 		for (RigidBody body : bodies) {
 
 			// reset position and orientation
-			body.transformW2B.transform(body.x);
-			body.theta = body.transformW2B.getTheta();
+			// TODO: I'm confused here...
+			// the body's W2B on it's position will simply give us zero, no?
 
+			// looks like these do nothing...
+			
+//			body.transformW2B.transform(body.x);
+//			body.transformW2B.T.getRotationScale( body.theta );
+			
 			// update transformations
 			body.transformB2W.set(body.transformB2C);
 			body.transformB2W.leftMult(transformB2W);
@@ -389,15 +479,18 @@ public class RigidCollection extends RigidBody {
 			body.transformW2B.invert();
 
 			// update position and orientation
-			body.transformB2W.transform(body.x);
-			body.theta = body.transformB2W.getTheta();
+			//body.transformB2W.T.get( tmp ); //transform(body.x);
+			body.x.x = body.transformB2W.T.m03;
+			body.x.x = body.transformB2W.T.m13;
+			body.x.x = body.transformB2W.T.m23;
+			body.transformB2W.T.getRotationScale( body.theta );
 		}
 	}
 
 	/**
 	 * Updates bodies velocities
 	 */
-	private void applyVelocitiesToBodies() {
+	protected void applyVelocitiesToBodies() {
 		for (RigidBody body : bodies) {
 			applyVelocitiesTo(body);
 		}
@@ -409,27 +502,32 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	public void applyVelocitiesTo(RigidBody body) {
-		if (pinned || temporarilyPinned) {
-			if (v.lengthSquared() > 1e-14 || omega > 1e-14)
+		if ( pinned ) { //|| temporarilyPinned) {
+			if (v.lengthSquared() > 1e-14 || omega.lengthSquared() > 1e-14)
 				System.err.println("[applyVelocitiesTo] velocities of pinned body is not zero.");
 		}
 
-		final Vector2d rw = new Vector2d(-(body.x.y - x.y), body.x.x - x.x);
-		rw.scale(omega);
-		body.v.add(v, rw); // sets the value of the sum
+		Vector3d r = new Vector3d();
+		Vector3d wxr = new Vector3d();
+		r.sub( body.x, x );
+		wxr.cross( omega, r );
+		
+		body.v.add( v, wxr ); // sets the value of the sum
 		body.omega = omega;
 	}
 
-	/**
-	 * Compute internal contacts force w.r.t lambdas
-	 * 
-	 * @param dt
-	 */
-	public void computeInternalContactsForce(double dt) {
-		for (Contact c : internalContacts) {
-			c.computeForces(true, dt);
-		}
-	}
+	// This computeInternalContactsForce code should be save to remove... we inefficiently call the computeForces in the display
+	// callback to save memory.
+//	/**
+//	 * Compute internal contacts force w.r.t lambdas
+//	 * 
+//	 * @param dt
+//	 */
+//	public void computeInternalContactsForce(double dt) {
+//		for (Contact c : internalContacts) {
+//			c.computeForces(true, dt);
+//		}
+//	}
 
 	/** Applies springs on the body, to the collection */
 	private void addBodiesSpringsToCollection() {
@@ -443,7 +541,7 @@ public class RigidCollection extends RigidBody {
 
 		double metric = motionMetricProcessor.getMotionMetric(this, body);
 
-		if (pinned || temporarilyPinned)
+		if (pinned ) // || temporarilyPinned)
 			metric /= 2;
 
 		return (metric > mergeParams.thresholdUnmerge.getValue());
@@ -460,7 +558,7 @@ public class RigidCollection extends RigidBody {
 			return;
 		} else {
 			applyVelocitiesTo(body);
-			body.deltaV.zero();
+			body.deltaV.setZero();
 			body.parent = null;
 		}
 	}
@@ -521,23 +619,22 @@ public class RigidCollection extends RigidBody {
 		return contacts;
 	}
 
-	public void displayInternalContactForces(GLAutoDrawable drawable) {
+	public void displayInternalContactForces(GLAutoDrawable drawable, double dt ) {
 
 		for (BodyPairContact bpc : bodyPairContacts) {
 			if (!bpc.inCollection)
 				continue;
 			for (Contact c : bpc.contactList)
-				c.displayContactForce(drawable, new Color3f(0, 0, 1)); // blue inside collection
+				c.displayContactForce( drawable, true, dt ); // blue inside collection
 		}
 	}
 
 	public void displayInternalContactLocations(GLAutoDrawable drawable, int size) {
-
 		for (BodyPairContact bpc : bodyPairContacts) {
 			if (!bpc.inCollection)
 				continue;
 			for (Contact c : bpc.contactList)
-				c.displayContactLocation(drawable, new Color3f(0, 0, 1), size); // blue inside collection
+				c.display( drawable, true ); // blue inside collection
 		}
 	}
 
@@ -548,30 +645,39 @@ public class RigidCollection extends RigidBody {
 	 */
 	public void displayCollection(GLAutoDrawable drawable) {
 
-		if (myListID == -1) { // transparency change
-			for (RigidBody b : bodies)
-				b.display(drawable, null);
+		// Note that the colour is set at a higher level, 
+		// and would have been assigned when the collection was created,
+		// so we just need to draw all the bodies, and not even 
+		// apply our B2W transformation as we will have updated all
+		// the body positions 
+		
+		for (RigidBody b : bodies)
+			b.display(drawable);
 
-			myListID = -2;
-
-		} else { // eulalie: transparency doesn't work, don't understand why
-			GL2 gl = drawable.getGL().getGL2(); // GL has no glBlendColor()
-			gl.glEnable(GL2.GL_BLEND);
-			gl.glBlendFuncSeparate(GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR, GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-			gl.glBlendEquation(GL2.GL_FUNC_ADD);
-			
-			if (isSleeping)
-				gl.glBlendColor((color.x+1)/2, (color.y+1)/2, (color.z+1)/2, Block.alpha);
-			else
-				gl.glBlendColor(color.x, color.y, color.z, Block.alpha);
-
-			for (RigidBody b : bodies)
-				b.display(drawable, color);
-
-			// Back to initial set up
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		}
+//		if (myListID == -1) { // transparency change
+//			for (RigidBody b : bodies)
+//				b.display(drawable);
+//
+//			myListID = -2;
+//
+//		} else { // eulalie: transparency doesn't work, don't understand why
+//			GL2 gl = drawable.getGL().getGL2(); // GL has no glBlendColor()
+//			gl.glEnable(GL2.GL_BLEND);
+//			gl.glBlendFuncSeparate(GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR, GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+//			gl.glBlendEquation(GL2.GL_FUNC_ADD);
+//			
+//			if (isSleeping)
+//				gl.glBlendColor((color.x+1)/2, (color.y+1)/2, (color.z+1)/2, Block.alpha);
+//			else
+//				gl.glBlendColor(color.x, color.y, color.z, Block.alpha);
+//
+//			for (RigidBody b : bodies)
+//				b.display(drawable, color);
+//
+//			// Back to initial set up
+//			gl.glEnable(GL.GL_BLEND);
+//			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+//		}
 	}
 
 	/**
@@ -585,8 +691,8 @@ public class RigidCollection extends RigidBody {
 		GL2 gl = drawable.getGL().getGL2();
 
 		// draw a line between the two bodies but only if they're both not pinned
-		Point2d p1 = new Point2d();
-		Point2d p2 = new Point2d();
+		Point3d p1 = new Point3d();
+		Point3d p2 = new Point3d();
 		for (BodyPairContact bpc : bodyPairContacts) {
 			if (bpc.inCollection) {
 				gl.glLineWidth(5);
@@ -601,23 +707,23 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 
-	/**
-	 * displays cycles (from merge condition)
-	 * 
-	 * @param drawable
-	 */
-	public void displayCycles(GLAutoDrawable drawable, int size) {
-
-		for (BodyPairContact bpc : bodyPairContacts) {
-			if (bpc.inCycle) {
-				if (bpc.contactList.isEmpty())
-					System.err.println(
-							"[displayCycles] The list of contact is empty. This should not happen. Probably due to an unwanted merge (concave?).");
-				else
-					bpc.contactList.get(0).displayContactLocation(drawable, bpc.cycleColor, size);
-			}
-		}
-	}
+//	/**
+//	 * displays cycles (from merge condition)
+//	 * 
+//	 * @param drawable
+//	 */
+//	public void displayCycles(GLAutoDrawable drawable, int size) {
+//
+//		for (BodyPairContact bpc : bodyPairContacts) {
+//			if (bpc.inCycle) {
+//				if (bpc.contactList.isEmpty())
+//					System.err.println(
+//							"[displayCycles] The list of contact is empty. This should not happen. Probably due to an unwanted merge (concave?).");
+//				else
+//					bpc.contactList.get(0).display(drawable, bpc.cycleColor, size);
+//			}
+//		}
+//	}
 
 	@Override
 	public void displayBB(GLAutoDrawable drawable) {

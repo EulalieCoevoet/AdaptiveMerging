@@ -183,8 +183,6 @@ public class XMLParser {
 			}
         }
 
-		Vector3d ll = new Vector3d();
-		Vector3d ur = new Vector3d();
 		double massLinear = 0;
 		Matrix3d massAngular = new Matrix3d();
 
@@ -222,6 +220,8 @@ public class XMLParser {
 		}
 		
 		// TODO: THIS BOUNDING BOX IS POSSIBLY WRONG?
+	    Vector3d ll = new Vector3d( Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE );
+	    Vector3d ur = new Vector3d( Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE );
 		for ( RigidBody b : bodies ) {
 			for ( Point3d p : b.boundingBoxB ) {
 				p.sub(com);

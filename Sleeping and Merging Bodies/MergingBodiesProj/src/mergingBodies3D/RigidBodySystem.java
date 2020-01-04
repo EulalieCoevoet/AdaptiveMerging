@@ -27,9 +27,7 @@ public class RigidBodySystem {
     public double simulationTime = 0;
     
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
-	
-	public CollisionProcessor collision = new CollisionProcessor(bodies);
-    
+	    
     public MouseSpringForce mouseSpring;
     
     BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
@@ -37,6 +35,10 @@ public class RigidBodySystem {
     DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );
     
     DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
+    
+	public CollisionProcessor collision = new CollisionProcessor(bodies);
+	public Merging merging = new Merging(bodies, collision);
+	public Sleeping sleeping = new Sleeping(bodies);
     
     /**
      * Creates a new rigid body system
@@ -98,8 +100,11 @@ public class RigidBodySystem {
 		collision.solveLCP(dt); 
         
         // advance the system by the given time step
-        for ( RigidBody b : bodies ) 
-            b.advanceTime(dt);
+		
+        RigidCollection.mergeParams = merging.params;
+        		
+		for ( RigidBody b : bodies )
+            b.advanceTime( dt );
 		
         computeTime = (System.nanoTime() - now) / 1e9;
         simulationTime += dt;
@@ -240,17 +245,18 @@ public class RigidBodySystem {
         
         if ( drawContacts.getValue() ) {
             for ( Contact c : collision.contacts ) {
-                c.display(drawable);
+                c.display( drawable, false );
     			if (drawContactForces.getValue()) {
-    				c.displayContactForce(drawable, dt );  // should let it draw its own colour
+    				c.displayContactForce( drawable, false, dt );  // should let it draw its own colour
     			}
             }
         }
-//        if ( drawCOMs.getValue() ) {
-//            for ( RigidBody b : bodies ) {
-//                b.displayCOM(drawable);
-//            }
-//        }
+        
+        if ( drawBBs.getValue() ) {
+        	 for ( RigidBody b : bodies ) {
+               b.displayBB(drawable);
+           }
+        }
         gl.glEnable(GL2.GL_DEPTH_TEST);
     }
 
@@ -331,6 +337,7 @@ public class RigidBodySystem {
     private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
     private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
     private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
+    private BooleanParameter drawBBs = new BooleanParameter( "draw bouding boxes", false );
     private BooleanParameter drawCOMs = new BooleanParameter( "draw center of mass positions", false );
     private BooleanParameter drawContacts = new BooleanParameter( "draw contact locations", false );
     private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
@@ -354,6 +361,7 @@ public class RigidBodySystem {
         vfpv.add( drawBoundingVolumes.getControls() );
         vfpv.add( drawAllBoundingVolumes.getControls() );
         vfpv.add( drawBoundingVolumesUsed.getControls() );
+        vfpv.add( drawBBs.getControls() );
         vfpv.add( drawCOMs.getControls() );
         vfpv.add( drawContactGraph.getControls() );
         vfpv.add( drawContacts.getControls() );

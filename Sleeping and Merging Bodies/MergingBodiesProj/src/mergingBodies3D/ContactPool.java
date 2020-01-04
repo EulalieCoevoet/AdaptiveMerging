@@ -11,7 +11,13 @@ import java.util.ArrayList;
  * for the next warm start.  Memory is allocated in two mostly continuous
  * blocks of memory of contact structures to help with cache locality in 
  * the solver (probably would want to organize memory differently if we 
- * really cared).  
+ * really cared).
+ * 
+ *   TODO: Consider a 3rd pool for contacts that are persistant within 
+ *   merged collections... should probably make a copy of the contact when 
+ *   merging so that the primary pool memory doesn't get disturbed?  This
+ *   might be a bit tricky to figure out...
+ *   
  * @author kry
  */
 public class ContactPool {

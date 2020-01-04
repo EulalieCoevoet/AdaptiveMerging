@@ -429,8 +429,7 @@ public class Contact {
 	}
 
 	/**
-	 * Draws the connections between bodies to visualize the 
-	 * the adjacency structure of the matrix as a graph.
+	 * Draws the contact force
 	 * @param drawable
 	 */
 	public void displayContactForce( GLAutoDrawable drawable, Color3f color ) {

@@ -38,7 +38,7 @@ public class MotionMetricProcessor {
 			return metric;
 	}
 	
-	public double getRelativeVelocitiesNorm(RigidBody body1, RigidBody body2) {
+	private double getRelativeVelocitiesNorm(RigidBody body1, RigidBody body2) {
 		
 		Vector2d relativeLinearVelocity = getRelativeLinearVelocity(body1, body2);
 		double relativeAngularVelocity = getRelativeAngularVelocity(body1, body2);
@@ -47,7 +47,14 @@ public class MotionMetricProcessor {
 		return k;
 	}
 	
-	public double getRelativeKineticEnergy(RigidBody body1, RigidBody body2) {
+	/**
+	 * TODO: subtracting masses and angular masses really doesn't make any sense!  modify this or junk it!
+	 * @param body1
+	 * @param body2
+	 * @return
+	 */
+	private double getRelativeKineticEnergy(RigidBody body1, RigidBody body2) {
+		System.err.println("Don't use getRelativeKineticEnergy!");
 
 		Vector2d relativeLinearVelocity = getRelativeLinearVelocity(body1, body2);
 		double relativeAngularVelocity = getRelativeAngularVelocity(body1, body2);
@@ -59,7 +66,7 @@ public class MotionMetricProcessor {
 		return k/massDifference;
 	}
 	
-	public double getLargestVelocityNorm(RigidBody body1, RigidBody body2) {
+	private double getLargestVelocityNorm(RigidBody body1, RigidBody body2) {
 		
 		RigidBody relative = new RigidBody();
 		relative.x = getCommonCOM(body1, body2);
@@ -91,7 +98,7 @@ public class MotionMetricProcessor {
 	 * @param body2
 	 * @return relative linear velocity
 	 */
-	public Vector2d getRelativeLinearVelocity(RigidBody body1, RigidBody body2) {
+	private Vector2d getRelativeLinearVelocity(RigidBody body1, RigidBody body2) {
 		
 		if ( body1.pinned || body1.temporarilyPinned ) {
 			if(body1.v.x != 0. || body1.v.y != 0.) {
@@ -137,7 +144,7 @@ public class MotionMetricProcessor {
 	 * @param body2
 	 * @return
 	 */
-	protected Point2d getCommonCOM(RigidBody body1, RigidBody body2) {
+	private Point2d getCommonCOM(RigidBody body1, RigidBody body2) {
 		Point2d massCOM1 = new Point2d(body1.x);
 		Point2d massCOM2 = new Point2d(body2.x);
 		massCOM1.scale(body1.massLinear);
@@ -154,7 +161,7 @@ public class MotionMetricProcessor {
 	 * @param body2
 	 * @return relative angular velocity
 	 */
-	public double getRelativeAngularVelocity(RigidBody body1, RigidBody body2) {
+	private double getRelativeAngularVelocity(RigidBody body1, RigidBody body2) {
 		
 		if ( body1.pinned || body1.temporarilyPinned ) {
 			if(body1.omega != 0.) {

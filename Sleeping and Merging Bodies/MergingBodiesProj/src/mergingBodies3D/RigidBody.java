@@ -6,6 +6,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -23,8 +24,9 @@ public class RigidBody {
 	/** 
 	 * Used for composite bodies and collections
 	 * TODO: either be careful or change out composites work once rigid collections are included in 3D... 
+	 * Actaully... composites are currently on the todo list... can come back to them later...
 	 */
-	RigidBody parent;
+	RigidCollection parent;
 	
     /** Variable to keep track of identifiers that can be given to rigid bodies */
     static public int nextIndex = 0;
@@ -34,6 +36,13 @@ public class RigidBody {
 	 * TODO: can this not live at the system level?  This seems like a weird place to put it
 	 */
 	public ArrayList<Spring> springs = new ArrayList<Spring>();
+	
+	/**
+	 * List of Contact in the collection: Contact between RigidBody of the
+	 * collection
+	 * TODO: CAREFUL in using this to make sure it works with memory pooling!!!
+	 */
+	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 	
     RigidBodyGeom geom;
         
@@ -69,6 +78,27 @@ public class RigidBody {
     
     /** Transforms points in World coordinates to Body coordinates */
     public RigidTransform transformW2B = new RigidTransform();
+    
+    
+	/**
+	 * TODO:  Somewhat wasted memory???  
+	 * Transforms points in body coordinates to collection coordinates, if a
+	 * collection exists
+	 */
+	RigidTransform transformB2C = new RigidTransform();
+
+	/**
+	 * Transforms points in collection coordinates to body coordinates, if a
+	 * collection exists
+	 */
+	RigidTransform transformC2B = new RigidTransform();
+	
+	/**
+	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
+	 * both internal and external bpc.
+	 **/
+	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
+    
     
     /** DeltaV for PGS resolution */
     Vector6d deltaV = new Vector6d();
@@ -117,6 +147,8 @@ public class RigidBody {
 	/** Restitution coefficient */
 	public double restitution; 
 	
+	public boolean isSleeping = false;
+
 	/** true if body is a magnetic */
 	public boolean magnetic = false;
 	
@@ -130,6 +162,17 @@ public class RigidBody {
 	public double radius;
 	
 	public float[] col;
+	
+	/**
+	 * keeps track of the activity of the last N steps, if it is false, means that
+	 * should be asleep, if true, should be awake
+	 */
+	public ArrayList<Double> metricHistory = new ArrayList<Double>();
+
+	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
+
+	/** Empty constructor needed in some special cases... use carefully! */
+	protected RigidBody() {}
 	
 	/**
 	 * Constructs a new rigid body
@@ -205,6 +248,28 @@ public class RigidBody {
 		deltaV.setZero();
 	}
     	
+	public boolean isInCollection() {
+		return (parent!=null);
+	}
+	
+	public boolean isInSameCollection(RigidBody body) {
+		return (parent!=null && parent==body.parent);
+	}
+	
+	public boolean isInCollection(RigidCollection collection) {
+		return ( parent == collection );
+	}
+	
+	public void wake() {
+		if (isSleeping) {
+	    	isSleeping = false;
+	    	metricHistory.clear();
+	    }
+		
+		if (isInCollection() && parent.isSleeping)
+	    	parent.wake();
+	}
+	
     /**
      * Updates the B2W and W2B transformations
      */
@@ -388,5 +453,23 @@ public class RigidBody {
         FancyAxis.draw(drawable);
         gl.glPopMatrix();
     }
+    
+	/**
+	 * Draws bounding box
+	 * @param drawable
+	 */
+	public void displayBB(GLAutoDrawable drawable) {
+		GL2 gl = drawable.getGL().getGL2();
+		gl.glPointSize( 10 );
+		float[] col = new  float[] {0, 0, 1, 1};
+		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
+		gl.glBegin(GL.GL_POINTS);
+		for (Point3d point : boundingBoxB) {
+			Point3d p = new Point3d(point);
+			transformB2W.transform(p);
+			gl.glVertex3d(p.x, p.y, p.z);
+		}					
+		gl.glEnd();
+	}
 
 }
