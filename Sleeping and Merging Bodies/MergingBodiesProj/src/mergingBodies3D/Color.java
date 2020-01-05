@@ -19,7 +19,7 @@ public class Color extends Color3f {
 		super();
 	}
 
-	private static Random rand = new Random();
+	private static Random rand = new Random(0L); // same random color sequence
 	
 	/**
 	 * Return a random color (not gray)

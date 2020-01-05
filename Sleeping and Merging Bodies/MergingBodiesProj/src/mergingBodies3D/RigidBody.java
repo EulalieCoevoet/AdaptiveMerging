@@ -37,13 +37,6 @@ public class RigidBody {
 	 */
 	public ArrayList<Spring> springs = new ArrayList<Spring>();
 	
-	/**
-	 * List of Contact in the collection: Contact between RigidBody of the
-	 * collection
-	 * TODO: CAREFUL in using this to make sure it works with memory pooling!!!
-	 */
-	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
-	
     RigidBodyGeom geom;
         
     BVNode root;

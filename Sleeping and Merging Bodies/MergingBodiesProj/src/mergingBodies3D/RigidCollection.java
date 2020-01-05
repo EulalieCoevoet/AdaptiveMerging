@@ -33,6 +33,7 @@ public class RigidCollection extends RigidBody {
 	/**
 	 * List of Contact in the collection: Contact between RigidBody of the
 	 * collection
+	 * JESUS CHRIST!!! no error for redelcaring 1??!
 	 */
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 

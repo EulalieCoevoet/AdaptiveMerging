@@ -40,6 +40,13 @@ public class CollisionProcessor {
      */
     ArrayList<Contact> contacts = new ArrayList<Contact>();
 
+    /**
+     * Array of contacts used for the single cycle update, kept separate 
+     * from the main solve contact list
+     */
+	ArrayList<Contact> altContactList = new ArrayList<Contact>(); 
+
+
     private ContactPool contactPool = new ContactPool();
     
 	/** PGS solver */
@@ -187,7 +194,7 @@ public class CollisionProcessor {
 			}
 		}
 		
-		bodyPairContacts.clear();
+		bodyPairContacts.clear();  // TODO: efficiency!!  if nothing needs removing nothing should be done! :(
 		bodyPairContacts.addAll(tmpBodyPairContacts);
 	}
 	
@@ -208,7 +215,7 @@ public class CollisionProcessor {
 		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 		solver.warmStart = true;
 		
-		solver.contacts = new ArrayList<Contact>(); // TODO: Memory!!
+		solver.contacts = altContactList;
 		boolean compute = false; // set to true if there is a collection in the system
 		
 		if (mergeParams.organizeContacts.getValue())

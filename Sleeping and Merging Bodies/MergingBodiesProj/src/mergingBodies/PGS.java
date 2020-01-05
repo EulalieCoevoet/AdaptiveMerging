@@ -23,7 +23,7 @@ public class PGS {
 		this.iterations=iterations;
 		feedbackStiffness=0.;
 		compliance=0.;
-		contacts = null;
+		contacts = null;  // why not maintain a list?  see the 3D implementation
 		warmStart = false;
 		computeInCollection = false;
 	}
