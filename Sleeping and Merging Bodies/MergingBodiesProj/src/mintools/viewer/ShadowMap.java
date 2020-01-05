@@ -125,11 +125,11 @@ public class ShadowMap {
 		gl.glEnable( GL2.GL_POINT_SMOOTH );
 
 		// no extra ambient light by default !
-		gl.glLightModelfv( GL2.GL_LIGHT_MODEL_AMBIENT, new float[] {0,0,0,1}, 0);
+		gl.glLightModelfv( GL2.GL_LIGHT_MODEL_AMBIENT, new float[] {0,0,0,0}, 0);
 
 		// Set some default material parameters
 		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {1,1,1,1}, 0 );
-		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, new float[] {1,1,1,1}, 0 );
+		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, new float[] {1,1,1,0}, 0 );
 		gl.glMaterialf( GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, 50 );
 
 		// CREATE THE FRAGMENT PROGRAM FOR DRAWING DEPTH
@@ -198,7 +198,7 @@ public class ShadowMap {
 		float I = lightIntensity.getFloatValue();
 		float A = ambientIntensity.getFloatValue();
 		float[] colour = { I, I, I, 1 };
-		float[] acolour = { A, A, A, 1 };
+		float[] acolour = { A, A, A, 0 };
 		gl.glLightfv( GL2.GL_LIGHT0, GL2.GL_SPECULAR, colour, 0 );
 		gl.glLightfv( GL2.GL_LIGHT0, GL2.GL_DIFFUSE, colour, 0 );
 		gl.glLightfv( GL2.GL_LIGHT0, GL2.GL_AMBIENT, acolour, 0 );

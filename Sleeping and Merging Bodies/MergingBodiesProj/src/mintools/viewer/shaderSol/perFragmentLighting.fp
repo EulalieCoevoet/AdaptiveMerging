@@ -35,5 +35,7 @@ void main(void) {
 								gl_LightSource[0].quadraticAttenuation * d * d );
 
     // write Total Color:  emissive (sceneColor), ambient, diffuse and specular
-    gl_FragColor = gl_FrontLightModelProduct.sceneColor + Iamb + (Idiff + Ispec) * shadow * attenuation;        
+    gl_FragColor = 
+    	//gl_FrontLightModelProduct.sceneColor + 
+    	Iamb + (Idiff + Ispec) * shadow * attenuation;        
 }

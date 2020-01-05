@@ -303,7 +303,7 @@ public class EasyViewer implements GLEventListener {
             int lightNumber = 1;
             float[] position = { light1Pos.x, light1Pos.y, light1Pos.z, 1 };
             float[] colour = { .8f, .8f, .8f, 1 };
-            float[] acolour = {0,0,0,1};//{ .05f, .05f, .05f, 1 };
+            float[] acolour = {0,0,0,0};//{ .05f, .05f, .05f, 1 };
             gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_SPECULAR, colour, 0);
             gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_DIFFUSE, colour, 0);
             gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_AMBIENT, acolour, 0);
@@ -317,7 +317,7 @@ public class EasyViewer implements GLEventListener {
             int lightNumber = 0;
             float[] position = { light2Pos.x, light2Pos.y, light2Pos.z, 1 };
             float[] colour = { .2f, .2f, .2f, 1 };
-            float[] acolour = { .0f, .0f, .0f, 1 };
+            float[] acolour = { .0f, .0f, .0f, 0 };
             gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_SPECULAR, colour, 0);
             gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_DIFFUSE, colour, 0);
             gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_AMBIENT, acolour, 0);
