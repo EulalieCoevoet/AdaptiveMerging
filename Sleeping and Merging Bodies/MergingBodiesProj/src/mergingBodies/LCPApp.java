@@ -290,10 +290,10 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         JEditorPane ta = new JEditorPane("text/html", 
         		"   <b>KEYBOARD</b><br/>" +          		
-        		"   space : start and stop simulation <br/>" +
-        		"   enter : start and stop recording <br/> " +
-        		"   m : simulate up to next merge or unmerge <br/> " +
-        		"   l : load a file <br/> " +
+        		"   SPACE : start and stop simulation <br/>" +
+        		"   ENTER : start and stop recording <br/> " +
+        		"   M : simulate up to next merge or unmerge <br/> " +
+        		"   L : load a file <br/> " +
         		"   &larr : previous scene<br/> " +
         		"   &rarr : next scene<br/> " +
         		"   1-7 : left right up down spring up down and toggle magnet<br/> "+

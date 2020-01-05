@@ -1,0 +1,42 @@
+<div width=500">
+<p>The scene file has one<root></root> element that containing bodies and collision properties.
+
+<p>&lt;body&gt; tags have required attributes:
+	type: one of: box, mesh, sphere, plane
+	name: anything you want, for debugging, need not be unique
+
+<p>All bodies currently have unit density.  Different body types 
+have required attributes that must appear after the tag:
+<ul>	
+<li>	box: <br/>
+		dim="l w d" for x y z dimensions
+<li>	mesh: <br/>
+		scale="s" for a scale factor, 
+		obj="fname.obj" for the mesh file,
+		st="fname.sph" for the sphere tree file (undocumented)
+<li>	plane: (always pinned) <br/>
+		p="x y x" a point on the plane,
+		n="x y z" the normal of the plane
+</ul>
+<p>The body element can contain elements with the following tags:
+<ul>
+<li>	&lt;x&gt; x y z &lt;/x&gt; <br/>
+		Specifies translation, default is zero
+<li>	&lt;R&gt x y z radians &lt;R&gt; <br/>
+		Specifies rotation, default is identity
+<li>	&lt;spring pB="x y z" k="ks" d="kd"/&gt; <br/>
+		Attaches a zero length spring in given body coordinates
+		to the world with given stiffness and damping.  The k
+		and d attributes can be omitted in which case they will
+		have default values.
+<li>	&lt;pinned&gt; bool &lt;/pinned&gt;<br/>
+		Default is false.
+<li>	&lt;factorypart&gt; bool &lt;/factorypart&gt;<br/>
+		Default is true, but set to false to not have the body
+		persistent, like pinned bodies, and not be generated 
+		randomly.
+<li>	&lt;col&gt; r g b &lt;/col&gt;<br/>
+		A body material colour with [0,1] RGB values.
+</ul>
+</div>
+		

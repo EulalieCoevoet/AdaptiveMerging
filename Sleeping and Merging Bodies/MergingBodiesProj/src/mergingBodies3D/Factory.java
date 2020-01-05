@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 import javax.vecmath.Vector3d;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.Vec3Parameter;
-import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -143,7 +141,7 @@ public class Factory {
      */
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
-        vfp.setBorder( new TitledBorder("Factory") );
+        //vfp.setBorder( new TitledBorder("Factory") );
         vfp.add( run.getControls() );       
         vfp.add( interval.getSliderControls(true) );
         vfp.add( seed );
@@ -151,9 +149,10 @@ public class Factory {
         vfp.add( linearVelocityScale.getSliderControls(true) );
         vfp.add( downVelocity.getSliderControls(false) );
         vfp.add( angularVelocityScale.getSliderControls(true) );
-        CollapsiblePanel cp = new CollapsiblePanel( vfp.getPanel());
-        cp.collapse();
-        return cp;
+        //CollapsiblePanel cp = new CollapsiblePanel( vfp.getPanel());
+        //cp.collapse();
+        //return cp;
+        return vfp.getPanel();
     }
     
 }

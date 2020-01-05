@@ -2,6 +2,7 @@ package mergingBodies3D;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -13,6 +14,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.text.DecimalFormat;
@@ -21,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Matrix4d;
@@ -83,11 +86,13 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         system.mouseSpring = mouseSpring;
         loadXMLSystem("scenes3D/boxboxWarmStartTest.xml");
         T.getBackingMatrix().setIdentity();
-        ev = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(540,480), new Dimension(640,480) );
+        ev = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(640,360), new Dimension(640,480) );
 
+        ev.controlFrame.add("Display", system.display.getControls());
         ev.controlFrame.add("Merging", system.merging.getControls());
         ev.controlFrame.add("Sleeping", system.sleeping.getControls());
         ev.controlFrame.add("Factory", factory.getControls());
+        ev.controlFrame.add("Help", getHelpPanel() );
 
         ev.addInteractor(this);       
         
@@ -227,21 +232,21 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 stringBuilder.append( "MEMORY DELTA = "); stringBuilder.append( memDelta ); stringBuilder.append( " KB \n" );
         stringBuilder.append( "FILTERED DELTA = "); stringBuilder.append( (int) filteredUsedMem ); stringBuilder.append( " KB \n" );
         
-        if ( ! hideOverlay.getValue() ) {
+        if ( ! system.display.params.hideOverlay.getValue() ) {
         	EasyViewer.printTextLines( drawable, stringBuilder.toString(), 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
         }
     	EasyViewer.endOverlay(drawable);
 
-        if ( drawGraphs.getValue() ) {
+        if ( system.display.params.drawGraphs.getValue() ) {
         	ccm.draw(drawable);
         }
-        if ( drawMemoryMonitor.getValue() ) {
+        if ( system.display.params.drawMemGraphs.getValue() ) {
         	memMonitor.draw( drawable, 0 );
         	computeTimeMonitor.draw( drawable, 1);
         }
         
         if ( run.getValue() || stepped ) {
-        	if ( drawGraphs.getValue() ) {
+        	if ( system.display.params.drawGraphs.getValue() ) {
             ccm.monitor(system);
         	}
         	stepped = false;        
@@ -281,7 +286,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 	        gl.glEnable( GL2.GL_CLIP_PLANE0 );
         }
         
-        system.display( drawable, picking );
+        system.display.display( drawable, picking );
 
         if ( useClipPlane.getValue() ) {
             gl.glDisable( GL2.GL_CLIP_PLANE0 );
@@ -302,7 +307,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         gl.glPushMatrix();
         gl.glScaled( sceneScale,sceneScale,sceneScale );
         gl.glTranslated( sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
-        system.displayNonShadowable(drawable, dt);
+        system.display.displayNonShadowable(drawable, dt);
         gl.glPopMatrix();
     }
     
@@ -394,24 +399,56 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private int nextFrameNum = 0;
     
     private NumberFormat format = new DecimalFormat("00000");
-
-    private BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", false );
-    private BooleanParameter drawGraphs = new BooleanParameter("draw performance graphs", false );
-    private BooleanParameter drawMemoryMonitor = new BooleanParameter("draw memory delta", false );
+    
     private BooleanParameter run = new BooleanParameter( "simulate", false );
     private DoubleParameter stepsize = new DoubleParameter( "step size", 0.05, 1e-5, 1 );
     private IntParameter substeps = new IntParameter( "sub steps (integer)", 1, 1, 100);
     
+    
     private BooleanParameter useClipPlane = new BooleanParameter( "use clip plane", false );
     private Vec3Parameter clipPlaneNormal = new Vec3Parameter( "clip plane normal", 0, 1, 1);
     private DoubleParameter clipPlaneD = new DoubleParameter( " clip plane D", 0, -10, 10 );
+    
+    public JPanel getHelpPanel() {
+    	VerticalFlowPanel vfp = new VerticalFlowPanel();
+        
+    	VerticalFlowPanel vfp1 = new VerticalFlowPanel();
+    	try {
+        	URL urlXMLSpec  = getClass().getResource( "resources/interfaceHelp.html" );
+    		JEditorPane ta = new JEditorPane( urlXMLSpec );        
+    		ta.setEditable(false);
+    		vfp1.add( ta );
+    	} catch ( Exception e ) {
+    		e.printStackTrace();
+    	}
+        vfp1.setBorder( new TitledBorder("Keyboard and Mouse controls") );
+        ((TitledBorder) vfp1.getPanel().getBorder()).setTitleFont(new Font("Arial", Font.BOLD, 18));
+        CollapsiblePanel cp = new CollapsiblePanel( vfp1.getPanel() );        
+        vfp.add( cp );
+        
+    	VerticalFlowPanel vfp2 = new VerticalFlowPanel();
+    	try {
+    		URL urlXMLSpec  = getClass().getResource( "resources/xmlSpec.html" );
+        	JEditorPane ta2 = new JEditorPane( urlXMLSpec );        
+    		ta2.setEditable(false);
+    		vfp2.add( ta2 );
+    	} catch ( Exception e ) {
+    		e.printStackTrace();
+    	}
+        vfp2.setBorder( new TitledBorder("XML documentation") );
+        ((TitledBorder) vfp2.getPanel().getBorder()).setTitleFont(new Font("Arial", Font.BOLD, 18));
+        CollapsiblePanel cp2 = new CollapsiblePanel( vfp2.getPanel() );
+        vfp.add( cp2 );
+        
+        return vfp.getPanel();
+    }
     
     /**
      * Creates a control panel for changing visualization and simulation parameters
      */
     @Override
     public JPanel getControls() {
-        VerticalFlowPanel vfp = new VerticalFlowPanel();
+    	VerticalFlowPanel vfp = new VerticalFlowPanel();
         
         JPanel basicControls = new JPanel( new GridLayout(1,3));
         JButton reset = new JButton("Reset");
@@ -446,11 +483,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         });
 
         vfp.add( basicControls );
-       
-        vfp.add( useClipPlane.getControls() );
-        vfp.add( clipPlaneNormal );
-        vfp.add( clipPlaneD.getSliderControls(false) );
-       
         
         HorizontalFlowPanel hfp2 = new HorizontalFlowPanel();
         hfp2.add( record.getControls() );
@@ -472,12 +504,18 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 ev.frame.setSize( ev.frame.getPreferredSize() );
 
             }
-        });                
+        });     
+        JButton res3 = new JButton("1920x1080");
+        hfp2.add( res3);
+        res2.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {                
+                ev.glCanvas.setSize( 1920, 1080 );
+                ev.frame.setSize( ev.frame.getPreferredSize() );
+
+            }
+        });  
         vfp.add( hfp2.getPanel() );
-        
-        vfp.add( hideOverlay.getControls() );
-        vfp.add( drawGraphs.getControls() );
-        vfp.add( drawMemoryMonitor.getControls() );
         
         vfp.add( run.getControls() );
         vfp.add( stepsize.getSliderControls(true) );
@@ -494,6 +532,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         CollapsiblePanel smcp = new CollapsiblePanel(vfpsm.getPanel());
         smcp.collapse();
         vfp.add( smcp );
+        
+        vfp.add( useClipPlane.getControls() );
+        vfp.add( clipPlaneNormal );
+        vfp.add( clipPlaneD.getSliderControls(false) );
         
         return vfp.getPanel();
     }
@@ -579,7 +621,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     
     /** [0,1] z position from opengl picking to use with unproject */
     private float zClosest;
-   
    
     private GLU glu = new GLU();
     

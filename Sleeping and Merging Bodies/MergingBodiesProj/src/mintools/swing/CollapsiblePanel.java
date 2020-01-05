@@ -34,6 +34,7 @@ import java.awt.Insets;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.TitledBorder;
 
 /**
  * CollapsiblePanel taken from xul.<p>
@@ -77,6 +78,9 @@ public class CollapsiblePanel extends JPanel implements Collapsible
       _spring.add( _contentlabel );
       _contentlabel.setHorizontalAlignment( SwingConstants.LEFT );
       _contentlabel.setVerticalAlignment( SwingConstants.TOP );
+      if ( _content.getBorder() != null && _content.getBorder() instanceof TitledBorder ) {
+    	  _contentlabel.setFont( ((TitledBorder)_content.getBorder()).getTitleFont() );
+      }
       expand();
    }
    
