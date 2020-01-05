@@ -70,10 +70,15 @@ public class Contact {
 	Vector6d jt2a = new Vector6d();
 	Vector6d jt2b = new Vector6d();
 	
-	/** Jacobian matrix, collection frame, packed as trans rot trans rot on each row */
-	// in comments as not yet used!
-	//DenseMatrix jc = new DenseMatrix(3,12);
-	
+	/** Jacobian matrix, collection frame */
+	Vector6d jcna = new Vector6d();
+	Vector6d jcnb = new Vector6d();
+	Vector6d jct1a = new Vector6d();
+	Vector6d jct1b = new Vector6d();
+	Vector6d jct2a = new Vector6d();
+	Vector6d jct2b = new Vector6d();
+	// TODO: Wasteful to keep all this memory for both Jacobian and collection Jacobian... is there a nice solution?
+		
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent1, tangent2) */
 	double lambda0;
 	double lambda1;
@@ -175,17 +180,17 @@ public class Contact {
 	 * In case of body in a collection, use COM of parent to compute the torque component of the Jacobian.
 	 */
 	public void computeJacobian(boolean computeInCollection) {
-		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection )? body1.parent: body1;
-		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection )? body2.parent: body2;
+		RigidBody b1 = (body1.isInCollection() && !computeInCollection )? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection() && !computeInCollection )? body2.parent: body2;
 		r1.sub( contactW, b1.x );
 		r2.sub( contactW, b2.x );
 		
-		//Vector6d jna = this.jna;   // j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
-		//Vector6d jt1a = this.jt1a; // j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
-		//Vector6d jt2a = this.jt2a; // j = this.j; //(b1 instanceof RigidCollection)? jc: this.j;
-		//Vector6d jnb = this.jnb;   // j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
-		//Vector6d jt1b = this.jt1b; // j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
-		//Vector6d jt2b = this.jt2b; // j = this.j; //(b2 instanceof RigidCollection)? jc: this.j;
+		Vector6d jna  = (b1 instanceof RigidCollection)? jcna  : this.jna;
+		Vector6d jt1a = (b1 instanceof RigidCollection)? jct1a : this.jt1a;
+		Vector6d jt2a = (b1 instanceof RigidCollection)? jct2a : this.jt2a;
+		Vector6d jnb  = (b2 instanceof RigidCollection)? jcnb  : this.jnb;
+		Vector6d jt1b = (b2 instanceof RigidCollection)? jct1b : this.jt1a;
+		Vector6d jt2b = (b2 instanceof RigidCollection)? jct1b : this.jt2b;
 
 		jna.v.scale( -1, normalW );		
 		jna.w.cross( normalW, r1 ); // - r1 x nW
@@ -211,8 +216,8 @@ public class Contact {
 	 */
 	public void computeB(double dt, double feedbackStiffness, boolean computeInCollection) {
 		
-		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection)? body1.parent: body1;
-		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection)? body2.parent: body2;
+		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
 
 		double m1inv = b1.minv;//(b1.temporarilyPinned)? 0: b1.minv; 
 		double m2inv = b2.minv;//(b2.temporarilyPinned)? 0: b2.minv;
@@ -228,6 +233,12 @@ public class Contact {
 		bn = 0; bt1 = 0; bt2 = 0;
 		
 		// Vector6d jna,t1a,t2a = this.jna,t1a,t2a; // j = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
+		Vector6d jna  = (b1 instanceof RigidCollection)? jcna  : this.jna;
+		Vector6d jt1a = (b1 instanceof RigidCollection)? jct1a : this.jt1a;
+		Vector6d jt2a = (b1 instanceof RigidCollection)? jct2a : this.jt2a;
+		Vector6d jnb  = (b2 instanceof RigidCollection)? jcnb  : this.jnb;
+		Vector6d jt1b = (b2 instanceof RigidCollection)? jct1b : this.jt1a;
+		Vector6d jt2b = (b2 instanceof RigidCollection)? jct1b : this.jt2b;
 		
 		tmp1.scaleAdd( m1inv*dt, b1.force, b1.v );	
 		bn  += tmp1.dot(jna.v);
@@ -278,8 +289,8 @@ public class Contact {
 	 */
 	public void computeJMinvJt(boolean computeInCollection) {
 		
-		RigidBody b1 = body1;//(body1.isInCollection() && !computeInCollection)? body1.parent: body1;
-		RigidBody b2 = body2;//(body2.isInCollection() && !computeInCollection)? body2.parent: body2;
+		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
+		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
 
 		double m1inv = b1.minv;//(b1.temporarilyPinned)? 0: b1.minv; 
 		double m2inv = b2.minv;//(b2.temporarilyPinned)? 0: b2.minv;
@@ -288,6 +299,13 @@ public class Contact {
 		
 		//DenseMatrix j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
 		//DenseMatrix j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
+		Vector6d jna  = (b1 instanceof RigidCollection)? jcna  : this.jna;
+		Vector6d jt1a = (b1 instanceof RigidCollection)? jct1a : this.jt1a;
+		Vector6d jt2a = (b1 instanceof RigidCollection)? jct2a : this.jt2a;
+		Vector6d jnb  = (b2 instanceof RigidCollection)? jcnb  : this.jnb;
+		Vector6d jt1b = (b2 instanceof RigidCollection)? jct1b : this.jt1a;
+		Vector6d jt2b = (b2 instanceof RigidCollection)? jct1b : this.jt2b;
+		
 		j1inv.transform( jna.w, tmp1 );
 		j2inv.transform( jnb.w, tmp2 );
 		D00 = m1inv * jna.v.dot( jna.v )   + jna.w.dot( tmp1 )  + m2inv * jnb.v.dot( jnb.v )   + jnb.w.dot( tmp2 );
@@ -303,22 +321,24 @@ public class Contact {
 	 * Returns Jdv values for given component.
 	 * @param computeInCollection
 	 * @param index (0 for normal, 1 for tangent1, 2 for tangent2)
+	 * TODO: Flow control looks like it could be better here... :/
 	 */
 	public double getJdv(boolean computeInCollection, int index) {
 		
 //		DenseVector dv1 = body1.deltaV;//(body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
 //		DenseVector dv2 = body2.deltaV;//(body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
-		Vector6d dv1 = body1.deltaV; 
-		Vector6d dv2 = body2.deltaV; 
+		Vector6d dv1 = (body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
+		Vector6d dv2 = (body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
 		
-		Vector6d ja = jna; // j = this.j;//(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
-		Vector6d jb = jnb;
+		// j = this.j;//(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
+		Vector6d ja   = (body1.isInCollection() && !computeInCollection)? jcna  : this.jna;
+		Vector6d jb   = (body2.isInCollection() && !computeInCollection)? jcnb  : this.jnb;
 		if ( index == 1 ) {
-			ja = jt1a;
-			jb = jt1b;
+			ja = (body1.isInCollection() && !computeInCollection)? jct1a : this.jt1a;
+			jb = (body2.isInCollection() && !computeInCollection)? jct1b : this.jt1a;
 		} else if ( index == 2 ) {
-			ja = jt2a;
-			jb = jt2b;			
+			ja = (body1.isInCollection() && !computeInCollection)? jct2a : this.jt2a;
+			jb = (body2.isInCollection() && !computeInCollection)? jct1b : this.jt2b;
 		}
 		
 		double Jdv = ja.dot( dv1 ) + jb.dot( dv2 );
