@@ -34,7 +34,7 @@ public class Display {
 		private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", false );
 		private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", false );
 		private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", false );
-		private IntParameter contactLocationSize = new IntParameter( "contact point size ", 5, 5, 20);
+		private DoubleParameter contactLocationSize = new DoubleParameter( "contact point size ", 5, 1, 20);
 		private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
 		private BooleanParameter drawCollectionContactGraph = new BooleanParameter( "draw collections' contact graph", false );
 		private BooleanParameter drawCycles = new BooleanParameter( "draw cycles", true );
@@ -72,6 +72,8 @@ public class Display {
                 c.displayConnection(drawable);
             }
         }
+
+        gl.glPointSize( params.contactLocationSize.getFloatValue() );
         
     	if (params.drawContactLocations.getValue() || params.drawContactForces.getValue()) {
 			for ( Contact c : collision.contacts ) {
@@ -88,7 +90,7 @@ public class Display {
 				if (b instanceof RigidCollection) {
 					RigidCollection collection = (RigidCollection)b;
 					if (params.drawContactLocations.getValue())
-						collection.displayInternalContactLocations(drawable, params.contactLocationSize.getValue());
+						collection.displayInternalContactLocations(drawable);
 					if (params.drawContactForcesInCollection.getValue())
 						collection.displayInternalContactForces( drawable, dt );
 				}
@@ -281,7 +283,7 @@ public class Display {
 		vfp.add( params.drawContactForces.getControls() );
 		vfp.add( params.drawContactForcesInCollection.getControls() );
 		vfp.add( params.drawContactLocations.getControls() );
-		vfp.add( params.contactLocationSize.getSliderControls());
+		vfp.add( params.contactLocationSize.getSliderControls(false));
 		vfp.add( params.drawContactGraph.getControls() );
 		vfp.add( params.drawCollectionContactGraph.getControls() );
 		vfp.add( params.drawCycles.getControls() );

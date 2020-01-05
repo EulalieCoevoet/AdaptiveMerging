@@ -479,7 +479,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         } else {
             system.reset(); // eulalie: I'm not sure why we do that?
         }
-        
+        // TODO: Why do we reload the system?  :/  Can't we just reset it cleanly
         loadSystem(systemDir);
     	if(loadXML.getValue())
     		xmlParser.parse(system, systemDir);

@@ -328,7 +328,7 @@ public class RigidBodySystem {
 	/**
 	 * Generate a body (called when N is pressed)
 	 */
-	public void generateBody() {
+	private void generateBody() {
 
 		RigidBody genbody = null;
 		int index = this.index.getValue();

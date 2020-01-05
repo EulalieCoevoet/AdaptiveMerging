@@ -57,7 +57,7 @@ import mintools.viewer.ShadowMap;
  */
 public class LCPApp3D implements SceneGraphNode, Interactor {
 
-    private EasyViewerAnim ev;
+    private EasyViewerAnim eva;
 
     private RigidBodySystem system = new RigidBodySystem();
     
@@ -86,19 +86,19 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         system.mouseSpring = mouseSpring;
         loadXMLSystem("scenes3D/boxboxWarmStartTest.xml");
         T.getBackingMatrix().setIdentity();
-        ev = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(640,360), new Dimension(640,480) );
+        EasyViewerAnim.antialiasing = true;        
+        eva = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(640,360), new Dimension(640,480) );
+        eva.controlFrame.add("Display", system.display.getControls());
+        eva.controlFrame.add("Merging", system.merging.getControls());
+        eva.controlFrame.add("Sleeping", system.sleeping.getControls());
+        eva.controlFrame.add("Factory", factory.getControls());
+        eva.controlFrame.add("Help", getHelpPanel() );
 
-        ev.controlFrame.add("Display", system.display.getControls());
-        ev.controlFrame.add("Merging", system.merging.getControls());
-        ev.controlFrame.add("Sleeping", system.sleeping.getControls());
-        ev.controlFrame.add("Factory", factory.getControls());
-        ev.controlFrame.add("Help", getHelpPanel() );
-
-        ev.addInteractor(this);       
+        eva.addInteractor(this);       
         
-        ev.trackBall.setFocalDistance(10);
+        eva.trackBall.setFocalDistance(10);
         //ev.trackBall.focalPointY.setValue(1);
-        ev.trackBall.near.setValue(2);
+        eva.trackBall.near.setValue(2);
         //ev.trackBall.far.setValue(15);
     }
      
@@ -119,7 +119,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
-        	
+                
         if ( selectRequest ) {
         	selectRequest = false;
     		select(drawable, mousePressedPoint );
@@ -147,12 +147,12 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         if ( ! drawWithShadows.getValue() ) {
             drawAllObjects( drawable, false );
         } else {                    
-            shadowMap.beginLightPass( drawable, ev.trackBall );
+            shadowMap.beginLightPass( drawable, eva.trackBall );
             drawAllObjects( drawable, false );        
-            shadowMap.endLightPass( drawable, ev.trackBall );
-            shadowMap.beginShadowMapping(drawable, ev.trackBall); 
+            shadowMap.endLightPass( drawable, eva.trackBall );
+            shadowMap.beginShadowMapping(drawable, eva.trackBall); 
             drawAllObjects( drawable, false );
-            shadowMap.endShadowMapping( drawable, ev.trackBall );
+            shadowMap.endShadowMapping( drawable, eva.trackBall );
         }
         displayAllObjectsNonShadowable( drawable,dt );
         if ( mouseSpring.picked != null ) {
@@ -255,7 +255,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 File file = new File( "stills/" + dumpName + format.format(nextFrameNum) + ".png" );                                             
                 nextFrameNum++;
                 file = new File(file.getAbsolutePath().trim());
-                ev.snapshot(drawable, file);
+                eva.snapshot(drawable, file);
             }
         }
     }
@@ -491,8 +491,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         res1.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ev.glCanvas.setSize( 640, 360 );
-                ev.frame.setSize( ev.frame.getPreferredSize() );
+                eva.glCanvas.setSize( 640, 360 );
+                eva.frame.setSize( eva.frame.getPreferredSize() );
             }
         });        
         JButton res2 = new JButton("1280x720");
@@ -500,8 +500,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         res2.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {                
-                ev.glCanvas.setSize( 1280, 720 );
-                ev.frame.setSize( ev.frame.getPreferredSize() );
+                eva.glCanvas.setSize( 1280, 720 );
+                eva.frame.setSize( eva.frame.getPreferredSize() );
 
             }
         });     
@@ -510,8 +510,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         res2.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {                
-                ev.glCanvas.setSize( 1920, 1080 );
-                ev.frame.setSize( ev.frame.getPreferredSize() );
+                eva.glCanvas.setSize( 1920, 1080 );
+                eva.frame.setSize( eva.frame.getPreferredSize() );
 
             }
         });  
@@ -721,7 +721,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                         loadXMLSystem( files[whichFile].getPath() );
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
-                    ev.stop();
+                    eva.stop();
                 } else if ( e.getKeyCode() == KeyEvent.VK_ENTER ) {
                     record.setValue( ! record.getValue() );
                 } else if ( e.getKeyCode() == KeyEvent.VK_UP ) {

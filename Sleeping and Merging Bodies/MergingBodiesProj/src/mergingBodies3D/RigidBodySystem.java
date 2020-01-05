@@ -86,8 +86,12 @@ public class RigidBodySystem {
     public void advanceTime( double dt ) {
         long now = System.nanoTime();        
 
-        for ( RigidBody b : bodies ) 
+        for ( RigidBody b : bodies ) {
             b.clear();
+	        if (b instanceof RigidCollection) {
+				((RigidCollection)b).clearBodies();
+	        }
+		}
         
 		applyExternalForces();
 
@@ -182,25 +186,16 @@ public class RigidBodySystem {
 			body.force.add( tmpForce ); // gravity goes directly into the accumulator, no torque
             body.applyCoriollisTorque(); // TODO: sadly, this appears to be buggy :(
 			
-//			if( body instanceof RigidCollection) 
-//				applyGravityCollection((RigidCollection) body, theta);
+			if( body instanceof RigidCollection) {				
+				for ( RigidBody b : ((RigidCollection)body).bodies ) {
+					tmpForce.set( Math.cos( theta ), Math.sin(theta), 0 );
+					tmpForce.scale( - body.massLinear * gravityAmount.getValue() );
+					b.force.add( tmpForce );
+				}
+			}
 		}
 	}
 	
-	/**
-	 * Apply gravity to bodies in given collection
-	 * @param collection
-	 * @param theta
-	 */
-//	private void applyGravityCollection(RigidCollection collection, double theta) {
-//		Vector2d force = new Vector2d();
-//		for (RigidBody body : collection.bodies) {
-//			force.set( Math.cos( theta ), Math.sin(theta) );
-//			force.scale( body.massLinear * gravityAmount.getValue() );
-//			body.force.add( force );
-//		}
-//	}
-
 	/**
 	 * Apply spring forces
 	 */
@@ -226,9 +221,47 @@ public class RigidBodySystem {
      * Resets the position of all bodies, and sets all velocities to zero
      */
     public void reset() {
-        for ( RigidBody b : bodies ) {
-            b.reset();
-        }
+    	//int size = bodies.size();
+		//int counter = 0;
+		int i = 0;
+		while (true) {
+			if (bodies.size() == 0) break;
+			RigidBody b = bodies.get(i);
+			//if (!b.created) {
+
+				if (b instanceof RigidCollection) {
+					for (RigidBody subBody: ((RigidCollection) b).bodies) {
+						subBody.parent = null;
+						bodies.add(subBody);
+					}
+					bodies.remove(b);
+
+					b = bodies.get(i);
+				}
+				b.reset();		
+//			} else {
+//				counter = i;
+//				break;
+//			}
+
+			i++;
+			if (i >= bodies.size()) break;
+		}
+		
+		collision.reset();
+		
+//		int iter = size - counter;
+//		if ( counter > 0) {
+//			while(iter > 0) {
+//				this.bodies.remove(bodies.size() - 1);
+//				iter--;
+//			}
+//		}
+    	
+//        for ( RigidBody b : bodies ) {
+//            b.reset();
+//        }
+        
         simulationTime = 0;
         collision.reset();
         totalAccumulatedComputeTime = 0;        

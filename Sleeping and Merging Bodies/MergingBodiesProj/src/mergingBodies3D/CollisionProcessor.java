@@ -208,11 +208,12 @@ public class CollisionProcessor {
 		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 		solver.warmStart = true;
 		
-		solver.contacts = new ArrayList<Contact>();
+		solver.contacts = new ArrayList<Contact>(); // TODO: Memory!!
 		boolean compute = false; // set to true if there is a collection in the system
 		
 		if (mergeParams.organizeContacts.getValue())
 			compute = getOrganizedContacts(solver.contacts);
+			// TODO: DEBUG: With sphere on plane, the solver dends up with 3 identical contacts in the list! DEBUG!
 		else {
 			// Copy the external contacts 
 			// This resolution is done with the Jacobians of the bodies (not the collection) 
@@ -584,6 +585,9 @@ public class CollisionProcessor {
      */
     public void reset() {
         contacts.clear();
+		bodyPairContacts.clear();
+		lastTimeStepContacts.clear();
+
         Contact.nextContactIndex = 0;
         visitID = 0;            
     }

@@ -368,10 +368,20 @@ public class Contact {
      * Draws the contact points
      * @param drawable
      */
-    public void display( GLAutoDrawable drawable, boolean inCollection ) {
+    public void display( GLAutoDrawable drawable, boolean isInCollection ) {
         GL2 gl = drawable.getGL().getGL2();
-        gl.glPointSize(3);
-        gl.glMaterialfv( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
+        float[] c = col;
+        if (state == ContactState.ONEDGE) {
+        	c = colOnEdge;
+		} else {
+			if ( newThisTimeStep ) {				
+				c = colNew;
+			} else if ( isInCollection ){
+				c = colInCollection;
+			}
+		} 
+		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
+        
         gl.glBegin( GL.GL_POINTS );
         gl.glVertex3d( contactW.x, contactW.y, contactW.z );
         gl.glEnd();
@@ -400,7 +410,7 @@ public class Contact {
 	 * @param dt
 	 */
 	private void computeForces( boolean computeInCollection, double dt, Vector3d forceW1 ) {
-		// Vector6d jna = this.jna; // j = this.j; //(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
+		Vector6d jna = (body1.isInCollection() && !computeInCollection)? this.jcna: this.jna;
 		
 		forceW1.scale( lambda0, jna.v );
 		forceW1.scaleAdd( lambda1, jt1a.v, forceW1 );
@@ -436,18 +446,19 @@ public class Contact {
 		GL2 gl = drawable.getGL().getGL2();
 		computeForces( isInCollection, dt, forceW1); // This might seem wasteful (e.g., if sim not running), but only used for debug visualization!
 		gl.glLineWidth(0.75f);
-		if (state == ContactState.ONEDGE) {
-    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colOnEdge, 0 );
+        float[] c = col;
+        if (state == ContactState.ONEDGE) {
+        	c = colOnEdge;
 		} else {
-			if ( newThisTimeStep ) {				
+			if ( newThisTimeStep ) {	
 				gl.glLineWidth(4f);
-	    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colNew, 0 );
+				c = colNew;
 			} else if ( isInCollection ){
-				gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colInCollection, 0 );
-			} else {
-	    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
+				c = colInCollection;
 			}
 		} 
+		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
+
 		gl.glBegin( GL.GL_LINES );
 		double scale = forceVizScale.getValue();
 		gl.glVertex3d(contactW.x + scale*forceW1.x, contactW.y+scale*forceW1.y, contactW.z+scale*forceW1.z );

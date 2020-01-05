@@ -640,7 +640,7 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 
-	public void displayInternalContactLocations(GLAutoDrawable drawable, int size) {
+	public void displayInternalContactLocations( GLAutoDrawable drawable ) {
 		for (BodyPairContact bpc : bodyPairContacts) {
 			if (!bpc.inCollection)
 				continue;

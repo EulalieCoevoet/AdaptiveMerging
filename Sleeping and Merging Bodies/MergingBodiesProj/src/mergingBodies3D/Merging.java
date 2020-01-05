@@ -37,7 +37,7 @@ public class Merging {
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging - contact normal condition", true);
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", false);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
-		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
+		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts (FIXE ME)", false);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 10, 1e-10, 100 );
