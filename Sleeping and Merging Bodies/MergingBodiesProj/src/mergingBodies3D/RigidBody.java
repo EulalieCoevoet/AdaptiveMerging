@@ -55,7 +55,7 @@ public class RigidBody {
     Vector3d torque = new Vector3d();
     
     /** rotational inertia in rest pose with rotation equal to identity */
-    private Matrix3d massAngular0 = new Matrix3d();
+    protected Matrix3d massAngular0 = new Matrix3d();
     /** rotational inertia in the current pose */
     Matrix3d massAngular = new Matrix3d();
     
@@ -435,14 +435,19 @@ public class RigidBody {
     }
    
     /** 
-     * Draws the blocks of a rigid body
+     * Draws the geometry of a rigid body
      * @param drawable
      */
     public void display( GLAutoDrawable drawable ) {
         GL2 gl = drawable.getGL().getGL2();
         gl.glPushMatrix();        
         gl.glMultMatrixd( transformB2W.Tflat.asArray(),0 );
-        geom.display( drawable );
+        	
+        
+        if (geom == null ) 
+        	geom = null; // set your breakpoint here...
+        
+    	geom.display( drawable );
         gl.glPopMatrix();
     }
     

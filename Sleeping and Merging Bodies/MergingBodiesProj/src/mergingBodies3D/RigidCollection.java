@@ -19,6 +19,10 @@ import mergingBodies3D.Merging.MergeParameters;
  * TODO: note for efficiency, should consider incremental updates to the inertia...
  * that is at least if bodies are being added one at a time to a collection
  * 
+ * TODO: Also... consider pooling rigid collections as they probably get create and destroyed often??  
+ * Perhaps not as bad as contacts... but just the same!!  The internal lists (contacts and bodies) will
+ * benefit from not being re-allocated and regrown too.
+ * 
  * @author kry
  */
 public class RigidCollection extends RigidBody {
@@ -52,13 +56,11 @@ public class RigidCollection extends RigidBody {
 		// Identity
 
 		color.setRandomColor();
-		col[0] = color.x;
-		col[1] = color.y;
-		col[2] = color.z;
+		col = new float[] { color.x, color.y, color.z, 1 };
 	
 		copyFrom(body1);
 
-		addBodyInternalMethod(body1);
+		addBodyInternalMethod(body1);  // this will update velocity, but it doesn't matter (body velocity averaged with itself)
 		updateCollectionState(body1);
 		addBodyInternalMethod(body2);
 		updateCollectionState(body2);
@@ -68,6 +70,21 @@ public class RigidCollection extends RigidBody {
 
 	/**
 	 * Adds a body to the collection
+	 * This generally follows a 3 step process
+	 * 1) Adds the body to the list, and updates the velocity to be a
+	 *    weighted average of the collection and the new body.  This velocity
+	 *    is updated to be in the collection's COM frame, even though other 
+	 *    methods to update the COM are not yet called.  Because the velocity
+	 *    is stored in a world aligned frame, this has little impact on the rest
+	 *    of the steps.
+	 *  2) Mass COM and Inertia are updated.  The inertia will be with
+	 *    respect to the current rotation of the collection, so some care necessary
+	 *    to initalize massAnular0 and jinv0 too.
+	 *  3) Rotation is optimized for the bounding volumes of the different bodies in
+	 *     the collection. (currently not implemented)  Because this changes the 
+	 *     rest rotation of the collection, it will influence the rest inertia.
+	 *  4) Transformations are updated (jinv too, perhaps wasteful), and likewise
+	 *     the body to collection transforms 
 	 * 
 	 * @param body body to add
 	 */
@@ -120,7 +137,7 @@ public class RigidCollection extends RigidBody {
 	 * average in the new COM frame to make sure that things work out.
 	 * Note: this might not do what you expect if either body is pinned!!
 	 * 
-	 * CAREFUL this will set the velocity in the new COM frame!!  :/
+	 * CAREFUL this will set the velocity at the new COM position!!
 	 * 
 	 * @param body
 	 */
@@ -143,12 +160,7 @@ public class RigidCollection extends RigidBody {
 		wxr.cross( body.omega, r );
 		tmp1.add( wxr, v );
 		tmp1.scale( body.massLinear );
-//		tmp1.scale(body.omega);
-//		tmp2.set(-tmp1.y, tmp1.x);
-//		tmp2.add(body.v);		
-//		tmp2.scale(body.massLinear);
-//		tmp3.add(tmp2);
-
+		
 		r.sub( xCom, x );
 		wxr.cross( omega, r );
 		tmp2.add( wxr, v );
@@ -157,21 +169,11 @@ public class RigidCollection extends RigidBody {
 		tmp1.add( tmp2 );
 		tmp1.scale( oneOverTotalMass );
 		
-//		tmp1.sub(xCom, x);
-//		tmp1.scale(omega);
-//		tmp2.set(-tmp1.y, tmp1.x);
-//		tmp2.add(v);
-//		tmp2.scale(massLinear);
-//		tmp3.add(tmp2);
-//
-//		tmp3.scale(1. / (body.massLinear + massLinear));
-
 		v.set(tmp1); 
 
 		omega.scale( massLinear );
 		omega.scaleAdd( body.massLinear, body.omega, omega );
 		omega.scale( oneOverTotalMass );
-		//omega = (omega * massLinear + body.omega * body.massLinear) / (body.massLinear + massLinear);
 	}
 
 	/**
@@ -220,7 +222,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void updateCollection() {
 
-		if (pinned ) { //|| temporarilyPinned) {
+		if ( pinned ) { //|| temporarilyPinned) {
 			v.set(0,0,0);
 			omega.set(0,0,0);
 		}
@@ -239,6 +241,9 @@ public class RigidCollection extends RigidBody {
 		addBodiesSpringsToCollection();
 	}
 
+	/** 
+	 * TODO: this could be a fast incremental update rather than recomputing for all bodies 
+	 */
 	private void updateMassCOMInertia() {
 		double massLinear = 0;
 		Matrix3d massAngular = new Matrix3d();
@@ -252,11 +257,13 @@ public class RigidCollection extends RigidBody {
 		for ( RigidBody b : bodies ) {
 			massAngular.add( b.massAngular );
 			// should certainly have a b.x squared type term for the mass being at a distance...
-//			I [p]    J  0    I   0 
-//			0  I    0 mI    [p] I
-//			I [p]   J   0
-//			0  I   m[p] 0
-//			J + I [p][p] in the upper left...
+			//			I [p]    J  0    I   0 
+			//			0  I    0 mI    [p] I
+			//
+			//			I [p]   J   0
+			//			0  I   m[p] 0
+			//
+			//			Thus.. J + I [p][p] in the upper left...
 			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
 			double x = b.x.x;
 			double y = b.x.y;
@@ -271,6 +278,16 @@ public class RigidCollection extends RigidBody {
 			op.mul( b.massLinear );
 			massAngular.add( op );			
 		}
+		// Let's get massAngular0
+		this.massAngular.set( massAngular );
+		this.jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
+		//	    J = R J0 R^T
+		//	so J0 = R^T J R
+		// and...      Jinv = R Jinv R^T
+		this.massAngular0.mul( thetaT, massAngular );
+		this.massAngular0.mul( theta );
+		this.jinv0.mul( thetaT, jinv);
+		this.jinv0.mul( theta );		
 	}
 	
 //	/**
@@ -484,6 +501,9 @@ public class RigidCollection extends RigidBody {
 			body.x.x = body.transformB2W.T.m13;
 			body.x.x = body.transformB2W.T.m23;
 			body.transformB2W.T.getRotationScale( body.theta );
+			// NOTE: updating the body's B2W is important for drawing, 
+			// but the other quantities are perhaps not needed until unmerge?
+			// TODO: make sure jinv and angularmass are up to date on unmerge!
 		}
 	}
 
@@ -515,19 +535,6 @@ public class RigidCollection extends RigidBody {
 		body.v.add( v, wxr ); // sets the value of the sum
 		body.omega = omega;
 	}
-
-	// This computeInternalContactsForce code should be save to remove... we inefficiently call the computeForces in the display
-	// callback to save memory.
-//	/**
-//	 * Compute internal contacts force w.r.t lambdas
-//	 * 
-//	 * @param dt
-//	 */
-//	public void computeInternalContactsForce(double dt) {
-//		for (Contact c : internalContacts) {
-//			c.computeForces(true, dt);
-//		}
-//	}
 
 	/** Applies springs on the body, to the collection */
 	private void addBodiesSpringsToCollection() {
@@ -639,45 +646,18 @@ public class RigidCollection extends RigidBody {
 	}
 
 	/**
-	 * displays the Body Collection in different color.
-	 * 
+	 * Displays the Body Collection in different color.
+	 * NOTE the colour is set by the caller!!!
+	 * Colours are assigned when the collection was created,
+	 * so we just need to draw all the bodies, and not even 
+	 * apply our B2W transformation as we will have updated all
+	 * the body positions, i.e., with updateBodiesPositionAndTransformations()
 	 * @param drawable
 	 */
 	public void displayCollection(GLAutoDrawable drawable) {
-
-		// Note that the colour is set at a higher level, 
-		// and would have been assigned when the collection was created,
-		// so we just need to draw all the bodies, and not even 
-		// apply our B2W transformation as we will have updated all
-		// the body positions 
-		
-		for (RigidBody b : bodies)
+		for (RigidBody b : bodies) {
 			b.display(drawable);
-
-//		if (myListID == -1) { // transparency change
-//			for (RigidBody b : bodies)
-//				b.display(drawable);
-//
-//			myListID = -2;
-//
-//		} else { // eulalie: transparency doesn't work, don't understand why
-//			GL2 gl = drawable.getGL().getGL2(); // GL has no glBlendColor()
-//			gl.glEnable(GL2.GL_BLEND);
-//			gl.glBlendFuncSeparate(GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR, GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-//			gl.glBlendEquation(GL2.GL_FUNC_ADD);
-//			
-//			if (isSleeping)
-//				gl.glBlendColor((color.x+1)/2, (color.y+1)/2, (color.z+1)/2, Block.alpha);
-//			else
-//				gl.glBlendColor(color.x, color.y, color.z, Block.alpha);
-//
-//			for (RigidBody b : bodies)
-//				b.display(drawable, color);
-//
-//			// Back to initial set up
-//			gl.glEnable(GL.GL_BLEND);
-//			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-//		}
+		}
 	}
 
 	/**

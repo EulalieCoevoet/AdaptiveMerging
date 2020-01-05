@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mergingBodies3D.Merging.MergeConditions;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.swing.CollapsiblePanel;
@@ -97,6 +98,17 @@ public class RigidBodySystem {
         collision.collisionDetection(dt);
 		collision.warmStart(); 	
         
+		collision.updateBodyPairContacts(); 
+
+		
+		sleeping.wakeAll();
+		
+		sleeping.wake();
+		
+		merging.unmergeAll(); // this only happens upon request (i.e., a UI checkbox)
+		
+		collision.updateInCollections(dt, merging.params);
+
 		collision.solveLCP(dt); 
         
         // advance the system by the given time step
@@ -105,6 +117,16 @@ public class RigidBodySystem {
         		
 		for ( RigidBody b : bodies )
             b.advanceTime( dt );
+		
+		for (BodyPairContact bpc : collision.bodyPairContacts) 
+			bpc.accumulate(merging.params);
+
+		merging.merge();
+		
+		sleeping.sleep();
+		
+		merging.unmerge(MergeConditions.RELATIVEMOTION, dt); 
+
 		
         computeTime = (System.nanoTime() - now) / 1e9;
         simulationTime += dt;

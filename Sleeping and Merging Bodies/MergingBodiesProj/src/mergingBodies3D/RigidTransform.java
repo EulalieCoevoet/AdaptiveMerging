@@ -56,13 +56,22 @@ public class RigidTransform {
     	T.m13 = p.y;
     	T.m23 = p.z;
     }
-    
+        
     /**
      * Inverts this transformation
      */
     public void invert() {
-        // TODO: UPDATE to do a proper rigid inverse... :(
-        T.invert();
+        // T.invert();
+        double x = T.m02;
+        double y = T.m12;
+        double z = T.m22;
+        T.m02 = 0;
+        T.m12 = 0;
+        T.m22 = 0;
+        T.transpose();
+        T.m02 = - T.m00*x - T.m01*y - T.m01*z;
+        T.m12 = - T.m10*x - T.m11*y - T.m11*z;
+        T.m22 = - T.m20*x - T.m21*y - T.m21*z;
     }
     
     /**

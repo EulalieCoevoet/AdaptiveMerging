@@ -81,10 +81,14 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      */
     public LCPApp3D() {
         system.mouseSpring = mouseSpring;
-        loadXMLSystem("scenes3D/boxesOnPlane.xml");
-        //System("datalcp/lcp.png"); // good default scene
+        loadXMLSystem("scenes3D/boxboxWarmStartTest.xml");
         T.getBackingMatrix().setIdentity();
         ev = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(540,480), new Dimension(640,480) );
+
+        ev.controlFrame.add("Merging", system.merging.getControls());
+        ev.controlFrame.add("Sleeping", system.sleeping.getControls());
+        ev.controlFrame.add("Factory", factory.getControls());
+
         ev.addInteractor(this);       
         
         ev.trackBall.setFocalDistance(10);
@@ -429,18 +433,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         });
         
-//        JButton load = new JButton("Load PNG");
-//        basicControls.add( load );
-//        load.addActionListener( new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                File f = FileSelect.select("png", "image", "load", "datalcp/", true );
-//                if ( f != null ) {
-//                    loadSystem( f.getPath() );
-//                }
-//            }
-//        });
-        
         JButton loadxml = new JButton("Load XML");
         basicControls.add( loadxml );
         loadxml.addActionListener( new ActionListener() {
@@ -493,19 +485,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         vfp.add( system.getControls() );
         
         vfp.add( mouseSpring.getControls() );
-        
-        VerticalFlowPanel vfpv = new VerticalFlowPanel();
-        vfpv.setBorder( new TitledBorder("window content scaling controls") );
-        vfpv.add( scale.getSliderControls(true) );
-        vfpv.add( posx.getSliderControls(false) );
-        vfpv.add( posy.getSliderControls(false) );
-        CollapsiblePanel vcp = new CollapsiblePanel(vfpv.getPanel());
-        vcp.collapse();
-        vfp.add( vcp );
-        
-        vfp.add( whiteEpsilon.getSliderControls(false) );
-        vfp.add( factory.getControls() );
-        
+                
         VerticalFlowPanel vfpsm = new VerticalFlowPanel();
         vfpsm.setBorder(new TitledBorder("shadow map controls") );
 
@@ -519,37 +499,13 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     }
     
     private BooleanParameter drawWithShadows = new BooleanParameter( "draw with shadows", true );
-
-    DoubleParameter whiteEpsilon = new DoubleParameter( "white epsilon", 0.05, 0, 1 );
         
-    // parameters and variables for for scaling and translating the window
-    private DoubleParameter scale = new DoubleParameter("scale scene",.9, 0.1, 10);
-    private DoubleParameter posx = new DoubleParameter("x translation", 0, -1000, 1000 );
-    private DoubleParameter posy = new DoubleParameter("y translation", 0, -1000, 1000 );
 
     // variables and objects for picking rigid body with the mouse
     private MouseSpringForce mouseSpring = new MouseSpringForce();
     
     private double sceneScale = 0.1; // guess how to get images to show up nicely in 3D in a first approximation...
     private Vector3d sceneTranslation = new Vector3d();
-    
-//    /**
-//     * Loads the specified image, clearing the old system, and resets viewing parameters.
-//     * @param filename
-//     */
-//    private void loadSystem( String filename ) {
-//        factory.use = false;        
-//        systemClear();
-//        system.name = filename;
-//        ImageBlocker blocker = new ImageBlocker( filename, (float) (double) whiteEpsilon.getValue() );
-//        sceneTranslation.set( - blocker.width/2, - blocker.height, 0 );
-//        system.bodies.addAll(blocker.bodies);
-//        
-//        for (RigidBody body: system.bodies) {
-//        	body.friction = system.collision.friction.getValue();
-//        	body.restitution = system.collision.restitution.getValue();
-//        }
-//    }
     
     /**
      * Loads the specified image, clearing the old system, and resets viewing parameters.
@@ -603,9 +559,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      * to draw the various rigid bodies are cleaned up on the next display call.
      */
     private void systemClear() {
-        posx.setValue(0.0);
-        posy.setValue(0.0);
-        scale.setValue(0.9);
         // TODO: avoid rebuilding display lists if only resetting a factory
         // also... awkward way to try to delete the display lists as the 
         // display loop is not really going to get a chance to be called before
@@ -700,13 +653,11 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     if ( f != null ) {
                         loadFactorySystem( f.getPath() );
                     }   
-//                } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
-//                    loadFactorySystem( "datalcp/tetrisTube.png" );
-//                    factory.spread.setValue(30);
-//                    factory.interval.setValue(0.4);
-//                    factory.downVelocity.setValue(10.0);
-//                    factory.angularVelocityScale.setValue(0.5);
-//                    factory.linearVelocityScale.setValue(2.5);
+                } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
+                    File f = FileSelect.select("xml", "xml scene for factory", "load", "scenes3D/", true );
+                    if ( f != null ) {
+                        loadFactorySystem( f.getPath() );
+                    }   
                 } else if ( e.getKeyCode() == KeyEvent.VK_PERIOD ) {                                       
                     factory.run.setValue ( ! factory.run.getValue() );
                 } else if ( e.getKeyCode() == KeyEvent.VK_COMMA ) {

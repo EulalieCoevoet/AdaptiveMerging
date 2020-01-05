@@ -33,6 +33,15 @@ public class Vector6d {
 		return v.dot( a.v ) + w.dot( a.w );
 	}
 	
+	/**
+	 * Sets this vector to be equal to the given vector
+	 * @param a
+	 */
+	public void set( Vector6d a ) {
+		v.set( a.v );
+		w.set( a.w );
+	}
+	
 	public void setZero() {
 		w.set(0,0,0);
 		v.set(0,0,0);

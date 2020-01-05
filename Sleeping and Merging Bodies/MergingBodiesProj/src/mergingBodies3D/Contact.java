@@ -95,6 +95,38 @@ public class Contact {
 		// constructor for pre-allocation
 	}
 	
+	/**
+	 * Copy constructor, for convenience for now, though this does not exploit our memory pooling efforts, 
+	 * it might not matter as contacts created in this way happen in longer lived merged collections...
+	 * These could still be pooled if necessary.
+	 * @param contact
+	 */
+	public Contact(Contact contact) {
+		body1 = contact.body1;
+		body2 = contact.body2;
+		bv1 = contact.bv1;
+		bv2 = contact.bv2;
+		info = contact.info;
+		
+		normalW.set(contact.normalW);   	// CRAP...  will we ever need these in a body frame for the "other" jacobian??  hmm... 	
+		tangent1W.set(contact.tangent1W);  // TODO: figure out if the body frame vectors are really needed or not.  I feel the answer is yes. :(
+		tangent2W.set(contact.tangent2W);  // but perhaps we can get by with ONLY those... 
+											// jacobian can be built directly rather than storing the world ones...  ?
+		
+		lambda0 = contact.lambda0;
+		lambda1 = contact.lambda1;
+		lambda2 = contact.lambda2;
+		
+		jna.set( contact.jna );
+		jnb.set( contact.jnb );
+		jt1a.set( contact.jt1a );
+		jt1b.set( contact.jt1b );
+		jt2a.set( contact.jt2a );
+		jt2b.set( contact.jt2b );
+				
+		constraintViolation = contact.constraintViolation;	
+		prevConstraintViolation = contact.prevConstraintViolation;	
+	}
 	
     /**
      * Sets the contact, and assigns it an index

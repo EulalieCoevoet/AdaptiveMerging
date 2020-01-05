@@ -10,6 +10,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import mergingBodies3D.Merging.MergeParameters;
 import mergingBodies3D.collision.BoxBox;
 import mergingBodies3D.collision.BoxPlane;
 import mergingBodies3D.collision.BoxSphere;
@@ -125,6 +126,218 @@ public class CollisionProcessor {
 			
 			updateContactsMap();
 			// computeContactsForce(dt);	// this was ONLY done for drawing ???
+		}
+	}
+	
+	/**
+	 * Updates bodyPairContacts list
+	 */
+	public void updateBodyPairContacts() {
+		
+		for (BodyPairContact bpc : bodyPairContacts) { // clear contactList of existing bpc
+			bpc.checked = false;
+			bpc.contactList.clear();
+		}
+		
+		for (RigidBody body: bodies) 
+			if (body instanceof RigidCollection) 
+				for (BodyPairContact bpc: body.bodyPairContacts)
+					bpc.checked = false;
+
+		for (Contact contact : contacts) // loop over all contacts between bodies
+			storeInBodyPairContacts(contact);
+		
+		removeEmptyBodyPairContacts();
+	}
+
+	/**
+	 * Store contact in bodyPairContacts.
+	 * @param contact newly detected contact
+	 */
+	private void storeInBodyPairContacts(Contact contact) {
+
+		// eulalie : I think this will never happen as we don't detect collision between two pinned bodies
+		if (contact.body1.pinned && contact.body2.pinned) 
+			return;
+		
+		BodyPairContact bpc = BodyPairContact.checkExists(contact.body1, contact.body2, bodyPairContacts);
+
+		if (bpc == null) { // body contact did not exist in previous list
+			bpc = new BodyPairContact(contact.body1, contact.body2);
+			bodyPairContacts.add(bpc);
+		} 
+		
+		bpc.addToBodyLists();
+		bpc.addToBodyListsParent();
+		bpc.contactList.add(contact);
+	}
+	
+	/**
+	 * Remove empty body pair contacts
+	 * TODO: THIS SHOULD NEVER HAPPEN IF WE DON'T PRUNE, yes?
+	 */
+	protected void removeEmptyBodyPairContacts() {
+		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+		for (BodyPairContact bpc : bodyPairContacts) {
+			if(!bpc.contactList.isEmpty())
+				tmpBodyPairContacts.add(bpc);
+			else {
+				bpc.removeFromBodyLists();
+				bpc.removeFromBodyListsParent();
+			}
+		}
+		
+		bodyPairContacts.clear();
+		bodyPairContacts.addAll(tmpBodyPairContacts);
+	}
+	
+	/**
+	 * Does one iteration of PGS to update contacts inside collections
+	 * @param dt
+	 */
+	public void updateInCollections(double dt, MergeParameters mergeParams) {
+
+		if (!mergeParams.updateContactsInCollections.getValue())
+			return;
+		
+		long now = System.nanoTime();
+		
+		solver.init(iterationsInCollection.getValue());
+		solver.computeInCollection = true;
+		solver.feedbackStiffness = feedbackStiffness.getValue();
+		solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
+		solver.warmStart = true;
+		
+		solver.contacts = new ArrayList<Contact>();
+		boolean compute = false; // set to true if there is a collection in the system
+		
+		if (mergeParams.organizeContacts.getValue())
+			compute = getOrganizedContacts(solver.contacts);
+		else {
+			// Copy the external contacts 
+			// This resolution is done with the Jacobians of the bodies (not the collection) 
+			// so not a good warm start for the LCP solve (we don't want to keep these values).
+			for ( Contact contact : contacts )
+				solver.contacts.add(new Contact(contact));
+			
+			for (RigidBody body : bodies) {
+				if (body instanceof RigidCollection && !body.isSleeping) {
+					compute = true;
+					RigidCollection collection = (RigidCollection)body;
+					// Update the internal contacts
+					solver.contacts.addAll(collection.internalContacts);
+				}
+			}
+			
+			if (shuffle.getValue()) 
+	    		knuthShuffle(solver.contacts);
+		}
+		
+		if (compute) { // there is at least one collection in the system
+			// eulalie: this can be optimized, only collections need an update 
+			for (Contact contact: solver.contacts) 
+				contact.computeJacobian(true);
+			
+			solver.solve(dt);
+			
+			for (RigidBody body : bodies) {
+				if (body instanceof RigidCollection && !body.isSleeping) {
+					
+					RigidCollection collection = (RigidCollection)body;
+					
+					// Pretty sure this is only being called for visualization:
+					//
+					//collection.computeInternalContactsForce(dt);
+					
+					for (RigidBody b : collection.bodies)
+						if(!b.pinned ) // && !b.temporarilyPinned)
+							b.advanceVelocities(dt);	
+				}
+				// Reset deltaV for LCP solve
+				body.deltaV.setZero();
+			}
+		}
+		
+		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
+	}
+	
+	/**
+	 * Reordering of the contacts list for the one iteration PGS as follows:
+	 * <p><ul>
+	 * <li> 1. New contacts 
+	 * <li> 2. For each new contact, add one level of contact neighbors
+	 * <li> 3. Continue until the end
+	 * </ul><p>
+	 */
+	protected boolean getOrganizedContacts(ArrayList<Contact> contacts) {
+
+		ArrayList<BodyPairContact> orderedBpcs = new ArrayList<BodyPairContact>();
+		
+		for ( BodyPairContact bpc : bodyPairContacts ) {
+			for ( Contact contact : bpc.contactList ) {
+				if (contact.newThisTimeStep) {
+					orderedBpcs.add(bpc);
+					bpc.checked = true;
+					break;
+				}
+			}
+		}
+
+		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+		tmpBodyPairContacts.addAll(orderedBpcs);
+		getNextLayer(tmpBodyPairContacts, orderedBpcs);
+		
+		for ( BodyPairContact bpc : bodyPairContacts ) {
+			if (!bpc.checked) {
+				orderedBpcs.add(bpc);
+				bpc.checked = true;
+			}
+		}
+		
+		boolean compute = false;
+		for (RigidBody body : bodies) {
+			if (body instanceof RigidCollection && !body.isSleeping) {
+				compute = true;
+				RigidCollection collection = (RigidCollection)body;
+				for ( BodyPairContact bpc : collection.bodyPairContacts ) {
+					if (!bpc.checked) {
+						orderedBpcs.add(bpc);
+						bpc.checked = true;
+					}
+				}
+			}
+		}
+		
+		for ( BodyPairContact bpc : orderedBpcs ) {
+			for (Contact contact : bpc.contactList) {
+				if (bpc.inCollection)
+					contacts.add(contact);
+				else
+					contacts.add(new Contact(contact));  /// how does this happen?  This code is not obious.
+			}
+		}
+		
+		return compute;
+	}	
+	
+	protected void getNextLayer(ArrayList<BodyPairContact> bodyPairContacts, ArrayList<BodyPairContact> orderedBpcs) {
+
+		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+		
+		for ( BodyPairContact bpc : bodyPairContacts ) {
+			for (RigidBody body : bpc.bodies) {		
+				for ( BodyPairContact otherBpc : body.bodyPairContacts ) {
+					if (!otherBpc.checked) {
+						tmpBodyPairContacts.add(otherBpc);
+						otherBpc.checked = true;
+					}
+				}
+			}
+		}	
+		
+		if (!tmpBodyPairContacts.isEmpty()) {
+			orderedBpcs.addAll(tmpBodyPairContacts);
+			getNextLayer(tmpBodyPairContacts, orderedBpcs);
 		}
 	}
 	
@@ -411,6 +624,7 @@ public class CollisionProcessor {
         }
     }
 
+	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
 	public BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	public DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
@@ -438,6 +652,8 @@ public class CollisionProcessor {
 		
         vfp.add( skipSolve.getControls() );
         vfp.add( iterations.getSliderControls() );
+		vfp.add( iterationsInCollection.getSliderControls() );
+
         vfp.add( restitution.getSliderControls(false) );
         vfp.add( friction.getSliderControls(false) );
 		vfp.add( feedbackStiffness.getSliderControls(false) );
