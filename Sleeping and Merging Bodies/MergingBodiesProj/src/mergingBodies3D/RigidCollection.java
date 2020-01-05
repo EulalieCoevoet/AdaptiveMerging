@@ -193,11 +193,15 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void copyFrom(RigidBody body) {
 		v.set(body.v);
-		omega = body.omega;
+		omega.set( body.omega );
 		x.set(body.x);
-		theta = body.theta;
+		theta.set( body.theta );
 		massLinear = body.massLinear;
-		massAngular = body.massAngular;
+		massAngular.set( body.massAngular );
+		massAngular0.set( body.massAngular0 );
+		jinv.set( body.jinv );
+		jinv0.set( body.jinv0 );
+		updateTransformations();
 	}
 
 	/**
@@ -654,7 +658,9 @@ public class RigidCollection extends RigidBody {
 	 * the body positions, i.e., with updateBodiesPositionAndTransformations()
 	 * @param drawable
 	 */
-	public void displayCollection(GLAutoDrawable drawable) {
+	@Override
+	public void display(GLAutoDrawable drawable) {
+		// DO NOT draw like a normal rigid body!
 		for (RigidBody b : bodies) {
 			b.display(drawable);
 		}
