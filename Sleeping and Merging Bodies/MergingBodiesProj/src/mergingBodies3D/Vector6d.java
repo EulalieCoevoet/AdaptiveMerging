@@ -47,4 +47,9 @@ public class Vector6d {
 		v.set(0,0,0);
 	}
 	
+	@Override
+	public String toString() {
+		return "v=" + v.toString() + " w=" + w.toString() + " " + super.toString();
+	}
+	
 }

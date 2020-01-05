@@ -216,6 +216,8 @@ public class CollisionProcessor {
 		solver.warmStart = true;
 		
 		solver.contacts = altContactList;
+		solver.contacts.clear();
+
 		boolean compute = false; // set to true if there is a collection in the system
 		
 		if (mergeParams.organizeContacts.getValue())
@@ -225,8 +227,11 @@ public class CollisionProcessor {
 			// Copy the external contacts 
 			// This resolution is done with the Jacobians of the bodies (not the collection) 
 			// so not a good warm start for the LCP solve (we don't want to keep these values).
-			for ( Contact contact : contacts )
-				solver.contacts.add(new Contact(contact));
+			for ( Contact contact : contacts ) {
+				// would be nice not to copy here, but the lambdas will get mucked up so we'll
+				// do it with a copy...
+				solver.contacts.add( new Contact(contact) );
+			}
 			
 			for (RigidBody body : bodies) {
 				if (body instanceof RigidCollection && !body.isSleeping) {
@@ -321,7 +326,7 @@ public class CollisionProcessor {
 				if (bpc.inCollection)
 					contacts.add(contact);
 				else
-					contacts.add(new Contact(contact));  /// how does this happen?  This code is not obious.
+					contacts.add(new Contact(contact));  /// how does this happen?  This code is not obvious.
 			}
 		}
 		

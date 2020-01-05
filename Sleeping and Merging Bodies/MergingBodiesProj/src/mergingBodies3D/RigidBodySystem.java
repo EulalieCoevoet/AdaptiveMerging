@@ -227,11 +227,13 @@ public class RigidBodySystem {
 		while (true) {
 			if (bodies.size() == 0) break;
 			RigidBody b = bodies.get(i);
+			b.bodyPairContacts.clear();
 			//if (!b.created) {
 
 				if (b instanceof RigidCollection) {
 					for (RigidBody subBody: ((RigidCollection) b).bodies) {
 						subBody.parent = null;
+						subBody.bodyPairContacts.clear();
 						bodies.add(subBody);
 					}
 					bodies.remove(b);

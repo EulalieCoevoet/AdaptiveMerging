@@ -31,9 +31,7 @@ public class RigidCollection extends RigidBody {
 	protected ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 
 	/**
-	 * List of Contact in the collection: Contact between RigidBody of the
-	 * collection
-	 * JESUS CHRIST!!! no error for redelcaring 1??!
+	 * List of Contact in the collection: Contact between RigidBody of the collection
 	 */
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
 
@@ -443,9 +441,12 @@ public class RigidCollection extends RigidBody {
 //	}
 
 	public void addToInternalContact(BodyPairContact bpc) {
-		for (Contact contact : bpc.contactList)
-			if (!internalContacts.contains(contact))
-				internalContacts.add(contact);
+		for (Contact contact : bpc.contactList) {
+			if (!internalContacts.contains(contact)) { // TODO: wasteful search? any way to just make sure these are only added once?
+				// need to make new to not mess with the memory pools... 
+				internalContacts.add( new Contact(contact) );
+			}
+		}
 	}
 
 	/**

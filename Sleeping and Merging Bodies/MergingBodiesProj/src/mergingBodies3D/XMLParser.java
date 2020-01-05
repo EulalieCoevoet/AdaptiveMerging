@@ -260,6 +260,8 @@ public class XMLParser {
 	 */
 	private RigidBody createBox( String name, Element eElement ) {
 		Vector3d s = new Vector3d( t3d( eElement.getAttribute("dim") ) );
+		RigidBodyGeomBox geom = new RigidBodyGeomBox( s );	
+
 		double density = 1;
 		double massLinear = s.x*s.y*s.z * density;
 		Matrix3d angularMass = new Matrix3d();
@@ -267,6 +269,7 @@ public class XMLParser {
 		angularMass.m11 = 1.0/12*massLinear*(s.x*s.x+s.z*s.z);
 		angularMass.m22 = 1.0/12*massLinear*(s.x*s.x+s.y*s.y);				
 		ArrayList<Point3d> bbB = new ArrayList<Point3d>();
+		s.scale(0.5);
 		bbB.add( new Point3d( -s.x, -s.y, -s.z ) );
 		bbB.add( new Point3d( -s.x, -s.y,  s.z ) );
 		bbB.add( new Point3d( -s.x,  s.y, -s.z ) );
@@ -278,11 +281,8 @@ public class XMLParser {
 		RigidBody body = new RigidBody(massLinear, angularMass, false, bbB );
 		setCommonAttributes( body, eElement );
 		body.updateTransformations();
-        body.geom = new RigidBodyGeomBox( s );	
-        
-        Vector3d tmp = new Vector3d( s );
-        tmp.scale(0.5);        
-        body.radius = tmp.length();
+        body.geom = geom;	        
+        body.radius = s.length();
         
         // Silly to deal with boxes with spheres, but this is the quick solution for now... 
         // Assume unit size tiling, and choose centers along faces
