@@ -125,9 +125,7 @@ public class CollisionProcessor {
 			// solve contacts
 			long now = System.nanoTime();
 			
-			if ( !skipSolve.getValue() ) {
-				solver.solve(dt);
-			}
+			solver.solve(dt);
 			
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
@@ -649,7 +647,6 @@ public class CollisionProcessor {
     /** Number of iterations to use in projected Gauss Seidel solve */
     public IntParameter iterations = new IntParameter("iterations for PGS solve", 20, 1, 500);
         
-    private BooleanParameter skipSolve = new BooleanParameter(" skip LCP solve", false );
     
     /**
      * @return controls for the collision processor
@@ -660,7 +657,6 @@ public class CollisionProcessor {
         
 		vfp.add( shuffle.getControls() );
 		
-        vfp.add( skipSolve.getControls() );
         vfp.add( iterations.getSliderControls() );
 		vfp.add( iterationsInCollection.getSliderControls() );
 

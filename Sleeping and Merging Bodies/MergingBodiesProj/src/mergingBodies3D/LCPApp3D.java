@@ -422,7 +422,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     		e.printStackTrace();
     	}
         vfp1.setBorder( new TitledBorder("Keyboard and Mouse controls") );
-        ((TitledBorder) vfp1.getPanel().getBorder()).setTitleFont(new Font("Arial", Font.BOLD, 18));
+        ((TitledBorder) vfp1.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
         CollapsiblePanel cp = new CollapsiblePanel( vfp1.getPanel() );        
         vfp.add( cp );
         
@@ -436,7 +436,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     		e.printStackTrace();
     	}
         vfp2.setBorder( new TitledBorder("XML documentation") );
-        ((TitledBorder) vfp2.getPanel().getBorder()).setTitleFont(new Font("Arial", Font.BOLD, 18));
+        ((TitledBorder) vfp2.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
         CollapsiblePanel cp2 = new CollapsiblePanel( vfp2.getPanel() );
         vfp.add( cp2 );
         

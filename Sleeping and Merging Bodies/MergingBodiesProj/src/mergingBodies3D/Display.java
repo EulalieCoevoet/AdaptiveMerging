@@ -1,8 +1,10 @@
 package mergingBodies3D;
 
+import java.awt.Font;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
@@ -11,7 +13,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
-import mintools.parameters.IntParameter;
+import mintools.swing.HorizontalFlowPanel;
 import mintools.swing.VerticalFlowPanel;
 import mintools.viewer.EasyViewer;
 
@@ -41,8 +43,8 @@ public class Display {
 		
 		private BooleanParameter drawCOMs = new BooleanParameter( "draw COM", false );
 		private BooleanParameter drawSpeedCOMs = new BooleanParameter( "draw speed COM", false );
-		private BooleanParameter drawBB = new BooleanParameter( "draw bounding box", false );
-		public BooleanParameter drawIndex = new BooleanParameter( "dawIndex", false );
+		private BooleanParameter drawBB = new BooleanParameter( "draw bounding box (for merge test, not collision)", false );
+		public BooleanParameter drawIndex = new BooleanParameter( "draw Index", false );
 	}
 	public DisplayParameters params = new DisplayParameters();
 	
@@ -268,32 +270,51 @@ public class Display {
 
 		VerticalFlowPanel vfp = new VerticalFlowPanel();
 		
-        vfp.add( params.hideOverlay.getControls() );
-        vfp.add( params.drawGraphs.getControls() );
-        vfp.add( params.drawMemGraphs.getControls() );
+		HorizontalFlowPanel hfp = new HorizontalFlowPanel();
+        hfp.add( params.hideOverlay.getControls() );
+        hfp.add( params.drawGraphs.getControls() );
+        hfp.add( params.drawMemGraphs.getControls() );
+        vfp.add( hfp.getPanel() );
         
-		vfp.add( params.transparency.getSliderControls(false));
-		vfp.add( params.drawBodies.getControls() );
-		vfp.add( params.drawCollections.getControls() );
-		
-		vfp.add( params.drawBoundingVolumes.getControls() );
-		vfp.add( params.drawBoundingVolumesUsed.getControls() );
-		vfp.add( params.drawAllBoundingVolumes.getControls() );
-		
-		vfp.add( params.drawContactForces.getControls() );
-		vfp.add( params.drawContactForcesInCollection.getControls() );
-		vfp.add( params.drawContactLocations.getControls() );
-		vfp.add( params.contactLocationSize.getSliderControls(false));
-		vfp.add( params.drawContactGraph.getControls() );
-		vfp.add( params.drawCollectionContactGraph.getControls() );
-		vfp.add( params.drawCycles.getControls() );
+		VerticalFlowPanel vfpc = new VerticalFlowPanel();
+		vfpc.add( params.drawContactForces.getControls() );
+		vfpc.add( params.drawContactForcesInCollection.getControls() );
+		vfpc.add( params.drawContactLocations.getControls() );
+		vfpc.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
+		vfpc.add( params.contactLocationSize.getSliderControls(false));
+		vfpc.setBorder( new TitledBorder("Contact Force Visualization") );
+        ((TitledBorder) vfpc.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
+		vfp.add( vfpc.getPanel() );
 
-		vfp.add( params.drawCOMs.getControls() );
-		vfp.add( params.drawSpeedCOMs.getControls() );
-		vfp.add( params.drawBB.getControls() );
-		vfp.add( params.drawIndex.getControls() );
-		vfp.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
 
+        VerticalFlowPanel vfpb = new VerticalFlowPanel();
+		vfpb.add( params.transparency.getSliderControls(false));
+		vfpb.add( params.drawBodies.getControls() );
+		vfpb.add( params.drawCollections.getControls() );
+		vfpb.add( params.drawCOMs.getControls() );
+		vfpb.add( params.drawSpeedCOMs.getControls() );
+		vfpb.add( params.drawIndex.getControls() );
+		vfpb.setBorder( new TitledBorder( "Rigid Body Visualization") );
+        ((TitledBorder) vfpb.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
+		vfp.add( vfpb.getPanel() );
+		
+		VerticalFlowPanel vfpg = new VerticalFlowPanel();
+		vfpg.add( params.drawContactGraph.getControls() );
+		vfpg.add( params.drawCollectionContactGraph.getControls() );
+		vfpg.add( params.drawCycles.getControls() );
+		vfpg.setBorder( new TitledBorder( "Contact Graph Visualization") );
+        ((TitledBorder) vfpg.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
+		vfp.add( vfpg.getPanel() );
+
+		VerticalFlowPanel vfpv = new VerticalFlowPanel();
+		vfpv.add( params.drawBoundingVolumes.getControls() );
+		vfpv.add( params.drawBoundingVolumesUsed.getControls() );
+		vfpv.add( params.drawAllBoundingVolumes.getControls() );
+		vfpv.add( params.drawBB.getControls() );
+		vfpv.setBorder( new TitledBorder("Bounding Volume Visualization") );
+        ((TitledBorder) vfpv.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
+		vfp.add( vfpv.getPanel() );
+		
 		return vfp.getPanel();
 	}
 }
