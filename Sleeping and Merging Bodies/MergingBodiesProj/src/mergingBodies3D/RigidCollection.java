@@ -256,7 +256,11 @@ public class RigidCollection extends RigidBody {
 			massLinear += b.massLinear;		
 			com.scaleAdd( b.massLinear, b.x, com );
 		}
-		com.scale( 1.0/massLinear );
+		com.scale( 1./massLinear );
+		x.set(com);
+		this.massLinear = massLinear;
+		this.minv = 1./massLinear;
+		
 		for ( RigidBody b : bodies ) {
 			massAngular.add( b.massAngular );
 			// should certainly have a b.x squared type term for the mass being at a distance...

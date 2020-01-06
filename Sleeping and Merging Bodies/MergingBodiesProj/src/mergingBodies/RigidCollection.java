@@ -209,7 +209,7 @@ public class RigidCollection extends RigidBody {
 		if (pinned)
 			minv = 0.;
 		else
-			minv = 1 / massLinear;
+			minv = 1. / massLinear;
 	}
 
 	/**
