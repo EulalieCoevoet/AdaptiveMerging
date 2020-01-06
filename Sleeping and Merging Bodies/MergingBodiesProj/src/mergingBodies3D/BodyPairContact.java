@@ -1,8 +1,7 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
-
-import javax.management.RuntimeErrorException;
+import java.util.Collection;
 
 import mergingBodies3D.Contact.ContactState;
 import mergingBodies3D.Merging.MergeParameters;
@@ -16,10 +15,12 @@ public class BodyPairContact {
 	public RigidBody body1; 
 	public RigidBody body2;
 	
+	public RigidBody getBody( int i ) { return i==0 ? body1 : body2; }
+	
 	/**
 	 * WHAT IS THIS???  is a body pair contact not just between two bodies?? :(
 	 */
-	//public ArrayList<RigidBody> bodies;
+	public ArrayList<RigidBody> bodyPair; // list containing the two bodies, used to loop over the bodies and avoid duplication 
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 	
@@ -47,9 +48,9 @@ public class BodyPairContact {
 		this.body2 = body2;
 		// TODO: BPC.bodies: why not just use either body's parent RigidCollection to get a list of bodies?? 
 		// Seems this was used for cycle checking, and other things??  Not clear given comments
-//		bodies = new ArrayList<RigidBody>();
-//		bodies.add(body1);
-//		bodies.add(body2);
+		bodyPair = new ArrayList<RigidBody>();
+		bodyPair.add(body1);
+		bodyPair.add(body2);
 	}
 
 	/**
@@ -357,25 +358,22 @@ public class BodyPairContact {
 	public void checkCyclesToUnmerge(ArrayList<BodyPairContact> bpcsToUnmerge) {
 		ArrayList<BodyPairContact> bpcToCheck = new ArrayList<BodyPairContact>();
 		
-		throw new RuntimeErrorException( new Error("BPC.contacts needed for checking cycles for unmerge?  don't use, or fix code below!"));
-//		for (RigidBody body: bodies) {
-//			for (BodyPairContact bpc: body.bodyPairContacts) { // check if body was part of a cycle
-//				if (bpc.inCycle) {
-//					bpc.addBpcToUnmerge(bpcsToUnmerge);
-//					bpcToCheck.add(bpc);
-//					 for (BodyPairContact bpcToUnmerge : bpc.othersInCycle) { // unmerge the others bodies
-//						bpcToUnmerge.addBpcToUnmerge(bpcsToUnmerge);
-//						bpcToCheck.add(bpcToUnmerge);
-//					 }
-//					bpc.clearCycle();
-//				}
-//			}
-//		}
-//		
-//		for (BodyPairContact bpc: bpcToCheck)
-//			bpc.checkCyclesToUnmerge(bpcsToUnmerge);
-
-		// TODO: BPC.bodies: code above needs fixing for cycles... if needed!
+		for (RigidBody body: bodyPair) {
+			for (BodyPairContact bpc: body.bodyPairContacts) { // check if body was part of a cycle
+				if (bpc.inCycle) {
+					bpc.addBpcToUnmerge(bpcsToUnmerge);
+					bpcToCheck.add(bpc);
+					 for (BodyPairContact bpcToUnmerge : bpc.othersInCycle) { // unmerge the others bodies
+						bpcToUnmerge.addBpcToUnmerge(bpcsToUnmerge);
+						bpcToCheck.add(bpcToUnmerge);
+					 }
+					bpc.clearCycle();
+				}
+			}
+		}
+		
+		for (BodyPairContact bpc: bpcToCheck)
+			bpc.checkCyclesToUnmerge(bpcsToUnmerge);
 	}
 		
 }

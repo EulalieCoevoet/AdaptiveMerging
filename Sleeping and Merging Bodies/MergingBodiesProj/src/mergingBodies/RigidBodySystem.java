@@ -97,11 +97,10 @@ public class RigidBodySystem {
 		collision.warmStart(); 		
 		collision.updateBodyPairContacts(); 
 		
-		sleeping.wakeAll();
-		
+		if (sleeping.params.wakeAll.getValue()) sleeping.wakeAll();
 		sleeping.wake();
 		
-		merging.unmergeAll();
+		if (merging.params.unmergeAll.getValue()) merging.unmergeAll();
 		
 		collision.updateInCollections(dt, merging.params);
 			

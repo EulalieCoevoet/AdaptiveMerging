@@ -76,21 +76,22 @@ public class RigidCollection extends RigidBody {
 	/**
 	 * Adds a body to the collection
 	 * This generally follows a 3 step process
-	 * 1) Adds the body to the list, and updates the velocity to be a
+	 * <p><ul>
+	 * <li> 1) Adds the body to the list, and updates the velocity to be a
 	 *    weighted average of the collection and the new body.  This velocity
 	 *    is updated to be in the collection's COM frame, even though other 
 	 *    methods to update the COM are not yet called.  Because the velocity
 	 *    is stored in a world aligned frame, this has little impact on the rest
 	 *    of the steps.
-	 *  2) Mass COM and Inertia are updated.  The inertia will be with
+	 * <li> 2) Mass COM and Inertia are updated.  The inertia will be with
 	 *    respect to the current rotation of the collection, so some care necessary
 	 *    to initalize massAnular0 and jinv0 too.
-	 *  3) Rotation is optimized for the bounding volumes of the different bodies in
+	 * <li> 3) Rotation is optimized for the bounding volumes of the different bodies in
 	 *     the collection. (currently not implemented)  Because this changes the 
 	 *     rest rotation of the collection, it will influence the rest inertia.
-	 *  4) Transformations are updated (jinv too, perhaps wasteful), and likewise
+	 * <li> 4) Transformations are updated (jinv too, perhaps wasteful), and likewise
 	 *     the body to collection transforms 
-	 * 
+	 * </p></ul>
 	 * @param body body to add
 	 */
 	public void addBody(RigidBody body) {
@@ -251,12 +252,10 @@ public class RigidCollection extends RigidBody {
 		updateBB();
 		
 		//updateInertia();
-		
-		addBodiesSpringsToCollection();
 	}
 
 	/** 
-	 * TODO: this could be a fast incremental update rather than recomputing for all bodies 
+	 * TODO: SPEED: this could be a fast incremental update rather than recomputing for all bodies 
 	 */
 	private void updateMassCOMInertia() {
 		double massLinear = 0;
@@ -277,7 +276,7 @@ public class RigidCollection extends RigidBody {
 			//			I [p]   J   0
 			//			0  I   m[p] 0
 			//
-			//			Thus.. J + I [p][p] in the upper left...
+			//			Thus.. J + mI [p][p] in the upper left...
 			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
 			double x = b.x.x;
 			double y = b.x.y;
@@ -512,16 +511,6 @@ public class RigidCollection extends RigidBody {
 	 */
 	protected void updateBodiesPositionAndTransformations() {
 		for (RigidBody body : bodies) {
-
-			// reset position and orientation
-			// TODO: I'm confused here...
-			// the body's W2B on it's position will simply give us zero, no?
-
-			// looks like these do nothing...
-			
-//			body.transformW2B.transform(body.x);
-//			body.transformW2B.T.getRotationScale( body.theta );
-			
 			// update transformations
 			body.transformB2W.set(body.transformB2C);
 			body.transformB2W.leftMult(transformB2W);
@@ -529,14 +518,16 @@ public class RigidCollection extends RigidBody {
 			body.transformW2B.invert();
 
 			// update position and orientation
-			//body.transformB2W.T.get( tmp ); //transform(body.x);
 			body.x.x = body.transformB2W.T.m03;
 			body.x.x = body.transformB2W.T.m13;
 			body.x.x = body.transformB2W.T.m23;
 			body.transformB2W.T.getRotationScale( body.theta );
-			// NOTE: updating the body's B2W is important for drawing, 
-			// but the other quantities are perhaps not needed until unmerge?
-			// TODO: make sure jinv and angularmass are up to date on unmerge!
+			if ( ! pinned ) {  // a normal update would do this... so we shoudl do it too for a correct single cycle update.
+		        jinv.mul( theta, jinv0 );
+		        jinv.mul( thetaT );
+		        massAngular.mul( theta, massAngular0 );
+		        massAngular.mul( thetaT );
+	        } 
 		}
 	}
 
@@ -567,14 +558,6 @@ public class RigidCollection extends RigidBody {
 		
 		body.v.add( v, wxr ); // sets the value of the sum
 		body.omega.set( omega );
-	}
-
-	/** Applies springs on the body, to the collection */
-	private void addBodiesSpringsToCollection() {
-		springs.clear();
-		for (RigidBody body : bodies) {
-			springs.addAll(body.springs);
-		}
 	}
 
 	public boolean isMovingAway(RigidBody body, MergeParameters mergeParams) {
@@ -660,30 +643,15 @@ public class RigidCollection extends RigidBody {
 	}
 
 	public void displayInternalContactForces(GLAutoDrawable drawable, double dt ) {
-		// Does this not work?
 		for (Contact c : internalContacts ) {
 			c.displayContactForce( drawable, true, dt ); // blue inside collection
 		}
-//		for (BodyPairContact bpc : bodyPairContacts) {
-//			if (!bpc.inCollection)
-//				continue;
-//			for (Contact c : bpc.contactList)
-//				c.displayContactForce( drawable, true, dt ); // blue inside collection
-//		}
 	}
 
 	public void displayInternalContactLocations( GLAutoDrawable drawable ) {
-		// can't we just go over the collections internalContacts list??
 		for (Contact c : internalContacts ) {
 			c.display( drawable, true ); // blue inside collection
 		}
-		
-//		for (BodyPairContact bpc : bodyPairContacts) {
-//			if (!bpc.inCollection)
-//				continue;
-//			for (Contact c : bpc.contactList)
-//				c.display( drawable, true ); // blue inside collection
-//		}
 	}
 
 	/**

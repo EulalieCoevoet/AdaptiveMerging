@@ -22,9 +22,7 @@ public class RigidBody {
 	String name;
 	
 	/** 
-	 * Used for composite bodies and collections
-	 * TODO: either be careful or change out composites work once rigid collections are included in 3D... 
-	 * Actaully... composites are currently on the todo list... can come back to them later...
+	 * Used for collections 
 	 */
 	RigidCollection parent;
 	
@@ -88,7 +86,7 @@ public class RigidBody {
 	
 	/**
 	 * list of contacting bodies present with this RigidBody. In case of a collection, 
-	 * the list will (TODO update... did) contain both internal and external bpc.
+	 * the list will contain ONLY external bpc.
 	 * The idea now is to hold internal BPCs in a separate list at the RigidCollection level
 	 **/
 	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
@@ -108,7 +106,7 @@ public class RigidBody {
     /** orientation of the body TODO: refactor to be R later?? */
     public Matrix3d theta = new Matrix3d();
     /**
-     * inverse orientation (i.e., world to body) 
+     * inverse orientation (i.e., world to body)  TODO: RIGIDTRANSFORM: we shouldn't be storing this! :(
      * This is primarily a temporary working variable!
      */
     public Matrix3d thetaT = new Matrix3d();
@@ -135,10 +133,10 @@ public class RigidBody {
 	public ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>(); 
 	
 	/** Friction coefficient */
-	public double friction; 
+	public double friction = 0.8; 
 	
 	/** Restitution coefficient */
-	public double restitution; 
+	public double restitution = 0; 
 	
 	public boolean isSleeping = false;
 
@@ -306,7 +304,7 @@ public class RigidBody {
     	if ( !pinned ) {
 	    	massAngular.transform( omega, tmp );
 	    	tmp2.cross( tmp, omega );
-	    	// TODO: this is certainly broken :(
+	    	// TODO: CORRIOLIS: this is certainly broken :(
 	    	//torque.sub(tmp2); // seems like this should be added, but could also be a sign error. :(
     	}
     }

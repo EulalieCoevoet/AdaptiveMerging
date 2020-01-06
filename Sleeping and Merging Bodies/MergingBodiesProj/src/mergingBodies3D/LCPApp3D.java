@@ -561,11 +561,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         XMLParser parser = new XMLParser();
         parser.parse( system, filename );
         sceneTranslation.set( 0 ,0, 0 );
-        // TODO: dont'override these values later... for now set!
-        for (RigidBody body: system.bodies) {
-        	body.friction = system.collision.friction.getValue();
-        	body.restitution = system.collision.restitution.getValue();
-        }
     }
     
     /**

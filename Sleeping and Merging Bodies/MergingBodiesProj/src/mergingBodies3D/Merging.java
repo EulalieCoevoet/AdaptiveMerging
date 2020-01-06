@@ -5,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import javax.management.RuntimeErrorException;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -151,9 +150,6 @@ public class Merging {
 	 * Unmerge all bodies
 	 */
 	public void unmergeAll() {
-
-		if (!params.unmergeAll.getValue())
-			return;
 		
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
@@ -211,21 +207,20 @@ public class Merging {
 				for (BodyPairContact bpc: collection.bodyPairContacts) {
 					if (!bpc.inCollection)
 						continue;
-					System.err.println("BPC.bodies missing!!! not throwing runtime exception, but this will probably be BAD!! Fix code below.");
-//					for (RigidBody b : bpc.bodies) { 
-//						if (!bpcsToUnmerge.contains(bpc)) {
-//							
-//							if (condition == MergeConditions.CONTACTS && !bpc.checkContactsState(dt, params))
-//								continue;
-//							
-//							if (condition == MergeConditions.RELATIVEMOTION && !collection.isMovingAway(b, params))
-//								continue;
-//							
-//							bpc.checkCyclesToUnmerge(bpcsToUnmerge);
-//							bpc.addBpcToUnmerge(bpcsToUnmerge);
-//						}
-//					}
-					// TODO: BPC.bodies: fix unmerging code above...   possibly a simple fix to just check both bodies??
+					
+					for (RigidBody b : bpc.bodyPair) { 
+						if (!bpcsToUnmerge.contains(bpc)) {
+							
+							if (condition == MergeConditions.CONTACTS && !bpc.checkContactsState(dt, params))
+								continue;
+							
+							if (condition == MergeConditions.RELATIVEMOTION && !collection.isMovingAway(b, params))
+								continue;
+							
+							bpc.checkCyclesToUnmerge(bpcsToUnmerge);
+							bpc.addBpcToUnmerge(bpcsToUnmerge);
+						}
+					}
 				}
 				
 				ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
@@ -248,81 +243,73 @@ public class Merging {
 	}
 
 	private void unmergeSelectedBpcs(RigidCollection collection, ArrayList<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
+			
+		// Check for unstable configurations
+		ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();
+		ArrayList<BodyPairContact> bpcs = new ArrayList<BodyPairContact>();
+		for (BodyPairContact bpc : bpcsToUnmerge) {
+			for (RigidBody body : bpc.bodyPair) {
+				bpcs.clear();
+				for (BodyPairContact newBpc : body.bodyPairContacts) 
+					if (newBpc.contactList.size()<2 && newBpc.inCollection && !bpcsToUnmerge.contains(newBpc) && !unstableBpcsToUnmerge.contains(newBpc)) 
+						bpcs.add(newBpc);
+				if (bpcs.size()==1)
+					unstableBpcsToUnmerge.add(bpcs.get(0));
+			}
+		}
+		bpcsToUnmerge.addAll(unstableBpcsToUnmerge);
 		
-		throw new RuntimeErrorException( new Error("BPC.bodies missing... unmerge selected BPCs can't proceed"));
-		// TODO: BPC.bodies missing... unmergeSelectedBPCs now in comments, 
-		// which is unfortunate as unmerging was somewhat working a while ago...
+		// Cut connections
+		for (BodyPairContact bpc: bpcsToUnmerge)
+			unmergeBodyPairContact(bpc);
 		
-//		// Check for unstable configurations
-//		ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();
-//		ArrayList<BodyPairContact> bpcs = new ArrayList<BodyPairContact>();
-//		for (BodyPairContact bpc : bpcsToUnmerge) {
-//			for (RigidBody body : bpc.bodies) {
-//				bpcs.clear();
-//				for (BodyPairContact newBpc : body.bodyPairContacts) 
-//					if (newBpc.contactList.size()<2 && newBpc.inCollection && !bpcsToUnmerge.contains(newBpc) && !unstableBpcsToUnmerge.contains(newBpc)) 
-//						bpcs.add(newBpc);
-//				if (bpcs.size()==1)
-//					unstableBpcsToUnmerge.add(bpcs.get(0));
-//			}
-//		}
-//		bpcsToUnmerge.addAll(unstableBpcsToUnmerge);
-//		
-//		// Cut connections
-//		for (BodyPairContact bpc: bpcsToUnmerge)
-//			unmergeBodyPairContact(bpc);
-//		
-//		// Compute resulting new collections/bodies
-//		ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
-//		ArrayList<RigidBody> subbodies = new ArrayList<RigidBody>();
-//		
-//		for (BodyPairContact bpc: bpcsToUnmerge) {
-//			for (RigidBody body : bpc.bodies) {
-//				
-//				if (!handledBodies.contains(body)) {
-//					
-//					subbodies.add(body);
-//					buildNeighborBody(body, subbodies, handledBodies);
-//					handledBodies.addAll(subbodies);
-//					
-//					for (RigidBody b: subbodies)
-//						collection.unmergeBody(b);
-//
-//					if (subbodies.size() > 1) {
-//						RigidCollection newCollection = new RigidCollection(subbodies.remove(0), subbodies.remove(0));
-//						newCollection.addBodies(subbodies);
-//						newCollection.fillInternalBodyContacts();
-//						newCollection.color = new Color(collection.color);
-//						collection.applyVelocitiesTo(newCollection);
-//						newBodies.add(newCollection);
-//					} else if (subbodies.size() == 1){ 
-//						newBodies.add(subbodies.get(0));
-//					}
-//					
-//					subbodies.clear();
-//				}
-//			}	
-//			
-//			if (bpc.body1.isInSameCollection(bpc.body2))
-//				mergeBodyPairContact(bpc);
-//		}	
-//		
-//		if(handledBodies.size() != collection.bodies.size()) {
-//			for (RigidBody body : collection.bodies) {
-//				if (body.isInCollection(collection)) {
-//					collection.unmergeBody(body);
-//					newBodies.add(body);
-//					handledBodies.add(body);
-//				}
-//			}
-//		}
-//		
-//		if(handledBodies.size() != collection.bodies.size())
-//			System.err.println("[unmergeSelectedBpcs] Something is wrong");
-//		
+		// Compute resulting new collections/bodies
+		ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
+		ArrayList<RigidBody> subbodies = new ArrayList<RigidBody>();
 		
+		for (BodyPairContact bpc: bpcsToUnmerge) {
+			for (RigidBody body : bpc.bodyPair) {
+				
+				if (!handledBodies.contains(body)) {
+					
+					subbodies.add(body);
+					buildNeighborBody(body, subbodies, handledBodies);
+					handledBodies.addAll(subbodies);
+					
+					for (RigidBody b: subbodies)
+						collection.unmergeBody(b);
+
+					if (subbodies.size() > 1) {
+						RigidCollection newCollection = new RigidCollection(subbodies.remove(0), subbodies.remove(0));
+						newCollection.addBodies(subbodies);
+						newCollection.fillInternalBodyContacts();
+						newCollection.color = new Color(collection.color);
+						collection.applyVelocitiesTo(newCollection);
+						newBodies.add(newCollection);
+					} else if (subbodies.size() == 1){ 
+						newBodies.add(subbodies.get(0));
+					}
+					
+					subbodies.clear();
+				}
+			}	
+			
+			if (bpc.body1.isInSameCollection(bpc.body2))
+				mergeBodyPairContact(bpc);
+		}	
 		
+		if(handledBodies.size() != collection.bodies.size()) {
+			for (RigidBody body : collection.bodies) {
+				if (body.isInCollection(collection)) {
+					collection.unmergeBody(body);
+					newBodies.add(body);
+					handledBodies.add(body);
+				}
+			}
+		}
 		
+		if(handledBodies.size() != collection.bodies.size())
+			System.err.println("[unmergeSelectedBpcs] Something is wrong");
 	}
 	
 	/**

@@ -130,7 +130,7 @@ public class PGS {
 				updateDeltaVwithLambdai(contact, contact.lambda2 - prevLambda_t2, 2);
 
 				
-				if (iter == 1) // TODO: weird way to do a post process?
+				if (iter == 1) // LAST ITERATION: avoid looping again over contacts, and fix the state on this last iteration!
 					contact.updateContactState(mu);
 			}
 			

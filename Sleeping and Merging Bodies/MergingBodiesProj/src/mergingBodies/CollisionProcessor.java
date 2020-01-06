@@ -299,7 +299,7 @@ public class CollisionProcessor {
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
 		
 		for ( BodyPairContact bpc : bodyPairContacts ) {
-			for (RigidBody body : bpc.bodies) {		
+			for (RigidBody body : bpc.bodyPair) {		
 				for ( BodyPairContact otherBpc : body.bodyPairContacts ) {
 					if (!otherBpc.checked) {
 						tmpBodyPairContacts.add(otherBpc);

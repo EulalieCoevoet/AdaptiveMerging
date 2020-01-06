@@ -135,7 +135,7 @@ public class Contact {
 	}
 	
     /**
-     * Sets the contact, and assigns it an index
+     * Sets the contact, and assigns it an index, only ever called for NEW contacts!
      * @param body1
      * @param body2
      * @param contactW	in world coordinates
@@ -171,8 +171,9 @@ public class Contact {
 		lambda0 = 0; 
 		lambda1 = 0;
 		lambda2 = 0;
-		
-        computeJacobian(true);
+
+        // TODO: if we are not in collection don't do that
+        //computeJacobian(true);
         computeJacobian(false);
     }
     
@@ -325,9 +326,6 @@ public class Contact {
 	 * TODO: Flow control looks like it could be better here... :/
 	 */
 	public double getJdv(boolean computeInCollection, int index) {
-		
-//		DenseVector dv1 = body1.deltaV;//(body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
-//		DenseVector dv2 = body2.deltaV;//(body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
 		Vector6d dv1 = (body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
 		Vector6d dv2 = (body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
 		
@@ -388,26 +386,12 @@ public class Contact {
         gl.glEnd();
     }
     
-    // I think these are only used for display!!! Move to the display call and use static members to save memory?
-	// Seems to likewise be the case for
     
-	/** temporary Contact force being applied by this contact on body1 (note this is world aligned at body COM) */
+	/** temporary Contact force being applied by this contact on body1 (note this is world aligned at body COM)... only used for display */
     static private Vector3d forceW1 = new Vector3d();
 
-//	/** Contact torque being applied by this contact on body1 */
-//    private Vector3d torqueW1 = new Vector3d();
-//
-//	/** Contact force being applied by this contact on body2 (note this is world aligned at body COM) */
-//    private Vector3d forceW2 = new Vector3d();
-//
-//	/** Contact torque being applied by this contact on body2 */
-//    private Vector3d torqueW2 = new Vector3d();
-
 	/**
-	 * Stores contact forces and torques for visualization purposes
-	 * TODO: is this ONLY done for visualization?  If so, more this code to the 
-	 * display method to free up memory in the contact data structure 
-	 * (i.e., waste computation in drawing, rather than wasting memory!!)
+	 * Comptues contact forces for visualization purposes
 	 * @param dt
 	 */
 	private void computeForces( boolean computeInCollection, double dt, Vector3d forceW1 ) {
@@ -417,24 +401,6 @@ public class Contact {
 		forceW1.scaleAdd( lambda1, jt1a.v, forceW1 );
 		forceW1.scaleAdd( lambda2, jt2a.v, forceW1 );		
 		forceW1.scale(1./dt);
-		
-//		f1 = lambda0*j.get(0,3) + lambda1*j.get(1,3) + lambda2*j.get(2,3);
-//		f2 = lambda0*j.get(0,4) + lambda1*j.get(1,4) + lambda2*j.get(2,4);
-//		f3 = lambda0*j.get(0,5) + lambda1*j.get(1,5) + lambda2*j.get(2,5);
-//		torqueW1.set(f1,f2,f3);
-//		torqueW1.scale(1./dt);
-//
-//		j = this.j; //(body2.isInCollection() && !computeInCollection)? this.jc: this.j;
-//		f1 = lambda0*j.get(0,6) + lambda1*j.get(1,6) + lambda2*j.get(2,6);
-//		f2 = lambda0*j.get(0,7) + lambda1*j.get(1,7) + lambda2*j.get(2,7);
-//		f3 = lambda0*j.get(0,8) + lambda1*j.get(1,8) + lambda2*j.get(2,8);
-//		forceW2.set(f1,f2,f3);
-//		forceW2.scale(1./dt);
-//		f1 = lambda0*j.get(0,9)  + lambda1*j.get(1,9) +  lambda2*j.get(2,9);
-//		f2 = lambda0*j.get(0,10) + lambda1*j.get(1,10) + lambda2*j.get(2,10);
-//		f3 = lambda0*j.get(0,11) + lambda1*j.get(1,11) + lambda2*j.get(2,11);
-//		torqueW2.set(f1,f2,f3);
-//		torqueW2.scale(1./dt);
 	}
 	
 	/**

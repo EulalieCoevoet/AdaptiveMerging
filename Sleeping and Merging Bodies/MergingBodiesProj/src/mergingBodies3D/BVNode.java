@@ -25,9 +25,6 @@ public class BVNode {
      */
     BVNode[] children;
     
-//    BVNode child1;
-//    BVNode child2;
-    
     /** The visitID keeps track of when this node was last visited */
     int visitID;
     
@@ -44,8 +41,6 @@ public class BVNode {
     			children[i] = new BVNode( n.children[i], body );
     		}
     	}
-//    	if ( n.child1 != null ) child1 = new BVNode( child1, body );
-//    	if ( n.child2 != null ) child2 = new BVNode( child2, body );
     }
     
     /** 
@@ -75,8 +70,6 @@ public class BVNode {
         	children = new BVNode[2];
         	children[0] = new BVNode( discs.get(0) );
         	children[1] = new BVNode( discs.get(1) );          			
-//                	child1 = new BVNode( discs.get(0) );
-//                	child2 = new BVNode( discs.get(1) );        	
         } else { // if ( blocks.size() > 2 ) {        
             // find the distribution     
         	boundingSphere = new BVSphere(discs);
@@ -122,8 +115,6 @@ public class BVNode {
             children = new BVNode[2];
             children[0] = new BVNode(L1, body);
             children[1] = new BVNode(L2, body);            
-//            if ( L1.size() > 0 ) child1 = new BVNode(L1, body);
-//            if ( L2.size() > 0 ) child2 = new BVNode(L2, body);            
         }
     }
 
@@ -132,7 +123,6 @@ public class BVNode {
      */    
     public boolean isLeaf() {
     	return ( children == null );
-//    	return (child1 == null) && (child2 == null ); 
     }
     
     /**
@@ -145,8 +135,6 @@ public class BVNode {
         for ( BVNode c : children ) {
         	c.display(drawable);
         }
-//        if ( child1 != null ) child1.display(drawable);
-//        if ( child2 != null ) child2.display(drawable);
     }
     
     /**
@@ -164,12 +152,6 @@ public class BVNode {
         		c.displayVisitBoundary(drawable, visit);
         	}
         }        
-//        else if ( child1.visitID != visit ) { // both children are visited, or not, never one or the other
-//            boundingSphere.display(drawable);
-//        } else {
-//            child1.displayVisitBoundary(drawable, visit);
-//            child2.displayVisitBoundary(drawable, visit);
-//        }
     }
     
 }

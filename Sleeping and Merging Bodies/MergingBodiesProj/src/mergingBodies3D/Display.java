@@ -49,11 +49,11 @@ public class Display {
 	public DisplayParameters params = new DisplayParameters();
 	
 	ArrayList<RigidBody> bodies;
-	CollisionProcessor collision; // TODO: rename 
+	CollisionProcessor collisionProcessor;
 	
 	Display(ArrayList<RigidBody> bodies, CollisionProcessor collisionProcessor) {
 		this.bodies = bodies;
-		this.collision = collisionProcessor;
+		this.collisionProcessor = collisionProcessor;
 	}
 	
     /** Might want to allow for different coloured blocks?? but for now, in 3D this is easiest */
@@ -70,7 +70,7 @@ public class Display {
     	// Should move this stuff below to a display non-shadowable function
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, green, 0);
         if ( params.drawContactGraph.getValue() ) {
-            for ( Contact c : collision.contacts ) {
+            for ( Contact c : collisionProcessor.contacts ) {
                 c.displayConnection(drawable);
             }
         }
@@ -78,7 +78,7 @@ public class Display {
         gl.glPointSize( params.contactLocationSize.getFloatValue() );
         
     	if (params.drawContactLocations.getValue() || params.drawContactForces.getValue()) {
-			for ( Contact c : collision.contacts ) {
+			for ( Contact c : collisionProcessor.contacts ) {
 				if (params.drawContactLocations.getValue()) {
 					c.display(drawable, false); 
 				}
@@ -144,10 +144,7 @@ public class Display {
         	}
         }
         
-        // TODO: perhaps do clipping planes here instead to only clip bodies?
-        // TODO: perhaps also have cull face options?  think we want to cull to better see contacts after clipping
         if ( params.drawBodies.getValue() ) {
-        	int i = 0;
         	for ( RigidBody b : bodies ) {
     			// let's control the colour of geometry here as it will let us 
     			// decide when we want to override this colour (e.g., if we have a 
@@ -159,17 +156,18 @@ public class Display {
     				c = b.col;
     			}
 				if( b instanceof RigidCollection && ! params.drawCollections.getValue() ) {
-					// TODO: make sure the bodies draw with their proper colours!
+					for (RigidBody b2 : ((RigidCollection)b).bodies) {
+						b2.col[3] = params.transparency.getFloatValue();         			
+						gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, b2.col, 0 );
+						b2.display(drawable);
+					}
+				} else {
+					c[3] = params.transparency.getFloatValue();         			
+	    			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
+	                b.display( drawable );
 				}
-				c[3] = params.transparency.getFloatValue();         			
-    			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
-                b.display( drawable );
-        	}
+			}
         }
-       
-        
-        // TODO: end clipping here to continue to see other debug visualizations un-clipped..
-        // again, perhaps an option to end clipping here or at the end of all of this!
         
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
         gl.glNormal3f(0,0,1);
@@ -202,7 +200,7 @@ public class Display {
             for ( RigidBody b : bodies ) {
             	if ( b.root == null ) continue; // rigid body planes don't have a BVH
             	if (!(b instanceof RigidCollection)) {
-            		b.root.displayVisitBoundary( drawable, collision.visitID );
+            		b.root.displayVisitBoundary( drawable, collisionProcessor.visitID );
             	} else {
             		displayVisitBoundaryCollection((RigidCollection) b, drawable);
             	}
@@ -260,7 +258,7 @@ public class Display {
 
 	private void displayVisitBoundaryCollection(RigidCollection b, GLAutoDrawable drawable) {
 		for (RigidBody body: b.bodies) {
-			body.root.displayVisitBoundary(drawable, collision.visitID);
+			body.root.displayVisitBoundary(drawable, collisionProcessor.visitID);
 		}
 	}
 

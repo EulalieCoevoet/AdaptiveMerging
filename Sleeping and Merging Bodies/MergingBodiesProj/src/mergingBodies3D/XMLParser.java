@@ -67,7 +67,7 @@ public class XMLParser {
 	
 	/**
 	 * Parse collision node to set parameters common to ALL bodies?
-	 * TODO: should probably have these adjust interface slider values for restitution and friction
+	 * TODO: RESTITUTION AND FRICTION: need to fix them...
 	 * And those parameters should perhaps be available as overrides or to modulate the restition and
 	 * friction parameters of bodies. 
 	 */
@@ -219,7 +219,7 @@ public class XMLParser {
 			massAngular.add( op );			
 		}
 		
-		// TODO: THIS BOUNDING BOX IS POSSIBLY WRONG?
+		// TODO: COMPOSITE BODY: is this bounding box correct?
 	    Vector3d ll = new Vector3d( Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE );
 	    Vector3d ur = new Vector3d( Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE );
 		for ( RigidBody b : bodies ) {

@@ -70,9 +70,7 @@ public class CollisionProcessor {
 	/** keeps track of the time used to update the contacts inside the collections on the last call */
 	double collectionUpdateTime = 0;
 	
-	// TODO: uncomment this when we are ready... 
-	// TODO: might want a memory pool for BodyPairContact too?  Could be complicated since bodyPairContacts have some dynamic internal memory??  
-	// TODO: Need to bring over a lot of code from the 2D collision processor...
+	// TODO: MEMORY POOLING? might want a memory pool for BodyPairContact too?  Could be complicated since bodyPairContacts have some dynamic internal memory??  
 	/**list that keeps track of all the body pair contacts that occurred in this time step */
 	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
     
@@ -118,9 +116,7 @@ public class CollisionProcessor {
 			
 			// solve contacts
 			long now = System.nanoTime();
-			
 			solver.solve(dt);
-			
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
 			updateContactsMap();
@@ -185,22 +181,42 @@ public class CollisionProcessor {
 	}
 	
 	/**
-	 * Remove empty body pair contacts
-	 * TODO: THIS SHOULD NEVER HAPPEN IF WE DON'T PRUNE, yes?
+	 * Remove empty body pair contacts	 
 	 */
 	protected void removeEmptyBodyPairContacts() {
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+		boolean updated = false;
 		for (BodyPairContact bpc : bodyPairContacts) {
 			if(!bpc.contactList.isEmpty())
 				tmpBodyPairContacts.add(bpc);
 			else {
 				bpc.removeFromBodyLists();
 				bpc.removeFromBodyListsParent();
+				updated = true;
 			}
 		}
 		
-		bodyPairContacts.clear();  // TODO: efficiency!!  if nothing needs removing nothing should be done! :(
-		bodyPairContacts.addAll(tmpBodyPairContacts);
+		if (updated) {
+			bodyPairContacts.clear();
+			bodyPairContacts.addAll(tmpBodyPairContacts);
+		}
+	}
+	
+	/**
+	 * Remove inactive contact from bodyPairContacts list
+	 */
+	public void clearBodyPairContacts() {
+		
+		for (BodyPairContact bpc : bodyPairContacts) {
+			ArrayList<Contact> tmpContacts = new ArrayList<Contact>();
+			for (Contact contact : bpc.contactList) 
+				if (Math.abs(contact.lambda0) > 1e-14) // (math.abs is for magnet)
+					tmpContacts.add(contact);
+			bpc.contactList.clear();
+			bpc.contactList.addAll(tmpContacts);
+		}
+
+		removeEmptyBodyPairContacts();
 	}
 	
 	/**
@@ -225,32 +241,28 @@ public class CollisionProcessor {
 
 		boolean compute = false; // set to true if there is a collection in the system
 		
-		// TODO: avoid all of this if we don't have any collections
 		
-		if (mergeParams.organizeContacts.getValue())
+		if (mergeParams.organizeContacts.getValue()) {		
+			// TODO: avoid all of this if we don't have any collections...try to have an cheap early exit if comptue is going to be false
 			compute = getOrganizedContacts(solver.contacts);
-			// TODO: DEBUG: With sphere on plane, the solver dends up with 3 identical contacts in the list! DEBUG!
-		else {
-			// Copy the external contacts 
-			// This resolution is done with the Jacobians of the bodies (not the collection) 
-			// so not a good warm start for the LCP solve (we don't want to keep these values).
-			for ( Contact contact : contacts ) {
-				// These EXTERNAL contacts will be added each time step... 
-				// but we don't need to worry about them persisting in this list
-				solver.contacts.add( contact );
-			}
-			
+		} else {			
 			for (RigidBody body : bodies) {
 				if (body instanceof RigidCollection && !body.isSleeping) {
 					compute = true;
 					RigidCollection collection = (RigidCollection)body;
-					// Update the internal contacts
 					solver.contacts.addAll(collection.internalContacts);
 				}
 			}
 			
-			if (shuffle.getValue()) 
-	    		knuthShuffle(solver.contacts);
+			if ( compute ) {
+				for ( Contact contact : contacts ) {
+					// These EXTERNAL contacts will be added each time step... 
+					// but we don't need to worry about them persisting in this list
+					solver.contacts.add( contact );
+				}
+				if (shuffle.getValue()) 
+		    		knuthShuffle(solver.contacts);
+			}
 		}
 		
 		if (compute) { // there is at least one collection in the system
@@ -350,7 +362,7 @@ public class CollisionProcessor {
 	
 		throw new RuntimeErrorException( new Error("bpc.bodies not yet included... fix commented code below") );
 //		for ( BodyPairContact bpc : bodyPairContacts ) {
-//			for (RigidBody body : bpc.bodies) {		
+			//			for (RigidBody body : bpc.bodies) {		
 //				for ( BodyPairContact otherBpc : body.bodyPairContacts ) {
 //					if (!otherBpc.checked) {
 //						tmpBodyPairContacts.add(otherBpc);
@@ -653,10 +665,10 @@ public class CollisionProcessor {
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
 	    
-    /** Restitution parameter for contact constraints */
+    /** TODO: RESTITUTION (currently unused) Restitution parameter for contact constraints */
     public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
     
-    /** Coulomb friction coefficient for contact constraint */
+    /** TODO: FRICTION (currently unused) Coulomb friction coefficient for contact constraint */
     public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.8, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */

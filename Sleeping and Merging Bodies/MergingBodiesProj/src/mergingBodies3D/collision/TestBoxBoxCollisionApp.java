@@ -68,10 +68,15 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 		double[] depth = new double[1];
 		int[] return_code = new int[1];
 		
+		b1.radius = size1.length() / 2;
+		b2.radius = size2.length() / 2;
+		
 		b1.theta.set( R1 );
 		b1.x.set( p1 );
 		b2.theta.set( R2 );
 		b2.x.set( p2 );
+		b1.updateTransformations();
+		b2.updateTransformations();
 		int cnum = BoxBox.dBoxBox( b1, size1, b2, size2, normal, depth, return_code, contacts, pool );
 
 		gl.glPointSize(10);

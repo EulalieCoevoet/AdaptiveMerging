@@ -102,7 +102,7 @@ public class PlaneRigidBody extends RigidBody {
 			
 			float s = radius;		
 			
-			// TODO: this is really dumb and slow... but at least it will get baked into a display list
+			// this is really dumb and slow... but at least it will get baked into a display list
 			// If it is ever the case we get rid of display lists, this code will certainly go too!
 			Vector3d tmp = new Vector3d(0,0,1);
 			Vector3d axis = new Vector3d();

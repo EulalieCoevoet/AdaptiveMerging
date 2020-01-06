@@ -87,9 +87,9 @@ public class Spring {
 		force.scale( - scale, displacement );
 
 		body.applyForceW( pbw, force );
-//		if ( body.isInCollection() ) {
-//			body.parent.applyForceW( pbw, force );
-//		}
+		if ( body.isInCollection() ) {
+			body.parent.applyForceW( pbw, force );
+		}
 	}
 
 	/**

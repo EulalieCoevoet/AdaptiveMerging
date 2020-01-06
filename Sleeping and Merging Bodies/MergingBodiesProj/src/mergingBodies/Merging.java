@@ -136,9 +136,6 @@ public class Merging {
 	 * Unmerge all bodies
 	 */
 	public void unmergeAll() {
-
-		if (!params.unmergeAll.getValue())
-			return;
 		
 		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
 		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
@@ -196,7 +193,7 @@ public class Merging {
 				for (BodyPairContact bpc: collection.bodyPairContacts) {
 					if (!bpc.inCollection)
 						continue;
-					for (RigidBody b : bpc.bodies) { 
+					for (RigidBody b : bpc.bodyPair) { 
 						if (!bpcsToUnmerge.contains(bpc)) {
 							
 							if (condition == MergeConditions.CONTACTS && !bpc.checkContactsState(dt, params))
@@ -236,7 +233,7 @@ public class Merging {
 		ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();
 		ArrayList<BodyPairContact> bpcs = new ArrayList<BodyPairContact>();
 		for (BodyPairContact bpc : bpcsToUnmerge) {
-			for (RigidBody body : bpc.bodies) {
+			for (RigidBody body : bpc.bodyPair) {
 				bpcs.clear();
 				for (BodyPairContact newBpc : body.bodyPairContacts) 
 					if (newBpc.contactList.size()<2 && newBpc.inCollection && !bpcsToUnmerge.contains(newBpc) && !unstableBpcsToUnmerge.contains(newBpc)) 
@@ -256,7 +253,7 @@ public class Merging {
 		ArrayList<RigidBody> subbodies = new ArrayList<RigidBody>();
 		
 		for (BodyPairContact bpc: bpcsToUnmerge) {
-			for (RigidBody body : bpc.bodies) {
+			for (RigidBody body : bpc.bodyPair) {
 				
 				if (!handledBodies.contains(body)) {
 					

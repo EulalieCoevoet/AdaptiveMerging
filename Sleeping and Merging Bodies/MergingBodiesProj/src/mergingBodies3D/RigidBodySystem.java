@@ -98,18 +98,22 @@ public class RigidBodySystem {
 		collision.updateContactsMap();
         collision.collisionDetection(dt);
 		collision.warmStart(); 	
-        
 		collision.updateBodyPairContacts(); 
 
-		
-		sleeping.wakeAll();
-		
+		if (sleeping.params.wakeAll.getValue()) sleeping.wakeAll();
 		sleeping.wake();
 		
-		merging.unmergeAll(); // this only happens upon request (i.e., a UI checkbox)
+		if (merging.params.unmergeAll.getValue()) merging.unmergeAll();
 		
 		collision.updateInCollections(dt, merging.params);
-
+		
+		merging.unmerge(MergeConditions.CONTACTS, dt);	
+		if (merging.mergingEvent) {
+			for (RigidBody body: bodies)
+				body.clear();
+			applyExternalForces();
+		}
+		
 		collision.solveLCP(dt); 
         
         // advance the system by the given time step
@@ -184,7 +188,7 @@ public class RigidBodySystem {
 			tmpForce.set( Math.cos( theta ), Math.sin(theta), 0 );
 			tmpForce.scale( - body.massLinear * gravityAmount.getValue() );
 			body.force.add( tmpForce ); // gravity goes directly into the accumulator, no torque
-            body.applyCoriollisTorque(); // TODO: sadly, this appears to be buggy :(
+            body.applyCoriollisTorque(); // TODO: CORIOLLIS: sadly, this appears to be buggy :(
 			
 			if( body instanceof RigidCollection) {				
 				for ( RigidBody b : ((RigidCollection)body).bodies ) {

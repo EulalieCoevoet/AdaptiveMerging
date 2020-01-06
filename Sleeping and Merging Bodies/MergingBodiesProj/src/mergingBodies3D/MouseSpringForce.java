@@ -56,21 +56,22 @@ public class MouseSpringForce {
     	return picked;
     }
     
+    /** Temporary working variables */
+    private Vector3d grabPointV = new Vector3d();
+    private Vector3d force = new Vector3d();
+    private Vector3d direction = new Vector3d();
+    
     /**
      * Applies the mouse spring force to the picked rigid body, or nohting if no body selected
-     * TODO: MEMORY: Consider eliminating memory allocation here!
      */
     public void apply() {
         if ( picked == null ) return;
         
-        Vector3d grabPointV = new Vector3d();
         picked.transformB2W.transform( grabPointB, grabPointBW );
         double distance = grabPointBW.distance( pointW );
         double k = stiffness.getValue();
         double c = damping.getValue();
         
-        Vector3d force = new Vector3d();
-        Vector3d direction = new Vector3d();
         direction.sub( pointW, grabPointBW );
         if ( direction.lengthSquared() < 1e-3 ) return;
         direction.normalize();

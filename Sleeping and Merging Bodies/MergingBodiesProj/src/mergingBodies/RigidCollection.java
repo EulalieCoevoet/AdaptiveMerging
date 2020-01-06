@@ -350,7 +350,7 @@ public class RigidCollection extends RigidBody {
 		bpc.addToBodyListsParent();
 
 		// add the external bpc to the collection bodyPairContactList
-		for (RigidBody body: bpc.bodies)
+		for (RigidBody body: bpc.bodyPair)
 			for (BodyPairContact bpcExt : body.bodyPairContacts)
 				bpcExt.addToBodyListsParent();
 	}

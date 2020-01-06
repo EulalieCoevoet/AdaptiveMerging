@@ -14,7 +14,7 @@ public class BodyPairContact {
 	
 	public RigidBody body1; 
 	public RigidBody body2;
-	public ArrayList<RigidBody> bodies;
+	public ArrayList<RigidBody> bodyPair; // list containing the two bodies, used to loop over the bodies and avoid duplication 
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 	
@@ -40,9 +40,9 @@ public class BodyPairContact {
 	public BodyPairContact(RigidBody body1, RigidBody body2) {
 		this.body1 = body1;
 		this.body2 = body2;
-		bodies = new ArrayList<RigidBody>();
-		bodies.add(body1);
-		bodies.add(body2);
+		bodyPair = new ArrayList<RigidBody>();
+		bodyPair.add(body1);
+		bodyPair.add(body2);
 	}
 
 	/**
@@ -347,7 +347,7 @@ public class BodyPairContact {
 	public void checkCyclesToUnmerge(ArrayList<BodyPairContact> bpcsToUnmerge) {
 		ArrayList<BodyPairContact> bpcToCheck = new ArrayList<BodyPairContact>();
 		
-		for (RigidBody body: bodies) {
+		for (RigidBody body: bodyPair) {
 			for (BodyPairContact bpc: body.bodyPairContacts) { // check if body was part of a cycle
 				if (bpc.inCycle) {
 					bpc.addBpcToUnmerge(bpcsToUnmerge);

@@ -119,9 +119,6 @@ public class Sleeping {
 	 */
 	public void wakeAll() {
 		
-		if (!params.wakeAll.getValue())
-			return;
-		
 		for (RigidBody body: bodies)
 			body.wake();
 
