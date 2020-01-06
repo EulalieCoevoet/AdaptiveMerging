@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import javax.management.RuntimeErrorException;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Point3d;
@@ -129,6 +130,9 @@ public class CollisionProcessor {
 	
 	/**
 	 * Updates bodyPairContacts list
+	 * It seems that the main thing that might happen is that a BPC could end up with an empty 
+	 * contact list...  Feels like there should be another way to deal with this...   but I can't 
+	 * see it right now... 
 	 */
 	public void updateBodyPairContacts() {
 		
@@ -137,10 +141,20 @@ public class CollisionProcessor {
 			bpc.contactList.clear();
 		}
 		
-		for (RigidBody body: bodies) 
-			if (body instanceof RigidCollection) 
-				for (BodyPairContact bpc: body.bodyPairContacts)
+		// TODO: with recent change, looks like this needs to be INTERNAL BPCs?
+		for (RigidBody body: bodies) {
+			if (body instanceof RigidCollection) {
+				for (BodyPairContact bpc: ((RigidCollection) body).internalBodyPairContacts) {
 					bpc.checked = false;
+				}
+				// This list now has BPCs for contacts external to the collection,
+				// so the flag should already be set by looping over this.bodyPairContacts...
+				// So this code can probably be removed:
+				for (BodyPairContact bpc: body.bodyPairContacts) {
+					bpc.checked = false;
+				}
+			}
+		}
 
 		for (Contact contact : contacts) // loop over all contacts between bodies
 			storeInBodyPairContacts(contact);
@@ -221,12 +235,9 @@ public class CollisionProcessor {
 			// This resolution is done with the Jacobians of the bodies (not the collection) 
 			// so not a good warm start for the LCP solve (we don't want to keep these values).
 			for ( Contact contact : contacts ) {
-				// would be nice not to copy here, but the lambdas might get mucked up 
-				// so we'll do it with a copy... for now...   
-				// TODO: fix this tricky memory issue... 
-				solver.contacts.add( new Contact(contact) );
-				// Does this happen each time??
-				
+				// These EXTERNAL contacts will be added each time step... 
+				// but we don't need to worry about them persisting in this list
+				solver.contacts.add( contact );
 			}
 			
 			for (RigidBody body : bodies) {
@@ -258,6 +269,10 @@ public class CollisionProcessor {
 					//
 					//collection.computeInternalContactsForce(dt);
 					
+					// unexpected??  why advance the velocities here if we are just going to 
+					// overwrite them with the collection velocities?  Is this for a special
+					// unmerge condition (i.e., use the single cycle update type thing?  IF so...
+					// clarify here!!!
 					for (RigidBody b : collection.bodies)
 						if(!b.pinned ) // && !b.temporarilyPinned)
 							b.advanceVelocities(dt);	
@@ -332,22 +347,24 @@ public class CollisionProcessor {
 	protected void getNextLayer(ArrayList<BodyPairContact> bodyPairContacts, ArrayList<BodyPairContact> orderedBpcs) {
 
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
-		
-		for ( BodyPairContact bpc : bodyPairContacts ) {
-			for (RigidBody body : bpc.bodies) {		
-				for ( BodyPairContact otherBpc : body.bodyPairContacts ) {
-					if (!otherBpc.checked) {
-						tmpBodyPairContacts.add(otherBpc);
-						otherBpc.checked = true;
-					}
-				}
-			}
-		}	
-		
-		if (!tmpBodyPairContacts.isEmpty()) {
-			orderedBpcs.addAll(tmpBodyPairContacts);
-			getNextLayer(tmpBodyPairContacts, orderedBpcs);
-		}
+	
+		throw new RuntimeErrorException( new Error("bpc.bodies not yet included... fix commented code below") );
+//		for ( BodyPairContact bpc : bodyPairContacts ) {
+//			for (RigidBody body : bpc.bodies) {		
+//				for ( BodyPairContact otherBpc : body.bodyPairContacts ) {
+//					if (!otherBpc.checked) {
+//						tmpBodyPairContacts.add(otherBpc);
+//						otherBpc.checked = true;
+//					}
+//				}
+//			}
+//		}			
+//		if (!tmpBodyPairContacts.isEmpty()) {
+//			orderedBpcs.addAll(tmpBodyPairContacts);
+//			getNextLayer(tmpBodyPairContacts, orderedBpcs);
+//		}
+		// TODO: BPC.bodies: fix code above.
+
 	}
 	
 	protected void updateContactsMap() {

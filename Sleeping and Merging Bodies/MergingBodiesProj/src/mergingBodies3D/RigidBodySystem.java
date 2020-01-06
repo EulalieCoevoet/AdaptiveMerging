@@ -230,18 +230,19 @@ public class RigidBodySystem {
 			b.bodyPairContacts.clear();
 			//if (!b.created) {
 
-				if (b instanceof RigidCollection) {
-					for (RigidBody subBody: ((RigidCollection) b).bodies) {
-						subBody.parent = null;
-						subBody.bodyPairContacts.clear();
-						bodies.add(subBody);
-					}
-					bodies.remove(b);
-
-					b = bodies.get(i);
+			if (b instanceof RigidCollection) {
+				for (RigidBody subBody: ((RigidCollection) b).bodies) {
+					subBody.parent = null;
+					subBody.bodyPairContacts.clear();
+					bodies.add(subBody);
 				}
-				b.reset();		
-//			} else {
+				bodies.remove(b);
+
+				b = bodies.get(i);
+			}
+			b.reset();		
+
+			//			} else {
 //				counter = i;
 //				break;
 //			}

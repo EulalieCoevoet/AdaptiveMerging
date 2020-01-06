@@ -3,6 +3,7 @@ package mergingBodies3D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import javax.management.RuntimeErrorException;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -30,6 +31,12 @@ public class RigidCollection extends RigidBody {
 	/** List of RigidBody of the collection */
 	protected ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 
+	/**
+	 * Let's keep the internal body pair contacts separate!
+	 * Not yet sure for what exactly they are needed... ??
+	 */
+	public ArrayList<BodyPairContact> internalBodyPairContacts = new ArrayList<BodyPairContact>();
+	
 	/**
 	 * List of Contact in the collection: Contact between RigidBody of the collection
 	 */
@@ -227,9 +234,14 @@ public class RigidCollection extends RigidBody {
 		if ( pinned ) { //|| temporarilyPinned) {
 			v.set(0,0,0);
 			omega.set(0,0,0);
+			minv = 0;
+			jinv0.setZero();
+			jinv.setZero();
+			massAngular.setZero(); // actually infinity.. but won't be used??
+			massAngular0.setZero();
+		} else {
+			updateMassCOMInertia();
 		}
-
-		updateMassCOMInertia();
 //		updateMass();
 //		updateCOM();
 		
@@ -439,8 +451,12 @@ public class RigidCollection extends RigidBody {
 //			jinv = 1. / inertia;
 //	}
 
+	/** 
+	 * Migrates the provided BPC to the collection, understanding that the contacts between these two
+	 * bodies will now be internal contacts.  The internal contacts and internal BPC lists are updated.
+	 * @param bpc
+	 */
 	public void addToInternalContact(BodyPairContact bpc) {
-		
 		ArrayList<Contact> tmp = new ArrayList<Contact>();// TODO: memory: fix me later...
 		for (Contact contact : bpc.contactList) {
 			if (!internalContacts.contains(contact)) { // TODO: wasteful search? any way to just make sure these are only added once?
@@ -454,6 +470,7 @@ public class RigidCollection extends RigidBody {
 		}
 		bpc.contactList.clear();
 		bpc.contactList.addAll( tmp );
+		internalBodyPairContacts.add( bpc );
 	}
 
 	/**
@@ -464,12 +481,14 @@ public class RigidCollection extends RigidBody {
 	public void addBPCsToCollection(BodyPairContact bpc) {
 		System.err.println("RigidCollection.addBPCsToCollection(): seems wrong to do it this way!");  
 
-		bpc.addToBodyListsParent();
-
-		// add the external bpc to the collection bodyPairContactList
-		for (RigidBody body: bpc.bodies)
-			for (BodyPairContact bpcExt : body.bodyPairContacts)
-				bpcExt.addToBodyListsParent();
+		throw new RuntimeErrorException( new Error("BPC.bodies:  not sure this code needs to be called... or revisit and fix" ));
+//		bpc.addToBodyListsParent();
+//
+//		// add the external bpc to the collection bodyPairContactList
+//		for (RigidBody body: bpc.bodies)
+//			for (BodyPairContact bpcExt : body.bodyPairContacts)
+//				bpcExt.addToBodyListsParent();
+		// TODO: BPC.bodies: repair above code, should it actually be needed!  
 	}
 	
 	@Override
@@ -538,7 +557,7 @@ public class RigidCollection extends RigidBody {
 	public void applyVelocitiesTo(RigidBody body) {
 		if ( pinned ) { //|| temporarilyPinned) {
 			if (v.lengthSquared() > 1e-14 || omega.lengthSquared() > 1e-14)
-				System.err.println("[applyVelocitiesTo] velocities of pinned body is not zero.");
+				System.err.println("[applyVelocitiesTo] velocities of pinned body is not zero. " + omega.toString() );
 		}
 
 		Vector3d r = new Vector3d();
@@ -547,7 +566,7 @@ public class RigidCollection extends RigidBody {
 		wxr.cross( omega, r );
 		
 		body.v.add( v, wxr ); // sets the value of the sum
-		body.omega = omega;
+		body.omega.set( omega );
 	}
 
 	/** Applies springs on the body, to the collection */
@@ -641,22 +660,30 @@ public class RigidCollection extends RigidBody {
 	}
 
 	public void displayInternalContactForces(GLAutoDrawable drawable, double dt ) {
-
-		for (BodyPairContact bpc : bodyPairContacts) {
-			if (!bpc.inCollection)
-				continue;
-			for (Contact c : bpc.contactList)
-				c.displayContactForce( drawable, true, dt ); // blue inside collection
+		// Does this not work?
+		for (Contact c : internalContacts ) {
+			c.displayContactForce( drawable, true, dt ); // blue inside collection
 		}
+//		for (BodyPairContact bpc : bodyPairContacts) {
+//			if (!bpc.inCollection)
+//				continue;
+//			for (Contact c : bpc.contactList)
+//				c.displayContactForce( drawable, true, dt ); // blue inside collection
+//		}
 	}
 
 	public void displayInternalContactLocations( GLAutoDrawable drawable ) {
-		for (BodyPairContact bpc : bodyPairContacts) {
-			if (!bpc.inCollection)
-				continue;
-			for (Contact c : bpc.contactList)
-				c.display( drawable, true ); // blue inside collection
+		// can't we just go over the collections internalContacts list??
+		for (Contact c : internalContacts ) {
+			c.display( drawable, true ); // blue inside collection
 		}
+		
+//		for (BodyPairContact bpc : bodyPairContacts) {
+//			if (!bpc.inCollection)
+//				continue;
+//			for (Contact c : bpc.contactList)
+//				c.display( drawable, true ); // blue inside collection
+//		}
 	}
 
 	/**

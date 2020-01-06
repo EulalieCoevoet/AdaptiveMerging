@@ -113,6 +113,7 @@ public class Contact {
 		bv2 = contact.bv2;
 		info = contact.info;
 		
+		contactW.set(contact.contactW);
 		normalW.set(contact.normalW);   	// CRAP...  will we ever need these in a body frame for the "other" jacobian??  hmm... 	
 		tangent1W.set(contact.tangent1W);  // TODO: figure out if the body frame vectors are really needed or not.  I feel the answer is yes. :(
 		tangent2W.set(contact.tangent2W);  // but perhaps we can get by with ONLY those... 

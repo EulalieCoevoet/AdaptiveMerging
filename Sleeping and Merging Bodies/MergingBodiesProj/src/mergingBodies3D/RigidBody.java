@@ -87,12 +87,12 @@ public class RigidBody {
 	RigidTransform transformC2B = new RigidTransform();
 	
 	/**
-	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
-	 * both internal and external bpc.
+	 * list of contacting bodies present with this RigidBody. In case of a collection, 
+	 * the list will (TODO update... did) contain both internal and external bpc.
+	 * The idea now is to hold internal BPCs in a separate list at the RigidCollection level
 	 **/
 	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
-    
-    
+
     /** DeltaV for PGS resolution */
     Vector6d deltaV = new Vector6d();
     
