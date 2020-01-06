@@ -175,6 +175,14 @@ public class Display {
     		for (Spring s : b.springs) {
 				s.displaySpring(drawable);
 			}
+    		
+    		if ( b instanceof RigidCollection ) {
+    			for ( RigidBody body : ((RigidCollection)b).bodies ) {
+	        		for (Spring s : body.springs) {
+	    				s.displaySpring(drawable);
+	    			}
+    			}
+        	}   
     	}        
         gl.glLineWidth(1);
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);

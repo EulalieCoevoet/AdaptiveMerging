@@ -3,7 +3,6 @@ package mergingBodies3D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import javax.management.RuntimeErrorException;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -30,12 +29,6 @@ public class RigidCollection extends RigidBody {
 
 	/** List of RigidBody of the collection */
 	protected ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
-
-	/**
-	 * Let's keep the internal body pair contacts separate!
-	 * Not yet sure for what exactly they are needed... ??
-	 */
-	public ArrayList<BodyPairContact> internalBodyPairContacts = new ArrayList<BodyPairContact>();
 	
 	/**
 	 * List of Contact in the collection: Contact between RigidBody of the collection
@@ -243,15 +236,11 @@ public class RigidCollection extends RigidBody {
 		} else {
 			updateMassCOMInertia();
 		}
-//		updateMass();
-//		updateCOM();
 		
 		updateTheta(); // currently does nothing, but can help optimize the BB
 		updateTransformations();
 		updateBodiesTransformations();
 		updateBB();
-		
-		//updateInertia();
 	}
 
 	/** 
@@ -303,43 +292,6 @@ public class RigidCollection extends RigidBody {
 		this.jinv0.mul( theta );		
 	}
 	
-//	/**
-//	 * Compute mass of collection w.r.t bodies
-//	 */
-//	private void updateMass() {
-//
-//		double massLinear = 0;
-//		for (RigidBody body : bodies) {
-//			massLinear += body.massLinear;
-//		}
-//		this.massLinear = massLinear;
-//		if (pinned)
-//			minv = 0.;
-//		else
-//			minv = 1 / massLinear;
-//	}
-//
-//	/**
-//	 * Loops through all bodies in collectionBodies
-//	 */
-//	private void updateCOM() {
-//
-//		Point3d com = new Point3d();
-//		Point3d tmp = new Point3d();
-//		double totalMass = massLinear;
-//		com.set(0,0,0);
-//
-//		for (RigidBody body : bodies) {
-//			double ratio = body.massLinear / totalMass;
-//			tmp.scale(ratio, body.x);
-//			com.add(tmp);
-//		}
-//		x.set(com);   /// WHY! :(  
-	
-	// TODO:   COM update happens in several stages with side effects...   
-	// redoing this code will probably make it cleaner!
-	
-//	}
 
 	/**
 	 * Compute theta of the collection from convex hull informations
@@ -363,7 +315,7 @@ public class RigidCollection extends RigidBody {
 		meanPos.scale(1.0 / N);
 
 		Vector3d v = new Vector3d();
-		MyMatrix3f covariance = new MyMatrix3f();
+		//MyMatrix3f covariance = new MyMatrix3f();
 		for (RigidBody body : bodies) {
 			if (body instanceof PlaneRigidBody) continue;
 			for (Point3d point : body.boundingBoxB) {
@@ -425,31 +377,6 @@ public class RigidCollection extends RigidBody {
 		boundingBoxB.add(3, new Point3d(bbminB.x, bbmaxB.y, bbmaxB.z));
 	}
 
-//	/**
-//	 * Updates the angular inertia.
-//	 */
-//	private void updateInertia() {
-//
-//		double inertia = 0;
-//		Point3d tmp = new Point3d(0,0,0);
-//		Point3d zero = new Point3d(0,0,0);
-//		for (RigidBody body : bodies) {
-//			if (!(body instanceof PlaneRigidBody)) {
-//				for (Block block : body.blocks) {
-//					double mass = block.getColorMass();
-//					tmp.set(block.pB);
-//					body.transformB2C.transform(tmp);
-//					inertia += mass * tmp.distanceSquared(zero);
-//				}
-//			}
-//		}
-//		massAngular = inertia;
-//		if (pinned)
-//			jinv = 0.;
-//		else
-//			jinv = 1. / inertia;
-//	}
-
 	/** 
 	 * Migrates the provided BPC to the collection, understanding that the contacts between these two
 	 * bodies will now be internal contacts.  The internal contacts and internal BPC lists are updated.
@@ -469,7 +396,6 @@ public class RigidCollection extends RigidBody {
 		}
 		bpc.contactList.clear();
 		bpc.contactList.addAll( tmp );
-		internalBodyPairContacts.add( bpc );
 	}
 
 	/**
@@ -478,16 +404,14 @@ public class RigidCollection extends RigidBody {
 	 * @param bpc
 	 */
 	public void addBPCsToCollection(BodyPairContact bpc) {
-		System.err.println("RigidCollection.addBPCsToCollection(): seems wrong to do it this way!");  
+		bpc.addToBodyListsParent();
 
-		throw new RuntimeErrorException( new Error("BPC.bodies:  not sure this code needs to be called... or revisit and fix" ));
-//		bpc.addToBodyListsParent();
-//
-//		// add the external bpc to the collection bodyPairContactList
-//		for (RigidBody body: bpc.bodies)
-//			for (BodyPairContact bpcExt : body.bodyPairContacts)
-//				bpcExt.addToBodyListsParent();
-		// TODO: BPC.bodies: repair above code, should it actually be needed!  
+		// add the external bpc to the collection bodyPairContactList
+		for (int i=0; i<2; i++) {
+			RigidBody body = bpc.getBody(i);
+			for (BodyPairContact bpcExt : body.bodyPairContacts)
+				bpcExt.addToBodyListsParent();
+		}
 	}
 	
 	@Override
@@ -499,7 +423,6 @@ public class RigidCollection extends RigidBody {
 			return;
 
 		updateBodiesPositionAndTransformations();
-		//computeInternalContactsForce(dt);
 
 		// Advance velocities for internal bodies
 		if (!mergeParams.enableUnmergeRelativeMotionCondition.getValue())
@@ -522,7 +445,7 @@ public class RigidCollection extends RigidBody {
 			body.x.x = body.transformB2W.T.m13;
 			body.x.x = body.transformB2W.T.m23;
 			body.transformB2W.T.getRotationScale( body.theta );
-			if ( ! pinned ) {  // a normal update would do this... so we shoudl do it too for a correct single cycle update.
+			if ( ! pinned ) {  // a normal update would do this... so we should do it too for a correct single cycle update.
 		        jinv.mul( theta, jinv0 );
 		        jinv.mul( thetaT );
 		        massAngular.mul( theta, massAngular0 );
@@ -656,16 +579,10 @@ public class RigidCollection extends RigidBody {
 
 	/**
 	 * Displays the Body Collection in different color.
-	 * NOTE the colour is set by the caller!!!
-	 * Colours are assigned when the collection was created,
-	 * so we just need to draw all the bodies, and not even 
-	 * apply our B2W transformation as we will have updated all
-	 * the body positions, i.e., with updateBodiesPositionAndTransformations()
 	 * @param drawable
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
-		// DO NOT draw like a normal rigid body!
 		for (RigidBody b : bodies) {
 			b.display(drawable);
 		}

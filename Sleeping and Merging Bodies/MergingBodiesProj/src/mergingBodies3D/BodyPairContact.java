@@ -1,7 +1,6 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import mergingBodies3D.Contact.ContactState;
 import mergingBodies3D.Merging.MergeParameters;
@@ -16,11 +15,6 @@ public class BodyPairContact {
 	public RigidBody body2;
 	
 	public RigidBody getBody( int i ) { return i==0 ? body1 : body2; }
-	
-	/**
-	 * WHAT IS THIS???  is a body pair contact not just between two bodies?? :(
-	 */
-	public ArrayList<RigidBody> bodyPair; // list containing the two bodies, used to loop over the bodies and avoid duplication 
 	
 	public ArrayList<Contact> contactList = new ArrayList<Contact>();
 	
@@ -46,11 +40,6 @@ public class BodyPairContact {
 	public BodyPairContact(RigidBody body1, RigidBody body2) {
 		this.body1 = body1;
 		this.body2 = body2;
-		// TODO: BPC.bodies: why not just use either body's parent RigidCollection to get a list of bodies?? 
-		// Seems this was used for cycle checking, and other things??  Not clear given comments
-		bodyPair = new ArrayList<RigidBody>();
-		bodyPair.add(body1);
-		bodyPair.add(body2);
 	}
 
 	/**
@@ -188,7 +177,6 @@ public class BodyPairContact {
 	 * @return true if the criteria is satisfied
 	 */
 	public boolean checkContactsCycle(MergeParameters mergeParams) {
-		// TODO: Complete cycle checking if needed...
 		System.err.println("cycle checking (i.e., complete subgraph checking) not yet implemented!");
 		return false;
 		
@@ -358,7 +346,8 @@ public class BodyPairContact {
 	public void checkCyclesToUnmerge(ArrayList<BodyPairContact> bpcsToUnmerge) {
 		ArrayList<BodyPairContact> bpcToCheck = new ArrayList<BodyPairContact>();
 		
-		for (RigidBody body: bodyPair) {
+		for (int i=0; i<2; i++) { 
+			RigidBody body = getBody(i);
 			for (BodyPairContact bpc: body.bodyPairContacts) { // check if body was part of a cycle
 				if (bpc.inCycle) {
 					bpc.addBpcToUnmerge(bpcsToUnmerge);

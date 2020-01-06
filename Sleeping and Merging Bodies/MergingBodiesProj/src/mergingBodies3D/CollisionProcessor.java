@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import javax.management.RuntimeErrorException;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Point3d;
@@ -73,7 +72,9 @@ public class CollisionProcessor {
 	// TODO: MEMORY POOLING? might want a memory pool for BodyPairContact too?  Could be complicated since bodyPairContacts have some dynamic internal memory??  
 	/**list that keeps track of all the body pair contacts that occurred in this time step */
 	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
-    
+	/**used to update bodyPairContacts*/
+	private ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+	
     /**
      * Processes all collisions 
      * @param dt time step
@@ -137,15 +138,8 @@ public class CollisionProcessor {
 			bpc.contactList.clear();
 		}
 		
-		// TODO: with recent change, looks like this needs to be INTERNAL BPCs?
 		for (RigidBody body: bodies) {
 			if (body instanceof RigidCollection) {
-				for (BodyPairContact bpc: ((RigidCollection) body).internalBodyPairContacts) {
-					bpc.checked = false;
-				}
-				// This list now has BPCs for contacts external to the collection,
-				// so the flag should already be set by looping over this.bodyPairContacts...
-				// So this code can probably be removed:
 				for (BodyPairContact bpc: body.bodyPairContacts) {
 					bpc.checked = false;
 				}
@@ -184,7 +178,7 @@ public class CollisionProcessor {
 	 * Remove empty body pair contacts	 
 	 */
 	protected void removeEmptyBodyPairContacts() {
-		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+		tmpBodyPairContacts.clear();
 		boolean updated = false;
 		for (BodyPairContact bpc : bodyPairContacts) {
 			if(!bpc.contactList.isEmpty())
@@ -206,9 +200,10 @@ public class CollisionProcessor {
 	 * Remove inactive contact from bodyPairContacts list
 	 */
 	public void clearBodyPairContacts() {
-		
+
+		ArrayList<Contact> tmpContacts = new ArrayList<Contact>();
 		for (BodyPairContact bpc : bodyPairContacts) {
-			ArrayList<Contact> tmpContacts = new ArrayList<Contact>();
+			tmpContacts.clear();
 			for (Contact contact : bpc.contactList) 
 				if (Math.abs(contact.lambda0) > 1e-14) // (math.abs is for magnet)
 					tmpContacts.add(contact);
@@ -240,7 +235,6 @@ public class CollisionProcessor {
 		solver.contacts.clear();
 
 		boolean compute = false; // set to true if there is a collection in the system
-		
 		
 		if (mergeParams.organizeContacts.getValue()) {		
 			// TODO: avoid all of this if we don't have any collections...try to have an cheap early exit if comptue is going to be false
@@ -358,25 +352,22 @@ public class CollisionProcessor {
 	
 	protected void getNextLayer(ArrayList<BodyPairContact> bodyPairContacts, ArrayList<BodyPairContact> orderedBpcs) {
 
-		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
-	
-		throw new RuntimeErrorException( new Error("bpc.bodies not yet included... fix commented code below") );
-//		for ( BodyPairContact bpc : bodyPairContacts ) {
-			//			for (RigidBody body : bpc.bodies) {		
-//				for ( BodyPairContact otherBpc : body.bodyPairContacts ) {
-//					if (!otherBpc.checked) {
-//						tmpBodyPairContacts.add(otherBpc);
-//						otherBpc.checked = true;
-//					}
-//				}
-//			}
-//		}			
-//		if (!tmpBodyPairContacts.isEmpty()) {
-//			orderedBpcs.addAll(tmpBodyPairContacts);
-//			getNextLayer(tmpBodyPairContacts, orderedBpcs);
-//		}
-		// TODO: BPC.bodies: fix code above.
-
+		tmpBodyPairContacts.clear();
+		for ( BodyPairContact bpc : bodyPairContacts ) {
+			for (int i=0; i<2; i++) { 
+				RigidBody body = bpc.getBody(i);
+				for ( BodyPairContact otherBpc : body.bodyPairContacts ) {
+					if (!otherBpc.checked) {
+						tmpBodyPairContacts.add(otherBpc);
+						otherBpc.checked = true;
+					}
+				}
+			}
+		}			
+		if (!tmpBodyPairContacts.isEmpty()) {
+			orderedBpcs.addAll(tmpBodyPairContacts);
+			getNextLayer(tmpBodyPairContacts, orderedBpcs);
+		}
 	}
 	
 	protected void updateContactsMap() {
@@ -413,19 +404,6 @@ public class CollisionProcessor {
 			}
 		}
 	}
-	
-	// computeContatForce is only used for viz, yes?  
-	// I note that internal and external forces are needed to update the b vectors for single
-	// cycles LCP solves, but this shouldn't cause a problem.  Leaving this in comments to be 
-	// removed in a future push, just in case this comment and code snippet are useful.
-//	/**
-//	 * Compute the contact force J*lambda.
-//	 * @param dt
-//	 */
-//	public void computeContactsForce(double dt) {
-//		for (Contact c: contacts)
-//			c.computeForces(false, dt);	
-//	}
 
 	/**go through each element in contacts 2.
 	* at each element, swap it for another random member of contacts2. 

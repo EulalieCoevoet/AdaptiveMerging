@@ -32,7 +32,7 @@ public class Merging {
 		public BooleanParameter enableMergeCycleCondition = new BooleanParameter( "merging - check cycle condition", false);
 		public BooleanParameter enableMergeStableContactCondition = new BooleanParameter( "merging - stable contact condition", true);
 		public BooleanParameter enableMergeLetItBreathe = new BooleanParameter( "merging - let it breathe condition", true);
-		public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging (UNTESTED)", false );
+		public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true );
 		public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging - friction condition", true);
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging - contact normal condition", true);
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", false);
@@ -79,11 +79,11 @@ public class Merging {
 				// a more permanent list... for now allocate new memory, but it could be pooled.
 				// It seems that the body pair contacts should persist at the subbody level, while
 				// anything in the parent collection's BPC list should only involve external contacts.
-				//  This would be logical.
+				// This would be logical.
 				
 				// The complication is with BPC that are between bodies and collections when those bodies
-				// merge, because the the contact was previously with the parent and needs to be updated to be
-				// with the subbody.
+				// merge, because the contact was previously with the parent and needs to be updated to be
+				// with the subbody. (correction: contacts are always between bodies, no collection involved)
 				
 				removalQueue.add(bpc); // bpc in now exclusively part of the collection
 				if(!bpc.body1.isInCollection() && !bpc.body2.isInCollection()) {
@@ -92,17 +92,14 @@ public class Merging {
 					bodies.remove(bpc.body2);
 					RigidCollection collection = new RigidCollection(bpc.body1, bpc.body2);
 					collection.addToInternalContact(bpc);
-					//collection.addBPCsToCollection(bpc);
+					collection.addBPCsToCollection(bpc);
 					bodies.add(collection);
-					// the body body case seems to work!  Get the others below to behave too!!
 				} else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() ) {
 					if ( bpc.body1.isInSameCollection(bpc.body2)) {
 						System.err.println("merge() had bodies from the same collection merging");
 					}
-					//both are collections:
-					//take all the bodies in the least massive one and add them to the collection of the most massive
-					// TODO: What is the implication of this?  Stability or efficiency.. would seem if efficiency is the goal, then the one with the smaller number of bodies should be merged.
-					if (bpc.body1.parent.massLinear > bpc.body2.parent.massLinear) {
+					//both are collections: take the smaller number of bodies and add them to the other collection
+					if (bpc.body1.parent.bodies.size() > bpc.body2.parent.bodies.size()) {
 						bodies.remove(bpc.body2.parent);
 						for (BodyPairContact bpccollection : bpc.body2.parent.bodyPairContacts)
 							if(!bpc.body1.parent.bodyPairContacts.contains(bpccollection))
@@ -111,7 +108,7 @@ public class Merging {
 						bpc.body1.parent.addCollection(bpc.body2.parent);
 						bpc.body1.parent.addToInternalContact(bpc);
 						bpc.body1.parent.addIncompleteCollectionContacts(bpc.body2.parent, removalQueue);
-						//bpc.body1.parent.addBPCsToCollection(bpc);
+						bpc.body1.parent.addBPCsToCollection(bpc);
 					} else {
 						bodies.remove(bpc.body1.parent);
 						for (BodyPairContact bpccollection : bpc.body1.parent.bodyPairContacts)
@@ -121,7 +118,7 @@ public class Merging {
 						bpc.body2.parent.addCollection(bpc.body1.parent);
 						bpc.body2.parent.addToInternalContact(bpc);
 						bpc.body2.parent.addIncompleteCollectionContacts(bpc.body1.parent, removalQueue);
-						//bpc.body2.parent.addBPCsToCollection(bpc);
+						bpc.body2.parent.addBPCsToCollection(bpc);
 					}
 				}
 				else if (bpc.body1.isInCollection()) {
@@ -138,7 +135,7 @@ public class Merging {
 					bpc.body2.parent.addBody(bpc.body1);
 					bpc.body2.parent.addToInternalContact(bpc);
 					bpc.body2.parent.addIncompleteContacts(bpc.body1, removalQueue);
-					//bpc.body2.parent.addBPCsToCollection(bpc);
+					bpc.body2.parent.addBPCsToCollection(bpc);
 				}
 			}
 		}
@@ -208,7 +205,8 @@ public class Merging {
 					if (!bpc.inCollection)
 						continue;
 					
-					for (RigidBody b : bpc.bodyPair) { 
+					for (int i=0; i<2; i++) { 
+						RigidBody b = bpc.getBody(i);
 						if (!bpcsToUnmerge.contains(bpc)) {
 							
 							if (condition == MergeConditions.CONTACTS && !bpc.checkContactsState(dt, params))
@@ -248,7 +246,8 @@ public class Merging {
 		ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();
 		ArrayList<BodyPairContact> bpcs = new ArrayList<BodyPairContact>();
 		for (BodyPairContact bpc : bpcsToUnmerge) {
-			for (RigidBody body : bpc.bodyPair) {
+			for (int i=0; i<2; i++) { 
+				RigidBody body = bpc.getBody(i);
 				bpcs.clear();
 				for (BodyPairContact newBpc : body.bodyPairContacts) 
 					if (newBpc.contactList.size()<2 && newBpc.inCollection && !bpcsToUnmerge.contains(newBpc) && !unstableBpcsToUnmerge.contains(newBpc)) 
@@ -268,7 +267,8 @@ public class Merging {
 		ArrayList<RigidBody> subbodies = new ArrayList<RigidBody>();
 		
 		for (BodyPairContact bpc: bpcsToUnmerge) {
-			for (RigidBody body : bpc.bodyPair) {
+			for (int i=0; i<2; i++) { 
+				RigidBody body = bpc.getBody(i);
 				
 				if (!handledBodies.contains(body)) {
 					

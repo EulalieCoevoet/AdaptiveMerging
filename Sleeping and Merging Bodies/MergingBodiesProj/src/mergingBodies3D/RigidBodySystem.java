@@ -35,14 +35,21 @@ public class RigidBodySystem {
 	public CollisionProcessor collision = new CollisionProcessor(bodies);
 	public Merging merging = new Merging(bodies, collision);
 	public Sleeping sleeping = new Sleeping(bodies);
-    
 	public Display display = new Display(bodies, collision);
+    
+	/**Time in seconds to advance the system*/
+	public double computeTime;
 
+	/**Total time in seconds for computation since last reset*/
+	public double totalAccumulatedComputeTime;
+	
+	/**Total number of steps performed*/
+	public int totalSteps = 0;
+	
     /**
      * Creates a new rigid body system
      */
     public RigidBodySystem() {
-        /* do nothing */
     }
     
     /**
@@ -69,22 +76,14 @@ public class RigidBodySystem {
      }
     }
     
-    /** 
-     * Time in seconds to advance the system
-     */
-    public double computeTime;
-    
-    /**
-     * Total time in seconds for computation since last reset
-     */
-    public double totalAccumulatedComputeTime;
-    
     /**
      * Advances the state of all rigid bodies
      * @param dt time step
      */
     public void advanceTime( double dt ) {
-        long now = System.nanoTime();        
+    	
+        long now = System.nanoTime();      
+		totalSteps++;  
 
         for ( RigidBody b : bodies ) {
             b.clear();
@@ -115,11 +114,9 @@ public class RigidBodySystem {
 		}
 		
 		collision.solveLCP(dt); 
+		collision.clearBodyPairContacts();
         
-        // advance the system by the given time step
-		
         RigidCollection.mergeParams = merging.params;
-        		
 		for ( RigidBody b : bodies )
             b.advanceTime( dt );
 		
@@ -132,10 +129,9 @@ public class RigidBodySystem {
 		
 		merging.unmerge(MergeConditions.RELATIVEMOTION, dt); 
 
-		
         computeTime = (System.nanoTime() - now) / 1e9;
         simulationTime += dt;
-        totalAccumulatedComputeTime += computeTime;
+		totalAccumulatedComputeTime += computeTime;
     }
     
     /**
@@ -180,8 +176,8 @@ public class RigidBodySystem {
 	private void applyGravityForce() {
 		for ( RigidBody body : bodies ) {
 			
-//			if (body.isSleeping)
-//				continue;
+			if (body.isSleeping)
+				continue;
 			
 			//fully active, regular stepping
 			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
@@ -205,10 +201,18 @@ public class RigidBodySystem {
 	 */
 	private void applySpringForces() {
 		for (RigidBody body: bodies){
-//			if (body.isSleeping)
-//				continue;
+			if (body.isSleeping)
+				continue;
 			for (Spring s: body.springs) {
 				s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
+			}
+			
+			if (body instanceof RigidCollection) {
+				for (RigidBody b: ((RigidCollection)body).bodies){
+					for (Spring s: b.springs) {
+						s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
+					}
+				}
 			}
 		}
 	}
