@@ -25,7 +25,7 @@ public class Display {
 	    public BooleanParameter drawGraphs = new BooleanParameter( "draw performance graphs", false );
 	    public BooleanParameter drawMemGraphs = new BooleanParameter( "draw memory graphs", false );
 	    
-		private DoubleParameter transparency = new DoubleParameter("body block transparency", .5, 0, 1 );
+		private DoubleParameter transparency = new DoubleParameter("body block transparency", 1., 0, 1 );
 		private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
 		private BooleanParameter drawCollections = new BooleanParameter( "draw collections with different colors", true );
 		

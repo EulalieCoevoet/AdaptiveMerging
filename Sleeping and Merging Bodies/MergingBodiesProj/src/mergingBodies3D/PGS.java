@@ -85,7 +85,7 @@ public class PGS {
 				double prevLambda_n = contact.lambda0;
 				contact.lambda0 = (contact.D00 * contact.lambda0 - contact.bn - Jdvn)/(contact.D00+compliance);
 				
-				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active				
+				// only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active				
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) 
 					contact.lambda0 = Math.max( 0, contact.lambda0 );
 				
@@ -107,7 +107,7 @@ public class PGS {
 				double prevLambda_t1 = contact.lambda1;
 				contact.lambda1 = (contact.D11*contact.lambda1 - contact.bt1 - Jdvt1)/(contact.D11+compliance);
 				
-				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
+				// only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
 					contact.lambda1 = Math.max(contact.lambda1, -mu*contact.lambda0);
 					contact.lambda1 = Math.min(contact.lambda1, mu*contact.lambda0);
@@ -121,16 +121,15 @@ public class PGS {
 				double prevLambda_t2 = contact.lambda2;
 				contact.lambda2 = (contact.D22*contact.lambda2 - contact.bt2 - Jdvt2)/(contact.D22+compliance);
 				
-				//only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
+				// only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
 					contact.lambda2 = Math.max(contact.lambda2, -mu*contact.lambda0);
 					contact.lambda2 = Math.min(contact.lambda2, mu*contact.lambda0);
 				}
 
 				updateDeltaVwithLambdai(contact, contact.lambda2 - prevLambda_t2, 2);
-
 				
-				if (iter == 1) // LAST ITERATION: avoid looping again over contacts, and fix the state on this last iteration!
+				if (iter == 1) // Last iteration: avoid looping again over contacts
 					contact.updateContactState(mu);
 			}
 			
@@ -152,29 +151,17 @@ public class PGS {
 		Matrix3d j1inv = body1.jinv; //(body1.temporarilyPinned)? 0: body1.jinv;
 		Matrix3d j2inv = body2.jinv; //(body2.temporarilyPinned)? 0: body2.jinv;
 
-		// I note that in Contact, the dv is sometimes the parent and sometimes the body...
-		// but here we are selectingthe bodies above, so this looks right (and follows the 2D code )
 		Vector6d dv1 = body1.deltaV; 
 		Vector6d dv2 = body2.deltaV; 
 		
-		//DenseMatrix j = contact.j; //(body1 instanceof RigidCollection)? contact.jc: contact.j;
-//		Vector6d ja = contact.jna;
-//		Vector6d jb = contact.jnb;
-//		if ( i == 1 ) {
-//			ja = contact.jt1a;
-//			jb = contact.jt1b;
-//		} else if ( i == 2 ) {
-//			ja = contact.jt2a;
-//			jb = contact.jt2b;
-//		}
-		Vector6d ja   = (body1.isInCollection() && !computeInCollection)? contact.jcna  : contact.jna;
-		Vector6d jb   = (body2.isInCollection() && !computeInCollection)? contact.jcnb  : contact.jnb;
+		Vector6d ja = contact.jna;
+		Vector6d jb = contact.jnb;
 		if ( i == 1 ) {
-			ja = (body1.isInCollection() && !computeInCollection)? contact.jct1a : contact.jt1a;
-			jb = (body2.isInCollection() && !computeInCollection)? contact.jct1b : contact.jt1a;
+			ja = contact.jt1a;
+			jb = contact.jt1b;
 		} else if ( i == 2 ) {
-			ja = (body1.isInCollection() && !computeInCollection)? contact.jct2a : contact.jt2a;
-			jb = (body2.isInCollection() && !computeInCollection)? contact.jct1b : contact.jt2b;
+			ja = contact.jt2a;
+			jb = contact.jt2b;
 		}
 
 		dv1.v.scaleAdd( m1inv*lambda, ja.v, dv1.v );

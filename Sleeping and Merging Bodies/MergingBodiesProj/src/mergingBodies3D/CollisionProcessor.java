@@ -111,17 +111,13 @@ public class CollisionProcessor {
 			solver.warmStart = true;
 			solver.contacts = contacts;
 
-			// TODO: eulalie: this can be optimized, only new collections need an update 
-			for (Contact contact: solver.contacts)
-				contact.computeJacobian(false);
+			updateCollectionJacobians(false);
 			
-			// solve contacts
 			long now = System.nanoTime();
 			solver.solve(dt);
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
 			updateContactsMap();
-			// computeContactsForce(dt);	// this was ONLY done for drawing ???
 		}
 	}
 	
@@ -234,61 +230,67 @@ public class CollisionProcessor {
 		solver.contacts = altContactList;
 		solver.contacts.clear();
 
-		boolean compute = false; // set to true if there is a collection in the system
+		boolean hasCollection = updateCollectionJacobians(true);
+		if (!hasCollection) return; 
 		
 		if (mergeParams.organizeContacts.getValue()) {		
-			// TODO: avoid all of this if we don't have any collections...try to have an cheap early exit if comptue is going to be false
-			compute = getOrganizedContacts(solver.contacts);
-		} else {			
+			getOrganizedContacts(solver.contacts);
+		} else {	
+			// Copy the external contacts 
+			// This resolution is done with the Jacobians of the bodies (not the collection) 
+			// so not a good warm start for the LCP solve (we don't want to keep these values).
+			for ( Contact contact : contacts )
+				solver.contacts.add(new Contact(contact));
+			//solver.contacts.addAll(contacts);
+			
 			for (RigidBody body : bodies) {
 				if (body instanceof RigidCollection && !body.isSleeping) {
-					compute = true;
 					RigidCollection collection = (RigidCollection)body;
 					solver.contacts.addAll(collection.internalContacts);
 				}
 			}
 			
-			if ( compute ) {
-				for ( Contact contact : contacts ) {
-					// These EXTERNAL contacts will be added each time step... 
-					// but we don't need to worry about them persisting in this list
-					solver.contacts.add( contact );
-				}
-				if (shuffle.getValue()) 
-		    		knuthShuffle(solver.contacts);
-			}
+			if (shuffle.getValue()) 
+	    		knuthShuffle(solver.contacts);
 		}
 		
-		if (compute) { // there is at least one collection in the system
-			// eulalie: this can be optimized, only collections need an update 
-			for (Contact contact: solver.contacts) 
-				contact.computeJacobian(true);
+		solver.solve(dt);
+		
+		for (RigidBody body : bodies) {
+			if (body instanceof RigidCollection && !body.isSleeping) {
+				RigidCollection collection = (RigidCollection)body;
 			
-			solver.solve(dt);
-			
-			for (RigidBody body : bodies) {
-				if (body instanceof RigidCollection && !body.isSleeping) {
-					
-					RigidCollection collection = (RigidCollection)body;
-					
-					// Pretty sure this is only being called for visualization:
-					//
-					//collection.computeInternalContactsForce(dt);
-					
-					// unexpected??  why advance the velocities here if we are just going to 
-					// overwrite them with the collection velocities?  Is this for a special
-					// unmerge condition (i.e., use the single cycle update type thing?  IF so...
-					// clarify here!!!
-					for (RigidBody b : collection.bodies)
-						if(!b.pinned ) // && !b.temporarilyPinned)
-							b.advanceVelocities(dt);	
-				}
-				// Reset deltaV for LCP solve
-				body.deltaV.setZero();
+				// Update the bodies velocities for the unmerge condition (relative motion)
+				for (RigidBody b : collection.bodies)
+					if(!b.pinned ) // && !b.temporarilyPinned)
+						b.advanceVelocities(dt);	
 			}
+			// Reset deltaV for LCP solve
+			body.deltaV.setZero();
 		}
 		
 		collectionUpdateTime = ( System.nanoTime() - now ) * 1e-9;
+	}
+	
+	/**
+	 * Update the Jacobians of the collections' external contacts
+	 * @param computeInCollection
+	 * @return true if there is a collection in the system...
+	 */
+	protected boolean updateCollectionJacobians(boolean computeInCollection) {
+		boolean hasCollection = false;
+		for (RigidBody body : bodies) {
+			if (body instanceof RigidCollection) {
+				hasCollection = true;
+				for (BodyPairContact bpc : body.bodyPairContacts) {
+					if (!bpc.inCollection) {
+						for (Contact contact: bpc.contactList)
+							contact.computeJacobian(computeInCollection);
+					}
+				}
+			}
+		}
+		return hasCollection;
 	}
 	
 	/**
@@ -299,7 +301,7 @@ public class CollisionProcessor {
 	 * <li> 3. Continue until the end
 	 * </ul><p>
 	 */
-	protected boolean getOrganizedContacts(ArrayList<Contact> contacts) {
+	protected void getOrganizedContacts(ArrayList<Contact> contacts) {
 
 		ArrayList<BodyPairContact> orderedBpcs = new ArrayList<BodyPairContact>();
 		
@@ -324,10 +326,8 @@ public class CollisionProcessor {
 			}
 		}
 		
-		boolean compute = false;
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.isSleeping) {
-				compute = true;
 				RigidCollection collection = (RigidCollection)body;
 				for ( BodyPairContact bpc : collection.bodyPairContacts ) {
 					if (!bpc.checked) {
@@ -346,8 +346,6 @@ public class CollisionProcessor {
 					contacts.add(new Contact(contact));  /// how does this happen?  This code is not obvious.
 			}
 		}
-		
-		return compute;
 	}	
 	
 	protected void getNextLayer(ArrayList<BodyPairContact> bodyPairContacts, ArrayList<BodyPairContact> orderedBpcs) {
@@ -394,11 +392,11 @@ public class CollisionProcessor {
 		for (Contact contact : contacts) {
 			Contact oldContact = lastTimeStepContacts.get( contact );
 			if (oldContact != null) {
+				contact.newThisTimeStep = false;
 				contact.lambda0 = oldContact.lambda0;
 				contact.lambda1 = oldContact.lambda1;
 				contact.lambda2 = oldContact.lambda2;
 				contact.prevConstraintViolation = oldContact.constraintViolation;
-				contact.newThisTimeStep = false;
 			} else {
 				contact.newThisTimeStep = true;
 			}
@@ -413,9 +411,6 @@ public class CollisionProcessor {
 	*/
 	private void knuthShuffle(ArrayList<Contact> contacts) {
 		Collections.shuffle(contacts);
-		for (Contact c : contacts) {
-			c.index = contacts.indexOf(c);
-		}
 	}
     
     /**

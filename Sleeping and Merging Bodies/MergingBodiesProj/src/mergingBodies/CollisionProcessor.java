@@ -201,7 +201,6 @@ public class CollisionProcessor {
 				if (body instanceof RigidCollection && !body.isSleeping) {
 					compute = true;
 					RigidCollection collection = (RigidCollection)body;
-					// Update the internal contacts
 					solver.contacts.addAll(collection.internalContacts);
 				}
 			}
@@ -223,6 +222,7 @@ public class CollisionProcessor {
 					RigidCollection collection = (RigidCollection)body;
 					collection.computeInternalContactsForce(dt);
 					
+					// Update the bodies velocities for the unmerge condition (relative motion)
 					for (RigidBody b : collection.bodies)
 						if(!b.pinned && !b.temporarilyPinned)
 							b.advanceVelocities(dt);	
@@ -492,10 +492,10 @@ public class CollisionProcessor {
 		for (Contact contact : contacts) {
 			Contact oldContact = getOldContact(contact);
 			if(oldContact != null) { 
+				contact.newThisTimeStep = false;
 				contact.lambda.x = oldContact.lambda.x;
 				contact.lambda.y = oldContact.lambda.y;
 				contact.prevConstraintViolation = oldContact.constraintViolation;
-				contact.newThisTimeStep = false;
 			} else {
 				contact.newThisTimeStep = true;
 			}

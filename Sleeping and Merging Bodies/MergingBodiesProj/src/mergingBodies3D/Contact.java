@@ -19,9 +19,6 @@ public class Contact {
     /** Next available contact index, used for determining which rows of the jacobian a contact uses */
     static public int nextContactIndex = 0;
     
-    /** Index of this contact, determines its (effective) rows in the jacobian (unassembled)*/
-    int index; // TODO: can this index be removed?
-    
     /** First RigidBody in contact */
     RigidBody body1;
     
@@ -41,14 +38,14 @@ public class Contact {
      * ONLY MADE PUBLIC FOR TESTING... can be private */
     public Point3d contactW = new Point3d();
     
-    /** Contact normal in body1 coordinates 
+    /** Contact normal in world coordinates 
      * ONLY PUBLIC FOR TESTING... CAN BE MADE PRIVATE */
 	public Vector3d normalW = new Vector3d();
     
-    /** Contact tangent1 in body1 coordinates */
+    /** Contact tangent1 in world coordinates */
     private Vector3d tangent1W = new Vector3d();
     
-    /** Contact tangent2 in body1 coordinates */
+    /** Contact tangent2 in world coordinates */
     private Vector3d tangent2W = new Vector3d();
       
 	/** vector points from body 2 to body 1, magnitude is the amount of overlap.*/
@@ -62,22 +59,12 @@ public class Contact {
 	boolean newThisTimeStep;
 	
 	/** Jacobian matrix, packed as trans rot trans rot on each row */
-	//DenseMatrix j = new DenseMatrix(3,12);
 	Vector6d jna = new Vector6d();
 	Vector6d jnb = new Vector6d();
 	Vector6d jt1a = new Vector6d();
 	Vector6d jt1b = new Vector6d();
 	Vector6d jt2a = new Vector6d();
 	Vector6d jt2b = new Vector6d();
-	
-	/** Jacobian matrix, collection frame */
-	Vector6d jcna = new Vector6d();
-	Vector6d jcnb = new Vector6d();
-	Vector6d jct1a = new Vector6d();
-	Vector6d jct1b = new Vector6d();
-	Vector6d jct2a = new Vector6d();
-	Vector6d jct2b = new Vector6d();
-	// TODO: Wasteful to keep all this memory for both Jacobian and collection Jacobian... is there a nice solution?
 		
 	/** Lagrange multiplier for contact, Vector2d(normal, tangent1, tangent2) */
 	double lambda0;
@@ -118,7 +105,6 @@ public class Contact {
 		tangent1W.set(contact.tangent1W);  // TODO: figure out if the body frame vectors are really needed or not.  I feel the answer is yes. :(
 		tangent2W.set(contact.tangent2W);  // but perhaps we can get by with ONLY those... 
 											// jacobian can be built directly rather than storing the world ones...  ?
-		
 		lambda0 = contact.lambda0;
 		lambda1 = contact.lambda1;
 		lambda2 = contact.lambda2;
@@ -139,7 +125,7 @@ public class Contact {
      * @param body1
      * @param body2
      * @param contactW	in world coordinates
-     * @param normal	in world woordinates
+     * @param normal	in world coordinates
      */
     public void set( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {
         this.body1 = body1;
@@ -149,7 +135,6 @@ public class Contact {
 		bv2 = disc2;
 		this.info = info;
 		this.constraintViolation =  constraintViolation;     
-        index = nextContactIndex++;     
         
 		this.normalW.set(normal);
 
@@ -172,9 +157,7 @@ public class Contact {
 		lambda1 = 0;
 		lambda2 = 0;
 
-        // TODO: if we are not in collection don't do that
-        //computeJacobian(true);
-        computeJacobian(false);
+        computeJacobian(false); // the boolean doesn't matter here
     }
     
     /**
@@ -186,13 +169,6 @@ public class Contact {
 		RigidBody b2 = (body2.isInCollection() && !computeInCollection )? body2.parent: body2;
 		r1.sub( contactW, b1.x );
 		r2.sub( contactW, b2.x );
-		
-		Vector6d jna  = (b1 instanceof RigidCollection)? jcna  : this.jna;
-		Vector6d jt1a = (b1 instanceof RigidCollection)? jct1a : this.jt1a;
-		Vector6d jt2a = (b1 instanceof RigidCollection)? jct2a : this.jt2a;
-		Vector6d jnb  = (b2 instanceof RigidCollection)? jcnb  : this.jnb;
-		Vector6d jt1b = (b2 instanceof RigidCollection)? jct1b : this.jt1a;
-		Vector6d jt2b = (b2 instanceof RigidCollection)? jct1b : this.jt2b;
 
 		jna.v.scale( -1, normalW );		
 		jna.w.cross( normalW, r1 ); // - r1 x nW
@@ -233,14 +209,6 @@ public class Contact {
 		}
 		
 		bn = 0; bt1 = 0; bt2 = 0;
-		
-		// Vector6d jna,t1a,t2a = this.jna,t1a,t2a; // j = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
-		Vector6d jna  = (b1 instanceof RigidCollection)? jcna  : this.jna;
-		Vector6d jt1a = (b1 instanceof RigidCollection)? jct1a : this.jt1a;
-		Vector6d jt2a = (b1 instanceof RigidCollection)? jct2a : this.jt2a;
-		Vector6d jnb  = (b2 instanceof RigidCollection)? jcnb  : this.jnb;
-		Vector6d jt1b = (b2 instanceof RigidCollection)? jct1b : this.jt1a;
-		Vector6d jt2b = (b2 instanceof RigidCollection)? jct1b : this.jt2b;
 		
 		tmp1.scaleAdd( m1inv*dt, b1.force, b1.v );	
 		bn  += tmp1.dot(jna.v);
@@ -299,15 +267,6 @@ public class Contact {
 		Matrix3d j1inv = b1.jinv;//(b1.temporarilyPinned)? 0: b1.jinv;
 		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
 		
-		//DenseMatrix j1 = this.j;//(b1 instanceof RigidCollection)? this.jc: this.j;	
-		//DenseMatrix j2 = this.j;//(b2 instanceof RigidCollection)? this.jc: this.j;	
-		Vector6d jna  = (b1 instanceof RigidCollection)? jcna  : this.jna;
-		Vector6d jt1a = (b1 instanceof RigidCollection)? jct1a : this.jt1a;
-		Vector6d jt2a = (b1 instanceof RigidCollection)? jct2a : this.jt2a;
-		Vector6d jnb  = (b2 instanceof RigidCollection)? jcnb  : this.jnb;
-		Vector6d jt1b = (b2 instanceof RigidCollection)? jct1b : this.jt1a;
-		Vector6d jt2b = (b2 instanceof RigidCollection)? jct1b : this.jt2b;
-		
 		j1inv.transform( jna.w, tmp1 );
 		j2inv.transform( jnb.w, tmp2 );
 		D00 = m1inv * jna.v.dot( jna.v )   + jna.w.dot( tmp1 )  + m2inv * jnb.v.dot( jnb.v )   + jnb.w.dot( tmp2 );
@@ -329,15 +288,14 @@ public class Contact {
 		Vector6d dv1 = (body1.isInCollection() && !computeInCollection)? body1.parent.deltaV : body1.deltaV; 
 		Vector6d dv2 = (body2.isInCollection() && !computeInCollection)? body2.parent.deltaV : body2.deltaV; 
 		
-		// j = this.j;//(body1.isInCollection() && !computeInCollection)? this.jc: this.j;
-		Vector6d ja   = (body1.isInCollection() && !computeInCollection)? jcna  : this.jna;
-		Vector6d jb   = (body2.isInCollection() && !computeInCollection)? jcnb  : this.jnb;
+		Vector6d ja = jna;
+		Vector6d jb = jnb;
 		if ( index == 1 ) {
-			ja = (body1.isInCollection() && !computeInCollection)? jct1a : this.jt1a;
-			jb = (body2.isInCollection() && !computeInCollection)? jct1b : this.jt1a;
+			ja = jt1a;
+			jb = jt1b;
 		} else if ( index == 2 ) {
-			ja = (body1.isInCollection() && !computeInCollection)? jct2a : this.jt2a;
-			jb = (body2.isInCollection() && !computeInCollection)? jct1b : this.jt2b;
+			ja = jt2a;
+			jb = jt2b;
 		}
 		
 		double Jdv = ja.dot( dv1 ) + jb.dot( dv2 );
@@ -394,9 +352,7 @@ public class Contact {
 	 * Comptues contact forces for visualization purposes
 	 * @param dt
 	 */
-	private void computeForces( boolean computeInCollection, double dt, Vector3d forceW1 ) {
-		Vector6d jna = (body1.isInCollection() && !computeInCollection)? this.jcna: this.jna;
-		
+	private void computeForces( boolean computeInCollection, double dt, Vector3d forceW1 ) {		
 		forceW1.scale( lambda0, jna.v );
 		forceW1.scaleAdd( lambda1, jt1a.v, forceW1 );
 		forceW1.scaleAdd( lambda2, jt2a.v, forceW1 );		

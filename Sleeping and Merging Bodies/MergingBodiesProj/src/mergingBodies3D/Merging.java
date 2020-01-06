@@ -127,7 +127,7 @@ public class Merging {
 					bpc.body1.parent.addBody(bpc.body2);
 					bpc.body1.parent.addToInternalContact(bpc);
 					bpc.body1.parent.addIncompleteContacts(bpc.body2, removalQueue);
-					//bpc.body1.parent.addBPCsToCollection(bpc);
+					bpc.body1.parent.addBPCsToCollection(bpc);
 				}
 				else if (bpc.body2.isInCollection()) {
 					//body2 is in a collection, body1 is not
