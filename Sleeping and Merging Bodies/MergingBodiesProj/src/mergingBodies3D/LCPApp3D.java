@@ -348,8 +348,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 		gl.glReadPixels( x, y, 1, 1, GL2.GL_RGB, GL.GL_UNSIGNED_BYTE, colorPixels );
 		colorPixels.rewind();		
 		int ID = getIDFromColor( colorPixels );
-		if ( ID > system.bodies.size() ) {
-//			System.out.println("picked non-body ID " + ID );
+		if ( ID >= system.display.bodiesDrawnForPicking.size() ) {
+			System.err.println("picking problm: ID too large! " + ID );
 			return;
 		}
 		
@@ -362,7 +362,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         long zL = Integer.toUnsignedLong( zint );
         zClosest = ( (float) zL ) / 0xffffffffL; 
         unproject( drawable, p.x, h-p.y, zClosest, mouseSpring.pointW );
-    	mouseSpring.picked = system.bodies.get( ID );
+    	mouseSpring.picked = system.display.bodiesDrawnForPicking.get( ID );
     	mouseSpring.picked.selected = true;
     	mouseSpring.pointW.scale( 1/sceneScale ); // gross to undo the other drawing stuff here... 
     	mouseSpring.pointW.sub( sceneTranslation);

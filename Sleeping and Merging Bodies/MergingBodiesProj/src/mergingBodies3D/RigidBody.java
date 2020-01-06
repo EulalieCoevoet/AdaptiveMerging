@@ -469,5 +469,10 @@ public class RigidBody {
 		}					
 		gl.glEnd();
 	}
+	
+	@Override
+	public String toString() {
+		return name + " " + super.toString();
+	}
 
 }

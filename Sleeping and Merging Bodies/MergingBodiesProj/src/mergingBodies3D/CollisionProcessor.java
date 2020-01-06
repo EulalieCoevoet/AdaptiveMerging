@@ -52,13 +52,6 @@ public class CollisionProcessor {
 	/** PGS solver */
     private PGS solver = new PGS();
 	
-	/**
-	 * Default constructor
-	 */
-	public CollisionProcessor() {
-		bodies = null;
-	}
-	
     /**
      * Creates this collision processor with the provided set of bodies
      * @param bodies
@@ -218,6 +211,8 @@ public class CollisionProcessor {
 
 		boolean compute = false; // set to true if there is a collection in the system
 		
+		// TODO: avoid all of this if we don't have any collections
+		
 		if (mergeParams.organizeContacts.getValue())
 			compute = getOrganizedContacts(solver.contacts);
 			// TODO: DEBUG: With sphere on plane, the solver dends up with 3 identical contacts in the list! DEBUG!
@@ -226,9 +221,12 @@ public class CollisionProcessor {
 			// This resolution is done with the Jacobians of the bodies (not the collection) 
 			// so not a good warm start for the LCP solve (we don't want to keep these values).
 			for ( Contact contact : contacts ) {
-				// would be nice not to copy here, but the lambdas will get mucked up so we'll
-				// do it with a copy...
+				// would be nice not to copy here, but the lambdas might get mucked up 
+				// so we'll do it with a copy... for now...   
+				// TODO: fix this tricky memory issue... 
 				solver.contacts.add( new Contact(contact) );
+				// Does this happen each time??
+				
 			}
 			
 			for (RigidBody body : bodies) {

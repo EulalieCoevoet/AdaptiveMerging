@@ -189,7 +189,7 @@ public class RigidBodySystem {
 			if( body instanceof RigidCollection) {				
 				for ( RigidBody b : ((RigidCollection)body).bodies ) {
 					tmpForce.set( Math.cos( theta ), Math.sin(theta), 0 );
-					tmpForce.scale( - body.massLinear * gravityAmount.getValue() );
+					tmpForce.scale( - b.massLinear * gravityAmount.getValue() );
 					b.force.add( tmpForce );
 				}
 			}

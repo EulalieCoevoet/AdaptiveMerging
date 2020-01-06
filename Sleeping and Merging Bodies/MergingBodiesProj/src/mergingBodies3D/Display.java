@@ -109,6 +109,8 @@ public class Display {
         gl.glEnable(GL2.GL_DEPTH_TEST);
     }
 	
+    ArrayList<RigidBody> bodiesDrawnForPicking = new ArrayList<RigidBody>();
+    
 	/**
 	 * Draws all rigid bodies
 	 * @param drawable
@@ -117,7 +119,26 @@ public class Display {
 		
 		GL2 gl = drawable.getGL().getGL2();
 		
-		if ( params.drawCOMs.getValue() && ! picking ) {
+		if ( picking ) {
+			bodiesDrawnForPicking.clear();
+			int i = 0;
+			for ( RigidBody b : bodies ) {
+    			if ( b instanceof RigidCollection ) {
+    				for ( RigidBody sb : ((RigidCollection) b).bodies ) {
+        				LCPApp3D.setColorWithID( gl, i++ );
+        				bodiesDrawnForPicking.add( sb );
+                        sb.display( drawable );    					
+    				}
+    			} else {
+    				LCPApp3D.setColorWithID( gl, i++ );
+    				bodiesDrawnForPicking.add( b );
+                    b.display( drawable );
+    			}
+			}
+			return;
+		}
+		
+		if ( params.drawCOMs.getValue() ) {
         	for ( RigidBody b : bodies ) {
         		b.displayFrame(drawable);
         	}
@@ -128,24 +149,20 @@ public class Display {
         if ( params.drawBodies.getValue() ) {
         	int i = 0;
         	for ( RigidBody b : bodies ) {
-        		if ( picking ) {
-        			LCPApp3D.setColorWithID( gl, i++ );
-        		} else {
-        			// let's control the colour of geometry here as it will let us 
-        			// decide when we want to override this colour (e.g., if we have a 
-        			// rigid body collection)
-        			float[] c = colour;
-        			if ( b.pinned ) {
-        				c = colourPinned;
-        			} else if ( b.col != null ) {
-        				c = b.col;
-        			}
-					if( b instanceof RigidCollection && ! params.drawCollections.getValue() ) {
-						// TODO: make sure the bodies draw with their proper colours!
-					}
-    				c[3] = params.transparency.getFloatValue();         			
-        			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
-        		}
+    			// let's control the colour of geometry here as it will let us 
+    			// decide when we want to override this colour (e.g., if we have a 
+    			// rigid body collection)
+    			float[] c = colour;
+    			if ( b.pinned ) {
+    				c = colourPinned;
+    			} else if ( b.col != null ) {
+    				c = b.col;
+    			}
+				if( b instanceof RigidCollection && ! params.drawCollections.getValue() ) {
+					// TODO: make sure the bodies draw with their proper colours!
+				}
+				c[3] = params.transparency.getFloatValue();         			
+    			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
                 b.display( drawable );
         	}
         }
@@ -154,45 +171,43 @@ public class Display {
         // TODO: end clipping here to continue to see other debug visualizations un-clipped..
         // again, perhaps an option to end clipping here or at the end of all of this!
         
-        if ( ! picking ) {
-	        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
-	        gl.glNormal3f(0,0,1);
-	    	for ( RigidBody b : bodies ) {
-	    		for (Spring s : b.springs) {
-					s.displaySpring(drawable);
-				}
-	    	}        
-	        gl.glLineWidth(1);
-	        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);
-	        if ( params.drawBoundingVolumes.getValue() ) {
-	            for ( RigidBody b : bodies ) {
-	            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
-	            	if (!(b instanceof RigidCollection)) {
-	            		b.root.boundingSphere.display(drawable);
-	            	}
-	            }
-	        }
-	        if ( params.drawAllBoundingVolumes.getValue() ) {
-	            for ( RigidBody b : bodies ) {
-	            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
-	            	if (!(b instanceof RigidCollection)) {
-	            		b.root.display( drawable );
-		            } else {
-	            		displayCollectionBV((RigidCollection) b, drawable);
-	            	}
-	            }
-	        }        
-	        if ( params.drawBoundingVolumesUsed.getValue() ) {
-	            for ( RigidBody b : bodies ) {
-	            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
-	            	if (!(b instanceof RigidCollection)) {
-	            		b.root.displayVisitBoundary( drawable, collision.visitID );
-	            	} else {
-	            		displayVisitBoundaryCollection((RigidCollection) b, drawable);
-	            	}
-	            }
-	        }	        
+        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
+        gl.glNormal3f(0,0,1);
+    	for ( RigidBody b : bodies ) {
+    		for (Spring s : b.springs) {
+				s.displaySpring(drawable);
+			}
+    	}        
+        gl.glLineWidth(1);
+        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);
+        if ( params.drawBoundingVolumes.getValue() ) {
+            for ( RigidBody b : bodies ) {
+            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
+            	if (!(b instanceof RigidCollection)) {
+            		b.root.boundingSphere.display(drawable);
+            	}
+            }
         }
+        if ( params.drawAllBoundingVolumes.getValue() ) {
+            for ( RigidBody b : bodies ) {
+            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
+            	if (!(b instanceof RigidCollection)) {
+            		b.root.display( drawable );
+	            } else {
+            		displayCollectionBV((RigidCollection) b, drawable);
+            	}
+            }
+        }        
+        if ( params.drawBoundingVolumesUsed.getValue() ) {
+            for ( RigidBody b : bodies ) {
+            	if ( b.root == null ) continue; // rigid body planes don't have a BVH
+            	if (!(b instanceof RigidCollection)) {
+            		b.root.displayVisitBoundary( drawable, collision.visitID );
+            	} else {
+            		displayVisitBoundaryCollection((RigidCollection) b, drawable);
+            	}
+            }
+        }	        
 		
 		// TODO: finish updating this display stuff...
 		

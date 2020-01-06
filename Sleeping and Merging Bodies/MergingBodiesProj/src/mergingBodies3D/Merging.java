@@ -74,6 +74,17 @@ public class Merging {
 			if (!bpc.inCollection && bpc.checkMergeCondition(params, true)) {
 				mergingEvent = true;
 				bpc.inCollection = true;
+				
+				// the body pair contact is now going to be internal, so let's migrate it's contacts over to
+				// a more permanent list... for now allocate new memory, but it could be pooled.
+				// It seems that the body pair contacts should persist at the subbody level, while
+				// anything in the parent collection's BPC list should only involve external contacts.
+				//  This would be logical.
+				
+				// The complication is with BPC that are between bodies and collections when those bodies
+				// merge, because the the contact was previously with the parent and needs to be updated to be
+				// with the subbody.
+				
 				removalQueue.add(bpc); // bpc in now exclusively part of the collection
 				if(!bpc.body1.isInCollection() && !bpc.body2.isInCollection()) {
 					//both are not collections: make a new collection
@@ -81,12 +92,16 @@ public class Merging {
 					bodies.remove(bpc.body2);
 					RigidCollection collection = new RigidCollection(bpc.body1, bpc.body2);
 					collection.addToInternalContact(bpc);
-					collection.addBPCsToCollection(bpc);
+					//collection.addBPCsToCollection(bpc);
+					collection.bodyPairContacts.add( bpc );  // TODO: is this the beginning of a can of worms...
 					bodies.add(collection);
-				}
-				else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() && !bpc.body1.isInSameCollection(bpc.body2)) {
+				} else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() ) {
+					if ( bpc.body1.isInSameCollection(bpc.body2)) {
+						System.err.println("merge() had bodies from the same collection merging");
+					}
 					//both are collections:
 					//take all the bodies in the least massive one and add them to the collection of the most massive
+					// TODO: What is the implication of this?  Stability or efficiency.. would seem if efficiency is the goal, then the one with the smaller number of bodies should be merged.
 					if (bpc.body1.parent.massLinear > bpc.body2.parent.massLinear) {
 						bodies.remove(bpc.body2.parent);
 						for (BodyPairContact bpccollection : bpc.body2.parent.bodyPairContacts)
@@ -97,8 +112,7 @@ public class Merging {
 						bpc.body1.parent.addToInternalContact(bpc);
 						bpc.body1.parent.addIncompleteCollectionContacts(bpc.body2.parent, removalQueue);
 						bpc.body1.parent.addBPCsToCollection(bpc);
-					}
-					else {
+					} else {
 						bodies.remove(bpc.body1.parent);
 						for (BodyPairContact bpccollection : bpc.body1.parent.bodyPairContacts)
 							if(!bpc.body2.parent.bodyPairContacts.contains(bpccollection))

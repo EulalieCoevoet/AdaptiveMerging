@@ -76,7 +76,9 @@ public class MouseSpringForce {
         direction.normalize();
         force.scale( distance * k, direction );
         
-        if (picked.isInCollection()) picked.parent.applyForceW( grabPointBW, force );
+        if (picked.isInCollection()) {
+        	picked.parent.applyForceW( grabPointBW, force );
+        }
         picked.applyForceW( grabPointBW, force );
         
         // spring damping forces

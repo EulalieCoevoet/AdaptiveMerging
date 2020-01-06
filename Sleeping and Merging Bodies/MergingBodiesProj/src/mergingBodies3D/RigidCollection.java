@@ -34,8 +34,7 @@ public class RigidCollection extends RigidBody {
 	 * List of Contact in the collection: Contact between RigidBody of the collection
 	 */
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
-
-	CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
+	
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	
 	static MergeParameters mergeParams;
@@ -441,12 +440,20 @@ public class RigidCollection extends RigidBody {
 //	}
 
 	public void addToInternalContact(BodyPairContact bpc) {
+		
+		ArrayList<Contact> tmp = new ArrayList<Contact>();// TODO: memory: fix me later...
 		for (Contact contact : bpc.contactList) {
 			if (!internalContacts.contains(contact)) { // TODO: wasteful search? any way to just make sure these are only added once?
 				// need to make new to not mess with the memory pools... 
-				internalContacts.add( new Contact(contact) );
+				Contact c = new Contact(contact);
+				tmp.add( c );
+				internalContacts.add( c );
+			} else {
+				System.out.println("addToInternalContact, contacts alreayd there... how does this happen?");
 			}
 		}
+		bpc.contactList.clear();
+		bpc.contactList.addAll( tmp );
 	}
 
 	/**
@@ -455,6 +462,7 @@ public class RigidCollection extends RigidBody {
 	 * @param bpc
 	 */
 	public void addBPCsToCollection(BodyPairContact bpc) {
+		System.err.println("RigidCollection.addBPCsToCollection(): seems wrong to do it this way!");  
 
 		bpc.addToBodyListsParent();
 

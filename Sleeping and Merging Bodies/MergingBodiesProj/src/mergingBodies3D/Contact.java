@@ -520,4 +520,8 @@ public class Contact {
         		body2 == c.body1 && bv2 == c.bv1 && body1 == c.body2 && bv1 == c.bv2;    
     }
 
+    @Override
+    public String toString() {
+    	return body1.name + " " + body2.name + " objhash=" + super.hashCode() + " " + super.toString();
+    }
 }

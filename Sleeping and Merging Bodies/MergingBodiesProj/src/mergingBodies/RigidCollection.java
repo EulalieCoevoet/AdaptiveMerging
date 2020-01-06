@@ -26,7 +26,6 @@ public class RigidCollection extends RigidBody {
 
 	public Color color;
 
-	CollisionProcessor collisionProcessor = new CollisionProcessor(bodies);
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 
 	/**
