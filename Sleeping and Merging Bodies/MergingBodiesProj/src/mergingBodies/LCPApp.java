@@ -589,7 +589,6 @@ public class LCPApp implements SceneGraphNode, Interactor {
 	            }
             	
                 if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
-
                 	if(system.merging.triggerMergingEvent) {
                     	system.merging.triggerMergingEvent = false;
                         run.setValue(true); 

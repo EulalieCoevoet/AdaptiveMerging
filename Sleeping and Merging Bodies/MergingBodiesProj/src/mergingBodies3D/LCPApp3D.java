@@ -669,7 +669,12 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             @Override
             public void keyPressed(KeyEvent e) {
                 if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
-                    run.setValue( ! run.getValue() ); 
+                	if(system.merging.triggerMergingEvent) {
+                    	system.merging.triggerMergingEvent = false;
+                        run.setValue(true); 
+                	} else {
+                		run.setValue( ! run.getValue() ); 
+                	}
                 } else if ( e.getKeyCode() == KeyEvent.VK_S ) {
                     double dt = stepsize.getValue() / (int)substeps.getValue();
                     for ( int i = 0; i < substeps.getValue(); i++ ) {
