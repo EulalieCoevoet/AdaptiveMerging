@@ -378,7 +378,7 @@ public class Merging {
 				RigidCollection collection = (RigidCollection)body;
 				if (colors.contains(collection.color)) {
 					RigidCollection sameColorCollection = collections.get(colors.indexOf(collection.color));
-					if(sameColorCollection.massLinear>collection.massLinear)
+					if(sameColorCollection.bodies.size()>collection.bodies.size())
 						collection.color.setRandomColor();
 					else
 						sameColorCollection.color.setRandomColor();

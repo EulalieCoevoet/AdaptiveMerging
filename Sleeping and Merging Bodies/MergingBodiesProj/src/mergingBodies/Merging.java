@@ -87,7 +87,7 @@ public class Merging {
 				else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() && !bpc.body1.isInSameCollection(bpc.body2)) {
 					//both are collections:
 					//take all the bodies in the least massive one and add them to the collection of the most massive
-					if (bpc.body1.parent.massLinear > bpc.body2.parent.massLinear) {
+					if (bpc.body1.parent.bodies.size() > bpc.body2.parent.bodies.size()) {
 						bodies.remove(bpc.body2.parent);
 						for (BodyPairContact bpccollection : bpc.body2.parent.bodyPairContacts)
 							if(!bpc.body1.parent.bodyPairContacts.contains(bpccollection))
@@ -193,6 +193,7 @@ public class Merging {
 				for (BodyPairContact bpc: collection.bodyPairContacts) {
 					if (!bpc.inCollection)
 						continue;
+					
 					for (RigidBody b : bpc.bodyPair) { 
 						if (!bpcsToUnmerge.contains(bpc)) {
 							

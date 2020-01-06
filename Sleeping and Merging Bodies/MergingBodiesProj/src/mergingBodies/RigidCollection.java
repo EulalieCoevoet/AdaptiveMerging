@@ -377,10 +377,6 @@ public class RigidCollection extends RigidBody {
 	private void updateBodiesPositionAndTransformations() {
 		for (RigidBody body : bodies) {
 
-			// reset position and orientation    /// TODO; These two lines do nothing, no?  if so.. remove!
-			body.transformW2B.transform(body.x);
-			body.theta = body.transformW2B.getTheta();
-
 			// update transformations
 			body.transformB2W.set(body.transformB2C);
 			body.transformB2W.leftMult(transformB2W);
@@ -388,6 +384,7 @@ public class RigidCollection extends RigidBody {
 			body.transformW2B.invert();
 
 			// update position and orientation
+			body.x.set(0.,0.);
 			body.transformB2W.transform(body.x);
 			body.theta = body.transformB2W.getTheta();
 		}

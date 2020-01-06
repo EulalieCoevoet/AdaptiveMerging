@@ -439,6 +439,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	protected void updateBodiesPositionAndTransformations() {
 		for (RigidBody body : bodies) {
+			
 			// update transformations
 			body.transformB2W.set(body.transformB2C);
 			body.transformB2W.leftMult(transformB2W);
@@ -447,8 +448,8 @@ public class RigidCollection extends RigidBody {
 
 			// update position and orientation
 			body.x.x = body.transformB2W.T.m03;
-			body.x.x = body.transformB2W.T.m13;
-			body.x.x = body.transformB2W.T.m23;
+			body.x.y = body.transformB2W.T.m13;
+			body.x.z = body.transformB2W.T.m23;
 			body.transformB2W.T.getRotationScale( body.theta );
 			
 			if ( ! pinned ) {  // a normal update would do this... so we should do it too for a correct single cycle update.

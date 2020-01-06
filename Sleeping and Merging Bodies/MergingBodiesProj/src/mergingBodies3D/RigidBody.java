@@ -369,7 +369,6 @@ public class RigidBody {
         jinv.transform( torque, domega );
         domega.scale( dt );
         omega.add( domega );
-        
         omega.add( deltaV.w );
 	}
 	
