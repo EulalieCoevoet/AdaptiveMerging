@@ -99,8 +99,6 @@ public class Display {
 			}
 		}
         
-        
-        
         if ( params.drawBB.getValue() ) {
         	 for ( RigidBody b : bodies ) {
                b.displayBB(drawable);

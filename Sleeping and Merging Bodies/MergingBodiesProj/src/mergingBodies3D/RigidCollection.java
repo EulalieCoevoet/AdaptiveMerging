@@ -200,6 +200,7 @@ public class RigidCollection extends RigidBody {
 		massAngular0.set( body.massAngular0 );
 		jinv.set( body.jinv );
 		jinv0.set( body.jinv0 );
+		boundingBoxB = new ArrayList<Point3d>(body.boundingBoxB);
 		updateTransformations();
 	}
 
@@ -370,11 +371,15 @@ public class RigidCollection extends RigidBody {
 				body.transformC2B.transform(point);
 			}
 		}
-		boundingBoxB = new ArrayList<Point3d>();
-		boundingBoxB.add(0, bbmaxB);
-		boundingBoxB.add(1, new Point3d(bbmaxB.x, bbminB.y, bbminB.z));
-		boundingBoxB.add(2, bbminB);
-		boundingBoxB.add(3, new Point3d(bbminB.x, bbmaxB.y, bbmaxB.z));
+		boundingBoxB.clear();
+		boundingBoxB.add(bbmaxB);
+		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbminB.z));
+		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbminB.z));
+		boundingBoxB.add(new Point3d(bbminB.x, bbminB.y, bbmaxB.z));
+		boundingBoxB.add(bbminB);
+		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbmaxB.z));
+		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbmaxB.z));
+		boundingBoxB.add(new Point3d(bbmaxB.x, bbmaxB.y, bbminB.z));
 	}
 
 	/** 
@@ -445,6 +450,7 @@ public class RigidCollection extends RigidBody {
 			body.x.x = body.transformB2W.T.m13;
 			body.x.x = body.transformB2W.T.m23;
 			body.transformB2W.T.getRotationScale( body.theta );
+			
 			if ( ! pinned ) {  // a normal update would do this... so we should do it too for a correct single cycle update.
 		        jinv.mul( theta, jinv0 );
 		        jinv.mul( thetaT );

@@ -137,7 +137,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         }
         
         double dt = stepsize.getValue() / substeps.getValue();
-        if ( run.getValue() ) {
+        if ( run.getValue() && (!system.merging.mergingEvent || !system.merging.triggerMergingEvent)) {
             for ( int i = 0; i < substeps.getValue(); i++ ) {
                 if ( factory.use ) factory.advanceTime( dt );
                 system.advanceTime( dt );                
@@ -703,6 +703,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     if ( f != null ) {
                         loadXMLSystem( f.getPath() );
                     }
+                } else if ( e.getKeyCode() == KeyEvent.VK_M ) {
+                	system.merging.triggerMergingEvent = true;
+                	system.merging.mergingEvent = false;
+                    run.setValue( true );   
                 } else if ( e.getKeyCode() == KeyEvent.VK_LEFT) {
                     if ( files != null && files.length >= 0 ) {
                         whichFile --;
@@ -733,5 +737,4 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         } );
     }
-    
 }

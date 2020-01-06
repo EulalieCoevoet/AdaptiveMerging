@@ -85,9 +85,9 @@ public class RigidBody {
 	RigidTransform transformC2B = new RigidTransform();
 	
 	/**
-	 * list of contacting bodies present with this RigidBody. In case of a collection, 
-	 * the list will contain ONLY external bpc.
-	 * The idea now is to hold internal BPCs in a separate list at the RigidCollection level
+	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
+	 * both internal and external bpc.
+	 * We may want to split this list in two parts...? (external/internal)
 	 **/
 	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
 
@@ -434,7 +434,6 @@ public class RigidBody {
         gl.glPushMatrix();        
         gl.glMultMatrixd( transformB2W.Tflat.asArray(),0 );
         	
-        
         if (geom == null ) 
         	geom = null; // set your breakpoint here...
         
