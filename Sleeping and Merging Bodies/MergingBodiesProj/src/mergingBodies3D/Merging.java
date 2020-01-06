@@ -95,6 +95,7 @@ public class Merging {
 					collection.addToInternalContact(bpc);
 					//collection.addBPCsToCollection(bpc);
 					bodies.add(collection);
+					// the body body case seems to work!  Get the others below to behave too!!
 				} else if (bpc.body1.isInCollection() && bpc.body2.isInCollection() ) {
 					if ( bpc.body1.isInSameCollection(bpc.body2)) {
 						System.err.println("merge() had bodies from the same collection merging");
@@ -111,7 +112,7 @@ public class Merging {
 						bpc.body1.parent.addCollection(bpc.body2.parent);
 						bpc.body1.parent.addToInternalContact(bpc);
 						bpc.body1.parent.addIncompleteCollectionContacts(bpc.body2.parent, removalQueue);
-						bpc.body1.parent.addBPCsToCollection(bpc);
+						//bpc.body1.parent.addBPCsToCollection(bpc);
 					} else {
 						bodies.remove(bpc.body1.parent);
 						for (BodyPairContact bpccollection : bpc.body1.parent.bodyPairContacts)
@@ -121,7 +122,7 @@ public class Merging {
 						bpc.body2.parent.addCollection(bpc.body1.parent);
 						bpc.body2.parent.addToInternalContact(bpc);
 						bpc.body2.parent.addIncompleteCollectionContacts(bpc.body1.parent, removalQueue);
-						bpc.body2.parent.addBPCsToCollection(bpc);
+						//bpc.body2.parent.addBPCsToCollection(bpc);
 					}
 				}
 				else if (bpc.body1.isInCollection()) {
@@ -130,7 +131,7 @@ public class Merging {
 					bpc.body1.parent.addBody(bpc.body2);
 					bpc.body1.parent.addToInternalContact(bpc);
 					bpc.body1.parent.addIncompleteContacts(bpc.body2, removalQueue);
-					bpc.body1.parent.addBPCsToCollection(bpc);
+					//bpc.body1.parent.addBPCsToCollection(bpc);
 				}
 				else if (bpc.body2.isInCollection()) {
 					//body2 is in a collection, body1 is not
@@ -138,7 +139,7 @@ public class Merging {
 					bpc.body2.parent.addBody(bpc.body1);
 					bpc.body2.parent.addToInternalContact(bpc);
 					bpc.body2.parent.addIncompleteContacts(bpc.body1, removalQueue);
-					bpc.body2.parent.addBPCsToCollection(bpc);
+					//bpc.body2.parent.addBPCsToCollection(bpc);
 				}
 			}
 		}
