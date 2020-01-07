@@ -368,7 +368,7 @@ public class Contact {
 	public void displayContactForce( GLAutoDrawable drawable, boolean isInCollection, double dt ) {
 		GL2 gl = drawable.getGL().getGL2();
 		computeForces( isInCollection, dt, forceW1); // This might seem wasteful (e.g., if sim not running), but only used for debug visualization!
-		gl.glLineWidth(0.75f);
+		
         float[] c = col;
         if (state == ContactState.ONEDGE) {
         	c = colOnEdge;

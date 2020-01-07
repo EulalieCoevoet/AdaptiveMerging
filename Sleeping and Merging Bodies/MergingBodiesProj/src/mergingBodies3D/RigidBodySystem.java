@@ -29,12 +29,6 @@ public class RigidBodySystem {
 	    
     public MouseSpringForce mouseSpring;
     
-    BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
-    
-    DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );
-    
-    DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
-    
 	public CollisionProcessor collision = new CollisionProcessor(bodies);
 	public Merging merging = new Merging(bodies, collision);
 	public Sleeping sleeping = new Sleeping(bodies);
@@ -315,7 +309,11 @@ public class RigidBodySystem {
 			stream = null;
 		}
 	}
-
+	
+    BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
+    DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );
+    DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
+   
     public BooleanParameter saveCSV = new BooleanParameter( "save CSV", false);
 	public DoubleParameter globalViscousDecay = new DoubleParameter("global viscous decay", 1, 0.1, 1 );
 

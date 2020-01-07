@@ -36,6 +36,8 @@ public class Display {
 		private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true );
 		private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true );
 		private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true );
+		private BooleanParameter drawContactLocationsInCollection = new BooleanParameter( "draw contact locations in collections", true );
+		private DoubleParameter contactForceSize = new DoubleParameter( "contact force line width ", 2, 1, 20);
 		private DoubleParameter contactLocationSize = new DoubleParameter( "contact point size ", 5, 1, 20);
 		private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
 		private BooleanParameter drawCollectionContactGraph = new BooleanParameter( "draw collections' contact graph", false );
@@ -76,22 +78,22 @@ public class Display {
         }
 
         gl.glPointSize( params.contactLocationSize.getFloatValue() );
+        gl.glLineWidth( params.contactForceSize.getFloatValue() );
         
     	if (params.drawContactLocations.getValue() || params.drawContactForces.getValue()) {
 			for ( Contact c : collisionProcessor.contacts ) {
-				if (params.drawContactLocations.getValue()) {
+				if (params.drawContactLocations.getValue()) 
 					c.display(drawable, false); 
-				}
 				if (params.drawContactForces.getValue())
 					c.displayContactForce(drawable, false, dt );
 			}
 		}
 		
-		if ( params.drawContactLocations.getValue() || params.drawContactForcesInCollection.getValue()) {
+		if ( params.drawContactLocationsInCollection.getValue() || params.drawContactForcesInCollection.getValue()) {
 			for (RigidBody b : bodies) {
 				if (b instanceof RigidCollection) {
 					RigidCollection collection = (RigidCollection)b;
-					if (params.drawContactLocations.getValue())
+					if (params.drawContactLocationsInCollection.getValue())
 						collection.displayInternalContactLocations(drawable);
 					if (params.drawContactForcesInCollection.getValue())
 						collection.displayInternalContactForces( drawable, dt );
@@ -300,7 +302,9 @@ public class Display {
 		vfpc.add( params.drawContactForces.getControls() );
 		vfpc.add( params.drawContactForcesInCollection.getControls() );
 		vfpc.add( params.drawContactLocations.getControls() );
+		vfpc.add( params.drawContactLocationsInCollection.getControls() );
 		vfpc.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
+		vfpc.add( params.contactForceSize.getSliderControls(false));
 		vfpc.add( params.contactLocationSize.getSliderControls(false));
 		vfpc.setBorder( new TitledBorder("Contact Force Visualization") );
         ((TitledBorder) vfpc.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
