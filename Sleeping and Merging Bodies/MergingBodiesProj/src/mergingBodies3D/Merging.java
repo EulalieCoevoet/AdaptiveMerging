@@ -41,7 +41,7 @@ public class Merging {
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 10, 1e-10, 100 );
-		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-5, 1e-10, 1e0 );
+		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-3, 1e-10, 1e0 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	}
 	public MergeParameters params = new MergeParameters();
@@ -140,7 +140,10 @@ public class Merging {
 			}
 		}
 		
-		collision.bodyPairContacts.removeAll(removalQueue);
+		for (BodyPairContact bpc: removalQueue) {
+			collision.bodyPairContacts.remove(bpc);
+			collision.contacts.removeAll(bpc.contactList);
+		}
 	}
 
 	/**
@@ -330,7 +333,8 @@ public class Merging {
 	}
 	
 	/**
-	 * Unmerge body pair contact
+	 * Merge body pair contact
+	 * Note: only to be used in unmerge process, this code supposes that bpc.body1 and bpc.body2 are already merged
 	 * @param bpc
 	 */
 	protected void mergeBodyPairContact(BodyPairContact bpc) {

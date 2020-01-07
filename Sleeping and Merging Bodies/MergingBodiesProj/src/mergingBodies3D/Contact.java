@@ -15,9 +15,6 @@ import mintools.parameters.DoubleParameter;
  * @author kry
  */
 public class Contact {
-
-    /** Next available contact index, used for determining which rows of the jacobian a contact uses */
-    static public int nextContactIndex = 0;
     
     /** First RigidBody in contact */
     RigidBody body1;
@@ -37,6 +34,9 @@ public class Contact {
     /** Position of contact point in world coordinates 
      * ONLY MADE PUBLIC FOR TESTING... can be private */
     public Point3d contactW = new Point3d();
+    
+    /** Position of contact point in body coordinates, used too draw contact in collections */
+    private Point3d contactB = new Point3d();
     
     /** Contact normal in world coordinates 
      * ONLY PUBLIC FOR TESTING... CAN BE MADE PRIVATE */
@@ -101,6 +101,7 @@ public class Contact {
 		info = contact.info;
 		
 		contactW.set(contact.contactW);
+		contactB.set(contact.contactB);
 		normalW.set(contact.normalW);   	// CRAP...  will we ever need these in a body frame for the "other" jacobian??  hmm... 	
 		tangent1W.set(contact.tangent1W);  // TODO: figure out if the body frame vectors are really needed or not.  I feel the answer is yes. :(
 		tangent2W.set(contact.tangent2W);  // but perhaps we can get by with ONLY those... 
@@ -115,6 +116,9 @@ public class Contact {
 		jt1b.set( contact.jt1b );
 		jt2a.set( contact.jt2a );
 		jt2b.set( contact.jt2b );
+		
+		state = contact.state;
+		newThisTimeStep = contact.newThisTimeStep;
 				
 		constraintViolation = contact.constraintViolation;	
 		prevConstraintViolation = contact.prevConstraintViolation;	
@@ -131,6 +135,7 @@ public class Contact {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW ); 
+        body1.transformW2B.transform(contactW, contactB);
 		bv1 = disc1;
 		bv2 = disc2;
 		this.info = info;
@@ -352,7 +357,7 @@ public class Contact {
 	 * Comptues contact forces for visualization purposes
 	 * @param dt
 	 */
-	private void computeForces( boolean computeInCollection, double dt, Vector3d forceW1 ) {		
+	private void computeForces( double dt, Vector3d forceW1 ) {		
 		forceW1.scale( lambda0, jna.v );
 		forceW1.scaleAdd( lambda1, jt1a.v, forceW1 );
 		forceW1.scaleAdd( lambda2, jt2a.v, forceW1 );		
@@ -367,7 +372,7 @@ public class Contact {
 	 */
 	public void displayContactForce( GLAutoDrawable drawable, boolean isInCollection, double dt ) {
 		GL2 gl = drawable.getGL().getGL2();
-		computeForces( isInCollection, dt, forceW1); // This might seem wasteful (e.g., if sim not running), but only used for debug visualization!
+		computeForces(dt, forceW1); // This might seem wasteful (e.g., if sim not running), but only used for debug visualization!
 		
         float[] c = col;
         if (state == ContactState.ONEDGE) {
@@ -384,6 +389,7 @@ public class Contact {
 
 		gl.glBegin( GL.GL_LINES );
 		double scale = forceVizScale.getValue();
+		body1.transformB2W.transform(contactB, contactW);
 		gl.glVertex3d(contactW.x + scale*forceW1.x, contactW.y+scale*forceW1.y, contactW.z+scale*forceW1.z );
 		gl.glVertex3d(contactW.x + -scale*forceW1.x, contactW.y+-scale*forceW1.y, contactW.z+-scale*forceW1.z );		
 		gl.glEnd();

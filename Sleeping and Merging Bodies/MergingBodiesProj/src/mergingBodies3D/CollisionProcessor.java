@@ -82,7 +82,6 @@ public class CollisionProcessor {
     public void collisionDetection( double dt ) {
         contacts.clear();
         contactPool.swapPools();
-        Contact.nextContactIndex = 0;
         
         long now = System.nanoTime();
         broadPhase();
@@ -320,9 +319,11 @@ public class CollisionProcessor {
 		}
 
 		// then add bpc layer by layer by looping over the "new bpcs" 
-		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
-		tmpBodyPairContacts.addAll(orderedBpcs);
-		getNextLayer(tmpBodyPairContacts, orderedBpcs);
+		if (!orderedBpcs.isEmpty()) {
+			ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+			tmpBodyPairContacts.addAll(orderedBpcs);
+			getNextLayer(tmpBodyPairContacts, orderedBpcs);
+		}
 		
 		// add missing bpc from bodyPairContacts (non-connected to the new contacts)
 		for ( BodyPairContact bpc : bodyPairContacts ) {
@@ -347,15 +348,14 @@ public class CollisionProcessor {
 
 		// build the final organized contact list
 		for ( BodyPairContact bpc : orderedBpcs ) {
-			for (Contact contact : bpc.contactList) {
-				if (bpc.inCollection)
-					contacts.add(contact);
-				else {
-					// Copy the external contacts 
-					// This resolution (single iteration PGS) is done with the Jacobians of the bodies (not the collection) 
-					// so not a good warm start for the LCP solve (we don't want to keep these values).
+			if (bpc.inCollection) {
+				contacts.addAll(bpc.contactList);
+			} else {
+				// Copy the external contacts 
+				// This resolution (single iteration PGS) is done with the Jacobians of the bodies (not the collection) 
+				// so not a good warm start for the LCP solve (we don't want to keep these values).
+				for (Contact contact : bpc.contactList)
 					contacts.add(new Contact(contact));
-				}
 			}
 		}
 	}	
@@ -610,7 +610,6 @@ public class CollisionProcessor {
 		bodyPairContacts.clear();
 		lastTimeStepContacts.clear();
 
-        Contact.nextContactIndex = 0;
         visitID = 0;            
     }
     

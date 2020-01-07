@@ -34,6 +34,7 @@ public class RigidCollection extends RigidBody {
 	 * List of Contact in the collection: Contact between RigidBody of the collection
 	 */
 	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
+	protected ArrayList<Contact> tmpContacts = new ArrayList<Contact>();
 	
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	
@@ -392,19 +393,19 @@ public class RigidCollection extends RigidBody {
 	 * @param bpc
 	 */
 	public void addToInternalContact(BodyPairContact bpc) {
-		ArrayList<Contact> tmp = new ArrayList<Contact>();// TODO: memory: fix me later...
+		tmpContacts.clear();
 		for (Contact contact : bpc.contactList) {
-			if (!internalContacts.contains(contact)) { // TODO: wasteful search? any way to just make sure these are only added once?
-				// need to make new to not mess with the memory pools... 
+			//if (!internalContacts.contains(contact)) { // TODO: eulalie: weird weird! doesn't seemed to work. I'm pretty sure we don't need it but still I'd like to understand...
+				// need to make new to not mess with the memory pools 
 				Contact c = new Contact(contact);
-				tmp.add( c );
+				tmpContacts.add( c );
 				internalContacts.add( c );
-			} else {
-				System.out.println("addToInternalContact, contacts alreayd there... how does this happen?");
-			}
+			//} else {
+			//	System.out.println("[addToInternalContact] Contacts already there. How does this happen?");			
+			//}
 		}
 		bpc.contactList.clear();
-		bpc.contactList.addAll( tmp );
+		bpc.contactList.addAll( tmpContacts );
 	}
 
 	/**
