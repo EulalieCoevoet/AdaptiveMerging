@@ -1,5 +1,8 @@
 package mergingBodies3D;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -36,6 +39,9 @@ public class RigidBodySystem {
 	public Merging merging = new Merging(bodies, collision);
 	public Sleeping sleeping = new Sleeping(bodies);
 	public Display display = new Display(bodies, collision);
+	
+	public PrintStream stream = null;
+	public String sceneName = null;
     
 	/**Time in seconds to advance the system*/
 	public double computeTime;
@@ -129,9 +135,13 @@ public class RigidBodySystem {
 		
 		merging.unmerge(MergeConditions.RELATIVEMOTION, dt); 
 
+		applyViscousDecay();
+		
         computeTime = (System.nanoTime() - now) / 1e9;
         simulationTime += dt;
 		totalAccumulatedComputeTime += computeTime;
+		
+		exportDataToFile();
     }
     
     /**
@@ -253,10 +263,19 @@ public class RigidBodySystem {
 			
 			if (i >= bodies.size()) break;
 		}
-        
+		
         simulationTime = 0;
         collision.reset();
         totalAccumulatedComputeTime = 0;     
+    }
+    
+    protected void applyViscousDecay()
+    {
+		double alpha = globalViscousDecay.getValue();
+		for ( RigidBody b : bodies ) {
+			b.v.scale( alpha );
+			b.omega.scale(alpha);
+		}
     }
     
     /**
@@ -268,6 +287,38 @@ public class RigidBodySystem {
         reset();
     }
     
+    /**
+	 * Export data to csv file
+	 */
+	protected void exportDataToFile() {
+			
+		if (saveCSV.getValue()) {
+			if (stream == null) {
+				try {
+					String filename;
+					if (merging.params.enableMerging.getValue()) 
+						filename = new String(sceneName + "_merged.csv");
+					else
+						filename = new String(sceneName + ".csv");
+					File file = new File(filename);
+					stream = new PrintStream(file);
+				} catch (FileNotFoundException e) {	}
+			} else {
+				stream.print(bodies.size()); stream.print(", ");
+				stream.print(collision.contacts.size()); stream.print(", ");
+				stream.print(collision.collisionDetectTime); stream.print(", ");
+				stream.print(collision.collisionSolveTime); stream.print(", ");
+				stream.print(computeTime); stream.print("\n ");
+			}
+		} else if (stream != null) {
+			stream.close();
+			stream = null;
+		}
+	}
+
+    public BooleanParameter saveCSV = new BooleanParameter( "save CSV", false);
+	public DoubleParameter globalViscousDecay = new DoubleParameter("global viscous decay", 1, 0.1, 1 );
+
 	public DoubleParameter springStiffnessMod = new DoubleParameter("spring stiffness multiplier", 1, 0, 10 );
 	public DoubleParameter springDampingMod= new DoubleParameter("spring damping multiplier", 1, 0, 10 );
 
@@ -286,6 +337,7 @@ public class RigidBodySystem {
         
 		vfp.add(springStiffnessMod.getSliderControls(false));
 		vfp.add(springDampingMod.getSliderControls(false));
+		vfp.add( globalViscousDecay.getSliderControls(false) );
 
 		return vfp.getPanel();
     }

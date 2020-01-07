@@ -2,13 +2,18 @@
 
 uniform mat4 lightProjection;
 
+uniform vec4 u_clipPlane;
+
 varying vec3 N;  // surface normal in camera 
 varying vec3 v;  // surface fragment location in camera 
 varying vec4 vL; // surface fragment location in light view NDC
+//varying float clip_distance;
+
 
 void main() {	
    vL = lightProjection * gl_ModelViewMatrix * gl_Vertex;
    v = vec3(gl_ModelViewMatrix * gl_Vertex);       
    N = normalize(gl_NormalMatrix * gl_Normal);
+   //clip_distance  = dot(vec4(v,1), u_clipPlane);  // clip planes attached to camera... does it matter?
    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; 
 }

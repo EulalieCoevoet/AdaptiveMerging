@@ -4,6 +4,7 @@ import java.awt.Dimension;
 
 import javax.swing.JPanel;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import com.jogamp.opengl.DebugGL2;
 import com.jogamp.opengl.GL;
@@ -87,6 +88,10 @@ public class ShadowMap {
         depthFBOSize = new Dimension(size,size);
     }
     
+    //BooleanParameter useClipPlane = new BooleanParameter( "use clip plane", false );
+    //Vec3Parameter np = new Vec3Parameter( "clipPlaneNormal", 0, 0, 1 );
+    //DoubleParameter planez = new DoubleParameter( "plane goes throuhg this z in eye coords", 10, 0, 100 );
+        
     /**
      * @return controls for the shadow mapped light
      */
@@ -100,7 +105,9 @@ public class ShadowMap {
         vfp.add( far.getSliderControls(false) );
         vfp.add( fov.getSliderControls(false) );
         vfp.add( debugLightFrustum.getControls() ); 
-
+        //vfp.add( useClipPlane.getControls() );
+        //vfp.add( np );
+        //vfp.add( planez.getSliderControls(false));
         return vfp.getPanel();
     }
     
@@ -275,9 +282,19 @@ public class ShadowMap {
 		
 		pflShaderState.useProgram(gl, true);
 		int shadowMapID = pflShaderState.getUniformLocation( gl, "shadowMap");
+		int clipPlaneID = pflShaderState.getUniformLocation( gl, "u_clipPlane");
 		int lightProjectionID = pflShaderState.getUniformLocation( gl, "lightProjection");
 		int sigmaID = pflShaderState.getUniformLocation( gl, "sigma");			
 		gl.glUniform1i( shadowMapID, 0 ); // use texture unit zero!
+		
+		/*Vector3d n = new Vector3d( np.x, np.y, np.z );
+		n.normalize();
+		float[] clipPlane = new float[] { 0, 0, 0, 1 }; 
+		if ( useClipPlane.getValue()) {
+				clipPlane = new float[] { (float)n.x, (float)n.y, (float)n.z, (float)(-n.z*planez.getValue()) };
+		}
+		gl.glUniform4fv( clipPlaneID, 1, clipPlane, 0 );*/
+		
 		// Don't screw up the numbers here!  Texture unit ID
 		gl.glUniformMatrix4fv( lightProjectionID, 1, false, lightProjectionMatrix.asArray(), 0 );
 		gl.glUniform1f( sigmaID, sigma.getFloatValue() ); // use texture unit zero!

@@ -25,6 +25,7 @@ import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
@@ -235,6 +236,15 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         if ( ! system.display.params.hideOverlay.getValue() ) {
         	EasyViewer.printTextLines( drawable, stringBuilder.toString(), 10, 10, 12, GLUT.BITMAP_HELVETICA_10 );
         }
+        
+        if (system.saveCSV.getValue()) {
+            gl.glColor4f(1,0,0,1);
+            String text = "Saving datas to " + system.sceneName + ".csv";
+			if (system.merging.params.enableMerging.getValue())
+				text = "Saving datas to " + system.sceneName + "_merged.csv";
+			EasyViewer.printTextLines( drawable, text, 10, drawable.getSurfaceHeight()-40, 10, GLUT.BITMAP_HELVETICA_10 );
+        }
+        
     	EasyViewer.endOverlay(drawable);
 
         if ( system.display.params.drawGraphs.getValue() ) {
@@ -484,6 +494,15 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 
         vfp.add( basicControls );
         
+        JToggleButton save = new JToggleButton("save CSV");
+        vfp.add( save);
+        save.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	system.saveCSV.setValue(!system.saveCSV.getValue());
+            }
+        });
+        
         HorizontalFlowPanel hfp2 = new HorizontalFlowPanel();
         hfp2.add( record.getControls() );
         JButton res1 = new JButton("640x360");
@@ -571,6 +590,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         factory.use = false;        
         systemClear();
         loadXMLSystem( filename );
+    	system.sceneName = filename.substring(0, filename.length() - 4);
         system.name = filename + " factory";
         factory.setSystem(system);
         factory.use = true;

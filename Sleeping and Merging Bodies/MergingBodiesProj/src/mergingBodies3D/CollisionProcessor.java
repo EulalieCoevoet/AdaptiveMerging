@@ -644,7 +644,6 @@ public class CollisionProcessor {
         }
     }
 
-	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
 	public BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	public DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
@@ -657,7 +656,9 @@ public class CollisionProcessor {
     public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.8, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
-    public IntParameter iterations = new IntParameter("iterations for PGS solve", 20, 1, 500);
+    public IntParameter iterations = new IntParameter("iterations for PGS solve", 200, 1, 500);
+
+	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
         
     
     /**

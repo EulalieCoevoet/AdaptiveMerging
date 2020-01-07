@@ -5,6 +5,8 @@ uniform float sigma;
 varying vec3 N;  // surface normal in camera 
 varying vec3 v;  // surface fragment location in camera 
 varying vec4 vL; // surface fragment location in light view NDC
+//varying float clip_distance;  // add a second clipping plane if desired!
+
  
  // some help with shadow map antialiasing from :
  // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
@@ -36,6 +38,8 @@ float random(vec3 seed, int i){
 
 void main(void) {
 
+	//if ( clip_distance < 0.0 ) discard;
+        
     vec3 L = normalize( gl_LightSource[0].position.xyz - v ); 
     vec3 E = normalize( -v ); // we are in Eye Coordinates, so EyePos is (0,0,0)  
     vec3 R = normalize( -reflect(L,N) );
