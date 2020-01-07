@@ -607,43 +607,39 @@ public class RigidCollection extends RigidBody {
 	 * 
 	 * @param drawable
 	 */
+    private static final float[] colGraph = new float[] { 0, 0.2f, 0, 0.25f };
 	public void displayContactGraph(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 
-		// draw a line between the two bodies but only if they're both not pinned
-		Point3d p1 = new Point3d();
-		Point3d p2 = new Point3d();
+		gl.glLineWidth(5);
+		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colGraph, 0 );
+		gl.glBegin(GL.GL_LINES);
 		for (BodyPairContact bpc : bodyPairContacts) {
 			if (bpc.inCollection) {
-				gl.glLineWidth(5);
-				gl.glColor4f(0.f, 0.f, 0.f, 1.0f);
-				gl.glBegin(GL.GL_LINES);
-				p1.set(bpc.body1.x);
-				p2.set(bpc.body2.x);
-				gl.glVertex2d(p1.x, p1.y);
-				gl.glVertex2d(p2.x, p2.y);
-				gl.glEnd();
+				gl.glVertex3d(bpc.body1.x.x, bpc.body1.x.y, bpc.body1.x.z);
+				gl.glVertex3d(bpc.body2.x.x, bpc.body2.x.y, bpc.body2.x.z);
+			}
+		}
+		gl.glEnd();
+	}
+
+	/**
+	 * displays cycles (from merge condition)
+	 * 
+	 * @param drawable
+	 */
+	public void displayCycles(GLAutoDrawable drawable, int size) {
+
+		for (BodyPairContact bpc : bodyPairContacts) {
+			if (bpc.inCycle) {
+				if (bpc.contactList.isEmpty())
+					System.err.println(
+							"[displayCycles] The list of contact is empty. This should not happen. Probably due to an unwanted merge (concave?).");
+				else
+					bpc.contactList.get(0).display(drawable, true);
 			}
 		}
 	}
-
-//	/**
-//	 * displays cycles (from merge condition)
-//	 * 
-//	 * @param drawable
-//	 */
-//	public void displayCycles(GLAutoDrawable drawable, int size) {
-//
-//		for (BodyPairContact bpc : bodyPairContacts) {
-//			if (bpc.inCycle) {
-//				if (bpc.contactList.isEmpty())
-//					System.err.println(
-//							"[displayCycles] The list of contact is empty. This should not happen. Probably due to an unwanted merge (concave?).");
-//				else
-//					bpc.contactList.get(0).display(drawable, bpc.cycleColor, size);
-//			}
-//		}
-//	}
 
 	@Override
 	public void displayBB(GLAutoDrawable drawable) {

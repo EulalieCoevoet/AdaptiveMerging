@@ -13,6 +13,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
+import mintools.parameters.IntParameter;
 import mintools.swing.HorizontalFlowPanel;
 import mintools.swing.VerticalFlowPanel;
 import mintools.viewer.EasyViewer;
@@ -37,8 +38,8 @@ public class Display {
 		private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true );
 		private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true );
 		private BooleanParameter drawContactLocationsInCollection = new BooleanParameter( "draw contact locations in collections", true );
-		private DoubleParameter contactForceSize = new DoubleParameter( "contact force line width ", 2, 1, 20);
-		private DoubleParameter contactLocationSize = new DoubleParameter( "contact point size ", 5, 1, 20);
+		private IntParameter contactForceSize = new IntParameter( "contact force line width ", 2, 1, 20);
+		private IntParameter contactLocationSize = new IntParameter( "contact point size ", 5, 1, 20);
 		private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
 		private BooleanParameter drawCollectionContactGraph = new BooleanParameter( "draw collections' contact graph", false );
 		private BooleanParameter drawCycles = new BooleanParameter( "draw cycles", true );
@@ -77,8 +78,8 @@ public class Display {
             }
         }
 
-        gl.glPointSize( params.contactLocationSize.getFloatValue() );
-        gl.glLineWidth( params.contactForceSize.getFloatValue() );
+        gl.glPointSize( params.contactLocationSize.getValue() );
+        gl.glLineWidth( params.contactForceSize.getValue() );
         
     	if (params.drawContactLocations.getValue() || params.drawContactForces.getValue()) {
 			for ( Contact c : collisionProcessor.contacts ) {
@@ -97,6 +98,35 @@ public class Display {
 						collection.displayInternalContactLocations(drawable);
 					if (params.drawContactForcesInCollection.getValue())
 						collection.displayInternalContactForces( drawable, dt );
+				}
+			}
+		}
+		
+		if ( params.drawContactGraph.getValue() ) {
+			for ( Contact c : collisionProcessor.contacts ) {
+				c.displayContactGraph(drawable);
+			}
+		}
+		
+		if (params.drawCollectionContactGraph.getValue()) {
+			for (RigidBody b : bodies) {
+				if (b instanceof RigidCollection) {
+					((RigidCollection)b).displayContactGraph(drawable);
+				}
+			}
+		}
+		
+		// TODO: eulalie: do we need to keep that?
+		/*if ( params.drawSpeedCOMs.getValue() ) {
+			for (RigidBody b: bodies) {
+				b.displaySpeedCOM(drawable);
+			}
+		}*/
+		
+		if ( params.drawCycles.getValue() ) {
+			for (RigidBody b : bodies) {
+				if (b instanceof RigidCollection) {
+					((RigidCollection)b).displayCycles(drawable, params.contactLocationSize.getValue());
 				}
 			}
 		}
@@ -214,49 +244,7 @@ public class Display {
             		displayVisitBoundaryCollection((RigidCollection) b, drawable);
             	}
             }
-        }	        
-		
-		// TODO: finish updating this display stuff...
-		
-//		if ( params.drawContactGraph.getValue() ) {
-//			if (collisionProcessor.useContactGraph.getValue()) {
-//				for (BodyPairContact bpc : collisionProcessor.bodyPairContacts) {
-//					for (Contact c : bpc.contactList) {
-//						c.displayContactGraph(drawable);
-//					}
-//				} 
-//			} 
-//			else {
-//				for ( Contact c : collisionProcessor.contacts ) {
-//					c.displayContactGraph(drawable);
-//				}
-//			}
-//		}
-//		
-//		if (params.drawCollectionContactGraph.getValue()) {
-//			for (RigidBody b : bodies) {
-//				if (b instanceof RigidCollection) {
-//					((RigidCollection)b).displayContactGraph(drawable);
-//				}
-//			}
-//		}
-//		
-//		if ( params.drawSpeedCOMs.getValue() ) {
-//			for (RigidBody b: bodies) {
-//				b.displaySpeedCOM(drawable);
-//			}
-//		}
-//
-//	
-//		
-//		if ( params.drawCycles.getValue() ) {
-//			for (RigidBody b : bodies) {
-//				if (b instanceof RigidCollection) {
-//					((RigidCollection)b).displayCycles(drawable, params.contactLocationSize.getValue());
-//				}
-//			}
-//		}
-		
+        }	      		
 		
 		if ( params.drawIndex.getValue()) {
 			for (RigidBody b : bodies) {
@@ -304,8 +292,8 @@ public class Display {
 		vfpc.add( params.drawContactLocations.getControls() );
 		vfpc.add( params.drawContactLocationsInCollection.getControls() );
 		vfpc.add( Contact.forceVizScale.getSliderControls(true) ); // Gross?
-		vfpc.add( params.contactForceSize.getSliderControls(false));
-		vfpc.add( params.contactLocationSize.getSliderControls(false));
+		vfpc.add( params.contactForceSize.getSliderControls());
+		vfpc.add( params.contactLocationSize.getSliderControls());
 		vfpc.setBorder( new TitledBorder("Contact Force Visualization") );
         ((TitledBorder) vfpc.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
 		vfp.add( vfpc.getPanel() );

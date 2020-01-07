@@ -11,6 +11,10 @@ public class Color extends Color3f {
 
 	private static final long serialVersionUID = 6836205431065116946L;
 
+	public Color(float r, float g, float b) {
+		super(r,g,b);
+	}
+	
 	public Color(Color color) {
 		super(color);
 	}
@@ -28,18 +32,18 @@ public class Color extends Color3f {
 	public void setRandomColor() {
 		this.set( java.awt.Color.getHSBColor( rand.nextFloat(), 1f, 1f ) );
 
-//		Float r = rand.nextFloat();
-//		Float g = rand.nextFloat();
-//		Float b = rand.nextFloat();
-//		
-//		this.set( java.awt.Color.getHSBColor( rand.nextFloat(), 1f, 1f ) );
-//		
-//		if (Math.abs(r - g) < 1.5e-1 && Math.abs(g - b) < 1.5e-1) // avoid gray
-//			this.setRandomColor();
-//		
-//		this.x = r;
-//		this.y = g;
-//		this.z = b;
+		/*Float r = rand.nextFloat();
+		Float g = rand.nextFloat();
+		Float b = rand.nextFloat();
+		
+		this.set( java.awt.Color.getHSBColor( rand.nextFloat(), 1f, 1f ) );
+		
+		if (Math.abs(r - g) < 1.5e-1 && Math.abs(g - b) < 1.5e-1) // avoid gray
+			this.setRandomColor();
+		
+		this.x = r;
+		this.y = g;
+		this.z = b;*/
 	}
 	
 }

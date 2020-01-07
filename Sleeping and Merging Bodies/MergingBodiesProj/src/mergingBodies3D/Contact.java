@@ -325,6 +325,7 @@ public class Contact {
     private static final float[] colInCollection = new float[] { 0, 0, 1, 0.25f };
     private static final float[] colNew = new float[] { 0, 0.5f, 0, 0.65f };
     private static final float[] colOnEdge = new float[] { 0, 0, 0, 0.75f };
+    private static final float[] colGraph = new float[] { 0, 0.2f, 0, 0.25f };
     
     /**
      * Draws the contact points
@@ -362,6 +363,26 @@ public class Contact {
 		forceW1.scaleAdd( lambda1, jt1a.v, forceW1 );
 		forceW1.scaleAdd( lambda2, jt2a.v, forceW1 );		
 		forceW1.scale(1./dt);
+	}
+	
+	/**
+	 * Draws the connections between bodies to visualize 
+	 * the adjacency structure of the matrix as a graph.
+	 * @param drawable
+	 */
+	public void displayContactGraph( GLAutoDrawable drawable ) {
+		GL2 gl = drawable.getGL().getGL2();
+		if ( !body1.pinned && ! body2.pinned ) {
+			
+			float[] c = colGraph;
+			gl.glLineWidth(2);
+			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
+			gl.glBegin( GL.GL_LINES );
+			
+			gl.glVertex3d(body1.x.x, body1.x.y, body1.x.z);
+			gl.glVertex3d(body2.x.x, body2.x.y, body2.x.z);
+			gl.glEnd();
+		}
 	}
 	
 	/**

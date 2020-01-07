@@ -176,25 +176,22 @@ public class BodyPairContact {
 	 * contacts, or cycles formed by three bodies with one contact between each.
 	 * @return true if the criteria is satisfied
 	 */
-	public boolean checkContactsCycle(MergeParameters mergeParams) {
-		System.err.println("cycle checking (i.e., complete subgraph checking) not yet implemented!");
-		return false;
+	public boolean checkContactsCycle(MergeParameters mergeParams) {		
+		int nbActiveContact = 0;
+		for (Contact contact : contactList)
+			if (contact.state != ContactState.BROKEN)
+				nbActiveContact += 1;
 		
-//		int nbActiveContact = 0;
-//		for (Contact contact : contactList)
-//			if (contact.state != ContactState.BROKEN)
-//				nbActiveContact += 1;
-//		
-//		// if there are more than one active contact within the bpc, we can merge
-//		if (nbActiveContact>1)
-//			return true;
-//
-//		// if the bpc has already been identified as being part of a cycle, we can merge
-//		if(inCycle) 
-//			return true;
-//		
-//		// otherwise check if this bpc is in a cycle formed by three bodies with one contact between each
-//		return body1.checkCycle(1, body2, this, mergeParams); 
+		// if there are more than one active contact within the bpc, we can merge
+		if (nbActiveContact>1)
+			return true;
+
+		// if the bpc has already been identified as being part of a cycle, we can merge
+		if(inCycle) 
+			return true;
+		
+		// otherwise check if this bpc is in a cycle formed by three bodies with one contact between each
+		return body1.checkCycle(1, body2, this, mergeParams); 
 	}
 	
 	/**

@@ -418,12 +418,9 @@ public class Contact {
 			gl.glLineWidth(2);
 			gl.glColor4f(0,.3f,0, 0.5f);
 			gl.glBegin( GL.GL_LINES );
-			
-			Point2d p1 = new Point2d(body1.x);
-			Point2d p2 = new Point2d(body2.x);
 
-			gl.glVertex2d(p1.x, p1.y);
-			gl.glVertex2d(p2.x, p2.y);
+			gl.glVertex2d(body1.x.x, body1.x.y);
+			gl.glVertex2d(body2.x.x, body2.x.y);
 			gl.glEnd();
 		}
 	}

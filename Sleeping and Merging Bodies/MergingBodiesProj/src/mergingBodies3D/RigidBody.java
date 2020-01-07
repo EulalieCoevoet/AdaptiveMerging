@@ -10,6 +10,8 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mergingBodies3D.Merging.MergeParameters;
+import mergingBodies3D.Contact.ContactState;
 import mintools.viewer.FancyAxis;
 
 /**
@@ -405,6 +407,67 @@ public class RigidBody {
         result.cross( omega, tmp );
         result.add( v );
     }
+    
+    /**
+	 * Check if the body is part of a cycle formed by three bodies with one contact between each.
+	 * @param count
+	 * @param startBody
+	 * @param bpcFrom
+	 * @return true or false
+	 */
+	protected boolean checkCycle(int count, RigidBody startBody, BodyPairContact bpcFrom, MergeParameters mergeParams) {
+		
+		if (count>2) { // more than three bodies in the cycle
+			bpcFrom.clearCycle();
+			return false;
+		}
+		
+		// if we come across a collection in the contact graph, we consider it as a body and check the external bpc 
+		ArrayList<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContacts : bodyPairContacts;
+		
+		RigidBody otherBodyFrom = bpcFrom.getOtherBodyWithCollectionPerspective(this);		
+		
+		BodyPairContact bpcToCheck = null;
+		for (BodyPairContact bpc: bpcList) {
+			
+			if(bpc != bpcFrom && !bpc.inCollection && !bpc.inCycle) { // we do not want to check the bpc we come from, nor the bpc inside the collection
+																	  // a bpc should only be part of one cycle
+				
+				// we only consider bodies that are ready to be merged
+				if(bpc.checkMergeCondition(mergeParams, false)) {
+			
+					RigidBody otherBody = bpc.getOtherBodyWithCollectionPerspective(this);
+	
+					int nbActiveContact = 0;
+					for (Contact contact : bpc.contactList)
+						if (contact.state != ContactState.BROKEN)
+							nbActiveContact += 1;
+					
+					if (nbActiveContact==1) // if there is only one active contact in the bpc, it is a direction we want to check for cycle
+						bpcToCheck = bpc;
+					
+					if(otherBody == otherBodyFrom || // we are touching two different bodies in a same collection
+					   otherBody.isInSameCollection(startBody) || // we are part of a collection that touches a same body 
+					   otherBody == startBody || // we have reached the body from which the cycle started
+					  (otherBody.pinned && startBody.pinned)) { // there is a body between two pinned body	
+						bpcFrom.updateCycle(bpc);
+						return true;
+					}
+				}
+			}
+		}
+
+		// we did not find a cycle, but there is another candidate, continue
+		if(bpcToCheck!=null) {
+			bpcFrom.updateCycle(bpcToCheck);
+			RigidBody otherBody = bpcToCheck.getOtherBodyWithCollectionPerspective(this);
+			return otherBody.checkCycle(++count, startBody, bpcToCheck, mergeParams); 
+		}
+		
+		// we did not find a cycle, and there is no another candidate, break
+		bpcFrom.clearCycle();
+		return false;
+	}
         
     /**
      * Resets this rigid body to its initial position and zero velocity, recomputes transforms

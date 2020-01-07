@@ -647,7 +647,7 @@ public class CollisionProcessor {
 	public DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
-	    
+	
     /** TODO: RESTITUTION (currently unused) Restitution parameter for contact constraints */
     public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
     
