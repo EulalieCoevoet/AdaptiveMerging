@@ -229,53 +229,34 @@ public class RigidBodySystem {
      * Resets the position of all bodies, and sets all velocities to zero
      */
     public void reset() {
-    	//int size = bodies.size();
-		//int counter = 0;
 		int i = 0;
 		while (true) {
 			if (bodies.size() == 0) break;
-			RigidBody b = bodies.get(i);
-			b.bodyPairContacts.clear();
-			//if (!b.created) {
+			RigidBody body = bodies.get(i);
 
-			if (b instanceof RigidCollection) {
-				for (RigidBody subBody: ((RigidCollection) b).bodies) {
+			if (body instanceof RigidCollection) {
+				RigidCollection collection = (RigidCollection) body;
+				for (RigidBody subBody: collection.bodies) {
 					subBody.parent = null;
 					subBody.bodyPairContacts.clear();
 					bodies.add(subBody);
 				}
-				bodies.remove(b);
-
-				b = bodies.get(i);
+				bodies.remove(body);
+				body = bodies.get(i);
+			}  
+			
+			if (!(body instanceof RigidCollection)) {
+				body.bodyPairContacts.clear();
+				body.reset();
+				i++;
 			}
-			b.reset();		
-
-			//			} else {
-//				counter = i;
-//				break;
-//			}
-
-			i++;
+			
 			if (i >= bodies.size()) break;
 		}
-		
-		collision.reset();
-		
-//		int iter = size - counter;
-//		if ( counter > 0) {
-//			while(iter > 0) {
-//				this.bodies.remove(bodies.size() - 1);
-//				iter--;
-//			}
-//		}
-    	
-//        for ( RigidBody b : bodies ) {
-//            b.reset();
-//        }
         
         simulationTime = 0;
         collision.reset();
-        totalAccumulatedComputeTime = 0;        
+        totalAccumulatedComputeTime = 0;     
     }
     
     /**

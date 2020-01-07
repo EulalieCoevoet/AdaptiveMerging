@@ -117,6 +117,9 @@ public class CollisionProcessor {
 			solver.solve(dt);
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
+			// eulalie: dirty?
+			updateCollectionJacobians(true);
+			
 			updateContactsMap();
 		}
 	}

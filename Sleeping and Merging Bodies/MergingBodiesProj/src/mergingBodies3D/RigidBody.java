@@ -414,8 +414,8 @@ public class RigidBody {
     public void reset() {
         x.set( x0 );        
         theta.set( theta0 );
-        jinv.set( jinv0 );
-        massAngular.set( massAngular0 );        
+        massAngular.set( massAngular0 ); 
+        jinv.set( jinv0 );       
         v.set(0,0,0);
         omega.set(0,0,0);
         for ( Spring s : springs ) {
