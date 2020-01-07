@@ -155,8 +155,9 @@ public class Display {
     			}
 				if( b instanceof RigidCollection && ! params.drawCollections.getValue() ) {
 					for (RigidBody b2 : ((RigidCollection)b).bodies) {
-						b2.col[3] = params.transparency.getFloatValue();         			
-						gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, b2.col, 0 );
+						c = ( b2.col != null ) ? b2.col : colour;
+						c[3] = params.transparency.getFloatValue();         			
+						gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
 						b2.display(drawable);
 					}
 				} else {
