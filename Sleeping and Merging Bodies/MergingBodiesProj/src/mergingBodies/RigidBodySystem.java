@@ -172,7 +172,7 @@ public class RigidBodySystem {
 	 */
 	protected void applyImpulse() {
 		if (impulse.isHoldingForce()) {
-			impulse.pickedBody.applyForceW(impulse.pickedPoint, impulse.force);
+			impulse.pickedBody.applyForceW(impulse.pickedPointW, impulse.force);
 			impulse.clear();
 		}
 	}

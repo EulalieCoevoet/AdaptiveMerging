@@ -85,6 +85,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      */
     public LCPApp3D() {
         system.mouseSpring = mouseSpring;
+        system.mouseImpulse = mouseImpulse;
         loadXMLSystem("scenes3D/testWeirdCollision.xml");
         T.getBackingMatrix().setIdentity();
         EasyViewerAnim.antialiasing = true;        
@@ -156,20 +157,24 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             shadowMap.endShadowMapping( drawable, eva.trackBall );
         }
         displayAllObjectsNonShadowable( drawable,dt );
-        if ( mouseSpring.picked != null ) {
+        if ( mouseSpring.picked != null || mouseImpulse.isGrabbing() ) {
         	gl.glPushMatrix();
         	gl.glScaled( sceneScale,sceneScale,sceneScale );
             gl.glTranslated( sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
 
         	int h = drawable.getSurfaceHeight();
-        	Point3d p1 = mouseSpring.pointW;
-        	Point3d p2 = mouseSpring.grabPointBW;
+        	Point3d p1 = (selectRequestType == SelectRequestType.SPRING)? mouseSpring.pointW : mouseImpulse.getEndPoint();
+        	Point3d p2 = (selectRequestType == SelectRequestType.SPRING)? mouseSpring.grabPointBW : mouseImpulse.getPickedPointW();
         	unproject( drawable, mousePressedPoint.x, h-mousePressedPoint.y, zClosest, p1 );
 
-        	mouseSpring.display(drawable);
+        	if (selectRequestType == SelectRequestType.SPRING)
+        		mouseSpring.display(drawable);
+        	else {
+        		mouseImpulse.display(drawable);
+        	}
 
-    		float[] red = new float[] { 1, 0, 0, 1 };		
-    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0 );
+    		float[] color = (selectRequestType == SelectRequestType.SPRING)? new float[] { 1, 0, 0, 1 }: new float[] { 1, 0.5f, 0, 1 };		
+    		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, color, 0 );
         	gl.glPushMatrix();
         	gl.glTranslated( p1.x, p1.y, p1.z );
         	gl.glColor3f(1, 0, 0);
@@ -182,7 +187,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         	EasyViewer.glut.glutSolidSphere(0.1,16,16);        
         	gl.glPopMatrix();
 
-        	
         	gl.glPopMatrix();
         }
        
@@ -371,16 +375,28 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 		// convert to [0,1] interval for unproject
         long zL = Integer.toUnsignedLong( zint );
         zClosest = ( (float) zL ) / 0xffffffffL; 
-        unproject( drawable, p.x, h-p.y, zClosest, mouseSpring.pointW );
-    	mouseSpring.picked = system.display.bodiesDrawnForPicking.get( ID );
-    	mouseSpring.picked.selected = true;
-    	mouseSpring.pointW.scale( 1/sceneScale ); // gross to undo the other drawing stuff here... 
-    	mouseSpring.pointW.sub( sceneTranslation);
-    	
-    	Matrix4d A = mouseSpring.picked.transformW2B.T;
-    	A.transform(mouseSpring.pointW,  mouseSpring.grabPointB ) ;
-//    	System.out.println(" unprojected in world = " +  mouseSpring.pointW  + " index " +  ID );
-//    	System.out.println(" unprojected on body = " +  mouseSpring.grabPointB  + " index " +  ID );
+        
+        Point3d pointW = new Point3d();
+        Point3d grabPointB = new Point3d();
+        RigidBody body;
+        
+        unproject( drawable, p.x, h-p.y, zClosest, pointW );
+        body = system.display.bodiesDrawnForPicking.get( ID );
+    	pointW.scale( 1/sceneScale ); // gross to undo the other drawing stuff here... 
+    	pointW.sub( sceneTranslation);
+    	Matrix4d A = body.transformW2B.T;
+    	A.transform(pointW,  grabPointB ) ;
+        
+        if (selectRequestType == SelectRequestType.SPRING) {
+	    	mouseSpring.picked = body;
+	    	mouseSpring.pointW.set(pointW); 
+	    	mouseSpring.grabPointB.set(grabPointB);
+        } else if (selectRequestType == SelectRequestType.IMPULSE) {
+        	mouseImpulse.grab(body, grabPointB);
+        	mouseImpulse.hold(pointW);
+        } else {
+        	System.err.print("[LCPApp3D] Unknown select request type.");
+        }
     }
     
     private void unproject( GLAutoDrawable drawable, float x, float y, float z, Point3d p ) {
@@ -542,6 +558,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         vfp.add( system.getControls() );
         
         vfp.add( mouseSpring.getControls() );
+        vfp.add( mouseImpulse.getControls() );
                 
         VerticalFlowPanel vfpsm = new VerticalFlowPanel();
         vfpsm.setBorder(new TitledBorder("shadow map controls") );
@@ -564,6 +581,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 
     // variables and objects for picking rigid body with the mouse
     private MouseSpringForce mouseSpring = new MouseSpringForce();
+    private MouseImpulse mouseImpulse = new MouseImpulse();
     
     private double sceneScale = 0.1; // guess how to get images to show up nicely in 3D in a first approximation...
     private Vector3d sceneTranslation = new Vector3d();
@@ -633,6 +651,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     
     private Point mousePressedPoint = null;
     private boolean selectRequest = false;
+    private enum SelectRequestType {SPRING, IMPULSE};
+    private SelectRequestType selectRequestType;
     
     /** [0,1] z position from opengl picking to use with unproject */
     private float zClosest;
@@ -665,18 +685,30 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     	component.addMouseListener( new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if ( mouseSpring.picked != null ) {
-					mouseSpring.picked.selected = false;
+        		if(mouseImpulse.isGrabbing()) {
+            		mouseImpulse.release();
+            	} 
+        		
+        		if ( mouseSpring.picked != null ) {
 					mouseSpring.picked = null;
 				}
-			}
+            }
+			
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if ( e.getButton() == 1 && e.isShiftDown() ) {
 					mousePressedPoint = e.getPoint();
 					selectRequest = true;
+					selectRequestType = SelectRequestType.SPRING;
 				}
+				
+				if( e.getButton() == 2 && e.isControlDown() ) {
+					mousePressedPoint = e.getPoint();
+					selectRequest = true;
+					selectRequestType = SelectRequestType.IMPULSE;
+            	}
 			}
+			
 			@Override
 			public void mouseExited(MouseEvent e) {}
 			@Override

@@ -1,9 +1,13 @@
-package mergingBodies;
+package mergingBodies3D;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.parameters.DoubleParameter;
 import mintools.swing.VerticalFlowPanel;
@@ -13,15 +17,15 @@ public class MouseImpulse {
     private RigidBody pickedBody = null;
     
     /** End point in world coordinate */
-    private Point2d endPointW = new Point2d();
+    private Point3d endPointW = new Point3d();
     
     /** Picked point in body coordinate */
-    private Point2d pickedPointB = new Point2d();
+    private Point3d pickedPointB = new Point3d();
     
     /** Picked point in world coordinate */
-    private Point2d pickedPointW = new Point2d();
+    private Point3d pickedPointW = new Point3d();
     
-    private Vector2d force = new Vector2d();
+    private Vector3d force = new Vector3d();
     
     public boolean released = false;
    
@@ -35,19 +39,26 @@ public class MouseImpulse {
     /**
      * Sets the picked body and the point on that body
      * @param picked
-     * @param point
+     * @param pointB in body coordinates
      */
-    public void grab( RigidBody picked, Point2d point ) {
-    	if(picked != null) {
+    public void grab( RigidBody picked, Point3d pointB ) {
+    	if (picked != null) {
 	        pickedBody = picked;  
-	        pickedPointB.set(point);
-	        pickedBody.transformB2W.transform(pickedPointB, pickedPointW);
+	        pickedPointB.set(pointB); 
+	        pickedBody.transformB2W.transform(pointB, pickedPointW);
     	}
     }
     
-    public void release( Point2d point ) {
+    /**
+     * Sets the end point
+     * @param pointW in world coordinate
+     */
+    public void hold( Point3d pointW ) {
+    	endPointW.set(pointW);
+    }
+    
+    public void release() {
     	released = true;
-    	endPointW.set(point); 
     }
     
     public boolean isGrabbing() {
@@ -58,11 +69,22 @@ public class MouseImpulse {
     	return pickedBody;
     }
     
-    public Point2d getPickedPoint() {
+    /** Get picked point in body coordinate */
+    public Point3d getPickedPoint() {
     	return pickedPointB;
     }
     
-    public Vector2d getForce() {
+    /** Get picked point in world coordinate */
+    public Point3d getPickedPointW() {
+    	pickedBody.transformB2W.transform(pickedPointB, pickedPointW);
+    	return pickedPointW;
+    }
+    
+    public Point3d getEndPoint() {
+    	return endPointW;
+    }
+    
+    public Vector3d getForce() {
     	return force;
     }
     
@@ -73,12 +95,12 @@ public class MouseImpulse {
         if ( pickedBody == null || !released) return;
         
         pickedBody.wake();
-
+        
         pickedBody.transformB2W.transform(pickedPointB, pickedPointW);
         double distance = endPointW.distance( pickedPointW );
         
-        Vector2d force = new Vector2d();
-        Vector2d direction = new Vector2d();
+        Vector3d force = new Vector3d();
+        Vector3d direction = new Vector3d();
         direction.sub( pickedPointW, endPointW );
         if ( direction.lengthSquared() < 1e-3 ) return;
         direction.normalize();
@@ -91,6 +113,23 @@ public class MouseImpulse {
         // Apply only once
         released = false;
         pickedBody = null;
+    }
+    
+    /**
+     * Draws a transparent line between the points connected by this spring.
+     * @param drawable
+     */
+    public void display(GLAutoDrawable drawable) {
+    	GL2 gl = drawable.getGL().getGL2();
+    	gl.glDisable( GL2.GL_LIGHTING );
+    	gl.glColor4d( 1, 0.5,0, 1 );
+    	gl.glLineWidth(3);
+        gl.glBegin(GL.GL_LINES);
+        gl.glVertex3d( endPointW.x, endPointW.y, endPointW.z );
+        pickedBody.transformB2W.transform(pickedPointB, pickedPointW);
+        gl.glVertex3d( pickedPointW.x, pickedPointW.y, pickedPointW.z);
+        gl.glEnd();
+        gl.glEnable( GL2.GL_LIGHTING );
     }
     
     /**

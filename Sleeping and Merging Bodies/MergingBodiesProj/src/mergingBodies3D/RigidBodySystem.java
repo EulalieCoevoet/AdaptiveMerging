@@ -28,6 +28,8 @@ public class RigidBodySystem {
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 	    
     public MouseSpringForce mouseSpring;
+	public MouseImpulse mouseImpulse;
+	public Impulse impulse = new Impulse();
     
 	public CollisionProcessor collision = new CollisionProcessor(bodies);
 	public Merging merging = new Merging(bodies, collision);
@@ -151,25 +153,25 @@ public class RigidBodySystem {
 			applySpringForces(); 
 		}
 		
-//		if (mouseImpulse != null && mouseImpulse.released) {
-//			impulse.set(mouseImpulse.getPickedBody());
-//			impulse.set(mouseImpulse.getPickedPoint());
-//			mouseImpulse.apply();
-//			impulse.set(mouseImpulse.getForce());
-//		} else {
-//			applyImpulse();
-//		}
+		if (mouseImpulse != null && mouseImpulse.released) {
+			impulse.set(mouseImpulse.getPickedBody());
+			impulse.set(mouseImpulse.getPickedPoint());
+			mouseImpulse.apply();
+			impulse.set(mouseImpulse.getForce());
+		} else {
+			applyImpulse();
+		}
 	}
 	
 	/**
 	 * Apply stored impulse to the picked body
 	 */
-//	protected void applyImpulse() {
-//		if (impulse.isHoldingForce()) {
-//			impulse.pickedBody.applyForceW(impulse.pickedPoint, impulse.force);
-//			impulse.clear();
-//		}
-//	}
+	protected void applyImpulse() {
+		if (impulse.isHoldingForce()) {
+			impulse.pickedBody.applyForceW(impulse.pickedPointW, impulse.force);
+			impulse.clear();
+		}
+	}
 	
 	/** Temporary working variable */
 	private Vector3d tmpForce = new Vector3d();

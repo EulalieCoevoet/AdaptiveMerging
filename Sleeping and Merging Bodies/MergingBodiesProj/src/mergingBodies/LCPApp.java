@@ -156,9 +156,9 @@ public class LCPApp implements SceneGraphNode, Interactor {
             Point2d tmp = new Point2d();
             picked.transformB2W.transform( grabPointB, tmp );
             if(mouseImpulse.isGrabbing())
-            	gl.glColor4f( 1,0.5f,0,0.5f);
+            	gl.glColor4f( 1,0.5f,0,0.5f );
             else
-            	gl.glColor4f( 1,0,0,0.5f);
+            	gl.glColor4f( 1,0,0,0.5f );
             gl.glLineWidth( 5 );
             gl.glBegin( GL.GL_LINES );
             gl.glVertex2d( mousePoint.x, mousePoint.y );
@@ -506,8 +506,6 @@ public class LCPApp implements SceneGraphNode, Interactor {
     /** current index in the files list */
     private int whichFile = 0;
     
-    private boolean shiftPressed = false;
-    
     /** Attaches mouse and keyboard listeners to the canvas. */
     @Override
     public void attach(Component component) {
@@ -551,7 +549,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     } 
                 }
                 
-                if(shiftPressed) {
+                if( e.getButton() == 1 && e.isShiftDown()) {
                 	if(!mouseImpulse.isGrabbing()) {
                 		mouseImpulse.grab( picked, mousePoint ); 
                 	}
@@ -573,20 +571,9 @@ public class LCPApp implements SceneGraphNode, Interactor {
         
         component.addKeyListener( new KeyAdapter() {
         	
-        	@Override
-        	public void keyReleased(KeyEvent e) {
-        		if ( e.getKeyCode() == KeyEvent.VK_SHIFT ) {
-                	shiftPressed = false;
-	            } 
-        	}
-        	
             @Override
             public void keyPressed(KeyEvent e) {
             	double ds = 0.5; // step size for moving controllable springs (might want to expose this as a parameter!)
-            	
-                if ( e.getKeyCode() == KeyEvent.VK_SHIFT ) {
-                	shiftPressed = true;
-	            }
             	
                 if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
                 	if(system.merging.triggerMergingEvent) {
