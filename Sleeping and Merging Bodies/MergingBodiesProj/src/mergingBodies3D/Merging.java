@@ -284,6 +284,7 @@ public class Merging {
 						newCollection.addBodies(subbodies);
 						newCollection.fillInternalBodyContacts();
 						newCollection.color = new Color(collection.color);
+						newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
 						collection.applyVelocitiesTo(newCollection);
 						newBodies.add(newCollection);
 					} else if (subbodies.size() == 1){ 
@@ -378,9 +379,9 @@ public class Merging {
 				RigidCollection collection = (RigidCollection)body;
 				if (colors.contains(collection.color)) {
 					RigidCollection sameColorCollection = collections.get(colors.indexOf(collection.color));
-					if(sameColorCollection.bodies.size()>collection.bodies.size())
+					if(sameColorCollection.bodies.size()>collection.bodies.size()) 
 						collection.color.setRandomColor();
-					else
+					else 
 						sameColorCollection.color.setRandomColor();
 				}
 				colors.add(collection.color);

@@ -308,6 +308,7 @@ public class CollisionProcessor {
 
 		ArrayList<BodyPairContact> orderedBpcs = new ArrayList<BodyPairContact>();
 		
+		// first add all bpc containing new contacts
 		for ( BodyPairContact bpc : bodyPairContacts ) {
 			for ( Contact contact : bpc.contactList ) {
 				if (contact.newThisTimeStep) {
@@ -318,17 +319,20 @@ public class CollisionProcessor {
 			}
 		}
 
+		// then add bpc layer by layer by looping over the "new bpcs" 
 		ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
 		tmpBodyPairContacts.addAll(orderedBpcs);
 		getNextLayer(tmpBodyPairContacts, orderedBpcs);
 		
+		// add missing bpc from bodyPairContacts (non-connected to the new contacts)
 		for ( BodyPairContact bpc : bodyPairContacts ) {
 			if (!bpc.checked) {
 				orderedBpcs.add(bpc);
 				bpc.checked = true;
 			}
 		}
-		
+
+		// add missing bpc from collections (non-connected to the new contacts)
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.isSleeping) {
 				RigidCollection collection = (RigidCollection)body;
@@ -340,13 +344,18 @@ public class CollisionProcessor {
 				}
 			}
 		}
-		
+
+		// build the final organized contact list
 		for ( BodyPairContact bpc : orderedBpcs ) {
 			for (Contact contact : bpc.contactList) {
 				if (bpc.inCollection)
 					contacts.add(contact);
-				else
-					contacts.add(new Contact(contact));  /// how does this happen?  This code is not obvious.
+				else {
+					// Copy the external contacts 
+					// This resolution (single iteration PGS) is done with the Jacobians of the bodies (not the collection) 
+					// so not a good warm start for the LCP solve (we don't want to keep these values).
+					contacts.add(new Contact(contact));
+				}
 			}
 		}
 	}	
