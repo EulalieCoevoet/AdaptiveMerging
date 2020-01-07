@@ -61,18 +61,18 @@ public class RigidTransform {
      * Inverts this transformation
      */
     public void invert() {
-    	//T.invert();
+    	T.invert();
          // TODO: fix me
-        double x = T.m03; // extract translation t
-        double y = T.m13;
-        double z = T.m23;
-        T.transpose(); // invert rotational part
-        T.m30 = 0; // zero out translation that was put into last row
-        T.m31 = 0;
-        T.m32 = 0;
-        T.m02 = - T.m00*x - T.m01*y - T.m02*z; // compute new translation -R^T t 
-        T.m12 = - T.m10*x - T.m11*y - T.m12*z;
-        T.m22 = - T.m20*x - T.m21*y - T.m22*z;
+//        double x = T.m03; // extract translation t
+//        double y = T.m13;
+//        double z = T.m23;
+//        T.transpose(); // invert rotational part
+//        T.m30 = 0; // zero out translation that was put into last row
+//        T.m31 = 0;
+//        T.m32 = 0;
+//        T.m02 = - T.m00*x - T.m01*y - T.m02*z; // compute new translation -R^T t 
+//        T.m12 = - T.m10*x - T.m11*y - T.m12*z;
+//        T.m22 = - T.m20*x - T.m21*y - T.m22*z;
     }
     
     /**
