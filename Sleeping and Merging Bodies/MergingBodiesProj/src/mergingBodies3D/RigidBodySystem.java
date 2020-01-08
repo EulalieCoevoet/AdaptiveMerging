@@ -275,6 +275,7 @@ public class RigidBodySystem {
      */
     public void clear() {
         bodies.clear();
+        springs.clear();
         RigidBody.nextIndex = 0;
         reset();
     }
