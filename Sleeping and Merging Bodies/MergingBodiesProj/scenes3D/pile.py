@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from box import Box
 
 root = ET.Element('root')
 
@@ -13,14 +14,7 @@ plane.set('name','plane')
 y = 0
 for i in range(15):
     y += 2.5
-    body = ET.SubElement(root, 'body')
-    body.set('type','box')
-    body.set('dim','8 2 2')
-    body.set('name','box'+str(i))
-    x = ET.SubElement(body, 'x')
-    x.text =  "0.0 "+str(y)+" 0.0"
-    R = ET.SubElement(body, 'R')
-    R.text = "0 -1 0 0.0"
+    Box(root, name='box'+str(i), position="0.0 "+str(y)+" 0.0", dim='8 2 2')
 
 filename = "pile.xml"
 print("Generated file: "+filename)

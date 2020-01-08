@@ -790,7 +790,19 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     if ( ss == substeps.getMinimum() ) return;
                     substeps.setValue( ss - 1 );
                     stepsize.setValue( stepsize.getValue() *(ss-1)/ss );
-                }
+                } else if ( e.getKeyCode() == KeyEvent.VK_7 ) {
+                	for ( RigidBody b : system.bodies ) {
+                		if (b instanceof RigidCollection) {
+                			RigidCollection collection = (RigidCollection)b;
+                			for ( RigidBody sb : collection.bodies ) {
+                				if(sb.magnetic)
+                					sb.activateMagnet = !sb.activateMagnet;
+                			}
+                		}
+                		if(b.magnetic)
+                			b.activateMagnet = !b.activateMagnet;
+                	}                    	
+                } 
             }
         } );
     }

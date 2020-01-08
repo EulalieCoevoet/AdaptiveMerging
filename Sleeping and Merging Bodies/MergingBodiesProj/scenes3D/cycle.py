@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from box import Box
 
 root = ET.Element('root')
 
@@ -6,16 +7,7 @@ root = ET.Element('root')
 x = 0
 for i in range(2):
     if i==1 : x += 18
-    body = ET.SubElement(root, 'body')
-    body.set('type','box')
-    body.set('dim','8 2 8')
-    body.set('name','box'+str(i))
-    com = ET.SubElement(body, 'x')
-    com.text =  str(x)+" 0.0 0.0"
-    R = ET.SubElement(body, 'R')
-    R.text = "0 -1 0 0.0"
-    pinned = ET.SubElement(body, 'pinned')
-    pinned.text = "true"
+    Box(root, name='box'+str(i), position=str(x)+" 0.0 0.0", dim='8 2 8', pinned="true")
 
 # Pile bodies
 y = 0
@@ -25,14 +17,7 @@ for i in range(8):
     if i==4 :
         x += 10
         y = 2.5
-    body = ET.SubElement(root, 'body')
-    body.set('type','box')
-    body.set('dim','8 2 8')
-    body.set('name','box'+str(i))
-    com = ET.SubElement(body, 'x')
-    com.text = str(x)+" "+str(y)+" 0.0"
-    R = ET.SubElement(body, 'R')
-    R.text = "0 -1 0 0.0"
+    Box(root, name='box'+str(i), position=str(x)+" "+str(y)+" 0.0", dim='8 2 8')
 
 filename = "cycle.xml"
 print("Generated file: "+filename)
