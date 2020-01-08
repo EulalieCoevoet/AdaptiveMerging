@@ -52,10 +52,12 @@ public class Display {
 	public DisplayParameters params = new DisplayParameters();
 	
 	ArrayList<RigidBody> bodies;
+	ArrayList<Spring> springs;
 	CollisionProcessor collisionProcessor;
 	
-	Display(ArrayList<RigidBody> bodies, CollisionProcessor collisionProcessor) {
+	Display(ArrayList<RigidBody> bodies, ArrayList<Spring> springs, CollisionProcessor collisionProcessor) {
 		this.bodies = bodies;
+		this.springs = springs;
 		this.collisionProcessor = collisionProcessor;
 	}
 	
@@ -202,19 +204,10 @@ public class Display {
         
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
         gl.glNormal3f(0,0,1);
-    	for ( RigidBody b : bodies ) {
-    		for (Spring s : b.springs) {
-				s.displaySpring(drawable);
-			}
+		for (Spring s : springs) {
+			s.displaySpring(drawable);
+		}  
     		
-    		if ( b instanceof RigidCollection ) {
-    			for ( RigidBody body : ((RigidCollection)b).bodies ) {
-	        		for (Spring s : body.springs) {
-	    				s.displaySpring(drawable);
-	    			}
-    			}
-        	}   
-    	}        
         gl.glLineWidth(1);
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);
         if ( params.drawBoundingVolumes.getValue() ) {

@@ -30,12 +30,6 @@ public class RigidBody {
 	
     /** Variable to keep track of identifiers that can be given to rigid bodies */
     static public int nextIndex = 0;
-    
-	/** 
-	 * list of springs attached to this body
-	 * TODO: can this not live at the system level?  This seems like a weird place to put it
-	 */
-	public ArrayList<Spring> springs = new ArrayList<Spring>();
 	
     RigidBodyGeom geom;
         
@@ -298,13 +292,12 @@ public class RigidBody {
     
     /**
      * Adds to the torque a corriolis term (J omega) * omegacross
-     * TODO: Check that this is correct!! And make more efficient?
      */
     public void applyCoriollisTorque() {
     	if ( !pinned ) {
 	    	massAngular.transform( omega, tmp );
 	    	tmp2.cross( tmp, omega );
-	    	// TODO: CORRIOLIS: this is certainly broken :(
+	    	// TODO: CORRIOLIS: this is certainly broken :( Check that this is correct!! And make more efficient?
 	    	//torque.sub(tmp2); // seems like this should be added, but could also be a sign error. :(
     	}
     }
@@ -509,9 +502,6 @@ public class RigidBody {
         jinv.set( jinv0 );       
         v.set(0,0,0);
         omega.set(0,0,0);
-        for ( Spring s : springs ) {
-        	s.reset();
-        }
         updateTransformations();
     }
    

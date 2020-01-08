@@ -476,7 +476,7 @@ public class XMLParser {
 				Element e = (Element) n;
 				Point3d pB = new Point3d( t3d( e.getAttribute("pB") ) );
 				Spring s = new Spring( pB, body );
-				body.springs.add( s );
+				system.springs.add( s );
 				String k = e.getAttribute("k");
 				if ( !k.isEmpty() ) s.k = Double.parseDouble( k );
 				String d = e.getAttribute("d");

@@ -28,13 +28,14 @@ public class RigidBodySystem {
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 	    
     public MouseSpringForce mouseSpring;
+	public ArrayList<Spring> springs = new ArrayList<Spring>();
 	public MouseImpulse mouseImpulse;
 	public Impulse impulse = new Impulse();
     
 	public CollisionProcessor collision = new CollisionProcessor(bodies);
 	public Merging merging = new Merging(bodies, collision);
 	public Sleeping sleeping = new Sleeping(bodies);
-	public Display display = new Display(bodies, collision);
+	public Display display = new Display(bodies, springs, collision);
 	
 	public PrintStream stream = null;
 	public String sceneName = null;
@@ -209,16 +210,8 @@ public class RigidBodySystem {
 		for (RigidBody body: bodies){
 			if (body.isSleeping)
 				continue;
-			for (Spring s: body.springs) {
+			for (Spring s: springs) {
 				s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
-			}
-			
-			if (body instanceof RigidCollection) {
-				for (RigidBody b: ((RigidCollection)body).bodies){
-					for (Spring s: b.springs) {
-						s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
-					}
-				}
 			}
 		}
 	}
@@ -259,6 +252,9 @@ public class RigidBodySystem {
 			
 			if (i >= bodies.size()) break;
 		}
+		
+        for ( Spring s : springs ) 
+        	s.reset();
 		
         simulationTime = 0;
         collision.reset();
