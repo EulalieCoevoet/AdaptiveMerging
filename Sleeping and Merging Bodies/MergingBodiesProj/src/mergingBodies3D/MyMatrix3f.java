@@ -264,7 +264,6 @@ final public class MyMatrix3f extends Matrix3f {
       if(sm == 0.0f) {
 	vout.set(v);
 	dout.set(d);
-	System.out.println("count = "+i);
 	return;
       }
 
