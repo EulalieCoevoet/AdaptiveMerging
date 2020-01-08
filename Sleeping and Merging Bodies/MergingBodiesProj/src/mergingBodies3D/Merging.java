@@ -39,8 +39,8 @@ public class Merging {
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
-		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
-		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 10, 1e-10, 100 );
+		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-1, 1e-10, 100 );
+		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1, 1e-10, 100 );
 		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-3, 1e-10, 1e0 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	}
@@ -246,20 +246,21 @@ public class Merging {
 	private void unmergeSelectedBpcs(RigidCollection collection, ArrayList<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
 			
 		// Check for unstable configurations
-		ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();
+		// TODO: eulalie: don't know about this strategy
+		/*ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();
 		ArrayList<BodyPairContact> bpcs = new ArrayList<BodyPairContact>();
 		for (BodyPairContact bpc : bpcsToUnmerge) {
 			for (int i=0; i<2; i++) { 
 				RigidBody body = bpc.getBody(i);
 				bpcs.clear();
 				for (BodyPairContact newBpc : body.bodyPairContacts) 
-					if (newBpc.contactList.size()<2 && newBpc.inCollection && !bpcsToUnmerge.contains(newBpc) && !unstableBpcsToUnmerge.contains(newBpc)) 
+					if (newBpc.contactList.size()<3 && newBpc.inCollection && !bpcsToUnmerge.contains(newBpc) && !unstableBpcsToUnmerge.contains(newBpc)) 
 						bpcs.add(newBpc);
 				if (bpcs.size()==1)
 					unstableBpcsToUnmerge.add(bpcs.get(0));
 			}
 		}
-		bpcsToUnmerge.addAll(unstableBpcsToUnmerge);
+		bpcsToUnmerge.addAll(unstableBpcsToUnmerge);*/
 		
 		// Cut connections
 		for (BodyPairContact bpc: bpcsToUnmerge)
