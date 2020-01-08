@@ -470,6 +470,8 @@ public class XMLParser {
 					body.jinv0.setZero();
 					body.jinv.setZero();
 				}
+			} else if ( tag.equalsIgnoreCase("magnetic") ) {	
+				body.magnetic = Boolean.parseBoolean(values[0]);
 			} else if ( tag.equalsIgnoreCase("factorypart") ) {	
 				body.factoryPart = Boolean.parseBoolean(values[0]);
 			} else if ( tag.equalsIgnoreCase("spring") ) {

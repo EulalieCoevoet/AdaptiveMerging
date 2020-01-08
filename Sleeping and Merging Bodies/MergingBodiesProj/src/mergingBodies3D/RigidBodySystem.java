@@ -181,11 +181,7 @@ public class RigidBodySystem {
 	 * Apply gravity to bodies, collections and bodies in collections
 	 */
 	private void applyGravityForce() {
-		for ( RigidBody body : bodies ) {
-			
-			if (body.isSleeping)
-				continue;
-			
+		for ( RigidBody body : bodies ) {			
 			//fully active, regular stepping
 			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
 			tmpForce.set( Math.cos( theta ), Math.sin(theta), 0 );
@@ -207,12 +203,8 @@ public class RigidBodySystem {
 	 * Apply spring forces
 	 */
 	private void applySpringForces() {
-		for (RigidBody body: bodies){
-			if (body.isSleeping)
-				continue;
-			for (Spring s: springs) {
-				s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
-			}
+		for (Spring s: springs) {
+			s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
 		}
 	}
     
