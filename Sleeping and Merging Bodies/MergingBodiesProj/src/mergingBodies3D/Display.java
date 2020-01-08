@@ -22,7 +22,7 @@ public class Display {
 	
 	public class DisplayParameters {
 
-	    public BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", false );
+	    public BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", true );
 	    public BooleanParameter drawGraphs = new BooleanParameter( "draw performance graphs", false );
 	    public BooleanParameter drawMemGraphs = new BooleanParameter( "draw memory graphs", false );
 	    

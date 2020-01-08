@@ -86,7 +86,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     public LCPApp3D() {
         system.mouseSpring = mouseSpring;
         system.mouseImpulse = mouseImpulse;
-        loadXMLSystem("scenes3D/testWeirdCollision.xml");
+        loadXMLSystem("scenes3D/towers8.xml");
         T.getBackingMatrix().setIdentity();
         EasyViewerAnim.antialiasing = true;        
         eva = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(640,360), new Dimension(640,480) );
