@@ -47,6 +47,10 @@ import mergingBodies3D.RigidBody;
  */
 public class BoxBox {
 
+	static double fudgeFactor = 1.05;
+	static double tinyOffset = 1e-5;
+	static double dLineClosestApproachEPS = (0.0001);
+	              
 	private static void ASSERT( boolean b ) {
 		if (b) {
 			throw new RuntimeErrorException( new Error("avenge my death!") );
@@ -288,7 +292,7 @@ public class BoxBox {
 		double expr1_val = (expr1); /* Avoid duplicate evaluation of expr1 */ 
 		double s2 = Math.abs(expr1_val) - (expr2); 
 		if (s2 > 0) return false; 
-		if (s2 > tst1._s + 1e-5) { // NOTE: we put a tiny buffer to better encourage consistent contact numbering!
+		if (s2 > tst1._s + tinyOffset) { // NOTE: we put a tiny offset to better encourage consistent contact numbering!
 			// Not sure what the rigth number is here, but 1e-5 seems reasonable for the scale of objects we have here
 			tst1._s = s2; 
 //			tst1._normalR_A = norm_A.v; 
@@ -313,7 +317,8 @@ public class BoxBox {
 		double l = Math.sqrt((n1)*(n1) + (n2)*(n2) + (n3)*(n3)); 
 		if (l > 0) { 
 			s2 /= l; 
-			if (s2*tst2._fudge_factor > tst2._s) { 
+//			if (s2*tst2._fudge_factor > tst2._s) { 
+	     	if (s2*fudgeFactor > tst2._s) { 
 				tst2._s = s2; 
 				tst2._normalR_M = null; 
 				tst2._normalR_col = 0; 
@@ -330,7 +335,7 @@ public class BoxBox {
 		return true;
 	}
 
-	private static class TstClass {
+	public static class TstClass {
 		int _code;
 		Matrix3d _normalR_M;
 		int _normalR_col;
@@ -367,7 +372,7 @@ public class BoxBox {
 		double q1 =  ua.dot(pLCP);
 		double q2 = -ub.dot(pLCP);
 		double d = 1-uaub*uaub;
-		if (d <= (0.0001)) { // @@@ this needs to be made more robust
+		if (d <= dLineClosestApproachEPS ) { // @@@ this needs to be made more robust
 			alpha[0] = 0;
 			beta[0]= 0;
 		} else {
@@ -414,6 +419,10 @@ public class BoxBox {
 	private static Vector3d center = new Vector3d();
 	private static Point3d pos = new Point3d();
 	private static int[] iret=new int[8];
+	private static double[] quad=new double[8];	// 2D coordinate of incident face (x,y pairs)
+	private static double[] ret=new double[16];
+	private static double[] point=new double[3*8];		// penetrating contact points
+	private static double[] dep=new double[8];			// depths for those points
 
 
 	//	int dBoxBox (const Vector3d p1, const dMatrix3 R1,
@@ -731,7 +740,6 @@ public class BoxBox {
 		}
 
 		// find the four corners of the incident face, in reference-face coordinates
-		double[] quad=new double[8];	// 2D coordinate of incident face (x,y pairs)
 		double c1,c2,m11,m12,m21,m22;
 		c1 = dDOT14 (center,Ra,code1);
 		c2 = dDOT14 (center,Ra,code2);
@@ -762,7 +770,7 @@ public class BoxBox {
 		rect[1] = getComp(Sa,code2);
 
 		// intersect the incident and reference faces
-		double[] ret=new double[16];
+
 		int n = intersectRectQuad (rect,quad,ret);
 		if (n < 1) return 0;		// this should never happen
 
@@ -770,8 +778,6 @@ public class BoxBox {
 		// and compute the contact position and depth for each point. only keep
 		// those points that have a positive (penetrating) depth. delete points in
 		// the 'ret' array as necessary so that 'point' and 'ret' correspond.
-		double[] point=new double[3*8];		// penetrating contact points
-		double[] dep=new double[8];			// depths for those points
 		double det1 = 1.0/(m11*m22 - m12*m21);
 		m11 *= det1;
 		m12 *= det1;
@@ -781,6 +787,7 @@ public class BoxBox {
 		for (j=0; j < n; j++) {
 			double k1 =  m22*(ret[j*2]-c1) - m12*(ret[j*2+1]-c2);
 			double k2 = -m21*(ret[j*2]-c1) + m11*(ret[j*2+1]-c2);
+			j=j;/// for a breakpoint
 			for (i=0; i<3; i++) point[cnum*3+i] =
 				//center.get(i) + k1*Rb.v[i*4+a1] + k2*Rb.v[i*4+a2];
 				getComp( center,i ) + k1*Rb.getElement(i,a1) + k2*Rb.getElement(i,a2); 
