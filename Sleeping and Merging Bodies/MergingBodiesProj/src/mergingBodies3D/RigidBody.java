@@ -415,10 +415,13 @@ public class RigidBody {
 	 * @param bpcFrom
 	 * @return true or false
 	 */
+    private ArrayList<BodyPairContact> cycle = new ArrayList<BodyPairContact>(4);
 	protected boolean checkCycle(int count, RigidBody startBody, BodyPairContact bpcFrom, MergeParameters mergeParams) {
 		
-		if (count>2) { // more than three bodies in the cycle
-			bpcFrom.clearCycle();
+		cycle.add(bpcFrom);
+		
+		if (count>3) { // more than four bodies in the cycle
+			cycle.clear();
 			return false;
 		}
 		
@@ -430,8 +433,11 @@ public class RigidBody {
 		BodyPairContact bpcToCheck = null;
 		for (BodyPairContact bpc: bpcList) {
 			
-			if(bpc != bpcFrom && !bpc.inCollection && !bpc.inCycle) { // we do not want to check the bpc we come from, nor the bpc inside the collection
-																	  // a bpc should only be part of one cycle
+			if(bpc != bpcFrom &&      // we do not want to check the bpc we come from
+			  !bpc.inCollection &&    // nor the bpc inside the collection
+			  !bpc.inCycle && 		  // a bpc should only be part of one cycle
+			  !cycle.contains(bpc)) { // we do not want to check a bpc that has already been tag as part of the cycle
+																	  					   
 				
 				// we only consider bodies that are ready to be merged
 				if(bpc.checkMergeCondition(mergeParams, false)) {
@@ -443,14 +449,15 @@ public class RigidBody {
 						if (contact.state != ContactState.BROKEN)
 							nbActiveContact += 1;
 					
-					if (nbActiveContact==1) // if there is only one active contact in the bpc, it is a direction we want to check for cycle
+					if (nbActiveContact<3) // if there is less than three active contacts in the bpc, it is a direction we want to check for cycle
 						bpcToCheck = bpc;
 					
 					if(otherBody == otherBodyFrom || // we are touching two different bodies in a same collection
 					   otherBody.isInSameCollection(startBody) || // we are part of a collection that touches a same body 
 					   otherBody == startBody || // we have reached the body from which the cycle started
 					  (otherBody.pinned && startBody.pinned)) { // there is a body between two pinned body	
-						bpcFrom.updateCycle(bpc);
+						cycle.add(bpc);
+						updateCycle();
 						return true;
 					}
 				}
@@ -459,14 +466,37 @@ public class RigidBody {
 
 		// we did not find a cycle, but there is another candidate, continue
 		if(bpcToCheck!=null) {
-			bpcFrom.updateCycle(bpcToCheck);
 			RigidBody otherBody = bpcToCheck.getOtherBodyWithCollectionPerspective(this);
 			return otherBody.checkCycle(++count, startBody, bpcToCheck, mergeParams); 
 		}
 		
 		// we did not find a cycle, and there is no another candidate, break
-		bpcFrom.clearCycle();
+		cycle.clear();
 		return false;
+	}
+	
+	/**
+	 * Input bpc is added as being part of the cycle. Update all lists and datas accordingly. 
+	 * @param bpc
+	 */
+	public void updateCycle() {
+		
+		Color color = new Color();
+		color.setRandomColor();
+		for (BodyPairContact bpc: cycle) {
+			if (bpc.cycle == null)
+				bpc.cycle = new ArrayList<BodyPairContact>();
+			bpc.cycle.clear();
+			bpc.cycle.addAll(cycle);
+			
+			if (bpc.cycleColor == null) 
+				bpc.cycleColor = new Color();
+			bpc.cycleColor.set(color);
+			
+			bpc.inCycle = true;
+		}
+		
+		cycle.clear();
 	}
         
     /**
