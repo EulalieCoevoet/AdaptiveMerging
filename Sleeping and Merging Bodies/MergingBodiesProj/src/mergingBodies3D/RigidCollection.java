@@ -633,10 +633,11 @@ public class RigidCollection extends RigidBody {
 		for (BodyPairContact bpc : bodyPairContacts) {
 			if (bpc.inCycle) {
 				if (bpc.contactList.isEmpty())
-					System.err.println(
-							"[displayCycles] The list of contact is empty. This should not happen. Probably due to an unwanted merge (concave?).");
-				else
-					bpc.contactList.get(0).display(drawable, true);
+					System.err.println("[displayCycles] The list of contact is empty. This should not happen. Probably due to an unwanted merge (concave?).");
+				else {
+					for (Contact contact : bpc.contactList) 
+						contact.display(drawable, true);
+				}
 			}
 		}
 	}
