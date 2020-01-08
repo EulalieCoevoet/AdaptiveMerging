@@ -128,17 +128,8 @@ public class Sleeping {
 	/**
 	 * Track metric over time steps
 	 */
-	protected void accumulate(RigidBody body) {
-		// TODO: WHY A DUMMY BODY... remove or at least make static! :(
-		// perhaps to use the bounding box relative velocity check?
-		// Should definitely avoid recreating this thing all the time!
-		RigidBody dummyBody = new RigidBody();
-		dummyBody.x.set(body.x);
-		dummyBody.theta = body.theta;
-		dummyBody.v.set(0.,0.,0);
-		dummyBody.omega.set(0,0,0);
-		
-		body.metricHistory.add(motionMetricProcessor.getMotionMetric(body, dummyBody));
+	protected void accumulate(RigidBody body) {		
+		body.metricHistory.add(motionMetricProcessor.getMotionMetric(body));
 		if (body.metricHistory.size() > params.stepAccum.getValue()) {
 			body.metricHistory.remove(0);	
 		}
