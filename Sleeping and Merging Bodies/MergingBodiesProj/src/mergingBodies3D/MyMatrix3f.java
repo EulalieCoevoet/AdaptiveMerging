@@ -223,11 +223,7 @@ final public class MyMatrix3f extends Matrix3f {
 
   public void getEigen(MyMatrix3f cov) {
     MyVector3f evals = new MyVector3f();
-
     mEigen(cov, evals, this);
-
-    System.out.println("EigenVectors=\n"+cov.toString());
-    System.out.println("EigenValues=\n"+evals.toString());
   }
 
   /**
