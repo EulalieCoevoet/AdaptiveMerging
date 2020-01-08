@@ -321,27 +321,23 @@ public class RigidCollection extends RigidBody {
 		meanPos.scale(1.0 / N);
 
 		Vector3d v = new Vector3d();
-		//MyMatrix3f covariance = new MyMatrix3f();
+		MyMatrix3f tmp = new MyMatrix3f();
+		MyMatrix3f covariance = new MyMatrix3f();
 		for (RigidBody body : bodies) {
 			if (body instanceof PlaneRigidBody) continue;
 			for (Point3d point : body.boundingBoxB) {
 				Point3d p = new Point3d(point);
 				transformB2C.transform(p);
 				v.sub(p, meanPos);
-				// TODO: UNFINISHED: Need to do our own rank 1 update :(
-				
-				//covariance.rank1(1.0 / N, v);
-				
+				tmp.m00 = (float)(v.x*v.x); tmp.m01 = (float)(v.x*v.y); tmp.m02 = (float)(v.x*v.z);
+				tmp.m10 = (float)(v.y*v.x); tmp.m11 = (float)(v.y*v.y); tmp.m12 = (float)(v.y*v.z);
+				tmp.m20 = (float)(v.z*v.x); tmp.m21 = (float)(v.z*v.y); tmp.m22 = (float)(v.z*v.z);
+				covariance.add(tmp);
 			}
 		}
-		// Need to do our own EVD ?  :(
-		
-		// or use the code in MyMatrix (harvested from web)
-	
-		// TODO: UNFINISHED: set theta... and make sure it is a right handed coordinate system!!!
-
-		theta.setIdentity();
-		
+		covariance.mul(1.f/N);
+		covariance.getEigen(tmp);
+		theta.set(tmp);
 	}
 
 	/**

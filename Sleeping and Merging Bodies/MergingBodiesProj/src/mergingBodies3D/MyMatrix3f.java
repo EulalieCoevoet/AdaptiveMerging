@@ -221,9 +221,8 @@ final public class MyMatrix3f extends Matrix3f {
     return (x < 0 ? -x : x);
   }
 
-  public void getEigen() {
+  public void getEigen(MyMatrix3f cov) {
     MyVector3f evals = new MyVector3f();
-    MyMatrix3f cov = new MyMatrix3f();
 
     mEigen(cov, evals, this);
 
