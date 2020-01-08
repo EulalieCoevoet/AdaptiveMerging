@@ -17,6 +17,8 @@ import mergingBodies3D.collision.BoxSphere;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
+import mintools.parameters.Parameter;
+import mintools.parameters.ParameterListener;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -648,10 +650,10 @@ public class CollisionProcessor {
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
 	
-    /** TODO: RESTITUTION (currently unused) Restitution parameter for contact constraints */
+    /** Restitution parameter for contact constraints */
     public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
     
-    /** TODO: FRICTION (currently unused) Coulomb friction coefficient for contact constraint */
+    /** Coulomb friction coefficient for contact constraint */
     public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.8, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
@@ -673,11 +675,36 @@ public class CollisionProcessor {
 		vfp.add( iterationsInCollection.getSliderControls() );
 
         vfp.add( restitution.getSliderControls(false) );
+        // If we change the restitution from the GUI, it will override the parameter for all bodies
+        restitution.addParameterListener( new ParameterListener<Double>() {
+			@Override
+			public void parameterChanged(Parameter<Double> parameter) {
+				for (RigidBody body: bodies) {
+					body.restitution = parameter.getValue();
+					if (body instanceof RigidCollection)
+						for (RigidBody b: ((RigidCollection)body).bodies)
+							b.restitution = parameter.getValue();
+				}
+			}
+		});
+        
         vfp.add( friction.getSliderControls(false) );
+        // If we change the friction from the GUI, it will override the parameter for all bodies
+        friction.addParameterListener( new ParameterListener<Double>() {
+			@Override
+			public void parameterChanged(Parameter<Double> parameter) {
+				for (RigidBody body: bodies) {
+					body.friction = parameter.getValue();
+					if (body instanceof RigidCollection)
+						for (RigidBody b: ((RigidCollection)body).bodies)
+							b.friction = parameter.getValue();
+				}
+			}
+		});
+        
 		vfp.add( feedbackStiffness.getSliderControls(false) );
 		vfp.add( enableCompliance.getControls() );
 		vfp.add( compliance.getSliderControls(true) );
-        
         return vfp.getPanel();
     }
     

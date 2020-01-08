@@ -208,10 +208,8 @@ public class Contact {
 		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
 		
 		// add the Bounce vector to the u's over here, but don't need to do that just yet
-		double restitution = 0.;
-		if (!computeInCollection) {
-			restitution=(body1.restitution+body2.restitution)/2.;
-		}
+		// Note: For the single iteration PGS the restitution should be considered.
+		double restitution=(body1.restitution+body2.restitution)/2.;
 		
 		bn = 0; bt1 = 0; bt2 = 0;
 		

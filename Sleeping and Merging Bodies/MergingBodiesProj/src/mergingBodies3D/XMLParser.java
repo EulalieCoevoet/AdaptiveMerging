@@ -66,10 +66,7 @@ public class XMLParser {
 	}
 	
 	/**
-	 * Parse collision node to set parameters common to ALL bodies?
-	 * TODO: RESTITUTION AND FRICTION: need to fix them...
-	 * And those parameters should perhaps be available as overrides or to modulate the restition and
-	 * friction parameters of bodies. 
+	 * Parse collision node to set parameters common to ALL bodies.
 	 */
 	private void parseCollision() {
 		NodeList nList = document.getElementsByTagName("collision");
@@ -254,15 +251,17 @@ public class XMLParser {
 	}
 	
 	/**
-	 * TODO: should include ability to change density
+	 * Create a box given the attribute dim, optional density can also be set (default is 1)
 	 * @param name
 	 * @param eElement
 	 */
 	private RigidBody createBox( String name, Element eElement ) {
 		Vector3d s = new Vector3d( t3d( eElement.getAttribute("dim") ) );
+		double density = 1;
+		if(eElement.hasAttribute("density"))
+			density = Double.parseDouble(eElement.getAttribute("density"));
 		RigidBodyGeomBox geom = new RigidBodyGeomBox( s );	
 
-		double density = 1;
 		double massLinear = s.x*s.y*s.z * density;
 		Matrix3d angularMass = new Matrix3d();
 		angularMass.m00 = 1.0/12*massLinear*(s.y*s.y+s.z*s.z);
@@ -284,40 +283,16 @@ public class XMLParser {
         body.geom = geom;	        
         body.radius = s.length();
         
-        // Silly to deal with boxes with spheres, but this is the quick solution for now... 
-        // Assume unit size tiling, and choose centers along faces
-        // ... and now in comments because we have box-box collisions
-        
-//        double radius = 0.5;
-//        int nx = (int) Math.ceil( s.x/2/radius );
-//        int ny = (int) Math.ceil( s.y/2/radius );
-//        int nz = (int) Math.ceil( s.z/2/radius );
-//        
-//        ArrayList<BVSphere> L = new ArrayList<BVSphere>();
-//        Point3d p = new Point3d();
-//        
-//        // stupid, but simple: loop over the volume, and only 
-//        // generate spheres at surface points
-//        for ( int i = 0; i < nx; i++ ) {
-//        	boolean iboundary = i == 0 || i == nx-1;
-//        	for ( int j = 0; j < ny; j++ ) {
-//            	boolean jboundary = j == 0 || j == ny-1;
-//        		for ( int k = 0; k < nz; k++ ) {
-//                	boolean kboundary = k == 0 || k == nz-1;
-//                	if ( !iboundary && !jboundary && !kboundary ) continue;
-//            		p.x = -s.x/2 + radius + i*2*radius;
-//            		p.y = -s.y/2 + radius + j*2*radius;
-//            		p.z = -s.z/2 + radius + k*2*radius;
-//            		L.add( new BVSphere( p, radius * Math.sqrt(2) , body ) ); // should probably be sqrt 3... but balance what is in and what is out/
-//        		}
-//        	}
-//        }        
-//        body.root = new BVNode( L, body );
-        
         body.name = name;
 		return body;
 	}
 
+	/**
+	 * Create pinned plane
+	 * @param name
+	 * @param eElement
+	 * @return
+	 */
 	private RigidBody createPlane( String name, Element eElement ) {
 		Point3d p = new Point3d();
 		Vector3d n = new Vector3d();
@@ -330,13 +305,15 @@ public class XMLParser {
 	}
 	
 	/**
-	 * TODO: should include ability to change density
+	 * Create a sphere given the attribute r (radius), optional density can also be set (default is 1)
 	 * @param name
 	 * @param eElement
 	 */
 	private RigidBody createSphere( String name, Element eElement ) {
 		double r = Double.parseDouble( eElement.getAttribute("r") );
 		double density = 1;
+		if(eElement.hasAttribute("density"))
+			density = Double.parseDouble(eElement.getAttribute("density"));
 		double massLinear = 4.0/3*Math.PI*r*r*r * density;
 		Matrix3d angularMass = new Matrix3d();
 		angularMass.setIdentity();
@@ -364,6 +341,8 @@ public class XMLParser {
 	private RigidBody createMesh( String name, Element eElement ) {
 		double scale = Double.parseDouble( eElement.getAttribute("scale") );
 		double density = 1;
+		if(eElement.hasAttribute("density"))
+			density = Double.parseDouble(eElement.getAttribute("density"));
 		String objfname = eElement.getAttribute("obj");
 		String stfname = eElement.getAttribute("st");
 		
