@@ -46,6 +46,12 @@ public class RigidBodySystem {
 	/**Total time in seconds for computation since last reset*/
 	public double totalAccumulatedComputeTime;
 	
+    /** keeps track of the time used to merge on the last call */
+    public double mergingTime = 0;
+    
+    /** keeps track of the time used to unmerge on the last call */
+    public double unmergingTime = 0;
+	
 	/**Total number of steps performed*/
 	public int totalSteps = 0;
 	
@@ -85,7 +91,7 @@ public class RigidBodySystem {
      */
     public void advanceTime( double dt ) {
     	
-        long now = System.nanoTime();      
+        long start = System.nanoTime();      
 		totalSteps++;  
 
         for ( RigidBody b : bodies ) {
@@ -108,8 +114,11 @@ public class RigidBodySystem {
 		if (merging.params.unmergeAll.getValue()) merging.unmergeAll();
 		
 		collision.updateInCollections(dt, merging.params);
-		
+
+        long now = System.nanoTime();   
 		merging.unmerge(MergeConditions.CONTACTS, dt);	
+        unmergingTime = (System.nanoTime() - now) / 1e9;
+        
 		if (merging.mergingEvent) {
 			for (RigidBody body: bodies)
 				body.clear();
@@ -126,15 +135,19 @@ public class RigidBodySystem {
 		for (BodyPairContact bpc : collision.bodyPairContacts) 
 			bpc.accumulate(merging.params);
 
+        now = System.nanoTime();   
 		merging.merge();
+        mergingTime = (System.nanoTime() - now) / 1e9;
 		
 		sleeping.sleep();
-		
+
+        now = System.nanoTime();   
 		merging.unmerge(MergeConditions.RELATIVEMOTION, dt); 
+        unmergingTime += (System.nanoTime() - now) / 1e9;
 
 		applyViscousDecay();
 		
-        computeTime = (System.nanoTime() - now) / 1e9;
+        computeTime = (System.nanoTime() - start) / 1e9;
         simulationTime += dt;
 		totalAccumulatedComputeTime += computeTime;
 		

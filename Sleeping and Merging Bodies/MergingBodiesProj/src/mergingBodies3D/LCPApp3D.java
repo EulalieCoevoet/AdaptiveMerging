@@ -201,7 +201,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         stringBuilder.append( "total compute time = "); stringBuilder.append( system.totalAccumulatedComputeTime); stringBuilder.append( '\n' );
         stringBuilder.append( "compute time = "); stringBuilder.append( system.computeTime); stringBuilder.append( '\n' );
         stringBuilder.append( "collision detection = "); stringBuilder.append( system.collision.collisionDetectTime); stringBuilder.append( '\n' );
-        stringBuilder.append( "collision processing = "); stringBuilder.append( system.collision.collisionSolveTime); stringBuilder.append( '\n' );
+        stringBuilder.append( "LCP solve = "); stringBuilder.append( system.collision.collisionSolveTime); stringBuilder.append( '\n' );
+        stringBuilder.append( "Single iteration solve = "); stringBuilder.append( system.collision.collectionUpdateTime); stringBuilder.append( '\n' );
+        stringBuilder.append( "Merging = "); stringBuilder.append( system.mergingTime); stringBuilder.append( '\n' );
+        stringBuilder.append( "Unmerging = "); stringBuilder.append( system.unmergingTime); stringBuilder.append( '\n' );
         stringBuilder.append( "h = "); 
         stringBuilder.append( stepsize.getValue()); 
         stringBuilder.append( " (with "); 

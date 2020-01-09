@@ -67,7 +67,7 @@ public class CollisionProcessor {
     
     /** keeps track of the time used to solve the LCP based velocity update on the last call */
     double collisionSolveTime = 0;
-	
+   
 	/** keeps track of the time used to update the contacts inside the collections on the last call */
 	double collectionUpdateTime = 0;
 	

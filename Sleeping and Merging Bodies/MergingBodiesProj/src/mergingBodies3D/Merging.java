@@ -177,9 +177,13 @@ public class Merging {
 		params.unmergeAll.setValue(false);
 	}
 	
+	private LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
+	private LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
+	private ArrayList<BodyPairContact> bpcsToUnmerge = new ArrayList<BodyPairContact>();
+	private ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
 	/**
 	 * Unmerge BodyPairContacts that satisfy condition
-	 */
+	 */	
 	public void unmerge(MergeConditions condition, double dt) {
 		
 		if (!params.enableUnmerging.getValue())
@@ -191,8 +195,8 @@ public class Merging {
 		if (condition == MergeConditions.CONTACTS && !(params.enableUnmergeNormalCondition.getValue() || params.enableUnmergeFrictionCondition.getValue()))
 			return;
 		
-		LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
-		LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
+		removalQueue.clear();
+		additionQueue.clear();
 		
 		for(RigidBody body : bodies) {
 			
@@ -202,7 +206,7 @@ public class Merging {
 			if (body instanceof RigidCollection) {
 				
 				RigidCollection collection = (RigidCollection) body;
-				ArrayList<BodyPairContact> bpcsToUnmerge = new ArrayList<BodyPairContact>();
+				bpcsToUnmerge.clear();
 				
 				for (BodyPairContact bpc: collection.bodyPairContacts) {
 					if (!bpc.inCollection)
@@ -218,13 +222,15 @@ public class Merging {
 							if (condition == MergeConditions.RELATIVEMOTION && !collection.isMovingAway(b, params))
 								continue;
 							
-							bpc.checkCyclesToUnmerge(bpcsToUnmerge);
+							if (params.enableMergeCycleCondition.getValue())
+								bpc.checkCyclesToUnmerge(bpcsToUnmerge);
+							
 							bpc.addBpcToUnmerge(bpcsToUnmerge);
 						}
 					}
 				}
 				
-				ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
+				newBodies.clear();
 				if (!bpcsToUnmerge.isEmpty()) 
 					unmergeSelectedBpcs(collection, bpcsToUnmerge, newBodies, dt);	
 
@@ -243,6 +249,15 @@ public class Merging {
 		processCollectionsColor(bodies);
 	}
 
+	ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
+	ArrayList<RigidBody> subbodies = new ArrayList<RigidBody>();
+	/**
+	 * Unmerge given bpcs
+	 * @param collection
+	 * @param bpcsToUnmerge
+	 * @param newBodies
+	 * @param dt
+	 */
 	private void unmergeSelectedBpcs(RigidCollection collection, ArrayList<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
 			
 		// Check for unstable configurations
@@ -267,8 +282,8 @@ public class Merging {
 			unmergeBodyPairContact(bpc);
 		
 		// Compute resulting new collections/bodies
-		ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
-		ArrayList<RigidBody> subbodies = new ArrayList<RigidBody>();
+		handledBodies.clear();
+		subbodies.clear();
 		
 		for (BodyPairContact bpc: bpcsToUnmerge) {
 			for (int i=0; i<2; i++) { 
