@@ -94,8 +94,21 @@ public class Spring {
 	}
 
 	public void reset() {
-		if (type == SpringType.ZERO)				
-			body1.transformB2W.transform( pb1, pw );
+		switch (type) {
+			case ZERO:
+				body1.transformB2W.transform(pb1, pw);
+				body1.transformB2W.transform(pb1, pb1W);
+				break;
+			case WORLD:
+				body1.transformB2W.transform(pb1, pb1W);
+				break;
+			case BODYBODY:
+				body1.transformB2W.transform(pb1, pb1W);
+				body2.transformB2W.transform(pb2, pb2W);
+				break;
+			default:
+				break;
+		}
 	}
 	
 	/**
@@ -183,6 +196,7 @@ public class Spring {
 		gl.glLineWidth(2);
 		gl.glColor4f(1, 0 ,0, 0.5f);
 		gl.glBegin( GL.GL_LINES );
+		
 		if (type == SpringType.BODYBODY) {
 			gl.glVertex3d( pb1W.x, pb1W.y, pb1W.z );	
 			gl.glVertex3d( pb2W.x, pb2W.y, pb2W.z );	
