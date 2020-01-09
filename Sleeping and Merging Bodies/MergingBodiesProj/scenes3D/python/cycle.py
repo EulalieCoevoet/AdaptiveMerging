@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
-from box import Box
+from modules.box import Box
+from modules.exportXML import export
 
 root = ET.Element('root')
 
@@ -19,8 +20,4 @@ for i in range(8):
         y = 2.5
     Box(root, name='box'+str(i), position=str(x)+" "+str(y)+" 0.0", dim='8 2 8')
 
-filename = "cycle.xml"
-print("Generated file: "+filename)
-file = open(filename, "w")
-file.write(ET.tostring(root))
-file.close
+export(root, "../cycle.xml")

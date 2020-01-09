@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as ET
-from box import Box
+from modules.box import Box
+from modules.exportXML import export
+
 root = ET.Element('root')
 
 # Spring Default
@@ -16,8 +18,4 @@ body.addSpring("0. 0. 0.", k="10")
 boat = Box(root, name='body4', position="8.0 -5.0 0.0", dim='2 2 2')
 boat.addSpring("0. 0. 0.", positionB2="0. 0. 0.", k="10", body2="body3")
 
-filename = "springsTest.xml"
-print("Generated file: "+filename)
-file = open(filename, "w")
-file.write(ET.tostring(root))
-file.close
+export(root, "../springsTest.xml")

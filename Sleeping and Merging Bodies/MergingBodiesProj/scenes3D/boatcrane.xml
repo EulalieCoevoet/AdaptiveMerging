@@ -1,1 +1,119 @@
-<root><body dim="15 2 15" name="dock" type="box"><x>-10.0 0.0 0.0</x><R>0. -1 0. 0.</R><pinned>true</pinned><magnetic>false</magnetic></body><body dim="30 2 15" name="boat" type="box"><x>17 0.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic><spring d="10" k="100" pB="15 0 7.5" /><spring d="10" k="100" pB="15 0 -7.5" /><spring d="10" k="100" pB="-15 0 -7.5" /><spring d="10" k="100" pB="-15 0 7.5" /></body><body dim="8 2 8" name="magnet" type="box"><x>-10.0 15.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>true</magnetic><spring d="10" k="100" pB="1 0 1" /><spring d="10" k="100" pB="1 0 -1" /><spring d="10" k="100" pB="-1 0 -1" /><spring d="10" k="100" pB="-1 0 1" /></body><body dim="8 2 8" name="box0" type="box"><x>8.5 2.5 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box1" type="box"><x>8.5 5.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box2" type="box"><x>8.5 7.5 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box3" type="box"><x>8.5 10.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box4" type="box"><x>8.5 12.5 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box5" type="box"><x>17.0 2.5 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box6" type="box"><x>17.0 5.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box7" type="box"><x>17.0 7.5 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box8" type="box"><x>17.0 10.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box9" type="box"><x>17.0 12.5 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box10" type="box"><x>25.5 2.5 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box11" type="box"><x>25.5 5.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box12" type="box"><x>25.5 7.5 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box13" type="box"><x>25.5 10.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 8" name="box14" type="box"><x>25.5 12.5 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body></root>
+<?xml version="1.0" ?>
+<root>
+	<body dim="15 2 15" name="dock" type="box">
+		<x>-10.0 0.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>true</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="30 2 15" name="boat" type="box">
+		<x>17 0.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<spring d="10" k="100" pB="15 0 7.5"/>
+		<spring d="10" k="100" pB="15 0 -7.5"/>
+		<spring d="10" k="100" pB="-15 0 -7.5"/>
+		<spring d="10" k="100" pB="-15 0 7.5"/>
+	</body>
+	<body dim="8 2 8" name="magnet" type="box">
+		<x>-10.0 15.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>true</magnetic>
+		<spring d="10" k="100" pB="1 0 1"/>
+		<spring d="10" k="100" pB="1 0 -1"/>
+		<spring d="10" k="100" pB="-1 0 -1"/>
+		<spring d="10" k="100" pB="-1 0 1"/>
+	</body>
+	<body dim="8 2 8" name="box0" type="box">
+		<x>8.5 2.5 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box1" type="box">
+		<x>8.5 5.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box2" type="box">
+		<x>8.5 7.5 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box3" type="box">
+		<x>8.5 10.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box4" type="box">
+		<x>8.5 12.5 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box5" type="box">
+		<x>17.0 2.5 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box6" type="box">
+		<x>17.0 5.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box7" type="box">
+		<x>17.0 7.5 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box8" type="box">
+		<x>17.0 10.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box9" type="box">
+		<x>17.0 12.5 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box10" type="box">
+		<x>25.5 2.5 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box11" type="box">
+		<x>25.5 5.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box12" type="box">
+		<x>25.5 7.5 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box13" type="box">
+		<x>25.5 10.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 8" name="box14" type="box">
+		<x>25.5 12.5 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+</root>
