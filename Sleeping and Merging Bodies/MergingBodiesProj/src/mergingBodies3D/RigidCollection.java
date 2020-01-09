@@ -160,7 +160,7 @@ public class RigidCollection extends RigidBody {
 
 		r.sub(xCom, body.x);
 		wxr.cross( body.omega, r );
-		tmp1.add( wxr, v );
+		tmp1.add( wxr, body.v );
 		tmp1.scale( body.massLinear );
 		
 		r.sub( xCom, x );
