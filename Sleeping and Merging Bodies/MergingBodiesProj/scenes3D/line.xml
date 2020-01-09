@@ -1,1 +1,34 @@
-<root><body n="0 1 0" name="plane" p="0 -1 0" type="plane" /><body dim="8 2 2" name="box0" type="box"><x>8.1 0.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 2" name="box1" type="box"><x>16.2 0.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 2" name="box2" type="box"><x>24.3 0.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 2" name="box3" type="box"><x>32.4 0.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body><body dim="8 2 2" name="box4" type="box"><x>40.5 0.0 0.0</x><R>0. -1 0. 0.</R><pinned>false</pinned><magnetic>false</magnetic></body></root>
+<?xml version="1.0" ?>
+<root>
+	<body n="0 1 0" name="plane" p="0 -1 0" type="plane"/>
+	<body dim="8 2 2" name="box0" type="box">
+		<x>8.1 0.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 2" name="box1" type="box">
+		<x>16.2 0.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 2" name="box2" type="box">
+		<x>24.3 0.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 2" name="box3" type="box">
+		<x>32.4 0.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body dim="8 2 2" name="box4" type="box">
+		<x>40.5 0.0 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+</root>
