@@ -1,6 +1,7 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -83,7 +84,7 @@ public class RigidBody {
 	 * both internal and external bpc.
 	 * We may want to split this list in two parts...? (external/internal)
 	 **/
-	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
+	public HashSet<BodyPairContact> bodyPairContacts = new HashSet<BodyPairContact>();
 
     /** DeltaV for PGS resolution */
     Vector6d deltaV = new Vector6d();
@@ -419,7 +420,7 @@ public class RigidBody {
 		}
 		
 		// if we come across a collection in the contact graph, we consider it as a body and check the external bpc 
-		ArrayList<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContacts : bodyPairContacts;
+		HashSet<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContacts : bodyPairContacts;
 		
 		RigidBody otherBodyFrom = bpcFrom.getOtherBodyWithCollectionPerspective(this);		
 		

@@ -3,6 +3,7 @@ package mergingBodies;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
@@ -163,6 +164,8 @@ public class Merging {
 		params.unmergeAll.setValue(false);
 	}
 	
+	private HashSet<BodyPairContact> bpcsToUnmerge = new HashSet<BodyPairContact>();
+
 	/**
 	 * Unmerge BodyPairContacts that satisfy condition
 	 */
@@ -188,7 +191,7 @@ public class Merging {
 			if (body instanceof RigidCollection) {
 				
 				RigidCollection collection = (RigidCollection) body;
-				ArrayList<BodyPairContact> bpcsToUnmerge = new ArrayList<BodyPairContact>();
+				bpcsToUnmerge.clear();
 				
 				for (BodyPairContact bpc: collection.bodyPairContacts) {
 					if (!bpc.inCollection)
@@ -228,7 +231,7 @@ public class Merging {
 		processCollectionsColor(bodies);
 	}
 
-	private void unmergeSelectedBpcs(RigidCollection collection, ArrayList<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
+	private void unmergeSelectedBpcs(RigidCollection collection, HashSet<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
 		
 		// Check for unstable configurations
 		ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();

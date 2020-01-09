@@ -2,6 +2,7 @@ package mergingBodies;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
@@ -104,7 +105,7 @@ public class RigidBody {
 	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
 	 * both internal and external bpc.
 	 **/
-	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
+	public HashSet<BodyPairContact> bodyPairContacts = new HashSet<BodyPairContact>();
 
 	/** list of springs attached to the body **/
 	public ArrayList<Spring> springs = new ArrayList<Spring>();
@@ -340,7 +341,7 @@ public class RigidBody {
 		}
 		
 		// if we come across a collection in the contact graph, we consider it as a body and check the external bpc 
-		ArrayList<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContacts : bodyPairContacts;
+		HashSet<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContacts : bodyPairContacts;
 		
 		RigidBody otherBodyFrom = bpcFrom.getOtherBodyWithCollectionPerspective(this);		
 		

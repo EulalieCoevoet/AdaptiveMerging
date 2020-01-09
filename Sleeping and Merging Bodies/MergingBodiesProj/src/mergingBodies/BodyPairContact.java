@@ -1,6 +1,7 @@
 package mergingBodies;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import mergingBodies.Contact.ContactState;
 import mergingBodies.Merging.MergeParameters;
@@ -242,7 +243,7 @@ public class BodyPairContact {
 	/**
 	 * Add the BodyContact to bodyContactList of members body1 and body2  
 	 */
-	public void addBpcToUnmerge(ArrayList<BodyPairContact> bpcsToUnmerge) {
+	public void addBpcToUnmerge(HashSet<BodyPairContact> bpcsToUnmerge) {
 		if(!body1.isInCollection() || !body2.isInCollection() || !body1.isInSameCollection(body2)) {
 			System.err.println("[addBodiesToUnmerge] trying to unmerge a body that is not in a collection. This shouldn't happen?");
 			return;
@@ -344,9 +345,14 @@ public class BodyPairContact {
 		this.inCycle = true;
 	}
 	
-	public void checkCyclesToUnmerge(ArrayList<BodyPairContact> bpcsToUnmerge) {
-		ArrayList<BodyPairContact> bpcToCheck = new ArrayList<BodyPairContact>();
-		
+	static private HashSet<BodyPairContact> bpcToCheck = new HashSet<BodyPairContact>();
+
+	/**
+	 * shares static memory to do the job. :(
+	 * @param bpcsToUnmerge
+	 */
+	public void checkCyclesToUnmerge(HashSet<BodyPairContact> bpcsToUnmerge) {
+		bpcToCheck.clear();
 		for (RigidBody body: bodyPair) {
 			for (BodyPairContact bpc: body.bodyPairContacts) { // check if body was part of a cycle
 				if (bpc.inCycle) {

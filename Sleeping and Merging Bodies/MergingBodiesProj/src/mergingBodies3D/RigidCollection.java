@@ -1,6 +1,8 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import javax.vecmath.Matrix3d;
@@ -33,7 +35,7 @@ public class RigidCollection extends RigidBody {
 	/**
 	 * List of Contact in the collection: Contact between RigidBody of the collection
 	 */
-	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
+	protected HashSet<Contact> internalContacts = new HashSet<Contact>();
 	protected ArrayList<Contact> tmpContacts = new ArrayList<Contact>();
 	
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
@@ -97,7 +99,7 @@ public class RigidCollection extends RigidBody {
 	/**
 	 * Adds given list of bodies the collection
 	 */
-	public void addBodies(ArrayList<RigidBody> bodies) {
+	public void addBodies(Collection<RigidBody> bodies) {
 		for (RigidBody body : bodies) {
 			addBodyInternalMethod(body);
 			updateCollectionState(body);
@@ -384,21 +386,16 @@ public class RigidCollection extends RigidBody {
 	}
 
 	/** 
-	 * Migrates the provided BPC to the collection, understanding that the contacts between these two
-	 * bodies will now be internal contacts.  The internal contacts and internal BPC lists are updated.
+	 * Migrates the contacts of the BPC to the internal contacts. 
 	 * @param bpc
 	 */
 	public void addToInternalContact(BodyPairContact bpc) {
 		tmpContacts.clear();
 		for (Contact contact : bpc.contactList) {
-			//if (!internalContacts.contains(contact)) { // TODO: eulalie: weird weird! doesn't seemed to work. I'm pretty sure we don't need it but still I'd like to understand...
-				// need to make new to not mess with the memory pools 
-				Contact c = new Contact(contact);
-				tmpContacts.add( c );
-				internalContacts.add( c );
-			//} else {
-			//	System.out.println("[addToInternalContact] Contacts already there. How does this happen?");			
-			//}
+			// need to make new to not mess with the memory pools 
+			Contact c = new Contact(contact);
+			tmpContacts.add( c );
+			internalContacts.add( c );
 		}
 		bpc.contactList.clear();
 		bpc.contactList.addAll( tmpContacts );

@@ -1,6 +1,7 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import mergingBodies3D.Contact.ContactState;
 import mergingBodies3D.Merging.MergeParameters;
@@ -49,7 +50,7 @@ public class BodyPairContact {
 	 * @param bodyPairContacts
 	 * @return the corresponding BodyContact object
 	 */
-	public static BodyPairContact checkExists(RigidBody body1, RigidBody body2, ArrayList<BodyPairContact> bodyPairContacts) {
+	public static BodyPairContact checkExists(RigidBody body1, RigidBody body2, HashSet<BodyPairContact> bodyPairContacts) {
 		for (BodyPairContact bpc: bodyPairContacts) {
 			if ((bpc.body1.equals(body1) && bpc.body2.equals(body2))
 				|| (bpc.body1.equals(body2) && bpc.body2.equals(body1))) {
@@ -238,7 +239,7 @@ public class BodyPairContact {
 	/**
 	 * Add the BodyContact to bodyContactList of members body1 and body2  
 	 */
-	public void addBpcToUnmerge(ArrayList<BodyPairContact> bpcsToUnmerge) {
+	public void addBpcToUnmerge(HashSet<BodyPairContact> bpcsToUnmerge) {
 		if(!body1.isInCollection() || !body2.isInCollection() || !body1.isInSameCollection(body2)) {
 			System.err.println("[addBodiesToUnmerge] trying to unmerge a body that is not in a collection. This shouldn't happen?");
 			return;
@@ -313,8 +314,13 @@ public class BodyPairContact {
 		}
 	}
 	
-	public void checkCyclesToUnmerge(ArrayList<BodyPairContact> bpcsToUnmerge) {
-		ArrayList<BodyPairContact> bpcToCheck = new ArrayList<BodyPairContact>();
+	private static HashSet<BodyPairContact> bpcToCheck = new HashSet<BodyPairContact>();
+
+	/**
+	 * Uses static internal memory to do the job
+	 * @param bpcsToUnmerge
+	 */
+	public void checkCyclesToUnmerge(HashSet<BodyPairContact> bpcsToUnmerge) {
 		
 		for (int i=0; i<2; i++) { 
 			RigidBody body = getBody(i);
