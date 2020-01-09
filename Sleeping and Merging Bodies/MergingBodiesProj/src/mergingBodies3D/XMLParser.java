@@ -63,6 +63,7 @@ public class XMLParser {
 		 
 		parseCollision(); 
 		parseBody();
+		parseCamera();
 	}
 	
 	/**
@@ -130,6 +131,28 @@ public class XMLParser {
 					RigidBody body = createComposite( name, eElement );
 					system.bodies.add( body );
 				}
+			}
+		}
+	}
+	
+	/**
+	 * Parse camera node
+	 */
+	private void parseCamera() {
+		NodeList root = document.getElementsByTagName("root");
+		Node rootNode = root.item(0);
+		NodeList nList = rootNode.getChildNodes();
+		for (int temp = 0; temp < nList.getLength(); temp++) {
+			Node node = nList.item(temp);
+			if ( node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equalsIgnoreCase("camera") ) {
+				eElement = (Element) node;
+				// Read position and orientation to reach in given time
+				// Will interpolate with current position of the camera
+				// Option to loop over the sequence (back and forward)
+				String x = eElement.getAttribute("position");
+				String R = eElement.getAttribute("orientation");
+				String time = eElement.getAttribute("time");
+				String loop = eElement.getAttribute("loop");
 			}
 		}
 	}
@@ -476,13 +499,34 @@ public class XMLParser {
 				body.factoryPart = Boolean.parseBoolean(values[0]);
 			} else if ( tag.equalsIgnoreCase("spring") ) {
 				Element e = (Element) n;
-				Point3d pB = new Point3d( t3d( e.getAttribute("pB") ) );
-				Spring s = new Spring( pB, body );
-				system.springs.add( s );
-				String k = e.getAttribute("k");
-				if ( !k.isEmpty() ) s.k = Double.parseDouble( k );
-				String d = e.getAttribute("d");
-				if ( !d.isEmpty() ) s.d = Double.parseDouble( d );
+				Spring s = null;
+				if (e.hasAttribute("pW")) {
+					Point3d pB = new Point3d( t3d( e.getAttribute("pB") ) );
+					Point3d pW = new Point3d( t3d( e.getAttribute("pW") ) );
+					s = new Spring( pB, body, pW );
+				} else if (e.hasAttribute("pB2") && e.hasAttribute("body2")) {
+					Point3d pB1 = new Point3d( t3d( e.getAttribute("pB") ) );
+					Point3d pB2 = new Point3d( t3d( e.getAttribute("pB2") ) );
+					String b2name = e.getAttribute("body2");
+					for(RigidBody b: system.bodies) {
+						if (b.name.equals(b2name)) { // TODO: eulalie: spring should stand alone?
+							s = new Spring( pB1, body, pB2, b );
+							break;
+						}
+					}
+				} else {
+					Point3d pB = new Point3d( t3d( e.getAttribute("pB") ) );
+					s = new Spring( pB, body );
+				}
+				if (s != null) {
+					system.springs.add( s );
+					String k = e.getAttribute("k");
+					if ( !k.isEmpty() ) s.k = Double.parseDouble( k );
+					String d = e.getAttribute("d");
+					if ( !d.isEmpty() ) s.d = Double.parseDouble( d );
+				} else {
+					System.err.println("[ParseSpring] Something is wrong with the spring.");
+				}
 			} else if ( tag.equalsIgnoreCase("col")) {
 				double [] col = asDoubles( values );
 				body.col = new float[] { (float) col[0], (float) col[1], (float) col[2], 1 };

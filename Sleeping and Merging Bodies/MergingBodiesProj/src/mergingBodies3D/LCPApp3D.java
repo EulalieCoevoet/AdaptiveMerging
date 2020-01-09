@@ -99,9 +99,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         eva.addInteractor(this);       
         
         eva.trackBall.setFocalDistance(10);
-        //ev.trackBall.focalPointY.setValue(1);
         eva.trackBall.near.setValue(2);
-        //ev.trackBall.far.setValue(15);
     }
      
     @Override

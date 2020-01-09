@@ -23,11 +23,19 @@ class Box():
             fric = ET.SubElement(self.body, 'friction')
             fric.text = friction
 
-    def addSpring(self, positionB="0 0 0", k="100", d="10"):
+    def addSpring(self, positionB="0 0 0", k="100", d="10", body2=None, positionW=None, positionB2=None):
         spring = ET.SubElement(self.body, 'spring')
         spring.set('pB', positionB)
         spring.set('k', k)
         spring.set('d', d)
+
+        if (body2!=None and positionB2!=None):
+            spring.set('body2', body2)
+            spring.set('pB2', positionB2)
+
+        if (positionW!=None):
+            spring.set('pW', positionW)
+
 
 
 ### Test
