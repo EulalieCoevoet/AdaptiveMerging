@@ -543,7 +543,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         });     
         JButton res3 = new JButton("1920x1080");
         hfp2.add( res3);
-        res2.addActionListener( new ActionListener() {
+        res3.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {                
                 eva.glCanvas.setSize( 1920, 1080 );
