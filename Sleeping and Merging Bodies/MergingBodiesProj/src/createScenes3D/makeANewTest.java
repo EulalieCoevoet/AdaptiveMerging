@@ -7,7 +7,7 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-public class makeTwoTowersApp {
+public class makeANewTest {
 
 	public static void main( String[] args ) {		
 		try {
