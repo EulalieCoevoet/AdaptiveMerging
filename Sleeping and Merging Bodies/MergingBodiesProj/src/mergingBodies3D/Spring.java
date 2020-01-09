@@ -25,7 +25,6 @@ public class Spring {
 	/** The point in the world to which this spring is attached */
 	private Point3d pw = new Point3d();
 
-	
 	enum SpringType {ZERO, WORLD, BODYBODY};
 	private SpringType type; 
 	
@@ -40,6 +39,11 @@ public class Spring {
 	 */
 	private double l0 = 0.5;
 
+	/** Temporary working variables */
+	private Vector3d displacement = new Vector3d();
+	private Vector3d velocity = new Vector3d(); // velocity of the point on the body
+	private Vector3d force = new Vector3d();
+	
 	/** 
 	 * Creates a new body pinned to world spring.
 	 * @param pB 	The attachment point in the body frame
@@ -89,11 +93,6 @@ public class Spring {
 		l0 = displacement.length();
 	}
 
-	/** Temporary working variables */
-	private Vector3d displacement = new Vector3d();
-	private Vector3d velocity = new Vector3d(); // velocity of the point on the body
-	private Vector3d force = new Vector3d();
-
 	public void reset() {
 		if (type == SpringType.ZERO)				
 			body1.transformB2W.transform( pb1, pw );
@@ -131,7 +130,7 @@ public class Spring {
 		body1.getSpatialVelocity( pb1W, velocity );
 		
 		double scale = 
-				- (k*ks * (displacement.length()  - l0) - 	d*ds * (velocity.dot(displacement) / displacement.length())) 
+				- (k*ks * (displacement.length()  - l0) - d*ds * (velocity.dot(displacement) / displacement.length())) 
 				/ displacement.length();
 
 		force.scale( - scale, displacement );
@@ -157,13 +156,9 @@ public class Spring {
 
 		// Silly fix... the force should go gracefully to zero without giving NaNs :(
 		if ( displacement.length() < 1e-3 ) return;  // hmm... should just give it some rest length?
-
-		body1.transformB2W.transform( pb1, pb1W );
-		body2.transformB2W.transform( pb2, pb2W );
-		displacement.sub( pb1W, pb2W ); 
 		
 		double scale = 
-				- (k*ks * (displacement.length()  - l0) - 	d*ds * (velocity.dot(displacement) / displacement.length())) 
+				- (k*ks * (displacement.length()  - l0)) 
 				/ displacement.length();
 
 		force.scale( scale, displacement );
