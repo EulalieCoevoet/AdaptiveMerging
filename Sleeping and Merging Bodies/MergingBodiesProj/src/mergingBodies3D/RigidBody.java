@@ -91,6 +91,9 @@ public class RigidBody {
     
     /** linear velocity */
     public Vector3d v = new Vector3d();
+
+    /** initial linear velocity */
+    public Vector3d v0 = new Vector3d();
     
     /** Position of center of mass in the world frame */
     public Point3d x = new Point3d();
@@ -110,13 +113,17 @@ public class RigidBody {
     public Matrix3d theta0 = new Matrix3d();
     
     /** angular velocity in radians per second */
-    public Vector3d omega = new Vector3d();
+    public Vector3d omega = new Vector3d();    
+    
+    /** initial angular velocity in radians per second */
+    public Vector3d omega0 = new Vector3d();
 
     /** inverse of the linear mass, or zero if pinned */
     double minv;
     
     /** inverse of the angular mass, or zero if pinned, for current pose */
     Matrix3d jinv = new Matrix3d();
+    
     /** inverse of the angular mass, or zero if pinned, for REST pose */
     Matrix3d jinv0 = new Matrix3d();
     
@@ -261,7 +268,7 @@ public class RigidBody {
      */
     public void updateTransformations() {
         transformB2W.set( theta, x );
-        thetaT.transpose( theta );
+        thetaT.transpose(theta);
         tmp.scale(-1,x);
         thetaT.transform(tmp);
         transformW2B.set( thetaT, tmp );
@@ -270,7 +277,7 @@ public class RigidBody {
         // rotational inertia updated give we are storing information in a 
         // world aligned frame... note that the non-inverted angular inertia
         // used for energy computation and for the corriollis force (disabled)
-        // also used by composite boides at the time of their creation 
+        // also used by composite bodies at the time of their creation 
         if ( ! pinned ) {
 	        jinv.mul( theta, jinv0 );
 	        jinv.mul( thetaT );
@@ -501,8 +508,8 @@ public class RigidBody {
         theta.set( theta0 );
         massAngular.set( massAngular0 ); 
         jinv.set( jinv0 );       
-        v.set(0,0,0);
-        omega.set(0,0,0);
+        v.set(v0);
+        omega.set(omega0);
         updateTransformations();
     }
    

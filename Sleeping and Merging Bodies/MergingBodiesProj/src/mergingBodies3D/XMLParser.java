@@ -63,7 +63,6 @@ public class XMLParser {
 		 
 		parseCollision(); 
 		parseBody();
-		parseCamera();
 	}
 	
 	/**
@@ -131,28 +130,6 @@ public class XMLParser {
 					RigidBody body = createComposite( name, eElement );
 					system.bodies.add( body );
 				}
-			}
-		}
-	}
-	
-	/**
-	 * Parse camera node
-	 */
-	private void parseCamera() {
-		NodeList root = document.getElementsByTagName("root");
-		Node rootNode = root.item(0);
-		NodeList nList = rootNode.getChildNodes();
-		for (int temp = 0; temp < nList.getLength(); temp++) {
-			Node node = nList.item(temp);
-			if ( node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equalsIgnoreCase("camera") ) {
-				eElement = (Element) node;
-				// Read position and orientation to reach in given time
-				// Will interpolate with current position of the camera
-				// Option to loop over the sequence (back and forward)
-				String x = eElement.getAttribute("position");
-				String R = eElement.getAttribute("orientation");
-				String time = eElement.getAttribute("time");
-				String loop = eElement.getAttribute("loop");
 			}
 		}
 	}
@@ -478,8 +455,10 @@ public class XMLParser {
 				body.updateTransformations();
 			} else if ( tag.equalsIgnoreCase("v") ) {
 				body.v.set( t3d( values ) );
+				body.v0.set( body.v );
 			} else if ( tag.equalsIgnoreCase("omega") ) {
 				body.omega.set( t3d( values ) );
+				body.omega0.set( body.omega );
 			} else if ( tag.equalsIgnoreCase("restitution") ) {
 				body.restitution = Double.parseDouble(values[0]);
 			} else if ( tag.equalsIgnoreCase("friction") ) {
