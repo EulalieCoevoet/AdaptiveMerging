@@ -279,10 +279,10 @@ public class RigidBody {
         // used for energy computation and for the corriollis force (disabled)
         // also used by composite bodies at the time of their creation 
         if ( ! pinned ) {
-	        jinv.mul( theta, jinv0 );
-	        jinv.mul( thetaT );
 	        massAngular.mul( theta, massAngular0 );
 	        massAngular.mul( thetaT );
+	        jinv.mul( theta, jinv0 );
+	        jinv.mul( thetaT );
         } 
     }
     
