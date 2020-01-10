@@ -88,7 +88,6 @@ public class RigidCollection extends RigidBody {
 		
 		x.set(body.x);
 		theta.set( body.theta );
-		thetaT.set( body.thetaT );
 		
 		massLinear = body.massLinear;
 		minv = body.minv;
@@ -98,7 +97,9 @@ public class RigidCollection extends RigidBody {
 		jinv.set( body.jinv );
 		jinv0.set( body.jinv0 );
 		
-		boundingBoxB = new ArrayList<Point3d>(body.boundingBoxB);
+		boundingBoxB.clear();
+		for (Point3d point: body.boundingBoxB)
+			boundingBoxB.add(new Point3d(point));
 		
 		updateTransformations();
 	}
@@ -240,7 +241,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void updateTheta(RigidBody newBody) {
 
-		if (newBody instanceof PlaneRigidBody) // TODO: eulalie: what if we copied a PlaneRigidBody...
+		/*if (newBody instanceof PlaneRigidBody) // TODO: eulalie: what if we copied a PlaneRigidBody...
 			return;
 
 		int N = 16;
@@ -277,8 +278,9 @@ public class RigidCollection extends RigidBody {
 		covariance.getEigen(Mtmp);
 		Mtmp.normalize();
 		
-		theta.set(Mtmp);
-		thetaT.transpose(theta);
+		theta.set(Mtmp);*/
+		
+		theta.setIdentity();
 	}
 
 	/**
@@ -299,15 +301,16 @@ public class RigidCollection extends RigidBody {
 			RigidBody body = (i==0)? this: newBody;
 					
 			massAngular.add( body.massAngular );
+
 			// translate inertia tensor to center of mass
 			// should certainly have a b.x squared type term for the mass being at a distance...
-			//			I [p]    J  0    I   0 
-			//			0  I    0 mI    [p] I
+			//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)
+			//			0  I      0 mI    [p] I
 			//
-			//			I [p]   J   0
-			//			0  I   m[p] 0
+			//			I -[p]   J   0
+			//			0   I   m[p] 0
 			//
-			//			Thus.. J + mI [p][p] in the upper left...
+			//			Thus.. J - mI [p][p] in the upper left...
 			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
 			double x = body.x.x - com.x; 
 			double y = body.x.y - com.y;
@@ -330,10 +333,11 @@ public class RigidCollection extends RigidBody {
 		//	    J = R J0 R^T
 		//	so J0 = R^T J R
 		// and...      Jinv = R Jinv R^T
-		massAngular0.mul( thetaT, massAngular );
-		massAngular0.mul( theta );
-		jinv0.mul( thetaT, jinv);
-		jinv0.mul( theta );		
+        thetaT.transpose(theta);
+		this.massAngular0.mul( thetaT, massAngular );
+		this.massAngular0.mul( theta );
+		this.jinv0.mul( thetaT, jinv);
+		this.jinv0.mul( theta );		
 	}
 
 	/**
@@ -372,11 +376,11 @@ public class RigidCollection extends RigidBody {
 		}
 			
 		boundingBoxB.clear();
-		boundingBoxB.add(bbmaxB);
+		boundingBoxB.add(new Point3d(bbmaxB));
 		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbminB.z));
 		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbminB.z));
 		boundingBoxB.add(new Point3d(bbminB.x, bbminB.y, bbmaxB.z));
-		boundingBoxB.add(bbminB);
+		boundingBoxB.add(new Point3d(bbminB));
 		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbmaxB.z));
 		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbmaxB.z));
 		boundingBoxB.add(new Point3d(bbmaxB.x, bbmaxB.y, bbminB.z));
@@ -449,6 +453,7 @@ public class RigidCollection extends RigidBody {
 			
 			if ( ! pinned ) {  // a normal update would do this... so we should do it too for a correct single cycle update.
 		        jinv.mul( theta, jinv0 );
+		        thetaT.transpose(theta);
 		        jinv.mul( thetaT );
 		        massAngular.mul( theta, massAngular0 );
 		        massAngular.mul( thetaT );

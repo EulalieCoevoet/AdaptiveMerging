@@ -66,7 +66,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
     
-    private String sceneFilename = "scenes3D/towers8.xml";
+    private String sceneFilename = "scenes3D/aNewTest.xml";
     
     /**
      * Creates a shadow map with a square image, e.g., 1024x1024.
@@ -594,6 +594,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      * @param filename
      */
     private void loadXMLSystem( String filename ) {
+    	this.sceneFilename = filename;
     	System.out.println("loading " + filename );
         factory.use = false;        
         systemClear();
@@ -608,7 +609,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      * @param filename
      */
     private void loadFactorySystem( String filename ) {              
-        factory.use = false;        
+    	this.sceneFilename = filename;
+    	factory.use = false;        
         systemClear();
         loadXMLSystem( filename );
     	system.sceneName = filename.substring(0, filename.length() - 4);
@@ -738,7 +740,16 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     }
                     stepped = true;
                 } else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
-                    systemReset();      
+                    if ( e.isShiftDown() ) {
+					if ( factory.use ) {
+                		loadFactorySystem( sceneFilename );
+                    } else {
+                    	loadXMLSystem( sceneFilename );
+                    }                    } else {
+                    	systemReset();
+                    }
+                } else if ( e.getKeyCode() == KeyEvent.VK_H ) { // tab is for changing focus, so a pain to capture here
+                	system.display.params.hideOverlay.setValue( ! system.display.params.hideOverlay.getValue() );
                 } else if ( e.getKeyCode() == KeyEvent.VK_K ) {
                 	if ( factory.use ) {
                 		loadFactorySystem( sceneFilename );
@@ -747,14 +758,14 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_C ) {                   
                     systemClear();
+                    sceneFilename = "";
                     factory.use = false;
                 } else if ( e.getKeyCode() == KeyEvent.VK_J ) {                   
                     system.jiggle();                                        
                 } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
                     File f = FileSelect.select("xml", "xml scene for factory", "load", "scenes3D/", true );
-                    sceneFilename = f.getPath();
                     if ( f != null ) {
-                        loadFactorySystem( sceneFilename );
+                        loadFactorySystem( f.getPath() );
                     }   
                 } else if ( e.getKeyCode() == KeyEvent.VK_PERIOD ) {                                       
                     factory.run.setValue ( ! factory.run.getValue() );
@@ -762,9 +773,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     factory.createBodyRequest = true;
                 } else if (  e.getKeyCode() == KeyEvent.VK_L ) {                    
                     File f = FileSelect.select( "xml", "scene", "load", "scenes3d/", true );
-                    sceneFilename = f.getPath();
                     if ( f != null ) {
-                        loadXMLSystem( sceneFilename );
+                        loadXMLSystem( f.getPath() );
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_M ) {
                 	system.merging.triggerMergingEvent = true;

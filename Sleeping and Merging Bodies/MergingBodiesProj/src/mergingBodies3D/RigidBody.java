@@ -184,7 +184,9 @@ public class RigidBody {
         	this.jinv0.setZero();
         	this.jinv.setZero();        
         } else {
-        	this.boundingBoxB.addAll( boundingBoxB );
+        	this.boundingBoxB.clear();
+        	for (Point3d point: boundingBoxB)
+        		this.boundingBoxB.add( new Point3d(point) );
         	this.massLinear = massLinear;
         	this.minv = 1.0 / massLinear;
         	if ( massAngular != null ) {
@@ -216,7 +218,9 @@ public class RigidBody {
         theta0.set( body.theta0 );
         omega.set( body.omega );
         
-		boundingBoxB = new ArrayList<Point3d>(body.boundingBoxB);
+    	this.boundingBoxB.clear();
+    	for (Point3d point: body.boundingBoxB)
+    		this.boundingBoxB.add( new Point3d(point) );
         // we can share the blocks and boundary blocks...
         // no need to update them as they are in the correct body coordinates already        
         updateTransformations();
@@ -280,6 +284,7 @@ public class RigidBody {
         // also used by composite bodies at the time of their creation 
         if ( ! pinned ) {
 	        massAngular.mul( theta, massAngular0 );
+	        thetaT.transpose(theta);
 	        massAngular.mul( thetaT );
 	        jinv.mul( theta, jinv0 );
 	        jinv.mul( thetaT );
