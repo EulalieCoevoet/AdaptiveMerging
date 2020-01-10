@@ -256,7 +256,7 @@ public class RigidCollection extends RigidBody {
 			massLinear += b.massLinear;		
 			x.scaleAdd( b.massLinear, b.x, x );
 		}
-		x.scale( 1./massLinear );
+		x.scale( 1./massLinear );  // this is the COM
 		this.minv = 1./massLinear;
 		
 		massAngular.setZero();
@@ -272,16 +272,16 @@ public class RigidCollection extends RigidBody {
 			//
 			//			Thus.. J - mI [p][p] in the upper left...
 			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
-			double x = b.x.x;
-			double y = b.x.y;
-			double z = b.x.z;
-			double x2 = x*x;
-			double y2 = y*y;
-			double z2 = z*z;
+			double px = b.x.x - x.x; // don't forget to subtract the center of mass!
+			double py = b.x.y - x.y; 
+			double pz = b.x.z - x.z;
+			double x2 = px*px;
+			double y2 = py*py;
+			double z2 = pz*pz;
 			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2; op.m01 = -x*y;   op.m02 = -x*z;
-			op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
-			op.m20 = -z*x;   op.m21 = -z*y;   op.m22 = x2+y2;
+			op.m00 = y2+z2; op.m01 = -px*py;   op.m02 = -px*pz;
+			op.m10 = -py*px;   op.m11 = x2+z2; op.m12 = -py*pz;
+			op.m20 = -pz*px;   op.m21 = -pz*py;   op.m22 = x2+y2;
 			op.mul( b.massLinear );
 			massAngular.add( op );			
 		}

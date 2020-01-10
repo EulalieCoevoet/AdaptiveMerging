@@ -11,7 +11,7 @@ public class makeANewTest {
 
 	public static void main( String[] args ) {		
 		try {
-			PrintStream ps = new PrintStream("scenes3D/aNewTest2.xml");
+			PrintStream ps = new PrintStream("scenes3D/aNewTest3.xml");
 			ps.println("<root>");
 			createPlane( ps, -10 );
 			
@@ -25,8 +25,8 @@ public class makeANewTest {
 			double bs = 4;
 			double platformRadius = bs * 2;
 			double dx = bs*5;
-			for ( int i = -1; i <= 1; i++ ) {
-				for ( int j = -1; j <= 1; j++ ) {
+			for ( int i = -2; i <= 2; i++ ) {
+				for ( int j = -0; j <= 0; j++ ) {
 					double offx = 0;//rand.nextDouble()*2-1;
 					double offz = 0;//rand.nextDouble()*2-1;
 //					Point3d pos = new Point3d( dx*i - offx, rand.nextDouble() * 8, dx*j - offz );

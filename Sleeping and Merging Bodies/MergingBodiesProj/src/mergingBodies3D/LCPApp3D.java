@@ -66,7 +66,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
     
-    private String sceneFilename = "scenes3D/aNewTest2.xml";
+    private String sceneFilename = "scenes3D/aNewTest3.xml";
     
     /**
      * Creates a shadow map with a square image, e.g., 1024x1024.
@@ -739,8 +739,11 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     stepped = true;
                 } else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
                     if ( e.isShiftDown() ) {
-                    	loadXMLSystem( sceneFilename );
+					if ( factory.use ) {
+                		loadFactorySystem( sceneFilename );
                     } else {
+                    	loadXMLSystem( sceneFilename );
+                    }                    } else {
                     	systemReset();
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_H ) { // tab is for changing focus, so a pain to capture here
