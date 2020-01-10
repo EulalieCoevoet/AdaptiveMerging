@@ -764,9 +764,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     system.jiggle();                                        
                 } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
                     File f = FileSelect.select("xml", "xml scene for factory", "load", "scenes3D/", true );
-                    sceneFilename = f.getPath();
                     if ( f != null ) {
-                        loadFactorySystem( sceneFilename );
+                        loadFactorySystem( f.getPath() );
                     }   
                 } else if ( e.getKeyCode() == KeyEvent.VK_PERIOD ) {                                       
                     factory.run.setValue ( ! factory.run.getValue() );
@@ -774,9 +773,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     factory.createBodyRequest = true;
                 } else if (  e.getKeyCode() == KeyEvent.VK_L ) {                    
                     File f = FileSelect.select( "xml", "scene", "load", "scenes3d/", true );
-                    sceneFilename = f.getPath();
                     if ( f != null ) {
-                        loadXMLSystem( sceneFilename );
+                        loadXMLSystem( f.getPath() );
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_M ) {
                 	system.merging.triggerMergingEvent = true;
