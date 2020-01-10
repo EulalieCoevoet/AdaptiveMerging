@@ -295,7 +295,7 @@ public class RigidCollection extends RigidBody {
 	
 	private void updateInertia(RigidBody newBody, Point3d com) {
 				
-		massAngular.setZero();
+	    Matrix3d massAngular = new Matrix3d();
 		for (int i=0; i<2; i++) {
 			RigidBody body = (i==0)? this: newBody;
 					
@@ -310,19 +310,21 @@ public class RigidCollection extends RigidBody {
 			//
 			//			Thus.. J + mI [p][p] in the upper left...
 			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
-			double x = body.x.x - com.x; // what should be this center of mass?
+			double x = body.x.x - com.x; 
 			double y = body.x.y - com.y;
 			double z = body.x.z - com.z;
 			double x2 = x*x;
 			double y2 = y*y;
 			double z2 = z*z;
 			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2; op.m01 = -x*y;   op.m02 = -x*z;
+			op.m00 = y2+z2;  op.m01 = -x*y;  op.m02 = -x*z;
 			op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
-			op.m20 = -z*x;   op.m21 = -z*y;   op.m22 = x2+y2;
+			op.m20 = -z*x;   op.m21 = -z*y;  op.m22 = x2+y2;
 			op.mul( body.massLinear );
 			massAngular.add( op );	
 		}
+		this.massAngular.set(massAngular);
+
 			
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
@@ -419,7 +421,7 @@ public class RigidCollection extends RigidBody {
 
 		super.advanceTime( dt );
 
-		if ( pinned || isSleeping ) // || temporarilyPinned )
+		if ( pinned || isSleeping )
 			return;
 
 		updateBodiesPositionAndTransformations();
@@ -471,7 +473,7 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	public void applyVelocitiesTo(RigidBody body) {
-		if ( pinned ) { //|| temporarilyPinned) {
+		if ( pinned ) { 
 			if (v.lengthSquared() > 1e-14 || omega.lengthSquared() > 1e-14)
 				System.err.println("[applyVelocitiesTo] velocities of pinned body is not zero. " + omega.toString() );
 		}
@@ -480,7 +482,6 @@ public class RigidCollection extends RigidBody {
 		Vector3d wxr = new Vector3d();
 		r.sub( body.x, x );
 		wxr.cross( omega, r );
-		
 		body.v.add( v, wxr ); // sets the value of the sum
 		body.omega.set( omega );
 	}
