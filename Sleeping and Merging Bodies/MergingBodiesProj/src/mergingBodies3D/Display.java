@@ -34,10 +34,10 @@ public class Display {
 		private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
 		private BooleanParameter drawAllBoundingVolumes = new BooleanParameter( "draw ALL bounding volumes", false );
 		
-		private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", true );
-		private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", true );
-		private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", true );
-		private BooleanParameter drawContactLocationsInCollection = new BooleanParameter( "draw contact locations in collections", true );
+		private BooleanParameter drawContactForces = new BooleanParameter("draw contact forces", false );
+		private BooleanParameter drawContactForcesInCollection = new BooleanParameter("draw contact forces in collections", false );
+		private BooleanParameter drawContactLocations = new BooleanParameter( "draw contact locations", false );
+		private BooleanParameter drawContactLocationsInCollection = new BooleanParameter( "draw contact locations in collections", false );
 		private IntParameter contactForceSize = new IntParameter( "contact force line width ", 2, 1, 20);
 		private IntParameter contactLocationSize = new IntParameter( "contact point size ", 5, 1, 20);
 		private BooleanParameter drawContactGraph = new BooleanParameter( "draw contact graph", false );
