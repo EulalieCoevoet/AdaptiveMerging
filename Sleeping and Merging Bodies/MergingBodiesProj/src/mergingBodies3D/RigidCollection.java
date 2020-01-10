@@ -61,7 +61,7 @@ public class RigidCollection extends RigidBody {
 	
 		copyFrom(body1);
 
-		addBodyInternalMethod(body1);  // this will update velocity, but it doesn't matter (body velocity averaged with itself)
+		addBodyInternalMethod(body1);
 		updateCollectionState(body1);
 		addBodyInternalMethod(body2);
 		updateCollectionState(body2);
@@ -161,42 +161,46 @@ public class RigidCollection extends RigidBody {
 		body.parent = this;
 		bodies.add(body);
 
-		if (bodies.size()<2) // we have copied already all the datas from the first body 
+		if (bodies.size()<2) { // we have copied already all the datas from the first body 
 			return; 
+		}
 		
 		updateTheta(body); // computed in world coordinates, is that correct? theta should be the rotations from inertial frame right?
 		updateBB(body); // set BB temporarily in world coordinates
-
-		Point3d com = new Point3d(); // new center of mass
-		double totalMassInv = 0; 
-		com.set(x);
-		com.scale(massLinear);
-		com.scaleAdd(body.massLinear, body.x, com);
-		totalMassInv = 1./(body.massLinear + massLinear);
-		com.scale( totalMassInv );
 		
-		if ( pinned ) { 
+		if ( pinned || body.pinned ) { 
 			v.set(0,0,0);
 			omega.set(0,0,0);
-			minv = 0;
-			jinv0.setZero();
-			jinv.setZero();
+
 			massAngular.setZero(); // actually infinity.. but won't be used??
 			massAngular0.setZero();
+			jinv.setZero();
+			jinv0.setZero();
+			
+        	massLinear = 0;
+			minv = 0;
 		} else {
+		
+			Point3d com = new Point3d(); // new center of mass
+			double totalMassInv = 0; 
+			com.set(x);
+			com.scale(massLinear);
+			com.scaleAdd(body.massLinear, body.x, com);
+			totalMassInv = 1./(body.massLinear + massLinear);
+			com.scale( totalMassInv );
+			
 			updateVelocitiesFrom(body, com, totalMassInv);
 			updateInertia(body, com);
-			massLinear += body.massLinear;
+			massLinear += body.massLinear; // used in updateInertia, this update should stay here
 			minv = totalMassInv;
+			x.set(com); // finally update com of the new collection
 		}
-		
-		x.set(com); // finally update com of the new collection
-		
+	
 		updateTransformations();
 		for (Point3d point : boundingBoxB) // put back BB in collection coordinates
 			transformW2B.transform(point);
 		
-		updateBodyTransformations(body);
+		updateBodiesTransformations(); // TODO: eulalie: this should probably be done somewhere else??
 	}
 
 	/**
@@ -209,7 +213,7 @@ public class RigidCollection extends RigidBody {
 	 * 
 	 * @param body
 	 */
-	private void updateVelocitiesFrom(RigidBody body, Point3d com, double totalMassInv) {
+	private void updateVelocitiesFrom(final RigidBody body, final Point3d com, final double totalMassInv) {
 
 		Vector3d r = new Vector3d();
 		Vector3d wxr = new Vector3d();
@@ -294,7 +298,7 @@ public class RigidCollection extends RigidBody {
 		body.isSleeping = false;
 	}
 	
-	private void updateInertia(RigidBody newBody, Point3d com) {
+	private void updateInertia(final RigidBody newBody, final Point3d com) {
 				
 	    Matrix3d massAngular = new Matrix3d();
 		for (int i=0; i<2; i++) {
@@ -345,17 +349,16 @@ public class RigidCollection extends RigidBody {
 	 * to collection But also, make each body's x and theta in collection, relative
 	 * to this x and theta
 	 */
-	private void updateBodyTransformations(RigidBody body) {
-		body.transformB2C.set(body.transformB2W);
-		body.transformB2C.leftMult(transformW2B);
-		body.transformC2B.set(body.transformB2C);
-		body.transformC2B.invert();
+	private void updateBodiesTransformations() {
+		for (RigidBody body: bodies) { 
+			body.transformB2C.set(body.transformB2W);
+			body.transformB2C.leftMult(transformW2B);
+			body.transformC2B.set(body.transformB2C);
+			body.transformC2B.invert();
+		}
 	}
 
 	private void updateBB(RigidBody newBody) {
-		
-		if (newBody instanceof PlaneRigidBody)
-			return;
 		
 		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
 		Point3d bbminB = new Point3d( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
@@ -363,6 +366,10 @@ public class RigidCollection extends RigidBody {
 		Point3d p = new Point3d();
 		for (int i=0; i<2; i++) {
 			RigidBody body = (i==0)? this: newBody;
+			
+			if (body instanceof PlaneRigidBody)
+				continue;
+			
 			for (Point3d point : body.boundingBoxB) {
 				p.set(point);
 				body.transformB2W.transform(p);
