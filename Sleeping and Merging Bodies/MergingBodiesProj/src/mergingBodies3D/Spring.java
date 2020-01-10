@@ -193,8 +193,7 @@ public class Spring {
 	 */
 	public void displaySpring( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
-		gl.glLineWidth(2);
-		gl.glColor4f(1, 0 ,0, 0.5f);
+		
 		gl.glBegin( GL.GL_LINES );
 		
 		if (type == SpringType.BODYBODY) {

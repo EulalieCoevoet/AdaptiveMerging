@@ -48,6 +48,9 @@ public class Display {
 		private BooleanParameter drawSpeedCOMs = new BooleanParameter( "draw speed COM", false );
 		private BooleanParameter drawBB = new BooleanParameter( "draw bounding box (for merge test, not collision)", false );
 		public BooleanParameter drawIndex = new BooleanParameter( "draw Index", false );
+		
+		public DoubleParameter springTransparency = new DoubleParameter("Spring transparency", 0.5, 0, 1 );
+        public DoubleParameter springLineWidth = new DoubleParameter("Spring line width", 1, 0, 5 );
 	}
 	public DisplayParameters params = new DisplayParameters();
 	
@@ -202,9 +205,12 @@ public class Display {
 			}
         }
         
+        
+        red[3] = params.springTransparency.getFloatValue();
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
         gl.glNormal3f(0,0,1);
-		for (Spring s : springs) {
+		gl.glLineWidth( params.springLineWidth.getFloatValue());
+        for (Spring s : springs) {
 			s.displaySpring(drawable);
 		}  
     		
@@ -299,6 +305,8 @@ public class Display {
 		vfpb.add( params.drawCOMs.getControls() );
 		vfpb.add( params.drawSpeedCOMs.getControls() );
 		vfpb.add( params.drawIndex.getControls() );
+		vfpb.add( params.springLineWidth.getSliderControls(false));
+		vfpb.add( params.springTransparency.getSliderControls(false));
 		vfpb.setBorder( new TitledBorder( "Rigid Body Visualization") );
         ((TitledBorder) vfpb.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
 		vfp.add( vfpb.getPanel() );
