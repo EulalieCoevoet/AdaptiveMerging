@@ -262,6 +262,7 @@ public class RigidCollection extends RigidBody {
 		massAngular.setZero();
 		for ( RigidBody b : bodies ) {
 			massAngular.add( b.massAngular );
+			// translate inertia tensor to center of mass
 			// should certainly have a b.x squared type term for the mass being at a distance...
 			//			I [p]    J  0    I   0 
 			//			0  I    0 mI    [p] I
@@ -273,14 +274,17 @@ public class RigidCollection extends RigidBody {
 			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
 			double x = b.x.x;
 			double y = b.x.y;
-			double z = b.x.z;			
+			double z = b.x.z;
 			double x2 = x*x;
 			double y2 = y*y;
 			double z2 = z*z;
 			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2; op.m01 = x*y; op.m02 = x*z;
-			op.m10 = y*x; op.m11 = x2+z2; op.m12 = y*z;
-			op.m20 = z*x; op.m21 = z*y; op.m22 = x2 + y2;
+			/*op.m00 = -y2-z2; op.m01 = x*y;    op.m02 = x*z;
+			op.m10 = y*x;    op.m11 = -x2-z2; op.m12 = y*z;
+			op.m20 = z*x;    op.m21 = z*y;    op.m22 = -x2-y2;*/
+			op.m00 = y2+z2; op.m01 = x*y;   op.m02 = x*z;
+			op.m10 = y*x;   op.m11 = x2+z2; op.m12 = y*z;
+			op.m20 = z*x;   op.m21 = z*y;   op.m22 = x2+y2;
 			op.mul( b.massLinear );
 			massAngular.add( op );			
 		}
@@ -637,8 +641,8 @@ public class RigidCollection extends RigidBody {
 	@Override
 	public void displayBB(GLAutoDrawable drawable) {
 		super.displayBB(drawable);
-		for (RigidBody body : bodies) {
+		/*for (RigidBody body : bodies) {
 			body.displayBB(drawable);
-		}
+		}*/
 	}
 }

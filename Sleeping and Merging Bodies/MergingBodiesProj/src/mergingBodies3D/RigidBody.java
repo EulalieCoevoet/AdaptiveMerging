@@ -511,6 +511,8 @@ public class RigidBody {
         v.set(v0);
         omega.set(omega0);
         updateTransformations();
+        
+        metricHistory.clear();
     }
    
     /** 
@@ -544,7 +546,7 @@ public class RigidBody {
 	public void displayBB(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glPointSize( 10 );
-		float[] col = new  float[] {0, 0, 1, 1};
+		float[] col = new  float[] {0, 0, 1, 0.5f};
 		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
 		gl.glBegin(GL.GL_POINTS);
 		for (Point3d point : boundingBoxB) {
