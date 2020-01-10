@@ -198,7 +198,6 @@ public class RigidCollection extends RigidBody {
 		omega.set( body.omega );
 		x.set(body.x);
 		theta.set( body.theta );
-		thetaT.set( body.thetaT );
 		massLinear = body.massLinear;
 		massAngular.set( body.massAngular );
 		massAngular0.set( body.massAngular0 );
@@ -293,6 +292,7 @@ public class RigidCollection extends RigidBody {
 		//	    J = R J0 R^T
 		//	so J0 = R^T J R
 		// and...      Jinv = R Jinv R^T
+        thetaT.transpose(theta);
 		this.massAngular0.mul( thetaT, massAngular );
 		this.massAngular0.mul( theta );
 		this.jinv0.mul( thetaT, jinv);
@@ -372,10 +372,9 @@ public class RigidCollection extends RigidBody {
 				maxArea = area;
 			}
 		}
+		//System.out.println(theta);
 		theta.setIdentity(); // TODO: eulalie: remove when fixed
-		thetaT.transpose(theta);
-			
-		}
+	}
 
 	/**
 	 * For each body in collection, determines the transformations to go from body
@@ -488,6 +487,7 @@ public class RigidCollection extends RigidBody {
 			
 			if ( ! pinned ) {  // a normal update would do this... so we should do it too for a correct single cycle update.
 		        jinv.mul( theta, jinv0 );
+		        thetaT.transpose(theta);
 		        jinv.mul( thetaT );
 		        massAngular.mul( theta, massAngular0 );
 		        massAngular.mul( thetaT );

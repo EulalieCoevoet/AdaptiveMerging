@@ -284,6 +284,7 @@ public class RigidBody {
         // also used by composite bodies at the time of their creation 
         if ( ! pinned ) {
 	        massAngular.mul( theta, massAngular0 );
+	        thetaT.transpose(theta);
 	        massAngular.mul( thetaT );
 	        jinv.mul( theta, jinv0 );
 	        jinv.mul( thetaT );
