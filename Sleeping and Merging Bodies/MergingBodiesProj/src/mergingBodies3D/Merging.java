@@ -41,7 +41,7 @@ public class Merging {
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
-		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-1, 1e-10, 100 );
+		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1, 1e-10, 100 );
 		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-3, 1e-10, 1e0 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
