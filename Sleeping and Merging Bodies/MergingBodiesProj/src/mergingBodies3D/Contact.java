@@ -362,7 +362,7 @@ public class Contact {
 		if ( !body1.pinned && ! body2.pinned ) {
 			
 			float[] c = colGraph;
-			gl.glLineWidth(2);
+			//gl.glLineWidth(2);
 			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
 			gl.glBegin( GL.GL_LINES );
 			

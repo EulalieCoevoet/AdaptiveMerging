@@ -45,8 +45,8 @@ public class svgToDominos {
 	}
 	
 	public svgToDominos() {
-		load("scenes3D/drawing2.svg");
-		write("scenes3D/dom2.xml");
+		load("scenes3D/drawing3.svg");
+		write("scenes3D/dom3.xml");
 		System.out.println("blocks written = " + blockID );
 	}
 	
@@ -121,7 +121,7 @@ public class svgToDominos {
 		arcLength = 0;
 		spacing = 1.5;
 		eps = 1e-5;
-		size.set( 0.5, 3, 1.5 );
+		size.set( 0.5, 5, 1.5 );
 		
 		Point2d p0 = new Point2d();
 		Point2d p1 = new Point2d();

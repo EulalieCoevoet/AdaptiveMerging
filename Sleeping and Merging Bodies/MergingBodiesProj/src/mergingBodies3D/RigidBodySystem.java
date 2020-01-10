@@ -264,10 +264,11 @@ public class RigidBodySystem {
     
     protected void applyViscousDecay()
     {
-		double alpha = globalViscousDecay.getValue();
+		double alpha1 = globalViscousLinearDecay.getValue();
+		double alpha2 = globalViscousAngularDecay.getValue();
 		for ( RigidBody b : bodies ) {
-			b.v.scale( alpha );
-			b.omega.scale(alpha);
+			b.v.scale( alpha1 );
+			b.omega.scale( alpha2 );
 		}
     }
     
@@ -315,7 +316,8 @@ public class RigidBodySystem {
     DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
    
     public BooleanParameter saveCSV = new BooleanParameter( "save CSV", false);
-	public DoubleParameter globalViscousDecay = new DoubleParameter("global viscous decay", 1, 0.1, 1 );
+	public DoubleParameter globalViscousLinearDecay = new DoubleParameter("global viscous linear decay", 1, 0.1, 1 );
+	public DoubleParameter globalViscousAngularDecay = new DoubleParameter("global viscous angular decay", 1, 0.1, 1 );
 
 	public DoubleParameter springStiffnessMod = new DoubleParameter("spring stiffness multiplier", 1, 0, 10 );
 	public DoubleParameter springDampingMod= new DoubleParameter("spring damping multiplier", 1, 0, 10 );
@@ -335,7 +337,8 @@ public class RigidBodySystem {
         
 		vfp.add(springStiffnessMod.getSliderControls(false));
 		vfp.add(springDampingMod.getSliderControls(false));
-		vfp.add( globalViscousDecay.getSliderControls(false) );
+		vfp.add( globalViscousLinearDecay.getSliderControls(false) );
+		vfp.add( globalViscousAngularDecay.getSliderControls(false) );
 
 		return vfp.getPanel();
     }
