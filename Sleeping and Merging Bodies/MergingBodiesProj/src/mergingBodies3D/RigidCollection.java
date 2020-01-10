@@ -160,15 +160,14 @@ public class RigidCollection extends RigidBody {
 		body.parent = this;
 		bodies.add(body);
 
-		if (bodies.size()<2)
+		if (bodies.size()<2) // we have copied already all the datas from the first body 
 			return; 
 		
-		Point3d com = new Point3d();
-		double totalMassInv = 0;
-
-		updateTheta(body); 
+		updateTheta(body); // computed in world coordinates, is that correct? theta should be the rotations from inertial frame right?
 		updateBB(body); // set BB temporarily in world coordinates
-		
+
+		Point3d com = new Point3d(); // new center of mass
+		double totalMassInv = 0; 
 		com.set(x);
 		com.scale(massLinear);
 		com.scaleAdd(body.massLinear, body.x, com);
@@ -190,7 +189,7 @@ public class RigidCollection extends RigidBody {
 			minv = totalMassInv;
 		}
 		
-		x.set(com);
+		x.set(com); // finally update com of the new collection
 		
 		updateTransformations();
 		for (Point3d point : boundingBoxB) // put back BB in collection coordinates
@@ -259,7 +258,7 @@ public class RigidCollection extends RigidBody {
 		meanPos.scale(1.f/N);
 
 		Vector3d v = new Vector3d();
-		MyMatrix3f tmp = new MyMatrix3f();
+		MyMatrix3f Mtmp = new MyMatrix3f();
 		MyMatrix3f covariance = new MyMatrix3f();
 		
 		for (int i=0; i<2; i++) {
@@ -268,17 +267,17 @@ public class RigidCollection extends RigidBody {
 				p.set(point);
 				body.transformB2W.transform(p);
 				v.sub(p, meanPos);
-				tmp.m00 = (float)(v.x*v.x); tmp.m01 = (float)(v.x*v.y); tmp.m02 = (float)(v.x*v.z);
-				tmp.m10 = (float)(v.y*v.x); tmp.m11 = (float)(v.y*v.y); tmp.m12 = (float)(v.y*v.z);
-				tmp.m20 = (float)(v.z*v.x); tmp.m21 = (float)(v.z*v.y); tmp.m22 = (float)(v.z*v.z);
-				covariance.add(tmp);
+				Mtmp.m00 = (float)(v.x*v.x); Mtmp.m01 = (float)(v.x*v.y); Mtmp.m02 = (float)(v.x*v.z);
+				Mtmp.m10 = (float)(v.y*v.x); Mtmp.m11 = (float)(v.y*v.y); Mtmp.m12 = (float)(v.y*v.z);
+				Mtmp.m20 = (float)(v.z*v.x); Mtmp.m21 = (float)(v.z*v.y); Mtmp.m22 = (float)(v.z*v.z);
+				covariance.add(Mtmp);
 			}
 		}
 		covariance.mul(1.f/N);
-		covariance.getEigen(tmp);
-		tmp.normalize();
+		covariance.getEigen(Mtmp);
+		Mtmp.normalize();
 		
-		theta.set(tmp);
+		theta.set(Mtmp);
 		thetaT.transpose(theta);
 	}
 
@@ -325,7 +324,6 @@ public class RigidCollection extends RigidBody {
 		}
 		this.massAngular.set(massAngular);
 
-			
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
 		
