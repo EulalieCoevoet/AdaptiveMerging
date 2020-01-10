@@ -572,9 +572,15 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         smcp.collapse();
         vfp.add( smcp );
         
-        vfp.add( useClipPlane.getControls() );
-        vfp.add( clipPlaneNormal );
-        vfp.add( clipPlaneD.getSliderControls(false) );
+        VerticalFlowPanel vfpclip = new VerticalFlowPanel();
+        vfpclip.setBorder(new TitledBorder("clip plane controls (turn off shadows to use)") );
+        vfpclip.add( useClipPlane.getControls() );
+        vfpclip.add( clipPlaneNormal );
+        vfpclip.add( clipPlaneD.getSliderControls(false) );
+        CollapsiblePanel cpclip = new CollapsiblePanel( vfpclip.getPanel() );
+        cpclip.collapse();
+        
+        vfp.add( cpclip );
         
         return vfp.getPanel();
     }

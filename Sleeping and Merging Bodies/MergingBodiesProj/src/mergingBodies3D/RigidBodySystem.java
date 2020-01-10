@@ -163,7 +163,7 @@ public class RigidBodySystem {
 		}  
 	
 		if (mouseSpring != null) {
-			mouseSpring.apply();
+			mouseSpring.apply( applyMouseSpringAtCOM.getValue() );
 			applySpringForces(); 
 		}
 		
@@ -321,6 +321,9 @@ public class RigidBodySystem {
 
 	public DoubleParameter springStiffnessMod = new DoubleParameter("spring stiffness multiplier", 1, 0, 10 );
 	public DoubleParameter springDampingMod= new DoubleParameter("spring damping multiplier", 1, 0, 10 );
+	
+    public BooleanParameter applyMouseSpringAtCOM = new BooleanParameter( "apply mouse spring at COM", false );
+
 
     /**
      * @return control panel for the system
@@ -339,6 +342,8 @@ public class RigidBodySystem {
 		vfp.add(springDampingMod.getSliderControls(false));
 		vfp.add( globalViscousLinearDecay.getSliderControls(false) );
 		vfp.add( globalViscousAngularDecay.getSliderControls(false) );
+		
+		vfp.add( applyMouseSpringAtCOM.getControls() );
 
 		return vfp.getPanel();
     }
