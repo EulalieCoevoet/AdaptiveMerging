@@ -65,119 +65,8 @@ public class RigidCollection extends RigidBody {
 		updateCollectionState(body1);
 		addBodyInternalMethod(body2);
 		updateCollectionState(body2);
-
-		updateCollection();
 	}
-
-	/**
-	 * Adds a body to the collection
-	 * This generally follows a 3 step process
-	 * <p><ul>
-	 * <li> 1) Adds the body to the list, and updates the velocity to be a
-	 *    weighted average of the collection and the new body.  This velocity
-	 *    is updated to be in the collection's COM frame, even though other 
-	 *    methods to update the COM are not yet called.  Because the velocity
-	 *    is stored in a world aligned frame, this has little impact on the rest
-	 *    of the steps.
-	 * <li> 2) Mass COM and Inertia are updated.  The inertia will be with
-	 *    respect to the current rotation of the collection, so some care necessary
-	 *    to initalize massAnular0 and jinv0 too.
-	 * <li> 3) Rotation is optimized for the bounding volumes of the different bodies in
-	 *     the collection. (currently not implemented)  Because this changes the 
-	 *     rest rotation of the collection, it will influence the rest inertia.
-	 * <li> 4) Transformations are updated (jinv too, perhaps wasteful), and likewise
-	 *     the body to collection transforms 
-	 * </p></ul>
-	 * @param body body to add
-	 */
-	public void addBody(RigidBody body) {
-		addBodyInternalMethod(body);
-		updateCollectionState(body);
-		updateCollection();
-	}
-
-	/**
-	 * Adds given list of bodies the collection
-	 */
-	public void addBodies(Collection<RigidBody> bodies) {
-		for (RigidBody body : bodies) {
-			addBodyInternalMethod(body);
-			updateCollectionState(body);
-		}
-
-		updateCollection();
-	}
-
-	/**
-	 * Adds a collection to the collection
-	 * 
-	 * @param collection collection to add
-	 */
-	public void addCollection(RigidCollection collection) {
-		for (RigidBody body : collection.bodies)
-			addBodyInternalMethod(body);
-
-		updateCollectionState(collection);
-		updateCollection();
-	}
-
-	/**
-	 * Adds a body to the collection (internal method, for factoring purposes).
-	 * 
-	 * @param body body to add
-	 */
-	private void addBodyInternalMethod( RigidBody body ) {
-		body.parent = this;
-		bodies.add(body);
-
-		updateVelocitiesFrom(body);
-	}
-
-	/**
-	 * Update's the collection's velocity given a newly added body
-	 * The velocities should match... but we'll do a mass weighted
-	 * average in the new COM frame to make sure that things work out.
-	 * Note: this might not do what you expect if either body is pinned!!
-	 * 
-	 * CAREFUL this will set the velocity at the new COM position!!
-	 * 
-	 * @param body
-	 */
-	private void updateVelocitiesFrom(RigidBody body) {
-		Point3d massCom1 = new Point3d();
-		Point3d massCom2 = new Point3d();
-		massCom1.scale(body.massLinear, body.x);
-		massCom2.scale(massLinear, x);
-		Point3d xCom = new Point3d();
-		xCom.add(massCom1, massCom2);
-		double oneOverTotalMass = 1. / (body.massLinear + massLinear);
-		xCom.scale( oneOverTotalMass );
-
-		Vector3d r = new Vector3d();
-		Vector3d wxr = new Vector3d();
-		Vector3d tmp1 = new Vector3d();
-		Vector3d tmp2 = new Vector3d();
-
-		r.sub(xCom, body.x);
-		wxr.cross( body.omega, r );
-		tmp1.add( wxr, body.v );
-		tmp1.scale( body.massLinear );
-		
-		r.sub( xCom, x );
-		wxr.cross( omega, r );
-		tmp2.add( wxr, v );
-		tmp2.scale( massLinear );
-		
-		tmp1.add( tmp2 );
-		tmp1.scale( oneOverTotalMass );
-		
-		v.set(tmp1); 
-
-		omega.scale( massLinear );
-		omega.scaleAdd( body.massLinear, body.omega, omega );
-		omega.scale( oneOverTotalMass );
-	}
-
+	
 	/**
 	 * Zero working variables for accumulating forces during a time step
 	 */
@@ -209,24 +98,66 @@ public class RigidCollection extends RigidBody {
 	}
 
 	/**
-	 * Update collection pinned condition
-	 * 
-	 * @param body
+	 * Adds a body to the collection
+	 * This generally follows a 3 step process
+	 * <p><ul>
+	 * <li> 1) Adds the body to the list, and updates the velocity to be a
+	 *    weighted average of the collection and the new body.  This velocity
+	 *    is updated to be in the collection's COM frame, even though other 
+	 *    methods to update the COM are not yet called.  Because the velocity
+	 *    is stored in a world aligned frame, this has little impact on the rest
+	 *    of the steps.
+	 * <li> 2) Mass COM and Inertia are updated.  The inertia will be with
+	 *    respect to the current rotation of the collection, so some care necessary
+	 *    to initalize massAnular0 and jinv0 too.
+	 * <li> 3) Rotation is optimized for the bounding volumes of the different bodies in
+	 *     the collection. (currently not implemented)  Because this changes the 
+	 *     rest rotation of the collection, it will influence the rest inertia.
+	 * <li> 4) Transformations are updated (jinv too, perhaps wasteful), and likewise
+	 *     the body to collection transforms 
+	 * </p></ul>
+	 * @param body body to add
 	 */
-	private void updateCollectionState(RigidBody body) {
-		pinned = (pinned || body.pinned);
-
-		isSleeping = (isSleeping || body.isSleeping);
-		body.isSleeping = false;
+	public void addBody(RigidBody body) {
+		addBodyInternalMethod(body);
+		updateCollectionState(body);
 	}
 
 	/**
-	 * Computes transforms, COM, mass, inertia, spring.
-	 * NOTE: velocity should already be updated into the COM frame at this point!
+	 * Adds given list of bodies the collection
 	 */
-	private void updateCollection() {
+	public void addBodies(Collection<RigidBody> bodies) {
+		for (RigidBody body : bodies) {
+			addBodyInternalMethod(body);
+			updateCollectionState(body);
+		}
+	}
 
-		updateTheta(); 
+	/**
+	 * Adds a collection to the collection
+	 * 
+	 * @param collection collection to add
+	 */
+	public void addCollection(RigidCollection collection) {
+		for (RigidBody body : collection.bodies)
+			addBodyInternalMethod(body);
+
+		updateCollectionState(collection);
+	}
+
+	/**
+	 * Adds a body to the collection (internal method, for factoring purposes).
+	 * 
+	 * @param body body to add
+	 */
+	private void addBodyInternalMethod( RigidBody body ) {
+		body.parent = this;
+		bodies.add(body);
+
+		updateVelocitiesFrom(body);
+		updateTheta(body); 
+		updateBB(body);
+		updateMassCOM(body);
 		
 		if ( pinned ) { 
 			v.set(0,0,0);
@@ -237,102 +168,112 @@ public class RigidCollection extends RigidBody {
 			massAngular.setZero(); // actually infinity.. but won't be used??
 			massAngular0.setZero();
 		} else {
-			updateMassCOMInertia();
+			updateInertia(body);
 		}
 		
 		updateTransformations();
-		updateBodiesTransformations();
-		updateBB();
+		updateBodyTransformations(body);
 	}
-
-	/** 
-	 * TODO: SPEED: this could be a fast incremental update rather than recomputing for all bodies 
-	 */
-	private void updateMassCOMInertia() {
-		
-		x.set(0.,0.,0.);
-		massLinear = 0;
-		for ( RigidBody b : bodies ) {
-			massLinear += b.massLinear;		
-			x.scaleAdd( b.massLinear, b.x, x );
-		}
-		x.scale( 1./massLinear );
-		this.minv = 1./massLinear;
-		
-		massAngular.setZero();
-		for ( RigidBody b : bodies ) {
-			massAngular.add( b.massAngular );
-			// translate inertia tensor to center of mass
-			// should certainly have a b.x squared type term for the mass being at a distance...
-			//			I [p]    J  0    I   0 
-			//			0  I    0 mI    [p] I
-			//
-			//			I [p]   J   0
-			//			0  I   m[p] 0
-			//
-			//			Thus.. J + mI [p][p] in the upper left...
-			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
-			double x = b.x.x;
-			double y = b.x.y;
-			double z = b.x.z;
-			double x2 = x*x;
-			double y2 = y*y;
-			double z2 = z*z;
-			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2; op.m01 = -x*y;   op.m02 = -x*z;
-			op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
-			op.m20 = -z*x;   op.m21 = -z*y;   op.m22 = x2+y2;
-			op.mul( b.massLinear );
-			massAngular.add( op );			
-		}
-		// Let's get massAngular0
-		this.jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
-		
-		//	    J = R J0 R^T
-		//	so J0 = R^T J R
-		// and...      Jinv = R Jinv R^T
-		this.massAngular0.mul( thetaT, massAngular );
-		this.massAngular0.mul( theta );
-		this.jinv0.mul( thetaT, jinv);
-		this.jinv0.mul( theta );		
-	}
-	
 
 	/**
-	 * Compute theta of the collection from convex hull informations
+	 * Update's the collection's velocity given a newly added body
+	 * The velocities should match... but we'll do a mass weighted
+	 * average in the new COM frame to make sure that things work out.
+	 * Note: this might not do what you expect if either body is pinned!!
+	 * 
+	 * CAREFUL this will set the velocity at the new COM position!!
+	 * 
+	 * @param body
 	 */
-	private void updateTheta() {
+	private void updateVelocitiesFrom(RigidBody body) {
+		Point3d massCom1 = new Point3d();
+		Point3d massCom2 = new Point3d();
+		massCom1.scale(body.massLinear, body.x);
+		massCom2.scale(massLinear, x); // This is not yet updated, which is correct
+		Point3d xCom = new Point3d();
+		xCom.add(massCom1, massCom2);
+		double oneOverTotalMass = 1. / (body.massLinear + massLinear);
+		xCom.scale( oneOverTotalMass );
 
-		int N = 0;
+		Vector3d r = new Vector3d();
+		Vector3d wxr = new Vector3d();
+		Vector3d tmp1 = new Vector3d();
+		Vector3d tmp2 = new Vector3d();
+
+		r.sub(xCom, body.x);
+		wxr.cross( body.omega, r );
+		tmp1.add( wxr, body.v );
+		tmp1.scale( body.massLinear );
+		
+		r.sub( xCom, x );
+		wxr.cross( omega, r );
+		tmp2.add( wxr, v );
+		tmp2.scale( massLinear );
+		
+		tmp1.add( tmp2 );
+		tmp1.scale( oneOverTotalMass );
+		
+		v.set(tmp1); 
+
+		omega.scale( massLinear );
+		omega.scaleAdd( body.massLinear, body.omega, omega );
+		omega.scale( oneOverTotalMass );
+	}
+	
+	/**
+	 * Compute mass and com w.r.t new body in
+	 * @param body
+	 */
+	private void updateMassCOM(RigidBody body) {
+		x.scale(massLinear);	
+		x.scaleAdd( body.massLinear, body.x, x );
+		massLinear += body.massLinear;	
+		x.scale( 1./massLinear );
+		minv = 1./massLinear;
+	}
+	
+	/**
+	 * Compute theta of the collection from covariance's eigen vectors
+	 */
+	private void updateTheta(RigidBody body) {
+
+		int N = 16;
 		Point3d meanPos = new Point3d();
 
-		for (RigidBody body : bodies) {
-			if (body instanceof PlaneRigidBody)
-				continue;
+		if (body instanceof PlaneRigidBody) // TODO: eulalie: what we copied a PlaneRigidBody...
+			return;
 
-			for (Point3d point : body.boundingBoxB) {
-				Point3d p = new Point3d(point);
-				transformB2C.transform(p);
-				meanPos.add(p);
-				N++;
-			}
+		Point3d p = new Point3d();
+		for (Point3d point : body.boundingBoxB) {
+			p.set(point);
+			body.transformB2W.transform(p);
+			transformW2B.transform(p);
+			meanPos.add(p);
 		}
-		meanPos.scale(1.0 / N);
+		for (Point3d point : boundingBoxB) {
+			meanPos.add(point);
+		}
+		meanPos.scale(1.f/N);
 
 		Vector3d v = new Vector3d();
 		MyMatrix3f tmp = new MyMatrix3f();
 		MyMatrix3f covariance = new MyMatrix3f();
-		for (RigidBody body : bodies) {
-			if (body instanceof PlaneRigidBody) continue;
-			for (Point3d point : body.boundingBoxB) {
-				Point3d p = new Point3d(point);
-				transformB2C.transform(p);
-				v.sub(p, meanPos);
-				tmp.m00 = (float)(v.x*v.x); tmp.m01 = (float)(v.x*v.y); tmp.m02 = (float)(v.x*v.z);
-				tmp.m10 = (float)(v.y*v.x); tmp.m11 = (float)(v.y*v.y); tmp.m12 = (float)(v.y*v.z);
-				tmp.m20 = (float)(v.z*v.x); tmp.m21 = (float)(v.z*v.y); tmp.m22 = (float)(v.z*v.z);
-				covariance.add(tmp);
-			}
+		for (Point3d point : body.boundingBoxB) {
+			p.set(point);
+			body.transformB2W.transform(p);
+			transformW2B.transform(p);
+			v.sub(meanPos, p);
+			tmp.m00 = (float)(v.x*v.x); tmp.m01 = (float)(v.x*v.y); tmp.m02 = (float)(v.x*v.z);
+			tmp.m10 = (float)(v.y*v.x); tmp.m11 = (float)(v.y*v.y); tmp.m12 = (float)(v.y*v.z);
+			tmp.m20 = (float)(v.z*v.x); tmp.m21 = (float)(v.z*v.y); tmp.m22 = (float)(v.z*v.z);
+			covariance.add(tmp);
+		}
+		for (Point3d point : boundingBoxB) {
+			v.sub(meanPos, point);
+			tmp.m00 = (float)(v.x*v.x); tmp.m01 = (float)(v.x*v.y); tmp.m02 = (float)(v.x*v.z);
+			tmp.m10 = (float)(v.y*v.x); tmp.m11 = (float)(v.y*v.y); tmp.m12 = (float)(v.y*v.z);
+			tmp.m20 = (float)(v.z*v.x); tmp.m21 = (float)(v.z*v.y); tmp.m22 = (float)(v.z*v.z);
+			covariance.add(tmp);
 		}
 		covariance.mul(1.f/N);
 		covariance.getEigen(tmp);
@@ -343,37 +284,98 @@ public class RigidCollection extends RigidBody {
 	}
 
 	/**
+	 * Update collection pinned condition
+	 * 
+	 * @param body
+	 */
+	private void updateCollectionState(RigidBody body) {
+		pinned = (pinned || body.pinned);
+
+		isSleeping = (isSleeping || body.isSleeping);
+		body.isSleeping = false;
+	}
+	
+	/** 
+	 * TODO: SPEED: this could be a fast incremental update rather than recomputing for all bodies 
+	 */
+	private void updateInertia(RigidBody body) {
+		
+		massAngular.add( body.massAngular );
+		// translate inertia tensor to center of mass
+		// should certainly have a b.x squared type term for the mass being at a distance...
+		//			I [p]    J  0    I   0 
+		//			0  I    0 mI    [p] I
+		//
+		//			I [p]   J   0
+		//			0  I   m[p] 0
+		//
+		//			Thus.. J + mI [p][p] in the upper left...
+		// recall lemma 2.3: [a] = a a^T - ||a||^2 I
+		double x = body.x.x - this.x.x;
+		double y = body.x.y - this.x.y;
+		double z = body.x.z - this.x.z;
+		double x2 = x*x;
+		double y2 = y*y;
+		double z2 = z*z;
+		Matrix3d op = new Matrix3d();
+		op.m00 = y2+z2; op.m01 = -x*y;   op.m02 = -x*z;
+		op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
+		op.m20 = -z*x;   op.m21 = -z*y;   op.m22 = x2+y2;
+		op.mul( body.massLinear );
+		massAngular.add( op );	
+			
+		// Let's get massAngular0
+		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
+		
+		//	    J = R J0 R^T
+		//	so J0 = R^T J R
+		// and...      Jinv = R Jinv R^T
+		massAngular0.mul( thetaT, massAngular );
+		massAngular0.mul( theta );
+		jinv0.mul( thetaT, jinv);
+		jinv0.mul( theta );		
+	}
+
+	/**
 	 * For each body in collection, determines the transformations to go from body
 	 * to collection But also, make each body's x and theta in collection, relative
 	 * to this x and theta
 	 */
-	private void updateBodiesTransformations() {
-		for (RigidBody body : bodies) {
-			body.transformB2C.set(body.transformB2W);
-			body.transformB2C.leftMult(transformW2B);
-			body.transformC2B.set(body.transformB2C);
-			body.transformC2B.invert();
-		}
+	private void updateBodyTransformations(RigidBody body) {
+		body.transformB2C.set(body.transformB2W);
+		body.transformB2C.leftMult(transformW2B);
+		body.transformC2B.set(body.transformB2C);
+		body.transformC2B.invert();
 	}
 
-	private void updateBB() {
+	private void updateBB(RigidBody body) {
 		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
 		Point3d bbminB = new Point3d( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
-		for (RigidBody body : bodies) {
-			if (body instanceof PlaneRigidBody)
-				continue;
+		
+		if (body instanceof PlaneRigidBody)
+			return;
 
-			for (Point3d point : body.boundingBoxB) {
-				body.transformB2C.transform(point);
-				bbmaxB.x = Math.max(bbmaxB.x, point.x);
-				bbmaxB.y = Math.max(bbmaxB.y, point.y);
-				bbmaxB.z = Math.max(bbmaxB.z, point.z);
-				bbminB.x = Math.min(bbminB.x, point.x);
-				bbminB.y = Math.min(bbminB.y, point.y);
-				bbminB.z = Math.min(bbminB.z, point.z);
-				body.transformC2B.transform(point);
-			}
+		Point3d p = new Point3d();
+		for (Point3d point : body.boundingBoxB) {
+			p.set(point);
+			body.transformB2W.transform(p);
+			transformW2B.transform(p);
+			bbmaxB.x = Math.max(bbmaxB.x, p.x);
+			bbmaxB.y = Math.max(bbmaxB.y, p.y);
+			bbmaxB.z = Math.max(bbmaxB.z, p.z);
+			bbminB.x = Math.min(bbminB.x, p.x);
+			bbminB.y = Math.min(bbminB.y, p.y);
+			bbminB.z = Math.min(bbminB.z, p.z);
 		}
+		for (Point3d point : boundingBoxB) {
+			bbmaxB.x = Math.max(bbmaxB.x, point.x);
+			bbmaxB.y = Math.max(bbmaxB.y, point.y);
+			bbmaxB.z = Math.max(bbmaxB.z, point.z);
+			bbminB.x = Math.min(bbminB.x, point.x);
+			bbminB.y = Math.min(bbminB.y, point.y);
+			bbminB.z = Math.min(bbminB.z, point.z);
+		}
+			
 		boundingBoxB.clear();
 		boundingBoxB.add(bbmaxB);
 		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbminB.z));
@@ -492,7 +494,7 @@ public class RigidCollection extends RigidBody {
 
 		double metric = motionMetricProcessor.getMotionMetric(this, body);
 
-		if (pinned ) // || temporarilyPinned)
+		if (pinned)
 			metric /= 2;
 
 		return (metric > mergeParams.thresholdUnmerge.getValue());

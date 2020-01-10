@@ -10,9 +10,10 @@
         <x> 2 10 -3 </x>
         <R> 0 1 0 0.1 </R>
     </body>
-    
+
     <body type="box" name="platform" dim="20 1 20">
         <x> 0 0 0 </x>
+		    <omega> 0 0.1 0 </omega>
         <spring pB="10 0.5 10"/>
         <spring pB="10 0.5 -10"/>
         <spring pB="-10 0.5 10"/>
@@ -20,7 +21,7 @@
         <pinned> false </pinned>
         <factorypart> false </factorypart>
     </body>
-    
+
     <body type="plane" name="plane1" p="0 -10 0" n="0 1 0">
     </body>
 
