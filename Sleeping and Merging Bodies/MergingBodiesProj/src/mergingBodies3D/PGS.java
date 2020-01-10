@@ -2,7 +2,6 @@ package mergingBodies3D;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 
@@ -147,10 +146,6 @@ public class PGS {
 	private void updateDeltaVwithLambdai(Contact contact, double lambda, int i ) {
 		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollection)? contact.body1.parent: contact.body1;
 		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
-		double m1inv = body1.minv; //(body1.temporarilyPinned)? 0: body1.minv; 
-		double m2inv = body2.minv; //(body2.temporarilyPinned)? 0: body2.minv;
-		Matrix3d j1inv = body1.jinv; //(body1.temporarilyPinned)? 0: body1.jinv;
-		Matrix3d j2inv = body2.jinv; //(body2.temporarilyPinned)? 0: body2.jinv;
 
 		Vector6d dv1 = body1.deltaV; 
 		Vector6d dv2 = body2.deltaV; 
@@ -165,12 +160,12 @@ public class PGS {
 			jb = contact.jt2b;
 		}
 
-		dv1.v.scaleAdd( m1inv*lambda, ja.v, dv1.v );
-		j1inv.transform( ja.w, tmp );
+		dv1.v.scaleAdd( body1.minv*lambda, ja.v, dv1.v );
+		body1.jinv.transform( ja.w, tmp );
 		dv1.w.scaleAdd( lambda, tmp, dv1.w );
 		
-		dv2.v.scaleAdd( m2inv*lambda, jb.v, dv2.v );
-		j2inv.transform( jb.w, tmp );
+		dv2.v.scaleAdd( body2.minv*lambda, jb.v, dv2.v );
+		body2.jinv.transform( jb.w, tmp );
 		dv2.w.scaleAdd( lambda, tmp, dv2.w );
 	}
 	

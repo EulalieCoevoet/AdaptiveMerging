@@ -3,6 +3,7 @@ package mergingBodies3D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
@@ -73,7 +74,7 @@ public class CollisionProcessor {
 	
 	// TODO: MEMORY POOLING? might want a memory pool for BodyPairContact too?  Could be complicated since bodyPairContacts have some dynamic internal memory??  
 	/**list that keeps track of all the body pair contacts that occurred in this time step */
-	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
+	public HashSet<BodyPairContact> bodyPairContacts = new HashSet<BodyPairContact>();
 	/**used to update bodyPairContacts*/
 	private ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
 	

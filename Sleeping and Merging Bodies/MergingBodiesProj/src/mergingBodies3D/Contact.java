@@ -1,6 +1,5 @@
 package mergingBodies3D;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -201,11 +200,6 @@ public class Contact {
 		
 		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
 		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
-
-		double m1inv = b1.minv;//(b1.temporarilyPinned)? 0: b1.minv; 
-		double m2inv = b2.minv;//(b2.temporarilyPinned)? 0: b2.minv;
-		Matrix3d j1inv = b1.jinv;//(b1.temporarilyPinned)? 0: b1.jinv;
-		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
 		
 		// add the Bounce vector to the u's over here, but don't need to do that just yet
 		// Note: For the single iteration PGS the restitution should be considered.
@@ -213,11 +207,11 @@ public class Contact {
 		
 		bn = 0; bt1 = 0; bt2 = 0;
 		
-		tmp1.scaleAdd( m1inv*dt, b1.force, b1.v );	
+		tmp1.scaleAdd( b1.minv*dt, b1.force, b1.v );	
 		bn  += tmp1.dot(jna.v);
 		bt1 += tmp1.dot(jt1a.v);
 		bt2 += tmp1.dot(jt2a.v);
-		j1inv.transform( b1.torque, tmp1 );
+		b1.jinv.transform( b1.torque, tmp1 );
 		tmp1.scale( dt );
 		tmp1.add( b1.omega );
 		bn  += tmp1.dot( jna.w );
@@ -228,11 +222,11 @@ public class Contact {
 		bBounce *= restitution;
 		bn += bBounce;
 		
-		tmp1.scaleAdd( m2inv*dt, b2.force, b2.v );
+		tmp1.scaleAdd( b2.minv*dt, b2.force, b2.v );
 		bn  += tmp1.dot(jnb.v);
 		bt1 += tmp1.dot(jt1b.v);
 		bt2 += tmp1.dot(jt2b.v);
-		j2inv.transform( b2.torque, tmp1 );
+		b2.jinv.transform( b2.torque, tmp1 );
 		tmp1.scale( dt );
 		tmp1.add( b2.omega );
 		bn  += tmp1.dot( jnb.w );
@@ -264,21 +258,16 @@ public class Contact {
 		
 		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
 		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
-
-		double m1inv = b1.minv;//(b1.temporarilyPinned)? 0: b1.minv; 
-		double m2inv = b2.minv;//(b2.temporarilyPinned)? 0: b2.minv;
-		Matrix3d j1inv = b1.jinv;//(b1.temporarilyPinned)? 0: b1.jinv;
-		Matrix3d j2inv = b2.jinv;//(b2.temporarilyPinned)? 0: b2.jinv;
 		
-		j1inv.transform( jna.w, tmp1 );
-		j2inv.transform( jnb.w, tmp2 );
-		D00 = m1inv * jna.v.dot( jna.v )   + jna.w.dot( tmp1 )  + m2inv * jnb.v.dot( jnb.v )   + jnb.w.dot( tmp2 );
-		j1inv.transform( jt1a.w, tmp1 );
-		j2inv.transform( jt1b.w, tmp2 );
-		D11 = m1inv * jt1a.v.dot( jt1a.v ) + jt1a.w.dot( tmp1 ) + m2inv * jt1b.v.dot( jt1b.v ) + jt1b.w.dot( tmp2 );
-		j1inv.transform( jt2a.w, tmp1 );
-		j2inv.transform( jt2b.w, tmp2 );
-		D22 = m1inv * jt2a.v.dot( jt2a.v ) + jt2a.w.dot( tmp1 ) + m2inv * jt2b.v.dot( jt2b.v ) + jt2b.w.dot( tmp2 );
+		b1.jinv.transform( jna.w, tmp1 );
+		b2.jinv.transform( jnb.w, tmp2 );
+		D00 = b1.minv * jna.v.dot( jna.v )   + jna.w.dot( tmp1 )  + b2.minv * jnb.v.dot( jnb.v )   + jnb.w.dot( tmp2 );
+		b1.jinv.transform( jt1a.w, tmp1 );
+		b2.jinv.transform( jt1b.w, tmp2 );
+		D11 = b1.minv * jt1a.v.dot( jt1a.v ) + jt1a.w.dot( tmp1 ) + b2.minv * jt1b.v.dot( jt1b.v ) + jt1b.w.dot( tmp2 );
+		b1.jinv.transform( jt2a.w, tmp1 );
+		b2.jinv.transform( jt2b.w, tmp2 );
+		D22 = b1.minv * jt2a.v.dot( jt2a.v ) + jt2a.w.dot( tmp1 ) + b2.minv * jt2b.v.dot( jt2b.v ) + jt2b.w.dot( tmp2 );
 	}
 	
 	/**

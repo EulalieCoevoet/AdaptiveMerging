@@ -1,6 +1,7 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -83,13 +84,16 @@ public class RigidBody {
 	 * both internal and external bpc.
 	 * We may want to split this list in two parts...? (external/internal)
 	 **/
-	public ArrayList<BodyPairContact> bodyPairContacts = new ArrayList<BodyPairContact>();
+	public HashSet<BodyPairContact> bodyPairContacts = new HashSet<BodyPairContact>();
 
     /** DeltaV for PGS resolution */
     Vector6d deltaV = new Vector6d();
     
     /** linear velocity */
     public Vector3d v = new Vector3d();
+
+    /** initial linear velocity */
+    public Vector3d v0 = new Vector3d();
     
     /** Position of center of mass in the world frame */
     public Point3d x = new Point3d();
@@ -109,13 +113,17 @@ public class RigidBody {
     public Matrix3d theta0 = new Matrix3d();
     
     /** angular velocity in radians per second */
-    public Vector3d omega = new Vector3d();
+    public Vector3d omega = new Vector3d();    
+    
+    /** initial angular velocity in radians per second */
+    public Vector3d omega0 = new Vector3d();
 
     /** inverse of the linear mass, or zero if pinned */
     double minv;
     
     /** inverse of the angular mass, or zero if pinned, for current pose */
     Matrix3d jinv = new Matrix3d();
+    
     /** inverse of the angular mass, or zero if pinned, for REST pose */
     Matrix3d jinv0 = new Matrix3d();
     
@@ -260,7 +268,7 @@ public class RigidBody {
      */
     public void updateTransformations() {
         transformB2W.set( theta, x );
-        thetaT.transpose( theta );
+        thetaT.transpose(theta);
         tmp.scale(-1,x);
         thetaT.transform(tmp);
         transformW2B.set( thetaT, tmp );
@@ -269,12 +277,12 @@ public class RigidBody {
         // rotational inertia updated give we are storing information in a 
         // world aligned frame... note that the non-inverted angular inertia
         // used for energy computation and for the corriollis force (disabled)
-        // also used by composite boides at the time of their creation 
+        // also used by composite bodies at the time of their creation 
         if ( ! pinned ) {
-	        jinv.mul( theta, jinv0 );
-	        jinv.mul( thetaT );
 	        massAngular.mul( theta, massAngular0 );
 	        massAngular.mul( thetaT );
+	        jinv.mul( theta, jinv0 );
+	        jinv.mul( thetaT );
         } 
     }
     
@@ -419,7 +427,7 @@ public class RigidBody {
 		}
 		
 		// if we come across a collection in the contact graph, we consider it as a body and check the external bpc 
-		ArrayList<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContacts : bodyPairContacts;
+		HashSet<BodyPairContact> bpcList = (this.isInCollection())? parent.bodyPairContacts : bodyPairContacts;
 		
 		RigidBody otherBodyFrom = bpcFrom.getOtherBodyWithCollectionPerspective(this);		
 		
@@ -500,9 +508,11 @@ public class RigidBody {
         theta.set( theta0 );
         massAngular.set( massAngular0 ); 
         jinv.set( jinv0 );       
-        v.set(0,0,0);
-        omega.set(0,0,0);
+        v.set(v0);
+        omega.set(omega0);
         updateTransformations();
+        
+        metricHistory.clear();
     }
    
     /** 
@@ -536,7 +546,7 @@ public class RigidBody {
 	public void displayBB(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glPointSize( 10 );
-		float[] col = new  float[] {0, 0, 1, 1};
+		float[] col = new  float[] {0, 0, 1, 0.5f};
 		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, col, 0 );
 		gl.glBegin(GL.GL_POINTS);
 		for (Point3d point : boundingBoxB) {

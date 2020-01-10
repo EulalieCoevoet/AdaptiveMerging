@@ -242,14 +242,10 @@ public class RigidBodySystem {
 				RigidCollection collection = (RigidCollection) body;
 				for (RigidBody subBody: collection.bodies) {
 					subBody.parent = null;
-					subBody.bodyPairContacts.clear();
 					bodies.add(subBody);
 				}
 				bodies.remove(body);
-				body = bodies.get(i);
-			}  
-			
-			if (!(body instanceof RigidCollection)) {
+			} else {
 				body.bodyPairContacts.clear();
 				body.reset();
 				i++;

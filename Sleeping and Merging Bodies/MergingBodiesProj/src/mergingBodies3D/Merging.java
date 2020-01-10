@@ -3,6 +3,8 @@ package mergingBodies3D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
@@ -39,7 +41,7 @@ public class Merging {
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
-		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-1, 1e-10, 100 );
+		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1, 1e-10, 100 );
 		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-3, 1e-10, 1e0 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
@@ -179,7 +181,7 @@ public class Merging {
 	
 	private LinkedList<RigidBody> removalQueue = new LinkedList<RigidBody>();
 	private LinkedList<RigidBody> additionQueue = new LinkedList<RigidBody>();
-	private ArrayList<BodyPairContact> bpcsToUnmerge = new ArrayList<BodyPairContact>();
+	private HashSet<BodyPairContact> bpcsToUnmerge = new HashSet<BodyPairContact>();
 	private ArrayList<RigidBody> newBodies = new ArrayList<RigidBody>();
 	/**
 	 * Unmerge BodyPairContacts that satisfy condition
@@ -249,8 +251,8 @@ public class Merging {
 		processCollectionsColor(bodies);
 	}
 
-	ArrayList<RigidBody> handledBodies = new ArrayList<RigidBody>();
-	ArrayList<RigidBody> subbodies = new ArrayList<RigidBody>();
+	private HashSet<RigidBody> handledBodies = new HashSet<RigidBody>();
+	private HashSet<RigidBody> subbodies = new HashSet<RigidBody>();
 	/**
 	 * Unmerge given bpcs
 	 * @param collection
@@ -258,7 +260,7 @@ public class Merging {
 	 * @param newBodies
 	 * @param dt
 	 */
-	private void unmergeSelectedBpcs(RigidCollection collection, ArrayList<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
+	private void unmergeSelectedBpcs(RigidCollection collection, HashSet<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
 			
 		// Check for unstable configurations
 		// TODO: eulalie: don't know about this strategy
@@ -299,7 +301,14 @@ public class Merging {
 						collection.unmergeBody(b);
 
 					if (subbodies.size() > 1) {
-						RigidCollection newCollection = new RigidCollection(subbodies.remove(0), subbodies.remove(0));
+						Iterator<RigidBody> iter = subbodies.iterator();
+						
+						RigidBody sb1 = iter.next();
+						RigidBody sb2 = iter.next();
+						subbodies.remove(sb1);
+						subbodies.remove(sb2);
+						
+						RigidCollection newCollection = new RigidCollection(sb1,sb2);
 						newCollection.addBodies(subbodies);
 						newCollection.fillInternalBodyContacts();
 						newCollection.color = new Color(collection.color);
@@ -307,7 +316,7 @@ public class Merging {
 						collection.applyVelocitiesTo(newCollection);
 						newBodies.add(newCollection);
 					} else if (subbodies.size() == 1){ 
-						newBodies.add(subbodies.get(0));
+						newBodies.add(subbodies.iterator().next());
 					}
 					
 					subbodies.clear();
@@ -357,9 +366,11 @@ public class Merging {
 		if (collision.bodyPairContacts.contains(bpc)) {
 			collision.bodyPairContacts.remove(bpc);
 			bpc.inCollection = true;
-			for (Contact contact : bpc.contactList) {
-				if (collision.contacts.contains(contact))
-					collision.contacts.remove(contact);
+			for (Contact contact : bpc.contactList) { // TODO remove me!!!
+				if (!collision.contacts.contains(contact)) {
+					System.err.println("Merging.mergeBodyPairContat: this contact should ALWAYS be in the list :(");// remove should be possible... period!! should not need to check??
+				}
+				collision.contacts.remove(contact);
 				if (!bpc.body1.parent.internalContacts.contains(contact))
 					bpc.body1.parent.internalContacts.add(contact);
 			}
@@ -371,7 +382,7 @@ public class Merging {
 	 * @param body
 	 * @param bodies
 	 */
-	private void buildNeighborBody(RigidBody body, ArrayList<RigidBody> bodies, ArrayList<RigidBody> handledBodies) {
+	private void buildNeighborBody(RigidBody body, HashSet<RigidBody> bodies, HashSet<RigidBody> handledBodies) {
 
 		for (BodyPairContact bpc : body.bodyPairContacts) {
 			if (!bpc.inCollection) 
@@ -385,6 +396,9 @@ public class Merging {
 		}
 	}
 	
+	private ArrayList<Color> colors = new ArrayList<Color>();
+	private ArrayList<RigidCollection> collections = new ArrayList<RigidCollection>();
+	
 	/**
 	 * Process collections color:
 	 * <p><ul>
@@ -392,8 +406,8 @@ public class Merging {
 	 * </ul><p>
 	 */
 	protected void processCollectionsColor(ArrayList<RigidBody> bodies) {
-		ArrayList<Color> colors = new ArrayList<Color>();
-		ArrayList<RigidCollection> collections = new ArrayList<RigidCollection>();
+		colors.clear();
+		collections.clear();
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection) {
 				RigidCollection collection = (RigidCollection)body;

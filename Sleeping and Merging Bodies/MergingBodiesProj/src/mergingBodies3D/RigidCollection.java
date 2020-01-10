@@ -1,6 +1,8 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import javax.vecmath.Matrix3d;
@@ -33,7 +35,7 @@ public class RigidCollection extends RigidBody {
 	/**
 	 * List of Contact in the collection: Contact between RigidBody of the collection
 	 */
-	protected ArrayList<Contact> internalContacts = new ArrayList<Contact>();
+	protected HashSet<Contact> internalContacts = new HashSet<Contact>();
 	protected ArrayList<Contact> tmpContacts = new ArrayList<Contact>();
 	
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
@@ -97,7 +99,7 @@ public class RigidCollection extends RigidBody {
 	/**
 	 * Adds given list of bodies the collection
 	 */
-	public void addBodies(ArrayList<RigidBody> bodies) {
+	public void addBodies(Collection<RigidBody> bodies) {
 		for (RigidBody body : bodies) {
 			addBodyInternalMethod(body);
 			updateCollectionState(body);
@@ -158,7 +160,7 @@ public class RigidCollection extends RigidBody {
 
 		r.sub(xCom, body.x);
 		wxr.cross( body.omega, r );
-		tmp1.add( wxr, v );
+		tmp1.add( wxr, body.v );
 		tmp1.scale( body.massLinear );
 		
 		r.sub( xCom, x );
@@ -196,6 +198,7 @@ public class RigidCollection extends RigidBody {
 		omega.set( body.omega );
 		x.set(body.x);
 		theta.set( body.theta );
+		thetaT.set( body.thetaT );
 		massLinear = body.massLinear;
 		massAngular.set( body.massAngular );
 		massAngular0.set( body.massAngular0 );
@@ -211,10 +214,6 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	private void updateCollectionState(RigidBody body) {
-//		temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
-//		body.temporarilyPinned = false;
-//		steps = Math.max(body.steps, steps);
-
 		pinned = (pinned || body.pinned);
 
 		isSleeping = (isSleeping || body.isSleeping);
@@ -227,7 +226,9 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void updateCollection() {
 
-		if ( pinned ) { //|| temporarilyPinned) {
+		updateTheta(); 
+		
+		if ( pinned ) { 
 			v.set(0,0,0);
 			omega.set(0,0,0);
 			minv = 0;
@@ -239,7 +240,6 @@ public class RigidCollection extends RigidBody {
 			updateMassCOMInertia();
 		}
 		
-		updateTheta(); // currently does nothing, but can help optimize the BB
 		updateTransformations();
 		updateBodiesTransformations();
 		updateBB();
@@ -249,46 +249,45 @@ public class RigidCollection extends RigidBody {
 	 * TODO: SPEED: this could be a fast incremental update rather than recomputing for all bodies 
 	 */
 	private void updateMassCOMInertia() {
-		double massLinear = 0;
-		Matrix3d massAngular = new Matrix3d();
-
-		Point3d com = new Point3d();
+		
+		x.set(0.,0.,0.);
+		massLinear = 0;
 		for ( RigidBody b : bodies ) {
 			massLinear += b.massLinear;		
-			com.scaleAdd( b.massLinear, b.x, com );
+			x.scaleAdd( b.massLinear, b.x, x );
 		}
-		com.scale( 1./massLinear );
-		x.set(com);
-		this.massLinear = massLinear;
+		x.scale( 1./massLinear );  // this is the COM
 		this.minv = 1./massLinear;
 		
+		massAngular.setZero();
 		for ( RigidBody b : bodies ) {
 			massAngular.add( b.massAngular );
+			// translate inertia tensor to center of mass
 			// should certainly have a b.x squared type term for the mass being at a distance...
-			//			I [p]    J  0    I   0 
-			//			0  I    0 mI    [p] I
+			//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)
+			//			0  I      0 mI    [p] I
 			//
-			//			I [p]   J   0
-			//			0  I   m[p] 0
+			//			I -[p]   J   0
+			//			0   I   m[p] 0
 			//
-			//			Thus.. J + mI [p][p] in the upper left...
+			//			Thus.. J - mI [p][p] in the upper left...
 			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
-			double x = b.x.x;
-			double y = b.x.y;
-			double z = b.x.z;			
-			double x2 = x*x;
-			double y2 = y*y;
-			double z2 = z*z;
+			double px = b.x.x - x.x; // don't forget to subtract the center of mass!
+			double py = b.x.y - x.y; 
+			double pz = b.x.z - x.z;
+			double x2 = px*px;
+			double y2 = py*py;
+			double z2 = pz*pz;
 			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2; op.m01 = x*y; op.m02 = x*z;
-			op.m10 = y*x; op.m11 = x2+z2; op.m12 = y*z;
-			op.m20 = z*x; op.m21 = z*y; op.m22 = x2 + y2;
+			op.m00 = y2+z2; op.m01 = -px*py;   op.m02 = -px*pz;
+			op.m10 = -py*px;   op.m11 = x2+z2; op.m12 = -py*pz;
+			op.m20 = -pz*px;   op.m21 = -pz*py;   op.m22 = x2+y2;
 			op.mul( b.massLinear );
 			massAngular.add( op );			
 		}
 		// Let's get massAngular0
-		this.massAngular.set( massAngular );
 		this.jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
+		
 		//	    J = R J0 R^T
 		//	so J0 = R^T J R
 		// and...      Jinv = R Jinv R^T
@@ -337,7 +336,10 @@ public class RigidCollection extends RigidBody {
 		}
 		covariance.mul(1.f/N);
 		covariance.getEigen(tmp);
+		tmp.normalize();
+		
 		theta.set(tmp);
+		thetaT.transpose(theta);
 	}
 
 	/**
@@ -384,21 +386,16 @@ public class RigidCollection extends RigidBody {
 	}
 
 	/** 
-	 * Migrates the provided BPC to the collection, understanding that the contacts between these two
-	 * bodies will now be internal contacts.  The internal contacts and internal BPC lists are updated.
+	 * Migrates the contacts of the BPC to the internal contacts. 
 	 * @param bpc
 	 */
 	public void addToInternalContact(BodyPairContact bpc) {
 		tmpContacts.clear();
 		for (Contact contact : bpc.contactList) {
-			//if (!internalContacts.contains(contact)) { // TODO: eulalie: weird weird! doesn't seemed to work. I'm pretty sure we don't need it but still I'd like to understand...
-				// need to make new to not mess with the memory pools 
-				Contact c = new Contact(contact);
-				tmpContacts.add( c );
-				internalContacts.add( c );
-			//} else {
-			//	System.out.println("[addToInternalContact] Contacts already there. How does this happen?");			
-			//}
+			// need to make new to not mess with the memory pools 
+			Contact c = new Contact(contact);
+			tmpContacts.add( c );
+			internalContacts.add( c );
 		}
 		bpc.contactList.clear();
 		bpc.contactList.addAll( tmpContacts );
@@ -641,8 +638,8 @@ public class RigidCollection extends RigidBody {
 	@Override
 	public void displayBB(GLAutoDrawable drawable) {
 		super.displayBB(drawable);
-		for (RigidBody body : bodies) {
+		/*for (RigidBody body : bodies) {
 			body.displayBB(drawable);
-		}
+		}*/
 	}
 }
