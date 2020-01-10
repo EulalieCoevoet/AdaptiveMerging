@@ -204,7 +204,9 @@ public class RigidCollection extends RigidBody {
 		massAngular0.set( body.massAngular0 );
 		jinv.set( body.jinv );
 		jinv0.set( body.jinv0 );
-		boundingBoxB = new ArrayList<Point3d>(body.boundingBoxB);
+		boundingBoxB.clear();
+		for (Point3d point: body.boundingBoxB)
+			boundingBoxB.add(new Point3d(point));
 		updateTransformations();
 	}
 
@@ -303,7 +305,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void updateTheta() {
 
-		int N = 0;
+		/*int N = 0;
 		Point3d meanPos = new Point3d();
 
 		for (RigidBody body : bodies) {
@@ -312,7 +314,7 @@ public class RigidCollection extends RigidBody {
 
 			for (Point3d point : body.boundingBoxB) {
 				Point3d p = new Point3d(point);
-				transformB2C.transform(p);
+				transformB2C.transform(p); // this is the identity...
 				meanPos.add(p);
 				N++;
 			}
@@ -326,7 +328,7 @@ public class RigidCollection extends RigidBody {
 			if (body instanceof PlaneRigidBody) continue;
 			for (Point3d point : body.boundingBoxB) {
 				Point3d p = new Point3d(point);
-				transformB2C.transform(p);
+				transformB2C.transform(p); // this is the identity...
 				v.sub(p, meanPos);
 				tmp.m00 = (float)(v.x*v.x); tmp.m01 = (float)(v.x*v.y); tmp.m02 = (float)(v.x*v.z);
 				tmp.m10 = (float)(v.y*v.x); tmp.m11 = (float)(v.y*v.y); tmp.m12 = (float)(v.y*v.z);
@@ -339,8 +341,41 @@ public class RigidCollection extends RigidBody {
 		tmp.normalize();
 		
 		theta.set(tmp);
+		thetaT.transpose(theta);*/
+		
+		double maxArea = 0.;
+		Point3d bbmaxB = new Point3d();
+		Point3d bbminB = new Point3d();
+		theta.setIdentity();
+		for (RigidBody body : bodies) {
+			if (body instanceof PlaneRigidBody) {
+				theta.setIdentity();
+				break;
+			}
+
+			bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+			bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
+			
+			for (Point3d point : body.boundingBoxB) {
+				bbmaxB.x = Math.max(bbmaxB.x, point.x);
+				bbmaxB.y = Math.max(bbmaxB.y, point.y);
+				bbmaxB.z = Math.max(bbmaxB.z, point.z);
+				bbminB.x = Math.min(bbminB.x, point.x);
+				bbminB.y = Math.min(bbminB.y, point.y);
+				bbminB.z = Math.min(bbminB.z, point.z);
+			}
+			bbmaxB.sub(bbminB);
+			double area = bbmaxB.x*bbmaxB.y*bbmaxB.z;
+			
+			if (area>maxArea) {
+				theta.set( body.theta );
+				maxArea = area;
+			}
+		}
+		theta.setIdentity(); // TODO: eulalie: remove when fixed
 		thetaT.transpose(theta);
-	}
+			
+		}
 
 	/**
 	 * For each body in collection, determines the transformations to go from body
@@ -359,27 +394,28 @@ public class RigidCollection extends RigidBody {
 	private void updateBB() {
 		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
 		Point3d bbminB = new Point3d( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
+		Point3d p = new Point3d();
 		for (RigidBody body : bodies) {
 			if (body instanceof PlaneRigidBody)
 				continue;
 
 			for (Point3d point : body.boundingBoxB) {
-				body.transformB2C.transform(point);
-				bbmaxB.x = Math.max(bbmaxB.x, point.x);
-				bbmaxB.y = Math.max(bbmaxB.y, point.y);
-				bbmaxB.z = Math.max(bbmaxB.z, point.z);
-				bbminB.x = Math.min(bbminB.x, point.x);
-				bbminB.y = Math.min(bbminB.y, point.y);
-				bbminB.z = Math.min(bbminB.z, point.z);
-				body.transformC2B.transform(point);
+				p.set(point);
+				body.transformB2C.transform(p);
+				bbmaxB.x = Math.max(bbmaxB.x, p.x);
+				bbmaxB.y = Math.max(bbmaxB.y, p.y);
+				bbmaxB.z = Math.max(bbmaxB.z, p.z);
+				bbminB.x = Math.min(bbminB.x, p.x);
+				bbminB.y = Math.min(bbminB.y, p.y);
+				bbminB.z = Math.min(bbminB.z, p.z);
 			}
 		}
 		boundingBoxB.clear();
-		boundingBoxB.add(bbmaxB);
+		boundingBoxB.add(new Point3d(bbmaxB));
 		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbminB.z));
 		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbminB.z));
 		boundingBoxB.add(new Point3d(bbminB.x, bbminB.y, bbmaxB.z));
-		boundingBoxB.add(bbminB);
+		boundingBoxB.add(new Point3d(bbminB));
 		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbmaxB.z));
 		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbmaxB.z));
 		boundingBoxB.add(new Point3d(bbmaxB.x, bbmaxB.y, bbminB.z));
