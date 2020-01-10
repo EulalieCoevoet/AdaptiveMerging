@@ -13,7 +13,7 @@
 
     <body type="box" name="platform" dim="20 1 20">
         <x> 0 0 0 </x>
-		    <omega> 0 0.1 0 </omega>
+		    <omega> 0 0.1 0.05 </omega>
         <spring pB="10 0.5 10"/>
         <spring pB="10 0.5 -10"/>
         <spring pB="-10 0.5 10"/>
