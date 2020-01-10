@@ -279,12 +279,9 @@ public class RigidCollection extends RigidBody {
 			double y2 = y*y;
 			double z2 = z*z;
 			Matrix3d op = new Matrix3d();
-			/*op.m00 = -y2-z2; op.m01 = x*y;    op.m02 = x*z;
-			op.m10 = y*x;    op.m11 = -x2-z2; op.m12 = y*z;
-			op.m20 = z*x;    op.m21 = z*y;    op.m22 = -x2-y2;*/
-			op.m00 = y2+z2; op.m01 = x*y;   op.m02 = x*z;
-			op.m10 = y*x;   op.m11 = x2+z2; op.m12 = y*z;
-			op.m20 = z*x;   op.m21 = z*y;   op.m22 = x2+y2;
+			op.m00 = y2+z2; op.m01 = -x*y;   op.m02 = -x*z;
+			op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
+			op.m20 = -z*x;   op.m21 = -z*y;   op.m22 = x2+y2;
 			op.mul( b.massLinear );
 			massAngular.add( op );			
 		}
