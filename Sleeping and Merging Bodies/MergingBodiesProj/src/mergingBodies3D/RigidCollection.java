@@ -198,6 +198,7 @@ public class RigidCollection extends RigidBody {
 		omega.set( body.omega );
 		x.set(body.x);
 		theta.set( body.theta );
+		thetaT.set( body.thetaT );
 		massLinear = body.massLinear;
 		massAngular.set( body.massAngular );
 		massAngular0.set( body.massAngular0 );
@@ -213,10 +214,6 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	private void updateCollectionState(RigidBody body) {
-//		temporarilyPinned = (temporarilyPinned || body.temporarilyPinned);
-//		body.temporarilyPinned = false;
-//		steps = Math.max(body.steps, steps);
-
 		pinned = (pinned || body.pinned);
 
 		isSleeping = (isSleeping || body.isSleeping);
@@ -229,7 +226,9 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void updateCollection() {
 
-		if ( pinned ) { //|| temporarilyPinned) {
+		updateTheta(); 
+		
+		if ( pinned ) { 
 			v.set(0,0,0);
 			omega.set(0,0,0);
 			minv = 0;
@@ -241,7 +240,6 @@ public class RigidCollection extends RigidBody {
 			updateMassCOMInertia();
 		}
 		
-		updateTheta(); // currently does nothing, but can help optimize the BB
 		updateTransformations();
 		updateBodiesTransformations();
 		updateBB();
@@ -251,19 +249,17 @@ public class RigidCollection extends RigidBody {
 	 * TODO: SPEED: this could be a fast incremental update rather than recomputing for all bodies 
 	 */
 	private void updateMassCOMInertia() {
-		double massLinear = 0;
-		Matrix3d massAngular = new Matrix3d();
-
-		Point3d com = new Point3d();
+		
+		x.set(0.,0.,0.);
+		massLinear = 0;
 		for ( RigidBody b : bodies ) {
 			massLinear += b.massLinear;		
-			com.scaleAdd( b.massLinear, b.x, com );
+			x.scaleAdd( b.massLinear, b.x, x );
 		}
-		com.scale( 1./massLinear );
-		x.set(com);
-		this.massLinear = massLinear;
+		x.scale( 1./massLinear );
 		this.minv = 1./massLinear;
 		
+		massAngular.setZero();
 		for ( RigidBody b : bodies ) {
 			massAngular.add( b.massAngular );
 			// should certainly have a b.x squared type term for the mass being at a distance...
@@ -289,8 +285,8 @@ public class RigidCollection extends RigidBody {
 			massAngular.add( op );			
 		}
 		// Let's get massAngular0
-		this.massAngular.set( massAngular );
 		this.jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
+		
 		//	    J = R J0 R^T
 		//	so J0 = R^T J R
 		// and...      Jinv = R Jinv R^T
@@ -339,7 +335,10 @@ public class RigidCollection extends RigidBody {
 		}
 		covariance.mul(1.f/N);
 		covariance.getEigen(tmp);
+		tmp.normalize();
+		
 		theta.set(tmp);
+		thetaT.transpose(theta);
 	}
 
 	/**
