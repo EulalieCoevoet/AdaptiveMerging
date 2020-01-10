@@ -41,6 +41,11 @@ public class RigidCollection extends RigidBody {
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	
 	static MergeParameters mergeParams;
+	
+	// Temp variable
+	/** new center of mass*/
+	private Point3d com = new Point3d(); 
+	private double totalMassInv = 0; 
 
 	Color color = new Color();
 	
@@ -98,8 +103,13 @@ public class RigidCollection extends RigidBody {
 		jinv0.set( body.jinv0 );
 		
 		boundingBoxB.clear();
-		for (Point3d point: body.boundingBoxB)
-			boundingBoxB.add(new Point3d(point));
+		if (body instanceof PlaneRigidBody) {
+			for (int i=0; i<8; i++) 
+				boundingBoxB.add(new Point3d());
+		} else {
+			for (Point3d point: body.boundingBoxB) 
+				boundingBoxB.add(new Point3d(point));
+		}
 		
 		updateTransformations();
 	}
@@ -180,9 +190,6 @@ public class RigidCollection extends RigidBody {
         	massLinear = 0;
 			minv = 0;
 		} else {
-		
-			Point3d com = new Point3d(); // new center of mass
-			double totalMassInv = 0; 
 			com.set(x);
 			com.scale(massLinear);
 			com.scaleAdd(body.massLinear, body.x, com);
@@ -300,11 +307,11 @@ public class RigidCollection extends RigidBody {
 	
 	private void updateInertia(final RigidBody newBody, final Point3d com) {
 				
-	    Matrix3d massAngular = new Matrix3d();
+		massAngular0.setZero(); // used as temp variable, will actually be set after the update of massAngular
 		for (int i=0; i<2; i++) {
 			RigidBody body = (i==0)? this: newBody;
 					
-			massAngular.add( body.massAngular );
+			massAngular0.add( body.massAngular );
 
 			// translate inertia tensor to center of mass
 			// should certainly have a b.x squared type term for the mass being at a distance...
@@ -327,9 +334,9 @@ public class RigidCollection extends RigidBody {
 			op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
 			op.m20 = -z*x;   op.m21 = -z*y;  op.m22 = x2+y2;
 			op.mul( body.massLinear );
-			massAngular.add( op );	
+			massAngular0.add( op );	
 		}
-		this.massAngular.set(massAngular);
+		this.massAngular.set(massAngular0);
 
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
@@ -358,11 +365,17 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 
+	private Point3d bbmaxB = new Point3d();
+	private Point3d bbminB = new Point3d();
+	/**
+	 * Update collection bounding box with new body
+	 * @param newBody
+	 */
 	private void updateBB(RigidBody newBody) {
 		
-		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-		Point3d bbminB = new Point3d( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
-
+		bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+		bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
+		
 		Point3d p = new Point3d();
 		for (int i=0; i<2; i++) {
 			RigidBody body = (i==0)? this: newBody;
@@ -381,16 +394,15 @@ public class RigidCollection extends RigidBody {
 				bbminB.z = Math.min(bbminB.z, p.z);
 			}
 		}
-			
-		boundingBoxB.clear();
-		boundingBoxB.add(new Point3d(bbmaxB));
-		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbminB.z));
-		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbminB.z));
-		boundingBoxB.add(new Point3d(bbminB.x, bbminB.y, bbmaxB.z));
-		boundingBoxB.add(new Point3d(bbminB));
-		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbmaxB.z));
-		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbmaxB.z));
-		boundingBoxB.add(new Point3d(bbmaxB.x, bbmaxB.y, bbminB.z));
+					
+		boundingBoxB.get(0).set(bbmaxB);
+		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
+		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
+		boundingBoxB.get(3).set(bbminB.x, bbminB.y, bbmaxB.z);
+		boundingBoxB.get(4).set(bbminB);
+		boundingBoxB.get(5).set(bbminB.x, bbmaxB.y, bbmaxB.z);
+		boundingBoxB.get(6).set(bbmaxB.x, bbminB.y, bbmaxB.z);
+		boundingBoxB.get(7).set(bbmaxB.x, bbmaxB.y, bbminB.z);
 	}
 
 	/** 
