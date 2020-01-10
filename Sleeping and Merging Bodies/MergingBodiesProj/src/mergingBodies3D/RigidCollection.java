@@ -264,13 +264,13 @@ public class RigidCollection extends RigidBody {
 			massAngular.add( b.massAngular );
 			// translate inertia tensor to center of mass
 			// should certainly have a b.x squared type term for the mass being at a distance...
-			//			I [p]    J  0    I   0 
-			//			0  I    0 mI    [p] I
+			//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)
+			//			0  I      0 mI    [p] I
 			//
-			//			I [p]   J   0
-			//			0  I   m[p] 0
+			//			I -[p]   J   0
+			//			0   I   m[p] 0
 			//
-			//			Thus.. J + mI [p][p] in the upper left...
+			//			Thus.. J - mI [p][p] in the upper left...
 			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
 			double x = b.x.x;
 			double y = b.x.y;
