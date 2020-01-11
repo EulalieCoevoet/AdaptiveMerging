@@ -131,8 +131,29 @@ public class Contact {
      * @param normal	in world coordinates
      */
     public void set( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {    	
-    	this.body1 = body1.isInComposite() ? body1.compositeBodyParent : body1;
-        this.body2 = body2.isInComposite() ? body2.compositeBodyParent : body2;
+    	this.body1 = body1;
+        this.body2 = body2;
+		this.info = info;
+        if ( this.body1.isInComposite() ) { // use the real body if this is a sub body in a composite
+        	this.body1 = body1.compositeBodyParent;
+        }
+        if ( this.body2.isInComposite() ) { // same for body 2
+        	this.body2 = body2.compositeBodyParent;
+        }
+        
+        // modify the info to include information about the sub body...  Note the ID will be zero by default
+        // note we assume less than 0xffff contaacts between two primitives
+        // and we assume that no composite body will be made of more than 256 bodies (otherwise it is expensive!)
+        // Perhaps this should be done down in the hash?
+        // perhaps we should actually just maintain more information type fields in the contact?
+        // contacts are already pretty big so this wouldn't really make a big deal...   
+        if ( hashcode( this.body1 ) < hashcode( this.body2) ) {        	
+	    	this.info += body1.subBodyID << 16; // put body2 subbody ID in highest byte
+	        this.info += body2.subBodyID << 24; // put body1 subbody ID in 3rd byte
+        } else {
+        	this.info += body2.subBodyID << 16; // put body2 subbody ID in highest byte
+	        this.info += body1.subBodyID << 24; // put body1 subbody ID in 3rd byte
+        }
         
         // TODO: last thing to fix here (Before writing the collision processing) is the info
         // Perhaps a body can know its index in the composite body list, and we can add 100 * id to the info to
@@ -143,7 +164,6 @@ public class Contact {
 //        body1.transformW2B.transform(contactW, contactB);
 		bv1 = disc1;
 		bv2 = disc2;
-		this.info = info;
 		this.constraintViolation =  constraintViolation;     
         
 		this.normalW.set(normal);

@@ -148,6 +148,17 @@ public class XMLParser {
 	private RigidBody createComposite( String name, Element bodyNode ) {
 		RigidBodyGeomComposite compositeGeom = new RigidBodyGeomComposite();
 
+		if(bodyNode.hasAttribute("obj")) {
+			String objfname = bodyNode.getAttribute("obj");
+			compositeGeom.soup = new PolygonSoup( objfname );
+		}
+		
+		// This is harder to implement than I would like, so I'm not going to do it right now.  :/
+//		double scale = 1;
+//		if(bodyNode.hasAttribute("scale")) {
+//			scale = Double.parseDouble( bodyNode.getAttribute("scale") );
+//		}
+		
 		// get the bodies, harvest their geometries, and compute the composite
 		//NodeList nodeList = eElement.getChildNodes();
 		NodeList nList = bodyNode.getChildNodes();
@@ -168,11 +179,14 @@ public class XMLParser {
 				if ( type.equalsIgnoreCase("box") ) {
 					sbody = createBox( name2, eElement );
 				} else if ( type.equalsIgnoreCase("plane") ) {
-					sbody = createPlane( name2, eElement );
+					System.err.println("composite should not include plane!");
+					//sbody = createPlane( name2, eElement );
 				} else if ( type.equalsIgnoreCase("sphere") ) {
 					sbody = createSphere( name2, eElement );
+					// the bvsphere is at the root.
 				} else if ( type.equalsIgnoreCase("mesh") ) {
-					sbody = createMesh( name2, eElement );
+					System.err.println("composite should best not include mesh objects!");
+					//sbody = createMesh( name2, eElement );
 				}
 				if ( sbody != null ) {
 					bodies.add( sbody );
@@ -254,13 +268,33 @@ public class XMLParser {
 		body.x.add( com );
 		body.updateRotationalInertaionFromTransformation();
 		body.geom = compositeGeom;
+		body.name = name;
 		
 		// bodies 
+		int ID = 0;
 		for ( RigidBody b : bodies ) {
 			b.compositeBodyParent = body;
-			b.transformB2C.multAinvB( body.transformB2W, b.transformB2W );
+			b.x.sub( com );
+			b.transformB2C.set( b.transformB2W );
+			//b.transformB2C.multAinvB( body.transformB2W, b.transformB2W );
+			b.subBodyID = ID++;
 		}
 		
+		if ( compositeGeom.soup != null ) {
+			for ( Vertex v : compositeGeom.soup.vertexList ) {
+				v.p.sub( com );
+			}
+		}
+		
+		// TODO: composites, as implemented, don't work in factories because the CD uses the 
+		// parent link of the geometry to identify the true contact.   If the bodies 
+		// making up the composite are to be shared, then this informaiton must be available
+		// in a different way.  For now, the easy solution is to simply not use composites in factories,
+		// but otherwise, one solution would be to pass more information at the CD level so that we can ask 
+		// for collision on one body but likewise request that any contact generated would be with the provided
+		// body (i.e., the composite).  This is easy enough, but would need updating everywhere the 
+		// Contact.set() method is called.
+		body.factoryPart = false; 
 		
 		return body;
 	}
@@ -275,6 +309,12 @@ public class XMLParser {
 		double density = 1;
 		if(eElement.hasAttribute("density"))
 			density = Double.parseDouble(eElement.getAttribute("density"));
+
+		if(eElement.hasAttribute("scale")) {
+			double scale = Double.parseDouble(eElement.getAttribute("scale"));
+			s.scale(scale);
+		}
+		
 		RigidBodyGeomBox geom = new RigidBodyGeomBox( s );	
 
 		double massLinear = s.x*s.y*s.z * density;

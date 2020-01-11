@@ -301,6 +301,7 @@ public class Display {
         VerticalFlowPanel vfpb = new VerticalFlowPanel();
 		vfpb.add( params.transparency.getSliderControls(false));
 		vfpb.add( params.drawBodies.getControls() );
+		vfpb.add( RigidBodyGeomComposite.disableDisplaySoup.getControls() );
 		vfpb.add( params.drawCollections.getControls() );
 		vfpb.add( params.drawCOMs.getControls() );
 		vfpb.add( params.drawSpeedCOMs.getControls() );

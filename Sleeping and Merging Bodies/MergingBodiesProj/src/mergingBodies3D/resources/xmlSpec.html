@@ -2,21 +2,46 @@
 <p>The scene file has one<root></root> element that containing bodies and collision properties.
 
 <p>&lt;body&gt; tags have required attributes:
-	type: one of: box, mesh, sphere, plane
-	name: anything you want, for debugging, need not be unique
+	type: one of: box, mesh, sphere, plane, composite.
+	name: anything you want, for spring attachments and debugging, and need to be unique for springs that go between bodies.
 
 <p>All bodies currently have unit density.  Different body types 
 have required attributes that must appear after the tag:
 <ul>	
 <li>	box: <br/>
-		dim="l w d" for x y z dimensions
+		<ul>
+		<li>dim="l w d" for x y z dimensions
+		<li>scale="s" for a scale factor on the dimensions (for convenience, see composite below). 
+		</ul>
 <li>	mesh: <br/>
-		scale="s" for a scale factor, 
-		obj="fname.obj" for the mesh file,
-		st="fname.sph" for the sphere tree file (undocumented)
+		<ul>
+		<li>scale="s" for a scale factor, 
+		<li>obj="fname.obj" for the mesh file,
+		<li>st="fname.sph" for the sphere tree file (undocumented)
+		</ul>
 <li>	plane: (always pinned) <br/>
-		p="x y x" a point on the plane,
-		n="x y z" the normal of the plane
+		<ul>
+		<li>p="x y x" a point on the plane,
+		<li>n="x y z" the normal of the plane
+		</ul>
+<li> composite: (always not a factory part, for now) </br>
+		<ul>
+		<li>obj="fname.obj"for the mesh file (optional).</br>
+        <li>Composite elements contain a collection of bodies (ideally only box and sphere, avoid mesh and plane) that
+        define their inertial properties and collision behaviour.  Composite bodies should not include planes (pinned) or
+        other composites.  They must be limited to under 256 parts, and even then if they start to include a large 
+        number of parts then some BV collision detection should be used instead (unimplemented). <br>
+        <li>If a mesh is define in the optional obj attribute then
+        these bodies can be drawn instead with the mesh.  Advice:
+        <ol>         
+        <li>Use blender to layer spheres and boxes on top of your mesh
+        <li>Plan ahead and build your object to an appropriate size!
+        <li>Read off the locations, rotation, and scale to define the attributes and tags of the subbodies. 
+        <li>Export the obj mesh with options (bottom left hand side of export interface) selection only, Y forward, and Z up, 
+		<li> Note that box scale will be half the dimension so use scale="2" with the dim xml attribute
+		<li> note that you want to view the rotation as axis angle and convert the angle to radians.  
+		</ol>
+        </ul> 
 </ul>
 <p>The body element can contain elements with the following tags:
 <ul>

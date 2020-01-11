@@ -1,0 +1,32 @@
+<root>
+    
+    <body type="composite" name="compartmentPlatform">
+		<x> 0 0 0 </x>
+		<v>  0 0 2 </v>
+		<omega> 0 0.5 0 </omega> 
+		<body type="box" name="base" dim="20 1 20"> <x> 0 0 0 </x>  </body>
+		<body type="box" name="n" dim="20 3 1"> <x>  0   2 -9.5 </x>  </body>
+		<body type="box" name="s" dim="20 3 1"> <x>  0   2  9.5 </x>  </body>
+		<body type="box" name="e" dim="1 3 20"> <x> -9.5 2  0 </x>  </body>
+		<body type="box" name="w" dim="1 3 20"> <x>  9.5 2  0 </x>  </body>
+		<body type="box" name="1" dim="1 3 18"> <x>  0   2  0 </x>  </body>
+		<body type="box" name="2" dim="18 3 1"> <x>  0   2  0 </x>  </body>
+
+		Tricky thing here is that the springs are defined in body coordinates PRIOR to COM shift...
+		If the COM of all the bodies above is zero, then this works out fine.
+		<spring d="100" k="400" pB="-9.5 2.5 -9.5" pW="0 50 0"/>
+		<spring d="100" k="400" pB="-9.5 2.5  9.5" pW="0 50 0"/>
+		<spring d="100" k="400" pB=" 9.5 2.5 -9.5" pW="0 50 0"/>
+		<spring d="100" k="400" pB=" 9.5 2.5  9.5" pW="0 50 0"/>
+	</body>
+	
+	<body type="sphere" name="S1" r="2"> <x> 5 2 5 </x> <col> 0.5 1 1 </col> </body>
+	<body type="sphere" name="S2" r="2"> <x> -5 2 -5 </x> <col> 1 0.5 1 </col> </body>
+
+	<body type="box" name="B1" dim="4 4 4"> <x> -5 2  5 </x> <col> 1 1 0.5 </col> <friction> 0.05 </friction> </body>
+	<body type="box" name="B2" dim="4 4 4"> <x>  5 2 -5 </x> <col> 0.75 1 0.75 </col> <friction> 0.05 </friction> </body>
+
+		
+    <body type="plane" name="plane1" p="0 -10 0" n="0 1 0"></body>
+
+</root>
