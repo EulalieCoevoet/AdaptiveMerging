@@ -631,6 +631,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	public void fillInternalBodyContacts() {
 		bodyPairContacts.clear();
+		internalContacts.clear();
 		for (RigidBody body : bodies) {
 			for (BodyPairContact bpc : body.bodyPairContacts) {
 				if (!bodyPairContacts.contains(bpc)) {
