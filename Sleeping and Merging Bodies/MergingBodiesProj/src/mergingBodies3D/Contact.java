@@ -130,11 +130,17 @@ public class Contact {
      * @param contactW	in world coordinates
      * @param normal	in world coordinates
      */
-    public void set( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {
-        this.body1 = body1;
-        this.body2 = body2;
+    public void set( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normal, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {    	
+    	this.body1 = body1.isInComposite() ? body1.compositeBodyParent : body1;
+        this.body2 = body2.isInComposite() ? body2.compositeBodyParent : body2;
+        
+        // TODO: last thing to fix here (Before writing the collision processing) is the info
+        // Perhaps a body can know its index in the composite body list, and we can add 100 * id to the info to
+        // make sure that different sub bodies with the same info do not collide wrt the warm start.
+        
         this.contactW.set( contactW ); 
-        body1.transformW2B.transform(contactW, contactB);
+        body1.transformB2W.inverseTransform( contactW, contactB );
+//        body1.transformW2B.transform(contactW, contactB);
 		bv1 = disc1;
 		bv2 = disc2;
 		this.info = info;

@@ -109,7 +109,7 @@ public class RigidCollection extends RigidBody {
 				boundingBoxB.add(new Point3d(point));
 		}
 		
-		updateTransformations();
+		updateRotationalInertaionFromTransformation();
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class RigidCollection extends RigidBody {
 		updateCollectionState(body);
 		addBodyInternalMethod(body);
 		
-		updateTransformations();
+		updateRotationalInertaionFromTransformation();
 		updateBB();
 		updateBodiesTransformations();
 	}
@@ -155,7 +155,7 @@ public class RigidCollection extends RigidBody {
 			addBodyInternalMethod(body);
 		}
 		
-		updateTransformations();
+		updateRotationalInertaionFromTransformation();
 		updateBB();
 		updateBodiesTransformations();
 	}
@@ -174,7 +174,7 @@ public class RigidCollection extends RigidBody {
 		updateCollectionState(collection);
 	    addBodyInternalMethod(collection);
 	    
-		updateTransformations();
+	    updateRotationalInertaionFromTransformation();
 		updateBB();
 		updateBodiesTransformations();
 	}
@@ -349,14 +349,8 @@ public class RigidCollection extends RigidBody {
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
 		
-		//	    J = R J0 R^T
-		//	so J0 = R^T J R
-		// and...      Jinv = R Jinv R^T
-        thetaT.transpose(theta);
-		this.massAngular0.mul( thetaT, massAngular );
-		this.massAngular0.mul( theta );
-		this.jinv0.mul( thetaT, jinv);
-		this.jinv0.mul( theta );		
+		this.transformB2W.computeRTJR( massAngular, massAngular0 );
+		this.transformB2W.computeRTJR( jinv, jinv0 );		
 	}
 
 	/**
@@ -365,11 +359,8 @@ public class RigidCollection extends RigidBody {
 	 * to this x and theta
 	 */
 	private void updateBodiesTransformations() {
-		for (RigidBody body: bodies) { 
-			body.transformB2C.set(body.transformB2W);
-			body.transformB2C.leftMult(transformW2B);
-			body.transformC2B.set(body.transformB2C);
-			body.transformC2B.invert();
+		for (RigidBody body : bodies) {
+			body.transformB2C.multAinvB( transformB2W, body.transformB2W );			
 		}
 	}
 
@@ -560,23 +551,11 @@ public class RigidCollection extends RigidBody {
 		for (RigidBody body : bodies) {
 			
 			// update transformations
-			body.transformB2W.set(body.transformB2C);
-			body.transformB2W.leftMult(transformB2W);
-			body.transformW2B.set(body.transformB2W);
-			body.transformW2B.invert();
-
-			// update position and orientation
-			body.x.x = body.transformB2W.T.m03;
-			body.x.y = body.transformB2W.T.m13;
-			body.x.z = body.transformB2W.T.m23;
-			body.transformB2W.T.getRotationScale( body.theta );
+			body.transformB2W.mult( transformB2W, body.transformB2C );			
 			
 			if ( ! pinned ) {  // a normal update would do this... so we should do it too for a correct single cycle update.
-		        jinv.mul( theta, jinv0 );
-		        thetaT.transpose(theta);
-		        jinv.mul( thetaT );
-		        massAngular.mul( theta, massAngular0 );
-		        massAngular.mul( thetaT );
+				body.transformB2W.computeRJinv0RT( jinv0, jinv );
+				body.transformB2W.computeRJinv0RT( massAngular0, massAngular );
 	        } 
 		}
 	}

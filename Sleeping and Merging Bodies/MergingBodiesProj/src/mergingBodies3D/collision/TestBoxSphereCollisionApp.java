@@ -59,8 +59,8 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 		
 		
 		b1.transformB2W.set( R1, p1 );
-		b1.transformW2B.set( R1, p1 );
-		b1.transformW2B.invert();
+		//b1.transformW2B.set( R1, p1 );
+		//b1.transformW2B.invert();
 		
 		contacts.clear();
 		pool.swapPools();

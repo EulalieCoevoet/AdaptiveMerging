@@ -97,9 +97,9 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 		b2.theta.set( R2 );
 		b2.x.set( p2 );
 		
-		b1.updateTransformations();
-		b1e.updateTransformations();
-		b2.updateTransformations();
+		b1.updateRotationalInertaionFromTransformation();
+		b1e.updateRotationalInertaionFromTransformation();
+		b2.updateRotationalInertaionFromTransformation();
 
 		contacts.clear();
 		pool.swapPools();
