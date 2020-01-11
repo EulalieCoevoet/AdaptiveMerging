@@ -244,7 +244,7 @@ public class RigidCollection extends RigidBody {
 
 			for (Point2d point : body.boundingBoxB) {
 				Point2d p = new Point2d(point);
-				transformB2C.transform(p);
+				transformB2C.transform(p); // eulalie: this is the identity... so all points are in body coordinates
 				meanPos.add(p);
 				N++;
 			}

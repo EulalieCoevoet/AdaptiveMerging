@@ -109,20 +109,6 @@ public class RigidBody {
 	/** Transforms points and vectors in body coordinates to collection coordinates, if in a collection */
 	RigidTransform3D transformB2C = new RigidTransform3D( new Matrix3d(), new Point3d() );
 
-	 // TODO:  Somewhat wasted memory???  
-				
-	///** Transforms points in World coordinates to Body coordinates */
-    //public RigidTransform transformW2B = new RigidTransform();
-    
-	///** Transforms points in collection coordinates to body coordinates, if a collection exists */
-	//RigidTransform transformC2B = new RigidTransform();
-
-//    /**
-//     * inverse orientation (i.e., world to body)  TODO: RIGIDTRANSFORM: we shouldn't be storing this! :(
-//     * This is primarily a temporary working variable!
-//     */
-//    public Matrix3d thetaT = new Matrix3d();
-
 	/**
 	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
 	 * both internal and external bpc.
@@ -283,11 +269,6 @@ public class RigidBody {
      * Updates the rotational inertia and inverse given the current transformation state stored in theta and x
      */
     public void updateRotationalInertaionFromTransformation() {
-//        transformB2W.set( theta, x );
-//        thetaT.transpose(theta);
-//        tmp.scale(-1,x);
-//        thetaT.transform(tmp);
-//        transformW2B.set( thetaT, tmp );
 
         // might be done more often than necessary, but need to have 
         // rotational inertia updated give we are storing information in a 
@@ -295,11 +276,6 @@ public class RigidBody {
         // used for energy computation and for the corriollis force (disabled)
         // also used by composite bodies at the time of their creation 
         if ( ! pinned ) {
-//	        massAngular.mul( theta, massAngular0 );
-//	        thetaT.transpose(theta);
-//	        massAngular.mul( thetaT );
-//	        jinv.mul( theta, jinv0 );
-//	        jinv.mul( thetaT );
 	        transformB2W.computeRJinv0RT(massAngular0, massAngular); // needed for corriolis, and merging
         	transformB2W.computeRJinv0RT(jinv0, jinv);
         } 
