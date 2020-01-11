@@ -296,11 +296,6 @@ public class Merging {
 		for (RigidBody body: collection.bodies) {
 			if (!handledBodies.contains(body)) {
 				
-				// TODO: eulalie: we could
-				// 1- create a list of new collections
-				// 2- the largest one, if size>collection.size/2, can remain the same -> collection.removeBodies(subbodies)
-				// 3- create all new collections or bodies
-				
 				subbodies.add(body);
 				buildNeighborBody(body, subbodies, handledBodies);
 				handledBodies.addAll(subbodies);
@@ -433,10 +428,13 @@ public class Merging {
 				RigidCollection collection = (RigidCollection)body;
 				if (colors.contains(collection.color)) {
 					RigidCollection sameColorCollection = collections.get(colors.indexOf(collection.color));
-					if(sameColorCollection.bodies.size()>collection.bodies.size()) 
+					if(sameColorCollection.bodies.size()>collection.bodies.size()) {
 						collection.color.setRandomColor();
-					else 
+						collection.col = new float[] { collection.color.x, collection.color.y, collection.color.z, 1 };
+					} else {
 						sameColorCollection.color.setRandomColor();
+						sameColorCollection.col = new float[] { sameColorCollection.color.x, sameColorCollection.color.y, sameColorCollection.color.z, 1 };
+					}
 				}
 				colors.add(collection.color);
 				collections.add(collection);
