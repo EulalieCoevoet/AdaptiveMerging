@@ -456,38 +456,6 @@ public class RigidCollection extends RigidBody {
 		updateBB();
 	}
 	
-	private void updateBB() {
-		bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-		bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
-		
-		Point3d p = new Point3d();
-		for (RigidBody body : bodies) {
-			
-			if (body instanceof PlaneRigidBody)
-				continue;
-			
-			for (Point3d point : body.boundingBoxB) {
-				p.set(point);
-				body.transformB2C.transform(p);
-				bbmaxB.x = Math.max(bbmaxB.x, p.x);
-				bbmaxB.y = Math.max(bbmaxB.y, p.y);
-				bbmaxB.z = Math.max(bbmaxB.z, p.z);
-				bbminB.x = Math.min(bbminB.x, p.x);
-				bbminB.y = Math.min(bbminB.y, p.y);
-				bbminB.z = Math.min(bbminB.z, p.z);
-			}
-		}
-					
-		boundingBoxB.get(0).set(bbmaxB);
-		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
-		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
-		boundingBoxB.get(3).set(bbminB.x, bbminB.y, bbmaxB.z);
-		boundingBoxB.get(4).set(bbminB);
-		boundingBoxB.get(5).set(bbminB.x, bbmaxB.y, bbmaxB.z);
-		boundingBoxB.get(6).set(bbmaxB.x, bbminB.y, bbmaxB.z);
-		boundingBoxB.get(7).set(bbmaxB.x, bbmaxB.y, bbminB.z);
-	}
-	
 	/**
 	 * Update inertia when we remove a body
 	 * @param bodyToRemove
