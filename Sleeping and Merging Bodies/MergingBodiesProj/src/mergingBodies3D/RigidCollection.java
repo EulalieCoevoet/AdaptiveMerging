@@ -299,7 +299,7 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	private void updateCollectionState(RigidBody body) {
-		pinned = (pinned || body.pinned);
+ 		pinned = (pinned || body.pinned);
 
 		isSleeping = (isSleeping || body.isSleeping);
 		body.isSleeping = false;
@@ -403,6 +403,132 @@ public class RigidCollection extends RigidBody {
 		boundingBoxB.get(5).set(bbminB.x, bbmaxB.y, bbmaxB.z);
 		boundingBoxB.get(6).set(bbmaxB.x, bbminB.y, bbmaxB.z);
 		boundingBoxB.get(7).set(bbmaxB.x, bbmaxB.y, bbminB.z);
+	}
+	
+	/**
+	 * Removes given list of bodies from the collection
+	 * @param bodiesToRemove
+	 */
+	public void removeBodies(Collection<RigidBody> bodiesToRemove) {
+		bodies.removeAll(bodiesToRemove);
+		pinned = false;
+		for (RigidBody body : bodies)
+			pinned = (pinned || body.pinned);
+		
+		theta.setIdentity(); // TODO: fix me...?
+		
+		if (pinned) { // should not be really necessary...
+			v.set(0,0,0);
+			omega.set(0,0,0);
+
+			massAngular.setZero(); // actually infinity.. but won't be used??
+			massAngular0.setZero();
+			jinv.setZero();
+			jinv0.setZero();
+			
+        	massLinear = 0;
+			minv = 0;
+		} else {
+			com.set(x);
+			x.scale(massLinear);
+			for (RigidBody body : bodiesToRemove) {
+				
+				x.scaleAdd(-body.massLinear, body.x, x);
+				massLinear -= body.massLinear;
+				minv = 1./massLinear;
+				
+				x.scale(minv);
+				updateInertiaReverse(body, com);
+				x.scale(massLinear);
+			}
+			x.scale(minv);
+		}
+		
+		updateTransformations();
+		updateBodiesTransformations();
+		updateBB();
+	}
+	
+	private void updateBB() {
+		bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+		bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
+		
+		Point3d p = new Point3d();
+		for (RigidBody body : bodies) {
+			
+			if (body instanceof PlaneRigidBody)
+				continue;
+			
+			for (Point3d point : body.boundingBoxB) {
+				p.set(point);
+				body.transformB2C.transform(p);
+				bbmaxB.x = Math.max(bbmaxB.x, p.x);
+				bbmaxB.y = Math.max(bbmaxB.y, p.y);
+				bbmaxB.z = Math.max(bbmaxB.z, p.z);
+				bbminB.x = Math.min(bbminB.x, p.x);
+				bbminB.y = Math.min(bbminB.y, p.y);
+				bbminB.z = Math.min(bbminB.z, p.z);
+			}
+		}
+					
+		boundingBoxB.get(0).set(bbmaxB);
+		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
+		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
+		boundingBoxB.get(3).set(bbminB.x, bbminB.y, bbmaxB.z);
+		boundingBoxB.get(4).set(bbminB);
+		boundingBoxB.get(5).set(bbminB.x, bbmaxB.y, bbmaxB.z);
+		boundingBoxB.get(6).set(bbmaxB.x, bbminB.y, bbmaxB.z);
+		boundingBoxB.get(7).set(bbmaxB.x, bbmaxB.y, bbminB.z);
+	}
+	
+	/**
+	 * Update inertia when we remove a body
+	 * @param bodyToRemove
+	 * @param com
+	 */
+	private void updateInertiaReverse(final RigidBody bodyToRemove, final Point3d com) {
+		
+		for (int i=0; i<2; i++) {
+			RigidBody body = (i==0)? this: bodyToRemove;
+					
+			if (i==1)
+				massAngular.sub( body.massAngular );
+		
+			// translate inertia tensor to center of mass
+			// should certainly have a b.x squared type term for the mass being at a distance...
+			//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)
+			//			0  I      0 mI    [p] I
+			//
+			//			I -[p]   J   0
+			//			0   I   m[p] 0
+			//
+			//			Thus.. J - mI [p][p] in the upper left...
+			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
+			double x = body.x.x - com.x; 
+			double y = body.x.y - com.y;
+			double z = body.x.z - com.z;
+			double x2 = x*x;
+			double y2 = y*y;
+			double z2 = z*z;
+			Matrix3d op = new Matrix3d();
+			op.m00 = y2+z2;  op.m01 = -x*y;  op.m02 = -x*z;
+			op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
+			op.m20 = -z*x;   op.m21 = -z*y;  op.m22 = x2+y2;
+			op.mul( body.massLinear );
+			massAngular.sub( op );	
+		}
+		
+		// Let's get massAngular0
+		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
+		
+		//	    J = R J0 R^T
+		//	so J0 = R^T J R
+		// and...      Jinv = R Jinv R^T
+		thetaT.transpose(theta);
+		this.massAngular0.mul( thetaT, massAngular );
+		this.massAngular0.mul( theta );
+		this.jinv0.mul( thetaT, jinv);
+		this.jinv0.mul( theta );		
 	}
 
 	/** 
@@ -539,6 +665,7 @@ public class RigidCollection extends RigidBody {
 	 * the collection
 	 */
 	public void fillInternalBodyContacts() {
+		bodyPairContacts.clear();
 		for (RigidBody body : bodies) {
 			for (BodyPairContact bpc : body.bodyPairContacts) {
 				if (!bodyPairContacts.contains(bpc)) {

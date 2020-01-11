@@ -233,14 +233,15 @@ public class Merging {
 				}
 				
 				newBodies.clear();
+				boolean removeCollection = false;
 				if (!bpcsToUnmerge.isEmpty()) 
-					unmergeSelectedBpcs(collection, bpcsToUnmerge, newBodies, dt);	
+					removeCollection = unmergeSelectedBpcs(collection, bpcsToUnmerge, newBodies, dt);	
 
 				if (!newBodies.isEmpty()) {
+					mergingEvent = true;
 					additionQueue.addAll(newBodies);
-					removalQueue.add(collection);
-					if (newBodies.size()>1)
-						mergingEvent = true;
+					if (removeCollection)
+						removalQueue.add(collection);
 				}
 			}
 		}
@@ -253,15 +254,19 @@ public class Merging {
 
 	private HashSet<RigidBody> handledBodies = new HashSet<RigidBody>();
 	private HashSet<RigidBody> subbodies = new HashSet<RigidBody>();
+	private HashSet<RigidBody> remainedBodies = new HashSet<RigidBody>();
 	/**
 	 * Unmerge given bpcs
 	 * @param collection
 	 * @param bpcsToUnmerge
 	 * @param newBodies
 	 * @param dt
+	 * @return true if collection should be removed from the system
 	 */
-	private void unmergeSelectedBpcs(RigidCollection collection, HashSet<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
+	private boolean unmergeSelectedBpcs(RigidCollection collection, HashSet<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
 			
+		boolean removeCollection = true;
+		
 		// Check for unstable configurations
 		// TODO: eulalie: don't know about this strategy
 		/*ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();
@@ -286,59 +291,74 @@ public class Merging {
 		// Compute resulting new collections/bodies
 		handledBodies.clear();
 		subbodies.clear();
+		remainedBodies.clear();
 		
-		for (BodyPairContact bpc: bpcsToUnmerge) {
-			for (int i=0; i<2; i++) { 
-				RigidBody body = bpc.getBody(i);
+		for (RigidBody body: collection.bodies) {
+			if (!handledBodies.contains(body)) {
 				
-				if (!handledBodies.contains(body)) {
-					
-					subbodies.add(body);
-					buildNeighborBody(body, subbodies, handledBodies);
-					handledBodies.addAll(subbodies);
-					
-					for (RigidBody b: subbodies)
-						collection.unmergeBody(b);
-
-					if (subbodies.size() > 1) {
-						Iterator<RigidBody> iter = subbodies.iterator();
-						
-						RigidBody sb1 = iter.next();
-						RigidBody sb2 = iter.next();
-						subbodies.remove(sb1);
-						subbodies.remove(sb2);
-						
-						RigidCollection newCollection = new RigidCollection(sb1,sb2);
-						newCollection.addBodies(subbodies);
-						newCollection.fillInternalBodyContacts();
-						newCollection.color = new Color(collection.color);
-						newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
-						collection.applyVelocitiesTo(newCollection);
-						newBodies.add(newCollection);
-					} else if (subbodies.size() == 1){ 
-						newBodies.add(subbodies.iterator().next());
+				// TODO: eulalie: we could
+				// 1- create a list of new collections
+				// 2- the largest one, if size>collection.size/2, can remain the same -> collection.removeBodies(subbodies)
+				// 3- create all new collections or bodies
+				
+				subbodies.add(body);
+				buildNeighborBody(body, subbodies, handledBodies);
+				handledBodies.addAll(subbodies);
+				
+				if (collection.bodies.size() != subbodies.size()) { 
+					if (subbodies.size() < collection.bodies.size()/2) { 
+						for (RigidBody b: subbodies)
+							collection.unmergeBody(b);
+	
+						if (subbodies.size() > 1) { // new collection
+							Iterator<RigidBody> iter = subbodies.iterator();
+							
+							RigidBody sb1 = iter.next();
+							RigidBody sb2 = iter.next();
+							subbodies.remove(sb1);
+							subbodies.remove(sb2);
+							
+							RigidCollection newCollection = new RigidCollection(sb1,sb2);
+							newCollection.addBodies(subbodies);
+							newCollection.fillInternalBodyContacts();
+							newCollection.color = new Color(collection.color);
+							newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
+							collection.applyVelocitiesTo(newCollection);
+							newBodies.add(newCollection);
+						} else if (subbodies.size() == 1){ // single body
+							newBodies.add(subbodies.iterator().next());
+						}
+					} else { // collection is only cut in half or less
+						removeCollection = false;
+						remainedBodies.addAll(subbodies);
 					}
-					
-					subbodies.clear();
+				} else { // collection remains entirely the same, happens if the bpc doesn't actually cut the collection in pieces
+					removeCollection = false;
+					remainedBodies.addAll(subbodies);
+					break;
 				}
+				
+				subbodies.clear();
 			}	
-			
+		}	
+
+		// Reconnect if necessary
+		for (BodyPairContact bpc: bpcsToUnmerge)
 			if (bpc.body1.isInSameCollection(bpc.body2))
 				mergeBodyPairContact(bpc);
-		}	
-		
-		if(handledBodies.size() != collection.bodies.size()) {
-			for (RigidBody body : collection.bodies) {
-				if (body.isInCollection(collection)) {
-					collection.unmergeBody(body);
-					newBodies.add(body);
-					handledBodies.add(body);
-				}
-			}
-		}
 		
 		if(handledBodies.size() != collection.bodies.size())
 			System.err.println("[unmergeSelectedBpcs] Something is wrong");
+		
+		if (!removeCollection) {
+			if (remainedBodies.size() != collection.bodies.size()) {
+				handledBodies.removeAll(remainedBodies);
+				collection.removeBodies(handledBodies);
+				collection.fillInternalBodyContacts();
+			}
+		}
+		
+		return removeCollection;
 	}
 	
 	/**
