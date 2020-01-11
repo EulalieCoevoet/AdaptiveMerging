@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mintools.parameters.BooleanParameter;
+import tools.moments.PolygonSoup;
+
 /**
  * A composite body is a permanently merged collection of bodies, and is perhaps useful 
  * for generating interesting geometries from collections of simple primitives without
@@ -16,6 +19,12 @@ public class RigidBodyGeomComposite extends RigidBodyGeom {
 	public ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 	
 	static private double[] openlGLmatrix = new double[16];
+	
+	/** optional visual geometry that can be set at load time */
+	public PolygonSoup soup = null;
+	
+	/** Added to interface by the Display class getControls method */
+	static BooleanParameter disableDisplaySoup = new BooleanParameter("display composite bodies instead of mesh mesh (if mesh defined)", false );
 	
 	/**
 	 * Updates the composite body positions for collision detection, or for drawing
@@ -36,13 +45,17 @@ public class RigidBodyGeomComposite extends RigidBodyGeom {
 	@Override
 	public void drawGeom(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
-		for ( RigidBody b : bodies ) {
-			gl.glPushMatrix();        
-	        gl.glMultMatrixd( b.transformB2C.getAsArray(openlGLmatrix), 0 );
-	        // skip the display list building step that would be at the body level... 
-	        b.geom.drawGeom( drawable );	        
-	        gl.glPopMatrix();
-		}	
+		if ( soup != null && ! disableDisplaySoup.getValue() ) {
+			soup.display(drawable);
+		} else {
+			for ( RigidBody b : bodies ) {
+				gl.glPushMatrix();        
+		        gl.glMultMatrixd( b.transformB2C.getAsArray(openlGLmatrix), 0 );
+		        // skip the display list building step that would be at the body level... 
+		        b.geom.drawGeom( drawable );	        
+		        gl.glPopMatrix();
+			}
+		}
 	}
 
 }

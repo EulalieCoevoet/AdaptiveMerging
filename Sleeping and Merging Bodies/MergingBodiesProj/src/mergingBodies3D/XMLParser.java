@@ -148,6 +148,11 @@ public class XMLParser {
 	private RigidBody createComposite( String name, Element bodyNode ) {
 		RigidBodyGeomComposite compositeGeom = new RigidBodyGeomComposite();
 
+		if(bodyNode.hasAttribute("obj")) {
+			String objfname = bodyNode.getAttribute("obj");
+			compositeGeom.soup = new PolygonSoup( objfname );
+		}
+		
 		// get the bodies, harvest their geometries, and compute the composite
 		//NodeList nodeList = eElement.getChildNodes();
 		NodeList nList = bodyNode.getChildNodes();
@@ -266,6 +271,12 @@ public class XMLParser {
 			b.subBodyID = ID++;
 		}
 		
+		if ( compositeGeom.soup != null ) {
+			for ( Vertex v : compositeGeom.soup.vertexList ) {
+				v.p.sub( com );
+			}
+		}
+		
 		// TODO: composites, as implemented, don't work in factories because the CD uses the 
 		// parent link of the geometry to identify the true contact.   If the bodies 
 		// making up the composite are to be shared, then this informaiton must be available
@@ -289,6 +300,12 @@ public class XMLParser {
 		double density = 1;
 		if(eElement.hasAttribute("density"))
 			density = Double.parseDouble(eElement.getAttribute("density"));
+
+		if(eElement.hasAttribute("scale")) {
+			double scale = Double.parseDouble(eElement.getAttribute("scale"));
+			s.scale(scale);
+		}
+		
 		RigidBodyGeomBox geom = new RigidBodyGeomBox( s );	
 
 		double massLinear = s.x*s.y*s.z * density;
