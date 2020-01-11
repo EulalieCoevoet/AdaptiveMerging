@@ -140,8 +140,8 @@ public class RigidCollection extends RigidBody {
 		addBodyInternalMethod(body);
 		
 		updateRotationalInertaionFromTransformation();
-		updateBB();
 		updateBodiesTransformations();
+		updateBB();
 	}
 
 	/**
@@ -156,8 +156,8 @@ public class RigidCollection extends RigidBody {
 		}
 		
 		updateRotationalInertaionFromTransformation();
-		updateBB();
 		updateBodiesTransformations();
+		updateBB();
 	}
 
 	/**
@@ -175,8 +175,8 @@ public class RigidCollection extends RigidBody {
 	    addBodyInternalMethod(collection);
 	    
 	    updateRotationalInertaionFromTransformation();
-		updateBB();
 		updateBodiesTransformations();
+		updateBB();
 	}
 	
 	/**
@@ -383,7 +383,7 @@ public class RigidCollection extends RigidBody {
 			
 			for (Point3d point : body.boundingBoxB) {
 				p.set(point);
-				transformB2C.transform(p);
+				body.transformB2C.transform(p);
 				bbmaxB.x = Math.max(bbmaxB.x, p.x);
 				bbmaxB.y = Math.max(bbmaxB.y, p.y);
 				bbmaxB.z = Math.max(bbmaxB.z, p.z);
