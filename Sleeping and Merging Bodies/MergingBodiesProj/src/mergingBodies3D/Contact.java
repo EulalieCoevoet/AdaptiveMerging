@@ -134,7 +134,8 @@ public class Contact {
         this.body1 = body1;
         this.body2 = body2;
         this.contactW.set( contactW ); 
-        body1.transformW2B.transform(contactW, contactB);
+        body1.transformB2W.inverseTransform( contactW, contactB );
+//        body1.transformW2B.transform(contactW, contactB);
 		bv1 = disc1;
 		bv2 = disc2;
 		this.info = info;

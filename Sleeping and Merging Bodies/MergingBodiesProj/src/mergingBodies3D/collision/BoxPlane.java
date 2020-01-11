@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 import mergingBodies3D.Contact;
 import mergingBodies3D.ContactPool;
 import mergingBodies3D.RigidBody;
-import mergingBodies3D.RigidTransform;
+import mergingBodies3D.RigidTransform3D;
 
 public class BoxPlane {
 
@@ -30,7 +30,7 @@ public class BoxPlane {
 
 		p.scale( 0.5, size );
 		int numContacts = contacts.size();
-		RigidTransform TB2W = body1.transformB2W;
+		RigidTransform3D TB2W = body1.transformB2W;
 		double s;
 		// we store the corner ID for warm starts...
 		// NOTE: could this be more efficient by transforming the plane to box coordinates?
