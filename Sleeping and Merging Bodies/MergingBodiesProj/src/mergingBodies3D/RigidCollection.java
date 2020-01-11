@@ -427,19 +427,17 @@ public class RigidCollection extends RigidBody {
         	massLinear = 0;
 			minv = 0;
 		} else {
-			com.set(x);
-			x.scale(massLinear);
 			for (RigidBody body : bodiesToRemove) {
+				com.set(x); // save com with body in it
 				
-				x.scaleAdd(-body.massLinear, body.x, x);
-				massLinear -= body.massLinear;
-				minv = 1./massLinear;
-				
-				x.scale(minv);
-				updateInertiaReverse(body, com);
 				x.scale(massLinear);
+				x.scaleAdd(-body.massLinear, body.x, x); 
+				massLinear -= body.massLinear; // mass with the body removed
+				minv = 1./massLinear;
+				x.scale(minv); // x with the body removed
+				
+				updateInertiaReverse(body, com);
 			}
-			x.scale(minv);
 		}
 		
 		updateRotationalInertaionFromTransformation();
@@ -457,7 +455,7 @@ public class RigidCollection extends RigidBody {
 		for (int i=0; i<2; i++) {
 			RigidBody body = (i==0)? this: bodyToRemove;
 					
-			if (i==1)
+			if (i==1) // massAngular will become this.massAngular
 				massAngular.sub( body.massAngular );
 		
 			// translate inertia tensor to center of mass
