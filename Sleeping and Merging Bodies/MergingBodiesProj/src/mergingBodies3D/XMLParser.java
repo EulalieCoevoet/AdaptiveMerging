@@ -153,6 +153,12 @@ public class XMLParser {
 			compositeGeom.soup = new PolygonSoup( objfname );
 		}
 		
+		// This is harder to implement than I would like, so I'm not going to do it right now.  :/
+//		double scale = 1;
+//		if(bodyNode.hasAttribute("scale")) {
+//			scale = Double.parseDouble( bodyNode.getAttribute("scale") );
+//		}
+		
 		// get the bodies, harvest their geometries, and compute the composite
 		//NodeList nodeList = eElement.getChildNodes();
 		NodeList nList = bodyNode.getChildNodes();
@@ -173,11 +179,14 @@ public class XMLParser {
 				if ( type.equalsIgnoreCase("box") ) {
 					sbody = createBox( name2, eElement );
 				} else if ( type.equalsIgnoreCase("plane") ) {
-					sbody = createPlane( name2, eElement );
+					System.err.println("composite should not include plane!");
+					//sbody = createPlane( name2, eElement );
 				} else if ( type.equalsIgnoreCase("sphere") ) {
 					sbody = createSphere( name2, eElement );
+					// the bvsphere is at the root.
 				} else if ( type.equalsIgnoreCase("mesh") ) {
-					sbody = createMesh( name2, eElement );
+					System.err.println("composite should best not include mesh objects!");
+					//sbody = createMesh( name2, eElement );
 				}
 				if ( sbody != null ) {
 					bodies.add( sbody );

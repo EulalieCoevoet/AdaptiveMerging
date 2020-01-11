@@ -27,7 +27,7 @@ have required attributes that must appear after the tag:
 <li> composite: (always not a factory part, for now) </br>
 		<ul>
 		<li>obj="fname.obj"for the mesh file (optional).</br>
-        <li>Composite elements contain a collection of bodies (ideally only box and sphere, but mesh can be used too) that
+        <li>Composite elements contain a collection of bodies (ideally only box and sphere, avoid mesh and plane) that
         define their inertial properties and collision behaviour.  Composite bodies should not include planes (pinned) or
         other composites.  They must be limited to under 256 parts, and even then if they start to include a large 
         number of parts then some BV collision detection should be used instead (unimplemented). <br>
