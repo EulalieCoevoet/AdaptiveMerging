@@ -66,10 +66,8 @@ public class RigidCollection extends RigidBody {
 	
 		copyFrom(body1);
 
-		addBodyInternalMethod(body1);
-		updateCollectionState(body1);
-		addBodyInternalMethod(body2);
-		updateCollectionState(body2);
+		addBody(body1);
+		addBody(body2);
 	}
 	
 	/**
@@ -136,8 +134,14 @@ public class RigidCollection extends RigidBody {
 	 * @param body body to add
 	 */
 	public void addBody(RigidBody body) {
-		addBodyInternalMethod(body);
+		body.parent = this;
+		bodies.add(body);
 		updateCollectionState(body);
+		addBodyInternalMethod(body);
+		
+		updateTransformations();
+		updateBB();
+		updateBodiesTransformations();
 	}
 
 	/**
@@ -145,9 +149,15 @@ public class RigidCollection extends RigidBody {
 	 */
 	public void addBodies(Collection<RigidBody> bodies) {
 		for (RigidBody body : bodies) {
-			addBodyInternalMethod(body);
+			body.parent = this;
+			this.bodies.add(body);
 			updateCollectionState(body);
+			addBodyInternalMethod(body);
 		}
+		
+		updateTransformations();
+		updateBB();
+		updateBodiesTransformations();
 	}
 
 	/**
@@ -156,10 +166,17 @@ public class RigidCollection extends RigidBody {
 	 * @param collection collection to add
 	 */
 	public void addCollection(RigidCollection collection) {
-		for (RigidBody body : collection.bodies)
-			addBodyInternalMethod(body);
+		for (RigidBody body : collection.bodies) {
+			body.parent = this;
+			bodies.add(body);
+		}
 
 		updateCollectionState(collection);
+	    addBodyInternalMethod(collection);
+	    
+		updateTransformations();
+		updateBB();
+		updateBodiesTransformations();
 	}
 	
 	/**
@@ -168,17 +185,14 @@ public class RigidCollection extends RigidBody {
 	 * @param body body to add
 	 */
 	private void addBodyInternalMethod( RigidBody body ) {
-		body.parent = this;
-		bodies.add(body);
 
 		if (bodies.size()<2) { // we have copied already all the datas from the first body 
 			return; 
 		}
 		
 		updateTheta(body); // computed in world coordinates, is that correct? theta should be the rotations from inertial frame right?
-		updateBB(body); // set BB temporarily in world coordinates
 		
-		if ( pinned || body.pinned ) { 
+		if ( pinned ) { 
 			v.set(0,0,0);
 			omega.set(0,0,0);
 
@@ -202,12 +216,6 @@ public class RigidCollection extends RigidBody {
 			minv = totalMassInv;
 			x.set(com); // finally update com of the new collection
 		}
-	
-		updateTransformations();
-		for (Point3d point : boundingBoxB) // put back BB in collection coordinates
-			transformW2B.transform(point);
-		
-		updateBodiesTransformations(); // TODO: eulalie: this should probably be done somewhere else??
 	}
 
 	/**
@@ -371,21 +379,20 @@ public class RigidCollection extends RigidBody {
 	 * Update collection bounding box with new body
 	 * @param newBody
 	 */
-	private void updateBB(RigidBody newBody) {
+	private void updateBB() {
 		
 		bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
 		bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
 		
 		Point3d p = new Point3d();
-		for (int i=0; i<2; i++) {
-			RigidBody body = (i==0)? this: newBody;
+		for (RigidBody body : bodies) {
 			
 			if (body instanceof PlaneRigidBody)
 				continue;
 			
 			for (Point3d point : body.boundingBoxB) {
 				p.set(point);
-				body.transformB2W.transform(p);
+				transformB2C.transform(p);
 				bbmaxB.x = Math.max(bbmaxB.x, p.x);
 				bbmaxB.y = Math.max(bbmaxB.y, p.y);
 				bbmaxB.z = Math.max(bbmaxB.z, p.z);
