@@ -465,6 +465,18 @@ public class CollisionProcessor {
 			for (RigidBody b: ((RigidCollection) body2).bodies) {
 				narrowPhase(body1, b);
 			}
+		} else if ( body1.geom instanceof RigidBodyGeomComposite ) {
+			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
+			g1.updateBodyPositionsFromParent();
+			for ( RigidBody b : g1.bodies ) {
+				narrowPhase( b, body2 );
+			}
+		} else if ( body2.geom instanceof RigidBodyGeomComposite ) {
+			RigidBodyGeomComposite g2 = (RigidBodyGeomComposite) body2.geom;
+			g2.updateBodyPositionsFromParent();
+			for ( RigidBody b : g2.bodies ) {
+				narrowPhase( body1, b );
+			}
 		} else if ( body1 instanceof PlaneRigidBody ) {
 			PlaneRigidBody b1 = (PlaneRigidBody) body1;
 			if ( body2 instanceof PlaneRigidBody ) {

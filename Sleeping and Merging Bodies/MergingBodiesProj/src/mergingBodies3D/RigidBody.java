@@ -38,6 +38,9 @@ public class RigidBody {
 	 */
 	RigidBody compositeBodyParent; 
 		
+	/** If in a COMPOSITE body then this is the ID of this subBody */
+	int subBodyID = 0;
+	
 	/** Visual geometry of the body, which also informs how the collision detector will run */
     RigidBodyGeom geom;
         
@@ -541,10 +544,6 @@ public class RigidBody {
         GL2 gl = drawable.getGL().getGL2();
         gl.glPushMatrix();        
         gl.glMultMatrixd( transformB2W.getAsArray( openGLmatrix ),0 );
-        	
-        if (geom == null ) 
-        	geom = null; // set your breakpoint here...
-        
     	geom.display( drawable );
         gl.glPopMatrix();
     }

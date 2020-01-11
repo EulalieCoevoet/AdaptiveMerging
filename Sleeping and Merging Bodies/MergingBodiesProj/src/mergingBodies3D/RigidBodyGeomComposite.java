@@ -17,12 +17,28 @@ public class RigidBodyGeomComposite extends RigidBodyGeom {
 	
 	static private double[] openlGLmatrix = new double[16];
 	
+	/**
+	 * Updates the composite body positions for collision detection, or for drawing
+	 */
+	public void updateBodyPositionsFromParent() {
+		for ( RigidBody b : bodies ) {
+			b.transformB2W.mult( b.compositeBodyParent.transformB2W, b.transformB2C );
+		}
+	}
+	
+	/**
+	 * We override the display method... don't create a display list for 
+	 * the whole body, but instead we'll call the bodies display methods individaully 
+	 * ( each with their own display list )
+	 * 
+	 * 
+	 */
 	@Override
 	public void drawGeom(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 		for ( RigidBody b : bodies ) {
 			gl.glPushMatrix();        
-	        gl.glMultMatrixd( b.transformB2W.getAsArray(openlGLmatrix), 0 );
+	        gl.glMultMatrixd( b.transformB2C.getAsArray(openlGLmatrix), 0 );
 	        // skip the display list building step that would be at the body level... 
 	        b.geom.drawGeom( drawable );	        
 	        gl.glPopMatrix();

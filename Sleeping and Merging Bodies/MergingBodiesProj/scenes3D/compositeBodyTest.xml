@@ -1,7 +1,7 @@
 <root>
 
 	<body type="composite" name="test">
-		<x> 0 0 0 </x>  will be the COM translation, wherever the COM is!  :/
+		<x> 0 10 0 </x> 
 	    <body type="box" name="box1" dim="4 1 6">
     	    <x> 0 5 0 </x>
   	  	</body>
