@@ -30,6 +30,14 @@ public class RigidBody {
 	/** Identifies the rigid collection to which this body belongs, or null if not in a collection */
 	RigidCollection parent;
 	
+	/** 
+	 * Identifies the body if this body is part of a composite body... could be shared with parent 
+	 * if we change the type... but be careful not to confuse the two!  I.e., best to leave parent
+	 * alone as there are probably checks to see if parent != null to identify if the body is a collection,
+	 * Just as checking (compositeBodyParent != null) to identify if this is in a composite body.
+	 */
+	RigidBody compositeBodyParent; 
+		
 	/** Visual geometry of the body, which also informs how the collision detector will run */
     RigidBodyGeom geom;
         
@@ -220,7 +228,7 @@ public class RigidBody {
     		this.boundingBoxB.add( new Point3d(point) );
         // we can share the blocks and boundary blocks...
         // no need to update them as they are in the correct body coordinates already        
-        updateTransformations();
+        updateRotationalInertaionFromTransformation();
         if ( body.root != null ) {
         	root = new BVNode( body.root, this ); // create a copy
         }
@@ -241,7 +249,11 @@ public class RigidBody {
 		torque.set(0,0,0);
 		deltaV.setZero();
 	}
-    	
+    
+	public boolean isInComposite() {
+		return ( compositeBodyParent != null );
+	}
+	
 	public boolean isInCollection() {
 		return (parent!=null);
 	}
@@ -265,9 +277,9 @@ public class RigidBody {
 	}
 	
     /**
-     * Updates the B2W and W2B transformations
+     * Updates the rotational inertia and inverse given the current transformation state stored in theta and x
      */
-    public void updateTransformations() {
+    public void updateRotationalInertaionFromTransformation() {
 //        transformB2W.set( theta, x );
 //        thetaT.transpose(theta);
 //        tmp.scale(-1,x);
@@ -389,7 +401,7 @@ public class RigidBody {
         	theta.normalizeCP( dR ); // keep it clean!
         }
 		
-        updateTransformations();
+        updateRotationalInertaionFromTransformation();
 	}	
 
     /**
@@ -514,7 +526,7 @@ public class RigidBody {
         jinv.set( jinv0 );       
         v.set(v0);
         omega.set(omega0);
-        updateTransformations();
+        updateRotationalInertaionFromTransformation();
         
         metricHistory.clear();
     }

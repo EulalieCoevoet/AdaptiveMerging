@@ -206,7 +206,7 @@ public class RigidCollection extends RigidBody {
 		boundingBoxB.clear();
 		for (Point3d point: body.boundingBoxB)
 			boundingBoxB.add(new Point3d(point));
-		updateTransformations();
+		updateRotationalInertaionFromTransformation();
 	}
 
 	/**
@@ -241,7 +241,7 @@ public class RigidCollection extends RigidBody {
 			updateMassCOMInertia();
 		}
 		
-		updateTransformations();
+		updateRotationalInertaionFromTransformation();
 		updateBodiesTransformations();
 		updateBB();
 	}

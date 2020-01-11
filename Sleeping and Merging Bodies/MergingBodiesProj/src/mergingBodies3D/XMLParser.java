@@ -190,28 +190,34 @@ public class XMLParser {
 			compositeGeom.bodies.add( b );
 		}
 		com.scale( 1.0/massLinear );
+		
 		for ( RigidBody b : bodies ) {
-			b.x.sub(com);  // ensure it draws relative to the center of mass
-			b.x0.sub(com);
-			b.updateTransformations();
+			// don't move it just yet... 
+			//b.x.sub(com);  // ensure it draws relative to the center of mass
+			//b.x0.sub(com); // won't be used... 
+			//b.updateRotationalInertaionFromTransformation(); // unnecessary (will only update j)
+			
 			massAngular.add( b.massAngular );
 			// should certainly have a b.x squared type term for the mass being at a distance...
-//			I [p]    J  0    I   0 
-//			0  I    0 mI    [p] I
-//			I [p]   J   0
-//			0  I   m[p] 0
-//			J + I [p][p] in the upper left...
-		// recall lemma 2.3: [a] = a a^T - ||a||^2 I
-			double x = b.x.x;
-			double y = b.x.y;
-			double z = b.x.z;			
+			//			I -[p]    J  0    I   0 
+			//			0  I    0 mI    [p] I
+			//
+			//			I -[p]   J   0
+			//			0  I   m[p] 0
+			//
+			//			J - I [p][p] in the upper left...
+			//
+			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
+			double x = b.x.x - com.x;
+			double y = b.x.y - com.y;
+			double z = b.x.z - com.z;			
 			double x2 = x*x;
 			double y2 = y*y;
 			double z2 = z*z;
 			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2; op.m01 = x*y; op.m02 = x*z;
-			op.m10 = y*x; op.m11 = x2+z2; op.m12 = y*z;
-			op.m20 = z*x; op.m21 = z*y; op.m22 = x2 + y2;
+			op.m00 = y2+z2; op.m01 = -x*y; op.m02 = -x*z;
+			op.m10 = -y*x; op.m11 = x2+z2; op.m12 = -y*z;
+			op.m20 = -z*x; op.m21 = -z*y; op.m22 = x2 + y2;
 			op.mul( b.massLinear );
 			massAngular.add( op );			
 		}
@@ -221,7 +227,7 @@ public class XMLParser {
 	    Vector3d ur = new Vector3d( Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE );
 		for ( RigidBody b : bodies ) {
 			for ( Point3d p : b.boundingBoxB ) {
-				p.sub(com);
+				p.sub(com); // move boudning box point to COM frame.
 				ll.x = Math.min( p.x, ll.x );
 				ll.y = Math.min( p.y, ll.y );
 				ll.z = Math.min( p.z,  ll.z );
@@ -243,9 +249,18 @@ public class XMLParser {
 		bbB.add( new Point3d( ur.x, ur.y, ur.z ) );
 		
 		RigidBody body = new RigidBody( massLinear, massAngular, false, bbB );
-		setCommonAttributes( body, bodyNode );
-		body.updateTransformations();
+		setCommonAttributes( body, bodyNode ); // this will set our position... 
+		// but bodies definining the composite were defined in a local frame, and that COM position should be added to x
+		body.x.add( com );
+		body.updateRotationalInertaionFromTransformation();
 		body.geom = compositeGeom;
+		
+		// bodies 
+		for ( RigidBody b : bodies ) {
+			b.compositeBodyParent = body;
+			b.transformB2C.multAinvB( body.transformB2W, b.transformB2W );
+		}
+		
 		
 		return body;
 	}
@@ -279,7 +294,7 @@ public class XMLParser {
 		bbB.add( new Point3d(  s.x,  s.y,  s.z ) );		
 		RigidBody body = new RigidBody(massLinear, angularMass, false, bbB );
 		setCommonAttributes( body, eElement );
-		body.updateTransformations();
+		body.updateRotationalInertaionFromTransformation();
         body.geom = geom;	        
         body.radius = s.length();
         
@@ -446,13 +461,13 @@ public class XMLParser {
 			if ( tag.equalsIgnoreCase("x") ) {
 				body.x.set( t3d( values ) );
 				body.x0.set( body.x );
-				body.updateTransformations();
+				body.updateRotationalInertaionFromTransformation();
 			} else if ( tag.equalsIgnoreCase("R") ) {
 				AxisAngle4d aa = new AxisAngle4d();
 				aa.set( asDoubles(values) );
 				body.theta.set( aa );
 				body.theta0.set( aa );
-				body.updateTransformations();
+				body.updateRotationalInertaionFromTransformation();
 			} else if ( tag.equalsIgnoreCase("v") ) {
 				body.v.set( t3d( values ) );
 				body.v0.set( body.v );
