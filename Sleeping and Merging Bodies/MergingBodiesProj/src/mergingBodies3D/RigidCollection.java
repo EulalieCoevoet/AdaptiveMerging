@@ -41,6 +41,11 @@ public class RigidCollection extends RigidBody {
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	
 	static MergeParameters mergeParams;
+	
+	// Temp variable
+	/** new center of mass*/
+	private Point3d com = new Point3d(); 
+	private double totalMassInv = 0; 
 
 	Color color = new Color();
 	
@@ -61,12 +66,50 @@ public class RigidCollection extends RigidBody {
 	
 		copyFrom(body1);
 
-		addBodyInternalMethod(body1);  // this will update velocity, but it doesn't matter (body velocity averaged with itself)
-		updateCollectionState(body1);
-		addBodyInternalMethod(body2);
-		updateCollectionState(body2);
+		addBody(body1);
+		addBody(body2);
+	}
+	
+	/**
+	 * Zero working variables for accumulating forces during a time step
+	 */
+	public void clearBodies() {
+		for (RigidBody body : bodies) {
+			applyVelocitiesTo(body);
+			body.clear();
+		}
+	}
 
-		updateCollection();
+	/**
+	 * Copy velocities of given body
+	 * 
+	 * @param body
+	 */
+	private void copyFrom(RigidBody body) {
+		v.set(body.v);
+		omega.set( body.omega );
+		
+		x.set(body.x);
+		theta.set( body.theta );
+		
+		massLinear = body.massLinear;
+		minv = body.minv;
+		
+		massAngular.set( body.massAngular );
+		massAngular0.set( body.massAngular0 );
+		jinv.set( body.jinv );
+		jinv0.set( body.jinv0 );
+		
+		boundingBoxB.clear();
+		if (body instanceof PlaneRigidBody) {
+			for (int i=0; i<8; i++) 
+				boundingBoxB.add(new Point3d());
+		} else {
+			for (Point3d point: body.boundingBoxB) 
+				boundingBoxB.add(new Point3d(point));
+		}
+		
+		updateRotationalInertaionFromTransformation();
 	}
 
 	/**
@@ -91,9 +134,14 @@ public class RigidCollection extends RigidBody {
 	 * @param body body to add
 	 */
 	public void addBody(RigidBody body) {
-		addBodyInternalMethod(body);
+		body.parent = this;
+		bodies.add(body);
 		updateCollectionState(body);
-		updateCollection();
+		addBodyInternalMethod(body);
+		
+		updateRotationalInertaionFromTransformation();
+		updateBB();
+		updateBodiesTransformations();
 	}
 
 	/**
@@ -101,11 +149,15 @@ public class RigidCollection extends RigidBody {
 	 */
 	public void addBodies(Collection<RigidBody> bodies) {
 		for (RigidBody body : bodies) {
-			addBodyInternalMethod(body);
+			body.parent = this;
+			this.bodies.add(body);
 			updateCollectionState(body);
+			addBodyInternalMethod(body);
 		}
-
-		updateCollection();
+		
+		updateRotationalInertaionFromTransformation();
+		updateBB();
+		updateBodiesTransformations();
 	}
 
 	/**
@@ -114,23 +166,56 @@ public class RigidCollection extends RigidBody {
 	 * @param collection collection to add
 	 */
 	public void addCollection(RigidCollection collection) {
-		for (RigidBody body : collection.bodies)
-			addBodyInternalMethod(body);
+		for (RigidBody body : collection.bodies) {
+			body.parent = this;
+			bodies.add(body);
+		}
 
 		updateCollectionState(collection);
-		updateCollection();
+	    addBodyInternalMethod(collection);
+	    
+	    updateRotationalInertaionFromTransformation();
+		updateBB();
+		updateBodiesTransformations();
 	}
-
+	
 	/**
 	 * Adds a body to the collection (internal method, for factoring purposes).
 	 * 
 	 * @param body body to add
 	 */
 	private void addBodyInternalMethod( RigidBody body ) {
-		body.parent = this;
-		bodies.add(body);
 
-		updateVelocitiesFrom(body);
+		if (bodies.size()<2) { // we have copied already all the datas from the first body 
+			return; 
+		}
+		
+		updateTheta(body); // computed in world coordinates, is that correct? theta should be the rotations from inertial frame right?
+		
+		if ( pinned ) { 
+			v.set(0,0,0);
+			omega.set(0,0,0);
+
+			massAngular.setZero(); // actually infinity.. but won't be used??
+			massAngular0.setZero();
+			jinv.setZero();
+			jinv0.setZero();
+			
+        	massLinear = 0;
+			minv = 0;
+		} else {
+			com.set(x);
+			com.scale(massLinear);
+			com.scaleAdd(body.massLinear, body.x, com);
+			totalMassInv = 1./(body.massLinear + massLinear);
+			com.scale( totalMassInv );
+			
+			updateVelocitiesFrom(body, com, totalMassInv);
+			updateInertia(body, com);
+			massLinear += body.massLinear; // used in updateInertia, this update should stay here
+			minv = totalMassInv;
+			x.set(com); // finally update com of the new collection
+		}
 	}
 
 	/**
@@ -143,75 +228,82 @@ public class RigidCollection extends RigidBody {
 	 * 
 	 * @param body
 	 */
-	private void updateVelocitiesFrom(RigidBody body) {
-		Point3d massCom1 = new Point3d();
-		Point3d massCom2 = new Point3d();
-		massCom1.scale(body.massLinear, body.x);
-		massCom2.scale(massLinear, x);
-		Point3d xCom = new Point3d();
-		xCom.add(massCom1, massCom2);
-		double oneOverTotalMass = 1. / (body.massLinear + massLinear);
-		xCom.scale( oneOverTotalMass );
+	private void updateVelocitiesFrom(final RigidBody body, final Point3d com, final double totalMassInv) {
 
 		Vector3d r = new Vector3d();
 		Vector3d wxr = new Vector3d();
 		Vector3d tmp1 = new Vector3d();
 		Vector3d tmp2 = new Vector3d();
 
-		r.sub(xCom, body.x);
+		r.sub( com, body.x );
 		wxr.cross( body.omega, r );
 		tmp1.add( wxr, body.v );
 		tmp1.scale( body.massLinear );
 		
-		r.sub( xCom, x );
+		r.sub( com, x );
 		wxr.cross( omega, r );
 		tmp2.add( wxr, v );
 		tmp2.scale( massLinear );
 		
 		tmp1.add( tmp2 );
-		tmp1.scale( oneOverTotalMass );
+		tmp1.scale( totalMassInv );
 		
 		v.set(tmp1); 
 
 		omega.scale( massLinear );
 		omega.scaleAdd( body.massLinear, body.omega, omega );
-		omega.scale( oneOverTotalMass );
+		omega.scale( totalMassInv );
 	}
-
+	
 	/**
-	 * Zero working variables for accumulating forces during a time step
+	 * Compute theta of the collection from covariance's eigen vectors
 	 */
-	public void clearBodies() {
-		for (RigidBody body : bodies) {
-			applyVelocitiesTo(body);
-			body.clear();
+	private void updateTheta(RigidBody newBody) {
+
+		/*if (newBody instanceof PlaneRigidBody) // TODO: eulalie: what if we copied a PlaneRigidBody...
+			return;
+
+		int N = 16;
+		Point3d meanPos = new Point3d();
+		Point3d p = new Point3d();
+		
+		for (int i=0; i<2; i++) {
+			RigidBody body = (i==0)? this: newBody;
+			for (Point3d point : body.boundingBoxB) {
+				p.set(point);
+				body.transformB2W.transform(p);
+				meanPos.add(p);
+			}
 		}
-	}
+		meanPos.scale(1.f/N);
 
-	/**
-	 * Copy velocities of given body
-	 * 
-	 * @param body
-	 */
-	private void copyFrom(RigidBody body) {
-		v.set(body.v);
-		omega.set( body.omega );
-		x.set(body.x);
-		theta.set( body.theta );
-		massLinear = body.massLinear;
-		massAngular.set( body.massAngular );
-		massAngular0.set( body.massAngular0 );
-		jinv.set( body.jinv );
-		jinv0.set( body.jinv0 );
-		boundingBoxB.clear();
-		for (Point3d point: body.boundingBoxB)
-			boundingBoxB.add(new Point3d(point));
-		updateRotationalInertaionFromTransformation();
+		Vector3d v = new Vector3d();
+		MyMatrix3f Mtmp = new MyMatrix3f();
+		MyMatrix3f covariance = new MyMatrix3f();
+		
+		for (int i=0; i<2; i++) {
+			RigidBody body = (i==0)? this: newBody;
+			for (Point3d point : body.boundingBoxB) {
+				p.set(point);
+				body.transformB2W.transform(p);
+				v.sub(p, meanPos);
+				Mtmp.m00 = (float)(v.x*v.x); Mtmp.m01 = (float)(v.x*v.y); Mtmp.m02 = (float)(v.x*v.z);
+				Mtmp.m10 = (float)(v.y*v.x); Mtmp.m11 = (float)(v.y*v.y); Mtmp.m12 = (float)(v.y*v.z);
+				Mtmp.m20 = (float)(v.z*v.x); Mtmp.m21 = (float)(v.z*v.y); Mtmp.m22 = (float)(v.z*v.z);
+				covariance.add(Mtmp);
+			}
+		}
+		covariance.mul(1.f/N);
+		covariance.getEigen(Mtmp);
+		Mtmp.normalize();
+		
+		theta.set(Mtmp);*/
+		
+		theta.setIdentity();
 	}
 
 	/**
 	 * Update collection pinned condition
-	 * 
 	 * @param body
 	 */
 	private void updateCollectionState(RigidBody body) {
@@ -220,49 +312,15 @@ public class RigidCollection extends RigidBody {
 		isSleeping = (isSleeping || body.isSleeping);
 		body.isSleeping = false;
 	}
+	
+	private void updateInertia(final RigidBody newBody, final Point3d com) {
+				
+		massAngular0.setZero(); // used as temp variable, will actually be set after the update of massAngular
+		for (int i=0; i<2; i++) {
+			RigidBody body = (i==0)? this: newBody;
+					
+			massAngular0.add( body.massAngular );
 
-	/**
-	 * Computes transforms, COM, mass, inertia, spring.
-	 * NOTE: velocity should already be updated into the COM frame at this point!
-	 */
-	private void updateCollection() {
-
-		updateTheta(); 
-		
-		if ( pinned ) { 
-			v.set(0,0,0);
-			omega.set(0,0,0);
-			minv = 0;
-			jinv0.setZero();
-			jinv.setZero();
-			massAngular.setZero(); // actually infinity.. but won't be used??
-			massAngular0.setZero();
-		} else {
-			updateMassCOMInertia();
-		}
-		
-		updateRotationalInertaionFromTransformation();
-		updateBodiesTransformations();
-		updateBB();
-	}
-
-	/** 
-	 * TODO: SPEED: this could be a fast incremental update rather than recomputing for all bodies 
-	 */
-	private void updateMassCOMInertia() {
-		
-		x.set(0.,0.,0.);
-		massLinear = 0;
-		for ( RigidBody b : bodies ) {
-			massLinear += b.massLinear;		
-			x.scaleAdd( b.massLinear, b.x, x );
-		}
-		x.scale( 1./massLinear );  // this is the COM
-		this.minv = 1./massLinear;
-		
-		massAngular.setZero();
-		for ( RigidBody b : bodies ) {
-			massAngular.add( b.massAngular );
 			// translate inertia tensor to center of mass
 			// should certainly have a b.x squared type term for the mass being at a distance...
 			//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)
@@ -273,111 +331,26 @@ public class RigidCollection extends RigidBody {
 			//
 			//			Thus.. J - mI [p][p] in the upper left...
 			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
-			double px = b.x.x - x.x; // don't forget to subtract the center of mass!
-			double py = b.x.y - x.y; 
-			double pz = b.x.z - x.z;
-			double x2 = px*px;
-			double y2 = py*py;
-			double z2 = pz*pz;
+			double x = body.x.x - com.x; 
+			double y = body.x.y - com.y;
+			double z = body.x.z - com.z;
+			double x2 = x*x;
+			double y2 = y*y;
+			double z2 = z*z;
 			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2; op.m01 = -px*py;   op.m02 = -px*pz;
-			op.m10 = -py*px;   op.m11 = x2+z2; op.m12 = -py*pz;
-			op.m20 = -pz*px;   op.m21 = -pz*py;   op.m22 = x2+y2;
-			op.mul( b.massLinear );
-			massAngular.add( op );			
+			op.m00 = y2+z2;  op.m01 = -x*y;  op.m02 = -x*z;
+			op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
+			op.m20 = -z*x;   op.m21 = -z*y;  op.m22 = x2+y2;
+			op.mul( body.massLinear );
+			massAngular0.add( op );	
 		}
+		this.massAngular.set(massAngular0);
+
 		// Let's get massAngular0
-		this.jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
-		
-		//	    J = R J0 R^T
-		//	so J0 = R^T J R
-		// and...      Jinv = R Jinv R^T
+		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
 		
 		this.transformB2W.computeRTJR( massAngular, massAngular0 );
-		this.transformB2W.computeRTJR( jinv, jinv0 );
-		
-//        thetaT.transpose(theta);
-//		this.massAngular0.mul( thetaT, massAngular );
-//		this.massAngular0.mul( theta );
-//		this.jinv0.mul( thetaT, jinv);
-//		this.jinv0.mul( theta );		
-	}
-	
-
-	/**
-	 * Compute theta of the collection from convex hull informations
-	 */
-	private void updateTheta() {
-
-		/*int N = 0;
-		Point3d meanPos = new Point3d();
-
-		for (RigidBody body : bodies) {
-			if (body instanceof PlaneRigidBody)
-				continue;
-
-			for (Point3d point : body.boundingBoxB) {
-				Point3d p = new Point3d(point);
-				transformB2C.transform(p); // this is the identity...
-				meanPos.add(p);
-				N++;
-			}
-		}
-		meanPos.scale(1.0 / N);
-
-		Vector3d v = new Vector3d();
-		MyMatrix3f tmp = new MyMatrix3f();
-		MyMatrix3f covariance = new MyMatrix3f();
-		for (RigidBody body : bodies) {
-			if (body instanceof PlaneRigidBody) continue;
-			for (Point3d point : body.boundingBoxB) {
-				Point3d p = new Point3d(point);
-				transformB2C.transform(p); // this is the identity...
-				v.sub(p, meanPos);
-				tmp.m00 = (float)(v.x*v.x); tmp.m01 = (float)(v.x*v.y); tmp.m02 = (float)(v.x*v.z);
-				tmp.m10 = (float)(v.y*v.x); tmp.m11 = (float)(v.y*v.y); tmp.m12 = (float)(v.y*v.z);
-				tmp.m20 = (float)(v.z*v.x); tmp.m21 = (float)(v.z*v.y); tmp.m22 = (float)(v.z*v.z);
-				covariance.add(tmp);
-			}
-		}
-		covariance.mul(1.f/N);
-		covariance.getEigen(tmp);
-		tmp.normalize();
-		
-		theta.set(tmp);
-		thetaT.transpose(theta);*/
-		
-		double maxArea = 0.;
-		Point3d bbmaxB = new Point3d();
-		Point3d bbminB = new Point3d();
-		theta.setIdentity();
-		for (RigidBody body : bodies) {
-			if (body instanceof PlaneRigidBody) {
-				theta.setIdentity();
-				break;
-			}
-
-			bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-			bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
-			
-			for (Point3d point : body.boundingBoxB) {
-				bbmaxB.x = Math.max(bbmaxB.x, point.x);
-				bbmaxB.y = Math.max(bbmaxB.y, point.y);
-				bbmaxB.z = Math.max(bbmaxB.z, point.z);
-				bbminB.x = Math.min(bbminB.x, point.x);
-				bbminB.y = Math.min(bbminB.y, point.y);
-				bbminB.z = Math.min(bbminB.z, point.z);
-			}
-			bbmaxB.sub(bbminB);
-			double area = bbmaxB.x*bbmaxB.y*bbmaxB.z;
-			
-			if (area>maxArea) {
-				theta.set( body.theta );
-				maxArea = area;
-			}
-		}
-		//System.out.println(theta);
-		theta.setIdentity(); // TODO: eulalie: remove when fixed
+		this.transformB2W.computeRTJR( jinv, jinv0 );		
 	}
 
 	/**
@@ -388,24 +361,29 @@ public class RigidCollection extends RigidBody {
 	private void updateBodiesTransformations() {
 		for (RigidBody body : bodies) {
 			body.transformB2C.multAinvB( transformB2W, body.transformB2W );			
-//			body.transformB2C.set(body.transformB2W);
-//			body.transformB2C.leftMult(transformW2B);
-//			body.transformC2B.set(body.transformB2C);
-//			body.transformC2B.invert();
 		}
 	}
 
+	private Point3d bbmaxB = new Point3d();
+	private Point3d bbminB = new Point3d();
+	/**
+	 * Update collection bounding box with new body
+	 * @param newBody
+	 */
 	private void updateBB() {
-		Point3d bbmaxB = new Point3d(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-		Point3d bbminB = new Point3d( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
+		
+		bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+		bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
+		
 		Point3d p = new Point3d();
 		for (RigidBody body : bodies) {
+			
 			if (body instanceof PlaneRigidBody)
 				continue;
-
+			
 			for (Point3d point : body.boundingBoxB) {
 				p.set(point);
-				body.transformB2C.transform(p);
+				transformB2C.transform(p);
 				bbmaxB.x = Math.max(bbmaxB.x, p.x);
 				bbmaxB.y = Math.max(bbmaxB.y, p.y);
 				bbmaxB.z = Math.max(bbmaxB.z, p.z);
@@ -414,15 +392,15 @@ public class RigidCollection extends RigidBody {
 				bbminB.z = Math.min(bbminB.z, p.z);
 			}
 		}
-		boundingBoxB.clear();
-		boundingBoxB.add(new Point3d(bbmaxB));
-		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbminB.z));
-		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbminB.z));
-		boundingBoxB.add(new Point3d(bbminB.x, bbminB.y, bbmaxB.z));
-		boundingBoxB.add(new Point3d(bbminB));
-		boundingBoxB.add(new Point3d(bbminB.x, bbmaxB.y, bbmaxB.z));
-		boundingBoxB.add(new Point3d(bbmaxB.x, bbminB.y, bbmaxB.z));
-		boundingBoxB.add(new Point3d(bbmaxB.x, bbmaxB.y, bbminB.z));
+					
+		boundingBoxB.get(0).set(bbmaxB);
+		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
+		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
+		boundingBoxB.get(3).set(bbminB.x, bbminB.y, bbmaxB.z);
+		boundingBoxB.get(4).set(bbminB);
+		boundingBoxB.get(5).set(bbminB.x, bbmaxB.y, bbmaxB.z);
+		boundingBoxB.get(6).set(bbmaxB.x, bbminB.y, bbmaxB.z);
+		boundingBoxB.get(7).set(bbmaxB.x, bbmaxB.y, bbminB.z);
 	}
 
 	/** 
@@ -462,7 +440,7 @@ public class RigidCollection extends RigidBody {
 
 		super.advanceTime( dt );
 
-		if ( pinned || isSleeping ) // || temporarilyPinned )
+		if ( pinned || isSleeping )
 			return;
 
 		updateBodiesPositionAndTransformations();
@@ -480,29 +458,10 @@ public class RigidCollection extends RigidBody {
 			
 			// update transformations
 			body.transformB2W.mult( transformB2W, body.transformB2C );			
-
-//			body.transformB2W.set(body.transformB2C);
-//			body.transformB2W.leftMult(transformB2W);
-//			body.transformW2B.set(body.transformB2W);
-//			body.transformW2B.invert();
-
-			// because B2W is backed by x and theta, the next 4 lines to update position and orientation aren't needed anymore...
-			
-//			// update position and orientation
-//			body.x.x = body.transformB2W.T.m03;
-//			body.x.y = body.transformB2W.T.m13;
-//			body.x.z = body.transformB2W.T.m23;
-//			body.transformB2W.T.getRotationScale( body.theta );
 			
 			if ( ! pinned ) {  // a normal update would do this... so we should do it too for a correct single cycle update.
 				body.transformB2W.computeRJinv0RT( jinv0, jinv );
 				body.transformB2W.computeRJinv0RT( massAngular0, massAngular );
-				
-//				jinv.mul( theta, jinv0 );
-//		        thetaT.transpose(theta);
-//		        jinv.mul( thetaT );
-//		        massAngular.mul( theta, massAngular0 );
-//		        massAngular.mul( thetaT );
 	        } 
 		}
 	}
@@ -522,7 +481,7 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	public void applyVelocitiesTo(RigidBody body) {
-		if ( pinned ) { //|| temporarilyPinned) {
+		if ( pinned ) { 
 			if (v.lengthSquared() > 1e-14 || omega.lengthSquared() > 1e-14)
 				System.err.println("[applyVelocitiesTo] velocities of pinned body is not zero. " + omega.toString() );
 		}
@@ -531,7 +490,6 @@ public class RigidCollection extends RigidBody {
 		Vector3d wxr = new Vector3d();
 		r.sub( body.x, x );
 		wxr.cross( omega, r );
-		
 		body.v.add( v, wxr ); // sets the value of the sum
 		body.omega.set( omega );
 	}
@@ -540,7 +498,7 @@ public class RigidCollection extends RigidBody {
 
 		double metric = motionMetricProcessor.getMotionMetric(this, body);
 
-		if (pinned ) // || temporarilyPinned)
+		if (pinned)
 			metric /= 2;
 
 		return (metric > mergeParams.thresholdUnmerge.getValue());
