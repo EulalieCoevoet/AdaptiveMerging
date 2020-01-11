@@ -369,6 +369,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	public void removeBodies(Collection<RigidBody> bodiesToRemove) {
 		bodies.removeAll(bodiesToRemove);
+		
 		boolean wasPinned = pinned;
 		pinned = false;
 		for (RigidBody body : bodies)
@@ -395,7 +396,7 @@ public class RigidCollection extends RigidBody {
 				massLinear += body.massLinear;
 			}
 			minv = 1./massLinear;
-			x.scale(minv); // x with the body removed
+			x.scale(minv); 
 			
 			computeInertia();
 		} else {
@@ -433,10 +434,7 @@ public class RigidCollection extends RigidBody {
 		}
 		
 		// Let's get massAngular0
-		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
-		
-		this.transformB2W.computeRTJR( massAngular, massAngular0 );
-		this.transformB2W.computeRTJR( jinv, jinv0 );	
+		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
 	}
 	
 	private void updateInertia(final RigidBody newBody, final Point3d com) {
@@ -453,10 +451,7 @@ public class RigidCollection extends RigidBody {
 		this.massAngular.set(massAngular0);
 
 		// Let's get massAngular0
-		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
-		
-		this.transformB2W.computeRTJR( massAngular, massAngular0 );
-		this.transformB2W.computeRTJR( jinv, jinv0 );		
+		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
 	}
 	
 	/**
@@ -477,11 +472,7 @@ public class RigidCollection extends RigidBody {
 		}
 		
 		// Let's get massAngular0
-		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
-		
-		this.transformB2W.computeRTJR( massAngular, massAngular0 );
-		this.transformB2W.computeRTJR( jinv, jinv0 );
-			
+		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/			
 	}
 	
 	//TODO: eulalie: change my name

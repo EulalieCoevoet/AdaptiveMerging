@@ -187,7 +187,6 @@ public class Merging {
 	 * Unmerge BodyPairContacts that satisfy condition
 	 */	
 	public void unmerge(MergeConditions condition, double dt) {
-		
 		if (!params.enableUnmerging.getValue())
 			return;
 		
@@ -301,7 +300,7 @@ public class Merging {
 				handledBodies.addAll(subbodies);
 				
 				if (collection.bodies.size() != subbodies.size()) { 
-					if (subbodies.size() < collection.bodies.size()/2) { 
+					if (subbodies.size() < collection.bodies.size()/2+1) { 
 						for (RigidBody b: subbodies)
 							collection.unmergeBody(b);
 	
@@ -318,7 +317,7 @@ public class Merging {
 							newCollection.fillInternalBodyContacts();
 							newCollection.color = new Color(collection.color);
 							newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
-							collection.applyVelocitiesTo(newCollection);
+							//collection.applyVelocitiesTo(newCollection); eulalie: the velocities are updated in call to addBodies...
 							newBodies.add(newCollection);
 						} else if (subbodies.size() == 1){ // single body
 							newBodies.add(subbodies.iterator().next());
