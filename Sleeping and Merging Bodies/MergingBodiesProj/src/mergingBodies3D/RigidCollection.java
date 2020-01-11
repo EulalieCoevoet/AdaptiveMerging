@@ -442,7 +442,7 @@ public class RigidCollection extends RigidBody {
 			x.scale(minv);
 		}
 		
-		updateTransformations();
+		updateRotationalInertaionFromTransformation();
 		updateBodiesTransformations();
 		updateBB();
 	}
@@ -487,14 +487,9 @@ public class RigidCollection extends RigidBody {
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
 		
-		//	    J = R J0 R^T
-		//	so J0 = R^T J R
-		// and...      Jinv = R Jinv R^T
-		thetaT.transpose(theta);
-		this.massAngular0.mul( thetaT, massAngular );
-		this.massAngular0.mul( theta );
-		this.jinv0.mul( thetaT, jinv);
-		this.jinv0.mul( theta );		
+		this.transformB2W.computeRTJR( massAngular, massAngular0 );
+		this.transformB2W.computeRTJR( jinv, jinv0 );
+			
 	}
 
 	/** 
