@@ -109,7 +109,7 @@ public class RigidCollection extends RigidBody {
 				boundingBoxB.add(new Point3d(point));
 		}
 		
-		updateTransformations();
+		updateRotationalInertaionFromTransformation();
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class RigidCollection extends RigidBody {
 		updateCollectionState(body);
 		addBodyInternalMethod(body);
 		
-		updateTransformations();
+		updateRotationalInertaionFromTransformation();
 		updateBB();
 		updateBodiesTransformations();
 	}
@@ -155,7 +155,7 @@ public class RigidCollection extends RigidBody {
 			addBodyInternalMethod(body);
 		}
 		
-		updateTransformations();
+		updateRotationalInertaionFromTransformation();
 		updateBB();
 		updateBodiesTransformations();
 	}
@@ -174,7 +174,7 @@ public class RigidCollection extends RigidBody {
 		updateCollectionState(collection);
 	    addBodyInternalMethod(collection);
 	    
-		updateTransformations();
+	    updateRotationalInertaionFromTransformation();
 		updateBB();
 		updateBodiesTransformations();
 	}
