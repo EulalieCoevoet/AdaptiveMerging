@@ -388,7 +388,7 @@ public class RigidCollection extends RigidBody {
 			
         	massLinear = 0;
 			minv = 0;
-		} else if (wasPinned) {
+		} else /*if (wasPinned)*/ {
 			x.set(0.,0.,0.);
 			massLinear = 0;
 			for (RigidBody body : bodies) {
@@ -399,7 +399,7 @@ public class RigidCollection extends RigidBody {
 			x.scale(minv); 
 			
 			computeInertia();
-		} else {
+		} /*else {
 			for (RigidBody body : bodiesToRemove) {
 				com.set(x); // save com with body in it
 				
@@ -411,7 +411,7 @@ public class RigidCollection extends RigidBody {
 				
 				updateInertiaReverse(body, com);
 			}
-		}
+		}*/
 		
 		updateRotationalInertaionFromTransformation();
 		updateBodiesTransformations();
@@ -435,8 +435,15 @@ public class RigidCollection extends RigidBody {
 		
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
+		this.transformB2W.computeRTJR( massAngular, massAngular0 );
+		this.transformB2W.computeRTJR( jinv, jinv0 );		
 	}
 	
+	/**
+	 * update inertia from newBody
+	 * @param newBody
+	 * @param com
+	 */
 	private void updateInertia(final RigidBody newBody, final Point3d com) {
 		
 		massAngular0.setZero(); // used as temp variable, will actually be set after the update of massAngular
@@ -452,6 +459,8 @@ public class RigidCollection extends RigidBody {
 
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
+		this.transformB2W.computeRTJR( massAngular, massAngular0 );
+		this.transformB2W.computeRTJR( jinv, jinv0 );	
 	}
 	
 	/**
@@ -472,7 +481,9 @@ public class RigidCollection extends RigidBody {
 		}
 		
 		// Let's get massAngular0
-		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/			
+		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
+		this.transformB2W.computeRTJR( massAngular, massAngular0 );
+		this.transformB2W.computeRTJR( jinv, jinv0 );		
 	}
 	
 	//TODO: eulalie: change my name
