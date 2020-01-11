@@ -313,46 +313,6 @@ public class RigidCollection extends RigidBody {
 		body.isSleeping = false;
 	}
 	
-	private void updateInertia(final RigidBody newBody, final Point3d com) {
-				
-		massAngular0.setZero(); // used as temp variable, will actually be set after the update of massAngular
-		for (int i=0; i<2; i++) {
-			RigidBody body = (i==0)? this: newBody;
-					
-			massAngular0.add( body.massAngular );
-
-			// translate inertia tensor to center of mass
-			// should certainly have a b.x squared type term for the mass being at a distance...
-			//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)
-			//			0  I      0 mI    [p] I
-			//
-			//			I -[p]   J   0
-			//			0   I   m[p] 0
-			//
-			//			Thus.. J - mI [p][p] in the upper left...
-			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
-			double x = body.x.x - com.x; 
-			double y = body.x.y - com.y;
-			double z = body.x.z - com.z;
-			double x2 = x*x;
-			double y2 = y*y;
-			double z2 = z*z;
-			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2;  op.m01 = -x*y;  op.m02 = -x*z;
-			op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
-			op.m20 = -z*x;   op.m21 = -z*y;  op.m22 = x2+y2;
-			op.mul( body.massLinear );
-			massAngular0.add( op );	
-		}
-		this.massAngular.set(massAngular0);
-
-		// Let's get massAngular0
-		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
-		
-		this.transformB2W.computeRTJR( massAngular, massAngular0 );
-		this.transformB2W.computeRTJR( jinv, jinv0 );		
-	}
-
 	/**
 	 * For each body in collection, determines the transformations to go from body
 	 * to collection But also, make each body's x and theta in collection, relative
@@ -363,7 +323,7 @@ public class RigidCollection extends RigidBody {
 			body.transformB2C.multAinvB( transformB2W, body.transformB2W );			
 		}
 	}
-
+	
 	private Point3d bbmaxB = new Point3d();
 	private Point3d bbminB = new Point3d();
 	/**
@@ -409,6 +369,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	public void removeBodies(Collection<RigidBody> bodiesToRemove) {
 		bodies.removeAll(bodiesToRemove);
+		boolean wasPinned = pinned;
 		pinned = false;
 		for (RigidBody body : bodies)
 			pinned = (pinned || body.pinned);
@@ -426,6 +387,17 @@ public class RigidCollection extends RigidBody {
 			
         	massLinear = 0;
 			minv = 0;
+		} else if (wasPinned) {
+			x.set(0.,0.,0.);
+			massLinear = 0;
+			for (RigidBody body : bodies) {
+				x.scaleAdd(body.massLinear, body.x, x); 
+				massLinear += body.massLinear;
+			}
+			minv = 1./massLinear;
+			x.scale(minv); // x with the body removed
+			
+			computeInertia();
 		} else {
 			for (RigidBody body : bodiesToRemove) {
 				com.set(x); // save com with body in it
@@ -446,39 +418,61 @@ public class RigidCollection extends RigidBody {
 	}
 	
 	/**
+	 * Compute inertia from bodies
+	 * @param bodyToRemove
+	 * @param com
+	 */
+	private void computeInertia() {
+
+		massAngular.setZero();
+		Matrix3d op = new Matrix3d();
+		for (RigidBody body: bodies) {
+			massAngular.add( body.massAngular );
+			getOp(body, x, op);
+			massAngular.add( op );	
+		}
+		
+		// Let's get massAngular0
+		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
+		
+		this.transformB2W.computeRTJR( massAngular, massAngular0 );
+		this.transformB2W.computeRTJR( jinv, jinv0 );	
+	}
+	
+	private void updateInertia(final RigidBody newBody, final Point3d com) {
+		
+		massAngular0.setZero(); // used as temp variable, will actually be set after the update of massAngular
+		Matrix3d op = new Matrix3d();
+		for (int i=0; i<2; i++) {
+			RigidBody body = (i==0)? this: newBody;
+					
+			massAngular0.add( body.massAngular );
+			getOp(body, com, op);
+			massAngular0.add( op );	
+		}
+		this.massAngular.set(massAngular0);
+
+		// Let's get massAngular0
+		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/
+		
+		this.transformB2W.computeRTJR( massAngular, massAngular0 );
+		this.transformB2W.computeRTJR( jinv, jinv0 );		
+	}
+	
+	/**
 	 * Update inertia when we remove a body
 	 * @param bodyToRemove
 	 * @param com
 	 */
 	private void updateInertiaReverse(final RigidBody bodyToRemove, final Point3d com) {
-		
+
+		Matrix3d op = new Matrix3d();
 		for (int i=0; i<2; i++) {
 			RigidBody body = (i==0)? this: bodyToRemove;
 					
 			if (i==1) // massAngular will become this.massAngular
 				massAngular.sub( body.massAngular );
-		
-			// translate inertia tensor to center of mass
-			// should certainly have a b.x squared type term for the mass being at a distance...
-			//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)
-			//			0  I      0 mI    [p] I
-			//
-			//			I -[p]   J   0
-			//			0   I   m[p] 0
-			//
-			//			Thus.. J - mI [p][p] in the upper left...
-			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
-			double x = body.x.x - com.x; 
-			double y = body.x.y - com.y;
-			double z = body.x.z - com.z;
-			double x2 = x*x;
-			double y2 = y*y;
-			double z2 = z*z;
-			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2;  op.m01 = -x*y;  op.m02 = -x*z;
-			op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
-			op.m20 = -z*x;   op.m21 = -z*y;  op.m22 = x2+y2;
-			op.mul( body.massLinear );
+			getOp(body, com, op);
 			massAngular.sub( op );	
 		}
 		
@@ -488,6 +482,30 @@ public class RigidCollection extends RigidBody {
 		this.transformB2W.computeRTJR( massAngular, massAngular0 );
 		this.transformB2W.computeRTJR( jinv, jinv0 );
 			
+	}
+	
+	//TODO: eulalie: change my name
+	void getOp(RigidBody body, Point3d com, Matrix3d op) {
+		// translate inertia tensor to center of mass
+		// should certainly have a b.x squared type term for the mass being at a distance...
+		//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)
+		//			0  I      0 mI    [p] I
+		//
+		//			I -[p]   J   0
+		//			0   I   m[p] 0
+		//
+		//			Thus.. J - mI [p][p] in the upper left...
+		// recall lemma 2.3: [a] = a a^T - ||a||^2 I
+		double x = body.x.x - com.x; 
+		double y = body.x.y - com.y;
+		double z = body.x.z - com.z;
+		double x2 = x*x;
+		double y2 = y*y;
+		double z2 = z*z;
+		op.m00 = y2+z2;  op.m01 = -x*y;  op.m02 = -x*z;
+		op.m10 = -y*x;   op.m11 = x2+z2; op.m12 = -y*z;
+		op.m20 = -z*x;   op.m21 = -z*y;  op.m22 = x2+y2;
+		op.mul( body.massLinear );
 	}
 
 	/** 
