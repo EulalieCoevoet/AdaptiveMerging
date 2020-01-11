@@ -8,7 +8,6 @@ import javax.vecmath.Vector3d;
 import mergingBodies3D.Contact;
 import mergingBodies3D.ContactPool;
 import mergingBodies3D.RigidBody;
-import mergingBodies3D.RigidTransform;
 
 /**
  * Box-Sphere collision test with preallocation of working variables
@@ -59,7 +58,8 @@ public class BoxSphere {
 	public static int dBoxSphere( RigidBody body1, Vector3d size, RigidBody body2, Point3d c, double r, ArrayList<Contact> contacts, ContactPool contactPool ) {
 		p.scale( 0.5, size );
 		
-		body1.transformW2B.transform( c, cB );
+		body1.transformB2W.inverseTransform( c, cB );
+		//body1.transformW2B.transform( c, cB );
 		testResult.depth = 1;
 		
 		// checking corners is easy, we'll do it in box coordinates		
@@ -157,8 +157,9 @@ public class BoxSphere {
 		if ( c.distance(body1.x) > body1.radius + r ) return false; // faster exit... 
 		
 		p.scale( 0.5, size );
-		RigidTransform TW2B1 = body1.transformW2B;
-		TW2B1.transform( c, cB );
+		body1.transformB2W.inverseTransform( c, cB );
+		// RigidTransform3D TW2B1 = body1.transformW2B;
+		// TW2B1.transform( c, cB );
 
 		// quick exit based on distance to faces
 		if ( cB.x -  p.x > r ) return false;

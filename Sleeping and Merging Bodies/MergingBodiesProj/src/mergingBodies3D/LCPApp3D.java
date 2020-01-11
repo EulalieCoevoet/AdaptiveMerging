@@ -387,9 +387,12 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         body = system.display.bodiesDrawnForPicking.get( ID );
     	pointW.scale( 1/sceneScale ); // gross to undo the other drawing stuff here... 
     	pointW.sub( sceneTranslation);
-    	Matrix4d A = body.transformW2B.T;
-    	A.transform(pointW,  grabPointB ) ;
+    	
+//    	Matrix4d A = body.transformW2B.T;
+//    	A.transform(pointW,  grabPointB ) ;
         
+    	body.transformB2W.inverseTransform( pointW, grabPointB );
+    	
         if (selectRequestType == SelectRequestType.SPRING) {
 	    	mouseSpring.picked = body;
 	    	mouseSpring.pointW.set(pointW); 
