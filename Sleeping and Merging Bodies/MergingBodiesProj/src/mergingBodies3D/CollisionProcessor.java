@@ -789,6 +789,7 @@ public class CollisionProcessor {
      */
     public void reset() {
         contacts.clear();
+        contactPool.clear();
 		bodyPairContacts.clear();
 		lastTimeStepContacts.clear();
 

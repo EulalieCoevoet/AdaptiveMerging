@@ -64,4 +64,9 @@ public class ContactPool {
 		nextInPool1 = 0;
 	}
 	
+	public void clear() {
+		pool1 = new ArrayList<Contact>(initialSize);
+		pool2 = new ArrayList<Contact>(initialSize);
+	}
+	
 }
