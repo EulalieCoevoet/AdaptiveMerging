@@ -97,6 +97,11 @@ public class RigidBody {
     public Vector3d v0 = new Vector3d();
     /** initial angular velocity in radians per second */
     public Vector3d omega0 = new Vector3d();
+    /** spinning axis if the xml file provides one (otherwise 0 vector) **/
+    public Vector3d spinner = new Vector3d();
+    /** temporary Spinning Vector for memory optimization ... used in LCPApp.java **/
+    public Vector3d tmpSpinner = new Vector3d();
+
            
     // TODO:  RigidBody improvements... 
     // Use a Vector6d for (v,omega)
@@ -154,6 +159,8 @@ public class RigidBody {
 	/** true if magnetic field is activate */
 	public boolean activateMagnet = false;
     
+    /** true if this body is capable of spinnig with q and w commands **/
+    public boolean canSpin = false;
 	/** 
 	 * A trivial bounding sphere about the COM
 	 * currently only updated for box geometries!
@@ -336,7 +343,7 @@ public class RigidBody {
      * @param dt step size
      */
     public void advanceTime( double dt ) {
-        if ( !pinned ) {   
+        if ( !pinned) {   
 			advanceVelocities(dt);
 			advancePositions(dt);
         }        

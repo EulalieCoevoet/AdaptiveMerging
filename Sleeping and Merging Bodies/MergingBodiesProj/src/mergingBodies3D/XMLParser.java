@@ -198,6 +198,7 @@ public class XMLParser {
 					System.err.println("composite should best not include mesh objects!");
 					//sbody = createMesh( name2, eElement );
 				}
+			
 				if ( sbody != null ) {
 					bodies.add( sbody );
 				}			
@@ -246,6 +247,7 @@ public class XMLParser {
 			massAngular.add( op );			
 		}
 		
+		
 		// TODO: COMPOSITE BODY: is this bounding box correct?
 	    Vector3d ll = new Vector3d( Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE );
 	    Vector3d ur = new Vector3d( Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE );
@@ -290,13 +292,21 @@ public class XMLParser {
 			//b.transformB2C.multAinvB( body.transformB2W, b.transformB2W );
 			b.subBodyID = ID++;
 		}
+	
 		
 		if ( compositeGeom.soup != null ) {
 			for ( Vertex v : compositeGeom.soup.vertexList ) {
 				v.p.sub( com );
 			}
 		}
+	
 		
+		/*//spinning capabilities
+		if (bodyNode.hasAttribute("spinner")) {
+			body.canSpin = true;
+			body.spinner = 
+		}
+		*/
 		// TODO: composites, as implemented, don't work in factories because the CD uses the 
 		// parent link of the geometry to identify the true contact.   If the bodies 
 		// making up the composite are to be shared, then this informaiton must be available
@@ -525,7 +535,12 @@ public class XMLParser {
 			} else if ( tag.equalsIgnoreCase("omega") ) {
 				body.omega.set( t3d( values ) );
 				body.omega0.set( body.omega );
-			} else if ( tag.equalsIgnoreCase("restitution") ) {
+			} else if ( tag.equalsIgnoreCase("spinner") ) {
+				body.spinner.set( t3d( values ) );
+				body.canSpin = true;
+			
+			} 
+			else if ( tag.equalsIgnoreCase("restitution") ) {
 				body.restitution = Double.parseDouble(values[0]);
 			} else if ( tag.equalsIgnoreCase("friction") ) {
 				body.friction = Double.parseDouble(values[0]);
