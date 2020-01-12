@@ -19,7 +19,7 @@ public class makePile2 {
 			int stackID = 0;
 			Point3d pos = new Point3d( -10, 0, 0 );
 			Vector3d brickSize = new Vector3d( 8,2,2 );					
-			createMessyStack(ps, stackID++, 15, -eps, brickSize, pos, 0.01);
+			createMessyStack(ps, stackID++, 15, -eps, brickSize, pos, 0.02);
 									
 			pos.set( 10, 0, 0 );
 			createMessyStack(ps, stackID++, 15, -eps, brickSize, pos, 0);
