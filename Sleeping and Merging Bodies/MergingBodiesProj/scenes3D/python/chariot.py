@@ -11,8 +11,8 @@ root = ET.Element('root')
 # Plane
 plane = ET.SubElement(root, 'body')
 plane.set('type','plane')
-plane.set('p','0 -0.6 0')
-plane.set('n','-0.05 1. 0.0')
+plane.set('p','0 -1 0')
+plane.set('n','0. 1. 0.0')
 plane.set('name','plane')
 fric = ET.SubElement(plane, 'friction')
 fric.text = "0.01"
@@ -34,7 +34,7 @@ for i in range(216):
     Box(root, name='box'+str(i), position=str(x)+" "+str(y)+" "+str(z), dim=str(dimx)+" "+str(dimy)+" "+str(dimz))
 
 Sphere(root, name='ball', position="1.8 2.7 0", radius="1.")
-Box(root, name='box'+str(i), position="-30 -2 0", orientation="0 0 1 0.08", dim="10 5 10", pinned="true")
+Box(root, name='box'+str(i), position="-30 -2 0", orientation="0 0 1 0", dim="10 5 20", pinned="true")
 
 # chariot
 composite = CompositeBody(root, obj="data/chariot.obj", scale="0.1", name="chariot", position="0. 1.7 0.", velocity="0. 0. 0.")
