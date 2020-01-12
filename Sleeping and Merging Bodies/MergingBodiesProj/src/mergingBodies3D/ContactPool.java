@@ -65,8 +65,11 @@ public class ContactPool {
 	}
 	
 	public void clear() {
-		pool1 = new ArrayList<Contact>(initialSize);
-		pool2 = new ArrayList<Contact>(initialSize);
+		// no need to force reallocation... 
+		// if this is really the fix, then there is really something weird going on....
+//		pool1 = new ArrayList<Contact>(initialSize);
+//		pool2 = new ArrayList<Contact>(initialSize);
+		nextInPool1 = 0;
 	}
 	
 }
