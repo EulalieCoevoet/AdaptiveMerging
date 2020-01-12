@@ -100,6 +100,10 @@ public class RigidCollection extends RigidBody {
 		jinv.set( body.jinv );
 		jinv0.set( body.jinv0 );
 		
+		if (body.canSpin) {
+			canSpin = true;
+			spinner = body.spinner;
+		}
 		boundingBoxB.clear();
 		if (body instanceof PlaneRigidBody) {
 			for (int i=0; i<8; i++) 
@@ -153,6 +157,10 @@ public class RigidCollection extends RigidBody {
 			this.bodies.add(body);
 			updateCollectionState(body);
 			addBodyInternalMethod(body);
+			if (body.canSpin) {
+				this.canSpin = true;
+				this.spinner = body.spinner;
+			}
 		}
 		
 		updateRotationalInertaionFromTransformation();
@@ -215,6 +223,10 @@ public class RigidCollection extends RigidBody {
 			massLinear += body.massLinear; // used in updateInertia, this update should stay here
 			minv = totalMassInv;
 			x.set(com); // finally update com of the new collection
+			if (body.canSpin) {
+				this.canSpin = true;
+				this.spinner = body.spinner;
+			}
 		}
 	}
 

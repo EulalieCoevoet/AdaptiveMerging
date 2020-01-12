@@ -538,7 +538,6 @@ public class XMLParser {
 			} else if ( tag.equalsIgnoreCase("spinner") ) {
 				body.spinner.set( t3d( values ) );
 				body.canSpin = true;
-			
 			} 
 			else if ( tag.equalsIgnoreCase("restitution") ) {
 				body.restitution = Double.parseDouble(values[0]);
