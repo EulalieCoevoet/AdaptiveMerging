@@ -214,6 +214,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         stringBuilder.append( "PGS iterations = "); stringBuilder.append( system.collision.iterations.getValue()); stringBuilder.append( '\n' );
         //stringBuilder.append( "mu = "); stringBuilder.append( system.collision.friction.getValue()); stringBuilder.append( '\n' );
         //stringBuilder.append( "r = "); stringBuilder.append( system.collision.restitution.getValue()); stringBuilder.append( '\n' );
+        stringBuilder.append( "(box-box) badWarmStarts = "); stringBuilder.append( system.collision.badWarmStarts); stringBuilder.append( '\n' );
+        stringBuilder.append( "(box-box) badWarmStartsRepaired = "); stringBuilder.append( system.collision.badWarmStartsRepaired); stringBuilder.append( '\n' );
         
         Runtime rt = Runtime.getRuntime();
         long usedMem = (rt.totalMemory() - rt.freeMemory()) / 1024; // / 1024;

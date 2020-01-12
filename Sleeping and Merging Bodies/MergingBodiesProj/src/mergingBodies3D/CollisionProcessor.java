@@ -19,8 +19,6 @@ import mergingBodies3D.collision.BoxSphere;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
-import mintools.parameters.Parameter;
-import mintools.parameters.ParameterListener;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -476,8 +474,14 @@ public class CollisionProcessor {
 		}
 	}
 	
+	int badWarmStarts = 0;
+	int badWarmStartsRepaired = 0;
+	
 	/**
-	 * Fills lambdas with values from previous time step
+	 * Fills lambdas with values from previous time step.
+	 * 
+	 * Would be nice to just loop over all contacts, but this uses the BPCs to treat box-box warm starts
+	 * slightly differently given that they don't always end up preserving their "info" number across time steps.
 	 */
 	protected void warmStart() {
 //		// check for hash collisions??
@@ -489,6 +493,8 @@ public class CollisionProcessor {
 //				}
 //			}
 //		}
+		badWarmStarts = 0;
+		badWarmStartsRepaired = 0;
 		for ( BodyPairContact bpc : bodyPairContacts ) {
 			if ( bpc.inCollection ) continue;
 			if ( bpc.body1.geom instanceof RigidBodyGeomBox && bpc.body2.geom instanceof RigidBodyGeomBox ) {
@@ -496,20 +502,53 @@ public class CollisionProcessor {
 					
 					Contact oldContact = lastTimeStepContacts.get( contact );
 					if (oldContact != null) {
-					
 						// if there is a poor match in body coordinates (i.e., off by more than 0.1 or 0.05
 						// then loop through contacts increasing info until null (check with as many box box
 						// contacts as there are, and then take the closest match.
-						
-						// perhaps record the info of the closest match for debugging purposes!?
-						
-//						Contact oldContact = lastTimeStepContacts.get( contact );
-//						if ( contact.contactW ) {
-//							
-//						}
-						
+						Point3d pNew = new Point3d();
+						Point3d pOld = new Point3d();
+						contact.body1.transformB2W.transform( contact.contactB1, pNew );
+						oldContact.body1.transformB2W.transform( oldContact.contactB1, pOld );
+						// note that body1 and body 2 can swap across time steps... so just compare in the current world!
+						// note also that nothing fancy is needed for composite bodies... the contact csb1 and csb2 
+						// (composite sub bodies) will match given the hashcode lookup, and we will only be changing
+						// contact info to walk over the 8 (?) maximum contacts.
+						double dist = pNew.distance( pOld );
+						if (  dist > 0.05 ) {
+							badWarmStarts++;
+							// try all info numbers on this contact (other than our current info number) to find a better match,
+							// then put our info number back to what it is suppose to be.
+							int myInfo = contact.info;
+							double bestMatchDist = dist;
+							int bestMatchInfo = myInfo;
+							Contact bestMatchOldContact = oldContact;
+							for ( int info = 0; info < 9; info++ ) {
+								if ( info == myInfo ) continue; // we've already got this as the best so far
+								contact.info = info;
+								oldContact = lastTimeStepContacts.get( contact );
+								if ( oldContact == null ) break; // no more contacts to check
+								if ( info == 8 ) {
+									System.err.println("warm start: unexpected number of box-box contacts!  what's the max number?");
+								}
+								oldContact.body1.transformB2W.transform( oldContact.contactB1, pOld );
+								dist = pNew.distance( pOld );
+								if ( dist < bestMatchDist ) {
+									bestMatchDist = dist;
+									bestMatchInfo = info;
+									bestMatchOldContact = oldContact;
+								}
+							}
+							if ( bestMatchInfo != myInfo ) {
+								badWarmStartsRepaired++;
+							}
+							oldContact = bestMatchOldContact;
+							contact.info = myInfo; 
+							// restoring the info of the contact in this step means that if this was just
+							// an order swap that happens when rotating from 44 to 46 degrees, for instance,
+							// then we won't need this search for the next warm start.
+						}
 					
-						contact.newThisTimeStep = false;
+						contact.newThisTimeStep = false; // not new, even if we failed to do a good warm start
 						contact.lambda0 = oldContact.lambda0;
 						contact.lambda1 = oldContact.lambda1;
 						contact.lambda2 = oldContact.lambda2;
@@ -544,19 +583,6 @@ public class CollisionProcessor {
 				}
 			}
 		}
-		
-//		for (Contact contact : contacts) {
-//			Contact oldContact = lastTimeStepContacts.get( contact );
-//			if (oldContact != null) {
-//				contact.newThisTimeStep = false;
-//				contact.lambda0 = oldContact.lambda0;
-//				contact.lambda1 = oldContact.lambda1;
-//				contact.lambda2 = oldContact.lambda2;
-//				contact.prevConstraintViolation = oldContact.constraintViolation;
-//			} else {
-//				contact.newThisTimeStep = true;
-//			}
-//		}
 	}
 
 	/**go through each element in contacts 2.
