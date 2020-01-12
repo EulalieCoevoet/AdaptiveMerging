@@ -11,27 +11,23 @@ public class makePile2 {
 
 	public static void main( String[] args ) {		
 		try {
-			PrintStream ps = new PrintStream("scenes3D/pile2.xml");
+			PrintStream ps = new PrintStream("scenes3D/pileMessComparison.xml");
 			ps.println("<root>");
 			createPlane( ps, 0 );
 			
 			double eps = 1e-4;
-			
-
 			int stackID = 0;
-
-			double bs = 4;
-
-			Point3d pos = new Point3d( 0, 0, 0 );
-
-			Vector3d brickSize = new Vector3d( bs,bs,bs );					
-
-			createMessyStack(ps, stackID++, 5, -eps, brickSize, pos);
-
-			
+			Point3d pos = new Point3d( -10, 0, 0 );
+			Vector3d brickSize = new Vector3d( 8,2,2 );					
+			createMessyStack(ps, stackID++, 15, -eps, brickSize, pos, 0.01);
+									
+			pos.set( 10, 0, 0 );
+			createMessyStack(ps, stackID++, 15, -eps, brickSize, pos, 0);
 			
 			ps.println("</root>");			
 			ps.close();
+
+			
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
@@ -57,7 +53,7 @@ public class makePile2 {
 	 * @param brickSize
 	 * @param pos
 	 */
-	public static void createMessyStack( PrintStream ps, int stackID, int layers, double gap, Vector3d brickSize, Point3d pos ) {
+	public static void createMessyStack( PrintStream ps, int stackID, int layers, double gap, Vector3d brickSize, Point3d pos, double deltaRad ) {
 		double sx = brickSize.x;
 		double sy = brickSize.y;
 		double sz = brickSize.z;
@@ -80,7 +76,7 @@ public class makePile2 {
 //			sy = brickSize.y* rand.nextDouble()*0.5 + 1;
 //			sz = brickSize.z * rand.nextDouble()*0.5 + 1;
 			y += sy/2 + gap;		
-			radians += 0.006;
+			radians += deltaRad * ( (j%2)==0 ? -1 : 1 );
 		}
 	}
 	
