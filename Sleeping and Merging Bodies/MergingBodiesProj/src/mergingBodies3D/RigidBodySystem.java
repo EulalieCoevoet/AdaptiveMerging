@@ -106,8 +106,8 @@ public class RigidBodySystem {
 		collision.updateContactsMap(); // also called after the LCP solve below... certainly not needed in both places!  :/
 		
         collision.collisionDetection(dt);
-		collision.warmStart(); 	
 		collision.updateBodyPairContacts(); 
+		collision.warmStart(); 	
 
 		if (sleeping.params.wakeAll.getValue()) sleeping.wakeAll();
 		sleeping.wake();

@@ -91,6 +91,15 @@ public class Contact {
 	double D11;
 	double D22;
 	
+	/** temporary Contact force being applied by this contact on body1 (note this is world aligned at body COM)... only used for display */
+    static private Vector3d forceW1 = new Vector3d();
+    	
+    /** Temporary contact frame information, used for display and to recompute jacobians */
+    static private Point3d contactInW = new Point3d();
+    static private Vector3d normalInW = new Vector3d();
+    static private Vector3d tangent1InW = new Vector3d();
+    static private Vector3d tangent2InW = new Vector3d();
+	
 	public Contact() {
 		// constructor for pre-allocation
 	}
@@ -121,7 +130,7 @@ public class Contact {
 		normalB1.set(contact.normalB1);   	
 		tangent1B1.set(contact.tangent1B1);  
 		tangent2B1.set(contact.tangent2B1);  
-											
+												
 		lambda0 = contact.lambda0;
 		lambda1 = contact.lambda1;
 		lambda2 = contact.lambda2;
@@ -170,7 +179,10 @@ public class Contact {
 		bv1 = disc1;
 		bv2 = disc2;
 		this.constraintViolation =  constraintViolation; //  + 1e-3;  // try to not actually push things completely apart!   perhaps??
-
+		
+		// why would initializing this break merging?
+		//this.prevConstraintViolation = 0; // don't know it until after warm start.
+		
 		lambda0 = 0; 
 		lambda1 = 0;
 		lambda2 = 0;
@@ -196,7 +208,7 @@ public class Contact {
 		tangent2B1.cross( normalW, tangent1B1 );
 		tangent2B1.normalize();
 		tangent1B1.cross( tangent2B1,  normalW );  // and doesn't need normalization 
-	
+		
 		// these quantities were built in world, so we can build the jacobian with them...
         computeJacobian(false, contactB1, normalB1, tangent1B1, tangent2B1 ); // the boolean doesn't matter here
         // Now need to store them in body coords in case this contact becomes
@@ -403,16 +415,6 @@ public class Contact {
         gl.glRasterPos3d( contactInW.x, contactInW.y, contactInW.z );
 		EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + info );
     }
-    
-    
-	/** temporary Contact force being applied by this contact on body1 (note this is world aligned at body COM)... only used for display */
-    static private Vector3d forceW1 = new Vector3d();
-    /** Temporary contact frame information, used for display and to recompute jacobians */
-    static private Point3d contactInW = new Point3d();
-    static private Vector3d normalInW = new Vector3d();
-    static private Vector3d tangent1InW = new Vector3d();
-    static private Vector3d tangent2InW = new Vector3d();
-
 
 	/**
 	 * Comptues contact forces for visualization purposes
