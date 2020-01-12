@@ -151,25 +151,25 @@ public class Contact {
 	
     /**
      * Sets the contact, and assigns it an index, only ever called for NEW contacts!
-     * @param body1
-     * @param body2
+     * @param b1
+     * @param b2
      * @param contactW	in world coordinates
      * @param normalW	in world coordinates
      */
-    public void set( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normalW, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {    	
-    	this.body1 = body1;
-        this.body2 = body2;
+    public void set( RigidBody b1, RigidBody b2, Point3d contactW, Vector3d normalW, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {    	
+    	body1 = b1;
+        body2 = b2;
 		this.info = info;
         
 		// Just add the composite sub bodies here!!  it will be needed for warm start information...
 		
-		if ( this.body1.isInComposite() ) { // use the real body if this is a sub body in a composite
-        	this.body1 = body1.compositeBodyParent;
-        	this.csb1 = body1;
+		if ( body1.isInComposite() ) { // use the real body if this is a sub body in a composite
+        	body1 = b1.compositeBodyParent;
+        	csb1 = b1;
         }
         if ( this.body2.isInComposite() ) { // same for body 2
-        	this.body2 = body2.compositeBodyParent;
-        	this.csb2 = body2;
+        	body2 = b2.compositeBodyParent;
+        	csb2 = b2;
         }
         
         // TODO: last thing to fix here (Before writing the collision processing) is the info
