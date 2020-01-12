@@ -11,7 +11,7 @@ public class makeStackOnSwing {
 
 	public static void main( String[] args ) {		
 		try {
-			PrintStream ps = new PrintStream("scenes3D/stackOnSwing.xml");
+			PrintStream ps = new PrintStream("scenes3D/stackOnSwing2.xml");
 			ps.println("<root>");
 			createPlane( ps, -10 );
 			
@@ -20,8 +20,8 @@ public class makeStackOnSwing {
 			int platformID = 0;
 			
 			Point3d pos = new Point3d( 0, 0, 0 );
-			Vector3d brickSize = new Vector3d( 8,1,8 );					
-			createMessyStack(ps, stackID++, 15, -eps, brickSize, pos, 0.02);
+			Vector3d brickSize = new Vector3d( 8,5,8 );					
+			createMessyStack(ps, stackID++, 2, -eps, brickSize, pos, 0.02);
 									
 			createPlatform(ps, platformID++, 10, pos, 50, 500, 200 );
 			

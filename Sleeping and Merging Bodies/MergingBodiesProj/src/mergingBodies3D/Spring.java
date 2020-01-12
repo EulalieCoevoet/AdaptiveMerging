@@ -194,6 +194,10 @@ public class Spring {
 	public void displaySpring( GLAutoDrawable drawable ) {
 		GL2 gl = drawable.getGL().getGL2();
 		
+		// positions always one step behind...
+		if ( body1 != null ) body1.transformB2W.transform( pb1, pb1W );
+		if ( body2 != null ) body2.transformB2W.transform( pb2, pb2W );
+
 		gl.glBegin( GL.GL_LINES );
 		
 		if (type == SpringType.BODYBODY) {

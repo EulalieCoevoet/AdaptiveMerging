@@ -103,7 +103,8 @@ public class RigidBodySystem {
         
 		applyExternalForces();
 
-		collision.updateContactsMap();
+		collision.updateContactsMap(); // also called after the LCP solve below... certainly not needed in both places!  :/
+		
         collision.collisionDetection(dt);
 		collision.warmStart(); 	
 		collision.updateBodyPairContacts(); 
@@ -124,6 +125,11 @@ public class RigidBodySystem {
 				body.clear();
 			applyExternalForces();
 		}
+		
+		// this is the main LCP solve, and we'll need to redo the warm start
+		// if the updateInCollections was run and mucked up the warm started values already
+		
+		collision.redoWarmStart();
 		
 		collision.solveLCP(dt); 
 		collision.clearBodyPairContacts();

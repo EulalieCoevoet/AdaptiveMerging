@@ -1,6 +1,7 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -113,16 +114,22 @@ public class CollisionProcessor {
 			solver.warmStart = true;
 			solver.contacts = contacts;
 
-			updateCollectionJacobians(false);
+//			updateCollectionJacobians(false);
+			// if we did a single cycle update, then some of our contacts will have had their
+			// jacobians computed for acting on bodies rather than collections... so update 
+			// those again so that we can compute the solution for the full system.
+			updateJacobiansThatNeedUpdating( solver.contacts, false );
+
 			
 			long now = System.nanoTime();
 			solver.solve( dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
+			// Paul: don't think this is needed anymore.
 			// eulalie: dirty?
-			updateCollectionJacobians(true);
+	//		updateCollectionJacobians(true);
 			
-			updateContactsMap();
+			updateContactsMap();  // why is this called in two places :(
 		}
 	}
 	
@@ -235,18 +242,23 @@ public class CollisionProcessor {
 		solver.contacts = altContactList;
 		solver.contacts.clear();
 
-		boolean hasCollection = updateCollectionJacobians(true);
-		if (!hasCollection) return; 
+//		boolean hasCollection = updateCollectionJacobians(true);
+//		if (!hasCollection) return; 
+		if ( !hasCollections() ) return;
 		
 		if (mergeParams.organizeContacts.getValue()) {		
 			getOrganizedContacts(solver.contacts);
 		} else {	
+			
+			// DON'T copy.. instead we'll redo the warm start
+			
 			// Copy the external contacts 
 			// This resolution is done with the Jacobians of the bodies (not the collection) 
 			// so not a good warm start for the LCP solve (we don't want to keep these values).
-			for ( Contact contact : contacts )
-				solver.contacts.add(new Contact(contact));
-			//solver.contacts.addAll(contacts);
+//			for ( Contact contact : contacts )
+//				solver.contacts.add(new Contact(contact));
+
+			solver.contacts.addAll(contacts);
 			
 			for (RigidBody body : bodies) {
 				if (body instanceof RigidCollection && !body.isSleeping) {
@@ -258,6 +270,14 @@ public class CollisionProcessor {
 			if (shuffle.getValue()) 
 	    		knuthShuffle(solver.contacts);
 		}
+		
+		// We may need to update select jacobians 
+		// - contacts that are internal (i.e., their frames moved)
+		// - contacts that are external but touch a collection (i.e., we need the jacobian to the 
+		//   rather than the collection, and while this would be a partial update of the jacobian if
+		//   there is only a collection on one side, it is easier just to ask again that the whole
+		//   jacobian be computed
+		updateJacobiansThatNeedUpdating( solver.contacts, true );
 		
 		solver.solve(dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
 		
@@ -278,25 +298,76 @@ public class CollisionProcessor {
 	}
 	
 	/**
-	 * Update the Jacobians of the collections' external contacts
-	 * @param computeInCollection
-	 * @return true if there is a collection in the system...
+	 * Check to see if we have collections, as we can save some work if we dont
+	 * @return
 	 */
-	protected boolean updateCollectionJacobians(boolean computeInCollection) {
-		boolean hasCollection = false;
+	protected boolean hasCollections() {
+		boolean hasCollection = false;		
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection) {
 				hasCollection = true;
-				for (BodyPairContact bpc : body.bodyPairContacts) {
-					if (!bpc.inCollection) {
-						for (Contact contact: bpc.contactList)
-							contact.computeJacobian(computeInCollection);
-					}
-				}
 			}
 		}
 		return hasCollection;
 	}
+	
+	/** 
+	 * Given a list of contacts, recompute jacobians, and use the computeInCollection flag to determine if
+	 * the jacobians should be computed based on subbody or parent
+	 * @param list
+	 * @param computeInCollection
+	 * @return
+	 */
+	protected void updateJacobiansThatNeedUpdating( Collection<Contact> list, boolean computeInCollection) {
+		for ( Contact c : list ) {
+			// if either body parent is non null then one side or both is a collection
+			// and possibly these bodies are even within the same collection.
+			if ( c.body1.parent != null || c.body2.parent != null ) {
+				c.computeJacobian(computeInCollection);
+			}
+		}
+	}
+		
+	
+//	/**
+//	 * Update the Jacobians of the collections' external contacts
+//	 * @param computeInCollection
+//	 * @return true if there is a collection in the system...
+//	 */
+//	protected boolean updateCollectionJacobians(boolean computeInCollection) {
+//		boolean hasCollection = false;
+//		
+//		for (RigidBody body : bodies) {
+//			if (body instanceof RigidCollection) {
+//				hasCollection = true;
+//			}
+//		}
+//		if ( ! hasCollection ) return hasCollection;
+//		
+//		
+//		
+//		// now which jacobians need updating?  
+//		
+////		// this is weird...
+////		// loop over bodies, but then if it is a colleciton loop over the BPCs?
+////		// I think all jacobians need an update, don't they?
+////		
+////		for (RigidBody body : bodies) {
+////			if (body instanceof RigidCollection) {
+////				hasCollection = true;
+////				for (BodyPairContact bpc : body.bodyPairContacts) {
+////					// swapping this around... 
+////					// if we are in a collection, then we DO need to update the jacobian?
+////					// or we *always? need to update?
+////					//if (!bpc.inCollection) {
+////						for (Contact contact: bpc.contactList)
+////							contact.computeJacobian(computeInCollection);
+////					//}
+////				}
+////			}
+////		}
+//		return hasCollection;
+//	}
 	
 	/**
 	 * Reordering of the contacts list for the one iteration PGS as follows:
@@ -357,8 +428,12 @@ public class CollisionProcessor {
 				// Copy the external contacts 
 				// This resolution (single iteration PGS) is done with the Jacobians of the bodies (not the collection) 
 				// so not a good warm start for the LCP solve (we don't want to keep these values).
-				for (Contact contact : bpc.contactList)
-					contacts.add(new Contact(contact));
+//				for (Contact contact : bpc.contactList)
+//					contacts.add(new Contact(contact));
+				
+				// DON"T copy these contacts... we'll redo the warm start before the full solve.
+
+				contacts.addAll( bpc.contactList );				
 			}
 		}
 	}	
@@ -391,6 +466,17 @@ public class CollisionProcessor {
 	}
 	
 	/**
+	 * Re-initialized lambdas with values identified from the warm start
+	 */
+	protected void redoWarmStart() {
+		for (Contact c : contacts) {
+			c.lambda0 = c.lambda0warm;
+			c.lambda1 = c.lambda1warm;
+			c.lambda2 = c.lambda2warm;
+		}
+	}
+	
+	/**
 	 * Fills lambdas with values from previous time step
 	 */
 	protected void warmStart() {
@@ -403,19 +489,74 @@ public class CollisionProcessor {
 //				}
 //			}
 //		}
-		
-		for (Contact contact : contacts) {
-			Contact oldContact = lastTimeStepContacts.get( contact );
-			if (oldContact != null) {
-				contact.newThisTimeStep = false;
-				contact.lambda0 = oldContact.lambda0;
-				contact.lambda1 = oldContact.lambda1;
-				contact.lambda2 = oldContact.lambda2;
-				contact.prevConstraintViolation = oldContact.constraintViolation;
+		for ( BodyPairContact bpc : bodyPairContacts ) {
+			if ( bpc.inCollection ) continue;
+			if ( bpc.body1.geom instanceof RigidBodyGeomBox && bpc.body2.geom instanceof RigidBodyGeomBox ) {
+				for ( Contact contact : bpc.contactList ) {
+					
+					Contact oldContact = lastTimeStepContacts.get( contact );
+					if (oldContact != null) {
+					
+						// if there is a poor match in body coordinates (i.e., off by more than 0.1 or 0.05
+						// then loop through contacts increasing info until null (check with as many box box
+						// contacts as there are, and then take the closest match.
+						
+						// perhaps record the info of the closest match for debugging purposes!?
+						
+//						Contact oldContact = lastTimeStepContacts.get( contact );
+//						if ( contact.contactW ) {
+//							
+//						}
+						
+					
+						contact.newThisTimeStep = false;
+						contact.lambda0 = oldContact.lambda0;
+						contact.lambda1 = oldContact.lambda1;
+						contact.lambda2 = oldContact.lambda2;
+
+						contact.lambda0warm = oldContact.lambda0;
+						contact.lambda1warm = oldContact.lambda1;
+						contact.lambda2warm = oldContact.lambda2;
+
+						contact.prevConstraintViolation = oldContact.constraintViolation;
+					} else {
+						contact.newThisTimeStep = true;
+					}	
+				}
+					
 			} else {
-				contact.newThisTimeStep = true;
+				for ( Contact contact : bpc.contactList ) {
+					Contact oldContact = lastTimeStepContacts.get( contact );
+					if (oldContact != null) {
+						contact.newThisTimeStep = false;
+						contact.lambda0 = oldContact.lambda0;
+						contact.lambda1 = oldContact.lambda1;
+						contact.lambda2 = oldContact.lambda2;
+						
+						contact.lambda0warm = oldContact.lambda0;
+						contact.lambda1warm = oldContact.lambda1;
+						contact.lambda2warm = oldContact.lambda2;
+
+						contact.prevConstraintViolation = oldContact.constraintViolation;
+					} else {
+						contact.newThisTimeStep = true;
+					}					
+				}
 			}
 		}
+		
+//		for (Contact contact : contacts) {
+//			Contact oldContact = lastTimeStepContacts.get( contact );
+//			if (oldContact != null) {
+//				contact.newThisTimeStep = false;
+//				contact.lambda0 = oldContact.lambda0;
+//				contact.lambda1 = oldContact.lambda1;
+//				contact.lambda2 = oldContact.lambda2;
+//				contact.prevConstraintViolation = oldContact.constraintViolation;
+//			} else {
+//				contact.newThisTimeStep = true;
+//			}
+//		}
 	}
 
 	/**go through each element in contacts 2.

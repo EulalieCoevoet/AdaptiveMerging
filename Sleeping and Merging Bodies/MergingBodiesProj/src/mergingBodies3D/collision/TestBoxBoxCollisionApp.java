@@ -6,6 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import com.jogamp.opengl.GL;
@@ -111,7 +112,8 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 		
 		int cnume = BoxBox.dBoxBox( b1e, size1, b2, size2, normale, depthe, return_codee, contacts2, pool );
 
-
+		Point3d contactW = new Point3d();
+		Vector3d normalW = new Vector3d();
 		
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
@@ -120,19 +122,22 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 			c.info = i++; // cheap way to keep track of contacts for warm starts?
 			gl.glColor3f(1, 0, 0);
 			
+			b1.transformB2W.transform( c.contactB1, contactW );
+			b1.transformB2W.transform( c.normalB1, normalW );
+			
 			gl.glBegin(GL.GL_POINTS);
-			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
+			gl.glVertex3d( contactW.x, contactW.y, contactW.z );
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
-			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
-			double x = c.normalW.x;
-			double y = c.normalW.y;
-			double z = c.normalW.z;
-			gl.glVertex3d( x + c.contactW.x, y + c.contactW.y, z + c.contactW.z );
+			gl.glVertex3d( contactW.x, contactW.y, contactW.z );
+			double x = normalW.x;
+			double y = normalW.y;
+			double z = normalW.z;
+			gl.glVertex3d( x + contactW.x, y + contactW.y, z + contactW.z );
 			gl.glEnd();
 	
 			gl.glColor3f( 1,1,1 );
-			gl.glRasterPos3d( c.contactW.x, c.contactW.y, c.contactW.z );
+			gl.glRasterPos3d( contactW.x, contactW.y, contactW.z );
 			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info + " " + c.constraintViolation ); 
 //			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, c.side1 + " " + c.side2 ); 
 			// side is unused :(  but doesn't need to be... 
@@ -146,19 +151,22 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 			c.info = i++; // cheap way to keep track of contacts for warm starts?
 			gl.glColor3f(1, 0, 0);
 			
+			b1.transformB2W.transform( c.contactB1, contactW );
+			b1.transformB2W.transform( c.normalB1, normalW );
+
 			gl.glBegin(GL.GL_POINTS);
-			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
+			gl.glVertex3d( contactW.x, contactW.y, contactW.z );
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
-			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
-			double x = c.normalW.x;
-			double y = c.normalW.y;
-			double z = c.normalW.z;
-			gl.glVertex3d( x + c.contactW.x, y + c.contactW.y, z + c.contactW.z );
+			gl.glVertex3d( contactW.x, contactW.y, contactW.z );
+			double x = normalW.x;
+			double y = normalW.y;
+			double z = normalW.z;
+			gl.glVertex3d( x + contactW.x, y + contactW.y, z + contactW.z );
 			gl.glEnd();
 	
 			gl.glColor3f( 1,1,1 );
-			gl.glRasterPos3d( c.contactW.x, c.contactW.y+labelOffy.getValue(), c.contactW.z );
+			gl.glRasterPos3d( contactW.x, contactW.y+labelOffy.getValue(), contactW.z );
 			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + c.info + " " + c.constraintViolation ); 
 //			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, c.side1 + " " + c.side2 ); 
 			// side is unused :(  but doesn't need to be... 
