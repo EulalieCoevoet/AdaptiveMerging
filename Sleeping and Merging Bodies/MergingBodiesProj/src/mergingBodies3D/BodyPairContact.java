@@ -84,7 +84,12 @@ public class BodyPairContact {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2));
+		if (body1.pinned)
+			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body2));
+		if (body2.pinned)
+			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1));
+		else
+			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2));
 		
 		if (motionMetricHist.size() > mergeParams.stepAccum.getValue())
 			motionMetricHist.remove(0);
