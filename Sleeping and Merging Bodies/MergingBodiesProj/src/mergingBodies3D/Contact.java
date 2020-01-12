@@ -474,6 +474,9 @@ public class Contact {
         float[] c = col;
         if (state == ContactState.ONEDGE) {
         	c = colOnEdge;
+        	if ( newThisTimeStep ) {
+        		c = colNewOnEdge;
+        	}
 		} else {
 			if ( newThisTimeStep ) {	
 				c = colNew;
