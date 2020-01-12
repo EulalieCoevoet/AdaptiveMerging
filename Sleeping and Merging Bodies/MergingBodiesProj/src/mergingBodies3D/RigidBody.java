@@ -140,10 +140,10 @@ public class RigidBody {
 	 */
 	public ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>(); 
 	
-	/** Friction coefficient */
+	/** Default friction coefficient */
 	public double friction = 0.8; 
 	
-	/** Restitution coefficient */
+	/** Default restitution coefficient */
 	public double restitution = 0; 
 	
 	public boolean isSleeping = false;

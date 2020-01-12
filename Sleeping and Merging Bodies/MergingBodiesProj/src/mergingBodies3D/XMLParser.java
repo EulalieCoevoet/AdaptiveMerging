@@ -85,14 +85,18 @@ public class XMLParser {
 								break;
 							case "restitution":
 								system.collision.restitution.setValue(Double.parseDouble(values[0]));
-								for (RigidBody body: system.bodies)
-									body.restitution = system.collision.restitution.getValue();
-								break;
+								system.collision.restitutionOverride.setValue( true );
+								System.out.println("Restituion override enabled and set to " + system.collision.restitution.getValue() );
+								//for (RigidBody body: system.bodies)
+								//body.restitution = system.collision.restitution.getValue();
+								//break;
 							case "friction":
 								system.collision.friction.setValue(Double.parseDouble(values[0]));
-								for (RigidBody body: system.bodies)
-									body.friction = system.collision.friction.getValue();
-								break;
+								system.collision.frictionOverride.setValue( true );
+								System.out.println("Friction override enabled and set to" + system.collision.friction.getValue() );
+//								for (RigidBody body: system.bodies)
+//									body.friction = system.collision.friction.getValue();
+//								break;
 							default:
 						}
 					}

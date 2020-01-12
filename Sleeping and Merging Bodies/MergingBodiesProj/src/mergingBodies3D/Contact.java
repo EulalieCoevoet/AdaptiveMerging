@@ -222,14 +222,17 @@ public class Contact {
 	 * @param feedbackStiffness
 	 * @param computeInCollection
 	 */
-	public void computeB(double dt, double feedbackStiffness, boolean computeInCollection) {
+	public void computeB(double dt, double feedbackStiffness, boolean computeInCollection, boolean restituionOverride, double restituionOverrideVal ) {
 		
 		RigidBody b1 = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
 		RigidBody b2 = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
 		
 		// add the Bounce vector to the u's over here, but don't need to do that just yet
 		// Note: For the single iteration PGS the restitution should be considered.
-		double restitution=(body1.restitution+body2.restitution)/2.;
+		double restitution = (body1.restitution+body2.restitution)/2.;
+		if ( restituionOverride ) {
+			restitution = restituionOverrideVal;
+		}
 		
 		bn = 0; bt1 = 0; bt2 = 0;
 		

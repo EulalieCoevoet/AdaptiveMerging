@@ -116,7 +116,7 @@ public class CollisionProcessor {
 			updateCollectionJacobians(false);
 			
 			long now = System.nanoTime();
-			solver.solve(dt);
+			solver.solve( dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
 			// eulalie: dirty?
@@ -259,7 +259,7 @@ public class CollisionProcessor {
 	    		knuthShuffle(solver.contacts);
 		}
 		
-		solver.solve(dt);
+		solver.solve(dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
 		
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.isSleeping) {
@@ -663,11 +663,17 @@ public class CollisionProcessor {
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
 	
+    /** Override restitution parameters when set true */
+    public BooleanParameter restitutionOverride = new BooleanParameter( "restitution override, otherwise default 0", false );
+
     /** Restitution parameter for contact constraints */
-    public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
+    public DoubleParameter restitution = new DoubleParameter( "restitution (bounce), if override enabled ", 0.5, 0, 2 );
+
+    /** Override friction parameters when set true */
+    public BooleanParameter frictionOverride = new BooleanParameter( "Coulomb friction override, otherwise default 0.8", false );
     
     /** Coulomb friction coefficient for contact constraint */
-    public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.8, 0, 2 );
+    public DoubleParameter friction = new DoubleParameter("Coulomb friction, if override enabled", 0.1, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
     public IntParameter iterations = new IntParameter("iterations for PGS solve", 200, 1, 500);
@@ -687,33 +693,39 @@ public class CollisionProcessor {
         vfp.add( iterations.getSliderControls() );
 		vfp.add( iterationsInCollection.getSliderControls() );
 
+		vfp.add( restitutionOverride.getControls() );
         vfp.add( restitution.getSliderControls(false) );
         // If we change the restitution from the GUI, it will override the parameter for all bodies
-        restitution.addParameterListener( new ParameterListener<Double>() {
-			@Override
-			public void parameterChanged(Parameter<Double> parameter) {
-				for (RigidBody body: bodies) {
-					body.restitution = parameter.getValue();
-					if (body instanceof RigidCollection)
-						for (RigidBody b: ((RigidCollection)body).bodies)
-							b.restitution = parameter.getValue();
-				}
-			}
-		});
         
+        // PGK: let's try modulate instead?  Not sure what the rigth interface sould be... 
+        // alternatively could have an "override friction" and "override restitution" boolean variables?
+        
+//        restitution.addParameterListener( new ParameterListener<Double>() {
+//			@Override
+//			public void parameterChanged(Parameter<Double> parameter) {
+//				for (RigidBody body: bodies) {
+//					body.restitution = parameter.getValue();
+//					if (body instanceof RigidCollection)
+//						for (RigidBody b: ((RigidCollection)body).bodies)
+//							b.restitution = parameter.getValue();
+//				}
+//			}
+//		});
+        
+        vfp.add( frictionOverride.getControls() );
         vfp.add( friction.getSliderControls(false) );
         // If we change the friction from the GUI, it will override the parameter for all bodies
-        friction.addParameterListener( new ParameterListener<Double>() {
-			@Override
-			public void parameterChanged(Parameter<Double> parameter) {
-				for (RigidBody body: bodies) {
-					body.friction = parameter.getValue();
-					if (body instanceof RigidCollection)
-						for (RigidBody b: ((RigidCollection)body).bodies)
-							b.friction = parameter.getValue();
-				}
-			}
-		});
+//        friction.addParameterListener( new ParameterListener<Double>() {
+//			@Override
+//			public void parameterChanged(Parameter<Double> parameter) {
+//				for (RigidBody body: bodies) {
+//					body.friction = parameter.getValue();
+//					if (body instanceof RigidCollection)
+//						for (RigidBody b: ((RigidCollection)body).bodies)
+//							b.friction = parameter.getValue();
+//				}
+//			}
+//		});
         
 		vfp.add( feedbackStiffness.getSliderControls(false) );
 		vfp.add( enableCompliance.getControls() );
