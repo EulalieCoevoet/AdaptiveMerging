@@ -155,6 +155,12 @@ public class XMLParser {
 		if(bodyNode.hasAttribute("obj")) {
 			String objfname = bodyNode.getAttribute("obj");
 			compositeGeom.soup = new PolygonSoup( objfname );
+			if(eElement.hasAttribute("scale")) {
+				double scale = Double.parseDouble( eElement.getAttribute("scale") );
+				for ( Vertex v : compositeGeom.soup.vertexList ) {
+					v.p.scale( scale );
+				}
+			}
 		}
 		
 		// This is harder to implement than I would like, so I'm not going to do it right now.  :/
@@ -248,10 +254,11 @@ public class XMLParser {
 				p.sub(com); // move boudning box point to COM frame.
 				ll.x = Math.min( p.x, ll.x );
 				ll.y = Math.min( p.y, ll.y );
-				ll.z = Math.min( p.z,  ll.z );
+				ll.z = Math.min( p.z, ll.z );
 				ur.x = Math.max( p.x, ur.x );
 				ur.y = Math.max( p.y, ur.y );
-				ur.z = Math.max( p.z,  ur.z );
+				ur.z = Math.max( p.z, ur.z );
+				p.add(com);
 			}
 		}
 		

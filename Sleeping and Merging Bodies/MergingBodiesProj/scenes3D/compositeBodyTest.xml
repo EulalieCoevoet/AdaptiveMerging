@@ -1,7 +1,7 @@
 <root>
 
 	<body type="composite" name="test">
-		<x> 0 10 0 </x> 
+		<x> 0 10 0 </x>
 	    <body type="box" name="box1" dim="4 1 6">
     	    <x> 0 5 0 </x>
   	  	</body>
@@ -10,9 +10,9 @@
         	<R> 0 1 0 0.1 </R>
     	</body>
     </body>
-    
+
     <body type="composite" name="jack">
-		<x> 20 20 0 </x> 
+		<x> 20 20 0 </x>
 		<body type="box" name="x" dim="5   0.7 0.7"> <R> 1 0 0 0.78539816339 </R> </body>
     	<body type="box" name="y" dim="0.7 5   0.7"> <R> 0 1 0 0.78539816339 </R> </body>
     	<body type="box" name="z" dim="0.7 0.7 5">   <R> 0 0 1 0.78539816339 </R> </body>
@@ -23,7 +23,7 @@
     	<body type="sphere" name="z+" r="1"> <x>  0  0  3 </x> </body>
     	<body type="sphere" name="z-" r="1"> <x>  0  0 -3 </x> </body>
     </body>
-    
+
     <body type="composite" name="monkey" obj="scenes3D/monkey.obj">  probably want to define a scale on this too :(
 		<R> 1 0 0 -1.57 </R>
     	<x> -20 20 0 </x>
@@ -34,7 +34,7 @@
 		<body type="box" name="leftEar" dim="0.239 0.099 0.489" scale="2"> <R> 0.200 -0.968 0.152 1.8675  </R> <x> 0.9 0.3 0.17 </x></body>
 		<body type="box" name="rightEar" dim="0.239 0.099 0.489" scale="2"> <R> 0.200 0.968 -0.152 1.8675  </R> <x> -0.9 0.3 0.17 </x></body>
     </body>
-    
+
     <body type="plane" name="plane1" p="0 -0 0" n="0 1 0">
     </body>
 
