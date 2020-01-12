@@ -6,8 +6,10 @@ import javax.vecmath.Vector3d;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.util.gl2.GLUT;
 
 import mintools.parameters.DoubleParameter;
+import mintools.viewer.EasyViewer;
 
 /**
  * Implementation of a contact constraint.
@@ -342,6 +344,7 @@ public class Contact {
     private static final float[] colNew = new float[] { 0, 0.5f, 0, 0.65f };
     private static final float[] colOnEdge = new float[] { 0, 0, 0, 0.75f };
     private static final float[] colGraph = new float[] { 0, 0.2f, 0, 0.25f };
+    private static final float[] colText = new float[] { 0,0,0, 0.9f };
     
     /**
      * Draws the contact points
@@ -359,11 +362,17 @@ public class Contact {
 				c = colInCollection;
 			}
 		} 
+        gl.glNormal3f(0, 0, 1);
+
 		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
         
         gl.glBegin( GL.GL_POINTS );
         gl.glVertex3d( contactW.x, contactW.y, contactW.z );
         gl.glEnd();
+
+        gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colText, 0 );
+        gl.glRasterPos3d( contactW.x, contactW.y, contactW.z );
+		EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + info );
     }
     
     
