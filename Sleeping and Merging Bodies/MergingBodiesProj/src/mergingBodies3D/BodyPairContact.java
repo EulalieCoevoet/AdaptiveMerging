@@ -86,7 +86,7 @@ public class BodyPairContact {
 		
 		if (body1.pinned)
 			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body2));
-		if (body2.pinned)
+		else if (body2.pinned)
 			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1));
 		else
 			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2));

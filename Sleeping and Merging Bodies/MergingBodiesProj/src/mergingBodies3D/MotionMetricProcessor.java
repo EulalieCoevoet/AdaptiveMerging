@@ -64,7 +64,6 @@ public class MotionMetricProcessor {
 			body.getSpatialVelocity(pW, v1);
 			largestVelocityNorm = Math.max( v1.length(), largestVelocityNorm );
 		}
-		System.out.println(largestVelocityNorm);
 		return largestVelocityNorm;
 	}
 }
