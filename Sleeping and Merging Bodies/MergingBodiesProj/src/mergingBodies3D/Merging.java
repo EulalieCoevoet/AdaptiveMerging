@@ -365,9 +365,14 @@ public class Merging {
 			bpc.inCollection = false;
 			bpc.contactStateHist.clear();
 			bpc.motionMetricHist.clear();
-			for (Contact contact : bpc.contactList) 
-				if (!collision.contacts.contains(contact))
+			for (Contact contact : bpc.contactList) {
+				if (!collision.contacts.contains(contact)) {
+					contact.lambda0warm = contact.lambda0;
+					contact.lambda1warm = contact.lambda1;
+					contact.lambda2warm = contact.lambda2;
 					collision.contacts.add(contact);
+				}
+			}
 		}
 	}
 	
