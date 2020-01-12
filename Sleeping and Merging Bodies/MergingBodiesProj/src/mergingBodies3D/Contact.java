@@ -164,7 +164,7 @@ public class Contact {
 //        body1.transformW2B.transform(contactW, contactB);
 		bv1 = disc1;
 		bv2 = disc2;
-		this.constraintViolation =  constraintViolation;     
+		this.constraintViolation =  constraintViolation; //  + 1e-3;  // try to not actually push things completely apart!   perhaps??
         
 		this.normalW.set(normal);
 
@@ -416,7 +416,6 @@ public class Contact {
         	c = colOnEdge;
 		} else {
 			if ( newThisTimeStep ) {	
-				gl.glLineWidth(4f);
 				c = colNew;
 			} else if ( isInCollection ){
 				c = colInCollection;
