@@ -164,9 +164,12 @@ public class RigidBodySystem {
 	 * Apply gravity, mouse spring and impulse
 	 */
 	protected void applyExternalForces() {
-		if (useGravity.getValue()) {
+		if ( useGravity.getValue() ) {
 			applyGravityForce();
 		}  
+		if ( useCoriolis.getValue() ) {
+			applyCoriolis();
+		}
 	
 		if (mouseSpring != null) {
 			mouseSpring.apply( applyMouseSpringAtCOM.getValue() );
@@ -194,25 +197,37 @@ public class RigidBodySystem {
 	}
 	
 	/** Temporary working variable */
+	private Vector3d tmpDir = new Vector3d();
 	private Vector3d tmpForce = new Vector3d();
 
 	/**
 	 * Apply gravity to bodies, collections and bodies in collections
 	 */
 	private void applyGravityForce() {
-		for ( RigidBody body : bodies ) {			
-			//fully active, regular stepping
-			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
-			tmpForce.set( Math.cos( theta ), Math.sin(theta), 0 );
-			tmpForce.scale( - body.massLinear * gravityAmount.getValue() );
+		double theta = gravityAngle.getValue() / 180.0 * Math.PI;
+		double gravAmount = gravityAmount.getValue();
+		tmpDir.set( gravAmount * Math.cos( theta ), gravAmount * Math.sin(theta), 0 );
+		for ( RigidBody body : bodies ) {		
+			tmpForce.scale( - body.massLinear, tmpDir );
 			body.force.add( tmpForce ); // gravity goes directly into the accumulator, no torque
-            body.applyCoriollisTorque(); // TODO: CORIOLLIS: sadly, this appears to be buggy :(
-			
 			if( body instanceof RigidCollection) {				
 				for ( RigidBody b : ((RigidCollection)body).bodies ) {
-					tmpForce.set( Math.cos( theta ), Math.sin(theta), 0 );
-					tmpForce.scale( - b.massLinear * gravityAmount.getValue() );
+					tmpForce.scale( - b.massLinear, tmpDir );
 					b.force.add( tmpForce );
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Apply Coriolis to bodies, collections and bodies in collections
+	 */
+	private void applyCoriolis() {
+		for ( RigidBody body : bodies ) {			
+            body.applyCoriolisTorque();			
+			if( body instanceof RigidCollection) {				
+				for ( RigidBody b : ((RigidCollection)body).bodies ) {
+					b.applyCoriolisTorque();
 				}
 			}
 		}
@@ -320,7 +335,8 @@ public class RigidBodySystem {
     BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
     DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );
     DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
-   
+    BooleanParameter useCoriolis = new BooleanParameter( "enable Coriolis (for stability: use smaller time steps, global angular viscous, or both)", false );
+    
     public BooleanParameter saveCSV = new BooleanParameter( "save CSV", false);
 	public DoubleParameter globalViscousLinearDecay = new DoubleParameter("global viscous linear decay", 1, 0.1, 1 );
 	public DoubleParameter globalViscousAngularDecay = new DoubleParameter("global viscous angular decay", 1, 0.1, 1 );
@@ -343,6 +359,7 @@ public class RigidBodySystem {
         vfp.add( useGravity.getControls() );
         vfp.add( gravityAmount.getSliderControls(false) );
         vfp.add( gravityAngle.getSliderControls(false) );
+        vfp.add( useCoriolis.getControls() );
         
 		vfp.add(springStiffnessMod.getSliderControls(false));
 		vfp.add(springDampingMod.getSliderControls(false));
