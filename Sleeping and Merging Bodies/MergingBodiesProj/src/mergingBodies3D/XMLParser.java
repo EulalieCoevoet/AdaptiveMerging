@@ -279,6 +279,8 @@ public class XMLParser {
 		setCommonAttributes( body, bodyNode ); // this will set our position... 
 		// but bodies definining the composite were defined in a local frame, and that COM position should be added to x
 		body.x.add( com );
+		body.x0.add( com );
+
 		body.updateRotationalInertaionFromTransformation();
 		body.geom = compositeGeom;
 		body.name = name;
