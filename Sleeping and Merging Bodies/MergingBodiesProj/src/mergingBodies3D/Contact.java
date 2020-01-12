@@ -382,6 +382,8 @@ public class Contact {
     private static final float[] colInCollection = new float[] { 0, 0, 1, 0.25f };
     private static final float[] colNew = new float[] { 0, 0.5f, 0, 0.65f };
     private static final float[] colOnEdge = new float[] { 0, 0, 0, 0.75f };
+    private static final float[] colNewOnEdge = new float[] { 0.35f, 0.35f, 0, 0.75f };
+
     private static final float[] colGraph = new float[] { 0, 0.2f, 0, 0.25f };
     private static final float[] colText = new float[] { 0,0,0, 0.9f };
     
@@ -394,6 +396,9 @@ public class Contact {
         float[] c = col;
         if (state == ContactState.ONEDGE) {
         	c = colOnEdge;
+        	if ( newThisTimeStep ) {
+        		c = colNewOnEdge;
+        	}
 		} else {
 			if ( newThisTimeStep ) {				
 				c = colNew;

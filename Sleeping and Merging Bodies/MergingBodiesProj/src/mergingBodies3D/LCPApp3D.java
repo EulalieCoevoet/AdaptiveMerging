@@ -65,7 +65,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
     
-    private String sceneFilename = "scenes3D/aNewTest.xml";
+    private String sceneFilename = "scenes3D/tower30.xml";
     
     /**
      * Creates a shadow map with a square image, e.g., 1024x1024.
