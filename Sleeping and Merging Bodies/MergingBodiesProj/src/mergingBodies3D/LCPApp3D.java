@@ -73,6 +73,9 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      */
     private ShadowMap shadowMap = new ShadowMap( 2048 );
     
+    private boolean loadSystemRequest = false;
+    private boolean loadFactoryRequest = false;
+    
     /**
      * Entry point for application
      * @param args
@@ -119,6 +122,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     
     @Override
     public void display(GLAutoDrawable drawable) {
+    	
+    	if(loadSystemRequest) {
+    		loadSystemRequest = false;
+    		loadXMLSystem(sceneFilename);
+    	}
+    	
+    	if(loadFactoryRequest) {
+    		loadFactoryRequest = false;
+    		loadFactorySystem(sceneFilename);
+    	}
+    	
         GL2 gl = drawable.getGL().getGL2();
                 
         if ( selectRequest ) {
@@ -618,7 +632,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      * Loads the specified image as a factory, clearing the old system, and resets viewing parameters.
      * @param filename
      */
-    private void loadFactorySystem( String filename ) {              
+    private void loadFactorySystem( String filename ) {          
     	this.sceneFilename = filename;
     	factory.use = false;        
         systemClear();
@@ -750,22 +764,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     }
                     stepped = true;
                 } else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
-                    if ( e.isShiftDown() ) {
-					if ( factory.use ) {
-                		loadFactorySystem( sceneFilename );
-                    } else {
-                    	loadXMLSystem( sceneFilename );
-                    }                    } else {
-                    	systemReset();
-                    }
+                	if ( e.isShiftDown() ) {
+                		if ( factory.use ) {
+                			loadFactoryRequest = true;
+                		} else {
+                			loadSystemRequest = true;
+                		}                    
+                	} else {
+                		systemReset();
+                	}
                 } else if ( e.getKeyCode() == KeyEvent.VK_H ) { // tab is for changing focus, so a pain to capture here
                 	system.display.params.hideOverlay.setValue( ! system.display.params.hideOverlay.getValue() );
-                } else if ( e.getKeyCode() == KeyEvent.VK_K ) {
-                	if ( factory.use ) {
-                		loadFactorySystem( sceneFilename );
-                    } else {
-                    	loadXMLSystem( sceneFilename );
-                    }
                 } else if ( e.getKeyCode() == KeyEvent.VK_C ) {                   
                     systemClear();
                     sceneFilename = "";
@@ -775,7 +784,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
                     File f = FileSelect.select("xml", "xml scene for factory", "load", "scenes3D/", true );
                     if ( f != null ) {
-                        loadFactorySystem( f.getPath() );
+                    	sceneFilename = f.getPath();
+                        loadFactoryRequest = true;   
                     }   
                 } else if ( e.getKeyCode() == KeyEvent.VK_PERIOD ) {                                       
                     factory.run.setValue ( ! factory.run.getValue() );
@@ -784,7 +794,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 } else if (  e.getKeyCode() == KeyEvent.VK_L ) {                    
                     File f = FileSelect.select( "xml", "scene", "load", "scenes3d/", true );
                     if ( f != null ) {
-                        loadXMLSystem( f.getPath() );
+                    	sceneFilename = f.getPath();
+                        loadSystemRequest = true;       
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_M ) {
                 	system.merging.triggerMergingEvent = true;
@@ -796,13 +807,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     if ( files != null && files.length >= 0 ) {
                         whichFile --;
                         if ( whichFile < 0 ) whichFile = files.length-1;
-                        loadXMLSystem( files[whichFile].getPath() );                        
+
+                    	sceneFilename = files[whichFile].getPath();
+                        loadSystemRequest = true;                        
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_RIGHT ) {
                     if ( files != null && files.length >= 0 ) {
                         whichFile ++;
                         if ( whichFile >= files.length ) whichFile = 0;
-                        loadXMLSystem( files[whichFile].getPath() );
+                        
+                    	sceneFilename = files[whichFile].getPath();
+                        loadSystemRequest = true;       
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
                     eva.stop();

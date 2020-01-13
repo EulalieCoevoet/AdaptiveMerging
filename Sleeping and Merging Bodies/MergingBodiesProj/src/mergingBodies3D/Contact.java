@@ -181,10 +181,8 @@ public class Contact {
         
 		bv1 = disc1;
 		bv2 = disc2;
-		this.constraintViolation =  constraintViolation; //  + 1e-3;  // try to not actually push things completely apart!   perhaps??
-		
-		// why would initializing this break merging?
-		//this.prevConstraintViolation = 0; // don't know it until after warm start.
+		this.constraintViolation = constraintViolation; //  + 1e-3;  // try to not actually push things completely apart!   perhaps??
+		this.prevConstraintViolation = 0.; 
 		
 		lambda0 = 0; 
 		lambda1 = 0;
