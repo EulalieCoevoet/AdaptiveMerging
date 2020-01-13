@@ -18,13 +18,13 @@ fric = ET.SubElement(plane, 'friction')
 fric.text = "0.01"
 
 # Bodies pile
-y0 = 2
+y0 = 2.5
 x0 = -2
 z0 = -1.9
 
 y=y0; x=x0; z=z0;
 dimx=0.5; dimy=0.5; dimz=0.5;
-dist=0.05;
+dist=0.01;
 for i in range(216):
     y += dimy + dist
     if (i%6==0):

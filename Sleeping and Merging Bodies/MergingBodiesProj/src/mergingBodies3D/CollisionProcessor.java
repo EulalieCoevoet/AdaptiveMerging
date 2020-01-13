@@ -484,6 +484,7 @@ public class CollisionProcessor {
 	 * slightly differently given that they don't always end up preserving their "info" number across time steps.
 	 */
 	protected void warmStart() {
+		
 		badWarmStarts = 0;
 		badWarmStartsRepaired = 0;
 		for ( BodyPairContact bpc : bodyPairContacts ) {
@@ -543,6 +544,7 @@ public class CollisionProcessor {
 							// an order swap that happens when rotating from 44 to 46 degrees, for instance,
 							// then we won't need this search for the next warm start.
 						}
+						
 						if ( dist < 0.05 ) {
 					
 							contact.newThisTimeStep = false; // not new, even if we failed to do a good warm start

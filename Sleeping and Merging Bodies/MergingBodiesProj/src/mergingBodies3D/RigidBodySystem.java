@@ -281,6 +281,7 @@ public class RigidBodySystem {
         simulationTime = 0;
         collision.reset();
         totalAccumulatedComputeTime = 0;     
+        totalSteps = 0;
     }
     
     protected void applyViscousDecay()

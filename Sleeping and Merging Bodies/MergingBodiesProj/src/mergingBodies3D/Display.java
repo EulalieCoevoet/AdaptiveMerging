@@ -29,6 +29,7 @@ public class Display {
 		private DoubleParameter transparency = new DoubleParameter("body block transparency", 1., 0, 1 );
 		private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
 		private BooleanParameter drawCollections = new BooleanParameter( "draw collections with different colors", true );
+		private BooleanParameter drawSleeping = new BooleanParameter( "draw sleeping bodies with different color", true );
 		
 		private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
 		private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
@@ -186,7 +187,7 @@ public class Display {
     			// decide when we want to override this colour (e.g., if we have a 
     			// rigid body collection)
     			float[] c = colour;
-    			if ( b.isSleeping ) {
+    			if ( b.isSleeping && params.drawSleeping.getValue() ) {
     				c = colourSleeping;
     			} else if (b.pinned) {
     				c = colourPinned;    				
@@ -306,6 +307,7 @@ public class Display {
 		vfpb.add( params.drawBodies.getControls() );
 		vfpb.add( RigidBodyGeomComposite.disableDisplaySoup.getControls() );
 		vfpb.add( params.drawCollections.getControls() );
+		vfpb.add( params.drawSleeping.getControls() );
 		vfpb.add( params.drawCOMs.getControls() );
 		vfpb.add( params.drawSpeedCOMs.getControls() );
 		vfpb.add( params.drawIndex.getControls() );

@@ -157,6 +157,9 @@ public class Contact {
      * @param normalW	in world coordinates
      */
     public void set( RigidBody b1, RigidBody b2, Point3d contactW, Vector3d normalW, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {    	
+    	
+    	state = ContactState.CLEAR;
+    	
     	body1 = b1;
         body2 = b2;
 		this.info = info;
@@ -167,7 +170,7 @@ public class Contact {
         	body1 = b1.compositeBodyParent;
         	csb1 = b1;
         }
-        if ( this.body2.isInComposite() ) { // same for body 2
+        if ( body2.isInComposite() ) { // same for body 2
         	body2 = b2.compositeBodyParent;
         	csb2 = b2;
         }
@@ -549,7 +552,7 @@ public class Contact {
         Contact c = (Contact) obj;
         if ( info != c.info ) return false;
         return body1 == c.body1 && bv1 == c.bv1 && body2 == c.body2 && bv2 == c.bv2 && csb1 == c.csb1 && csb2 == c.csb2 ||
-        		body2 == c.body1 && bv2 == c.bv1 && body1 == c.body2 && bv1 == c.bv2 && csb1 == c.csb2 && csb2 == c.csb1;    
+        	   body2 == c.body1 && bv2 == c.bv1 && body1 == c.body2 && bv1 == c.bv2 && csb2 == c.csb1 && csb1 == c.csb2;    
     }
 
     @Override

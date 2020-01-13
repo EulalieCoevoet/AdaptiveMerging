@@ -519,6 +519,7 @@ public class RigidCollection extends RigidBody {
 		for (Contact contact : bpc.contactList) {
 			// need to make new to not mess with the memory pools 
 			Contact c = new Contact(contact);
+			c.newThisTimeStep = false;
 			tmpContacts.add( c );
 			internalContacts.add( c );
 		}
@@ -678,11 +679,6 @@ public class RigidCollection extends RigidBody {
 		for (RigidBody body : collection.bodies) {
 			addIncompleteContacts(body, removalQueue);
 		}
-	}
-
-	public ArrayList<Contact> getInternalContacts() {
-		ArrayList<Contact> contacts = new ArrayList<Contact>(internalContacts);
-		return contacts;
 	}
 
 	public void displayInternalContactForces(GLAutoDrawable drawable, double dt ) {
