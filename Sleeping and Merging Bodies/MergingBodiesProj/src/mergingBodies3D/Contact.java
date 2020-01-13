@@ -385,10 +385,27 @@ public class Contact {
 	 * Update state of the contact: either BROKE, SLIDING or CLEAR
 	 * @param mu
 	 */
-	protected void updateContactState(double mu) {
+	protected void updateContactState(double mu, double dt, boolean computeInCollection) {
+			
+//		RigidBody b = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
+//		
+//		// tmp1 = v + dt*minv*force + deltaV.v
+//		tmp1.set(b.v);
+//		tmp1.scaleAdd( dt*b.minv, b.force, tmp1 );
+//		tmp1.add( b.deltaV.v );
+//		// tmp2 = w + dt*jinv*torque + deltaV.w
+//		b.jinv.transform( b.torque, tmp2 );
+//		tmp2.scale( dt );
+//		tmp2.add( b.omega );
+//		tmp2.add( b.deltaV.w );
+//		
+//		double w1 = jt1a.v.x*tmp1.x + jt1a.v.y*tmp1.y + jt1a.v.z*tmp1.z + jt1a.w.x*tmp2.x + jt1a.w.y*tmp2.y + jt1a.w.z*tmp2.z;
+//		double w2 = jt2a.v.x*tmp1.x + jt2a.v.y*tmp1.y + jt2a.v.z*tmp1.z + jt2a.w.x*tmp2.x + jt2a.w.y*tmp2.y + jt2a.w.z*tmp2.z;
+//		System.out.println(w1);
 		
 		if (Math.abs(lambda0) <= 1e-14) // (math.abs is for magnet)
 			state = ContactState.BROKEN;	
+		//else if ( Math.abs(w1)>1e-10 || Math.abs(w2)>1e-10 ) 
 		else if ( Math.abs(lambda1) == lambda0*mu || Math.abs(lambda2) == lambda0*mu ) 
 			state = ContactState.ONEDGE;
 		else

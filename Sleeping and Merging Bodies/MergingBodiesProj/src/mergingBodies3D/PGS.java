@@ -134,7 +134,7 @@ public class PGS {
 				updateDeltaVwithLambdai(contact, contact.lambda2 - prevLambda_t2, 2);
 				
 				if (iter == 1) // Last iteration: avoid looping again over contacts
-					contact.updateContactState(mu);
+					contact.updateContactState(mu, dt, computeInCollection);
 			}
 			
 			iter--;
