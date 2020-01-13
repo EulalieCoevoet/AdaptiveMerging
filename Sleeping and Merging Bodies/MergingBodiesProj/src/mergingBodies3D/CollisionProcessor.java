@@ -485,23 +485,39 @@ public class CollisionProcessor {
 	 */
 	protected void warmStart() {
 		
-//		// check for hash collisions??
-//		for ( Contact c1 : contacts ) {
-//			for ( Contact c2 : contacts ) {
-//				if ( c2 == c1 ) continue;
-//				if ( c1.hashCode() == c2.hashCode() ) {
-//					System.out.println( "hash collision" );
-//				}
-//			}
-//		}
+		// check for hash collisions??
+		for ( Contact c1 : contacts ) {
+			for ( Contact c2 : contacts ) {
+				if ( c2 == c1 ) continue;
+				if ( c1.hashCode() == c2.hashCode() ) {
+					System.out.println( "hash collision" );
+				}
+			}
+		}
 		
 		badWarmStarts = 0;
 		badWarmStartsRepaired = 0;
 		for ( BodyPairContact bpc : bodyPairContacts ) {
 			if ( bpc.inCollection ) continue;
-			if ( bpc.body1.geom instanceof RigidBodyGeomBox && bpc.body2.geom instanceof RigidBodyGeomBox ) {
+			// TODO: BUG!!! if body1.geom is a RigidBodyComposite, then we should check to see if any contacts
+			
+			boolean b1IsBox = bpc.body1.geom instanceof RigidBodyGeomBox;
+			boolean b2IsBox = bpc.body2.geom instanceof RigidBodyGeomBox;
+			boolean b1IsComp = bpc.body1.geom instanceof RigidBodyGeomComposite;
+			boolean b2IsComp = bpc.body2.geom instanceof RigidBodyGeomComposite;
+			
+			if ( b1IsBox && b2IsBox || b1IsComp && b2IsBox || b1IsBox && b2IsComp || b1IsComp && b2IsComp ) {
 				for ( Contact contact : bpc.contactList ) {
-						
+					// could end up here with composite bodies... so be sure to drop out into a vanilla
+					// warm start if it isn't a box box collision.
+					if ( contact.csb1 != null && !(contact.csb1.geom instanceof RigidBodyGeomBox) ) {
+						vanillaWarmStart( contact );
+						continue; 
+					}
+					if ( contact.csb2 != null && !(contact.csb2.geom instanceof RigidBodyGeomBox)) {
+						vanillaWarmStart( contact );
+					}
+					
 					// note that body1 and body 2 can swap across time steps... so just compare in the current world!
 					// note also that nothing fancy is needed for composite bodies... the contact csb1 and csb2 
 					// (composite sub bodies) will match given the hashcode lookup, so we can search for our warm start
@@ -627,25 +643,34 @@ public class CollisionProcessor {
 					
 			} else {
 				for ( Contact contact : bpc.contactList ) {
-					Contact oldContact = lastTimeStepContacts.get( contact );
-					if (oldContact != null) {
-						contact.newThisTimeStep = false;
-						contact.lambda0 = oldContact.lambda0;
-						contact.lambda1 = oldContact.lambda1;
-						contact.lambda2 = oldContact.lambda2;
-						
-						contact.lambda0warm = oldContact.lambda0;
-						contact.lambda1warm = oldContact.lambda1;
-						contact.lambda2warm = oldContact.lambda2;
-
-						contact.prevConstraintViolation = oldContact.constraintViolation;
-					} else {
-						contact.newThisTimeStep = true;
-					}					
+					vanillaWarmStart( contact );
 				}
 			}
 		}
 	}
+	
+	/** 
+	 * Do the basic warm start of taking whatever contact matches the hash.
+	 * @param contact
+	 */
+	private void vanillaWarmStart( Contact contact ) {
+		Contact oldContact = lastTimeStepContacts.get( contact );
+		if (oldContact != null) {
+			contact.newThisTimeStep = false;
+			contact.lambda0 = oldContact.lambda0;
+			contact.lambda1 = oldContact.lambda1;
+			contact.lambda2 = oldContact.lambda2;
+			
+			contact.lambda0warm = oldContact.lambda0;
+			contact.lambda1warm = oldContact.lambda1;
+			contact.lambda2warm = oldContact.lambda2;
+
+			contact.prevConstraintViolation = oldContact.constraintViolation;
+		} else {
+			contact.newThisTimeStep = true;
+		}					
+	}
+	
 
 	/**go through each element in contacts 2.
 	* at each element, swap it for another random member of contacts2. 

@@ -31,9 +31,9 @@ public class Contact {
 	/** Information to help in warm starts by allowing contacts between bodies across time steps to be matched */
 	public int info;
 	/** composite sub body 1, for warm starting with composites **/
-	private RigidBody csb1 = null;
+	public RigidBody csb1 = null;
 	/** composite sub body 2, for warm starting with composites **/
-	private RigidBody csb2 = null;
+	public RigidBody csb2 = null;
     
 	// CONTACT FRAME, stored in body, but originally specified in world.
 	
