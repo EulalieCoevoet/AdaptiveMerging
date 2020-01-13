@@ -272,13 +272,22 @@ public class RigidBodySystem {
     }
     
     /**
-     * Removes all bodies from the system
+     * Removes all bodies AND springs from the system
      */
     public void clear() {
         bodies.clear();
         springs.clear();
         RigidBody.nextIndex = 0;
         reset();
+    }
+    
+    /**
+     * Removes all bodies from the system. Not springs. Used for initializing factory.
+     */
+    public void clearBodies() {
+    	bodies.clear();
+    	RigidBody.nextIndex = 0;
+    	reset();
     }
     
     /**
