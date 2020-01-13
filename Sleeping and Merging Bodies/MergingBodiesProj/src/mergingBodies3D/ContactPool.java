@@ -65,10 +65,8 @@ public class ContactPool {
 	}
 	
 	public void clear() {
-		// no need to force reallocation... 
-		// if this is really the fix, then there is really something weird going on....
-//		pool1.clear();
-//		pool2.clear();
+		pool1.clear();
+		pool2.clear();
 		nextInPool1 = 0;
 	}
 	

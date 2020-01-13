@@ -49,7 +49,7 @@ public class CollisionProcessor {
 	ArrayList<Contact> altContactList = new ArrayList<Contact>(); 
 
 
-    private ContactPool contactPool = new ContactPool();
+    public ContactPool contactPool = new ContactPool();
     
 	/** PGS solver */
     private PGS solver = new PGS();
@@ -876,7 +876,6 @@ public class CollisionProcessor {
      */
     public void reset() {
         contacts.clear();
-        contactPool.clear();
 		bodyPairContacts.clear();
 		lastTimeStepContacts.clear();
 
@@ -931,7 +930,7 @@ public class CollisionProcessor {
     public DoubleParameter friction = new DoubleParameter("Coulomb friction, if override enabled", 0.1, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
-    public IntParameter iterations = new IntParameter("iterations for PGS solve", 200, 1, 500);
+    public IntParameter iterations = new IntParameter("iterations for PGS solve", 1000, 1, 5000);
 
 	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
         

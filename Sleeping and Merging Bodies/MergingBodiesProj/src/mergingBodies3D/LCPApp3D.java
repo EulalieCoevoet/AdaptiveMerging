@@ -75,6 +75,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     
     private boolean loadSystemRequest = false;
     private boolean loadFactoryRequest = false;
+    private boolean clearRequest = false;
     
     /**
      * Entry point for application
@@ -122,6 +123,18 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     
     @Override
     public void display(GLAutoDrawable drawable) {
+    	
+    	if(clearRequest) {
+            clearRequest = false;
+    		systemClear();
+        	system.collision.contactPool.clear(); 
+            System.gc();
+            if (factory.use)
+        		loadFactoryRequest = false;
+            else
+            	loadSystemRequest = true;
+            factory.use = false;
+    	}
     	
     	if(loadSystemRequest) {
     		loadSystemRequest = false;
@@ -512,8 +525,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         clear.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                factory.use = false;
-                systemClear();
+                clearRequest = true;
             }
         });
         
@@ -620,7 +632,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private void loadXMLSystem( String filename ) {
     	this.sceneFilename = filename;
     	System.out.println("loading " + filename );
-        factory.use = false;        
+        factory.use = false;
         systemClear();
         system.name = filename;
         XMLParser parser = new XMLParser();
@@ -632,10 +644,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      * Loads the specified image as a factory, clearing the old system, and resets viewing parameters.
      * @param filename
      */
-    private void loadFactorySystem( String filename ) {          
+    private void loadFactorySystem( String filename ) {    
     	this.sceneFilename = filename;
-    	factory.use = false;        
-        systemClear();
+    	factory.use = false; 
+    	systemClear();
         loadXMLSystem( filename );
     	system.sceneName = filename.substring(0, filename.length() - 4);
         system.name = filename + " factory";
@@ -644,6 +656,20 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         factory.reset();        
     }
     
+    /**
+     * Clears the system, and ensures that any display lists that were created
+     * to draw the various rigid bodies are cleaned up on the next display call.
+     */
+    private void systemClear() {
+    	// TODO: avoid rebuilding display lists if only resetting a factory
+    	// also... awkward way to try to delete the display lists as the 
+    	// display loop is not really going to get a chance to be called before
+    	// the system.clear call...   In any case, not a big deal if we only 
+    	// load systems occasionally.
+    	deleteDisplayListRequest = true;  
+    	system.clear();
+    }
+
     /**
      * Resets the rigid body system, and factory if it is currently being used.  
      * When the factory is reset, all non pinned rigid bodies are removed from the system.
@@ -657,20 +683,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     }
     
     private boolean deleteDisplayListRequest = false;
-    
-    /**
-     * Clears the system, and ensures that any display lists that were created
-     * to draw the various rigid bodies are cleaned up on the next display call.
-     */
-    private void systemClear() {
-        // TODO: avoid rebuilding display lists if only resetting a factory
-        // also... awkward way to try to delete the display lists as the 
-        // display loop is not really going to get a chance to be called before
-        // the system.clear call...   In any case, not a big deal if we only 
-        // load systems occasionally.
-        deleteDisplayListRequest = true;  
-        system.clear();
-    }
     
     /** List of png files in the data folder which can be loaded with left and right arrow */
     private File[] files = null;
@@ -775,10 +787,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 	}
                 } else if ( e.getKeyCode() == KeyEvent.VK_H ) { // tab is for changing focus, so a pain to capture here
                 	system.display.params.hideOverlay.setValue( ! system.display.params.hideOverlay.getValue() );
-                } else if ( e.getKeyCode() == KeyEvent.VK_C ) {                   
-                    systemClear();
-                    sceneFilename = "";
-                    factory.use = false;
+                } else if ( e.getKeyCode() == KeyEvent.VK_C ) { 
+                    clearRequest = true;
                 } else if ( e.getKeyCode() == KeyEvent.VK_J ) {                   
                     system.jiggle();                                        
                 } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
