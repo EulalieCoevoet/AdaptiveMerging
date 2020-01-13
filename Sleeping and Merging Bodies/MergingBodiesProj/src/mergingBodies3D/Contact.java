@@ -169,10 +169,14 @@ public class Contact {
 		if ( body1.isInComposite() ) { // use the real body if this is a sub body in a composite
         	body1 = b1.compositeBodyParent;
         	csb1 = b1;
+        } else {
+        	csb1 = null;
         }
         if ( body2.isInComposite() ) { // same for body 2
         	body2 = b2.compositeBodyParent;
         	csb2 = b2;
+        } else {
+        	csb2 = null;
         }
         
         // TODO: last thing to fix here (Before writing the collision processing) is the info
@@ -218,6 +222,18 @@ public class Contact {
         body1.transformB2W.inverseTransform( normalB1 );
         body1.transformB2W.inverseTransform( tangent1B1 );
         body1.transformB2W.inverseTransform( tangent2B1 );
+        
+        bn = 0;
+        bt1 = 0;
+        bt2 = 0;
+        D00 = 0;
+        D11 = 0;
+        D22 = 0;
+        newThisTimeStep = true; // warm start will change later
+        
+        
+        
+        
     }
     
     private void computeJacobian( boolean computeInCollection, Point3d contactW, Vector3d normalW, Vector3d tangent1W, Vector3d tangent2W ) {
