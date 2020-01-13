@@ -51,7 +51,7 @@ public class Sleeping {
 			
 			boolean externalContact = false;
 			for (BodyPairContact bpc : body.bodyPairContacts) {
-				if (!bpc.inCollection && !(bpc.body1.pinned || bpc.body2.pinned)) {
+				if (!bpc.inCollection) {
 					externalContact = true;
 					break;
 				}
