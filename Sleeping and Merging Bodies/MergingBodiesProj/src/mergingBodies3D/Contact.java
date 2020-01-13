@@ -386,6 +386,7 @@ public class Contact {
 	 * @param mu
 	 */
 	protected void updateContactState(double mu) {
+		
 		if (Math.abs(lambda0) <= 1e-14) // (math.abs is for magnet)
 			state = ContactState.BROKEN;	
 		else if ( Math.abs(lambda1) == lambda0*mu || Math.abs(lambda2) == lambda0*mu ) 

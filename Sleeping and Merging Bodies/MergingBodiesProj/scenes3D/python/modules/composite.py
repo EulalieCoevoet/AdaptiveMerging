@@ -9,7 +9,8 @@ class CompositeBody():
         self.body = ET.SubElement(root, 'body')
         self.body.set('type','composite')
         self.body.set('name', name)
-        self.body.set('obj', obj)
+        if (obj is not None):
+            self.body.set('obj', obj)
         self.body.set('scale', scale)
         com = ET.SubElement(self.body, 'x')
         com.text = position
@@ -46,3 +47,6 @@ class CompositeBody():
 
     def addSphere(self, **kwargs):
         Sphere(self.body, **kwargs)
+
+    def get(self):
+        return self.body
