@@ -499,20 +499,24 @@ public class CollisionProcessor {
 			if ( bpc.inCollection ) continue;
 			if ( bpc.body1.geom instanceof RigidBodyGeomBox && bpc.body2.geom instanceof RigidBodyGeomBox ) {
 				for ( Contact contact : bpc.contactList ) {
+						
+					// note that body1 and body 2 can swap across time steps... so just compare in the current world!
+					// note also that nothing fancy is needed for composite bodies... the contact csb1 and csb2 
+					// (composite sub bodies) will match given the hashcode lookup, so we can search for our warm start
+					// by changing the info number, running info from 0 to 7 
 					
+					// TODO: this threshold for fixing box-boxy warm starts is perhaps delicate??
+					// Perhaps 0.1 or 0.05 is far enough to say it is a bad match?
+					// should also perhaps make sure that we don't match the same more than once??
+					// which would give a bit of a boost to the lagrange multipliers in the warm start.
+					
+					Point3d pNew = new Point3d();
+					Point3d pOld = new Point3d();
+					contact.body1.transformB2W.transform( contact.contactB1, pNew );
+
 					Contact oldContact = lastTimeStepContacts.get( contact );
 					if (oldContact != null) {
-						// if there is a poor match in body coordinates (i.e., off by more than 0.1 or 0.05
-						// then loop through contacts increasing info until null (check with as many box box
-						// contacts as there are, and then take the closest match.
-						Point3d pNew = new Point3d();
-						Point3d pOld = new Point3d();
-						contact.body1.transformB2W.transform( contact.contactB1, pNew );
 						oldContact.body1.transformB2W.transform( oldContact.contactB1, pOld );
-						// note that body1 and body 2 can swap across time steps... so just compare in the current world!
-						// note also that nothing fancy is needed for composite bodies... the contact csb1 and csb2 
-						// (composite sub bodies) will match given the hashcode lookup, and we will only be changing
-						// contact info to walk over the 8 (?) maximum contacts.
 						double dist = pNew.distance( pOld );
 						if (  dist > 0.05 ) {
 							badWarmStarts++;
@@ -543,24 +547,79 @@ public class CollisionProcessor {
 							}
 							oldContact = bestMatchOldContact;
 							contact.info = myInfo; 
+							dist = bestMatchDist;
 							// restoring the info of the contact in this step means that if this was just
 							// an order swap that happens when rotating from 44 to 46 degrees, for instance,
 							// then we won't need this search for the next warm start.
 						}
+						if ( dist < 0.05 ) {
 					
-						contact.newThisTimeStep = false; // not new, even if we failed to do a good warm start
-						contact.lambda0 = oldContact.lambda0;
-						contact.lambda1 = oldContact.lambda1;
-						contact.lambda2 = oldContact.lambda2;
-
-						contact.lambda0warm = oldContact.lambda0;
-						contact.lambda1warm = oldContact.lambda1;
-						contact.lambda2warm = oldContact.lambda2;
-
-						contact.prevConstraintViolation = oldContact.constraintViolation;
+							contact.newThisTimeStep = false; // not new, even if we failed to do a good warm start
+							contact.lambda0 = oldContact.lambda0;
+							contact.lambda1 = oldContact.lambda1;
+							contact.lambda2 = oldContact.lambda2;
+	
+							contact.lambda0warm = oldContact.lambda0;
+							contact.lambda1warm = oldContact.lambda1;
+							contact.lambda2warm = oldContact.lambda2;
+							
+							// we are taking these values... don't let anyone else have them!
+							oldContact.lambda0 = 0;
+							oldContact.lambda1 = 0;
+							oldContact.lambda2 = 0;
+	
+							contact.prevConstraintViolation = oldContact.constraintViolation;
+						} else {
+							// may as well treat as new as didn't find anything close.
+							contact.newThisTimeStep = true;
+						}
 					} else {
-						contact.newThisTimeStep = true;
-					}	
+						// Just because we didn't find ourselves, doesn't mean that we're not there!
+						// start searching from zero
+						int myInfo = contact.info;
+						double bestMatchDist = Double.MAX_VALUE;
+						int bestMatchInfo = -1;
+						Contact bestMatchOldContact = null;
+						for ( int info = 0; info < 9; info++ ) {
+							contact.info = info;
+							oldContact = lastTimeStepContacts.get( contact );
+							if ( oldContact == null ) break; // no more contacts to check
+							oldContact.body1.transformB2W.transform( oldContact.contactB1, pOld );
+							double dist = pNew.distance( pOld );
+							if ( dist < bestMatchDist ) {
+								bestMatchDist = dist;
+								bestMatchInfo = info;
+								bestMatchOldContact = oldContact;
+							}
+						}
+						contact.info = myInfo; // put my info back!!
+						if ( bestMatchInfo != -1 ) {
+							badWarmStartsRepaired++;
+							// found something... but might still be large
+							if ( bestMatchDist < 0.05 ) {
+								oldContact = bestMatchOldContact;
+								
+								contact.newThisTimeStep = false; // not new, even if we failed to do a good warm start
+								contact.lambda0 = oldContact.lambda0;
+								contact.lambda1 = oldContact.lambda1;
+								contact.lambda2 = oldContact.lambda2;
+		
+								contact.lambda0warm = oldContact.lambda0;
+								contact.lambda1warm = oldContact.lambda1;
+								contact.lambda2warm = oldContact.lambda2;
+								
+								// we are taking these values... don't let anyone else have them!
+								oldContact.lambda0 = 0;
+								oldContact.lambda1 = 0;
+								oldContact.lambda2 = 0;
+		
+								contact.prevConstraintViolation = oldContact.constraintViolation;
+							}
+
+						} else {
+							contact.newThisTimeStep = true;
+						}
+					}
 				}
 					
 			} else {
