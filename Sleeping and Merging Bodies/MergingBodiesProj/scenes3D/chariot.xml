@@ -4,1297 +4,1297 @@
 		<friction>0.01</friction>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box0" type="box">
-		<x>-2 2 -1.39</x>
+		<x>-2 2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box1" type="box">
-		<x>-2 2.51 -1.39</x>
+		<x>-2 2.55 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box2" type="box">
-		<x>-2 3.02 -1.39</x>
+		<x>-2 3.1 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box3" type="box">
-		<x>-2 3.53 -1.39</x>
+		<x>-2 3.65 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box4" type="box">
-		<x>-2 4.04 -1.39</x>
+		<x>-2 4.2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box5" type="box">
-		<x>-2 4.55 -1.39</x>
+		<x>-2 4.75 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box6" type="box">
-		<x>-1.49 2 -1.39</x>
+		<x>-1.45 2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box7" type="box">
-		<x>-1.49 2.51 -1.39</x>
+		<x>-1.45 2.55 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box8" type="box">
-		<x>-1.49 3.02 -1.39</x>
+		<x>-1.45 3.1 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box9" type="box">
-		<x>-1.49 3.53 -1.39</x>
+		<x>-1.45 3.65 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box10" type="box">
-		<x>-1.49 4.04 -1.39</x>
+		<x>-1.45 4.2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box11" type="box">
-		<x>-1.49 4.55 -1.39</x>
+		<x>-1.45 4.75 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box12" type="box">
-		<x>-0.98 2 -1.39</x>
+		<x>-0.9 2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box13" type="box">
-		<x>-0.98 2.51 -1.39</x>
+		<x>-0.9 2.55 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box14" type="box">
-		<x>-0.98 3.02 -1.39</x>
+		<x>-0.9 3.1 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box15" type="box">
-		<x>-0.98 3.53 -1.39</x>
+		<x>-0.9 3.65 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box16" type="box">
-		<x>-0.98 4.04 -1.39</x>
+		<x>-0.9 4.2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box17" type="box">
-		<x>-0.98 4.55 -1.39</x>
+		<x>-0.9 4.75 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box18" type="box">
-		<x>-0.47 2 -1.39</x>
+		<x>-0.35 2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box19" type="box">
-		<x>-0.47 2.51 -1.39</x>
+		<x>-0.35 2.55 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box20" type="box">
-		<x>-0.47 3.02 -1.39</x>
+		<x>-0.35 3.1 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box21" type="box">
-		<x>-0.47 3.53 -1.39</x>
+		<x>-0.35 3.65 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box22" type="box">
-		<x>-0.47 4.04 -1.39</x>
+		<x>-0.35 4.2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box23" type="box">
-		<x>-0.47 4.55 -1.39</x>
+		<x>-0.35 4.75 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box24" type="box">
-		<x>0.04 2 -1.39</x>
+		<x>0.2 2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box25" type="box">
-		<x>0.04 2.51 -1.39</x>
+		<x>0.2 2.55 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box26" type="box">
-		<x>0.04 3.02 -1.39</x>
+		<x>0.2 3.1 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box27" type="box">
-		<x>0.04 3.53 -1.39</x>
+		<x>0.2 3.65 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box28" type="box">
-		<x>0.04 4.04 -1.39</x>
+		<x>0.2 4.2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box29" type="box">
-		<x>0.04 4.55 -1.39</x>
+		<x>0.2 4.75 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box30" type="box">
-		<x>0.55 2 -1.39</x>
+		<x>0.75 2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box31" type="box">
-		<x>0.55 2.51 -1.39</x>
+		<x>0.75 2.55 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box32" type="box">
-		<x>0.55 3.02 -1.39</x>
+		<x>0.75 3.1 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box33" type="box">
-		<x>0.55 3.53 -1.39</x>
+		<x>0.75 3.65 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box34" type="box">
-		<x>0.55 4.04 -1.39</x>
+		<x>0.75 4.2 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box35" type="box">
-		<x>0.55 4.55 -1.39</x>
+		<x>0.75 4.75 -1.35</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box36" type="box">
-		<x>-2 2 -0.88</x>
+		<x>-2 2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box37" type="box">
-		<x>-2 2.51 -0.88</x>
+		<x>-2 2.55 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box38" type="box">
-		<x>-2 3.02 -0.88</x>
+		<x>-2 3.1 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box39" type="box">
-		<x>-2 3.53 -0.88</x>
+		<x>-2 3.65 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box40" type="box">
-		<x>-2 4.04 -0.88</x>
+		<x>-2 4.2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box41" type="box">
-		<x>-2 4.55 -0.88</x>
+		<x>-2 4.75 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box42" type="box">
-		<x>-1.49 2 -0.88</x>
+		<x>-1.45 2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box43" type="box">
-		<x>-1.49 2.51 -0.88</x>
+		<x>-1.45 2.55 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box44" type="box">
-		<x>-1.49 3.02 -0.88</x>
+		<x>-1.45 3.1 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box45" type="box">
-		<x>-1.49 3.53 -0.88</x>
+		<x>-1.45 3.65 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box46" type="box">
-		<x>-1.49 4.04 -0.88</x>
+		<x>-1.45 4.2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box47" type="box">
-		<x>-1.49 4.55 -0.88</x>
+		<x>-1.45 4.75 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box48" type="box">
-		<x>-0.98 2 -0.88</x>
+		<x>-0.9 2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box49" type="box">
-		<x>-0.98 2.51 -0.88</x>
+		<x>-0.9 2.55 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box50" type="box">
-		<x>-0.98 3.02 -0.88</x>
+		<x>-0.9 3.1 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box51" type="box">
-		<x>-0.98 3.53 -0.88</x>
+		<x>-0.9 3.65 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box52" type="box">
-		<x>-0.98 4.04 -0.88</x>
+		<x>-0.9 4.2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box53" type="box">
-		<x>-0.98 4.55 -0.88</x>
+		<x>-0.9 4.75 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box54" type="box">
-		<x>-0.47 2 -0.88</x>
+		<x>-0.35 2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box55" type="box">
-		<x>-0.47 2.51 -0.88</x>
+		<x>-0.35 2.55 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box56" type="box">
-		<x>-0.47 3.02 -0.88</x>
+		<x>-0.35 3.1 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box57" type="box">
-		<x>-0.47 3.53 -0.88</x>
+		<x>-0.35 3.65 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box58" type="box">
-		<x>-0.47 4.04 -0.88</x>
+		<x>-0.35 4.2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box59" type="box">
-		<x>-0.47 4.55 -0.88</x>
+		<x>-0.35 4.75 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box60" type="box">
-		<x>0.04 2 -0.88</x>
+		<x>0.2 2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box61" type="box">
-		<x>0.04 2.51 -0.88</x>
+		<x>0.2 2.55 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box62" type="box">
-		<x>0.04 3.02 -0.88</x>
+		<x>0.2 3.1 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box63" type="box">
-		<x>0.04 3.53 -0.88</x>
+		<x>0.2 3.65 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box64" type="box">
-		<x>0.04 4.04 -0.88</x>
+		<x>0.2 4.2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box65" type="box">
-		<x>0.04 4.55 -0.88</x>
+		<x>0.2 4.75 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box66" type="box">
-		<x>0.55 2 -0.88</x>
+		<x>0.75 2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box67" type="box">
-		<x>0.55 2.51 -0.88</x>
+		<x>0.75 2.55 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box68" type="box">
-		<x>0.55 3.02 -0.88</x>
+		<x>0.75 3.1 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box69" type="box">
-		<x>0.55 3.53 -0.88</x>
+		<x>0.75 3.65 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box70" type="box">
-		<x>0.55 4.04 -0.88</x>
+		<x>0.75 4.2 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box71" type="box">
-		<x>0.55 4.55 -0.88</x>
+		<x>0.75 4.75 -0.8</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box72" type="box">
-		<x>-2 2 -0.37</x>
+		<x>-2 2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box73" type="box">
-		<x>-2 2.51 -0.37</x>
+		<x>-2 2.55 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box74" type="box">
-		<x>-2 3.02 -0.37</x>
+		<x>-2 3.1 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box75" type="box">
-		<x>-2 3.53 -0.37</x>
+		<x>-2 3.65 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box76" type="box">
-		<x>-2 4.04 -0.37</x>
+		<x>-2 4.2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box77" type="box">
-		<x>-2 4.55 -0.37</x>
+		<x>-2 4.75 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box78" type="box">
-		<x>-1.49 2 -0.37</x>
+		<x>-1.45 2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box79" type="box">
-		<x>-1.49 2.51 -0.37</x>
+		<x>-1.45 2.55 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box80" type="box">
-		<x>-1.49 3.02 -0.37</x>
+		<x>-1.45 3.1 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box81" type="box">
-		<x>-1.49 3.53 -0.37</x>
+		<x>-1.45 3.65 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box82" type="box">
-		<x>-1.49 4.04 -0.37</x>
+		<x>-1.45 4.2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box83" type="box">
-		<x>-1.49 4.55 -0.37</x>
+		<x>-1.45 4.75 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box84" type="box">
-		<x>-0.98 2 -0.37</x>
+		<x>-0.9 2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box85" type="box">
-		<x>-0.98 2.51 -0.37</x>
+		<x>-0.9 2.55 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box86" type="box">
-		<x>-0.98 3.02 -0.37</x>
+		<x>-0.9 3.1 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box87" type="box">
-		<x>-0.98 3.53 -0.37</x>
+		<x>-0.9 3.65 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box88" type="box">
-		<x>-0.98 4.04 -0.37</x>
+		<x>-0.9 4.2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box89" type="box">
-		<x>-0.98 4.55 -0.37</x>
+		<x>-0.9 4.75 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box90" type="box">
-		<x>-0.47 2 -0.37</x>
+		<x>-0.35 2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box91" type="box">
-		<x>-0.47 2.51 -0.37</x>
+		<x>-0.35 2.55 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box92" type="box">
-		<x>-0.47 3.02 -0.37</x>
+		<x>-0.35 3.1 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box93" type="box">
-		<x>-0.47 3.53 -0.37</x>
+		<x>-0.35 3.65 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box94" type="box">
-		<x>-0.47 4.04 -0.37</x>
+		<x>-0.35 4.2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box95" type="box">
-		<x>-0.47 4.55 -0.37</x>
+		<x>-0.35 4.75 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box96" type="box">
-		<x>0.04 2 -0.37</x>
+		<x>0.2 2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box97" type="box">
-		<x>0.04 2.51 -0.37</x>
+		<x>0.2 2.55 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box98" type="box">
-		<x>0.04 3.02 -0.37</x>
+		<x>0.2 3.1 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box99" type="box">
-		<x>0.04 3.53 -0.37</x>
+		<x>0.2 3.65 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box100" type="box">
-		<x>0.04 4.04 -0.37</x>
+		<x>0.2 4.2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box101" type="box">
-		<x>0.04 4.55 -0.37</x>
+		<x>0.2 4.75 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box102" type="box">
-		<x>0.55 2 -0.37</x>
+		<x>0.75 2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box103" type="box">
-		<x>0.55 2.51 -0.37</x>
+		<x>0.75 2.55 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box104" type="box">
-		<x>0.55 3.02 -0.37</x>
+		<x>0.75 3.1 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box105" type="box">
-		<x>0.55 3.53 -0.37</x>
+		<x>0.75 3.65 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box106" type="box">
-		<x>0.55 4.04 -0.37</x>
+		<x>0.75 4.2 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box107" type="box">
-		<x>0.55 4.55 -0.37</x>
+		<x>0.75 4.75 -0.25</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box108" type="box">
-		<x>-2 2 0.14</x>
+		<x>-2 2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box109" type="box">
-		<x>-2 2.51 0.14</x>
+		<x>-2 2.55 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box110" type="box">
-		<x>-2 3.02 0.14</x>
+		<x>-2 3.1 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box111" type="box">
-		<x>-2 3.53 0.14</x>
+		<x>-2 3.65 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box112" type="box">
-		<x>-2 4.04 0.14</x>
+		<x>-2 4.2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box113" type="box">
-		<x>-2 4.55 0.14</x>
+		<x>-2 4.75 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box114" type="box">
-		<x>-1.49 2 0.14</x>
+		<x>-1.45 2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box115" type="box">
-		<x>-1.49 2.51 0.14</x>
+		<x>-1.45 2.55 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box116" type="box">
-		<x>-1.49 3.02 0.14</x>
+		<x>-1.45 3.1 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box117" type="box">
-		<x>-1.49 3.53 0.14</x>
+		<x>-1.45 3.65 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box118" type="box">
-		<x>-1.49 4.04 0.14</x>
+		<x>-1.45 4.2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box119" type="box">
-		<x>-1.49 4.55 0.14</x>
+		<x>-1.45 4.75 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box120" type="box">
-		<x>-0.98 2 0.14</x>
+		<x>-0.9 2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box121" type="box">
-		<x>-0.98 2.51 0.14</x>
+		<x>-0.9 2.55 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box122" type="box">
-		<x>-0.98 3.02 0.14</x>
+		<x>-0.9 3.1 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box123" type="box">
-		<x>-0.98 3.53 0.14</x>
+		<x>-0.9 3.65 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box124" type="box">
-		<x>-0.98 4.04 0.14</x>
+		<x>-0.9 4.2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box125" type="box">
-		<x>-0.98 4.55 0.14</x>
+		<x>-0.9 4.75 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box126" type="box">
-		<x>-0.47 2 0.14</x>
+		<x>-0.35 2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box127" type="box">
-		<x>-0.47 2.51 0.14</x>
+		<x>-0.35 2.55 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box128" type="box">
-		<x>-0.47 3.02 0.14</x>
+		<x>-0.35 3.1 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box129" type="box">
-		<x>-0.47 3.53 0.14</x>
+		<x>-0.35 3.65 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box130" type="box">
-		<x>-0.47 4.04 0.14</x>
+		<x>-0.35 4.2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box131" type="box">
-		<x>-0.47 4.55 0.14</x>
+		<x>-0.35 4.75 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box132" type="box">
-		<x>0.04 2 0.14</x>
+		<x>0.2 2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box133" type="box">
-		<x>0.04 2.51 0.14</x>
+		<x>0.2 2.55 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box134" type="box">
-		<x>0.04 3.02 0.14</x>
+		<x>0.2 3.1 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box135" type="box">
-		<x>0.04 3.53 0.14</x>
+		<x>0.2 3.65 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box136" type="box">
-		<x>0.04 4.04 0.14</x>
+		<x>0.2 4.2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box137" type="box">
-		<x>0.04 4.55 0.14</x>
+		<x>0.2 4.75 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box138" type="box">
-		<x>0.55 2 0.14</x>
+		<x>0.75 2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box139" type="box">
-		<x>0.55 2.51 0.14</x>
+		<x>0.75 2.55 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box140" type="box">
-		<x>0.55 3.02 0.14</x>
+		<x>0.75 3.1 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box141" type="box">
-		<x>0.55 3.53 0.14</x>
+		<x>0.75 3.65 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box142" type="box">
-		<x>0.55 4.04 0.14</x>
+		<x>0.75 4.2 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box143" type="box">
-		<x>0.55 4.55 0.14</x>
+		<x>0.75 4.75 0.3</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box144" type="box">
-		<x>-2 2 0.65</x>
+		<x>-2 2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box145" type="box">
-		<x>-2 2.51 0.65</x>
+		<x>-2 2.55 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box146" type="box">
-		<x>-2 3.02 0.65</x>
+		<x>-2 3.1 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box147" type="box">
-		<x>-2 3.53 0.65</x>
+		<x>-2 3.65 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box148" type="box">
-		<x>-2 4.04 0.65</x>
+		<x>-2 4.2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box149" type="box">
-		<x>-2 4.55 0.65</x>
+		<x>-2 4.75 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box150" type="box">
-		<x>-1.49 2 0.65</x>
+		<x>-1.45 2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box151" type="box">
-		<x>-1.49 2.51 0.65</x>
+		<x>-1.45 2.55 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box152" type="box">
-		<x>-1.49 3.02 0.65</x>
+		<x>-1.45 3.1 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box153" type="box">
-		<x>-1.49 3.53 0.65</x>
+		<x>-1.45 3.65 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box154" type="box">
-		<x>-1.49 4.04 0.65</x>
+		<x>-1.45 4.2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box155" type="box">
-		<x>-1.49 4.55 0.65</x>
+		<x>-1.45 4.75 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box156" type="box">
-		<x>-0.98 2 0.65</x>
+		<x>-0.9 2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box157" type="box">
-		<x>-0.98 2.51 0.65</x>
+		<x>-0.9 2.55 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box158" type="box">
-		<x>-0.98 3.02 0.65</x>
+		<x>-0.9 3.1 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box159" type="box">
-		<x>-0.98 3.53 0.65</x>
+		<x>-0.9 3.65 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box160" type="box">
-		<x>-0.98 4.04 0.65</x>
+		<x>-0.9 4.2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box161" type="box">
-		<x>-0.98 4.55 0.65</x>
+		<x>-0.9 4.75 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box162" type="box">
-		<x>-0.47 2 0.65</x>
+		<x>-0.35 2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box163" type="box">
-		<x>-0.47 2.51 0.65</x>
+		<x>-0.35 2.55 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box164" type="box">
-		<x>-0.47 3.02 0.65</x>
+		<x>-0.35 3.1 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box165" type="box">
-		<x>-0.47 3.53 0.65</x>
+		<x>-0.35 3.65 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box166" type="box">
-		<x>-0.47 4.04 0.65</x>
+		<x>-0.35 4.2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box167" type="box">
-		<x>-0.47 4.55 0.65</x>
+		<x>-0.35 4.75 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box168" type="box">
-		<x>0.04 2 0.65</x>
+		<x>0.2 2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box169" type="box">
-		<x>0.04 2.51 0.65</x>
+		<x>0.2 2.55 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box170" type="box">
-		<x>0.04 3.02 0.65</x>
+		<x>0.2 3.1 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box171" type="box">
-		<x>0.04 3.53 0.65</x>
+		<x>0.2 3.65 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box172" type="box">
-		<x>0.04 4.04 0.65</x>
+		<x>0.2 4.2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box173" type="box">
-		<x>0.04 4.55 0.65</x>
+		<x>0.2 4.75 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box174" type="box">
-		<x>0.55 2 0.65</x>
+		<x>0.75 2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box175" type="box">
-		<x>0.55 2.51 0.65</x>
+		<x>0.75 2.55 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box176" type="box">
-		<x>0.55 3.02 0.65</x>
+		<x>0.75 3.1 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box177" type="box">
-		<x>0.55 3.53 0.65</x>
+		<x>0.75 3.65 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box178" type="box">
-		<x>0.55 4.04 0.65</x>
+		<x>0.75 4.2 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box179" type="box">
-		<x>0.55 4.55 0.65</x>
+		<x>0.75 4.75 0.85</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box180" type="box">
-		<x>-2 2 1.16</x>
+		<x>-2 2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box181" type="box">
-		<x>-2 2.51 1.16</x>
+		<x>-2 2.55 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box182" type="box">
-		<x>-2 3.02 1.16</x>
+		<x>-2 3.1 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box183" type="box">
-		<x>-2 3.53 1.16</x>
+		<x>-2 3.65 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box184" type="box">
-		<x>-2 4.04 1.16</x>
+		<x>-2 4.2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box185" type="box">
-		<x>-2 4.55 1.16</x>
+		<x>-2 4.75 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box186" type="box">
-		<x>-1.49 2 1.16</x>
+		<x>-1.45 2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box187" type="box">
-		<x>-1.49 2.51 1.16</x>
+		<x>-1.45 2.55 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box188" type="box">
-		<x>-1.49 3.02 1.16</x>
+		<x>-1.45 3.1 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box189" type="box">
-		<x>-1.49 3.53 1.16</x>
+		<x>-1.45 3.65 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box190" type="box">
-		<x>-1.49 4.04 1.16</x>
+		<x>-1.45 4.2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box191" type="box">
-		<x>-1.49 4.55 1.16</x>
+		<x>-1.45 4.75 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box192" type="box">
-		<x>-0.98 2 1.16</x>
+		<x>-0.9 2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box193" type="box">
-		<x>-0.98 2.51 1.16</x>
+		<x>-0.9 2.55 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box194" type="box">
-		<x>-0.98 3.02 1.16</x>
+		<x>-0.9 3.1 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box195" type="box">
-		<x>-0.98 3.53 1.16</x>
+		<x>-0.9 3.65 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box196" type="box">
-		<x>-0.98 4.04 1.16</x>
+		<x>-0.9 4.2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box197" type="box">
-		<x>-0.98 4.55 1.16</x>
+		<x>-0.9 4.75 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box198" type="box">
-		<x>-0.47 2 1.16</x>
+		<x>-0.35 2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box199" type="box">
-		<x>-0.47 2.51 1.16</x>
+		<x>-0.35 2.55 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box200" type="box">
-		<x>-0.47 3.02 1.16</x>
+		<x>-0.35 3.1 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box201" type="box">
-		<x>-0.47 3.53 1.16</x>
+		<x>-0.35 3.65 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box202" type="box">
-		<x>-0.47 4.04 1.16</x>
+		<x>-0.35 4.2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box203" type="box">
-		<x>-0.47 4.55 1.16</x>
+		<x>-0.35 4.75 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box204" type="box">
-		<x>0.04 2 1.16</x>
+		<x>0.2 2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box205" type="box">
-		<x>0.04 2.51 1.16</x>
+		<x>0.2 2.55 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box206" type="box">
-		<x>0.04 3.02 1.16</x>
+		<x>0.2 3.1 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box207" type="box">
-		<x>0.04 3.53 1.16</x>
+		<x>0.2 3.65 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box208" type="box">
-		<x>0.04 4.04 1.16</x>
+		<x>0.2 4.2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box209" type="box">
-		<x>0.04 4.55 1.16</x>
+		<x>0.2 4.75 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box210" type="box">
-		<x>0.55 2 1.16</x>
+		<x>0.75 2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box211" type="box">
-		<x>0.55 2.51 1.16</x>
+		<x>0.75 2.55 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box212" type="box">
-		<x>0.55 3.02 1.16</x>
+		<x>0.75 3.1 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box213" type="box">
-		<x>0.55 3.53 1.16</x>
+		<x>0.75 3.65 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box214" type="box">
-		<x>0.55 4.04 1.16</x>
+		<x>0.75 4.2 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body dim="0.5 0.5 0.5" name="box215" type="box">
-		<x>0.55 4.55 1.16</x>
+		<x>0.75 4.75 1.4</x>
 		<R>0. -1 0. 0.</R>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
@@ -1342,31 +1342,31 @@
 			<magnetic>false</magnetic>
 		</body>
 		<body dim="7.2 0.2 4" name="panier" type="box">
-			<x>0.2 0. 0.</x>
+			<x>0.2 0.1 0.</x>
 			<R>0. -1 0. 0.</R>
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body dim="7.2 2.5 0.2" name="panierb1" type="box">
-			<x>0.2 0. -1.9</x>
+		<body dim="7.2 1.5 0.2" name="panierb1" type="box">
+			<x>0.2 0.75 -1.9</x>
 			<R>0. -1 0. 0.</R>
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body dim="0.2 2.5 4" name="panierb2" type="box">
-			<x>3.7 0. 0.</x>
+		<body dim="0.2 1.5 4" name="panierb2" type="box">
+			<x>3.7 0.75 0.</x>
 			<R>0. -1 0. 0.</R>
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body dim="7.2 2.5 0.2" name="panierb3" type="box">
-			<x>0.2 0. 1.9</x>
+		<body dim="7.2 1.5 0.2" name="panierb3" type="box">
+			<x>0.2 0.75 1.9</x>
 			<R>0. -1 0. 0.</R>
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body dim="0.2 2.5 4" name="panierb4" type="box">
-			<x>-3.5 0. 0.</x>
+		<body dim="0.2 1.5 4" name="panierb4" type="box">
+			<x>-3.5 0.75 0.</x>
 			<R>0. -1 0. 0.</R>
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>

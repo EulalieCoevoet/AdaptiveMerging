@@ -66,7 +66,8 @@ public class Display {
 	
     /** Might want to allow for different coloured blocks?? but for now, in 3D this is easiest */
     private float[] green = new float[] { 0, 1, 0, 0.25f };
-    private float[] colourPinned = new float[] { 0.75f,0.75f,1, 1 };		        			
+    private float[] colourPinned = new float[] { 0.75f,0.75f,1, 1 };	
+    private float[] colourSleeping = new float[] { 1, 1, 1, 1 };		        			
 	private float[] colour = new float[] { 0.9f,0.9f,0.9f, 1 };        			
     private float[] red = new float[] { 1, 0, 0, 0.5f };
     private float[] blue = new float[] { 0, 0, 1, 0.25f };
@@ -185,8 +186,10 @@ public class Display {
     			// decide when we want to override this colour (e.g., if we have a 
     			// rigid body collection)
     			float[] c = colour;
-    			if ( b.pinned ) {
-    				c = colourPinned;
+    			if ( b.isSleeping ) {
+    				c = colourSleeping;
+    			} else if (b.pinned) {
+    				c = colourPinned;    				
     			} else if ( b.col != null ) {
     				c = b.col;
     			}

@@ -282,7 +282,7 @@ public class RigidBody {
 	    	metricHistory.clear();
 	    }
 		
-		if (isInCollection() && parent.isSleeping)
+		if (isInCollection())
 	    	parent.wake();
 	}
 	

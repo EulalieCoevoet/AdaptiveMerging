@@ -17,7 +17,7 @@ public class Sleeping {
 	ArrayList<RigidBody> bodies;
 	
 	public class SleepParameters {
-		public BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
+		public BooleanParameter enableSleeping = new BooleanParameter( "sleeping", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
 		public DoubleParameter threshold = new DoubleParameter("sleeping threshold", 1e-7, 1e-10, 1 );
 		public BooleanParameter wakeAll = new BooleanParameter("wake all", false);
@@ -51,7 +51,6 @@ public class Sleeping {
 			
 			boolean externalContact = false;
 			for (BodyPairContact bpc : body.bodyPairContacts) {
-						
 				if (!bpc.inCollection && !(bpc.body1.pinned || bpc.body2.pinned)) {
 					externalContact = true;
 					break;
@@ -101,16 +100,12 @@ public class Sleeping {
 			if (!body.isSleeping) 
 				continue;
 			
-			boolean wake = false;
 			for (BodyPairContact bpc : body.bodyPairContacts) {
-				if (!bpc.body1.isInSameCollection(bpc.body2) && !(bpc.body1.pinned || bpc.body2.pinned)) {
-					wake = true;
-					break;
+				if (!bpc.inCollection) {
+					bpc.body1.wake();
+					bpc.body2.wake();
 				}
 			}
-			
-			if(wake)
-				body.wake();
 		}
 	}	
 	

@@ -67,6 +67,8 @@ public class MouseSpringForce {
     public void apply( boolean applyAtCOM ) {
         if ( picked == null ) return;
         
+        picked.wake();
+        
         picked.transformB2W.transform( grabPointB, grabPointBW );
         double distance = grabPointBW.distance( pointW );
         double k = stiffness.getValue();

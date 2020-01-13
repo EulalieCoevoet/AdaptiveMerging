@@ -24,12 +24,13 @@ z0 = -1.9
 
 y=y0; x=x0; z=z0;
 dimx=0.5; dimy=0.5; dimz=0.5;
+dist=0.05;
 for i in range(216):
-    y += dimy + 0.01
+    y += dimy + dist
     if (i%6==0):
-        x+=dimx + 0.01; y=y0;
+        x+=dimx + dist; y=y0;
     if (i%36==0):
-        x=x0; y=y0; z+=dimz + 0.01;
+        x=x0; y=y0; z+=dimz + dist;
     orientation = "0 -1 0 0.03" if (i%2) else "0 -1 0 0";
     Box(root, name='box'+str(i), position=str(x)+" "+str(y)+" "+str(z), dim=str(dimx)+" "+str(dimy)+" "+str(dimz))
 
@@ -42,11 +43,11 @@ composite.addSphere(name='wheel1', position=" 3.15 -1.7  1.9", radius='1')
 composite.addSphere(name='wheel2', position=" 3.15 -1.7 -1.9", radius='1')
 composite.addSphere(name='wheel3', position="-3.15 -1.7  1.9", radius='1')
 composite.addSphere(name='wheel4', position="-3.15 -1.7 -1.9", radius='1')
-composite.addBox(name='panier', position="0.2 0. 0.", dim='7.2 0.2 4')
-composite.addBox(name='panierb1', position="0.2 0. -1.9", dim='7.2 2.5 0.2')
-composite.addBox(name='panierb2', position="3.7 0. 0.", dim='0.2 2.5 4')
-composite.addBox(name='panierb3', position="0.2 0. 1.9", dim='7.2 2.5 0.2')
-composite.addBox(name='panierb4', position="-3.5 0. 0.", dim='0.2 2.5 4')
+composite.addBox(name='panier', position="0.2 0.1 0.", dim='7.2 0.2 4')
+composite.addBox(name='panierb1', position="0.2 0.75 -1.9", dim='7.2 1.5 0.2')
+composite.addBox(name='panierb2', position="3.7 0.75 0.", dim='0.2 1.5 4')
+composite.addBox(name='panierb3', position="0.2 0.75 1.9", dim='7.2 1.5 0.2')
+composite.addBox(name='panierb4', position="-3.5 0.75 0.", dim='0.2 1.5 4')
 
 
 

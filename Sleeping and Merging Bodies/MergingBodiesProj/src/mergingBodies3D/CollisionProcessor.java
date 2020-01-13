@@ -484,15 +484,6 @@ public class CollisionProcessor {
 	 * slightly differently given that they don't always end up preserving their "info" number across time steps.
 	 */
 	protected void warmStart() {
-//		// check for hash collisions??
-//		for ( Contact c1 : contacts ) {
-//			for ( Contact c2 : contacts ) {
-//				if ( c2 == c1 ) continue;
-//				if ( c1.hashCode() == c2.hashCode() ) {
-//					System.out.println( "hash collision" );
-//				}
-//			}
-//		}
 		badWarmStarts = 0;
 		badWarmStartsRepaired = 0;
 		for ( BodyPairContact bpc : bodyPairContacts ) {
