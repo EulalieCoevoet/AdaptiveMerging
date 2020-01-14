@@ -69,7 +69,7 @@ public class Display {
     private float[] green = new float[] { 0, 1, 0, 0.25f };
     private float[] colourPinned = new float[] { 0.75f,0.75f,1, 1 };	
     private float[] colourSleeping = new float[] { 1, 1, 1, 1 };		        			
-	private float[] colour = new float[] { 0.9f,0.9f,0.9f, 1 };        			
+	private float[] colour = new float[] { 0.4f,0.4f,0.4f, 1 };        			
     private float[] red = new float[] { 1, 0, 0, 0.5f };
     private float[] blue = new float[] { 0, 0, 1, 0.25f };
     
@@ -183,28 +183,12 @@ public class Display {
         
         if ( params.drawBodies.getValue() ) {
         	for ( RigidBody b : bodies ) {
-    			// let's control the colour of geometry here as it will let us 
-    			// decide when we want to override this colour (e.g., if we have a 
-    			// rigid body collection)
-    			float[] c = colour;
-    			if ( b.isSleeping && params.drawSleeping.getValue() ) {
-    				c = colourSleeping;
-    			} else if (b.pinned) {
-    				c = colourPinned;    				
-    			} else if ( b.col != null ) {
-    				c = b.col;
-    			}
-				if( b instanceof RigidCollection && ! params.drawCollections.getValue() ) {
+				if( b instanceof RigidCollection) {
 					for (RigidBody b2 : ((RigidCollection)b).bodies) {
-						c = ( b2.col != null ) ? b2.col : colour;
-						c[3] = params.transparency.getFloatValue();         			
-						gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
-						b2.display(drawable);
+		        		drawBody(drawable, b2);
 					}
 				} else {
-					c[3] = params.transparency.getFloatValue();         			
-	    			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
-	                b.display( drawable );
+	        		drawBody(drawable, b);
 				}
 			}
         }
@@ -254,6 +238,29 @@ public class Display {
 				displayIndex(b, bodies.indexOf(b), drawable, GLUT.BITMAP_8_BY_13);
 			}
 		}
+	}
+	
+	private void drawBody(GLAutoDrawable drawable, RigidBody b) {
+		GL2 gl = drawable.getGL().getGL2();
+		
+		boolean sleeping = (b.isInCollection())? b.parent.isSleeping: b.isSleeping;
+		boolean pinned = (b.isInCollection() && params.drawCollections.getValue() && !params.drawSleeping.getValue())? b.parent.pinned : b.pinned;
+		float[] bodyCol = (b.isInCollection() && params.drawCollections.getValue())? b.parent.col: b.col;
+		
+		// let's control the colour of geometry here as it will let us 
+		// decide when we want to override this colour (e.g., if we have a 
+		// rigid body collection)
+		float[] c = colour;
+		if (pinned) {
+			c = colourPinned;    				
+		} else if ( sleeping && params.drawSleeping.getValue() ) {
+			c = colourSleeping;
+		} else if ( bodyCol != null ) {
+			c = bodyCol;
+		}
+		c[3] = params.transparency.getFloatValue();         			
+		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
+        b.display( drawable );
 	}
 
 	private void displayVisitBoundaryCollection(RigidCollection b, GLAutoDrawable drawable) {

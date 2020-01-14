@@ -694,17 +694,6 @@ public class RigidCollection extends RigidBody {
 	}
 
 	/**
-	 * Displays the Body Collection in different color.
-	 * @param drawable
-	 */
-	@Override
-	public void display(GLAutoDrawable drawable) {
-		for (RigidBody b : bodies) {
-			b.display(drawable);
-		}
-	}
-
-	/**
 	 * displays the Body Collection as lines between the center of masses of each
 	 * rigid body to the other. Uses a string arrayList to check if a connection has
 	 * already been drawn.

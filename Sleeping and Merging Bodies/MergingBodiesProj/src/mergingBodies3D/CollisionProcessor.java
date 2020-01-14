@@ -112,7 +112,6 @@ public class CollisionProcessor {
 			solver.warmStart = true;
 			solver.contacts = contacts;
 
-//			updateCollectionJacobians(false);
 			// if we did a single cycle update, then some of our contacts will have had their
 			// jacobians computed for acting on bodies rather than collections... so update 
 			// those again so that we can compute the solution for the full system.
@@ -123,11 +122,8 @@ public class CollisionProcessor {
 			solver.solve( dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
-			// Paul: don't think this is needed anymore.
-			// eulalie: dirty?
-	//		updateCollectionJacobians(true);
-			
-			updateContactsMap();  // why is this called in two places :(
+		} else {
+			collisionSolveTime = 0.;
 		}
 	}
 	
@@ -226,8 +222,10 @@ public class CollisionProcessor {
 	 */
 	public void updateInCollections(double dt, MergeParameters mergeParams) {
 
-		if (!mergeParams.updateContactsInCollections.getValue())
+		if (!mergeParams.updateContactsInCollections.getValue()) {
+			collectionUpdateTime = 0.;
 			return;
+		}
 		
 		long now = System.nanoTime();
 		
@@ -240,22 +238,17 @@ public class CollisionProcessor {
 		solver.contacts = altContactList;
 		solver.contacts.clear();
 
-//		boolean hasCollection = updateCollectionJacobians(true);
-//		if (!hasCollection) return; 
-		if ( !hasCollections() ) return;
+		if ( !hasCollections() ) {
+			collectionUpdateTime = 0.;
+			return;
+		}
 		
 		if (mergeParams.organizeContacts.getValue()) {		
 			getOrganizedContacts(solver.contacts);
 		} else {	
-			
-			// DON'T copy.. instead we'll redo the warm start
-			
-			// Copy the external contacts 
 			// This resolution is done with the Jacobians of the bodies (not the collection) 
 			// so not a good warm start for the LCP solve (we don't want to keep these values).
-//			for ( Contact contact : contacts )
-//				solver.contacts.add(new Contact(contact));
-
+			// we will redo the warm start after
 			solver.contacts.addAll(contacts);
 			
 			for (RigidBody body : bodies) {
@@ -325,47 +318,6 @@ public class CollisionProcessor {
 			}
 		}
 	}
-		
-	
-//	/**
-//	 * Update the Jacobians of the collections' external contacts
-//	 * @param computeInCollection
-//	 * @return true if there is a collection in the system...
-//	 */
-//	protected boolean updateCollectionJacobians(boolean computeInCollection) {
-//		boolean hasCollection = false;
-//		
-//		for (RigidBody body : bodies) {
-//			if (body instanceof RigidCollection) {
-//				hasCollection = true;
-//			}
-//		}
-//		if ( ! hasCollection ) return hasCollection;
-//		
-//		
-//		
-//		// now which jacobians need updating?  
-//		
-////		// this is weird...
-////		// loop over bodies, but then if it is a colleciton loop over the BPCs?
-////		// I think all jacobians need an update, don't they?
-////		
-////		for (RigidBody body : bodies) {
-////			if (body instanceof RigidCollection) {
-////				hasCollection = true;
-////				for (BodyPairContact bpc : body.bodyPairContacts) {
-////					// swapping this around... 
-////					// if we are in a collection, then we DO need to update the jacobian?
-////					// or we *always? need to update?
-////					//if (!bpc.inCollection) {
-////						for (Contact contact: bpc.contactList)
-////							contact.computeJacobian(computeInCollection);
-////					//}
-////				}
-////			}
-////		}
-//		return hasCollection;
-//	}
 	
 	/**
 	 * Reordering of the contacts list for the one iteration PGS as follows:
@@ -423,14 +375,9 @@ public class CollisionProcessor {
 			if (bpc.inCollection) {
 				contacts.addAll(bpc.contactList);
 			} else {
-				// Copy the external contacts 
-				// This resolution (single iteration PGS) is done with the Jacobians of the bodies (not the collection) 
+				// This resolution is done with the Jacobians of the bodies (not the collection) 
 				// so not a good warm start for the LCP solve (we don't want to keep these values).
-//				for (Contact contact : bpc.contactList)
-//					contacts.add(new Contact(contact));
-				
-				// DON"T copy these contacts... we'll redo the warm start before the full solve.
-
+				// we will redo the warm start after
 				contacts.addAll( bpc.contactList );				
 			}
 		}
@@ -949,37 +896,9 @@ public class CollisionProcessor {
 
 		vfp.add( restitutionOverride.getControls() );
         vfp.add( restitution.getSliderControls(false) );
-        // If we change the restitution from the GUI, it will override the parameter for all bodies
-        
-        // PGK: let's try modulate instead?  Not sure what the rigth interface sould be... 
-        // alternatively could have an "override friction" and "override restitution" boolean variables?
-        
-//        restitution.addParameterListener( new ParameterListener<Double>() {
-//			@Override
-//			public void parameterChanged(Parameter<Double> parameter) {
-//				for (RigidBody body: bodies) {
-//					body.restitution = parameter.getValue();
-//					if (body instanceof RigidCollection)
-//						for (RigidBody b: ((RigidCollection)body).bodies)
-//							b.restitution = parameter.getValue();
-//				}
-//			}
-//		});
         
         vfp.add( frictionOverride.getControls() );
         vfp.add( friction.getSliderControls(false) );
-        // If we change the friction from the GUI, it will override the parameter for all bodies
-//        friction.addParameterListener( new ParameterListener<Double>() {
-//			@Override
-//			public void parameterChanged(Parameter<Double> parameter) {
-//				for (RigidBody body: bodies) {
-//					body.friction = parameter.getValue();
-//					if (body instanceof RigidCollection)
-//						for (RigidBody b: ((RigidCollection)body).bodies)
-//							b.friction = parameter.getValue();
-//				}
-//			}
-//		});
         
 		vfp.add( feedbackStiffness.getSliderControls(false) );
 		vfp.add( enableCompliance.getControls() );
