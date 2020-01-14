@@ -49,9 +49,14 @@ public class Sleeping {
 			if (body.isSleeping)
 				continue;
 			
+			if (body.pinned) {
+				body.isSleeping = true;
+				continue;
+			}
+			
 			boolean externalContact = false;
 			for (BodyPairContact bpc : body.bodyPairContacts) {
-				if (!bpc.inCollection) {
+				if (!bpc.inCollection && !(bpc.body1.pinned || bpc.body2.pinned)) {
 					externalContact = true;
 					break;
 				}
@@ -101,7 +106,7 @@ public class Sleeping {
 				continue;
 			
 			for (BodyPairContact bpc : body.bodyPairContacts) {
-				if (!bpc.inCollection) {
+				if (!bpc.inCollection && !(bpc.body1.pinned || bpc.body2.pinned)) {
 					bpc.body1.wake();
 					bpc.body2.wake();
 				}
