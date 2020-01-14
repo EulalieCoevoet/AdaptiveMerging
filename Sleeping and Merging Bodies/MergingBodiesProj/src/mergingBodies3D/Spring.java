@@ -165,21 +165,30 @@ public class Spring {
 			
 		body1.transformB2W.transform( pb1, pb1W );
 		body2.transformB2W.transform( pb2, pb2W );
-		displacement.sub( pb1W, pb2W ); 
 
+		displacement.sub( pb2W, pb1W ); 
 		// Silly fix... the force should go gracefully to zero without giving NaNs :(
 		if ( displacement.length() < 1e-3 ) return;  // hmm... should just give it some rest length?
 		
+		body1.getSpatialVelocity( pb1W, velocity );
+		
 		double scale = 
-				- (k*ks * (displacement.length()  - l0)) 
+				- (k*ks * (displacement.length()  - l0) - d*ds * (velocity.dot(displacement) / displacement.length())) 
 				/ displacement.length();
-
-		force.scale( scale, displacement );
+		
+		force.scale( -scale, displacement );
 		body1.applyForceW( pb1W, force );
 		if ( body1.isInCollection() ) {
 			body1.parent.applyForceW( pb1W, force );
 		}
+
+		displacement.sub( pb1W, pb2W ); 		
+		body2.getSpatialVelocity( pb2W, velocity );
 		
+		scale = 
+				- (k*ks * (displacement.length()  - l0) - d*ds * (velocity.dot(displacement) / displacement.length())) 
+				/ displacement.length();
+
 		force.scale( -scale, displacement );
 		body2.applyForceW( pb2W, force );
 		if ( body2.isInCollection() ) {
