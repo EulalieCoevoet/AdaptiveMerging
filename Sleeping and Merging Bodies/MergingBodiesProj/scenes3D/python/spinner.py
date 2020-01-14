@@ -21,7 +21,7 @@ spinnery="7"
 spinnersize="8"
 
 spinner = Platform(root, spinner=True, dim="15 1 15", height="3", position="0. 5. 0.", omega="0 0.5 0.", friction="0.1")
-spinner.addStand(width="20", height="30", k="12", d="10", pinned="true", weirdCoeff="-5")
+spinner.addStand(width="20", height="30", k="12", d="10", pinned="false", weirdCoeff="-5")
 
 Sphere(root, name='ball1', position="3.75 "+spinnery+" 3.75", radius="2", color="0.5 0. 0. 1.")
 Sphere(root, name='ball2', position="-3.75 "+spinnery+" -3.75", radius="2", color="0. 0.5 0. 1.")
