@@ -3,8 +3,10 @@ import xml.dom.minidom as md
 
 from modules.box import Box
 from modules.sphere import Sphere
-from modules.composite import CompositeBody
+from modules.composite import Composite
 from modules.exportXML import export
+
+import random
 
 root = ET.Element('root')
 
@@ -32,13 +34,14 @@ for i in range(216):
     if (i%36==0):
         x=x0; y=y0; z+=dimz + dist;
     orientation = "0 -1 0 0.03" if (i%2) else "0 -1 0 0";
+    #color = str(random.uniform(0, 1)) + " " + str(random.uniform(0, 1)) + " " + str(random.uniform(0, 1)) + " 1."
     Box(root, name='box'+str(i), position=str(x)+" "+str(y)+" "+str(z), dim=str(dimx)+" "+str(dimy)+" "+str(dimz))
 
-Sphere(root, name='ball', position="1.8 2.7 0", radius="1.")
+Sphere(root, name='ball', position="1.8 2.7 0", radius="1.", color="0.8 0.8 0. 1.")
 Box(root, name='box'+str(i), position="-30 -2 0", orientation="0 0 1 0", dim="10 5 20", pinned="true")
 
 # chariot
-composite = CompositeBody(root, obj="data/chariot.obj", scale="0.1", name="chariot", position="0. 1.7 0.", velocity="0. 0. 0.")
+composite = Composite(root, obj="data/chariot.obj", scale="0.1", name="chariot", position="0. 1.7 0.", velocity="0. 0. 0.", color="1. 0. 0. 1.")
 composite.addSphere(name='wheel1', position=" 3.15 -1.7  1.9", radius='1')
 composite.addSphere(name='wheel2', position=" 3.15 -1.7 -1.9", radius='1')
 composite.addSphere(name='wheel3', position="-3.15 -1.7  1.9", radius='1')

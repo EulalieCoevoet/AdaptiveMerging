@@ -1,21 +1,21 @@
 import xml.etree.ElementTree as ET
 from box import Box
 from sphere import Sphere
-from composite import CompositeBody
+from composite import Composite
 
 class Stand():
 
-    def __init__(self, root, body2, dimBody2, ybody2, k="100", d="10", width="5", length="20", orientation="0. -1 0. 0.", scale="1", restitution=None, friction=None, thickness="1"):
+    def __init__(self, root, body2, dimBody2, ybody2, k="100", d="10", width="5", height="20", orientation="0. -1 0. 0.", scale="1", restitution=None, friction=None, thickness="1"):
 
-        composite = CompositeBody(root, obj=None, name="stand", position="0 0 0", orientation=orientation, scale=scale, restitution=restitution, friction=friction)
-        composite.addBox(dim=str(float(width)*2.+float(thickness))+" "+thickness+" "+thickness, position="0 "+length+" "+width)
-        composite.addBox(dim=str(float(width)*2.+float(thickness))+" "+thickness+" "+thickness, position="0 "+length+" -"+width)
-        composite.addBox(dim=thickness+" "+thickness+" "+str(float(width)*2.+float(thickness)), position=width+" "+length+" 0")
-        composite.addBox(dim=thickness+" "+thickness+" "+str(float(width)*2.+float(thickness)), position=" -"+width+" "+length+" 0")
-        composite.addBox(dim=thickness+" "+length+" "+thickness, position=width+" "+str(float(length)/2.)+" "+width)
-        composite.addBox(dim=thickness+" "+length+" "+thickness, position="-"+width+" "+str(float(length)/2.)+" "+width)
-        composite.addBox(dim=thickness+" "+length+" "+thickness, position=width+" "+str(float(length)/2.)+" -"+width)
-        composite.addBox(dim=thickness+" "+length+" "+thickness, position="-"+width+" "+str(float(length)/2.)+" -"+width)
+        composite = Composite(root, obj=None, name="stand", position="0 0 0", orientation=orientation, scale=scale, restitution=restitution, friction=friction)
+        composite.addBox(dim=str(float(width)*2.+float(thickness))+" "+thickness+" "+thickness, position="0 "+height+" "+width)
+        composite.addBox(dim=str(float(width)*2.+float(thickness))+" "+thickness+" "+thickness, position="0 "+height+" -"+width)
+        composite.addBox(dim=thickness+" "+thickness+" "+str(float(width)*2.+float(thickness)), position=width+" "+height+" 0")
+        composite.addBox(dim=thickness+" "+thickness+" "+str(float(width)*2.+float(thickness)), position=" -"+width+" "+height+" 0")
+        composite.addBox(dim=thickness+" "+height+" "+thickness, position=width+" "+str(float(height)/2.)+" "+width)
+        composite.addBox(dim=thickness+" "+height+" "+thickness, position="-"+width+" "+str(float(height)/2.)+" "+width)
+        composite.addBox(dim=thickness+" "+height+" "+thickness, position=width+" "+str(float(height)/2.)+" -"+width)
+        composite.addBox(dim=thickness+" "+height+" "+thickness, position="-"+width+" "+str(float(height)/2.)+" -"+width)
         stand = composite.get()
 
         dim = dimBody2.split()
@@ -26,7 +26,7 @@ class Stand():
               "-"+x+" "+y+" "+z,
               "-"+x+" "+y+" -"+z,
               x+" "+y+" -"+z,]
-        y = str(float(length)-float(ybody2)+float(thickness)*2)
+        y = str(float(height)-float(ybody2)+float(thickness)*2)
         pB = [    str(float(width))+" "+y+" " +str(float(width)),
               "-"+str(float(width))+" "+y+" " +str(float(width)),
               "-"+str(float(width))+" "+y+" -" +str(float(width)),
