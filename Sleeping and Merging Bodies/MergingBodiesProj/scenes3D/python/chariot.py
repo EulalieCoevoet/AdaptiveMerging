@@ -3,6 +3,7 @@ import xml.dom.minidom as md
 
 from modules.box import Box
 from modules.sphere import Sphere
+from modules.mesh import Mesh
 from modules.composite import Composite
 from modules.exportXML import export
 
@@ -52,7 +53,7 @@ composite.addBox(name='panierb3', position="0.2 0.75 1.9", dim='7.2 1.5 0.2')
 composite.addBox(name='panierb4', position="-3.5 0.75 0.", dim='0.2 1.5 4')
 
 # BookCase
-composite = Composite(root, obj=None, name="bookCase", position="-40. 0. 0.")
+composite = Composite(root, obj=None, name="bookCase", position="-40. 0. 0.", color="0.6 0.6 0.5 1.")
 composite.addBox(name='wallL', position="-5 10 0", dim='0.2 20 4')
 composite.addBox(name='wallR', position="5 10 0", dim='0.2 20 4')
 
@@ -69,8 +70,9 @@ for i in range(8):
             orientation = "0 0 -1 0.3" if (i%2==0) else "0 0 1 0.3";
             orientation = "0 0 -1 0" if (i%3==0) else orientation;
             color = str(random.uniform(0, 0.5)) + " " + str(random.uniform(0, 0.5)) + " " + str(random.uniform(0, 0.5)) + " 1."
-            Box(root, name='book'+str(j), position=str(x)+" "+str(yb)+" "+str(z), dim="0.4 2 1.5", color=color, orientation=orientation, friction="0.3")
+            Box(root, name='book'+str(j), position=str(x)+" "+str(yb)+" "+str(z), dim="0.4 2 1.5", color=color, orientation=orientation, friction="0.3", density="1")
 
-
+Box(root, name='bookAlone1', position="-35.75 "+yb+" 1.", dim="0.15 2 1.5", color=color, friction="0.3", density="0.1")
+Box(root, name='bookAlone2', position="-35.9 "+yb+" 1.", dim="0.1 2 1.5", color=color, friction="0.3", density="0.1")
 
 export(root, "../chariot.xml")
