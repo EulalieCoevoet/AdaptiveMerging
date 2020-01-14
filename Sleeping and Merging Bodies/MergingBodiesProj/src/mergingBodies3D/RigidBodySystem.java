@@ -356,6 +356,7 @@ public class RigidBodySystem {
         vfp.setBorder( new TitledBorder("Rigid Body System Controls" ));
         
         vfp.add( collision.getControls() );
+		vfp.add( Contact.slidingThreshold.getSliderControls(true) ); // Gross?
         
         vfp.add( useGravity.getControls() );
         vfp.add( gravityAmount.getSliderControls(false) );

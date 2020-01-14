@@ -387,26 +387,27 @@ public class Contact {
 	 */
 	protected void updateContactState(double mu, double dt, boolean computeInCollection) {
 			
-//		RigidBody b = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
-//		
-//		// tmp1 = v + dt*minv*force + deltaV.v
-//		tmp1.set(b.v);
-//		tmp1.scaleAdd( dt*b.minv, b.force, tmp1 );
-//		tmp1.add( b.deltaV.v );
-//		// tmp2 = w + dt*jinv*torque + deltaV.w
-//		b.jinv.transform( b.torque, tmp2 );
-//		tmp2.scale( dt );
-//		tmp2.add( b.omega );
-//		tmp2.add( b.deltaV.w );
-//		
-//		double w1 = jt1a.v.x*tmp1.x + jt1a.v.y*tmp1.y + jt1a.v.z*tmp1.z + jt1a.w.x*tmp2.x + jt1a.w.y*tmp2.y + jt1a.w.z*tmp2.z;
-//		double w2 = jt2a.v.x*tmp1.x + jt2a.v.y*tmp1.y + jt2a.v.z*tmp1.z + jt2a.w.x*tmp2.x + jt2a.w.y*tmp2.y + jt2a.w.z*tmp2.z;
-//		System.out.println(w1);
+		RigidBody b = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
+		if (b.pinned)
+			b = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
+		
+		// tmp1 = v + dt*minv*force + deltaV.v
+		tmp1.scaleAdd( dt*b.minv, b.force, b.v );
+		tmp1.add( b.deltaV.v );
+		// tmp2 = w + dt*jinv*torque + deltaV.w
+		b.jinv.transform( b.torque, tmp2 );
+		tmp2.scale( dt );
+		tmp2.add( b.omega );
+		tmp2.add( b.deltaV.w );
+		
+		double w1 = jt1a.v.x*tmp1.x + jt1a.v.y*tmp1.y + jt1a.v.z*tmp1.z + jt1a.w.x*tmp2.x + jt1a.w.y*tmp2.y + jt1a.w.z*tmp2.z;
+		double w2 = jt2a.v.x*tmp1.x + jt2a.v.y*tmp1.y + jt2a.v.z*tmp1.z + jt2a.w.x*tmp2.x + jt2a.w.y*tmp2.y + jt2a.w.z*tmp2.z;
 		
 		if (Math.abs(lambda0) <= 1e-14) // (math.abs is for magnet)
 			state = ContactState.BROKEN;	
-		//else if ( Math.abs(w1)>1e-10 || Math.abs(w2)>1e-10 ) 
-		else if ( Math.abs(lambda1) == lambda0*mu || Math.abs(lambda2) == lambda0*mu ) 
+		else if ( Math.abs(w1)>slidingThreshold.getValue() && Math.abs(lambda1)==mu*lambda0) 
+			state = ContactState.ONEDGE;	
+		else if ( Math.abs(w2)>slidingThreshold.getValue() && Math.abs(lambda2)==mu*lambda0) 
 			state = ContactState.ONEDGE;
 		else
 			state = ContactState.CLEAR;
@@ -470,12 +471,6 @@ public class Contact {
 		forceW1.scaleAdd( lambda1, tangent1InW, forceW1 );
 		forceW1.scaleAdd( lambda2, tangent2InW, forceW1 );		
 		forceW1.scale(1./dt);
-        
-		//computeJacobian(true);
-//		forceW1.scale( lambda0, jna.v );
-//		forceW1.scaleAdd( lambda1, jt1a.v, forceW1 );
-//		forceW1.scaleAdd( lambda2, jt2a.v, forceW1 );		
-//		forceW1.scale(1./dt);
 	}
 	
 	/**
@@ -532,6 +527,7 @@ public class Contact {
 	}
     
 	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.0001, 1);
+	static DoubleParameter slidingThreshold = new DoubleParameter("sliding velocity threshold", 0.1, 0.0001, 3);
 
     /**
      * Draws the connections between bodies to visualize the 
