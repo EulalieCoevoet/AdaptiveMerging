@@ -151,6 +151,12 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         if ( selectRequest ) {
         	selectRequest = false;
     		select(drawable, mousePressedPoint );
+    		if ( enableQMG.getValue() ) {
+    			lastSelectedBody = mouseSpring.picked;
+    			if ( lastSelectedBody != null ) {
+    				qmgMetric.setNameAndClear( "BPC metric on " + lastSelectedBody.name );
+    			}
+    		}
         	gl.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT );
         }
         
@@ -170,7 +176,20 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 if ( factory.use ) factory.advanceTime( dt );
                 system.advanceTime( dt );                
             }
+
+            if ( enableQMG.getValue() ) {
+            	if ( lastSelectedBody != null ) {
+            		for ( BodyPairContact bpc : lastSelectedBody.bodyPairContacts ) {
+            			if ( bpc.motionMetricHist.size() > 0 ) {
+            				qmgMetric.add( bpc.motionMetricHist.get( bpc.motionMetricHist.size()-1 ) );
+            			}
+            		}
+            		qmgMetric.step();
+            	}
+            }
         }
+        
+        
 
         if ( ! drawWithShadows.getValue() ) {
             drawAllObjects( drawable, false );
@@ -289,6 +308,9 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         	memMonitor.draw( drawable, 0 );
         	computeTimeMonitor.draw( drawable, 1);
         }
+        if ( drawQMG.getValue() ) {
+        	qmgMetric.draw(drawable, 0);
+        }
         
         if ( run.getValue() || stepped ) {
         	if ( system.display.params.drawGraphs.getValue() ) {
@@ -304,6 +326,12 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         }
     }
+    
+    BooleanParameter enableQMG = new BooleanParameter("enable quantity monitor (otherwise graph is boring)", false );
+    BooleanParameter drawQMG = new BooleanParameter("draw quantity monitor graph", false );
+    /** Last selected body is used for the quantity harvesting */
+    RigidBody lastSelectedBody;
+    private QuantityMonitorGraph qmgMetric = new QuantityMonitorGraph("Metric","units");
     
     private MemoryMonitor memMonitor = new MemoryMonitor( "memory", "step");
     private MemoryMonitor computeTimeMonitor = new MemoryMonitor( "compute time", "step");
@@ -584,6 +612,9 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         });  
         vfp.add( hfp2.getPanel() );
+        
+        vfp.add( enableQMG.getControls() );
+        vfp.add( drawQMG.getControls() );
         
         vfp.add( run.getControls() );
         vfp.add( stepsize.getSliderControls(true) );
