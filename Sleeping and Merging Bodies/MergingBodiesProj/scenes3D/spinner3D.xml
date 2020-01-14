@@ -23,8 +23,9 @@
 	<body type="sphere" name="S1" r="2"> <x> 5 2 5 </x> <col> 0.5 1 1 </col> </body>
 	<body type="sphere" name="S2" r="2"> <x> -5 2 -5 </x> <col> 1 0.5 1 </col> </body>
 
-	<bbody type="box" name="B1" dim="4 4 4"> <x> -5 2  5 </x> <col> 1 1 0.5 </col> <friction> 0.05 </friction> </bbody>
-	<bbody type="box" name="B2" dim="4 4 4"> <x>  5 2 -5 </x> <col> 0.75 1 0.75 </col> <friction> 0.05 </friction> </bbody>
+  
+	<body type="box" name="B1" dim="4 4 4"> <x> -5 2  5 </x> <col> 1 1 0.5 </col> <friction> 0.05 </friction> </body>
+	<body type="box" name="B2" dim="4 4 4"> <x>  5 2 -5 </x> <col> 0.75 1 0.75 </col> <friction> 0.05 </friction> </body>
 
 		
     <body type="plane" name="plane1" p="0 -10 0" n="0 1 0"></body>

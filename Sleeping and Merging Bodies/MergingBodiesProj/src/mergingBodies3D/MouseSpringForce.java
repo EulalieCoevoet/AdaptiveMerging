@@ -128,6 +128,7 @@ public class MouseSpringForce {
      * @param drawable
      */
     public void display(GLAutoDrawable drawable) {
+    	if ( picked == null ) return;
     	GL2 gl = drawable.getGL().getGL2();
     	gl.glDisable( GL2.GL_LIGHTING );
     	gl.glColor4d( 1, 0,0, 0.5 );
