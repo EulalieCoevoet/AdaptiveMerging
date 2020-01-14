@@ -1,1738 +1,226 @@
 <?xml version="1.0" ?>
 <root>
-	<body n="0. 1. 0.0" name="plane" p="0 -1 0" type="plane">
-		<friction>0.01</friction>
+	<body n="0. 1. 0.0" name="plane" p="0 0 0" type="plane">
+		<friction>0.8</friction>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box0" scale="1" type="box">
-		<x>-2 2.5 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box0" scale="1" type="box">
+		<x>-1.0 3 -0.89</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box1" scale="1" type="box">
-		<x>-2 3.01 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box1" scale="1" type="box">
+		<x>-1.0 4.01 -0.89</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box2" scale="1" type="box">
-		<x>-2 3.52 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box2" scale="1" type="box">
+		<x>-1.0 5.02 -0.89</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box3" scale="1" type="box">
-		<x>-2 4.03 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box3" scale="1" type="box">
+		<x>0.01 3 -0.89</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box4" scale="1" type="box">
-		<x>-2 4.54 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box4" scale="1" type="box">
+		<x>0.01 4.01 -0.89</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box5" scale="1" type="box">
-		<x>-2 5.05 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box5" scale="1" type="box">
+		<x>0.01 5.02 -0.89</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box6" scale="1" type="box">
-		<x>-1.49 2.5 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box6" scale="1" type="box">
+		<x>1.02 3 -0.89</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box7" scale="1" type="box">
-		<x>-1.49 3.01 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box7" scale="1" type="box">
+		<x>1.02 4.01 -0.89</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box8" scale="1" type="box">
-		<x>-1.49 3.52 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box8" scale="1" type="box">
+		<x>1.02 5.02 -0.89</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box9" scale="1" type="box">
-		<x>-1.49 4.03 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box9" scale="1" type="box">
+		<x>-1.0 3 0.12</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box10" scale="1" type="box">
-		<x>-1.49 4.54 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box10" scale="1" type="box">
+		<x>-1.0 4.01 0.12</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box11" scale="1" type="box">
-		<x>-1.49 5.05 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box11" scale="1" type="box">
+		<x>-1.0 5.02 0.12</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box12" scale="1" type="box">
-		<x>-0.98 2.5 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box12" scale="1" type="box">
+		<x>0.01 3 0.12</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box13" scale="1" type="box">
-		<x>-0.98 3.01 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box13" scale="1" type="box">
+		<x>0.01 4.01 0.12</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box14" scale="1" type="box">
-		<x>-0.98 3.52 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box14" scale="1" type="box">
+		<x>0.01 5.02 0.12</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box15" scale="1" type="box">
-		<x>-0.98 4.03 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box15" scale="1" type="box">
+		<x>1.02 3 0.12</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box16" scale="1" type="box">
-		<x>-0.98 4.54 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box16" scale="1" type="box">
+		<x>1.02 4.01 0.12</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box17" scale="1" type="box">
-		<x>-0.98 5.05 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box17" scale="1" type="box">
+		<x>1.02 5.02 0.12</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box18" scale="1" type="box">
-		<x>-0.47 2.5 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box18" scale="1" type="box">
+		<x>-1.0 3 1.13</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box19" scale="1" type="box">
-		<x>-0.47 3.01 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box19" scale="1" type="box">
+		<x>-1.0 4.01 1.13</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box20" scale="1" type="box">
-		<x>-0.47 3.52 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box20" scale="1" type="box">
+		<x>-1.0 5.02 1.13</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box21" scale="1" type="box">
-		<x>-0.47 4.03 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box21" scale="1" type="box">
+		<x>0.01 3 1.13</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box22" scale="1" type="box">
-		<x>-0.47 4.54 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box22" scale="1" type="box">
+		<x>0.01 4.01 1.13</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box23" scale="1" type="box">
-		<x>-0.47 5.05 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box23" scale="1" type="box">
+		<x>0.01 5.02 1.13</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box24" scale="1" type="box">
-		<x>0.04 2.5 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box24" scale="1" type="box">
+		<x>1.02 3 1.13</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box25" scale="1" type="box">
-		<x>0.04 3.01 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box25" scale="1" type="box">
+		<x>1.02 4.01 1.13</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box26" scale="1" type="box">
-		<x>0.04 3.52 -1.39</x>
+	<body density="2.5" dim="1 1 1" name="box26" scale="1" type="box">
+		<x>1.02 5.02 1.13</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body dim="0.5 0.5 0.5" name="box27" scale="1" type="box">
-		<x>0.04 4.03 -1.39</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box28" scale="1" type="box">
-		<x>0.04 4.54 -1.39</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box29" scale="1" type="box">
-		<x>0.04 5.05 -1.39</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box30" scale="1" type="box">
-		<x>0.55 2.5 -1.39</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box31" scale="1" type="box">
-		<x>0.55 3.01 -1.39</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box32" scale="1" type="box">
-		<x>0.55 3.52 -1.39</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box33" scale="1" type="box">
-		<x>0.55 4.03 -1.39</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box34" scale="1" type="box">
-		<x>0.55 4.54 -1.39</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box35" scale="1" type="box">
-		<x>0.55 5.05 -1.39</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box36" scale="1" type="box">
-		<x>-2 2.5 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box37" scale="1" type="box">
-		<x>-2 3.01 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box38" scale="1" type="box">
-		<x>-2 3.52 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box39" scale="1" type="box">
-		<x>-2 4.03 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box40" scale="1" type="box">
-		<x>-2 4.54 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box41" scale="1" type="box">
-		<x>-2 5.05 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box42" scale="1" type="box">
-		<x>-1.49 2.5 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box43" scale="1" type="box">
-		<x>-1.49 3.01 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box44" scale="1" type="box">
-		<x>-1.49 3.52 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box45" scale="1" type="box">
-		<x>-1.49 4.03 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box46" scale="1" type="box">
-		<x>-1.49 4.54 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box47" scale="1" type="box">
-		<x>-1.49 5.05 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box48" scale="1" type="box">
-		<x>-0.98 2.5 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box49" scale="1" type="box">
-		<x>-0.98 3.01 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box50" scale="1" type="box">
-		<x>-0.98 3.52 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box51" scale="1" type="box">
-		<x>-0.98 4.03 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box52" scale="1" type="box">
-		<x>-0.98 4.54 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box53" scale="1" type="box">
-		<x>-0.98 5.05 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box54" scale="1" type="box">
-		<x>-0.47 2.5 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box55" scale="1" type="box">
-		<x>-0.47 3.01 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box56" scale="1" type="box">
-		<x>-0.47 3.52 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box57" scale="1" type="box">
-		<x>-0.47 4.03 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box58" scale="1" type="box">
-		<x>-0.47 4.54 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box59" scale="1" type="box">
-		<x>-0.47 5.05 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box60" scale="1" type="box">
-		<x>0.04 2.5 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box61" scale="1" type="box">
-		<x>0.04 3.01 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box62" scale="1" type="box">
-		<x>0.04 3.52 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box63" scale="1" type="box">
-		<x>0.04 4.03 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box64" scale="1" type="box">
-		<x>0.04 4.54 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box65" scale="1" type="box">
-		<x>0.04 5.05 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box66" scale="1" type="box">
-		<x>0.55 2.5 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box67" scale="1" type="box">
-		<x>0.55 3.01 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box68" scale="1" type="box">
-		<x>0.55 3.52 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box69" scale="1" type="box">
-		<x>0.55 4.03 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box70" scale="1" type="box">
-		<x>0.55 4.54 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box71" scale="1" type="box">
-		<x>0.55 5.05 -0.88</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box72" scale="1" type="box">
-		<x>-2 2.5 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box73" scale="1" type="box">
-		<x>-2 3.01 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box74" scale="1" type="box">
-		<x>-2 3.52 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box75" scale="1" type="box">
-		<x>-2 4.03 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box76" scale="1" type="box">
-		<x>-2 4.54 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box77" scale="1" type="box">
-		<x>-2 5.05 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box78" scale="1" type="box">
-		<x>-1.49 2.5 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box79" scale="1" type="box">
-		<x>-1.49 3.01 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box80" scale="1" type="box">
-		<x>-1.49 3.52 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box81" scale="1" type="box">
-		<x>-1.49 4.03 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box82" scale="1" type="box">
-		<x>-1.49 4.54 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box83" scale="1" type="box">
-		<x>-1.49 5.05 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box84" scale="1" type="box">
-		<x>-0.98 2.5 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box85" scale="1" type="box">
-		<x>-0.98 3.01 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box86" scale="1" type="box">
-		<x>-0.98 3.52 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box87" scale="1" type="box">
-		<x>-0.98 4.03 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box88" scale="1" type="box">
-		<x>-0.98 4.54 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box89" scale="1" type="box">
-		<x>-0.98 5.05 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box90" scale="1" type="box">
-		<x>-0.47 2.5 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box91" scale="1" type="box">
-		<x>-0.47 3.01 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box92" scale="1" type="box">
-		<x>-0.47 3.52 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box93" scale="1" type="box">
-		<x>-0.47 4.03 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box94" scale="1" type="box">
-		<x>-0.47 4.54 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box95" scale="1" type="box">
-		<x>-0.47 5.05 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box96" scale="1" type="box">
-		<x>0.04 2.5 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box97" scale="1" type="box">
-		<x>0.04 3.01 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box98" scale="1" type="box">
-		<x>0.04 3.52 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box99" scale="1" type="box">
-		<x>0.04 4.03 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box100" scale="1" type="box">
-		<x>0.04 4.54 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box101" scale="1" type="box">
-		<x>0.04 5.05 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box102" scale="1" type="box">
-		<x>0.55 2.5 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box103" scale="1" type="box">
-		<x>0.55 3.01 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box104" scale="1" type="box">
-		<x>0.55 3.52 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box105" scale="1" type="box">
-		<x>0.55 4.03 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box106" scale="1" type="box">
-		<x>0.55 4.54 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box107" scale="1" type="box">
-		<x>0.55 5.05 -0.37</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box108" scale="1" type="box">
-		<x>-2 2.5 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box109" scale="1" type="box">
-		<x>-2 3.01 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box110" scale="1" type="box">
-		<x>-2 3.52 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box111" scale="1" type="box">
-		<x>-2 4.03 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box112" scale="1" type="box">
-		<x>-2 4.54 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box113" scale="1" type="box">
-		<x>-2 5.05 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box114" scale="1" type="box">
-		<x>-1.49 2.5 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box115" scale="1" type="box">
-		<x>-1.49 3.01 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box116" scale="1" type="box">
-		<x>-1.49 3.52 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box117" scale="1" type="box">
-		<x>-1.49 4.03 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box118" scale="1" type="box">
-		<x>-1.49 4.54 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box119" scale="1" type="box">
-		<x>-1.49 5.05 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box120" scale="1" type="box">
-		<x>-0.98 2.5 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box121" scale="1" type="box">
-		<x>-0.98 3.01 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box122" scale="1" type="box">
-		<x>-0.98 3.52 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box123" scale="1" type="box">
-		<x>-0.98 4.03 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box124" scale="1" type="box">
-		<x>-0.98 4.54 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box125" scale="1" type="box">
-		<x>-0.98 5.05 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box126" scale="1" type="box">
-		<x>-0.47 2.5 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box127" scale="1" type="box">
-		<x>-0.47 3.01 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box128" scale="1" type="box">
-		<x>-0.47 3.52 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box129" scale="1" type="box">
-		<x>-0.47 4.03 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box130" scale="1" type="box">
-		<x>-0.47 4.54 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box131" scale="1" type="box">
-		<x>-0.47 5.05 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box132" scale="1" type="box">
-		<x>0.04 2.5 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box133" scale="1" type="box">
-		<x>0.04 3.01 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box134" scale="1" type="box">
-		<x>0.04 3.52 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box135" scale="1" type="box">
-		<x>0.04 4.03 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box136" scale="1" type="box">
-		<x>0.04 4.54 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box137" scale="1" type="box">
-		<x>0.04 5.05 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box138" scale="1" type="box">
-		<x>0.55 2.5 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box139" scale="1" type="box">
-		<x>0.55 3.01 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box140" scale="1" type="box">
-		<x>0.55 3.52 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box141" scale="1" type="box">
-		<x>0.55 4.03 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box142" scale="1" type="box">
-		<x>0.55 4.54 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box143" scale="1" type="box">
-		<x>0.55 5.05 0.14</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box144" scale="1" type="box">
-		<x>-2 2.5 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box145" scale="1" type="box">
-		<x>-2 3.01 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box146" scale="1" type="box">
-		<x>-2 3.52 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box147" scale="1" type="box">
-		<x>-2 4.03 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box148" scale="1" type="box">
-		<x>-2 4.54 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box149" scale="1" type="box">
-		<x>-2 5.05 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box150" scale="1" type="box">
-		<x>-1.49 2.5 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box151" scale="1" type="box">
-		<x>-1.49 3.01 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box152" scale="1" type="box">
-		<x>-1.49 3.52 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box153" scale="1" type="box">
-		<x>-1.49 4.03 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box154" scale="1" type="box">
-		<x>-1.49 4.54 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box155" scale="1" type="box">
-		<x>-1.49 5.05 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box156" scale="1" type="box">
-		<x>-0.98 2.5 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box157" scale="1" type="box">
-		<x>-0.98 3.01 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box158" scale="1" type="box">
-		<x>-0.98 3.52 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box159" scale="1" type="box">
-		<x>-0.98 4.03 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box160" scale="1" type="box">
-		<x>-0.98 4.54 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box161" scale="1" type="box">
-		<x>-0.98 5.05 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box162" scale="1" type="box">
-		<x>-0.47 2.5 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box163" scale="1" type="box">
-		<x>-0.47 3.01 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box164" scale="1" type="box">
-		<x>-0.47 3.52 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box165" scale="1" type="box">
-		<x>-0.47 4.03 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box166" scale="1" type="box">
-		<x>-0.47 4.54 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box167" scale="1" type="box">
-		<x>-0.47 5.05 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box168" scale="1" type="box">
-		<x>0.04 2.5 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box169" scale="1" type="box">
-		<x>0.04 3.01 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box170" scale="1" type="box">
-		<x>0.04 3.52 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box171" scale="1" type="box">
-		<x>0.04 4.03 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box172" scale="1" type="box">
-		<x>0.04 4.54 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box173" scale="1" type="box">
-		<x>0.04 5.05 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box174" scale="1" type="box">
-		<x>0.55 2.5 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box175" scale="1" type="box">
-		<x>0.55 3.01 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box176" scale="1" type="box">
-		<x>0.55 3.52 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box177" scale="1" type="box">
-		<x>0.55 4.03 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box178" scale="1" type="box">
-		<x>0.55 4.54 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box179" scale="1" type="box">
-		<x>0.55 5.05 0.65</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box180" scale="1" type="box">
-		<x>-2 2.5 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box181" scale="1" type="box">
-		<x>-2 3.01 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box182" scale="1" type="box">
-		<x>-2 3.52 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box183" scale="1" type="box">
-		<x>-2 4.03 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box184" scale="1" type="box">
-		<x>-2 4.54 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box185" scale="1" type="box">
-		<x>-2 5.05 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box186" scale="1" type="box">
-		<x>-1.49 2.5 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box187" scale="1" type="box">
-		<x>-1.49 3.01 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box188" scale="1" type="box">
-		<x>-1.49 3.52 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box189" scale="1" type="box">
-		<x>-1.49 4.03 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box190" scale="1" type="box">
-		<x>-1.49 4.54 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box191" scale="1" type="box">
-		<x>-1.49 5.05 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box192" scale="1" type="box">
-		<x>-0.98 2.5 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box193" scale="1" type="box">
-		<x>-0.98 3.01 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box194" scale="1" type="box">
-		<x>-0.98 3.52 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box195" scale="1" type="box">
-		<x>-0.98 4.03 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box196" scale="1" type="box">
-		<x>-0.98 4.54 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box197" scale="1" type="box">
-		<x>-0.98 5.05 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box198" scale="1" type="box">
-		<x>-0.47 2.5 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box199" scale="1" type="box">
-		<x>-0.47 3.01 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box200" scale="1" type="box">
-		<x>-0.47 3.52 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box201" scale="1" type="box">
-		<x>-0.47 4.03 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box202" scale="1" type="box">
-		<x>-0.47 4.54 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box203" scale="1" type="box">
-		<x>-0.47 5.05 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box204" scale="1" type="box">
-		<x>0.04 2.5 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box205" scale="1" type="box">
-		<x>0.04 3.01 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box206" scale="1" type="box">
-		<x>0.04 3.52 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box207" scale="1" type="box">
-		<x>0.04 4.03 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box208" scale="1" type="box">
-		<x>0.04 4.54 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box209" scale="1" type="box">
-		<x>0.04 5.05 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box210" scale="1" type="box">
-		<x>0.55 2.5 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box211" scale="1" type="box">
-		<x>0.55 3.01 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box212" scale="1" type="box">
-		<x>0.55 3.52 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box213" scale="1" type="box">
-		<x>0.55 4.03 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box214" scale="1" type="box">
-		<x>0.55 4.54 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body dim="0.5 0.5 0.5" name="box215" scale="1" type="box">
-		<x>0.55 5.05 1.16</x>
-		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body name="ball" r="1." scale="1" type="sphere">
-		<x>1.8 2.7 0</x>
+	<body density="1" name="ball" r="1." scale="1" type="sphere">
+		<x>2.5 3.7 0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
@@ -1740,23 +228,16 @@
 		<magnetic>false</magnetic>
 		<col>0.8 0.8 0. 1.</col>
 	</body>
-	<body dim="10 5 20" name="box215" scale="1" type="box">
-		<x>-30 -2 0</x>
-		<R>0 0 1 0</R>
-		<v>0. 0. 0.</v>
-		<omega>0. 0. 0.</omega>
-		<pinned>true</pinned>
-		<magnetic>false</magnetic>
-	</body>
-	<body name="chariot" obj="data/chariot.obj" scale="0.1" type="composite">
-		<x>0. 1.7 0.</x>
+	<body density="1" name="chariot" obj="data/chariot.obj" scale="0.1" type="composite">
+		<x>0. 2.7 0.</x>
 		<R>0. -1 0. 0.</R>
-		<v>0. 0. 0.</v>
+		<v>-4 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
+		<friction>0.01</friction>
 		<col>1. 0. 0. 1.</col>
-		<body name="wheel1" r="1" scale="1" type="sphere">
+		<body density="1" name="wheel1" r="1" scale="1" type="sphere">
 			<x> 3.15 -1.7  1.9</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1764,7 +245,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body name="wheel2" r="1" scale="1" type="sphere">
+		<body density="1" name="wheel2" r="1" scale="1" type="sphere">
 			<x> 3.15 -1.7 -1.9</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1772,7 +253,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body name="wheel3" r="1" scale="1" type="sphere">
+		<body density="1" name="wheel3" r="1" scale="1" type="sphere">
 			<x>-3.15 -1.7  1.9</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1780,7 +261,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body name="wheel4" r="1" scale="1" type="sphere">
+		<body density="1" name="wheel4" r="1" scale="1" type="sphere">
 			<x>-3.15 -1.7 -1.9</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1788,7 +269,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body dim="7.2 0.2 4" name="panier" scale="1" type="box">
+		<body density="1" dim="7.2 0.2 4" name="panier" scale="1" type="box">
 			<x>0.2 0.1 0.</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1796,7 +277,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body dim="7.2 1.5 0.2" name="panierb1" scale="1" type="box">
+		<body density="1" dim="7.2 1.5 0.2" name="panierb1" scale="1" type="box">
 			<x>0.2 0.75 -1.9</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1804,7 +285,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body dim="0.2 1.5 4" name="panierb2" scale="1" type="box">
+		<body density="1" dim="0.2 1.5 4" name="panierb2" scale="1" type="box">
 			<x>3.7 0.75 0.</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1812,7 +293,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body dim="7.2 1.5 0.2" name="panierb3" scale="1" type="box">
+		<body density="1" dim="7.2 1.5 0.2" name="panierb3" scale="1" type="box">
 			<x>0.2 0.75 1.9</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1820,7 +301,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body dim="0.2 1.5 4" name="panierb4" scale="1" type="box">
+		<body density="1" dim="0.2 1.5 4" name="panierb4" scale="1" type="box">
 			<x>-3.5 0.75 0.</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1828,5 +309,933 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
+	</body>
+	<body density="1" name="bookCase" scale="1" type="composite">
+		<x>-40. 0. 0.</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<body density="1" dim="0.2 20 4" name="wallL" scale="1" type="box">
+			<x>-5 10 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="0.2 20 4" name="wallR" scale="1" type="box">
+			<x>5 10 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="10.2 0.2 4" name="floor0" scale="1" type="box">
+			<x> 0. 2.5 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="10.2 0.2 4" name="floor1" scale="1" type="box">
+			<x> 0. 5.0 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="10.2 0.2 4" name="floor2" scale="1" type="box">
+			<x> 0. 7.5 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="10.2 0.2 4" name="floor3" scale="1" type="box">
+			<x> 0. 10.0 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="10.2 0.2 4" name="floor4" scale="1" type="box">
+			<x> 0. 12.5 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="10.2 0.2 4" name="floor5" scale="1" type="box">
+			<x> 0. 15.0 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="10.2 0.2 4" name="floor6" scale="1" type="box">
+			<x> 0. 17.5 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="10.2 0.2 4" name="floor7" scale="1" type="box">
+			<x> 0. 20.0 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
+		<x>-44.4 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.137864474501 0.203969674075 0.170808437036 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
+		<x>-43.98 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.194673115389 0.153977550383 0.190808099466 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
+		<x>-43.56 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.314448901649 0.467776248506 0.0827610199825 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
+		<x>-43.14 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.140706846235 0.0741843473521 0.383886137012 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
+		<x>-42.72 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.483457345344 0.22127015137 0.384002518644 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
+		<x>-42.3 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0816818696825 0.0184056277323 0.140858597411 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
+		<x>-41.88 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.153529933048 0.189992106643 0.101390353802 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
+		<x>-41.46 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.279467859691 0.0243542903901 0.364588782653 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
+		<x>-41.04 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.149994432258 0.168038225956 0.143251713761 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
+		<x>-40.62 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.49602219163 0.487630263164 0.402859075249 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
+		<x>-40.2 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.237737396247 0.0927956627339 0.316851749303 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
+		<x>-39.78 3.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.382923141697 0.195072470774 0.0139132480056 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
+		<x>-40.2 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.08233748143 0.280658803144 0.0177484057932 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
+		<x>-39.78 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.253809582885 0.405044037809 0.232724076112 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
+		<x>-39.36 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.289013799688 0.305445239118 0.26235502631 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
+		<x>-38.94 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.467880253619 0.00790005160964 0.158112912178 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
+		<x>-38.52 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.40339967175 0.263685821173 0.200574000153 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
+		<x>-38.1 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.461204569224 0.468375966266 0.416968614371 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
+		<x>-37.68 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.192819211956 0.306080639246 0.291057650515 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
+		<x>-37.26 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.292677522505 0.463273657248 0.0855388194299 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
+		<x>-36.84 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0145299722975 0.319242692228 0.17771764751 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
+		<x>-36.42 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.332065059054 0.460904239125 0.323690877518 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
+		<x>-36.0 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.00621261345489 0.126985072024 0.104832020575 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
+		<x>-35.58 6.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.418475277239 0.335349962967 0.169274817003 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
+		<x>-44.4 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.034515720938 0.407066661244 0.239693714624 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
+		<x>-43.98 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.133337668609 0.289011717316 0.00115167500316 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
+		<x>-43.56 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.438551349818 0.470557687415 0.282510490099 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
+		<x>-43.14 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.212734153822 0.0977778332831 0.164892220892 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
+		<x>-42.72 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0221112391066 0.099933006098 0.414919375529 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
+		<x>-42.3 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.318374975247 0.296715859168 0.136096925286 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
+		<x>-41.88 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.00550354748387 0.329267061777 0.494493762944 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
+		<x>-41.46 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.223204082516 0.179415042745 0.385456291032 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
+		<x>-41.04 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.174541524689 0.0453495309601 0.106231704251 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
+		<x>-40.62 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.159973150361 0.425434284915 0.455143729843 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
+		<x>-40.2 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.203765107006 0.175296195276 0.366102747874 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
+		<x>-39.78 8.61 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.205238610225 0.336970081082 0.165451765415 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
+		<x>-40.2 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.452310270251 0.438436411023 0.000771825488229 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
+		<x>-39.78 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.473626962527 0.0414366773956 0.42484287337 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
+		<x>-39.36 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.167341338247 0.125859713346 0.21673332571 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
+		<x>-38.94 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.402939312047 0.254490062035 0.366483431663 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
+		<x>-38.52 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0600709030505 0.499026049714 0.15831074812 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
+		<x>-38.1 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.00497780586404 0.220095834947 0.277365279665 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
+		<x>-37.68 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.475168478165 0.48628480098 0.484529428322 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
+		<x>-37.26 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0165431953517 0.460776040003 0.0714329500728 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
+		<x>-36.84 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.134678645601 0.0797397738418 0.347320875197 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
+		<x>-36.42 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.195137964364 0.101771980909 0.246698355168 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
+		<x>-36.0 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.419745419587 0.190307323366 0.42768187024 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
+		<x>-35.58 11.11 1.13</x>
+		<R>0 0 -1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.398452878184 0.301274655935 0.117355552963 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
+		<x>-44.4 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.401567464236 0.236213534054 0.290866153484 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
+		<x>-43.98 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.217436411375 0.417020874942 0.474486474482 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
+		<x>-43.56 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.264919490779 0.0116196438463 0.313331403707 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
+		<x>-43.14 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.250290517976 0.491486375063 0.255990639999 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
+		<x>-42.72 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.148608973662 0.224082620106 0.285060756754 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
+		<x>-42.3 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.246291661082 0.399624335647 0.272961052632 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
+		<x>-41.88 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.119018276548 0.375097810261 0.0717507379977 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
+		<x>-41.46 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.400876631719 0.394821415999 0.40978047575 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
+		<x>-41.04 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.378563302739 0.264256497747 0.422686488481 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
+		<x>-40.62 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.2783722084 0.207012917723 0.317668581568 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
+		<x>-40.2 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.232225039153 0.218063598313 0.483515660157 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
+		<x>-39.78 13.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.232812571231 0.0736088553122 0.404210608277 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
+		<x>-40.2 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0657602229529 0.137547617102 0.119645409646 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
+		<x>-39.78 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.120786185521 0.197953490138 0.0832921765485 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
+		<x>-39.36 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0793245974878 0.287950212395 0.150798501646 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
+		<x>-38.94 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.153534998591 0.163160086463 0.0441037460331 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
+		<x>-38.52 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.136587527186 0.0442792988856 0.297846128256 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
+		<x>-38.1 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.364401865513 0.269782532834 0.12396464594 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
+		<x>-37.68 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.28973892255 0.0907681007173 0.112825914007 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
+		<x>-37.26 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0530331537145 0.276933423354 0.125364798246 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
+		<x>-36.84 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.259116014366 0.462664291754 0.329103728015 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
+		<x>-36.42 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.228089219912 0.00147498080319 0.275535838035 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
+		<x>-36.0 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.383602221367 0.147734793175 0.412574763691 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
+		<x>-35.58 16.11 1.13</x>
+		<R>0 0 -1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.491483305547 0.209684567477 0.16694647301 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
+		<x>-44.4 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.00268586799704 0.34354111698 0.428935251122 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
+		<x>-43.98 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.221072237248 0.00176259005929 0.200507004965 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
+		<x>-43.56 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.207888060612 0.33092166223 0.449613299956 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
+		<x>-43.14 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.325352577964 0.472266648585 0.0899883658286 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
+		<x>-42.72 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.386314369449 0.440788010924 0.44565148796 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
+		<x>-42.3 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.333571444838 0.124156783058 0.352317371999 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
+		<x>-41.88 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.346908364619 0.208826207151 0.0817265105107 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
+		<x>-41.46 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0299858733334 0.0475252310498 0.452401669963 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
+		<x>-41.04 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.491437097659 0.434943828689 0.260256969345 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
+		<x>-40.62 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.36719105439 0.476905946046 0.0392272453033 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
+		<x>-40.2 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.362060941618 0.142955680451 0.258555769254 1.</col>
+	</body>
+	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
+		<x>-39.78 18.61 1.13</x>
+		<R>0 0 1 0.3</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.3</friction>
+		<col>0.0427563485565 0.169806860267 0.30700765311 1.</col>
 	</body>
 </root>

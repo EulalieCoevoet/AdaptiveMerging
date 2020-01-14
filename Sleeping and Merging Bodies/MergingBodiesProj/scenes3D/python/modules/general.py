@@ -1,11 +1,12 @@
 import xml.etree.ElementTree as ET
 
-def body(root, type, name, position="0 0 0", orientation="0. -1 0. 0.", velocity="0. 0. 0.", omega="0. 0. 0.", dim="2 2 2", obj=None, radius="1", scale="1", pinned="false", magnetic="false", restitution=None, friction=None, color=None):
+def body(root, type, name, position="0 0 0", orientation="0. -1 0. 0.", velocity="0. 0. 0.", omega="0. 0. 0.", dim="2 2 2", obj=None, radius="1", scale="1", pinned="false", magnetic="false", density="1", restitution=None, friction=None, color=None):
     # Fixed body
     body = ET.SubElement(root, 'body')
     body.set('type', type)
     body.set('name', name)
     body.set('scale', scale)
+    body.set('density', density)
 
     if(type == "box"):
         body.set('dim', dim)
@@ -16,26 +17,26 @@ def body(root, type, name, position="0 0 0", orientation="0. -1 0. 0.", velocity
     elif ((type == "mesh")):
         body.set('obj', obj)
 
-    com = ET.SubElement(body, 'x')
-    com.text = position
-    R = ET.SubElement(body, 'R')
-    R.text = orientation
-    vel = ET.SubElement(body, 'v')
-    vel.text = velocity
-    ome = ET.SubElement(body, 'omega')
-    ome.text = omega
-    pin = ET.SubElement(body, 'pinned')
-    pin.text = pinned
-    magn = ET.SubElement(body, 'magnetic')
-    magn.text = magnetic
+    prop = ET.SubElement(body, 'x')
+    prop.text = position
+    prop = ET.SubElement(body, 'R')
+    prop.text = orientation
+    prop = ET.SubElement(body, 'v')
+    prop.text = velocity
+    prop = ET.SubElement(body, 'omega')
+    prop.text = omega
+    prop = ET.SubElement(body, 'pinned')
+    prop.text = pinned
+    prop = ET.SubElement(body, 'magnetic')
+    prop.text = magnetic
     if(restitution!=None):
-        rest = ET.SubElement(body, 'restitution')
-        rest.text = restitution
+        prop = ET.SubElement(body, 'restitution')
+        prop.text = restitution
     if(friction!=None):
-        fric = ET.SubElement(body, 'friction')
-        fric.text = friction
+        prop = ET.SubElement(body, 'friction')
+        prop.text = friction
     if(color!=None):
-        col = ET.SubElement(body, 'col')
-        col.text = color
+        prop = ET.SubElement(body, 'col')
+        prop.text = color
 
     return body
