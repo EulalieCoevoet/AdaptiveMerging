@@ -15,16 +15,16 @@ plane.set('p','0 0 0')
 plane.set('n','0. 1. 0.0')
 plane.set('name','plane')
 
-# Bodies pile
-Box(root, name='box', position="0 10 0", orientation="0 0 1 0", dim="1 1 1", pinned="true")
+# Default Box
+Box(root, name='box', position="0 100 0", orientation="0 0 1 0", dim="1.7 1.7 1.7")
 
-# chariot
-composite = Composite(root, obj="data/funnel.obj", scale="2", name="funnel", position="0. 50. 0.", velocity="0. 0. 0.")
+# Funnel
+composite = Composite(root, obj="data/funnel.obj", scale="2", name="funnel", position="0. 50. 0.", velocity="0. 0. 0.", color="0.5 0. 0. 1.")
 composite.addBox(name='wall1', position="0. 0. -9.", orientation="-1 0 0 0.5", dim='28 22 1')
 composite.addBox(name='wall3', position="0. 0. 9.", orientation="1 0 0 0.5", dim='28 22 1')
 composite.addBox(name='wall2', position="-9. 0. 0.", orientation="0 0 1 0.5", dim='1 22 28')
 composite.addBox(name='wall4', position="9. 0. 0.", orientation="0 0 -1 0.5", dim='1 22 28')
 
-Stand(root, body2="funnel", dimBody2="26 20 26", ybody2="74", width="40", height="100")
+Stand(root, body2="funnel", dimBody2="26 20 26", ybody2="74", width="40", height="100", pinned="true")
 
 export(root, "../funnel.xml")

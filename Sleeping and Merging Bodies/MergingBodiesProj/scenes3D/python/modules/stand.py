@@ -5,9 +5,9 @@ from composite import Composite
 
 class Stand():
 
-    def __init__(self, root, body2, dimBody2, ybody2, k="100", d="10", width="5", height="20", orientation="0. -1 0. 0.", scale="1", restitution=None, friction=None, thickness="1"):
+    def __init__(self, root, body2, dimBody2, ybody2, k="100", d="10", width="5", height="20", orientation="0. -1 0. 0.", scale="1", restitution=None, friction=None, thickness="1", pinned="false"):
 
-        composite = Composite(root, obj=None, name="stand", position="0 0 0", orientation=orientation, scale=scale, restitution=restitution, friction=friction)
+        composite = Composite(root, obj=None, name="stand", position="0 0 0", orientation=orientation, scale=scale, restitution=restitution, friction=friction, pinned=pinned)
         composite.addBox(dim=str(float(width)*2.+float(thickness))+" "+thickness+" "+thickness, position="0 "+height+" "+width)
         composite.addBox(dim=str(float(width)*2.+float(thickness))+" "+thickness+" "+thickness, position="0 "+height+" -"+width)
         composite.addBox(dim=thickness+" "+thickness+" "+str(float(width)*2.+float(thickness)), position=width+" "+height+" 0")

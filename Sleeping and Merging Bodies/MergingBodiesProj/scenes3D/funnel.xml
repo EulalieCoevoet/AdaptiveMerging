@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <root>
 	<body n="0. 1. 0.0" name="plane" p="0 0 0" type="plane"/>
-	<body dim="1 1 1" name="box" scale="1" type="box">
-		<x>0 10 0</x>
+	<body dim="1.7 1.7 1.7" name="box" scale="1" type="box">
+		<x>0 100 0</x>
 		<R>0 0 1 0</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
-		<pinned>true</pinned>
+		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
 	<body name="funnel" obj="data/funnel.obj" scale="2" type="composite">
@@ -16,6 +16,7 @@
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
+		<col>0.5 0. 0. 1.</col>
 		<body dim="28 22 1" name="wall1" scale="1" type="box">
 			<x>0. 0. -9.</x>
 			<R>-1 0 0 0.5</R>
@@ -54,7 +55,7 @@
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
+		<pinned>true</pinned>
 		<magnetic>false</magnetic>
 		<body dim="81.0 1 1" name="box" scale="1" type="box">
 			<x>0 100 40</x>
