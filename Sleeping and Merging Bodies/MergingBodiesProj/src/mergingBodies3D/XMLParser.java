@@ -503,6 +503,13 @@ public class XMLParser {
 					if ( !k.isEmpty() ) s.k = Double.parseDouble( k );
 					String d = e.getAttribute("d");
 					if ( !d.isEmpty() ) s.d = Double.parseDouble( d );
+					String controllable = e.getAttribute("controllable");
+					s.controllable = Boolean.parseBoolean(controllable);
+					if (s.controllable) {
+					
+						s.setTargetpW();
+						
+					}
 				} else {
 					System.err.println("[ParseSpring] Something is wrong with the spring.");
 				}

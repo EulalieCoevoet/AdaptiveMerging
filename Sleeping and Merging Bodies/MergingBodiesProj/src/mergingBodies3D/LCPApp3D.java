@@ -725,6 +725,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         component.addKeyListener( new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+            	
                 if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
                 	if(system.merging.triggerMergingEvent) {
                     	system.merging.triggerMergingEvent = false;
@@ -732,8 +733,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 	} else {
                 		run.setValue( ! run.getValue() ); 
                 	}
-                } else if ( e.getKeyCode() == KeyEvent.VK_S ) {
-                    double dt = stepsize.getValue() / (int)substeps.getValue();
+                } else if ( e.getKeyCode() == KeyEvent.VK_S  && !e.isAltDown()) {
+                	double dt = stepsize.getValue() / (int)substeps.getValue();
                     for ( int i = 0; i < substeps.getValue(); i++ ) {
                         if ( factory.use ) factory.advanceTime( dt );
                         system.advanceTime( dt );                
@@ -822,8 +823,37 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 		if(b.magnetic)
                 			b.activateMagnet = !b.activateMagnet;
                 	}                    	
-                } 
+                } else if (moveControlSpringsTrigger(e)) {
+                	//move all controllable springs forward z
+                	Vector3d direction = new Vector3d();
+                	if (e.getKeyCode() == KeyEvent.VK_W) {
+                		direction.set(0, 0, -1);
+                	}else if (e.getKeyCode() == KeyEvent.VK_S) {
+                		direction.set(0, 0, 1);
+                	}else if (e.getKeyCode() == KeyEvent.VK_A) {
+                		direction.set(-1, 0, 0);
+                	}else if (e.getKeyCode() == KeyEvent.VK_D) {
+                		direction.set(1, 0, 0);
+                	}else if (e.getKeyCode() == KeyEvent.VK_Q) {
+                		direction.set(0, 1, 0);
+                	}else if (e.getKeyCode() == KeyEvent.VK_E) {
+                		direction.set(0, -1, 0);
+                	}
+                	
+                	for( Spring s : system.springs) {
+                		if (s.controllable) {
+                			s.moveTargetpW(direction);
+                		}
+                	}
+                }
             }
+
+			private boolean moveControlSpringsTrigger(KeyEvent e) {
+				if (e.isAltDown()) {
+					return true;
+				}
+				return false;
+			}
         } );
     }
 }

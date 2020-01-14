@@ -217,7 +217,11 @@ public class RigidBodySystem {
 	 */
 	private void applySpringForces() {
 		for (Spring s: springs) {
+			if (s.controllable) {
+				s.moveSpring();
+			}
 			s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
+			
 		}
 	}
     
