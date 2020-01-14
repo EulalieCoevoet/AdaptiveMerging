@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <root>
 	<body n="0. 1. 0.0" name="plane" p="0 0 0" type="plane"/>
-	<body dim="1.7 1.7 1.7" name="box" scale="1" type="box">
+	<body dim="1.8 1.8 1.8" name="box" scale="1" type="box">
 		<x>0 100 0</x>
 		<R>0 0 1 0</R>
 		<v>0. 0. 0.</v>

@@ -16,7 +16,7 @@ plane.set('n','0. 1. 0.0')
 plane.set('name','plane')
 
 # Default Box
-Box(root, name='box', position="0 100 0", orientation="0 0 1 0", dim="1.7 1.7 1.7")
+Box(root, name='box', position="0 100 0", orientation="0 0 1 0", dim="1.8 1.8 1.8")
 
 # Funnel
 composite = Composite(root, obj="data/funnel.obj", scale="2", name="funnel", position="0. 50. 0.", velocity="0. 0. 0.", color="0.5 0. 0. 1.")
