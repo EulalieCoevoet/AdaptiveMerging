@@ -383,25 +383,13 @@ public class Contact {
     
 	/**
 	 * Update state of the contact: either BROKE, SLIDING or CLEAR
+	 * This MUST be called post solve so that the b values are available.
 	 * @param mu
 	 */
 	protected void updateContactState(double mu, double dt, boolean computeInCollection) {
-			
-		RigidBody b = (body1.isInCollection() && !computeInCollection)? body1.parent: body1;
-		if (b.pinned)
-			b = (body2.isInCollection() && !computeInCollection)? body2.parent: body2;
-		
-		// tmp1 = v + dt*minv*force + deltaV.v
-		tmp1.scaleAdd( dt*b.minv, b.force, b.v );
-		tmp1.add( b.deltaV.v );
-		// tmp2 = w + dt*jinv*torque + deltaV.w
-		b.jinv.transform( b.torque, tmp2 );
-		tmp2.scale( dt );
-		tmp2.add( b.omega );
-		tmp2.add( b.deltaV.w );
-		
-		double w1 = jt1a.v.x*tmp1.x + jt1a.v.y*tmp1.y + jt1a.v.z*tmp1.z + jt1a.w.x*tmp2.x + jt1a.w.y*tmp2.y + jt1a.w.z*tmp2.z;
-		double w2 = jt2a.v.x*tmp1.x + jt2a.v.y*tmp1.y + jt2a.v.z*tmp1.z + jt2a.w.x*tmp2.x + jt2a.w.y*tmp2.y + jt2a.w.z*tmp2.z;
+		// store in member variables for viewing...  :/
+		w1 = bt1 + getJdv(computeInCollection, 1);
+		w2 = bt2 + getJdv(computeInCollection, 2);
 		
 		if (Math.abs(lambda0) <= 1e-14) // (math.abs is for magnet)
 			state = ContactState.BROKEN;	
@@ -412,6 +400,9 @@ public class Contact {
 		else
 			state = ContactState.CLEAR;
 	}
+
+	/** For monitoring slip externally... */
+	public double w1,w2;
 	
 	/** Colour for drawing contacts */
     private static final float[] col = new float[] { 1f, 0, 0, 0.25f };

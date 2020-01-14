@@ -155,6 +155,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     			lastSelectedBody = mouseSpring.picked;
     			if ( lastSelectedBody != null ) {
     				qmgMetric.setNameAndClear( "BPC metric on " + lastSelectedBody.name );
+    				qmgContact.setNameAndClear( "contact slip on " + lastSelectedBody.name );    				
     			}
     		}
         	gl.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT );
@@ -183,8 +184,13 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             			if ( bpc.motionMetricHist.size() > 0 ) {
             				qmgMetric.add( bpc.motionMetricHist.get( bpc.motionMetricHist.size()-1 ) );
             			}
+            			for ( Contact c : bpc.contactList ) {
+            				qmgContact.add( Math.abs( c.w1 ) );
+            				qmgContact.add( Math.abs( c.w2 ) );
+            			}
             		}
             		qmgMetric.step();
+            		qmgContact.step();
             	}
             }
         }
@@ -310,6 +316,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         }
         if ( drawQMG.getValue() ) {
         	qmgMetric.draw(drawable, 0);
+        	qmgContact.draw(drawable, 1);
         }
         
         if ( run.getValue() || stepped ) {
@@ -332,6 +339,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     /** Last selected body is used for the quantity harvesting */
     RigidBody lastSelectedBody;
     private QuantityMonitorGraph qmgMetric = new QuantityMonitorGraph("Metric","units");
+    private QuantityMonitorGraph qmgContact = new QuantityMonitorGraph("Metric","units");
     
     private MemoryMonitor memMonitor = new MemoryMonitor( "memory", "step");
     private MemoryMonitor computeTimeMonitor = new MemoryMonitor( "compute time", "step");

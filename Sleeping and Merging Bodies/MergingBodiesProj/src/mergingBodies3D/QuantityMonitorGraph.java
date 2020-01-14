@@ -98,7 +98,7 @@ public class QuantityMonitorGraph {
 
 		gl.glRasterPos2d(0.3,-0.1);
 		EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, xLabel );
-		gl.glRasterPos2d(0.3,1.0);
+		gl.glRasterPos2d(0.3,1.1);
 		EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, title );
 
         gl.glPointSize(2);
