@@ -34,7 +34,7 @@ public class RigidBodySystem {
     
 	public CollisionProcessor collision = new CollisionProcessor(bodies);
 	public Merging merging = new Merging(bodies, collision);
-	public Sleeping sleeping = new Sleeping(bodies);
+	public Sleeping sleeping = new Sleeping(bodies, springs);
 	public Display display = new Display(bodies, springs, collision);
 	
 	public PrintStream stream = null;

@@ -14,7 +14,8 @@ import mintools.swing.VerticalFlowPanel;
 
 public class Sleeping {
 	
-	ArrayList<RigidBody> bodies;
+	protected ArrayList<RigidBody> bodies;
+	protected ArrayList<Spring> springs;
 	
 	public class SleepParameters {
 		public BooleanParameter enableSleeping = new BooleanParameter( "sleeping", true);
@@ -27,8 +28,9 @@ public class Sleeping {
 	
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	
-	public Sleeping(ArrayList<RigidBody> bodies) {
+	public Sleeping(ArrayList<RigidBody> bodies, ArrayList<Spring> springs) {
 		this.bodies = bodies;
+		this.springs = springs;
 	}
 	
 	/**
@@ -110,6 +112,20 @@ public class Sleeping {
 					bpc.body1.wake();
 					bpc.body2.wake();
 				}
+			}
+		}
+		
+		for (Spring spring: springs) {
+			
+			if (spring.body2 == null)
+				continue;
+			
+			boolean sleeping1 = (spring.body1.isInCollection())? spring.body1.parent.isSleeping: spring.body1.isSleeping;
+			boolean sleeping2 = (spring.body2.isInCollection())? spring.body2.parent.isSleeping: spring.body2.isSleeping; 
+			
+			if(sleeping1!=sleeping2) {
+				spring.body1.wake();
+				spring.body2.wake();
 			}
 		}
 	}	

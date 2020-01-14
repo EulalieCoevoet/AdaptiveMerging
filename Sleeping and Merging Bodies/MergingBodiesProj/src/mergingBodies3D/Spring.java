@@ -11,9 +11,9 @@ import com.jogamp.opengl.GLAutoDrawable;
 public class Spring {
 
 	/** The body to which this spring is attached */
-	private RigidBody body1;
+	public RigidBody body1;
 	/** The other body to which this spring is attached */
-	private RigidBody body2;
+	public RigidBody body2;
 	/** The point at which this spring is attached in body1 coordinates */
 	private Point3d pb1 = new Point3d();
 	/** The point at which this spring is attached in body2 coordinates */
