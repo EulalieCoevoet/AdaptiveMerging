@@ -787,7 +787,6 @@ public class BoxBox {
 		for (j=0; j < n; j++) {
 			double k1 =  m22*(ret[j*2]-c1) - m12*(ret[j*2+1]-c2);
 			double k2 = -m21*(ret[j*2]-c1) + m11*(ret[j*2+1]-c2);
-			j=j;/// for a breakpoint
 			for (i=0; i<3; i++) point[cnum*3+i] =
 				//center.get(i) + k1*Rb.v[i*4+a1] + k2*Rb.v[i*4+a2];
 				getComp( center,i ) + k1*Rb.getElement(i,a1) + k2*Rb.getElement(i,a2); 

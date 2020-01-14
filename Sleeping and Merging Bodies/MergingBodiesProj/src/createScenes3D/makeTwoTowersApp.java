@@ -11,9 +11,9 @@ public class makeTwoTowersApp {
 
 	public static void main( String[] args ) {		
 		try {
-			PrintStream ps = new PrintStream("scenes3D/aNewTest.xml");
+			PrintStream ps = new PrintStream("scenes3D/tower30.xml");
 			ps.println("<root>");
-			createPlane( ps, -10 );
+			createPlane( ps, 0 );
 			
 			double eps = 1e-4;
 			
@@ -25,18 +25,18 @@ public class makeTwoTowersApp {
 			double bs = 4;
 			double platformRadius = bs * 2;
 			double dx = bs*5;
-			for ( int i = -1; i <= 1; i++ ) {
-				for ( int j = -1; j <= 1; j++ ) {
+			for ( int i = -0; i <= 0; i++ ) {
+				for ( int j = -0; j <= 0; j++ ) {
 					double offx = rand.nextDouble()*2-1;
 					double offz = rand.nextDouble()*2-1;
 //					Point3d pos = new Point3d( dx*i - offx, rand.nextDouble() * 8, dx*j - offz );
 					Point3d pos = new Point3d( dx*i - offx, 0, dx*j - offz );
-					createPlatform( ps, platformID++, platformRadius, pos, 25, offx, offz, 500, 200, rand.nextDouble()*2*0.017-0.017 );
+					//createPlatform( ps, platformID++, platformRadius, pos, 25, offx, offz, 500, 200, rand.nextDouble()*2*0.017-0.017 );
 					if ( i == 0 && j == 0 ) {
-						Vector3d size = new Vector3d( 2, 2, 4 ); // brick size in towers			
-						createTower( ps, towerID++, platformRadius*0.9 , 3, -eps, size, pos );
+						Vector3d size = new Vector3d( 1, 3, 4 ); // brick size in towers			
+						createTower( ps, towerID++, platformRadius*0.9 , 15, -eps, size, pos );
 						
-						createBallDrop(ps, 200, 0.35, pos);
+						//createBallDrop(ps, 200, 0.35, pos);
 						//createVenus(ps, venusID++, 1, new Point3d( pos.x, pos.y + 8, pos.z ) );
 					} else {
 						Vector3d brickSize = new Vector3d( bs,bs,bs );					
@@ -66,7 +66,10 @@ public class makeTwoTowersApp {
 	
 	public static void createPlane( PrintStream ps, double floory ) {
 		int space = 0;
-		ps.println("<body type=\"plane\" name=\"plane1\" p=\"0 "+(floory-space)+" 0\" n=\"0 1 0\"></body>");
+		ps.println("<body type=\"plane\" name=\"plane1\" p=\"0 "+(floory-space)+" 0\" n=\"0 1 0\">");
+		ps.println("    <friction> 0.3 </friction>" );
+		ps.println("    <restitution> 0.3 </restitution>" );
+		ps.println("</body>");
 	}
 
 	/** 
@@ -161,14 +164,18 @@ public class makeTwoTowersApp {
 				if ( j%2 == 1 ) {
 					radians += Math.PI / N;
 				}
+				
+				//if ( rand.nextInt(30) == 9 ) continue; // skip some blocks
+				
 				double x = Math.cos( radians ) * r + pos.x;
 				double z = Math.sin( radians ) * r + pos.z;
 				String name = "T" + towerID + "B" + i + "L" + j;
 				ps.println("<body type=\"box\" name=\""+name+"\" " + dim + ">" );
 				ps.println("    <x> " + asString(x,y,z) + " </x>" );
 				ps.println("    <R> 0 -1 0 " + radians + "</R>" );
-				int ind = rand.nextInt( col.length );
-				ps.println("    <col> " + col[ind] + "</col>" );
+				ps.println("    <friction> 0.3 </friction>" );
+				ps.println("    <restitution> 0.3 </restitution>" );
+				addRandCol(ps);			
 				ps.println("</body>");
 			}
 			y = y + (float)(sy + gap);

@@ -14,10 +14,11 @@ import mintools.swing.VerticalFlowPanel;
 
 public class Sleeping {
 	
-	ArrayList<RigidBody> bodies;
+	protected ArrayList<RigidBody> bodies;
+	protected ArrayList<Spring> springs;
 	
 	public class SleepParameters {
-		public BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
+		public BooleanParameter enableSleeping = new BooleanParameter( "sleeping", true);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
 		public DoubleParameter threshold = new DoubleParameter("sleeping threshold", 1e-7, 1e-10, 1 );
 		public BooleanParameter wakeAll = new BooleanParameter("wake all", false);
@@ -27,8 +28,9 @@ public class Sleeping {
 	
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	
-	public Sleeping(ArrayList<RigidBody> bodies) {
+	public Sleeping(ArrayList<RigidBody> bodies, ArrayList<Spring> springs) {
 		this.bodies = bodies;
+		this.springs = springs;
 	}
 	
 	/**
@@ -49,9 +51,13 @@ public class Sleeping {
 			if (body.isSleeping)
 				continue;
 			
+			if (body.pinned) {
+				body.isSleeping = true;
+				continue;
+			}
+			
 			boolean externalContact = false;
 			for (BodyPairContact bpc : body.bodyPairContacts) {
-						
 				if (!bpc.inCollection && !(bpc.body1.pinned || bpc.body2.pinned)) {
 					externalContact = true;
 					break;
@@ -101,16 +107,26 @@ public class Sleeping {
 			if (!body.isSleeping) 
 				continue;
 			
-			boolean wake = false;
 			for (BodyPairContact bpc : body.bodyPairContacts) {
-				if (!bpc.body1.isInSameCollection(bpc.body2) && !(bpc.body1.pinned || bpc.body2.pinned)) {
-					wake = true;
-					break;
+				if (!bpc.inCollection && !(bpc.body1.pinned || bpc.body2.pinned)) {
+					bpc.body1.wake();
+					bpc.body2.wake();
 				}
 			}
+		}
+		
+		for (Spring spring: springs) {
 			
-			if(wake)
-				body.wake();
+			if (spring.body2 == null)
+				continue;
+			
+			boolean sleeping1 = (spring.body1.isInCollection())? spring.body1.parent.isSleeping: spring.body1.isSleeping;
+			boolean sleeping2 = (spring.body2.isInCollection())? spring.body2.parent.isSleeping: spring.body2.isSleeping; 
+			
+			if(sleeping1!=sleeping2) {
+				spring.body1.wake();
+				spring.body2.wake();
+			}
 		}
 	}	
 	

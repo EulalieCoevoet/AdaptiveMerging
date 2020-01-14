@@ -1,0 +1,23 @@
+<root>
+    
+    <body type="composite" name="boat">
+		<x>0 50 0</x><spring pB="25  2.5 15" k="1000.0" d="10.0" pW="25 54 15"></spring>
+    	<spring d="10" pB="25 2.5 -15" pW="25 54 -15" k="1000"></spring>
+    	<spring d="10" pB="-25 2.5 -15" pW="-25 54 -15" k="1000"></spring>
+    	<spring d="10" pB="-25 2.5 15" pW="-25 54 15" k="1000"></spring>
+    	<body type="box" name="x" dim="50 5 30"> </body>
+    	<body type="box" name="y" dim="40 5 25">
+    		<x>0 -5 0</x>
+    	</body>
+    	<body type="box" name="z" dim="35 5 23">
+    		<x>0 -10 0</x>
+    	</body>
+    	<body type="box" name="v" dim="32 5 20">
+    		<x>0 -5 0</x>
+    	</body>
+		</body>
+    
+    <body type="plane" name="plane1" p="0 -0 0" n="0 1 0">
+    </body>
+
+</root>

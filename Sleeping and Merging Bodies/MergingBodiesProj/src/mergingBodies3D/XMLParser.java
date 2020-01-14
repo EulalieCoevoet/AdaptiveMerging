@@ -85,14 +85,18 @@ public class XMLParser {
 								break;
 							case "restitution":
 								system.collision.restitution.setValue(Double.parseDouble(values[0]));
-								for (RigidBody body: system.bodies)
-									body.restitution = system.collision.restitution.getValue();
-								break;
+								system.collision.restitutionOverride.setValue( true );
+								System.out.println("Restituion override enabled and set to " + system.collision.restitution.getValue() );
+								//for (RigidBody body: system.bodies)
+								//body.restitution = system.collision.restitution.getValue();
+								//break;
 							case "friction":
 								system.collision.friction.setValue(Double.parseDouble(values[0]));
-								for (RigidBody body: system.bodies)
-									body.friction = system.collision.friction.getValue();
-								break;
+								system.collision.frictionOverride.setValue( true );
+								System.out.println("Friction override enabled and set to" + system.collision.friction.getValue() );
+//								for (RigidBody body: system.bodies)
+//									body.friction = system.collision.friction.getValue();
+//								break;
 							default:
 						}
 					}
@@ -148,6 +152,23 @@ public class XMLParser {
 	private RigidBody createComposite( String name, Element bodyNode ) {
 		RigidBodyGeomComposite compositeGeom = new RigidBodyGeomComposite();
 
+		if(bodyNode.hasAttribute("obj")) {
+			String objfname = bodyNode.getAttribute("obj");
+			compositeGeom.soup = new PolygonSoup( objfname );
+			if(eElement.hasAttribute("scale")) {
+				double scale = Double.parseDouble( eElement.getAttribute("scale") );
+				for ( Vertex v : compositeGeom.soup.vertexList ) {
+					v.p.scale( scale );
+				}
+			}
+		}
+		
+		// This is harder to implement than I would like, so I'm not going to do it right now.  :/
+//		double scale = 1;
+//		if(bodyNode.hasAttribute("scale")) {
+//			scale = Double.parseDouble( bodyNode.getAttribute("scale") );
+//		}
+		
 		// get the bodies, harvest their geometries, and compute the composite
 		//NodeList nodeList = eElement.getChildNodes();
 		NodeList nList = bodyNode.getChildNodes();
@@ -168,12 +189,16 @@ public class XMLParser {
 				if ( type.equalsIgnoreCase("box") ) {
 					sbody = createBox( name2, eElement );
 				} else if ( type.equalsIgnoreCase("plane") ) {
-					sbody = createPlane( name2, eElement );
+					System.err.println("composite should not include plane!");
+					//sbody = createPlane( name2, eElement );
 				} else if ( type.equalsIgnoreCase("sphere") ) {
 					sbody = createSphere( name2, eElement );
+					// the bvsphere is at the root.
 				} else if ( type.equalsIgnoreCase("mesh") ) {
-					sbody = createMesh( name2, eElement );
+					System.err.println("composite should best not include mesh objects!");
+					//sbody = createMesh( name2, eElement );
 				}
+			
 				if ( sbody != null ) {
 					bodies.add( sbody );
 				}			
@@ -190,44 +215,52 @@ public class XMLParser {
 			compositeGeom.bodies.add( b );
 		}
 		com.scale( 1.0/massLinear );
+		
 		for ( RigidBody b : bodies ) {
-			b.x.sub(com);  // ensure it draws relative to the center of mass
-			b.x0.sub(com);
-			b.updateTransformations();
+			// don't move it just yet... 
+			//b.x.sub(com);  // ensure it draws relative to the center of mass
+			//b.x0.sub(com); // won't be used... 
+			//b.updateRotationalInertaionFromTransformation(); // unnecessary (will only update j)
+			
 			massAngular.add( b.massAngular );
 			// should certainly have a b.x squared type term for the mass being at a distance...
-//			I [p]    J  0    I   0 
-//			0  I    0 mI    [p] I
-//			I [p]   J   0
-//			0  I   m[p] 0
-//			J + I [p][p] in the upper left...
-		// recall lemma 2.3: [a] = a a^T - ||a||^2 I
-			double x = b.x.x;
-			double y = b.x.y;
-			double z = b.x.z;			
+			//			I -[p]    J  0    I   0 
+			//			0  I    0 mI    [p] I
+			//
+			//			I -[p]   J   0
+			//			0  I   m[p] 0
+			//
+			//			J - I [p][p] in the upper left...
+			//
+			// recall lemma 2.3: [a] = a a^T - ||a||^2 I
+			double x = b.x.x - com.x;
+			double y = b.x.y - com.y;
+			double z = b.x.z - com.z;			
 			double x2 = x*x;
 			double y2 = y*y;
 			double z2 = z*z;
 			Matrix3d op = new Matrix3d();
-			op.m00 = y2+z2; op.m01 = x*y; op.m02 = x*z;
-			op.m10 = y*x; op.m11 = x2+z2; op.m12 = y*z;
-			op.m20 = z*x; op.m21 = z*y; op.m22 = x2 + y2;
+			op.m00 = y2+z2; op.m01 = -x*y; op.m02 = -x*z;
+			op.m10 = -y*x; op.m11 = x2+z2; op.m12 = -y*z;
+			op.m20 = -z*x; op.m21 = -z*y; op.m22 = x2 + y2;
 			op.mul( b.massLinear );
 			massAngular.add( op );			
 		}
+		
 		
 		// TODO: COMPOSITE BODY: is this bounding box correct?
 	    Vector3d ll = new Vector3d( Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE );
 	    Vector3d ur = new Vector3d( Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE );
 		for ( RigidBody b : bodies ) {
 			for ( Point3d p : b.boundingBoxB ) {
-				p.sub(com);
+				p.sub(com); // move boudning box point to COM frame.
 				ll.x = Math.min( p.x, ll.x );
 				ll.y = Math.min( p.y, ll.y );
-				ll.z = Math.min( p.z,  ll.z );
+				ll.z = Math.min( p.z, ll.z );
 				ur.x = Math.max( p.x, ur.x );
 				ur.y = Math.max( p.y, ur.y );
-				ur.z = Math.max( p.z,  ur.z );
+				ur.z = Math.max( p.z, ur.z );
+				p.add(com);
 			}
 		}
 		
@@ -243,9 +276,48 @@ public class XMLParser {
 		bbB.add( new Point3d( ur.x, ur.y, ur.z ) );
 		
 		RigidBody body = new RigidBody( massLinear, massAngular, false, bbB );
-		setCommonAttributes( body, bodyNode );
-		body.updateTransformations();
+		setCommonAttributes( body, bodyNode ); // this will set our position... 
+		// but bodies definining the composite were defined in a local frame, and that COM position should be added to x
+		body.x.add( com );
+		body.x0.add( com );
+
+		body.updateRotationalInertaionFromTransformation();
 		body.geom = compositeGeom;
+		body.name = name;
+		
+		// bodies 
+		int ID = 0;
+		for ( RigidBody b : bodies ) {
+			b.compositeBodyParent = body;
+			b.x.sub( com );
+			b.transformB2C.set( b.transformB2W );
+			//b.transformB2C.multAinvB( body.transformB2W, b.transformB2W );
+			b.subBodyID = ID++;
+		}
+	
+		
+		if ( compositeGeom.soup != null ) {
+			for ( Vertex v : compositeGeom.soup.vertexList ) {
+				v.p.sub( com );
+			}
+		}
+	
+		
+		/*//spinning capabilities
+		if (bodyNode.hasAttribute("spinner")) {
+			body.canSpin = true;
+			body.spinner = 
+		}
+		*/
+		// TODO: composites, as implemented, don't work in factories because the CD uses the 
+		// parent link of the geometry to identify the true contact.   If the bodies 
+		// making up the composite are to be shared, then this informaiton must be available
+		// in a different way.  For now, the easy solution is to simply not use composites in factories,
+		// but otherwise, one solution would be to pass more information at the CD level so that we can ask 
+		// for collision on one body but likewise request that any contact generated would be with the provided
+		// body (i.e., the composite).  This is easy enough, but would need updating everywhere the 
+		// Contact.set() method is called.
+		body.factoryPart = false; 
 		
 		return body;
 	}
@@ -260,6 +332,12 @@ public class XMLParser {
 		double density = 1;
 		if(eElement.hasAttribute("density"))
 			density = Double.parseDouble(eElement.getAttribute("density"));
+
+		if(eElement.hasAttribute("scale")) {
+			double scale = Double.parseDouble(eElement.getAttribute("scale"));
+			s.scale(scale);
+		}
+		
 		RigidBodyGeomBox geom = new RigidBodyGeomBox( s );	
 
 		double massLinear = s.x*s.y*s.z * density;
@@ -279,7 +357,7 @@ public class XMLParser {
 		bbB.add( new Point3d(  s.x,  s.y,  s.z ) );		
 		RigidBody body = new RigidBody(massLinear, angularMass, false, bbB );
 		setCommonAttributes( body, eElement );
-		body.updateTransformations();
+		body.updateRotationalInertaionFromTransformation();
         body.geom = geom;	        
         body.radius = s.length();
         
@@ -446,20 +524,25 @@ public class XMLParser {
 			if ( tag.equalsIgnoreCase("x") ) {
 				body.x.set( t3d( values ) );
 				body.x0.set( body.x );
-				body.updateTransformations();
+				body.updateRotationalInertaionFromTransformation();
 			} else if ( tag.equalsIgnoreCase("R") ) {
 				AxisAngle4d aa = new AxisAngle4d();
 				aa.set( asDoubles(values) );
 				body.theta.set( aa );
 				body.theta0.set( aa );
-				body.updateTransformations();
+				body.updateRotationalInertaionFromTransformation();
 			} else if ( tag.equalsIgnoreCase("v") ) {
 				body.v.set( t3d( values ) );
 				body.v0.set( body.v );
 			} else if ( tag.equalsIgnoreCase("omega") ) {
 				body.omega.set( t3d( values ) );
 				body.omega0.set( body.omega );
-			} else if ( tag.equalsIgnoreCase("restitution") ) {
+			} else if ( tag.equalsIgnoreCase("spinner") ) {
+				body.spinner.set( t3d( values ) );
+				body.canSpin = true;
+			
+			} 
+			else if ( tag.equalsIgnoreCase("restitution") ) {
 				body.restitution = Double.parseDouble(values[0]);
 			} else if ( tag.equalsIgnoreCase("friction") ) {
 				body.friction = Double.parseDouble(values[0]);

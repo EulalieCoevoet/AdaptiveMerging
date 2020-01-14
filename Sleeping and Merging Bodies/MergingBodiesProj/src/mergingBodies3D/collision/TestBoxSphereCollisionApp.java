@@ -59,8 +59,8 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 		
 		
 		b1.transformB2W.set( R1, p1 );
-		b1.transformW2B.set( R1, p1 );
-		b1.transformW2B.invert();
+		//b1.transformW2B.set( R1, p1 );
+		//b1.transformW2B.invert();
 		
 		contacts.clear();
 		pool.swapPools();
@@ -68,19 +68,25 @@ public class TestBoxSphereCollisionApp implements SceneGraphNode{
 		int cnum = BoxSphere.dBoxSphere( b1, size1, b2, p2, r, contacts, pool );
 		boolean test = BoxSphere.dBoxSphereTest(b1, size1, p2, r );
 				
+		Point3d contactW = new Point3d();
+		Vector3d normalW = new Vector3d();
+		
 		gl.glPointSize(10);
 		gl.glLineWidth(3);
 		gl.glColor3f(1, 0, 0);
 		for ( Contact c : contacts ) {
+			b1.transformB2W.transform( c.contactB1, contactW );
+			b1.transformB2W.transform( c.normalB1, normalW );
+			
 			gl.glBegin(GL.GL_POINTS);
-			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
+			gl.glVertex3d( contactW.x, contactW.y, contactW.z );
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
-			gl.glVertex3d( c.contactW.x, c.contactW.y, c.contactW.z );
-			double x = c.normalW.x;
-			double y = c.normalW.y;
-			double z = c.normalW.z;
-			gl.glVertex3d( x + c.contactW.x, y + c.contactW.y, z + c.contactW.z );
+			gl.glVertex3d( contactW.x, contactW.y, contactW.z );
+			double x = normalW.x;
+			double y = normalW.y;
+			double z = normalW.z;
+			gl.glVertex3d( x + contactW.x, y + contactW.y, z + contactW.z );
 			gl.glEnd();
 		}
 		

@@ -64,8 +64,10 @@ public class MouseSpringForce {
     /**
      * Applies the mouse spring force to the picked rigid body, or nohting if no body selected
      */
-    public void apply() {
+    public void apply( boolean applyAtCOM ) {
         if ( picked == null ) return;
+        
+        picked.wake();
         
         picked.transformB2W.transform( grabPointB, grabPointBW );
         double distance = grabPointBW.distance( pointW );
@@ -80,14 +82,22 @@ public class MouseSpringForce {
         if (picked.isInCollection()) {
         	picked.parent.applyForceW( grabPointBW, force );
         }
-        picked.applyForceW( grabPointBW, force );
+        if ( applyAtCOM ) {
+        	picked.applyForceW( picked.x, force );
+        } else {
+        	picked.applyForceW( grabPointBW, force );
+        }
         
         // spring damping forces
         picked.getSpatialVelocity( grabPointBW, grabPointV );
         force.scale( - grabPointV.dot( direction ) * c, direction );
         
         if (picked.isInCollection()) picked.parent.applyForceW( grabPointBW, force );
-        picked.applyForceW( grabPointBW, force );        
+        if ( applyAtCOM ) {
+        	picked.applyForceW( picked.x, force );    
+        } else {
+        	picked.applyForceW( grabPointBW, force );    
+        }
     }
     
     /**
@@ -98,7 +108,7 @@ public class MouseSpringForce {
     /**
      * Viscous damping coefficient for the mouse spring
      */
-    public DoubleParameter damping = new DoubleParameter("mouse spring damping", 0, 0, 100 );
+    public DoubleParameter damping = new DoubleParameter("mouse spring damping", 30, 0, 100 );
     
     /**
      * @return controls for the collision processor
@@ -118,6 +128,7 @@ public class MouseSpringForce {
      * @param drawable
      */
     public void display(GLAutoDrawable drawable) {
+    	if ( picked == null ) return;
     	GL2 gl = drawable.getGL().getGL2();
     	gl.glDisable( GL2.GL_LIGHTING );
     	gl.glColor4d( 1, 0,0, 0.5 );

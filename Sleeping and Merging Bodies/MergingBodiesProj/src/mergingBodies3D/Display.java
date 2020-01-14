@@ -29,6 +29,7 @@ public class Display {
 		private DoubleParameter transparency = new DoubleParameter("body block transparency", 1., 0, 1 );
 		private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
 		private BooleanParameter drawCollections = new BooleanParameter( "draw collections with different colors", true );
+		private BooleanParameter drawSleeping = new BooleanParameter( "draw sleeping bodies with different color", true );
 		
 		private BooleanParameter drawBoundingVolumes = new BooleanParameter( "draw root bounding volumes", false );
 		private BooleanParameter drawBoundingVolumesUsed = new BooleanParameter( "draw bounding volumes used", false );
@@ -48,6 +49,9 @@ public class Display {
 		private BooleanParameter drawSpeedCOMs = new BooleanParameter( "draw speed COM", false );
 		private BooleanParameter drawBB = new BooleanParameter( "draw bounding box (for merge test, not collision)", false );
 		public BooleanParameter drawIndex = new BooleanParameter( "draw Index", false );
+		
+		public DoubleParameter springTransparency = new DoubleParameter("Spring transparency", 0.5, 0, 1 );
+        public DoubleParameter springLineWidth = new DoubleParameter("Spring line width", 1, 0, 5 );
 	}
 	public DisplayParameters params = new DisplayParameters();
 	
@@ -63,8 +67,9 @@ public class Display {
 	
     /** Might want to allow for different coloured blocks?? but for now, in 3D this is easiest */
     private float[] green = new float[] { 0, 1, 0, 0.25f };
-    private float[] colourPinned = new float[] { 0.75f,0.75f,1, 1 };		        			
-	private float[] colour = new float[] { 0.9f,0.9f,0.9f, 1 };        			
+    private float[] colourPinned = new float[] { 0.75f,0.75f,1, 1 };	
+    private float[] colourSleeping = new float[] { 1, 1, 1, 1 };		        			
+	private float[] colour = new float[] { 0.4f,0.4f,0.4f, 1 };        			
     private float[] red = new float[] { 1, 0, 0, 0.5f };
     private float[] blue = new float[] { 0, 0, 1, 0.25f };
     
@@ -178,33 +183,22 @@ public class Display {
         
         if ( params.drawBodies.getValue() ) {
         	for ( RigidBody b : bodies ) {
-    			// let's control the colour of geometry here as it will let us 
-    			// decide when we want to override this colour (e.g., if we have a 
-    			// rigid body collection)
-    			float[] c = colour;
-    			if ( b.pinned ) {
-    				c = colourPinned;
-    			} else if ( b.col != null ) {
-    				c = b.col;
-    			}
-				if( b instanceof RigidCollection && ! params.drawCollections.getValue() ) {
+				if( b instanceof RigidCollection) {
 					for (RigidBody b2 : ((RigidCollection)b).bodies) {
-						c = ( b2.col != null ) ? b2.col : colour;
-						c[3] = params.transparency.getFloatValue();         			
-						gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
-						b2.display(drawable);
+		        		drawBody(drawable, b2);
 					}
 				} else {
-					c[3] = params.transparency.getFloatValue();         			
-	    			gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
-	                b.display( drawable );
+	        		drawBody(drawable, b);
 				}
 			}
         }
         
+        
+        red[3] = params.springTransparency.getFloatValue();
         gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
         gl.glNormal3f(0,0,1);
-		for (Spring s : springs) {
+		gl.glLineWidth( params.springLineWidth.getFloatValue());
+        for (Spring s : springs) {
 			s.displaySpring(drawable);
 		}  
     		
@@ -244,6 +238,29 @@ public class Display {
 				displayIndex(b, bodies.indexOf(b), drawable, GLUT.BITMAP_8_BY_13);
 			}
 		}
+	}
+	
+	private void drawBody(GLAutoDrawable drawable, RigidBody b) {
+		GL2 gl = drawable.getGL().getGL2();
+		
+		boolean sleeping = (b.isInCollection())? b.parent.isSleeping: b.isSleeping;
+		boolean pinned = (b.isInCollection() && params.drawCollections.getValue() && !params.drawSleeping.getValue())? b.parent.pinned : b.pinned;
+		float[] bodyCol = (b.isInCollection() && params.drawCollections.getValue())? b.parent.col: b.col;
+		
+		// let's control the colour of geometry here as it will let us 
+		// decide when we want to override this colour (e.g., if we have a 
+		// rigid body collection)
+		float[] c = colour;
+		if (pinned) {
+			c = colourPinned;    				
+		} else if ( sleeping && params.drawSleeping.getValue() ) {
+			c = colourSleeping;
+		} else if ( bodyCol != null ) {
+			c = bodyCol;
+		}
+		c[3] = params.transparency.getFloatValue();         			
+		gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, c, 0 );
+        b.display( drawable );
 	}
 
 	private void displayVisitBoundaryCollection(RigidCollection b, GLAutoDrawable drawable) {
@@ -295,10 +312,14 @@ public class Display {
         VerticalFlowPanel vfpb = new VerticalFlowPanel();
 		vfpb.add( params.transparency.getSliderControls(false));
 		vfpb.add( params.drawBodies.getControls() );
+		vfpb.add( RigidBodyGeomComposite.disableDisplaySoup.getControls() );
 		vfpb.add( params.drawCollections.getControls() );
+		vfpb.add( params.drawSleeping.getControls() );
 		vfpb.add( params.drawCOMs.getControls() );
 		vfpb.add( params.drawSpeedCOMs.getControls() );
 		vfpb.add( params.drawIndex.getControls() );
+		vfpb.add( params.springLineWidth.getSliderControls(false));
+		vfpb.add( params.springTransparency.getSliderControls(false));
 		vfpb.setBorder( new TitledBorder( "Rigid Body Visualization") );
         ((TitledBorder) vfpb.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
 		vfp.add( vfpb.getPanel() );

@@ -1,0 +1,26 @@
+
+
+
+<root>
+
+    <bbody type="box" name="platform" dim="20 1 1">
+        <x> 0 10 0 </x>
+        <sxpring pB="10 0.5 10"/>
+        <sxpring pB="10 0.5 -10"/>
+        <sxpring pB="-10 0.5 10"/>
+        <sxpring pB="-10 0.5 -10"/>
+        <pinned> true</pinned>
+    </bbody>
+
+
+    <body type="box" name="box1" dim="5 1 10">
+        <x> 0 5 5 </x>
+        <R> 0 1 0 0.1 </R>
+        <omega> 6 0 0 </omega>
+        <v> 0 0 0 </v>
+    </body>
+
+
+    <body type="plane" name="plane1" p="0 -10 0" n="0 1 0" />
+
+</root>

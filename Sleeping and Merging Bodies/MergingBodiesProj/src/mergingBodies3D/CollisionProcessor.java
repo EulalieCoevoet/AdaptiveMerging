@@ -1,6 +1,7 @@
 package mergingBodies3D;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,8 +19,6 @@ import mergingBodies3D.collision.BoxSphere;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
-import mintools.parameters.Parameter;
-import mintools.parameters.ParameterListener;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -50,7 +49,7 @@ public class CollisionProcessor {
 	ArrayList<Contact> altContactList = new ArrayList<Contact>(); 
 
 
-    private ContactPool contactPool = new ContactPool();
+    public ContactPool contactPool = new ContactPool();
     
 	/** PGS solver */
     private PGS solver = new PGS();
@@ -113,16 +112,18 @@ public class CollisionProcessor {
 			solver.warmStart = true;
 			solver.contacts = contacts;
 
-			updateCollectionJacobians(false);
+			// if we did a single cycle update, then some of our contacts will have had their
+			// jacobians computed for acting on bodies rather than collections... so update 
+			// those again so that we can compute the solution for the full system.
+			updateJacobiansThatNeedUpdating( solver.contacts, false );
+
 			
 			long now = System.nanoTime();
-			solver.solve(dt);
+			solver.solve( dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
 			collisionSolveTime = (System.nanoTime() - now) * 1e-9;
 			
-			// eulalie: dirty?
-			updateCollectionJacobians(true);
-			
-			updateContactsMap();
+		} else {
+			collisionSolveTime = 0.;
 		}
 	}
 	
@@ -221,8 +222,10 @@ public class CollisionProcessor {
 	 */
 	public void updateInCollections(double dt, MergeParameters mergeParams) {
 
-		if (!mergeParams.updateContactsInCollections.getValue())
+		if (!mergeParams.updateContactsInCollections.getValue()) {
+			collectionUpdateTime = 0.;
 			return;
+		}
 		
 		long now = System.nanoTime();
 		
@@ -235,18 +238,18 @@ public class CollisionProcessor {
 		solver.contacts = altContactList;
 		solver.contacts.clear();
 
-		boolean hasCollection = updateCollectionJacobians(true);
-		if (!hasCollection) return; 
+		if ( !hasCollections() ) {
+			collectionUpdateTime = 0.;
+			return;
+		}
 		
 		if (mergeParams.organizeContacts.getValue()) {		
 			getOrganizedContacts(solver.contacts);
 		} else {	
-			// Copy the external contacts 
 			// This resolution is done with the Jacobians of the bodies (not the collection) 
 			// so not a good warm start for the LCP solve (we don't want to keep these values).
-			for ( Contact contact : contacts )
-				solver.contacts.add(new Contact(contact));
-			//solver.contacts.addAll(contacts);
+			// we will redo the warm start after
+			solver.contacts.addAll(contacts);
 			
 			for (RigidBody body : bodies) {
 				if (body instanceof RigidCollection && !body.isSleeping) {
@@ -259,7 +262,15 @@ public class CollisionProcessor {
 	    		knuthShuffle(solver.contacts);
 		}
 		
-		solver.solve(dt);
+		// We may need to update select jacobians 
+		// - contacts that are internal (i.e., their frames moved)
+		// - contacts that are external but touch a collection (i.e., we need the jacobian to the 
+		//   rather than the collection, and while this would be a partial update of the jacobian if
+		//   there is only a collection on one side, it is easier just to ask again that the whole
+		//   jacobian be computed
+		updateJacobiansThatNeedUpdating( solver.contacts, true );
+		
+		solver.solve(dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
 		
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.isSleeping) {
@@ -278,24 +289,34 @@ public class CollisionProcessor {
 	}
 	
 	/**
-	 * Update the Jacobians of the collections' external contacts
-	 * @param computeInCollection
-	 * @return true if there is a collection in the system...
+	 * Check to see if we have collections, as we can save some work if we dont
+	 * @return
 	 */
-	protected boolean updateCollectionJacobians(boolean computeInCollection) {
-		boolean hasCollection = false;
+	protected boolean hasCollections() {
+		boolean hasCollection = false;		
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection) {
 				hasCollection = true;
-				for (BodyPairContact bpc : body.bodyPairContacts) {
-					if (!bpc.inCollection) {
-						for (Contact contact: bpc.contactList)
-							contact.computeJacobian(computeInCollection);
-					}
-				}
 			}
 		}
 		return hasCollection;
+	}
+	
+	/** 
+	 * Given a list of contacts, recompute jacobians, and use the computeInCollection flag to determine if
+	 * the jacobians should be computed based on subbody or parent
+	 * @param list
+	 * @param computeInCollection
+	 * @return
+	 */
+	protected void updateJacobiansThatNeedUpdating( Collection<Contact> list, boolean computeInCollection) {
+		for ( Contact c : list ) {
+			// if either body parent is non null then one side or both is a collection
+			// and possibly these bodies are even within the same collection.
+			if ( c.body1.parent != null || c.body2.parent != null ) {
+				c.computeJacobian(computeInCollection);
+			}
+		}
 	}
 	
 	/**
@@ -354,11 +375,10 @@ public class CollisionProcessor {
 			if (bpc.inCollection) {
 				contacts.addAll(bpc.contactList);
 			} else {
-				// Copy the external contacts 
-				// This resolution (single iteration PGS) is done with the Jacobians of the bodies (not the collection) 
+				// This resolution is done with the Jacobians of the bodies (not the collection) 
 				// so not a good warm start for the LCP solve (we don't want to keep these values).
-				for (Contact contact : bpc.contactList)
-					contacts.add(new Contact(contact));
+				// we will redo the warm start after
+				contacts.addAll( bpc.contactList );				
 			}
 		}
 	}	
@@ -391,32 +411,213 @@ public class CollisionProcessor {
 	}
 	
 	/**
-	 * Fills lambdas with values from previous time step
+	 * Re-initialized lambdas with values identified from the warm start
+	 */
+	protected void redoWarmStart() {
+		for (Contact c : contacts) {
+			c.lambda0 = c.lambda0warm;
+			c.lambda1 = c.lambda1warm;
+			c.lambda2 = c.lambda2warm;
+		}
+	}
+	
+	int badWarmStarts = 0;
+	int badWarmStartsRepaired = 0;
+	
+	/**
+	 * Fills lambdas with values from previous time step.
+	 * 
+	 * Would be nice to just loop over all contacts, but this uses the BPCs to treat box-box warm starts
+	 * slightly differently given that they don't always end up preserving their "info" number across time steps.
 	 */
 	protected void warmStart() {
-//		// check for hash collisions??
-//		for ( Contact c1 : contacts ) {
-//			for ( Contact c2 : contacts ) {
-//				if ( c2 == c1 ) continue;
-//				if ( c1.hashCode() == c2.hashCode() ) {
-//					System.out.println( "hash collision" );
-//				}
-//			}
-//		}
 		
-		for (Contact contact : contacts) {
-			Contact oldContact = lastTimeStepContacts.get( contact );
-			if (oldContact != null) {
-				contact.newThisTimeStep = false;
-				contact.lambda0 = oldContact.lambda0;
-				contact.lambda1 = oldContact.lambda1;
-				contact.lambda2 = oldContact.lambda2;
-				contact.prevConstraintViolation = oldContact.constraintViolation;
+		// check for hash collisions??
+		for ( Contact c1 : contacts ) {
+			for ( Contact c2 : contacts ) {
+				if ( c2 == c1 ) continue;
+				if ( c1.hashCode() == c2.hashCode() ) {
+					System.out.println( "hash collision" );
+				}
+			}
+		}
+		
+		badWarmStarts = 0;
+		badWarmStartsRepaired = 0;
+		for ( BodyPairContact bpc : bodyPairContacts ) {
+			if ( bpc.inCollection ) continue;
+			// TODO: BUG!!! if body1.geom is a RigidBodyComposite, then we should check to see if any contacts
+			
+			boolean b1IsBox = bpc.body1.geom instanceof RigidBodyGeomBox;
+			boolean b2IsBox = bpc.body2.geom instanceof RigidBodyGeomBox;
+			boolean b1IsComp = bpc.body1.geom instanceof RigidBodyGeomComposite;
+			boolean b2IsComp = bpc.body2.geom instanceof RigidBodyGeomComposite;
+			
+			if ( b1IsBox && b2IsBox || b1IsComp && b2IsBox || b1IsBox && b2IsComp || b1IsComp && b2IsComp ) {
+				for ( Contact contact : bpc.contactList ) {
+					// could end up here with composite bodies... so be sure to drop out into a vanilla
+					// warm start if it isn't a box box collision.
+					if ( contact.csb1 != null && !(contact.csb1.geom instanceof RigidBodyGeomBox) ) {
+						vanillaWarmStart( contact );
+						continue; 
+					}
+					if ( contact.csb2 != null && !(contact.csb2.geom instanceof RigidBodyGeomBox)) {
+						vanillaWarmStart( contact );
+					}
+					
+					// note that body1 and body 2 can swap across time steps... so just compare in the current world!
+					// note also that nothing fancy is needed for composite bodies... the contact csb1 and csb2 
+					// (composite sub bodies) will match given the hashcode lookup, so we can search for our warm start
+					// by changing the info number, running info from 0 to 7 
+					
+					// TODO: this threshold for fixing box-boxy warm starts is perhaps delicate??
+					// Perhaps 0.1 or 0.05 is far enough to say it is a bad match?
+					// should also perhaps make sure that we don't match the same more than once??
+					// which would give a bit of a boost to the lagrange multipliers in the warm start.
+					
+					Point3d pNew = new Point3d();
+					Point3d pOld = new Point3d();
+					contact.body1.transformB2W.transform( contact.contactB1, pNew );
+
+					Contact oldContact = lastTimeStepContacts.get( contact );
+					if (oldContact != null) {
+						oldContact.body1.transformB2W.transform( oldContact.contactB1, pOld );
+						double dist = pNew.distance( pOld );
+						if (  dist > 0.05 ) {
+							badWarmStarts++;
+							// try all info numbers on this contact (other than our current info number) to find a better match,
+							// then put our info number back to what it is suppose to be.
+							int myInfo = contact.info;
+							double bestMatchDist = dist;
+							int bestMatchInfo = myInfo;
+							Contact bestMatchOldContact = oldContact;
+							for ( int info = 0; info < 9; info++ ) {
+								if ( info == myInfo ) continue; // we've already got this as the best so far
+								contact.info = info;
+								oldContact = lastTimeStepContacts.get( contact );
+								if ( oldContact == null ) break; // no more contacts to check
+								if ( info == 8 ) {
+									System.err.println("warm start: unexpected number of box-box contacts!  what's the max number?");
+								}
+								oldContact.body1.transformB2W.transform( oldContact.contactB1, pOld );
+								dist = pNew.distance( pOld );
+								if ( dist < bestMatchDist ) {
+									bestMatchDist = dist;
+									bestMatchInfo = info;
+									bestMatchOldContact = oldContact;
+								}
+							}
+							if ( bestMatchInfo != myInfo ) {
+								badWarmStartsRepaired++;
+							}
+							oldContact = bestMatchOldContact;
+							contact.info = myInfo; 
+							dist = bestMatchDist;
+							// restoring the info of the contact in this step means that if this was just
+							// an order swap that happens when rotating from 44 to 46 degrees, for instance,
+							// then we won't need this search for the next warm start.
+						}
+						
+						if ( dist < 0.05 ) {
+					
+							contact.newThisTimeStep = false; // not new, even if we failed to do a good warm start
+							contact.lambda0 = oldContact.lambda0;
+							contact.lambda1 = oldContact.lambda1;
+							contact.lambda2 = oldContact.lambda2;
+	
+							contact.lambda0warm = oldContact.lambda0;
+							contact.lambda1warm = oldContact.lambda1;
+							contact.lambda2warm = oldContact.lambda2;
+							
+							// we are taking these values... don't let anyone else have them!
+							oldContact.lambda0 = 0;
+							oldContact.lambda1 = 0;
+							oldContact.lambda2 = 0;
+	
+							contact.prevConstraintViolation = oldContact.constraintViolation;
+						} else {
+							// may as well treat as new as didn't find anything close.
+							contact.newThisTimeStep = true;
+						}
+					} else {
+						// Just because we didn't find ourselves, doesn't mean that we're not there!
+						// start searching from zero
+						int myInfo = contact.info;
+						double bestMatchDist = Double.MAX_VALUE;
+						int bestMatchInfo = -1;
+						Contact bestMatchOldContact = null;
+						for ( int info = 0; info < 9; info++ ) {
+							contact.info = info;
+							oldContact = lastTimeStepContacts.get( contact );
+							if ( oldContact == null ) break; // no more contacts to check
+							oldContact.body1.transformB2W.transform( oldContact.contactB1, pOld );
+							double dist = pNew.distance( pOld );
+							if ( dist < bestMatchDist ) {
+								bestMatchDist = dist;
+								bestMatchInfo = info;
+								bestMatchOldContact = oldContact;
+							}
+						}
+						contact.info = myInfo; // put my info back!!
+						if ( bestMatchInfo != -1 ) {
+							badWarmStartsRepaired++;
+							// found something... but might still be large
+							if ( bestMatchDist < 0.05 ) {
+								oldContact = bestMatchOldContact;
+								
+								contact.newThisTimeStep = false; // not new, even if we failed to do a good warm start
+								contact.lambda0 = oldContact.lambda0;
+								contact.lambda1 = oldContact.lambda1;
+								contact.lambda2 = oldContact.lambda2;
+		
+								contact.lambda0warm = oldContact.lambda0;
+								contact.lambda1warm = oldContact.lambda1;
+								contact.lambda2warm = oldContact.lambda2;
+								
+								// we are taking these values... don't let anyone else have them!
+								oldContact.lambda0 = 0;
+								oldContact.lambda1 = 0;
+								oldContact.lambda2 = 0;
+		
+								contact.prevConstraintViolation = oldContact.constraintViolation;
+							}
+
+						} else {
+							contact.newThisTimeStep = true;
+						}
+					}
+				}
+					
 			} else {
-				contact.newThisTimeStep = true;
+				for ( Contact contact : bpc.contactList ) {
+					vanillaWarmStart( contact );
+				}
 			}
 		}
 	}
+	
+	/** 
+	 * Do the basic warm start of taking whatever contact matches the hash.
+	 * @param contact
+	 */
+	private void vanillaWarmStart( Contact contact ) {
+		Contact oldContact = lastTimeStepContacts.get( contact );
+		if (oldContact != null) {
+			contact.newThisTimeStep = false;
+			contact.lambda0 = oldContact.lambda0;
+			contact.lambda1 = oldContact.lambda1;
+			contact.lambda2 = oldContact.lambda2;
+			
+			contact.lambda0warm = oldContact.lambda0;
+			contact.lambda1warm = oldContact.lambda1;
+			contact.lambda2warm = oldContact.lambda2;
+
+			contact.prevConstraintViolation = oldContact.constraintViolation;
+		} else {
+			contact.newThisTimeStep = true;
+		}					
+	}
+	
 
 	/**go through each element in contacts 2.
 	* at each element, swap it for another random member of contacts2. 
@@ -464,6 +665,18 @@ public class CollisionProcessor {
 		} else if ( body2 instanceof RigidCollection ) {
 			for (RigidBody b: ((RigidCollection) body2).bodies) {
 				narrowPhase(body1, b);
+			}
+		} else if ( body1.geom instanceof RigidBodyGeomComposite ) {
+			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
+			g1.updateBodyPositionsFromParent();
+			for ( RigidBody b : g1.bodies ) {
+				narrowPhase( b, body2 );
+			}
+		} else if ( body2.geom instanceof RigidBodyGeomComposite ) {
+			RigidBodyGeomComposite g2 = (RigidBodyGeomComposite) body2.geom;
+			g2.updateBodyPositionsFromParent();
+			for ( RigidBody b : g2.bodies ) {
+				narrowPhase( body1, b );
 			}
 		} else if ( body1 instanceof PlaneRigidBody ) {
 			PlaneRigidBody b1 = (PlaneRigidBody) body1;
@@ -651,14 +864,20 @@ public class CollisionProcessor {
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
 	
+    /** Override restitution parameters when set true */
+    public BooleanParameter restitutionOverride = new BooleanParameter( "restitution override, otherwise default 0", false );
+
     /** Restitution parameter for contact constraints */
-    public DoubleParameter restitution = new DoubleParameter( "restitution (bounce)", 0, 0, 1 );
+    public DoubleParameter restitution = new DoubleParameter( "restitution (bounce), if override enabled ", 0.5, 0, 2 );
+
+    /** Override friction parameters when set true */
+    public BooleanParameter frictionOverride = new BooleanParameter( "Coulomb friction override, otherwise default 0.8", false );
     
     /** Coulomb friction coefficient for contact constraint */
-    public DoubleParameter friction = new DoubleParameter("Coulomb friction", 0.8, 0, 2 );
+    public DoubleParameter friction = new DoubleParameter("Coulomb friction, if override enabled", 0.1, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
-    public IntParameter iterations = new IntParameter("iterations for PGS solve", 200, 1, 500);
+    public IntParameter iterations = new IntParameter("iterations for PGS solve", 1000, 1, 5000);
 
 	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
         
@@ -675,33 +894,11 @@ public class CollisionProcessor {
         vfp.add( iterations.getSliderControls() );
 		vfp.add( iterationsInCollection.getSliderControls() );
 
+		vfp.add( restitutionOverride.getControls() );
         vfp.add( restitution.getSliderControls(false) );
-        // If we change the restitution from the GUI, it will override the parameter for all bodies
-        restitution.addParameterListener( new ParameterListener<Double>() {
-			@Override
-			public void parameterChanged(Parameter<Double> parameter) {
-				for (RigidBody body: bodies) {
-					body.restitution = parameter.getValue();
-					if (body instanceof RigidCollection)
-						for (RigidBody b: ((RigidCollection)body).bodies)
-							b.restitution = parameter.getValue();
-				}
-			}
-		});
         
+        vfp.add( frictionOverride.getControls() );
         vfp.add( friction.getSliderControls(false) );
-        // If we change the friction from the GUI, it will override the parameter for all bodies
-        friction.addParameterListener( new ParameterListener<Double>() {
-			@Override
-			public void parameterChanged(Parameter<Double> parameter) {
-				for (RigidBody body: bodies) {
-					body.friction = parameter.getValue();
-					if (body instanceof RigidCollection)
-						for (RigidBody b: ((RigidCollection)body).bodies)
-							b.friction = parameter.getValue();
-				}
-			}
-		});
         
 		vfp.add( feedbackStiffness.getSliderControls(false) );
 		vfp.add( enableCompliance.getControls() );

@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<root>
+	<body n="0. 1. 0.0" name="plane" p="0 -1 0" type="plane">
+		<friction>0.01</friction>
+	</body>
+	
+	<body name="chariot" obj="data/chariot.obj" scale="0.1" type="composite">
+		<x>0. 1.7 0.</x>
+		<v>0. 0. 0.</v>
+		<R>0. -1 0. 0.</R>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<body name="wheel1" r="1" type="sphere">
+			<x> 3.15 -1.7  1.9</x>
+			<R>0. -1 0. 0.</R>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body name="wheel2" r="1" type="sphere">
+			<x> 3.15 -1.7 -1.9</x>
+			<R>0. -1 0. 0.</R>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body name="wheel3" r="1" type="sphere">
+			<x>-3.15 -1.7  1.9</x>
+			<R>0. -1 0. 0.</R>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body name="wheel4" r="1" type="sphere">
+			<x>-3.15 -1.7 -1.9</x>
+			<R>0. -1 0. 0.</R>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body dim="7.2 0.2 4" name="panier" type="box">
+			<x>0.2 0. 0.</x>
+			<R>0. -1 0. 0.</R>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body dim="7.2 2.5 0.2" name="panierb1" type="box">
+			<x>0.2 0. -1.9</x>
+			<R>0. -1 0. 0.</R>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body dim="0.2 2.5 4" name="panierb2" type="box">
+			<x>3.7 0. 0.</x>
+			<R>0. -1 0. 0.</R>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body dim="7.2 2.5 0.2" name="panierb3" type="box">
+			<x>0.2 0. 1.9</x>
+			<R>0. -1 0. 0.</R>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body dim="0.2 2.5 4" name="panierb4" type="box">
+			<x>-3.5 0. 0.</x>
+			<R>0. -1 0. 0.</R>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+	</body>
+</root>

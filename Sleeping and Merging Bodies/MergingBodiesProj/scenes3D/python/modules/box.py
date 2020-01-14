@@ -36,6 +36,8 @@ class Box():
         if (positionW!=None):
             spring.set('pW', positionW)
 
+    def get(self):
+        return self.body
 
 
 ### Test

@@ -40,10 +40,10 @@ public class Merging {
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", false);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
-		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
+		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 3, 0, 200 );
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1, 1e-10, 100 );
-		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-3, 1e-10, 1e0 );
+		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-5, 1e-10, 1e0 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	}
 	public MergeParameters params = new MergeParameters();
@@ -187,7 +187,6 @@ public class Merging {
 	 * Unmerge BodyPairContacts that satisfy condition
 	 */	
 	public void unmerge(MergeConditions condition, double dt) {
-		
 		if (!params.enableUnmerging.getValue())
 			return;
 		
@@ -202,7 +201,7 @@ public class Merging {
 		
 		for(RigidBody body : bodies) {
 			
-			if(body.isSleeping )//|| body.temporarilyPinned)
+			if(body.isSleeping )
 				continue;
 			
 			if (body instanceof RigidCollection) {
@@ -233,14 +232,15 @@ public class Merging {
 				}
 				
 				newBodies.clear();
+				boolean removeCollection = false;
 				if (!bpcsToUnmerge.isEmpty()) 
-					unmergeSelectedBpcs(collection, bpcsToUnmerge, newBodies, dt);	
+					removeCollection = unmergeSelectedBpcs(collection, bpcsToUnmerge, newBodies, dt);	
 
 				if (!newBodies.isEmpty()) {
+					mergingEvent = true;
 					additionQueue.addAll(newBodies);
-					removalQueue.add(collection);
-					if (newBodies.size()>1)
-						mergingEvent = true;
+					if (removeCollection)
+						removalQueue.add(collection);
 				}
 			}
 		}
@@ -253,15 +253,19 @@ public class Merging {
 
 	private HashSet<RigidBody> handledBodies = new HashSet<RigidBody>();
 	private HashSet<RigidBody> subbodies = new HashSet<RigidBody>();
+	private HashSet<RigidBody> remainedBodies = new HashSet<RigidBody>();
 	/**
 	 * Unmerge given bpcs
 	 * @param collection
 	 * @param bpcsToUnmerge
 	 * @param newBodies
 	 * @param dt
+	 * @return true if collection should be removed from the system
 	 */
-	private void unmergeSelectedBpcs(RigidCollection collection, HashSet<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
+	private boolean unmergeSelectedBpcs(RigidCollection collection, HashSet<BodyPairContact> bpcsToUnmerge, ArrayList<RigidBody> newBodies, double dt) {
 			
+		boolean removeCollection = true;
+		
 		// Check for unstable configurations
 		// TODO: eulalie: don't know about this strategy
 		/*ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();
@@ -286,59 +290,69 @@ public class Merging {
 		// Compute resulting new collections/bodies
 		handledBodies.clear();
 		subbodies.clear();
+		remainedBodies.clear();
 		
-		for (BodyPairContact bpc: bpcsToUnmerge) {
-			for (int i=0; i<2; i++) { 
-				RigidBody body = bpc.getBody(i);
+		for (RigidBody body: collection.bodies) {
+			if (!handledBodies.contains(body)) {
 				
-				if (!handledBodies.contains(body)) {
-					
-					subbodies.add(body);
-					buildNeighborBody(body, subbodies, handledBodies);
-					handledBodies.addAll(subbodies);
-					
-					for (RigidBody b: subbodies)
-						collection.unmergeBody(b);
-
-					if (subbodies.size() > 1) {
-						Iterator<RigidBody> iter = subbodies.iterator();
-						
-						RigidBody sb1 = iter.next();
-						RigidBody sb2 = iter.next();
-						subbodies.remove(sb1);
-						subbodies.remove(sb2);
-						
-						RigidCollection newCollection = new RigidCollection(sb1,sb2);
-						newCollection.addBodies(subbodies);
-						newCollection.fillInternalBodyContacts();
-						newCollection.color = new Color(collection.color);
-						newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
-						collection.applyVelocitiesTo(newCollection);
-						newBodies.add(newCollection);
-					} else if (subbodies.size() == 1){ 
-						newBodies.add(subbodies.iterator().next());
+				subbodies.add(body);
+				buildNeighborBody(body, subbodies, handledBodies);
+				handledBodies.addAll(subbodies);
+				
+				if (collection.bodies.size() != subbodies.size()) { 
+					if (subbodies.size() < collection.bodies.size()/2+1) { 
+						for (RigidBody b: subbodies)
+							collection.unmergeBody(b);
+	
+						if (subbodies.size() > 1) { // new collection
+							Iterator<RigidBody> iter = subbodies.iterator();
+							
+							RigidBody sb1 = iter.next();
+							RigidBody sb2 = iter.next();
+							subbodies.remove(sb1);
+							subbodies.remove(sb2);
+							
+							RigidCollection newCollection = new RigidCollection(sb1,sb2);
+							newCollection.addBodies(subbodies);
+							newCollection.fillInternalBodyContacts();
+							newCollection.color = new Color(collection.color);
+							newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
+							//collection.applyVelocitiesTo(newCollection); eulalie: the velocities are updated in call to addBodies...
+							newBodies.add(newCollection);
+						} else if (subbodies.size() == 1){ // single body
+							newBodies.add(subbodies.iterator().next());
+						}
+					} else { // collection is only cut in half or less
+						removeCollection = false;
+						remainedBodies.addAll(subbodies);
 					}
-					
-					subbodies.clear();
+				} else { // collection remains entirely the same, happens if the bpc doesn't actually cut the collection in pieces
+					removeCollection = false;
+					remainedBodies.addAll(subbodies);
+					break;
 				}
+				
+				subbodies.clear();
 			}	
-			
+		}	
+
+		// Reconnect if necessary
+		for (BodyPairContact bpc: bpcsToUnmerge)
 			if (bpc.body1.isInSameCollection(bpc.body2))
 				mergeBodyPairContact(bpc);
-		}	
-		
-		if(handledBodies.size() != collection.bodies.size()) {
-			for (RigidBody body : collection.bodies) {
-				if (body.isInCollection(collection)) {
-					collection.unmergeBody(body);
-					newBodies.add(body);
-					handledBodies.add(body);
-				}
-			}
-		}
 		
 		if(handledBodies.size() != collection.bodies.size())
 			System.err.println("[unmergeSelectedBpcs] Something is wrong");
+		
+		if (!removeCollection) {
+			if (remainedBodies.size() != collection.bodies.size()) {
+				handledBodies.removeAll(remainedBodies);
+				collection.removeBodies(handledBodies);
+				collection.fillInternalBodyContacts();
+			}
+		}
+		
+		return removeCollection;
 	}
 	
 	/**
@@ -351,9 +365,14 @@ public class Merging {
 			bpc.inCollection = false;
 			bpc.contactStateHist.clear();
 			bpc.motionMetricHist.clear();
-			for (Contact contact : bpc.contactList) 
-				if (!collision.contacts.contains(contact))
+			for (Contact contact : bpc.contactList) {
+				if (!collision.contacts.contains(contact)) {
+					contact.lambda0warm = contact.lambda0;
+					contact.lambda1warm = contact.lambda1;
+					contact.lambda2warm = contact.lambda2;
 					collision.contacts.add(contact);
+				}
+			}
 		}
 	}
 	
@@ -413,10 +432,13 @@ public class Merging {
 				RigidCollection collection = (RigidCollection)body;
 				if (colors.contains(collection.color)) {
 					RigidCollection sameColorCollection = collections.get(colors.indexOf(collection.color));
-					if(sameColorCollection.bodies.size()>collection.bodies.size()) 
+					if(sameColorCollection.bodies.size()>collection.bodies.size()) {
 						collection.color.setRandomColor();
-					else 
+						collection.col = new float[] { collection.color.x, collection.color.y, collection.color.z, 1 };
+					} else {
 						sameColorCollection.color.setRandomColor();
+						sameColorCollection.col = new float[] { sameColorCollection.color.x, sameColorCollection.color.y, sameColorCollection.color.z, 1 };
+					}
 				}
 				colors.add(collection.color);
 				collections.add(collection);
@@ -445,6 +467,7 @@ public class Merging {
 		vfp.add( params.thresholdMerge.getSliderControls(false) );
 		vfp.add( params.thresholdUnmerge.getSliderControls(false) );
 		vfp.add( params.thresholdBreath.getSliderControls(true) );
+		vfp.add( Contact.slidingThreshold.getSliderControls(true) ); // Gross?
         JButton umergeButton = new JButton("unmerge all");
         vfp.add( umergeButton);
         umergeButton.addActionListener( new ActionListener() {

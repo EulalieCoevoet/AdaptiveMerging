@@ -2,26 +2,32 @@
 
 	should set some factory parameters here!
 
+
     <body type="box" name="box1" dim=".7 .3 .7">
         <x> 0 5 0 </x>
     </body>
 
     <body type="box" name="box2" dim=".5 .5 .5">
+
         <x> 2 10 -3 </x>
         <R> 0 1 0 0.1 </R>
     </body>
     
+
     <body type="box" name="platform" dim="100 1 100">
         <x> 0 0 0 </x>
         <spring pB="50 0.5 50" k="1000"/>
         <spring pB="50 0.5 -50" k="1000"/>
         <spring pB="-50 0.5 50" k="1000"/>
         <spring pB="-50 0.5 -50" k="1000"/>
+
         <pinned> false </pinned>
         <factorypart> false </factorypart>
     </body>
     
+
     <body type="plane" name="plane1" p="0 -50 0" n="0 1 0">
+
     </body>
 
 </root>

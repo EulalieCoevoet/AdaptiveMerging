@@ -27,7 +27,6 @@ import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -66,13 +65,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
     
-    private String sceneFilename = "scenes3D/aNewTest.xml";
+    private String sceneFilename = "scenes3D/tower30.xml";
     
     /**
      * Creates a shadow map with a square image, e.g., 1024x1024.
      * This number can be reduced to improve performance.
      */
     private ShadowMap shadowMap = new ShadowMap( 2048 );
+    
+    private boolean loadSystemRequest = false;
+    private boolean loadFactoryRequest = false;
+    private boolean clearRequest = false;
     
     /**
      * Entry point for application
@@ -120,11 +123,41 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     
     @Override
     public void display(GLAutoDrawable drawable) {
+    	
+    	if(clearRequest) {
+            clearRequest = false;
+    		systemClear();
+        	system.collision.contactPool.clear(); 
+            System.gc();
+            if (factory.use)
+        		loadFactoryRequest = false;
+            else
+            	loadSystemRequest = true;
+            factory.use = false;
+    	}
+    	
+    	if(loadSystemRequest) {
+    		loadSystemRequest = false;
+    		loadXMLSystem(sceneFilename);
+    	}
+    	
+    	if(loadFactoryRequest) {
+    		loadFactoryRequest = false;
+    		loadFactorySystem(sceneFilename);
+    	}
+    	
         GL2 gl = drawable.getGL().getGL2();
                 
         if ( selectRequest ) {
         	selectRequest = false;
     		select(drawable, mousePressedPoint );
+    		if ( enableQMG.getValue() ) {
+    			lastSelectedBody = mouseSpring.picked;
+    			if ( lastSelectedBody != null ) {
+    				qmgMetric.setNameAndClear( "BPC metric on " + lastSelectedBody.name );
+    				qmgContact.setNameAndClear( "contact slip on " + lastSelectedBody.name );    				
+    			}
+    		}
         	gl.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT );
         }
         
@@ -144,7 +177,25 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 if ( factory.use ) factory.advanceTime( dt );
                 system.advanceTime( dt );                
             }
+
+            if ( enableQMG.getValue() ) {
+            	if ( lastSelectedBody != null ) {
+            		for ( BodyPairContact bpc : lastSelectedBody.bodyPairContacts ) {
+            			if ( bpc.motionMetricHist.size() > 0 ) {
+            				qmgMetric.add( bpc.motionMetricHist.get( bpc.motionMetricHist.size()-1 ) );
+            			}
+            			for ( Contact c : bpc.contactList ) {
+            				qmgContact.add( Math.abs( c.w1 ) );
+            				qmgContact.add( Math.abs( c.w2 ) );
+            			}
+            		}
+            		qmgMetric.step();
+            		qmgContact.step();
+            	}
+            }
         }
+        
+        
 
         if ( ! drawWithShadows.getValue() ) {
             drawAllObjects( drawable, false );
@@ -213,8 +264,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         stringBuilder.append( substeps.getValue()); 
         stringBuilder.append( " substeps)\n" );
         stringBuilder.append( "PGS iterations = "); stringBuilder.append( system.collision.iterations.getValue()); stringBuilder.append( '\n' );
-        stringBuilder.append( "mu = "); stringBuilder.append( system.collision.friction.getValue()); stringBuilder.append( '\n' );
-        stringBuilder.append( "r = "); stringBuilder.append( system.collision.restitution.getValue()); stringBuilder.append( '\n' );
+        //stringBuilder.append( "mu = "); stringBuilder.append( system.collision.friction.getValue()); stringBuilder.append( '\n' );
+        //stringBuilder.append( "r = "); stringBuilder.append( system.collision.restitution.getValue()); stringBuilder.append( '\n' );
+        stringBuilder.append( "(box-box) badWarmStarts = "); stringBuilder.append( system.collision.badWarmStarts); stringBuilder.append( '\n' );
+        stringBuilder.append( "(box-box) badWarmStartsRepaired = "); stringBuilder.append( system.collision.badWarmStartsRepaired); stringBuilder.append( '\n' );
         
         Runtime rt = Runtime.getRuntime();
         long usedMem = (rt.totalMemory() - rt.freeMemory()) / 1024; // / 1024;
@@ -261,6 +314,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         	memMonitor.draw( drawable, 0 );
         	computeTimeMonitor.draw( drawable, 1);
         }
+        if ( drawQMG.getValue() ) {
+        	qmgMetric.draw(drawable, 0);
+        	qmgContact.draw(drawable, 1);
+        }
         
         if ( run.getValue() || stepped ) {
         	if ( system.display.params.drawGraphs.getValue() ) {
@@ -276,6 +333,13 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         }
     }
+    
+    BooleanParameter enableQMG = new BooleanParameter("enable quantity monitor (otherwise graph is boring)", false );
+    BooleanParameter drawQMG = new BooleanParameter("draw quantity monitor graph", false );
+    /** Last selected body is used for the quantity harvesting */
+    RigidBody lastSelectedBody;
+    private QuantityMonitorGraph qmgMetric = new QuantityMonitorGraph("Metric","units");
+    private QuantityMonitorGraph qmgContact = new QuantityMonitorGraph("Metric","units");
     
     private MemoryMonitor memMonitor = new MemoryMonitor( "memory", "step");
     private MemoryMonitor computeTimeMonitor = new MemoryMonitor( "compute time", "step");
@@ -387,9 +451,12 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         body = system.display.bodiesDrawnForPicking.get( ID );
     	pointW.scale( 1/sceneScale ); // gross to undo the other drawing stuff here... 
     	pointW.sub( sceneTranslation);
-    	Matrix4d A = body.transformW2B.T;
-    	A.transform(pointW,  grabPointB ) ;
+    	
+//    	Matrix4d A = body.transformW2B.T;
+//    	A.transform(pointW,  grabPointB ) ;
         
+    	body.transformB2W.inverseTransform( pointW, grabPointB );
+    	
         if (selectRequestType == SelectRequestType.SPRING) {
 	    	mouseSpring.picked = body;
 	    	mouseSpring.pointW.set(pointW); 
@@ -494,8 +561,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         clear.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                factory.use = false;
-                systemClear();
+                clearRequest = true;
             }
         });
         
@@ -555,6 +621,9 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         });  
         vfp.add( hfp2.getPanel() );
         
+        vfp.add( enableQMG.getControls() );
+        vfp.add( drawQMG.getControls() );
+        
         vfp.add( run.getControls() );
         vfp.add( stepsize.getSliderControls(true) );
         vfp.add( substeps.getControls() );
@@ -572,9 +641,15 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         smcp.collapse();
         vfp.add( smcp );
         
-        vfp.add( useClipPlane.getControls() );
-        vfp.add( clipPlaneNormal );
-        vfp.add( clipPlaneD.getSliderControls(false) );
+        VerticalFlowPanel vfpclip = new VerticalFlowPanel();
+        vfpclip.setBorder(new TitledBorder("clip plane controls (turn off shadows to use)") );
+        vfpclip.add( useClipPlane.getControls() );
+        vfpclip.add( clipPlaneNormal );
+        vfpclip.add( clipPlaneD.getSliderControls(false) );
+        CollapsiblePanel cpclip = new CollapsiblePanel( vfpclip.getPanel() );
+        cpclip.collapse();
+        
+        vfp.add( cpclip );
         
         return vfp.getPanel();
     }
@@ -596,7 +671,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private void loadXMLSystem( String filename ) {
     	this.sceneFilename = filename;
     	System.out.println("loading " + filename );
-        factory.use = false;        
+        factory.use = false;
         systemClear();
         system.name = filename;
         XMLParser parser = new XMLParser();
@@ -608,10 +683,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      * Loads the specified image as a factory, clearing the old system, and resets viewing parameters.
      * @param filename
      */
-    private void loadFactorySystem( String filename ) {              
+    private void loadFactorySystem( String filename ) {    
     	this.sceneFilename = filename;
-    	factory.use = false;        
-        systemClear();
+    	factory.use = false; 
+    	systemClear();
         loadXMLSystem( filename );
     	system.sceneName = filename.substring(0, filename.length() - 4);
         system.name = filename + " factory";
@@ -620,6 +695,20 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         factory.reset();        
     }
     
+    /**
+     * Clears the system, and ensures that any display lists that were created
+     * to draw the various rigid bodies are cleaned up on the next display call.
+     */
+    private void systemClear() {
+    	// TODO: avoid rebuilding display lists if only resetting a factory
+    	// also... awkward way to try to delete the display lists as the 
+    	// display loop is not really going to get a chance to be called before
+    	// the system.clear call...   In any case, not a big deal if we only 
+    	// load systems occasionally.
+    	deleteDisplayListRequest = true;  
+    	system.clear();
+    }
+
     /**
      * Resets the rigid body system, and factory if it is currently being used.  
      * When the factory is reset, all non pinned rigid bodies are removed from the system.
@@ -633,20 +722,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     }
     
     private boolean deleteDisplayListRequest = false;
-    
-    /**
-     * Clears the system, and ensures that any display lists that were created
-     * to draw the various rigid bodies are cleaned up on the next display call.
-     */
-    private void systemClear() {
-        // TODO: avoid rebuilding display lists if only resetting a factory
-        // also... awkward way to try to delete the display lists as the 
-        // display loop is not really going to get a chance to be called before
-        // the system.clear call...   In any case, not a big deal if we only 
-        // load systems occasionally.
-        deleteDisplayListRequest = true;  
-        system.clear();
-    }
     
     /** List of png files in the data folder which can be loaded with left and right arrow */
     private File[] files = null;
@@ -741,33 +816,26 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     }
                     stepped = true;
                 } else if ( e.getKeyCode() == KeyEvent.VK_R ) {                    
-                    if ( e.isShiftDown() ) {
-					if ( factory.use ) {
-                		loadFactorySystem( sceneFilename );
-                    } else {
-                    	loadXMLSystem( sceneFilename );
-                    }                    } else {
-                    	systemReset();
-                    }
+                	if ( e.isShiftDown() ) {
+                		if ( factory.use ) {
+                			loadFactoryRequest = true;
+                		} else {
+                			loadSystemRequest = true;
+                		}                    
+                	} else {
+                		systemReset();
+                	}
                 } else if ( e.getKeyCode() == KeyEvent.VK_H ) { // tab is for changing focus, so a pain to capture here
                 	system.display.params.hideOverlay.setValue( ! system.display.params.hideOverlay.getValue() );
-                } else if ( e.getKeyCode() == KeyEvent.VK_K ) {
-                	if ( factory.use ) {
-                		loadFactorySystem( sceneFilename );
-                    } else {
-                    	loadXMLSystem( sceneFilename );
-                    }
-                } else if ( e.getKeyCode() == KeyEvent.VK_C ) {                   
-                    systemClear();
-                    sceneFilename = "";
-                    factory.use = false;
+                } else if ( e.getKeyCode() == KeyEvent.VK_C ) { 
+                    clearRequest = true;
                 } else if ( e.getKeyCode() == KeyEvent.VK_J ) {                   
                     system.jiggle();                                        
                 } else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
                     File f = FileSelect.select("xml", "xml scene for factory", "load", "scenes3D/", true );
-                    sceneFilename = f.getPath();
                     if ( f != null ) {
-                        loadFactorySystem( sceneFilename );
+                    	sceneFilename = f.getPath();
+                        loadFactoryRequest = true;   
                     }   
                 } else if ( e.getKeyCode() == KeyEvent.VK_PERIOD ) {                                       
                     factory.run.setValue ( ! factory.run.getValue() );
@@ -775,9 +843,9 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     factory.createBodyRequest = true;
                 } else if (  e.getKeyCode() == KeyEvent.VK_L ) {                    
                     File f = FileSelect.select( "xml", "scene", "load", "scenes3d/", true );
-                    sceneFilename = f.getPath();
                     if ( f != null ) {
-                        loadXMLSystem( sceneFilename );
+                    	sceneFilename = f.getPath();
+                        loadSystemRequest = true;       
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_M ) {
                 	system.merging.triggerMergingEvent = true;
@@ -789,13 +857,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     if ( files != null && files.length >= 0 ) {
                         whichFile --;
                         if ( whichFile < 0 ) whichFile = files.length-1;
-                        loadXMLSystem( files[whichFile].getPath() );                        
+
+                    	sceneFilename = files[whichFile].getPath();
+                        loadSystemRequest = true;                        
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_RIGHT ) {
                     if ( files != null && files.length >= 0 ) {
                         whichFile ++;
                         if ( whichFile >= files.length ) whichFile = 0;
-                        loadXMLSystem( files[whichFile].getPath() );
+                        
+                    	sceneFilename = files[whichFile].getPath();
+                        loadSystemRequest = true;       
                     }
                 } else if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
                     eva.stop();
@@ -811,7 +883,25 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     if ( ss == substeps.getMinimum() ) return;
                     substeps.setValue( ss - 1 );
                     stepsize.setValue( stepsize.getValue() *(ss-1)/ss );
-                } else if ( e.getKeyCode() == KeyEvent.VK_7 ) {
+                }  else if ( e.getKeyCode() == KeyEvent.VK_Q ) {
+                	float scale = 1;
+                    for (RigidBody b: system.bodies) {
+                    	if (b.canSpin) {
+                    		b.tmpSpinner.set(b.spinner);
+                    		b.tmpSpinner.scale(scale);
+                    		b.omega.add(b.tmpSpinner);
+                    	}
+                    }
+                } else if ( e.getKeyCode() == KeyEvent.VK_W ) {
+                	float scale = 1;
+                    for (RigidBody b: system.bodies) {
+                    	if (b.canSpin) {
+                    		b.tmpSpinner.set(b.spinner);
+                    		b.tmpSpinner.scale(-scale);
+                    		b.omega.add(b.tmpSpinner);
+                    	}
+                    }
+                }else if ( e.getKeyCode() == KeyEvent.VK_7 ) {
                 	for ( RigidBody b : system.bodies ) {
                 		if (b instanceof RigidCollection) {
                 			RigidCollection collection = (RigidCollection)b;

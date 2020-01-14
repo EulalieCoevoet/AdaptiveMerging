@@ -55,7 +55,7 @@ public class PGS {
 	 * Solve contact problem
 	 * @param dt time step
 	 */
-	public void solve(double dt) {
+	public void solve(double dt, boolean restitutionOverride, double restitutionOverrideVal, boolean frictionOverride, double frictionOverrideVal ) {
 				
 		if (contacts == null) {
 			System.err.println("PGS.solve() method needs the list PGS.contacts to be filled.");
@@ -68,7 +68,7 @@ public class PGS {
 			confidentWarmStart();
 
 		for (Contact contact: contacts) {
-			contact.computeB(dt, feedbackStiffness, computeInCollection);
+			contact.computeB(dt, feedbackStiffness, computeInCollection, restitutionOverride, restitutionOverrideVal );
 			contact.computeJMinvJt(computeInCollection);
 		}
 
@@ -95,12 +95,16 @@ public class PGS {
 				
 				// TODO: eulalie : we should assign material property to bodies and have a table for the corresponding friction coefficient...
 				// Note: Collection as no friction, we only consider the friction coefficient of the merged body being in contact (which is correct)
-				if (contact.body1.friction<0.2 || contact.body2.friction<0.2) 
-					mu = Math.min(contact.body1.friction, contact.body2.friction);
-				else if (contact.body1.friction>1. || contact.body2.friction>1.) 
-					mu = Math.max(contact.body1.friction, contact.body2.friction);
-				else
-					mu = (contact.body1.friction + contact.body2.friction)/2.;				
+				if ( frictionOverride ) {
+					mu = frictionOverrideVal;
+				} else {
+					if (contact.body1.friction<0.2 || contact.body2.friction<0.2) 
+						mu = Math.min(contact.body1.friction, contact.body2.friction);
+					else if (contact.body1.friction>1. || contact.body2.friction>1.) 
+						mu = Math.max(contact.body1.friction, contact.body2.friction);
+					else
+						mu = (contact.body1.friction + contact.body2.friction)/2.;				
+				}
 				
 				// Tangential1 direction
 				double Jdvt1 = contact.getJdv(computeInCollection,1);
@@ -130,7 +134,7 @@ public class PGS {
 				updateDeltaVwithLambdai(contact, contact.lambda2 - prevLambda_t2, 2);
 				
 				if (iter == 1) // Last iteration: avoid looping again over contacts
-					contact.updateContactState(mu);
+					contact.updateContactState(mu, dt, computeInCollection);
 			}
 			
 			iter--;
@@ -148,7 +152,7 @@ public class PGS {
 		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
 
 		Vector6d dv1 = body1.deltaV; 
-		Vector6d dv2 = body2.deltaV; 
+		Vector6d dv2 = body2.deltaV;
 		
 		Vector6d ja = contact.jna;
 		Vector6d jb = contact.jnb;
