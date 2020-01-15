@@ -616,11 +616,13 @@ public class RigidCollection extends RigidBody {
 
 	public boolean isMovingAway(RigidBody body, MergeParameters mergeParams) {
 
+		long now = System.nanoTime();
 		double metric = motionMetricProcessor.getMotionMetric(this, body);
 
 		if (pinned)
 			metric /= 2;
-
+		
+		mergeParams.unmergingCheckMotionTime += (System.nanoTime() - now) / 1e9;
 		return (metric > mergeParams.thresholdUnmerge.getValue());
 	}
 

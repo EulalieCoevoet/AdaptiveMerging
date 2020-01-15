@@ -675,6 +675,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      */
     private void loadXMLSystem( String filename ) {
     	this.sceneFilename = filename;
+    	system.sceneName = filename.substring(0, filename.length() - 4);
     	System.out.println("loading " + filename );
         factory.use = false;
         systemClear();
@@ -691,10 +692,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      */
     private void loadFactorySystem( String filename ) {    
     	this.sceneFilename = filename;
+    	system.sceneName = filename.substring(0, filename.length() - 4);
     	factory.use = false; 
     	systemClear();
         loadXMLSystem( filename );
-    	system.sceneName = filename.substring(0, filename.length() - 4);
         system.name = filename + " factory";
         factory.setSystem(system);
         factory.use = true;
