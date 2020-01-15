@@ -237,9 +237,15 @@ public class RigidBodySystem {
 	 * Apply spring forces
 	 */
 	private void applySpringForces() {
+		double h = springMotionStepSize.getValue();
+    	double k1 = animationk1.getValue();
+    	// tiny bit underdamped and we don't notice!
+    	double k2 = 2*Math.sqrt(k1)*animationCDM.getValue(); // critical damping at sqrt(b^2- 4 k)
+    	
 		for (Spring s: springs) {
 			if (s.controllable) {
-				s.moveSpring();
+				s.updateScale(moveScale.getValue()); //is there another, nicer way to do this without making moveScale static or putting it as a member variable in LCPApp? 
+				s.moveSpring(h,k1, k2 );
 			}
 			s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
 			
@@ -360,7 +366,16 @@ public class RigidBodySystem {
 	
     public BooleanParameter applyMouseSpringAtCOM = new BooleanParameter( "apply mouse spring at COM", false );
 
-
+    
+	/** Parameters to help solve ODE to get controllable springs to desired position smoothly
+	 * TODO: Should make these available to modify on interface
+	 */
+	private DoubleParameter springMotionStepSize = new DoubleParameter( "Anim step size", 0.005, 1e-4, 1 );
+	private DoubleParameter animationk1= new DoubleParameter( "Motion stiffness", 100, 10, 1e6 );
+	private DoubleParameter animationCDM = new DoubleParameter( "Critical damping multiplyer", 0.9, 0, 2);
+	public  DoubleParameter moveScale = new DoubleParameter("Step Movement Scale", 0.2, 0.01, 10); 
+	
+	
     /**
      * @return control panel for the system
      */
@@ -384,5 +399,21 @@ public class RigidBodySystem {
 
 		return vfp.getPanel();
     }
+    
+	
+	/**
+	  * @return control panel for controllable springs
+	  */
+	 public JPanel getMoveableSpringControls() {
+	     VerticalFlowPanel vfp = new VerticalFlowPanel();
+	     vfp.setBorder( new TitledBorder("Moveable Springs Controls" ));
+	     vfp.add( springMotionStepSize.getSliderControls(true) );
+	     vfp.add( animationk1.getSliderControls(true) );
+	     vfp.add( animationCDM.getSliderControls(false) );
+	     vfp.add( moveScale.getSliderControls(true) );
+	   
+		return vfp.getPanel();
+	 }
+		
     
 }

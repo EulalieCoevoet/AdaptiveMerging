@@ -540,6 +540,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         return vfp.getPanel();
     }
     
+
     /**
      * Creates a control panel for changing visualization and simulation parameters
      */
@@ -629,6 +630,9 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         vfp.add( stepsize.getSliderControls(true) );
         vfp.add( substeps.getControls() );
         vfp.add( system.getControls() );
+        
+        vfp.add( system.getMoveableSpringControls());
+       
         
         vfp.add( mouseSpring.getControls() );
         vfp.add( mouseImpulse.getControls() );

@@ -588,9 +588,7 @@ public class XMLParser {
 					String controllable = e.getAttribute("controllable");
 					s.controllable = Boolean.parseBoolean(controllable);
 					if (s.controllable) {
-					
-						s.setTargetpW();
-						
+						s.setTarget();
 					}
 				} else {
 					System.err.println("[ParseSpring] Something is wrong with the spring.");

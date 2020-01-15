@@ -1,5 +1,7 @@
 package mergingBodies3D;
 
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
@@ -10,6 +12,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.parameters.DoubleParameter;
+import mintools.swing.VerticalFlowPanel;
 
 
 public class Spring {
@@ -257,14 +260,6 @@ public class Spring {
 	/** Target point in world coordinates for our controllable springs */
 	public double targetl0 = 0;
 
-	/** Parameters to help solve ODE to get controllable springs to desired position smoothly
-	 * TODO: Should make these available to modify on interface
-	 */
-	private DoubleParameter animationStepSize = new DoubleParameter( "Anim step size", 0.005, 1e-4, 1 );
-	private DoubleParameter animationk1= new DoubleParameter( "Anim stiffness", 100, 1, 1e6 );
-	private DoubleParameter animationCDM = new DoubleParameter( "Anim critical damping multiplyer", 0.9, 0, 2);
-	private DoubleParameter moveScale = new DoubleParameter("Step Movement Scale", 0.2, 0.1, 10);
-	
 	/** Vector that stores error in each direction*/
 	private Vector3d err = new Vector3d();
 	/** Velocity of moving pW */
@@ -277,13 +272,8 @@ public class Spring {
 	/*
 	 * Moves world coordinates of spring to desired target spoothly.
 	 */
-	public void moveSpring() {
+	public void moveSpring(double h, double k1, double k2) {
 		
-		double h = animationStepSize.getValue();
-    	double k1 = animationk1.getValue();
-    	// tiny bit underdamped and we don't notice!
-    	double k2 = 2*Math.sqrt(k1)*animationCDM.getValue(); // critical damping at sqrt(b^2- 4 k)
-    	
     	//define errors
     	errL = targetl0 - l0;
     	err.sub(targetpW, pw);
@@ -309,28 +299,36 @@ public class Spring {
 	
 	Vector3d temp = new Vector3d();
 	double templ = 0;
+	private double moveScale = 0;
 	/**
 	 * Moves target position... called in LCPApp3d whenever WASDQE are pressed. 
 	 * (Maybe with alt down)
 	 * @param direction
 	 */
 	public void moveTargetpW(Vector3d direction, double length) {
+		double scale = moveScale; //ugly I know... but I prefer it to creating member variable in LCPApp3D
 		temp.set(direction);
 	
-		temp.scale(moveScale.getValue());
+		temp.scale(scale);
 		
 		double templ = length;
-		templ *= moveScale.getValue();
+		templ *= scale;
 		
 		targetpW.add(temp);
 		targetl0 += templ;
 	}
-
-	public void setTargetpW() {
+	
+	/** Initializes target values of pW and l0, and remembers original values in case of reset. */
+	public void setTarget() {
 		targetpW.set(pw);
 		pwo.set(pw);
 		targetl0 = l0;
 		lo = l0;
 	}
 	
+	/** Updates member variable of spring moveScale... only called by RigidBodySystem... maybe there's a cleaner way than this*/
+	public void updateScale(double scale) {
+		moveScale = scale;
+	}
+
 }
