@@ -1,0 +1,30 @@
+<root>
+
+    <body type="composite" name="boat" obj="scenes3D/boat.obj">  probably want to define a scale on this too :(
+		<R>1 0 0 -1.57</R>
+    	<x>0 20 0</x>
+		<body type="box" name="surface " dim="6.219 9.120 0.287" scale="2"> <x>0 0 4.2814</x> </body>
+		<body type="box" name="body1 " dim="5.37 8.738 0.287" scale="2"> <x>0 0 3.7205</x> </body>
+		<body type="box" name="body2 " dim="5.148 8.195 0.287" scale="2"> <x>0 0 3.1383</x> </body>
+		<body type="box" name="body3 " dim="4.818 7.747 0.287" scale="2"> <x>0 0 2.5795</x> </body>
+		<body type="box" name="body4 " dim="4.495 7.307 0.287" scale="2"> <x>0 0 2.0065</x> </body>
+		<body type="box" name="body5 " dim="3.975 6.766 0.287" scale="2"> <x>0 0 1.4371</x> </body>
+		<body type="box" name="body6 " dim="3.629 6.374 0.287" scale="2"> <x>0 0 .89476</x> </body>
+		<body type="box" name="body7 " dim="3.348 5.989 0.287" scale="2"> <x>0 0 .3858</x> </body>
+		<body type="box" name="chimney1 " dim="1.485 1.403 0.231" scale="2"> <x>0 -6.753 6.6869</x> </body>
+		<body type="box" name="chimney2 " dim=".938 .883 1.0" scale="2"> <x>0 -6.753 5.5568</x> </body>
+		<body type="box" name="controlroom1 " dim="2.713 .410 0.506" scale="2"> <x>0 7.5422 7.0656</x> </body>
+		<body type="box" name="controlroom2 " dim="2.713 1 1" scale="2"> <x>0 6.9737 5.5603</x> </body>
+		<body type="box" name="controlroom3 " dim="2.713 1 0.506" scale="2"> <x>0 4.9738 5.02</x> </body>
+		
+		<spring pB="6 9 1.5" controllable="true"></spring>
+		<spring pB="-6 9 1.5" controllable="true"></spring>
+		<spring pB="-6 -9 1.5" controllable="true"></spring>
+		<spring pB="6 -9 1.5" controllable="true"></spring>
+
+	</body>
+
+    <body type="plane" name="plane1" p="0 -0 0" n="0 1 0">
+    </body>
+
+</root>

@@ -95,6 +95,7 @@ public class PGS {
 				
 				// TODO: eulalie : we should assign material property to bodies and have a table for the corresponding friction coefficient...
 				// Note: Collection as no friction, we only consider the friction coefficient of the merged body being in contact (which is correct)
+				
 				if ( frictionOverride ) {
 					mu = frictionOverrideVal;
 				} else {
