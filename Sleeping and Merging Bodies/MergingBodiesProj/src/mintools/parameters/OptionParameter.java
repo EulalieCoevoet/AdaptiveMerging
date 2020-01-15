@@ -76,6 +76,13 @@ public class OptionParameter extends Parameter<Integer> {
 //		panel.add(radioPanel);
 	}
 
+	public void setOptions(String... options) {
+		comboBox.removeAllItems();
+		for (String s : options ) {
+			comboBox.addItem(s);
+		}
+	}
+	
 	@Override
 	public JPanel getControls() {
 		return panel;

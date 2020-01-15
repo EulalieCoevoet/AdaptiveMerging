@@ -66,7 +66,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
     
     private String sceneFilename = "scenes3D/tower30.xml";
-
     
     /**
      * Creates a shadow map with a square image, e.g., 1024x1024.
@@ -100,6 +99,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         eva.controlFrame.add("Merging", system.merging.getControls());
         eva.controlFrame.add("Sleeping", system.sleeping.getControls());
         eva.controlFrame.add("Factory", factory.getControls());
+        eva.controlFrame.add("Animation", system.animation.getControls());
         eva.controlFrame.add("Help", getHelpPanel() );
 
         eva.addInteractor(this);       
@@ -465,9 +465,9 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         } else if (selectRequestType == SelectRequestType.IMPULSE) {
         	mouseImpulse.grab(body, grabPointB);
         	mouseImpulse.hold(pointW);
-        } else {
-        	System.err.print("[LCPApp3D] Unknown select request type.");
-        }
+        } else if (selectRequestType == SelectRequestType.ANIMATION) {
+        	system.animation.setSelection(body.name);
+    	} 
     }
     
     private void unproject( GLAutoDrawable drawable, float x, float y, float z, Point3d p ) {
@@ -681,6 +681,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         system.name = filename;
         XMLParser parser = new XMLParser();
         parser.parse( system, filename );
+        system.animation.init(system.bodies);
         sceneTranslation.set( 0 ,0, 0 );
     }
     
@@ -736,7 +737,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     
     private Point mousePressedPoint = null;
     private boolean selectRequest = false;
-    private enum SelectRequestType {SPRING, IMPULSE};
+    private enum SelectRequestType {SPRING, IMPULSE, ANIMATION};
     private SelectRequestType selectRequestType;
     
     /** [0,1] z position from opengl picking to use with unproject */
@@ -791,6 +792,12 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
 					mousePressedPoint = e.getPoint();
 					selectRequest = true;
 					selectRequestType = SelectRequestType.IMPULSE;
+            	}
+				
+				if( e.getButton() == 1 && e.isControlDown() ) {
+					mousePressedPoint = e.getPoint();
+					selectRequest = true;
+					selectRequestType = SelectRequestType.ANIMATION;
             	}
 			}
 			

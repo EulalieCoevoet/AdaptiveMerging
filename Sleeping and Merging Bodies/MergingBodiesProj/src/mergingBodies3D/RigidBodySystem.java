@@ -35,6 +35,7 @@ public class RigidBodySystem {
 	public CollisionProcessor collision = new CollisionProcessor(bodies);
 	public Merging merging = new Merging(bodies, collision);
 	public Sleeping sleeping = new Sleeping(bodies, springs);
+	public Animation animation = new Animation(); 
 	public Display display = new Display(bodies, springs, collision);
 	
 	public PrintStream stream = null;
@@ -113,7 +114,8 @@ public class RigidBodySystem {
 		sleeping.wake();
 		
 		if (merging.params.unmergeAll.getValue()) merging.unmergeAll();
-		
+
+        animation.apply(dt);
 		collision.updateInCollections(dt, merging.params);
 
         long now = System.nanoTime();   
@@ -130,10 +132,10 @@ public class RigidBodySystem {
 		// if the updateInCollections was run and mucked up the warm started values already
 		
 		collision.redoWarmStart();
-		
+
 		collision.solveLCP(dt); 
 		collision.clearBodyPairContacts();
-        
+
         RigidCollection.mergeParams = merging.params;
 		for ( RigidBody b : bodies )
             b.advanceTime( dt );
@@ -290,6 +292,7 @@ public class RigidBodySystem {
 		
         simulationTime = 0;
         collision.reset();
+        animation.reset();
         totalAccumulatedComputeTime = 0;     
         totalSteps = 0;
     }
