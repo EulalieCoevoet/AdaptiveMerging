@@ -874,17 +874,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     eva.stop();
                 } else if ( e.getKeyCode() == KeyEvent.VK_ENTER ) {
                     record.setValue( ! record.getValue() );
-                } else if ( e.getKeyCode() == KeyEvent.VK_UP ) {
+                } else if ( e.getKeyCode() == KeyEvent.VK_UP && !e.isAltDown() ) {
                     int ss = substeps.getValue();
                     if ( ss == substeps.getMaximum() ) return;
                     substeps.setValue( ss + 1 );
                     stepsize.setValue( stepsize.getValue() * (ss+1)/ss );
-                } else if ( e.getKeyCode() == KeyEvent.VK_DOWN ) {
+                } else if ( e.getKeyCode() == KeyEvent.VK_DOWN && !e.isAltDown() ) {
                     int ss = substeps.getValue();
                     if ( ss == substeps.getMinimum() ) return;
                     substeps.setValue( ss - 1 );
                     stepsize.setValue( stepsize.getValue() *(ss-1)/ss );
-                }  else if ( e.getKeyCode() == KeyEvent.VK_Q ) {
+                }  else if ( e.getKeyCode() == KeyEvent.VK_Q  && !e.isAltDown()) {
                 	float scale = 1;
                     for (RigidBody b: system.bodies) {
                     	if (b.canSpin) {
@@ -893,7 +893,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                     		b.omega.add(b.tmpSpinner);
                     	}
                     }
-                } else if ( e.getKeyCode() == KeyEvent.VK_W ) {
+                } else if ( e.getKeyCode() == KeyEvent.VK_W && !e.isAltDown()) {
                 	float scale = 1;
                     for (RigidBody b: system.bodies) {
                     	if (b.canSpin) {
@@ -917,6 +917,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 } else if (moveControlSpringsTrigger(e)) {
                 	//move all controllable springs forward z
                 	Vector3d direction = new Vector3d();
+                	double length = 0;
+                	boolean moveEvent = true;
                 	if (e.getKeyCode() == KeyEvent.VK_W) {
                 		direction.set(0, 0, -1);
                 	}else if (e.getKeyCode() == KeyEvent.VK_S) {
@@ -930,12 +932,22 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 	}else if (e.getKeyCode() == KeyEvent.VK_E) {
                 		direction.set(0, -1, 0);
                 	}
-                	
-                	for( Spring s : system.springs) {
-                		if (s.controllable) {
-                			s.moveTargetpW(direction);
-                		}
+                	else if (e.getKeyCode() == KeyEvent.VK_UP) {
+                		length = -1;
                 	}
+                	else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                		length = 1;
+                	}else {
+                		moveEvent = false;
+                	}
+                	if (moveEvent) {
+                	}
+                		for( Spring s : system.springs) {
+                    		if (s.controllable) {
+                    			s.moveTargetpW(direction, length);
+                    		}
+                	}
+                	
                 }
             }
 

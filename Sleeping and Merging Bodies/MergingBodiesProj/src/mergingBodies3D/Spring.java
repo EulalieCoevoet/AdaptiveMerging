@@ -31,6 +31,9 @@ public class Spring {
 	
 	/** The original point in the world to which this spring is attached*/
 	private Point3d pwo = new Point3d();
+	
+	/** The original length of the spring*/
+	private double lo = 0;
 
 	enum SpringType {ZERO, WORLD, BODYBODY};
 	private SpringType type; 
@@ -109,6 +112,8 @@ public class Spring {
 		if (controllable) {
 			pw.set(pwo);
 			targetpW.set(pw);
+			l0 = lo;
+			targetl0 = l0;
 		}
 		switch (type) {
 			case ZERO:
@@ -248,6 +253,9 @@ public class Spring {
 	
 	/** Target point in world coordinates for our controllable springs */
 	public Point3d targetpW = new Point3d();
+	
+	/** Target point in world coordinates for our controllable springs */
+	public double targetl0 = 0;
 
 	/** Parameters to help solve ODE to get controllable springs to desired position smoothly
 	 * TODO: Should make these available to modify on interface
@@ -262,6 +270,10 @@ public class Spring {
 	/** Velocity of moving pW */
 	private Vector3d vpW = new Vector3d();
 	
+	/** error of length */
+	private double errL = 0;
+	/** velocity of length as it is being changes*/
+	private double vl0 = 0;
 	/*
 	 * Moves world coordinates of spring to desired target spoothly.
 	 */
@@ -272,7 +284,10 @@ public class Spring {
     	// tiny bit underdamped and we don't notice!
     	double k2 = 2*Math.sqrt(k1)*animationCDM.getValue(); // critical damping at sqrt(b^2- 4 k)
     	
+    	//define errors
+    	errL = targetl0 - l0;
     	err.sub(targetpW, pw);
+    
     	
     	// x direction
     	vpW.x += h * ( k1 * err.x - k2 * vpW.x);
@@ -286,25 +301,36 @@ public class Spring {
     	vpW.z += h * ( k1 * err.z - k2 * vpW.z);
     	pw.z += h * vpW.z;
     	
+    	//length
+    	vl0 += h * ( k1 * errL - k2 * vl0);
+    	l0 += h * vl0;
+    	
 	}
 	
 	Vector3d temp = new Vector3d();
+	double templ = 0;
 	/**
 	 * Moves target position... called in LCPApp3d whenever WASDQE are pressed. 
 	 * (Maybe with alt down)
 	 * @param direction
 	 */
-	public void moveTargetpW(Vector3d direction) {
+	public void moveTargetpW(Vector3d direction, double length) {
 		temp.set(direction);
-		double scale = moveScale.getValue();
-		temp.scale(scale);
-		targetpW.add(temp);
+	
+		temp.scale(moveScale.getValue());
 		
+		double templ = length;
+		templ *= moveScale.getValue();
+		
+		targetpW.add(temp);
+		targetl0 += templ;
 	}
 
 	public void setTargetpW() {
 		targetpW.set(pw);
 		pwo.set(pw);
+		targetl0 = l0;
+		lo = l0;
 	}
 	
 }
