@@ -327,6 +327,8 @@ public class CollisionProcessor {
 		}
 	}
 	
+	private ArrayList<BodyPairContact> orderedBpcs = new ArrayList<BodyPairContact>();
+	
 	/**
 	 * Reordering of the contacts list for the one iteration PGS as follows:
 	 * <p><ul>
@@ -337,7 +339,7 @@ public class CollisionProcessor {
 	 */
 	protected void getOrganizedContacts(ArrayList<Contact> contacts) {
 
-		ArrayList<BodyPairContact> orderedBpcs = new ArrayList<BodyPairContact>();
+		orderedBpcs.clear();
 		
 		// first add all bpc containing new contacts
 		for ( BodyPairContact bpc : bodyPairContacts ) {
@@ -347,6 +349,28 @@ public class CollisionProcessor {
 					bpc.checked = true;
 					break;
 				}
+			}
+		}
+		
+		for ( RigidBody body : bodies ) {
+			if (body instanceof RigidCollection) {
+				for ( RigidBody b : ((RigidCollection)body).bodies ) {
+					if ( b.picked ) {
+						for ( BodyPairContact bpc : b.bodyPairContacts )
+							if (!bpc.checked) {
+								orderedBpcs.add(bpc);
+								bpc.checked=true;
+							}
+						b.picked = false;
+					}
+				}
+			} else if ( body.picked ) {
+				for ( BodyPairContact bpc : body.bodyPairContacts )
+					if (!bpc.checked) {
+						orderedBpcs.add(bpc);
+						bpc.checked=true;
+					}
+				body.picked = false;
 			}
 		}
 
@@ -377,17 +401,13 @@ public class CollisionProcessor {
 				}
 			}
 		}
-
+		
 		// build the final organized contact list
 		for ( BodyPairContact bpc : orderedBpcs ) {
-			if (bpc.inCollection) {
-				contacts.addAll(bpc.contactList);
-			} else {
-				// This resolution is done with the Jacobians of the bodies (not the collection) 
-				// so not a good warm start for the LCP solve (we don't want to keep these values).
-				// we will redo the warm start after
-				contacts.addAll( bpc.contactList );				
-			}
+			// This resolution is done with the Jacobians of the bodies (not the collection) 
+			// so not a good warm start for the LCP solve (we don't want to keep these values).
+			// we will redo the warm start after
+			contacts.addAll( bpc.contactList );			
 		}
 	}	
 	

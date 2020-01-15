@@ -68,6 +68,7 @@ public class MouseSpringForce {
         if ( picked == null ) return;
         
         picked.wake();
+        picked.picked = true;
         
         picked.transformB2W.transform( grabPointB, grabPointBW );
         double distance = grabPointBW.distance( pointW );

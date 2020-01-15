@@ -95,6 +95,7 @@ public class MouseImpulse {
         if ( pickedBody == null || !released) return;
         
         pickedBody.wake();
+        pickedBody.picked = true;
         
         pickedBody.transformB2W.transform(pickedPointB, pickedPointW);
         double distance = endPointW.distance( pickedPointW );
