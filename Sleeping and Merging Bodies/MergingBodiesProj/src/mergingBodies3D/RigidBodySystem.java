@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Vector3d;
 
-import mergingBodies3D.Merging.MergeConditions;
+import mergingBodies3D.Merging.UnmergingCondition;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.swing.VerticalFlowPanel;
@@ -119,7 +119,7 @@ public class RigidBodySystem {
 		collision.updateInCollections(dt, merging.params);
 
         long now = System.nanoTime();   
-		merging.unmerge(MergeConditions.CONTACTS, dt);	
+		merging.unmerge(UnmergingCondition.CONTACTS, dt);	
         unmergingTime = (System.nanoTime() - now) / 1e9;
         
 		if (merging.mergingEvent) {
@@ -150,7 +150,7 @@ public class RigidBodySystem {
 		sleeping.sleep();
 
         now = System.nanoTime();   
-		merging.unmerge(MergeConditions.RELATIVEMOTION, dt); 
+		merging.unmerge(UnmergingCondition.RELATIVEMOTION, dt); 
         unmergingTime += (System.nanoTime() - now) / 1e9;
 
 		applyViscousDecay();
@@ -341,12 +341,43 @@ public class RigidBodySystem {
 						filename = new String(sceneName + ".csv");
 					File file = new File(filename);
 					stream = new PrintStream(file);
+					
+					stream.print("#bodies"); stream.print(", ");
+					stream.print("#contacts"); stream.print(", ");
+					stream.print("detection"); stream.print(", ");
+					stream.print("LCPSolve"); stream.print(", ");
+					stream.print("singleItPGS"); stream.print(", ");
+					stream.print("merging"); stream.print(", ");
+					stream.print("mergingCheckContacts"); stream.print(", ");
+					stream.print("mergingCheckMotion"); stream.print(", ");
+					stream.print("mergingCheckViolation"); stream.print(", ");
+					stream.print("mergingCheckCycle"); stream.print(", ");
+					stream.print("mergingBuild"); stream.print(", ");
+					stream.print("unmerging"); stream.print(", ");
+					stream.print("unmergingCheckContacts"); stream.print(", ");
+					stream.print("unmergingCheckMotion"); stream.print(", ");
+					stream.print("unmergingCheckCycle"); stream.print(", ");
+					stream.print("unmergingBuild"); stream.print(", ");
+					stream.print("computeTime"); stream.print("\n ");
+					
 				} catch (FileNotFoundException e) {	}
 			} else {
 				stream.print(bodies.size()); stream.print(", ");
 				stream.print(collision.contacts.size()); stream.print(", ");
 				stream.print(collision.collisionDetectTime); stream.print(", ");
 				stream.print(collision.collisionSolveTime); stream.print(", ");
+				stream.print(collision.collectionUpdateTime); stream.print(", ");
+				stream.print(mergingTime); stream.print(", ");
+				stream.print(merging.params.mergingCheckContactTime); stream.print(", ");
+				stream.print(merging.params.mergingCheckMotionTime); stream.print(", ");
+				stream.print(merging.params.mergingCheckViolationTime); stream.print(", ");
+				stream.print(merging.params.mergingCheckCycleTime); stream.print(", ");
+				stream.print(merging.params.mergingBuildTime); stream.print(", ");
+				stream.print(unmergingTime); stream.print(", ");
+				stream.print(merging.params.unmergingCheckContactTime); stream.print(", ");
+				stream.print(merging.params.unmergingCheckMotionTime); stream.print(", ");
+				stream.print(merging.params.unmergingCheckCycleTime); stream.print(", ");
+				stream.print(merging.params.unmergingBuildTime); stream.print(", ");
 				stream.print(computeTime); stream.print("\n ");
 			}
 		} else if (stream != null) {

@@ -51,10 +51,11 @@ public class Sleeping {
 			if (body.isSleeping)
 				continue;
 			
-			if (body.pinned) {
+			//This is not safe, single iteration PGS may take multiple time steps to detect something...
+			/*if (body.pinned) {
 				body.isSleeping = true;
 				continue;
-			}
+			}*/
 			
 			boolean externalContact = false;
 			for (BodyPairContact bpc : body.bodyPairContacts) {

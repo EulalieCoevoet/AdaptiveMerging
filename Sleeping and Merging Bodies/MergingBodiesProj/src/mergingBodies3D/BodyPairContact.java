@@ -123,13 +123,17 @@ public class BodyPairContact {
 	 */
 	protected boolean checkMergeCondition(MergeParameters mergeParams, boolean checkCycle) {
 
+		long now;
+		
 		if (body1.isSleeping && body2.isSleeping) 
 			return true;
-				
+
+		now = System.nanoTime();
 		if (mergeParams.enableMergeLetItBreathe.getValue())
 			for (Contact contact: contactList)
 				if (Math.abs(contact.prevConstraintViolation - contact.constraintViolation)>mergeParams.thresholdBreath.getValue()) 
 					return false;
+		mergeParams.mergingCheckViolationTime += (System.nanoTime() - now) / 1e9;
 		
 		if (!mergeParams.enableMergePinned.getValue() && (body1.pinned || body2.pinned)) 
 			return false;
@@ -137,14 +141,20 @@ public class BodyPairContact {
 		if (body1.isInSameCollection(body2)) 
 			return false;
 		
+		now = System.nanoTime();
 		if (!checkMotionMetric(mergeParams))
 			return false;
-		
+		mergeParams.mergingCheckMotionTime += (System.nanoTime() - now) / 1e9;
+
+		now = System.nanoTime();
 		if (mergeParams.enableMergeStableContactCondition.getValue() && !areContactsStable(mergeParams))
 			return false;
+		mergeParams.mergingCheckContactTime += (System.nanoTime() - now) / 1e9;
 		
+		now = System.nanoTime();   
 		if (mergeParams.enableMergeCycleCondition.getValue() && checkCycle && !checkContactsCycle(mergeParams))
 			return false;
+		mergeParams.mergingCheckCycleTime += (System.nanoTime() - now) / 1e9;
 			
 		return true;
 	}
@@ -195,21 +205,21 @@ public class BodyPairContact {
 	 * contacts, or cycles formed by three bodies with one contact between each.
 	 * @return true if the criteria is satisfied
 	 */
-	public boolean checkContactsCycle(MergeParameters mergeParams) {		
+	public boolean checkContactsCycle(MergeParameters mergeParams) {	
 		int nbActiveContact = 0;
 		for (Contact contact : contactList)
 			if (contact.state != ContactState.BROKEN)
 				nbActiveContact += 1;
 		
 		// if there are more than two active contact within the bpc, we can merge
-		if (nbActiveContact>2)
+		if (nbActiveContact>2) 
 			return true;
 
 		// if the bpc has already been identified as being part of a cycle, we can merge
 		if(inCycle) 
 			return true;
 		
-		// otherwise check if this bpc is in a cycle formed by three bodies with one contact between each
+		// otherwise check if this bpc is in a cycle formed by three bodies with one contact between each		
 		return body1.checkCycle(1, body2, this, mergeParams); 
 	}
 	
@@ -221,13 +231,20 @@ public class BodyPairContact {
 	 */
 	public boolean checkContactsState(double dt, MergeParameters mergeParams) {		
 				
+		long now = System.nanoTime();
+
 		for (Contact contact : contactList) { 
-			if (contact.state == ContactState.BROKEN && mergeParams.enableUnmergeNormalCondition.getValue()) 
+			if (contact.state == ContactState.BROKEN && mergeParams.enableUnmergeNormalCondition.getValue()) {
+				mergeParams.unmergingCheckContactTime += (System.nanoTime() - now) / 1e9;
 				return true; // rule 1. if one contact has broken
-			if (contact.state == ContactState.ONEDGE && mergeParams.enableUnmergeFrictionCondition.getValue())
+			}
+			if (contact.state == ContactState.ONEDGE && mergeParams.enableUnmergeFrictionCondition.getValue()) {
+				mergeParams.unmergingCheckContactTime += (System.nanoTime() - now) / 1e9;
 				return true; // rule 2. if one contact is on the edge of friction cone
+			}
 		}
-	
+
+		mergeParams.unmergingCheckContactTime += (System.nanoTime() - now) / 1e9;
 		return false;
 	}
 	
@@ -339,7 +356,7 @@ public class BodyPairContact {
 	 * @param bpcsToUnmerge
 	 */
 	public void checkCyclesToUnmerge(HashSet<BodyPairContact> bpcsToUnmerge) {
-		
+
 		for (int i=0; i<2; i++) { 
 			RigidBody body = getBody(i);
 			for (BodyPairContact bpc: body.bodyPairContacts) { // check if body was part of a cycle

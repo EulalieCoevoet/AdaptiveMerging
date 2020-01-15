@@ -87,6 +87,7 @@ public class Animation {
 			resetVelocities();
 			time = 0;
 			reset = false;
+			play = false;
 		}
 		
 		if (!play)
@@ -182,7 +183,7 @@ public class Animation {
 	
 	protected void updateSelection() {
 		if (params.bodyName.getValue()!=selection) {
-			resetVelocities();
+			reset=true;
 			selection = params.bodyName.getValue();
 			for (RigidBody body: bodies) {
 				
