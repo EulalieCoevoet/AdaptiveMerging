@@ -279,6 +279,8 @@ public class XMLParser {
 		setCommonAttributes( body, bodyNode ); // this will set our position... 
 		// but bodies definining the composite were defined in a local frame, and that COM position should be added to x
 		body.x.add( com );
+		body.x0.add( com );
+
 		body.updateRotationalInertaionFromTransformation();
 		body.geom = compositeGeom;
 		body.name = name;
@@ -583,6 +585,13 @@ public class XMLParser {
 					if ( !k.isEmpty() ) s.k = Double.parseDouble( k );
 					String d = e.getAttribute("d");
 					if ( !d.isEmpty() ) s.d = Double.parseDouble( d );
+					String controllable = e.getAttribute("controllable");
+					s.controllable = Boolean.parseBoolean(controllable);
+					if (s.controllable) {
+					
+						s.setTargetpW();
+						
+					}
 				} else {
 					System.err.println("[ParseSpring] Something is wrong with the spring.");
 				}

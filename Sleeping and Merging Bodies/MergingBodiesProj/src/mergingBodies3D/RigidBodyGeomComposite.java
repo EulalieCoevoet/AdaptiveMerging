@@ -35,6 +35,36 @@ public class RigidBodyGeomComposite extends RigidBodyGeom {
 		}
 	}
 	
+	/** 
+     * Draws the rigid body geometry, and uses display lists to make things reasonably fast
+     * @param drawable
+     */
+	@Override
+    public void display( GLAutoDrawable drawable ) {
+        GL2 gl = drawable.getGL().getGL2();
+        if ( soup != null && ! disableDisplaySoup.getValue() ) {
+			soup.display(drawable);
+			return;
+        }
+        if ( myListID == -1 ) {
+            Integer ID = mapObjectsToDisplayList.get(this);
+            if ( ID == null ) {
+                myListID = gl.glGenLists(1);
+                gl.glNewList( myListID, GL2.GL_COMPILE_AND_EXECUTE );
+                
+                drawGeom( drawable );
+                
+                gl.glEndList();
+                mapObjectsToDisplayList.put( this, myListID );
+            } else {
+                myListID = ID;
+                gl.glCallList(myListID);
+            }
+        } else {
+            gl.glCallList(myListID);
+        }
+    }
+	
 	/**
 	 * We override the display method... don't create a display list for 
 	 * the whole body, but instead we'll call the bodies display methods individaully 

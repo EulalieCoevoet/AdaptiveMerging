@@ -134,7 +134,7 @@ public class PGS {
 				updateDeltaVwithLambdai(contact, contact.lambda2 - prevLambda_t2, 2);
 				
 				if (iter == 1) // Last iteration: avoid looping again over contacts
-					contact.updateContactState(mu);
+					contact.updateContactState(mu, dt, computeInCollection);
 			}
 			
 			iter--;
@@ -152,7 +152,7 @@ public class PGS {
 		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
 
 		Vector6d dv1 = body1.deltaV; 
-		Vector6d dv2 = body2.deltaV; 
+		Vector6d dv2 = body2.deltaV;
 		
 		Vector6d ja = contact.jna;
 		Vector6d jb = contact.jnb;

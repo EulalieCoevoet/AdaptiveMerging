@@ -64,4 +64,10 @@ public class ContactPool {
 		nextInPool1 = 0;
 	}
 	
+	public void clear() {
+		pool1.clear();
+		pool2.clear();
+		nextInPool1 = 0;
+	}
+	
 }

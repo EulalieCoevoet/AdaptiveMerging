@@ -1,5 +1,7 @@
 package mergingBodies3D;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -7,13 +9,15 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
+import mintools.parameters.DoubleParameter;
+
 
 public class Spring {
 
 	/** The body to which this spring is attached */
-	private RigidBody body1;
+	public RigidBody body1;
 	/** The other body to which this spring is attached */
-	private RigidBody body2;
+	public RigidBody body2;
 	/** The point at which this spring is attached in body1 coordinates */
 	private Point3d pb1 = new Point3d();
 	/** The point at which this spring is attached in body2 coordinates */
@@ -24,6 +28,9 @@ public class Spring {
 	private Point3d pb2W = new Point3d();
 	/** The point in the world to which this spring is attached */
 	private Point3d pw = new Point3d();
+	
+	/** The original point in the world to which this spring is attached*/
+	private Point3d pwo = new Point3d();
 
 	enum SpringType {ZERO, WORLD, BODYBODY};
 	private SpringType type; 
@@ -44,6 +51,7 @@ public class Spring {
 	private Vector3d velocity = new Vector3d(); // velocity of the point on the body
 	private Vector3d force = new Vector3d();
 	
+
 	/** 
 	 * Creates a new body pinned to world spring.
 	 * @param pB 	The attachment point in the body frame
@@ -55,6 +63,8 @@ public class Spring {
 		this.pb1.set( pB );
 		body.transformB2W.transform( pb1, pb1W );
 		body.transformB2W.transform( pb1, pw );
+		
+		
 	}
 	
 	/**
@@ -72,6 +82,7 @@ public class Spring {
 		this.pw.set( pW );
 		displacement.sub( pw, pb1W ); 
 		l0 = displacement.length();
+	
 	}
 	
 	/**
@@ -91,9 +102,14 @@ public class Spring {
 		body2.transformB2W.transform( pb2, pb2W );
 		displacement.sub( pb1W, pb2W ); 
 		l0 = displacement.length();
+		
 	}
 
 	public void reset() {
+		if (controllable) {
+			pw.set(pwo);
+			targetpW.set(pw);
+		}
 		switch (type) {
 			case ZERO:
 				body1.transformB2W.transform(pb1, pw);
@@ -165,21 +181,30 @@ public class Spring {
 			
 		body1.transformB2W.transform( pb1, pb1W );
 		body2.transformB2W.transform( pb2, pb2W );
-		displacement.sub( pb1W, pb2W ); 
 
+		displacement.sub( pb2W, pb1W ); 
 		// Silly fix... the force should go gracefully to zero without giving NaNs :(
 		if ( displacement.length() < 1e-3 ) return;  // hmm... should just give it some rest length?
 		
+		body1.getSpatialVelocity( pb1W, velocity );
+		
 		double scale = 
-				- (k*ks * (displacement.length()  - l0)) 
+				- (k*ks * (displacement.length()  - l0) - d*ds * (velocity.dot(displacement) / displacement.length())) 
 				/ displacement.length();
-
-		force.scale( scale, displacement );
+		
+		force.scale( -scale, displacement );
 		body1.applyForceW( pb1W, force );
 		if ( body1.isInCollection() ) {
 			body1.parent.applyForceW( pb1W, force );
 		}
+
+		displacement.sub( pb1W, pb2W ); 		
+		body2.getSpatialVelocity( pb2W, velocity );
 		
+		scale = 
+				- (k*ks * (displacement.length()  - l0) - d*ds * (velocity.dot(displacement) / displacement.length())) 
+				/ displacement.length();
+
 		force.scale( -scale, displacement );
 		body2.applyForceW( pb2W, force );
 		if ( body2.isInCollection() ) {
@@ -216,6 +241,70 @@ public class Spring {
 		pw.y += dy;
 		l0 += dl;
 		if (l0 < 0 ) l0 = 0;
+	}
+	
+	/** Boolean: true if spring is moveable with spring controls */
+	public boolean controllable = false;
+	
+	/** Target point in world coordinates for our controllable springs */
+	public Point3d targetpW = new Point3d();
+
+	/** Parameters to help solve ODE to get controllable springs to desired position smoothly
+	 * TODO: Should make these available to modify on interface
+	 */
+	private DoubleParameter animationStepSize = new DoubleParameter( "Anim step size", 0.005, 1e-4, 1 );
+	private DoubleParameter animationk1= new DoubleParameter( "Anim stiffness", 100, 1, 1e6 );
+	private DoubleParameter animationCDM = new DoubleParameter( "Anim critical damping multiplyer", 0.9, 0, 2);
+	private DoubleParameter moveScale = new DoubleParameter("Step Movement Scale", 0.2, 0.1, 10);
+	
+	/** Vector that stores error in each direction*/
+	private Vector3d err = new Vector3d();
+	/** Velocity of moving pW */
+	private Vector3d vpW = new Vector3d();
+	
+	/*
+	 * Moves world coordinates of spring to desired target spoothly.
+	 */
+	public void moveSpring() {
+		
+		double h = animationStepSize.getValue();
+    	double k1 = animationk1.getValue();
+    	// tiny bit underdamped and we don't notice!
+    	double k2 = 2*Math.sqrt(k1)*animationCDM.getValue(); // critical damping at sqrt(b^2- 4 k)
+    	
+    	err.sub(targetpW, pw);
+    	
+    	// x direction
+    	vpW.x += h * ( k1 * err.x - k2 * vpW.x);
+    	pw.x += h * vpW.x;
+    	
+    	// y direction
+    	vpW.y += h * ( k1 * err.y - k2 * vpW.y);
+    	pw.y += h * vpW.y;
+    
+    	//z direction
+    	vpW.z += h * ( k1 * err.z - k2 * vpW.z);
+    	pw.z += h * vpW.z;
+    	
+	}
+	
+	Vector3d temp = new Vector3d();
+	/**
+	 * Moves target position... called in LCPApp3d whenever WASDQE are pressed. 
+	 * (Maybe with alt down)
+	 * @param direction
+	 */
+	public void moveTargetpW(Vector3d direction) {
+		temp.set(direction);
+		double scale = moveScale.getValue();
+		temp.scale(scale);
+		targetpW.add(temp);
+		
+	}
+
+	public void setTargetpW() {
+		targetpW.set(pw);
+		pwo.set(pw);
 	}
 	
 }

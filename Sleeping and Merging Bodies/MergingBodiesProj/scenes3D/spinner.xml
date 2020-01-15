@@ -1,0 +1,157 @@
+<?xml version="1.0" ?>
+<root>
+	<body n="0. 1. 0.0" name="plane" p="0 0 0" type="plane"/>
+	<body density="1" name="platform" scale="1" type="composite">
+		<x>0. 5. 0.</x>
+		<R>0. -1 0. 0.</R>
+		<v>0 0 0</v>
+		<omega>0 0.5 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<body density="1" dim="15 1 15" name="box" scale="1" type="box">
+			<x>0. 0. 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="15 3 1" name="box" scale="1" type="box">
+			<x>0. 1.0 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="15 3 1" name="box" scale="1" type="box">
+			<x>0. 1.0 7.0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="15 3 1" name="box" scale="1" type="box">
+			<x>0. 1.0 -7.0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="1 3 15" name="box" scale="1" type="box">
+			<x>0. 1.0 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="1 3 15" name="box" scale="1" type="box">
+			<x> 7.0 1.0 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="1 3 15" name="box" scale="1" type="box">
+			<x> -7.0 1.0 0.</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+	</body>
+	<body density="1" name="stand" scale="1" type="composite">
+		<x>0 0 0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<body density="1" dim="41.0 1 1" name="box" scale="1" type="box">
+			<x>0 30 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="1 30 1" name="box" scale="1" type="box">
+			<x>20 15.0 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="1 30 1" name="box" scale="1" type="box">
+			<x>-20 15.0 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="1 1 10" name="box" scale="1" type="box">
+			<x>20 0 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="1 1 10" name="box" scale="1" type="box">
+			<x>-20 0 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<spring body2="platform" d="10" k="12" pB="0 12.0 0" pB2="7.5 0.5 7.5"/>
+		<spring body2="platform" d="10" k="12" pB="-0 12.0 0" pB2="-7.5 0.5 7.5"/>
+		<spring body2="platform" d="10" k="12" pB="-0 12.0 0" pB2="-7.5 0.5 -7.5"/>
+		<spring body2="platform" d="10" k="12" pB="0 12.0 0" pB2="7.5 0.5 -7.5"/>
+	</body>
+	<body density="1" name="ball1" r="2" scale="1" type="sphere">
+		<x>3.75 7 3.75</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>0.5 0. 0. 1.</col>
+	</body>
+	<body density="1" name="ball2" r="2" scale="1" type="sphere">
+		<x>-3.75 7 -3.75</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>0. 0.5 0. 1.</col>
+	</body>
+	<body density="1" dim="3 3 3" name="box1" scale="1" type="box">
+		<x>-3.75 7 3.75</x>
+		<R>0 -1 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>0. 0. 0.5 1.</col>
+	</body>
+	<body density="1" dim="3 3 3" name="box2" scale="1" type="box">
+		<x>3.75 7 -3.75</x>
+		<R>0 -1 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>0.8 0.8 0. 1.</col>
+	</body>
+</root>

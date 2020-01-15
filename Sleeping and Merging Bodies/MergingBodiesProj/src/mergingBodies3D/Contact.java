@@ -31,9 +31,9 @@ public class Contact {
 	/** Information to help in warm starts by allowing contacts between bodies across time steps to be matched */
 	public int info;
 	/** composite sub body 1, for warm starting with composites **/
-	private RigidBody csb1 = null;
+	public RigidBody csb1 = null;
 	/** composite sub body 2, for warm starting with composites **/
-	private RigidBody csb2 = null;
+	public RigidBody csb2 = null;
     
 	// CONTACT FRAME, stored in body, but originally specified in world.
 	
@@ -91,6 +91,15 @@ public class Contact {
 	double D11;
 	double D22;
 	
+	/** temporary Contact force being applied by this contact on body1 (note this is world aligned at body COM)... only used for display */
+    static private Vector3d forceW1 = new Vector3d();
+    	
+    /** Temporary contact frame information, used for display and to recompute jacobians */
+    static private Point3d contactInW = new Point3d();
+    static private Vector3d normalInW = new Vector3d();
+    static private Vector3d tangent1InW = new Vector3d();
+    static private Vector3d tangent2InW = new Vector3d();
+	
 	public Contact() {
 		// constructor for pre-allocation
 	}
@@ -121,7 +130,7 @@ public class Contact {
 		normalB1.set(contact.normalB1);   	
 		tangent1B1.set(contact.tangent1B1);  
 		tangent2B1.set(contact.tangent2B1);  
-											
+												
 		lambda0 = contact.lambda0;
 		lambda1 = contact.lambda1;
 		lambda2 = contact.lambda2;
@@ -142,25 +151,32 @@ public class Contact {
 	
     /**
      * Sets the contact, and assigns it an index, only ever called for NEW contacts!
-     * @param body1
-     * @param body2
+     * @param b1
+     * @param b2
      * @param contactW	in world coordinates
      * @param normalW	in world coordinates
      */
-    public void set( RigidBody body1, RigidBody body2, Point3d contactW, Vector3d normalW, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {    	
-    	this.body1 = body1;
-        this.body2 = body2;
+    public void set( RigidBody b1, RigidBody b2, Point3d contactW, Vector3d normalW, BVSphere disc1, BVSphere disc2, int info, double constraintViolation ) {    	
+    	
+    	state = ContactState.CLEAR;
+    	
+    	body1 = b1;
+        body2 = b2;
 		this.info = info;
         
 		// Just add the composite sub bodies here!!  it will be needed for warm start information...
 		
-		if ( this.body1.isInComposite() ) { // use the real body if this is a sub body in a composite
-        	this.body1 = body1.compositeBodyParent;
-        	this.csb1 = body1;
+		if ( body1.isInComposite() ) { // use the real body if this is a sub body in a composite
+        	body1 = b1.compositeBodyParent;
+        	csb1 = b1;
+        } else {
+        	csb1 = null;
         }
-        if ( this.body2.isInComposite() ) { // same for body 2
-        	this.body2 = body2.compositeBodyParent;
-        	this.csb2 = body2;
+        if ( body2.isInComposite() ) { // same for body 2
+        	body2 = b2.compositeBodyParent;
+        	csb2 = b2;
+        } else {
+        	csb2 = null;
         }
         
         // TODO: last thing to fix here (Before writing the collision processing) is the info
@@ -169,8 +185,9 @@ public class Contact {
         
 		bv1 = disc1;
 		bv2 = disc2;
-		this.constraintViolation =  constraintViolation; //  + 1e-3;  // try to not actually push things completely apart!   perhaps??
-
+		this.constraintViolation = constraintViolation; //  + 1e-3;  // try to not actually push things completely apart!   perhaps??
+		this.prevConstraintViolation = 0.; 
+		
 		lambda0 = 0; 
 		lambda1 = 0;
 		lambda2 = 0;
@@ -196,7 +213,7 @@ public class Contact {
 		tangent2B1.cross( normalW, tangent1B1 );
 		tangent2B1.normalize();
 		tangent1B1.cross( tangent2B1,  normalW );  // and doesn't need normalization 
-	
+		
 		// these quantities were built in world, so we can build the jacobian with them...
         computeJacobian(false, contactB1, normalB1, tangent1B1, tangent2B1 ); // the boolean doesn't matter here
         // Now need to store them in body coords in case this contact becomes
@@ -205,6 +222,18 @@ public class Contact {
         body1.transformB2W.inverseTransform( normalB1 );
         body1.transformB2W.inverseTransform( tangent1B1 );
         body1.transformB2W.inverseTransform( tangent2B1 );
+        
+        bn = 0;
+        bt1 = 0;
+        bt2 = 0;
+        D00 = 0;
+        D11 = 0;
+        D22 = 0;
+        newThisTimeStep = true; // warm start will change later
+        
+        
+        
+        
     }
     
     private void computeJacobian( boolean computeInCollection, Point3d contactW, Vector3d normalW, Vector3d tangent1W, Vector3d tangent2W ) {
@@ -354,22 +383,34 @@ public class Contact {
     
 	/**
 	 * Update state of the contact: either BROKE, SLIDING or CLEAR
+	 * This MUST be called post solve so that the b values are available.
 	 * @param mu
 	 */
-	protected void updateContactState(double mu) {
+	protected void updateContactState(double mu, double dt, boolean computeInCollection) {
+		// store in member variables for viewing...  :/
+		w1 = bt1 + getJdv(computeInCollection, 1);
+		w2 = bt2 + getJdv(computeInCollection, 2);
+		
 		if (Math.abs(lambda0) <= 1e-14) // (math.abs is for magnet)
 			state = ContactState.BROKEN;	
-		else if ( Math.abs(lambda1) == lambda0*mu || Math.abs(lambda2) == lambda0*mu ) 
+		else if ( Math.abs(w1)>slidingThreshold.getValue() && Math.abs(lambda1)==mu*lambda0) 
+			state = ContactState.ONEDGE;	
+		else if ( Math.abs(w2)>slidingThreshold.getValue() && Math.abs(lambda2)==mu*lambda0) 
 			state = ContactState.ONEDGE;
 		else
 			state = ContactState.CLEAR;
 	}
+
+	/** For monitoring slip externally... */
+	public double w1,w2;
 	
 	/** Colour for drawing contacts */
     private static final float[] col = new float[] { 1f, 0, 0, 0.25f };
     private static final float[] colInCollection = new float[] { 0, 0, 1, 0.25f };
     private static final float[] colNew = new float[] { 0, 0.5f, 0, 0.65f };
     private static final float[] colOnEdge = new float[] { 0, 0, 0, 0.75f };
+    private static final float[] colNewOnEdge = new float[] { 0.35f, 0.35f, 0, 0.75f };
+
     private static final float[] colGraph = new float[] { 0, 0.2f, 0, 0.25f };
     private static final float[] colText = new float[] { 0,0,0, 0.9f };
     
@@ -382,6 +423,9 @@ public class Contact {
         float[] c = col;
         if (state == ContactState.ONEDGE) {
         	c = colOnEdge;
+        	if ( newThisTimeStep ) {
+        		c = colNewOnEdge;
+        	}
 		} else {
 			if ( newThisTimeStep ) {				
 				c = colNew;
@@ -399,20 +443,12 @@ public class Contact {
         gl.glVertex3d( contactInW.x, contactInW.y, contactInW.z );
         gl.glEnd();
 
-        gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colText, 0 );
-        gl.glRasterPos3d( contactInW.x, contactInW.y, contactInW.z );
-		EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + info );
+        if(false) {
+		    gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colText, 0 );
+		    gl.glRasterPos3d( contactInW.x, contactInW.y, contactInW.z );
+			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + info );
+        }
     }
-    
-    
-	/** temporary Contact force being applied by this contact on body1 (note this is world aligned at body COM)... only used for display */
-    static private Vector3d forceW1 = new Vector3d();
-    /** Temporary contact frame information, used for display and to recompute jacobians */
-    static private Point3d contactInW = new Point3d();
-    static private Vector3d normalInW = new Vector3d();
-    static private Vector3d tangent1InW = new Vector3d();
-    static private Vector3d tangent2InW = new Vector3d();
-
 
 	/**
 	 * Comptues contact forces for visualization purposes
@@ -426,12 +462,6 @@ public class Contact {
 		forceW1.scaleAdd( lambda1, tangent1InW, forceW1 );
 		forceW1.scaleAdd( lambda2, tangent2InW, forceW1 );		
 		forceW1.scale(1./dt);
-        
-		//computeJacobian(true);
-//		forceW1.scale( lambda0, jna.v );
-//		forceW1.scaleAdd( lambda1, jt1a.v, forceW1 );
-//		forceW1.scaleAdd( lambda2, jt2a.v, forceW1 );		
-//		forceW1.scale(1./dt);
 	}
 	
 	/**
@@ -467,6 +497,9 @@ public class Contact {
         float[] c = col;
         if (state == ContactState.ONEDGE) {
         	c = colOnEdge;
+        	if ( newThisTimeStep ) {
+        		c = colNewOnEdge;
+        	}
 		} else {
 			if ( newThisTimeStep ) {	
 				c = colNew;
@@ -485,6 +518,7 @@ public class Contact {
 	}
     
 	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.0001, 1);
+	static DoubleParameter slidingThreshold = new DoubleParameter("sliding velocity threshold", 0.1, 0.0001, 3);
 
     /**
      * Draws the connections between bodies to visualize the 
@@ -537,7 +571,7 @@ public class Contact {
         Contact c = (Contact) obj;
         if ( info != c.info ) return false;
         return body1 == c.body1 && bv1 == c.bv1 && body2 == c.body2 && bv2 == c.bv2 && csb1 == c.csb1 && csb2 == c.csb2 ||
-        		body2 == c.body1 && bv2 == c.bv1 && body1 == c.body2 && bv1 == c.bv2 && csb1 == c.csb2 && csb2 == c.csb1;    
+        	   body2 == c.body1 && bv2 == c.bv1 && body1 == c.body2 && bv1 == c.bv2 && csb2 == c.csb1 && csb1 == c.csb2;    
     }
 
     @Override

@@ -58,7 +58,7 @@ public class Factory {
     public void reset() {
         elapsed = interval.getValue(); // make a body right away!
         rand.setSeed(0);
-        system.clear();
+        system.clearBodies();
         for ( RigidBody b : pinnedBodies ) {
         	system.bodies.add( b );
         }

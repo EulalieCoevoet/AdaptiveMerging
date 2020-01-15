@@ -1,27 +1,11 @@
 import xml.etree.ElementTree as ET
+import general
 
 class Sphere():
 
-    def __init__(self, root, name="box", position="0 0 0", orientation="0. -1 0. 0.", radius="1", pinned="false", magnetic="false", restitution=None, friction=None):
+    def __init__(self, root, name="box", position="0 0 0", orientation="0. -1 0. 0.", velocity="0. 0. 0.", omega="0. 0. 0.",radius="1", density="1", pinned="false", magnetic="false", restitution=None, friction=None, color=None):
         # Fixed body
-        self.body = ET.SubElement(root, 'body')
-        self.body.set('type','sphere')
-        self.body.set('r', radius)
-        self.body.set('name',name)
-        com = ET.SubElement(self.body, 'x')
-        com.text = position
-        R = ET.SubElement(self.body, 'R')
-        R.text = orientation
-        pin = ET.SubElement(self.body, 'pinned')
-        pin.text = pinned
-        magn = ET.SubElement(self.body, 'magnetic')
-        magn.text = magnetic
-        if(restitution!=None):
-            rest = ET.SubElement(self.body, 'restitution')
-            rest.text = restitution
-        if(friction!=None):
-            fric = ET.SubElement(self.body, 'friction')
-            fric.text = friction
+        self.body = general.body(root, "sphere", name, position, orientation, velocity=velocity, omega=omega, radius=radius, pinned=pinned, magnetic=magnetic, density=density, restitution=restitution, friction=friction, color=color)
 
     def addSpring(self, positionB="0 0 0", k="100", d="10", body2=None, positionW=None, positionB2=None):
         spring = ET.SubElement(self.body, 'spring')
@@ -35,3 +19,6 @@ class Sphere():
 
         if (positionW!=None):
             spring.set('pW', positionW)
+
+    def get(self):
+        return self.body

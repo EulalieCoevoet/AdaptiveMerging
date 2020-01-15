@@ -36,7 +36,7 @@ public class makeDominoPlatformPyramid {
 			double sz = 0.5; 
 			
 			
-			//first spiral dimesnios... will be increased as we go down the loop.
+			//first spiral dimesnios... will be increased as we go down the pyramid.
 			int numLoops = 2; //how many times iwll the dominos do a full 360 loop?
 			double rStart = 10;	// given initial radius... will be made gradually smaller for spiralling 
 			double rEnd = 2; //when r reaches this value, terminate the domino generation??? not using this stopping condition but may be better

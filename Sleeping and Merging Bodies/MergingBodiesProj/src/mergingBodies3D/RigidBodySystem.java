@@ -34,7 +34,7 @@ public class RigidBodySystem {
     
 	public CollisionProcessor collision = new CollisionProcessor(bodies);
 	public Merging merging = new Merging(bodies, collision);
-	public Sleeping sleeping = new Sleeping(bodies);
+	public Sleeping sleeping = new Sleeping(bodies, springs);
 	public Display display = new Display(bodies, springs, collision);
 	
 	public PrintStream stream = null;
@@ -106,8 +106,8 @@ public class RigidBodySystem {
 		collision.updateContactsMap(); // also called after the LCP solve below... certainly not needed in both places!  :/
 		
         collision.collisionDetection(dt);
-		collision.warmStart(); 	
 		collision.updateBodyPairContacts(); 
+		collision.warmStart(); 	
 
 		if (sleeping.params.wakeAll.getValue()) sleeping.wakeAll();
 		sleeping.wake();
@@ -164,9 +164,12 @@ public class RigidBodySystem {
 	 * Apply gravity, mouse spring and impulse
 	 */
 	protected void applyExternalForces() {
-		if (useGravity.getValue()) {
+		if ( useGravity.getValue() ) {
 			applyGravityForce();
 		}  
+		if ( useCoriolis.getValue() ) {
+			applyCoriolis();
+		}
 	
 		if (mouseSpring != null) {
 			mouseSpring.apply( applyMouseSpringAtCOM.getValue() );
@@ -194,25 +197,37 @@ public class RigidBodySystem {
 	}
 	
 	/** Temporary working variable */
+	private Vector3d tmpDir = new Vector3d();
 	private Vector3d tmpForce = new Vector3d();
 
 	/**
 	 * Apply gravity to bodies, collections and bodies in collections
 	 */
 	private void applyGravityForce() {
-		for ( RigidBody body : bodies ) {			
-			//fully active, regular stepping
-			double theta = gravityAngle.getValue() / 180.0 * Math.PI;
-			tmpForce.set( Math.cos( theta ), Math.sin(theta), 0 );
-			tmpForce.scale( - body.massLinear * gravityAmount.getValue() );
+		double theta = gravityAngle.getValue() / 180.0 * Math.PI;
+		double gravAmount = gravityAmount.getValue();
+		tmpDir.set( gravAmount * Math.cos( theta ), gravAmount * Math.sin(theta), 0 );
+		for ( RigidBody body : bodies ) {		
+			tmpForce.scale( - body.massLinear, tmpDir );
 			body.force.add( tmpForce ); // gravity goes directly into the accumulator, no torque
-            body.applyCoriollisTorque(); // TODO: CORIOLLIS: sadly, this appears to be buggy :(
-			
 			if( body instanceof RigidCollection) {				
 				for ( RigidBody b : ((RigidCollection)body).bodies ) {
-					tmpForce.set( Math.cos( theta ), Math.sin(theta), 0 );
-					tmpForce.scale( - b.massLinear * gravityAmount.getValue() );
+					tmpForce.scale( - b.massLinear, tmpDir );
 					b.force.add( tmpForce );
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Apply Coriolis to bodies, collections and bodies in collections
+	 */
+	private void applyCoriolis() {
+		for ( RigidBody body : bodies ) {			
+            body.applyCoriolisTorque();			
+			if( body instanceof RigidCollection) {				
+				for ( RigidBody b : ((RigidCollection)body).bodies ) {
+					b.applyCoriolisTorque();
 				}
 			}
 		}
@@ -223,7 +238,11 @@ public class RigidBodySystem {
 	 */
 	private void applySpringForces() {
 		for (Spring s: springs) {
+			if (s.controllable) {
+				s.moveSpring();
+			}
 			s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
+			
 		}
 	}
     
@@ -266,6 +285,7 @@ public class RigidBodySystem {
         simulationTime = 0;
         collision.reset();
         totalAccumulatedComputeTime = 0;     
+        totalSteps = 0;
     }
     
     protected void applyViscousDecay()
@@ -279,13 +299,22 @@ public class RigidBodySystem {
     }
     
     /**
-     * Removes all bodies from the system
+     * Removes all bodies AND springs from the system
      */
     public void clear() {
         bodies.clear();
         springs.clear();
         RigidBody.nextIndex = 0;
         reset();
+    }
+    
+    /**
+     * Removes all bodies from the system. Not springs. Used for initializing factory.
+     */
+    public void clearBodies() {
+    	bodies.clear();
+    	RigidBody.nextIndex = 0;
+    	reset();
     }
     
     /**
@@ -320,7 +349,8 @@ public class RigidBodySystem {
     BooleanParameter useGravity = new BooleanParameter( "enable gravity", true );
     DoubleParameter gravityAmount = new DoubleParameter( "gravitational constant", 1, -20, 20 );
     DoubleParameter gravityAngle = new DoubleParameter( "gravity angle", 90, 0, 360 );
-   
+    BooleanParameter useCoriolis = new BooleanParameter( "enable Coriolis (for stability: use smaller time steps, global angular viscous, or both)", false );
+    
     public BooleanParameter saveCSV = new BooleanParameter( "save CSV", false);
 	public DoubleParameter globalViscousLinearDecay = new DoubleParameter("global viscous linear decay", 1, 0.1, 1 );
 	public DoubleParameter globalViscousAngularDecay = new DoubleParameter("global viscous angular decay", 1, 0.1, 1 );
@@ -343,6 +373,7 @@ public class RigidBodySystem {
         vfp.add( useGravity.getControls() );
         vfp.add( gravityAmount.getSliderControls(false) );
         vfp.add( gravityAngle.getSliderControls(false) );
+        vfp.add( useCoriolis.getControls() );
         
 		vfp.add(springStiffnessMod.getSliderControls(false));
 		vfp.add(springDampingMod.getSliderControls(false));

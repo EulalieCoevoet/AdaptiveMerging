@@ -40,10 +40,10 @@ public class Merging {
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", false);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
-		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
+		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 3, 0, 200 );
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1, 1e-10, 100 );
-		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-3, 1e-10, 1e0 );
+		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-5, 1e-10, 1e0 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 	}
 	public MergeParameters params = new MergeParameters();
@@ -201,7 +201,7 @@ public class Merging {
 		
 		for(RigidBody body : bodies) {
 			
-			if(body.isSleeping )//|| body.temporarilyPinned)
+			if(body.isSleeping )
 				continue;
 			
 			if (body instanceof RigidCollection) {
@@ -365,9 +365,14 @@ public class Merging {
 			bpc.inCollection = false;
 			bpc.contactStateHist.clear();
 			bpc.motionMetricHist.clear();
-			for (Contact contact : bpc.contactList) 
-				if (!collision.contacts.contains(contact))
+			for (Contact contact : bpc.contactList) {
+				if (!collision.contacts.contains(contact)) {
+					contact.lambda0warm = contact.lambda0;
+					contact.lambda1warm = contact.lambda1;
+					contact.lambda2warm = contact.lambda2;
 					collision.contacts.add(contact);
+				}
+			}
 		}
 	}
 	
@@ -462,6 +467,7 @@ public class Merging {
 		vfp.add( params.thresholdMerge.getSliderControls(false) );
 		vfp.add( params.thresholdUnmerge.getSliderControls(false) );
 		vfp.add( params.thresholdBreath.getSliderControls(true) );
+		vfp.add( Contact.slidingThreshold.getSliderControls(true) ); // Gross?
         JButton umergeButton = new JButton("unmerge all");
         vfp.add( umergeButton);
         umergeButton.addActionListener( new ActionListener() {

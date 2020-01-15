@@ -67,6 +67,8 @@ public class MouseSpringForce {
     public void apply( boolean applyAtCOM ) {
         if ( picked == null ) return;
         
+        picked.wake();
+        
         picked.transformB2W.transform( grabPointB, grabPointBW );
         double distance = grabPointBW.distance( pointW );
         double k = stiffness.getValue();
@@ -126,6 +128,7 @@ public class MouseSpringForce {
      * @param drawable
      */
     public void display(GLAutoDrawable drawable) {
+    	if ( picked == null ) return;
     	GL2 gl = drawable.getGL().getGL2();
     	gl.glDisable( GL2.GL_LIGHTING );
     	gl.glColor4d( 1, 0,0, 0.5 );

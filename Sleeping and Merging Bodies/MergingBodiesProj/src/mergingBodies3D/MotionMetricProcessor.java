@@ -52,9 +52,8 @@ public class MotionMetricProcessor {
 	
 	/**
 	 * Compute the magnitude of the largest relative velocity looking at
-	 * each bounding box point of each body.
-	 * @param body1
-	 * @param body2
+	 * each bounding box point the given body.
+	 * @param body
 	 * @return
 	 */
 	private double getLargestVelocityNorm(RigidBody body) {

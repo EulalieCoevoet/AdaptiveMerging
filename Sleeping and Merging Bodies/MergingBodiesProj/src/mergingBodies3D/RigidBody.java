@@ -282,7 +282,7 @@ public class RigidBody {
 	    	metricHistory.clear();
 	    }
 		
-		if (isInCollection() && parent.isSleeping)
+		if (isInCollection())
 	    	parent.wake();
 	}
 	
@@ -326,13 +326,15 @@ public class RigidBody {
     
     /**
      * Adds to the torque a corriolis term (J omega) * omegacross
+     * Needs small time steps to be stable, so watch out!  Otherwise, we might
+     * put some sort of scaling factor on this in combination to using gentle
+     * global viscous damping to try to keep things stable?
      */
-    public void applyCoriollisTorque() {
+    public void applyCoriolisTorque() {
     	if ( !pinned ) {
 	    	massAngular.transform( omega, tmp );
 	    	tmp2.cross( tmp, omega );
-	    	// TODO: CORRIOLIS: this is certainly broken :( Check that this is correct!! And make more efficient?
-	    	//torque.sub(tmp2); // seems like this should be added, but could also be a sign error. :(
+	    	torque.sub(tmp2); // seems like this should be added, but could also be a sign error. :(
     	}
     }
     

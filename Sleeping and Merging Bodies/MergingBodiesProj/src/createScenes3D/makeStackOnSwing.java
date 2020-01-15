@@ -11,19 +11,20 @@ public class makeStackOnSwing {
 
 	public static void main( String[] args ) {		
 		try {
-			PrintStream ps = new PrintStream("scenes3D/stackOnSwing2.xml");
+			PrintStream ps = new PrintStream("scenes3D/stackOnSwing.xml");
 			ps.println("<root>");
 			createPlane( ps, -10 );
 			
-			double eps = 1e-4;
+			double eps = -1e-5;
 			int stackID = 0;
 			int platformID = 0;
 			
 			Point3d pos = new Point3d( 0, 0, 0 );
-			Vector3d brickSize = new Vector3d( 8,5,8 );					
-			createMessyStack(ps, stackID++, 2, -eps, brickSize, pos, 0.02);
-									
-			createPlatform(ps, platformID++, 10, pos, 50, 500, 200 );
+			Vector3d brickSize = new Vector3d( 8,1,8 );					
+			createMessyStack(ps, stackID++, 20, -eps, brickSize, pos, 0.02);
+					
+			double standWidth = 20;
+			createPlatform(ps, platformID++, 10, pos, 50, 500, 200, standWidth );
 			
 			ps.println("</root>");			
 			ps.close();
@@ -106,13 +107,38 @@ public class makeStackOnSwing {
 	 * @param k
 	 * @param d
 	 */
-	public static void createPlatform( PrintStream ps, int platformID, double r, Point3d pos, double springLength, double k, double d ) {
+	public static void createPlatform( PrintStream ps, int platformID, double r, Point3d pos, double springLength, double k, double d, double standWidth ) {
+		
+		ps.println("<body type=\"composite\" name=\"stand\">"); 
+		ps.println("    <x> 0. 0. 0. </x>" );
+		ps.println("    <body type=\"box\" name=\"compositBox1 \" dim=\" " + (2*r+2+standWidth*2) + " 2 " + 2 + "\">");
+		ps.println("         <x> "+ asString( 0., springLength, pos.z )+" </x>" );
+		ps.println("         <R>  0 -1 0 0. </R>" );		
+		ps.println("    </body>");
+		ps.println("    <body type=\"box\" name=\"compositBox2 \" dim=\"2 " + (pos.y+10+springLength) + " 2 \">");
+		ps.println("         <x> "+ asString( (r+standWidth), (pos.y+springLength-10)/2., pos.z )+" </x>" );
+		ps.println("         <R>  0 -1 0 0. </R>" );		
+		ps.println("    </body>");
+		ps.println("    <body type=\"box\" name=\"compositBox3 \" dim=\"2 " + (pos.y+10+springLength) + " 2 \">");
+		ps.println("         <x> "+ asString( (-r-standWidth), (pos.y+springLength-10)/2., pos.z )+" </x>" );
+		ps.println("         <R>  0 -1 0 0. </R>" );		
+		ps.println("    </body>");
+		ps.println("    <body type=\"box\" name=\"compositBox4 \" dim=\" " + 2 + " 2 " + 10 + "\">");
+		ps.println("         <x> "+ asString( (r+standWidth), -9, pos.z )+" </x>" );
+		ps.println("         <R>  0 -1 0 0. </R>" );		
+		ps.println("    </body>");
+		ps.println("    <body type=\"box\" name=\"compositBox5 \" dim=\" " + 2 + " 2 " + 10 + "\">");
+		ps.println("         <x> "+ asString( (-r-standWidth), -9, pos.z )+" </x>" );
+		ps.println("         <R>  0 -1 0 0. </R>" );		
+		ps.println("    </body>");
+		ps.println("</body>");	
+		
 		ps.println("<body type=\"box\" name=\"platform"+platformID+"\" dim=\"" + 2*r + " 1 " + 2*r + "\">"); 
 		ps.println("    <x> " + asString( pos.x, pos.y-0.5, pos.z ) + " </x>" );
-		ps.println("    <spring pB=\"" + asString( -r, +0.5, -r ) + "\" pW=\"" + asString( pos.x, pos.y+springLength, pos.z ) + "\" k=\""+k+"\" d=\""+d+"\"/>");
-		ps.println("    <spring pB=\"" + asString( -r, +0.5, +r ) + "\" pW=\"" + asString( pos.x, pos.y+springLength, pos.z ) + "\" k=\""+k+"\" d=\""+d+"\"/>");
-		ps.println("    <spring pB=\"" + asString( +r, +0.5, -r ) + "\" pW=\"" + asString( pos.x, pos.y+springLength, pos.z ) + "\" k=\""+k+"\" d=\""+d+"\"/>");
-		ps.println("    <spring pB=\"" + asString( +r, +0.5, +r ) + "\" pW=\"" + asString( pos.x, pos.y+springLength, pos.z ) + "\" k=\""+k+"\" d=\""+d+"\"/>");
+		ps.println("    <spring pB=\"" + asString( -r, +0.5, -r ) + "\" pB2=\" 0. " + (springLength/2-2) + " 0. \" body2= \"stand\" k=\""+k+"\" d=\""+d+"\"/>");
+		ps.println("    <spring pB=\"" + asString( -r, +0.5, +r ) + "\" pB2=\" 0. " + (springLength/2-2) + " 0. \" body2= \"stand\" k=\""+k+"\" d=\""+d+"\"/>");
+		ps.println("    <spring pB=\"" + asString( +r, +0.5, -r ) + "\" pB2=\" 0. " + (springLength/2-2) + " 0. \" body2= \"stand\" k=\""+k+"\" d=\""+d+"\"/>");
+		ps.println("    <spring pB=\"" + asString( +r, +0.5, +r ) + "\" pB2=\" 0. " + (springLength/2-2) + " 0. \" body2= \"stand\" k=\""+k+"\" d=\""+d+"\"/>");
 		ps.println("</body>");		
 	}
 	

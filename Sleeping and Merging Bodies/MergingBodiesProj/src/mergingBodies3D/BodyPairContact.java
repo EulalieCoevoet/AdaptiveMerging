@@ -84,15 +84,33 @@ public class BodyPairContact {
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
 		
-		motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2));
+		if (body1.pinned)
+			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body2));
+		else if (body2.pinned)
+			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1));
+		else
+			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2));
 		
 		if (motionMetricHist.size() > mergeParams.stepAccum.getValue())
 			motionMetricHist.remove(0);
 	
-		Contact.ContactState state = Contact.ContactState.CLEAR;
-		for (Contact contact : contactList) 
-			if (contact.state == Contact.ContactState.ONEDGE)
-				state = Contact.ContactState.ONEDGE;
+		ContactState state = ContactState.CLEAR;
+		// If only have one contact, then our state can come from the only contact
+		// If we have two contacts, then again, if one of the two is on edge, we could have spinning
+		// HOWEVER... for 3 contacts, if we see 2 that are not on edge, that is good enough. 
+		int notOnEdgeCount = 0;
+		for (Contact contact : contactList)
+			if (contact.state != ContactState.ONEDGE)
+				notOnEdgeCount++;
+		
+		if (notOnEdgeCount == 0) // Note: this call cannot be made on an empty bodyPairContact
+			state = ContactState.ONEDGE;
+		else if (notOnEdgeCount >= 2) // even if we only have 2, consider it good, as the cycle detection's job will do 3 point stability.
+			state = ContactState.CLEAR;
+		else if (contactList.size() == 1) 
+			state = ContactState.CLEAR;
+		else // we get here by having only 1 notOnEdge, and 2 or more contacts... this is a onEdge case
+			state = ContactState.ONEDGE;
 		
 		contactStateHist.add(state);
 		if (contactStateHist.size() > mergeParams.stepAccum.getValue())
