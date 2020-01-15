@@ -71,6 +71,10 @@ public class CollisionProcessor {
 	/** keeps track of the time used to update the contacts inside the collections on the last call */
 	double collectionUpdateTime = 0;
 	
+	double contactOrderingTime = 0;
+	
+	double singleItPGSTime = 0;
+	
 	// TODO: MEMORY POOLING? might want a memory pool for BodyPairContact too?  Could be complicated since bodyPairContacts have some dynamic internal memory??  
 	/**list that keeps track of all the body pair contacts that occurred in this time step */
 	public HashSet<BodyPairContact> bodyPairContacts = new HashSet<BodyPairContact>();
@@ -243,8 +247,10 @@ public class CollisionProcessor {
 			return;
 		}
 		
-		if (mergeParams.organizeContacts.getValue()) {		
+		if (mergeParams.organizeContacts.getValue()) {	
+			long now1 = System.nanoTime();	
 			getOrganizedContacts(solver.contacts);
+			contactOrderingTime = ( System.nanoTime() - now1 ) * 1e-9;
 		} else {	
 			// This resolution is done with the Jacobians of the bodies (not the collection) 
 			// so not a good warm start for the LCP solve (we don't want to keep these values).
@@ -269,8 +275,10 @@ public class CollisionProcessor {
 		//   there is only a collection on one side, it is easier just to ask again that the whole
 		//   jacobian be computed
 		updateJacobiansThatNeedUpdating( solver.contacts, true );
-		
+
+		long now2 = System.nanoTime();	
 		solver.solve(dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
+		singleItPGSTime = ( System.nanoTime() - now2 ) * 1e-9;
 		
 		for (RigidBody body : bodies) {
 			if (body instanceof RigidCollection && !body.isSleeping) {

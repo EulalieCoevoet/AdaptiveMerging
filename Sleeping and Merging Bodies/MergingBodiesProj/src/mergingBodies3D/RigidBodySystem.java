@@ -52,6 +52,8 @@ public class RigidBodySystem {
     
     /** keeps track of the time used to unmerge on the last call */
     public double unmergingTime = 0;
+    
+    public double warmStartTime = 0;
 	
 	/**Total number of steps performed*/
 	public int totalSteps = 0;
@@ -107,8 +109,11 @@ public class RigidBodySystem {
 		collision.updateContactsMap(); // also called after the LCP solve below... certainly not needed in both places!  :/
 		
         collision.collisionDetection(dt);
-		collision.updateBodyPairContacts(); 
+		collision.updateBodyPairContacts();         
+		
+		long now = System.nanoTime();   
 		collision.warmStart(); 	
+        warmStartTime = (System.nanoTime() - now) / 1e9;
 
 		if (sleeping.params.wakeAll.getValue()) sleeping.wakeAll();
 		sleeping.wake();
@@ -118,7 +123,7 @@ public class RigidBodySystem {
         animation.apply(dt);
 		collision.updateInCollections(dt, merging.params);
 
-        long now = System.nanoTime();   
+        now = System.nanoTime();   
 		merging.unmerge(UnmergingCondition.CONTACTS, dt);	
         unmergingTime = (System.nanoTime() - now) / 1e9;
         
@@ -345,7 +350,10 @@ public class RigidBodySystem {
 					stream.print("#bodies"); stream.print(", ");
 					stream.print("#contacts"); stream.print(", ");
 					stream.print("detection"); stream.print(", ");
+					stream.print("warmstart"); stream.print(", ");
 					stream.print("LCPSolve"); stream.print(", ");
+					stream.print("updateCollections"); stream.print(", ");
+					stream.print("contactOrdering"); stream.print(", ");
 					stream.print("singleItPGS"); stream.print(", ");
 					stream.print("merging"); stream.print(", ");
 					stream.print("mergingCheckContacts"); stream.print(", ");
@@ -365,8 +373,11 @@ public class RigidBodySystem {
 				stream.print(bodies.size()); stream.print(", ");
 				stream.print(collision.contacts.size()); stream.print(", ");
 				stream.print(collision.collisionDetectTime); stream.print(", ");
+				stream.print(warmStartTime); stream.print(", ");
 				stream.print(collision.collisionSolveTime); stream.print(", ");
 				stream.print(collision.collectionUpdateTime); stream.print(", ");
+				stream.print(collision.contactOrderingTime); stream.print(", ");
+				stream.print(collision.singleItPGSTime); stream.print(", ");
 				stream.print(mergingTime); stream.print(", ");
 				stream.print(merging.params.mergingCheckContactTime); stream.print(", ");
 				stream.print(merging.params.mergingCheckMotionTime); stream.print(", ");
