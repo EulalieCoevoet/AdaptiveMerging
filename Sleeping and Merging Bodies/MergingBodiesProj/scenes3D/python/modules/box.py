@@ -7,11 +7,12 @@ class Box():
         # Fixed body
         self.body = general.body(root, "box", name, position, orientation, velocity=velocity, omega=omega, dim=dim, pinned=pinned, magnetic=magnetic, density=density, restitution=restitution, friction=friction, color=color)
 
-    def addSpring(self, positionB="0 0 0", k="100", d="10", body2=None, positionW=None, positionB2=None):
+    def addSpring(self, positionB="0 0 0", k="100", d="10", body2=None, positionW=None, positionB2=None, controllable="false"):
         spring = ET.SubElement(self.body, 'spring')
         spring.set('pB', positionB)
         spring.set('k', k)
         spring.set('d', d)
+        spring.set('controllable', controllable)
 
         if (body2!=None and positionB2!=None):
             spring.set('body2', body2)
