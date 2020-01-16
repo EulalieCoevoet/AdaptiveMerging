@@ -348,7 +348,7 @@ public class RigidBody {
      * @param dt step size
      */
     public void advanceTime( double dt ) {
-        if ( !pinned) {   
+        if ( !pinned && !isSleeping) {   
 			advanceVelocities(dt);
 			advancePositions(dt);
         }        

@@ -142,12 +142,30 @@ public class RigidBodySystem {
 		collision.clearBodyPairContacts();
 
         RigidCollection.mergeParams = merging.params;
+//        for ( RigidBody b : bodies )  
+//			b.advanceTime(dt);
+        
 		for ( RigidBody b : bodies )
-            b.advanceTime( dt );
-		
+			if (!b.pinned && !b.isSleeping)   
+				b.advanceVelocities(dt);
+
 		for (BodyPairContact bpc : collision.bodyPairContacts) 
 			bpc.accumulate(merging.params);
 
+		for ( RigidBody b : bodies ) {
+			if (!b.pinned && !b.isSleeping) { 
+				b.advancePositions(dt);
+			
+				if (b instanceof RigidCollection) {
+					((RigidCollection)b).updateBodiesPositionAndTransformations();
+		
+					// Advance velocities for internal bodies
+					if (!merging.params.enableUnmergeRelativeMotionCondition.getValue())
+						((RigidCollection)b).applyVelocitiesToBodies();
+				}
+			}
+		}
+		
         now = System.nanoTime();   
 		merging.merge();
         mergingTime = (System.nanoTime() - now) / 1e9;

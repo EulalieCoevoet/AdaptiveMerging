@@ -122,9 +122,11 @@ public class Sleeping {
 				continue;
 			
 			boolean sleeping1 = (spring.body1.isInCollection())? spring.body1.parent.isSleeping: spring.body1.isSleeping;
-			boolean sleeping2 = (spring.body2.isInCollection())? spring.body2.parent.isSleeping: spring.body2.isSleeping; 
+			boolean sleeping2 = (spring.body2.isInCollection())? spring.body2.parent.isSleeping: spring.body2.isSleeping; 			
+			boolean pinned1   = (spring.body1.isInCollection())? spring.body1.parent.pinned: spring.body1.pinned;
+			boolean pinned2   = (spring.body2.isInCollection())? spring.body2.parent.pinned: spring.body2.pinned; 
 			
-			if(sleeping1!=sleeping2) {
+			if(sleeping1!=sleeping2 && !(pinned1 || pinned2)) {
 				spring.body1.wake();
 				spring.body2.wake();
 			}

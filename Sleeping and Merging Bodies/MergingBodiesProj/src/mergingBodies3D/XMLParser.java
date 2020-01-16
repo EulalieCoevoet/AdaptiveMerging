@@ -253,7 +253,7 @@ public class XMLParser {
 	    Vector3d ur = new Vector3d( Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE );
 		for ( RigidBody b : bodies ) {
 			for ( Point3d p : b.boundingBoxB ) {
-				p.sub(com); // move boudning box point to COM frame.
+				//p.sub(com); // move boudning box point to COM frame.
 				ll.x = Math.min( p.x, ll.x );
 				ll.y = Math.min( p.y, ll.y );
 				ll.z = Math.min( p.z, ll.z );
