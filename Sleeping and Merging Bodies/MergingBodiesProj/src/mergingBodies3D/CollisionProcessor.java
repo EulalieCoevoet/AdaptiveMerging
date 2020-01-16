@@ -460,21 +460,10 @@ public class CollisionProcessor {
 	 */
 	protected void warmStart() {
 		
-		// check for hash collisions??
-		for ( Contact c1 : contacts ) {
-			for ( Contact c2 : contacts ) {
-				if ( c2 == c1 ) continue;
-				if ( c1.hashCode() == c2.hashCode() ) {
-					System.out.println( "hash collision" );
-				}
-			}
-		}
-		
 		badWarmStarts = 0;
 		badWarmStartsRepaired = 0;
 		for ( BodyPairContact bpc : bodyPairContacts ) {
 			if ( bpc.inCollection ) continue;
-			// TODO: BUG!!! if body1.geom is a RigidBodyComposite, then we should check to see if any contacts
 			
 			boolean b1IsBox = bpc.body1.geom instanceof RigidBodyGeomBox;
 			boolean b2IsBox = bpc.body2.geom instanceof RigidBodyGeomBox;

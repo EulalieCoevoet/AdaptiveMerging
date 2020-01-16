@@ -5,16 +5,16 @@ from composite import Composite
 
 class Platform():
 
-    def __init__(self, root, position="0 3 0", orientation="0. -1 0. 0.", scale="1", pinned="false", dim="8 2 8", restitution=None, friction=None, spinner=False, height="3", velocity="0 0 0", omega="0 0 0"):
+    def __init__(self, root, position="0 3 0", orientation="0. -1 0. 0.", density="1", scale="1", pinned="false", dim="8 2 8", restitution=None, friction=None, spinner=False, height="3", velocity="0 0 0", omega="0 0 0"):
         self.root = root
         self.position = position
         self.dim = dim.split()
         d = self.dim
 
         if not spinner:
-            Box( root, name="platform", position=position, orientation=orientation, velocity=velocity, omega=omega, dim=dim, pinned=pinned, magnetic="false", restitution=restitution, friction=friction)
+            Box( root, name="platform", position=position, orientation=orientation, velocity=velocity, density=density, omega=omega, dim=dim, pinned=pinned, magnetic="false", restitution=restitution, friction=friction)
         else:
-            composite = Composite( root, name="platform", obj=None, position=position, orientation=orientation, pinned=pinned, magnetic="false", restitution=restitution, friction=friction, velocity=velocity, omega=omega)
+            composite = Composite( root, name="platform", obj=None, position=position, orientation=orientation, density=density, pinned=pinned, magnetic="false", restitution=restitution, friction=friction, velocity=velocity, omega=omega)
             dx=str(float(d[0])/2.-float(d[1])/2.)
             dy=str(float(height)/2.-float(d[1])/2.)
             dz=str(float(d[2])/2.-float(d[1])/2.)
