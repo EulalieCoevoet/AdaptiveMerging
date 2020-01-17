@@ -44,8 +44,10 @@ composite.addBox(name='cockpit1', dim="2 2 2", position="2 5.5 -10")
 composite.addBox(name='cockpit2', dim="2 2 2", position="-10 5.5 -10")
 
 magnet = Box(root, name='magnet', dim="1 1 1", position="-2 5 -6", magnetic="true", color="0. 0. 0. 1.")
-magnet.addSpring(positionB="-0.4 0.5 0.", controllable="true")
-magnet.addSpring(positionB="0.4 0.5 0.", controllable="true")
+magnet.addSpring(positionB="-0.4 0.5 0.4", controllable="true", k="100", d="1")
+magnet.addSpring(positionB="0.4 0.5 0.4", controllable="true", k="100", d="1")
+magnet.addSpring(positionB="-0.4 0.5 -0.4", controllable="true", k="100", d="1")
+magnet.addSpring(positionB="0.4 0.5 -0.4", controllable="true", k="100", d="1")
 
 # Boat
 boat = Composite(root, obj="data/boat.obj", scale="0.1", name="boat", position="0. -2.5 0.",density="10")
