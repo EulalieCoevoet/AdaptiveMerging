@@ -46,6 +46,7 @@ public class Merging {
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1, 1e-10, 100 );
 		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-5, 1e-10, 1e0 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
+		public BooleanParameter changeColors = new BooleanParameter("change colors", false);
 		
 	    public double mergingCheckContactTime = 0;
 	    public double mergingCheckCycleTime = 0;
@@ -478,11 +479,9 @@ public class Merging {
 				if (colors.contains(collection.color)) {
 					RigidCollection sameColorCollection = collections.get(colors.indexOf(collection.color));
 					if(sameColorCollection.bodies.size()>collection.bodies.size()) {
-						collection.color.setRandomColor();
-						collection.col = new float[] { collection.color.x, collection.color.y, collection.color.z, 1 };
+						collection.generateColor();
 					} else {
-						sameColorCollection.color.setRandomColor();
-						sameColorCollection.col = new float[] { sameColorCollection.color.x, sameColorCollection.color.y, sameColorCollection.color.z, 1 };
+						sameColorCollection.generateColor();
 					}
 				}
 				colors.add(collection.color);
@@ -521,8 +520,14 @@ public class Merging {
             	params.unmergeAll.setValue(true);
             }
         });
-		CollapsiblePanel cpm = new CollapsiblePanel(vfp.getPanel());
-		cpm.collapse();
+        JButton changeColors = new JButton("change colors");
+        vfp.add( changeColors);
+        changeColors.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	params.changeColors.setValue(true);
+            }
+        });
 
 		return vfp.getPanel();
 	}

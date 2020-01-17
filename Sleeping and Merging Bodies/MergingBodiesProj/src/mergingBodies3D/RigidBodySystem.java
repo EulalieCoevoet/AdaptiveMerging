@@ -102,9 +102,14 @@ public class RigidBodySystem {
         for ( RigidBody b : bodies ) {
             b.clear();
 	        if (b instanceof RigidCollection) {
-				((RigidCollection)b).clearBodies();
+	        	RigidCollection collection = (RigidCollection)b;
+				collection.clearBodies();
+	        	if (merging.params.changeColors.getValue())
+	        		collection.generateColor();
 	        }
 		}
+        if (merging.params.changeColors.getValue()) 
+    		merging.params.changeColors.setValue(false);
         
 		applyExternalForces();
 

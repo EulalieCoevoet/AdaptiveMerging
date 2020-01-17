@@ -61,13 +61,21 @@ public class RigidCollection extends RigidBody {
 		// their state w.r.t the collection frame is unchanged as C2W and W2C are
 		// Identity
 
-		color.setRandomColor();
-		col = new float[] { color.x, color.y, color.z, 1 };
+		generateColor();
 	
 		copyFrom(body1);
 
 		addBody(body1);
 		addBody(body2);
+	}
+	
+	public void generateColor() {
+		color.setRandomColor();
+		if (col!=null) {
+			col[0] = color.x; col[1] = color.y; col[2] = color.z; col[3] = 1;
+		} else {
+			col = new float[] { color.x, color.y, color.z, 1 };
+		}
 	}
 	
 	/**

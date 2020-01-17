@@ -11,18 +11,21 @@ import random
 
 root = ET.Element('root')
 
+#animation trunk: time=12, vx=-0.75
+#animation chariot: time=12, vx=-3
+
 # Plane
 plane = ET.SubElement(root, 'body')
 plane.set('type','plane')
-plane.set('p','-150 -16.5 0')
+plane.set('p','-120 -16.5 0')
 plane.set('n','0. 1. 0.0')
 plane.set('name','plane')
 fric = ET.SubElement(plane, 'friction')
-fric.text = "0.01"
+fric.text = "0.001"
 
 # Bodies pile
 y0 = 3
-x0 = -1.
+x0 = -21.
 z0 = -1.9
 
 y=y0; x=x0; z=z0;
@@ -38,10 +41,10 @@ for i in range(27):
     #color = str(random.uniform(0, 1)) + " " + str(random.uniform(0, 1)) + " " + str(random.uniform(0, 1)) + " 1."
     Box(root, name='box'+str(i), position=str(x)+" "+str(y)+" "+str(z), dim=str(dimx)+" "+str(dimy)+" "+str(dimz), density="2.5")
 
-Sphere(root, name='ball', position="2.5 3.7 0", radius="1.", color="0.8 0.8 0. 1.")
+Sphere(root, name='ball', position="-17.5 3.7 0", radius="1.", color="0.8 0.8 0. 1.")
 
 # Chariot
-composite = Composite(root, obj="data/chariot.obj", scale="0.1", name="chariot", position="0. 2.7 0.", velocity="0. 0. 0.", color="0.7 0. 0. 1.")
+composite = Composite(root, obj="data/chariot.obj", scale="0.1", name="chariot", position="-20. 2.7 0.", velocity="0. 0. 0.", color="0.7 0. 0. 1.")
 composite.addSphere(name='wheel1', position=" 3.15 -1.7  1.9", radius='1')
 composite.addSphere(name='wheel2', position=" 3.15 -1.7 -1.9", radius='1')
 composite.addSphere(name='wheel3', position="-3.15 -1.7  1.9", radius='1')
@@ -75,7 +78,7 @@ Box(root, name='bookAlone1', position="-35.75 "+yb+" 1.", dim="0.15 2 1.5", colo
 Box(root, name='bookAlone2', position="-35.9 "+yb+" 1.", dim="0.1 2 1.5", color=colors[random.randint(0,3)], friction="0.3", density="0.1")
 
 # Truck
-composite = Composite(root, obj="data/truck.obj", name="truck", scale="0.1", position="0. 2.5 0.", color="0.5 0.5 0.5 1.", density="1", friction="0.8")
+composite = Composite(root, obj="data/truck.obj", name="truck", scale="0.1", position="0. 2.5 0.", color="0.5 0.5 0.5 1.", density="1", friction="0.3")
 composite.addBox(name='ground', position="-20 -3.5 0", dim='60 2 25')
 composite.addBox(name='ground', position="-45 -12 10", dim='5 20 5')
 composite.addBox(name='ground', position="-45 -12 -10", dim='5 20 5')
