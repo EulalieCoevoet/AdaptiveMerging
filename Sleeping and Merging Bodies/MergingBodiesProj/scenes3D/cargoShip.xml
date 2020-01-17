@@ -11790,16 +11790,18 @@
 			<magnetic>false</magnetic>
 		</body>
 	</body>
-	<body density="1" dim="1 1 1" name="magnet" scale="1" type="box">
-		<x>-2 5 -6</x>
+	<body density="1" dim="2.5 1 2.5" name="magnet" scale="1" type="box">
+		<x>-4 4 -6</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>true</magnetic>
 		<col>0. 0. 0. 1.</col>
-		<spring controllable="true" d="10" k="100" pB="-0.4 0.5 0."/>
-		<spring controllable="true" d="10" k="100" pB="0.4 0.5 0."/>
+		<spring controllable="true" d="15" k="10" pB="-1.25 0.5 1.25"/>
+		<spring controllable="true" d="15" k="10" pB="1.25 0.5 1.25"/>
+		<spring controllable="true" d="15" k="10" pB="-1.25 0.5 -1.25"/>
+		<spring controllable="true" d="15" k="10" pB="1.25 0.5 -1.25"/>
 	</body>
 	<body density="10" name="boat" obj="data/boat.obj" scale="0.1" type="composite">
 		<x>0. -2.5 0.</x>

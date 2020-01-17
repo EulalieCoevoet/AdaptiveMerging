@@ -140,6 +140,8 @@ public class PGS {
 			
 			iter--;
 		}
+
+		int x = 0;
 	}
 	
 	/** temporary working variable */
