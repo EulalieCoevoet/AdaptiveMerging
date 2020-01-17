@@ -60,9 +60,30 @@ public class XMLParser {
 		}
 		 
 		document.getDocumentElement().normalize();
-		 
+
+		parseSystem(); 
 		parseCollision(); 
 		parseBody();
+	}
+	
+	private void parseSystem() {
+		NodeList nList = document.getElementsByTagName("system");
+		for (int temp = 0; temp < nList.getLength(); temp++) {
+			Node node = nList.item(temp);
+			if (node.getNodeType() == Node.ELEMENT_NODE) {
+				eElement = (Element) node;
+
+				if(eElement.hasAttribute("mouseSpringStiffness")) {
+					system.mouseSpring.stiffness.setValue(Double.parseDouble(eElement.getAttribute("mouseSpringStiffness")));
+					system.mouseSpring.stiffness.setDefaultValue(Double.parseDouble(eElement.getAttribute("mouseSpringStiffness")));
+				}
+				
+				if(eElement.hasAttribute("mouseSpringDamping")) {
+					system.mouseSpring.damping.setValue(Double.parseDouble(eElement.getAttribute("mouseSpringDamping")));
+					system.mouseSpring.damping.setDefaultValue(Double.parseDouble(eElement.getAttribute("mouseSpringDamping")));
+				}
+			}
+		}
 	}
 	
 	/**
@@ -74,32 +95,27 @@ public class XMLParser {
 			Node node = nList.item(temp);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				eElement = (Element) node;
-				String[] attributes = {"feedbackStiffness", "restitution", "friction"};
-				for (String attribute : attributes) {
-					Node n = eElement.getElementsByTagName(attribute).item(0);
-					if ( n != null) {
-						String[] values = n.getTextContent().split("\\s+");
-						switch(attribute) {
-							case "feedbackStiffness":
-								system.collision.feedbackStiffness.setValue(Double.parseDouble(values[0]));
-								break;
-							case "restitution":
-								system.collision.restitution.setValue(Double.parseDouble(values[0]));
-								system.collision.restitutionOverride.setValue( true );
-								System.out.println("Restituion override enabled and set to " + system.collision.restitution.getValue() );
-								//for (RigidBody body: system.bodies)
-								//body.restitution = system.collision.restitution.getValue();
-								//break;
-							case "friction":
-								system.collision.friction.setValue(Double.parseDouble(values[0]));
-								system.collision.frictionOverride.setValue( true );
-								System.out.println("Friction override enabled and set to" + system.collision.friction.getValue() );
-//								for (RigidBody body: system.bodies)
-//									body.friction = system.collision.friction.getValue();
-//								break;
-							default:
-						}
-					}
+				
+				if(eElement.hasAttribute("iterations")) {
+					system.collision.iterations.setValue(Integer.parseInt(eElement.getAttribute("iterations")));
+					system.collision.iterations.setDefaultValue(Integer.parseInt(eElement.getAttribute("iterations")));
+				}
+				
+				if(eElement.hasAttribute("feedbackStiffness")) {
+					system.collision.feedbackStiffness.setValue(Double.parseDouble(eElement.getAttribute("feedbackStiffness")));
+					system.collision.feedbackStiffness.setDefaultValue(Double.parseDouble(eElement.getAttribute("feedbackStiffness")));
+				}
+				
+				if(eElement.hasAttribute("restitution")) {
+					system.collision.restitution.setValue(Double.parseDouble(eElement.getAttribute("restitution")));
+					system.collision.restitutionOverride.setValue( true );
+					System.out.println("Restituion override enabled and set to " + system.collision.restitution.getValue() );
+				}
+				
+				if(eElement.hasAttribute("friction")) {
+					system.collision.friction.setValue(Double.parseDouble(eElement.getAttribute("friction")));
+					system.collision.frictionOverride.setValue( true );
+					System.out.println("Friction override enabled and set to" + system.collision.friction.getValue() );
 				}
 			}
 		}

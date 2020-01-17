@@ -1,5 +1,6 @@
 package mergingBodies3D;
 
+import java.awt.Font;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -13,6 +14,7 @@ import javax.vecmath.Vector3d;
 import mergingBodies3D.Merging.UnmergingCondition;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
+import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -433,10 +435,10 @@ public class RigidBodySystem {
 	/** Parameters to help solve ODE to get controllable springs to desired position smoothly
 	 * TODO: Should make these available to modify on interface
 	 */
-	private DoubleParameter springMotionStepSize = new DoubleParameter( "Anim step size", 0.005, 1e-4, 1 );
-	private DoubleParameter animationk1= new DoubleParameter( "Motion stiffness", 100, 10, 1e6 );
-	private DoubleParameter animationCDM = new DoubleParameter( "Critical damping multiplyer", 0.9, 0, 2);
-	public  DoubleParameter moveScale = new DoubleParameter("Step Movement Scale", 0.2, 0.01, 10); 
+	private DoubleParameter springMotionStepSize = new DoubleParameter( "anim step size", 0.005, 1e-4, 1 );
+	private DoubleParameter animationk1= new DoubleParameter( "motion stiffness", 100, 10, 1e6 );
+	private DoubleParameter animationCDM = new DoubleParameter( "critical damping multiplyer", 0.9, 0, 2);
+	public  DoubleParameter moveScale = new DoubleParameter("step Movement Scale", 0.2, 0.01, 10); 
 	
 	
     /**
@@ -445,8 +447,7 @@ public class RigidBodySystem {
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
         vfp.setBorder( new TitledBorder("Rigid Body System Controls" ));
-        
-        vfp.add( collision.getControls() );
+        ((TitledBorder) vfp.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
         
         vfp.add( useGravity.getControls() );
         vfp.add( gravityAmount.getSliderControls(false) );
@@ -462,21 +463,22 @@ public class RigidBodySystem {
 
 		return vfp.getPanel();
     }
-    
-	
-	/**
-	  * @return control panel for controllable springs
-	  */
-	 public JPanel getMoveableSpringControls() {
-	     VerticalFlowPanel vfp = new VerticalFlowPanel();
-	     vfp.setBorder( new TitledBorder("Moveable Springs Controls" ));
-	     vfp.add( springMotionStepSize.getSliderControls(true) );
-	     vfp.add( animationk1.getSliderControls(true) );
-	     vfp.add( animationCDM.getSliderControls(false) );
-	     vfp.add( moveScale.getSliderControls(true) );
-	   
-		return vfp.getPanel();
-	 }
+
+
+    /**
+     * @return control panel for controllable springs
+     */
+    public JPanel getMoveableSpringControls() {
+    	VerticalFlowPanel vfp = new VerticalFlowPanel();
+    	vfp.setBorder( new TitledBorder("Moveable Springs Controls" ));
+    	((TitledBorder) vfp.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
+    	vfp.add( springMotionStepSize.getSliderControls(true) );
+    	vfp.add( animationk1.getSliderControls(true) );
+    	vfp.add( animationCDM.getSliderControls(false) );
+    	vfp.add( moveScale.getSliderControls(true) );
+    	CollapsiblePanel cp = new CollapsiblePanel(vfp.getPanel());
+    	return cp;
+    }
 		
     
 }

@@ -629,30 +629,29 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         vfp.add( run.getControls() );
         vfp.add( stepsize.getSliderControls(true) );
         vfp.add( substeps.getControls() );
+        vfp.add( system.collision.getControls() );
         vfp.add( system.getControls() );
-        
-        vfp.add( system.getMoveableSpringControls());
        
-        
         vfp.add( mouseSpring.getControls() );
         vfp.add( mouseImpulse.getControls() );
+        vfp.add( system.getMoveableSpringControls());
                 
         VerticalFlowPanel vfpsm = new VerticalFlowPanel();
-        vfpsm.setBorder(new TitledBorder("shadow map controls") );
+        vfpsm.setBorder(new TitledBorder("Shadow map controls") );
+        ((TitledBorder) vfpsm.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
 
         vfpsm.add( drawWithShadows.getControls() );
         vfpsm.add( shadowMap.getControls() );
         CollapsiblePanel smcp = new CollapsiblePanel(vfpsm.getPanel());
-        smcp.collapse();
         vfp.add( smcp );
         
         VerticalFlowPanel vfpclip = new VerticalFlowPanel();
-        vfpclip.setBorder(new TitledBorder("clip plane controls (turn off shadows to use)") );
+        vfpclip.setBorder(new TitledBorder("Clip plane controls (turn off shadows to use)") );
+        ((TitledBorder) vfpclip.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
         vfpclip.add( useClipPlane.getControls() );
         vfpclip.add( clipPlaneNormal );
         vfpclip.add( clipPlaneD.getSliderControls(false) );
         CollapsiblePanel cpclip = new CollapsiblePanel( vfpclip.getPanel() );
-        cpclip.collapse();
         
         vfp.add( cpclip );
         

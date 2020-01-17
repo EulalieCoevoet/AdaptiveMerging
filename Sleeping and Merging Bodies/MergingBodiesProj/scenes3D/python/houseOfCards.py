@@ -19,6 +19,11 @@ plane.set('p','0 0 0')
 plane.set('n','0. 1. 0.0')
 plane.set('name','plane')
 
+
+system = ET.SubElement(root, 'system')
+system.set('mouseSpringStiffness','3')
+system.set('mouseSpringDamping','0.1')
+
 nbFloor=4
 nbHouse=1
 cardSizex=0.05

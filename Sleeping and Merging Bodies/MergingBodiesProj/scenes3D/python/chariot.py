@@ -18,7 +18,7 @@ plane.set('p','-150 -16.5 0')
 plane.set('n','0. 1. 0.0')
 plane.set('name','plane')
 fric = ET.SubElement(plane, 'friction')
-fric.text = "0.8"
+fric.text = "0.01"
 
 # Bodies pile
 y0 = 3
@@ -76,7 +76,7 @@ Box(root, name='bookAlone2', position="-35.9 "+yb+" 1.", dim="0.1 2 1.5", color=
 
 # Truck
 composite = Composite(root, obj="data/truck.obj", name="truck", scale="0.1", position="0. 2.5 0.", color="0.5 0.5 0.5 1.", density="1", friction="0.8")
-composite.addBox(name='ground', position="-20 -3.5 0", dim='50 2 25')
+composite.addBox(name='ground', position="-20 -3.5 0", dim='60 2 25')
 composite.addBox(name='ground', position="-45 -12 10", dim='5 20 5')
 composite.addBox(name='ground', position="-45 -12 -10", dim='5 20 5')
 composite.addBox(name='ground', position="5 -12 -10", dim='5 20 5')

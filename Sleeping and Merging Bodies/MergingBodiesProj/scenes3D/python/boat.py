@@ -33,10 +33,10 @@ for k in range(2):
 
 # Crane on the dock
 composite = Composite(root, obj=None, name="crane", position="0. 0. 0.", color="0.5 0.4 0. 1.")
-composite.addBox(name='stand1', dim="3 0.1 3", position="-8 -2.5 -10")
+composite.addBox(name='stand1', dim="3 0.1 7", position="-8 -2.5 -8.5")
 composite.addBox(name='crane11', dim="1 10 1", position="-8 2.5 -10")
 composite.addBox(name='crane12', dim="1 0.75 16", position="-6 5.5 -6")
-composite.addBox(name='stand2', dim="3 0.1 3", position="0 -2.5 -10")
+composite.addBox(name='stand2', dim="3 0.1 7", position="0 -2.5 -8.5")
 composite.addBox(name='crane21', dim="1 10 1", position="0 2.5 -10")
 composite.addBox(name='crane22', dim="1 0.75 16", position="-2 5.5 -6")
 composite.addBox(name='stand3', dim="10 1 1", position="-4 5.5 -10")
@@ -77,7 +77,7 @@ for i in range(71):
 
 
 # Ocean
-ocean = Composite(root, obj="data/ocean.obj", scale="0.1", name="ocean", position="0. -2.5 40.", color="0. 0. 0.4 1.", density="10")
+ocean = Composite(root, obj="data/ocean.obj", scale="0.1", name="ocean", position="0. -2.5 40.", color="0. 0.18 0.29 1.", density="10")
 ocean.addBox(name="dummy", position="0. -1.5 0.", dim="30 3 6")
 ocean.addSpring(positionB="7. 0 1.8", positionW="7 -1.5 41.8", k="100", d="1")
 ocean.addSpring(positionB="-7. 0 1.8", positionW="-7 -1.5 41.8", k="100", d="1")

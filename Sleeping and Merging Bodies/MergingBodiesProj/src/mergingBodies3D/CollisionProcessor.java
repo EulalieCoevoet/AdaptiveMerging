@@ -1,5 +1,6 @@
 package mergingBodies3D;
 
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -905,6 +906,7 @@ public class CollisionProcessor {
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
         vfp.setBorder( new TitledBorder("Collision Processing Controls") );
+        ((TitledBorder) vfp.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
         
 		vfp.add( shuffle.getControls() );
 		

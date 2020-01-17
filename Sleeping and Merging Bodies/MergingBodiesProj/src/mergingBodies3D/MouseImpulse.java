@@ -1,5 +1,7 @@
 package mergingBodies3D;
 
+import java.awt.Font;
+
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Point3d;
@@ -10,6 +12,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import mintools.parameters.DoubleParameter;
+import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
 public class MouseImpulse {
@@ -144,7 +147,9 @@ public class MouseImpulse {
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
         vfp.setBorder( new TitledBorder("Mouse Impulse Controls") );
+        ((TitledBorder) vfp.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
         vfp.add( scale.getSliderControls(true) );
-        return vfp.getPanel();
+        CollapsiblePanel cp = new CollapsiblePanel(vfp.getPanel());
+        return cp;
     }
 }

@@ -1,5 +1,7 @@
 package mergingBodies3D;
 
+import java.awt.Font;
+
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Point3d;
@@ -117,10 +119,12 @@ public class MouseSpringForce {
     public JPanel getControls() {
         VerticalFlowPanel vfp = new VerticalFlowPanel();
         vfp.setBorder( new TitledBorder("Mouse Spring Controls") );
+        ((TitledBorder) vfp.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
+        stiffness.setDefaultValue(stiffness.getValue());
         vfp.add( stiffness.getSliderControls(true) );
+        damping.setDefaultValue(damping.getValue());
         vfp.add( damping.getSliderControls(false) );
         CollapsiblePanel cp = new CollapsiblePanel(vfp.getPanel());
-        cp.collapse();
         return cp;
     }
     

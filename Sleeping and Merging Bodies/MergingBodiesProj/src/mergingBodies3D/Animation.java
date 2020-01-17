@@ -114,7 +114,7 @@ public class Animation {
 			body.v.x = params.vx.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.vx.setValue(0.);
-				time = 0;
+				reset();
 			}
 		}
 		if(params.vy.getValue() != 0.) {
@@ -123,7 +123,7 @@ public class Animation {
 			body.v.y = params.vy.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.vy.setValue(0.);
-				time = 0;
+				reset();
 			}
 		}
 		if(params.vz.getValue() != 0.) {
@@ -132,7 +132,7 @@ public class Animation {
 			body.v.z = params.vz.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.vz.setValue(0.);
-				time = 0;
+				reset();
 			}
 		}
 		if(params.wx.getValue() != 0.) {
@@ -141,7 +141,7 @@ public class Animation {
 			body.omega.x = params.wx.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.wx.setValue(0.);
-				time = 0;
+				reset();
 			}
 		}
 		if(params.wy.getValue() != 0.) {
@@ -150,7 +150,7 @@ public class Animation {
 			body.omega.y = params.wy.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.wy.setValue(0.);
-				time = 0;
+				reset();
 			}
 		}
 		if(params.wz.getValue() != 0.) {
@@ -159,7 +159,7 @@ public class Animation {
 			body.omega.z = params.wz.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.wz.setValue(0.);
-				time = 0;
+				reset();
 			}
 		}
 	}
