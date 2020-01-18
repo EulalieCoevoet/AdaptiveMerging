@@ -662,6 +662,7 @@ public class CollisionProcessor {
         	for ( int j = i+1; j < N; j++ ) {
         		RigidBody b2 = bodies.get( j );
                 if ( b1.pinned && b2.pinned ) continue;
+                if ( (b1.pinned && b2.isSleeping) || (b2.pinned && b1.isSleeping) ) continue;
                 narrowPhase( b1, b2 );                
         	}
         }    

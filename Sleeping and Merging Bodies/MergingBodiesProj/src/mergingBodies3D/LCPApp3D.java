@@ -858,6 +858,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 	system.merging.triggerMergingEvent = true;
                 	system.merging.mergingEvent = false;
                     run.setValue( true );   
+                } else if ( e.getKeyCode() == KeyEvent.VK_G) {                   
+                        	system.generateBody= true;
                 } else if ( e.getKeyCode() == KeyEvent.VK_O ) {
                 	system.display.params.hideOverlay.setValue(!system.display.params.hideOverlay.getValue()); 
                 } else if ( e.getKeyCode() == KeyEvent.VK_LEFT) {

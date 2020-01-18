@@ -9,11 +9,15 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import mergingBodies3D.Merging.UnmergingCondition;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
+import mintools.parameters.Vec3Parameter;
 import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
@@ -59,6 +63,8 @@ public class RigidBodySystem {
 	
 	/**Total number of steps performed*/
 	public int totalSteps = 0;
+	
+	public boolean generateBody = false;
 	
     /**
      * Creates a new rigid body system
@@ -189,6 +195,11 @@ public class RigidBodySystem {
         simulationTime += dt;
 		totalAccumulatedComputeTime += computeTime;
 		
+		if (generateBody) {
+			generateBody();
+			generateBody = false;
+		}
+		
 		exportDataToFile();
     }
     
@@ -301,6 +312,11 @@ public class RigidBodySystem {
 			if (bodies.size() == 0) break;
 			RigidBody body = bodies.get(i);
 
+			if(body.created) {
+				bodies.remove(body);
+				continue;
+			}
+			
 			if (body instanceof RigidCollection) {
 				RigidCollection collection = (RigidCollection) body;
 				for (RigidBody subBody: collection.bodies) {
@@ -355,6 +371,47 @@ public class RigidBodySystem {
     	RigidBody.nextIndex = 0;
     	reset();
     }
+    
+    /**
+	 * Generate a body (called when G is pressed)
+	 */
+	private void generateBody() {
+
+		RigidBody genbody = null;
+		
+		//get an unpinned random RigidBody
+		for (RigidBody body: bodies) {
+			if (!(body instanceof RigidCollection) && !body.pinned) {
+				genbody = new RigidBody(body);
+				break;
+			}
+			
+			if (body instanceof RigidCollection) {
+				RigidCollection collection = (RigidCollection)body;
+				for (RigidBody b: collection.bodies) {
+					if (!b.pinned) {
+						genbody = new RigidBody(b);
+						break;
+					}
+				}
+			}
+		}
+
+		//also needs to scale the blocks of the body:
+		//   body.scale(scale.getValue());
+		if (genbody != null) {
+			genbody.x0.set(generatedBodyPos.x, generatedBodyPos.y, generatedBodyPos.z);                        
+			genbody.x.set(generatedBodyPos.x, generatedBodyPos.y, generatedBodyPos.z);            
+			genbody.v.set(generatedBodyVel.x, generatedBodyVel.y, generatedBodyVel.z);
+			genbody.theta.setIdentity();
+			genbody.omega.set(0.,0.,0.);
+			genbody.updateRotationalInertaionFromTransformation();
+			genbody.created = true;
+			bodies.add(genbody);
+		} else {
+			System.err.println("[generateBody] Could not find a body to generate");
+		}
+	}
     
     /**
 	 * Export data to csv file
@@ -435,10 +492,12 @@ public class RigidBodySystem {
 	public DoubleParameter springDampingMod= new DoubleParameter("spring damping multiplier", 1, 0, 10 );
 	
     public BooleanParameter applyMouseSpringAtCOM = new BooleanParameter( "apply mouse spring at COM", false );
+    
+	public static Vec3Parameter generatedBodyPos = new Vec3Parameter("position new body", 50, 50, 0, 200 );
+	public static Vec3Parameter generatedBodyVel = new Vec3Parameter("velocity of new body", 0, 0, 0, 100 );
 
     
 	/** Parameters to help solve ODE to get controllable springs to desired position smoothly
-	 * TODO: Should make these available to modify on interface
 	 */
 	private DoubleParameter springMotionStepSize = new DoubleParameter( "anim step size", 0.005, 1e-4, 1 );
 	private DoubleParameter animationk1= new DoubleParameter( "motion stiffness", 100, 10, 1e6 );
@@ -463,6 +522,9 @@ public class RigidBodySystem {
 		vfp.add(springDampingMod.getSliderControls(false));
 		vfp.add( globalViscousLinearDecay.getSliderControls(false) );
 		vfp.add( globalViscousAngularDecay.getSliderControls(false) );
+
+		vfp.add( generatedBodyPos );
+		vfp.add( generatedBodyVel );
 		
 		vfp.add( applyMouseSpringAtCOM.getControls() );
 
