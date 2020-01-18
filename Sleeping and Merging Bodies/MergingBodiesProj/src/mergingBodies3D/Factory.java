@@ -98,7 +98,8 @@ public class Factory {
     private void generateBody() {     
         RigidBody body = new RigidBody( unpinnedBodies.get( rand.nextInt(unpinnedBodies.size())) );
         Vector3d tmp = new Vector3d( seed.x, seed.y, seed.z );
-        tmp.x += ((system.bodies.size()*2)%5 - 2) * spread.getValue();
+        tmp.x += (rand.nextFloat()*2-1) * spread.getValue();
+        tmp.z += (rand.nextFloat()*2-1) * spread.getValue();
         body.x0.set( tmp );                        
         body.x.set( tmp );            
         body.theta.setIdentity(); 
@@ -114,7 +115,7 @@ public class Factory {
     }
     
     /** seed location for creating new rigid bodies */
-    Vec3Parameter seed = new Vec3Parameter( "seed location", 0, 50, 0, 75 );    
+    Vec3Parameter seed = new Vec3Parameter( "seed location", 0, 50, 0, 150 );    
 
     /** Specifies the width of the zone from which new objects will be dropped */
     DoubleParameter spread = new DoubleParameter("drop zone width", 3, 0, 60 );

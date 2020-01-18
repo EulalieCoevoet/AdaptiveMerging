@@ -25,6 +25,8 @@ public class Display {
 	    public BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", true );
 	    public BooleanParameter drawGraphs = new BooleanParameter( "draw performance graphs", false );
 	    public BooleanParameter drawMemGraphs = new BooleanParameter( "draw memory graphs", false );
+	    public BooleanParameter enableQMG = new BooleanParameter("enable quantity monitor (otherwise graph is boring)", false );
+	    public BooleanParameter drawQMG = new BooleanParameter("draw quantity monitor graph", false );
 	    
 		private DoubleParameter transparency = new DoubleParameter("body block transparency", 1., 0, 1 );
 		private BooleanParameter drawBodies = new BooleanParameter( "draw bodies", true );
@@ -294,6 +296,11 @@ public class Display {
         hfp.add( params.hideOverlay.getControls() );
         hfp.add( params.drawGraphs.getControls() );
         hfp.add( params.drawMemGraphs.getControls() );
+        vfp.add( hfp.getPanel() );
+        
+        hfp = new HorizontalFlowPanel();
+        hfp.add( params.enableQMG.getControls() );
+        hfp.add( params.drawQMG.getControls() );
         vfp.add( hfp.getPanel() );
         
 		VerticalFlowPanel vfpc = new VerticalFlowPanel();

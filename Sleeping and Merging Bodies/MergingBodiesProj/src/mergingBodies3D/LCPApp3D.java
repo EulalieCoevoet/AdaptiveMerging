@@ -152,7 +152,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         if ( selectRequest ) {
         	selectRequest = false;
     		select(drawable, mousePressedPoint );
-    		if ( enableQMG.getValue() ) {
+    		if ( system.display.params.enableQMG.getValue() ) {
     			lastSelectedBody = mouseSpring.picked;
     			if ( lastSelectedBody != null ) {
     				qmgMetric.setNameAndClear( "BPC metric on " + lastSelectedBody.name );
@@ -179,7 +179,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
                 system.advanceTime( dt );                
             }
 
-            if ( enableQMG.getValue() ) {
+            if ( system.display.params.enableQMG.getValue() ) {
             	if ( lastSelectedBody != null ) {
             		for ( BodyPairContact bpc : lastSelectedBody.bodyPairContacts ) {
             			if ( bpc.motionMetricHist.size() > 0 ) {
@@ -315,7 +315,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         	memMonitor.draw( drawable, 0 );
         	computeTimeMonitor.draw( drawable, 1);
         }
-        if ( drawQMG.getValue() ) {
+        if ( system.display.params.drawQMG.getValue() ) {
         	qmgMetric.draw(drawable, 0);
         	qmgContact.draw(drawable, 1);
         }
@@ -335,8 +335,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         }
     }
     
-    BooleanParameter enableQMG = new BooleanParameter("enable quantity monitor (otherwise graph is boring)", false );
-    BooleanParameter drawQMG = new BooleanParameter("draw quantity monitor graph", false );
     /** Last selected body is used for the quantity harvesting */
     RigidBody lastSelectedBody;
     private QuantityMonitorGraph qmgMetric = new QuantityMonitorGraph("Metric","units");
@@ -622,9 +620,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
             }
         });  
         vfp.add( hfp2.getPanel() );
-        
-        vfp.add( enableQMG.getControls() );
-        vfp.add( drawQMG.getControls() );
         
         vfp.add( run.getControls() );
         vfp.add( stepsize.getSliderControls(true) );
