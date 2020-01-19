@@ -1,40 +1,39 @@
 clear 
 close all
-
-X_unmerged = readtable("tower30.csv")
-X_merged = readtable("tower30_merged.csv")
+scene_name = "tower30"
+plot_name = "Performance With Time for " + scene_name + " Scene"
+X_unmerged = readtable(scene_name + ".csv")
+X_merged = readtable(scene_name + "_merged.csv")
 
 num_timesteps = min(height(X_unmerged), height(X_merged))
 
 hfig = figure('Renderer', 'painters', 'Position', [10 10 600 400]), set(gcf,'color','w'); hold on;
 
-col = [ 
-    1,  0.4,  0.0 
-    1,  0.2, 0.0
-    0,  0.4, 1
-    0,  0.2, 1
-    ];
 
 hold;
-yyaxis left
-%plot 20th column... total compute_time.
+
+subplot(2,1,1);
 semilogy(X_merged{1:num_timesteps, 20 }, 'DisplayName','Merging')
 hold;
 semilogy(X_unmerged{1:num_timesteps, 20}, 'DisplayName','No Merging')
 hold;
 ylabel("Computation Time (s)")
 
-yyaxis right
-plot(X_merged{1:num_timesteps, 2}, 'DisplayName','Merging')
-hold;
-plot(X_unmerged{1:num_timesteps, 2}, 'DisplayName','No Merging')
-ylabel("# Contacts")
+legend
 
-hold off
+subplot(2,1,2);
+
+semilogy(X_merged{1:num_timesteps, 2}, 'DisplayName','Merging')
+hold;
+semilogy(X_unmerged{1:num_timesteps, 2}, 'DisplayName','No Merging')
+ylabel("# Contacts")
+ylim([10^(1) 10^4])
+
+
 
 legend
 
-xlabel("Simulation Timestep (0.05s)")
+xlabel("Simulation Timestep")
 
 
 fontSize = 10;
