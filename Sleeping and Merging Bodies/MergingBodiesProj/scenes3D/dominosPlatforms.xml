@@ -2,120 +2,136 @@
 <root>
 	<body n="0. 1. 0.0" name="plane" p="0 0 0" type="plane"/>
 	<system mouseSpringDamping="1" mouseSpringStiffness="3"/>
-	<body density="1" dim="0.25 2 1" name="domino0" scale="1" type="box">
-		<x>0.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino0" scale="1" type="box">
+		<x>0.44 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino1" scale="1" type="box">
-		<x>1.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino1" scale="1" type="box">
+		<x>1.32 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino2" scale="1" type="box">
-		<x>2.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino2" scale="1" type="box">
+		<x>2.2 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino3" scale="1" type="box">
-		<x>3.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino3" scale="1" type="box">
+		<x>3.08 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino4" scale="1" type="box">
-		<x>4.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino4" scale="1" type="box">
+		<x>3.96 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino5" scale="1" type="box">
-		<x>5.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino5" scale="1" type="box">
+		<x>4.84 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino6" scale="1" type="box">
-		<x>6.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino6" scale="1" type="box">
+		<x>5.72 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino7" scale="1" type="box">
-		<x>7.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino7" scale="1" type="box">
+		<x>6.6 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino8" scale="1" type="box">
-		<x>8.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino8" scale="1" type="box">
+		<x>7.48 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino9" scale="1" type="box">
-		<x>9.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino9" scale="1" type="box">
+		<x>8.36 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino10" scale="1" type="box">
-		<x>10.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino10" scale="1" type="box">
+		<x>9.24 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino11" scale="1" type="box">
-		<x>11.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino11" scale="1" type="box">
+		<x>10.12 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino12" scale="1" type="box">
-		<x>12.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino12" scale="1" type="box">
+		<x>11.0 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino13" scale="1" type="box">
-		<x>13.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino13" scale="1" type="box">
+		<x>11.88 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino14" scale="1" type="box">
-		<x>14.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino14" scale="1" type="box">
+		<x>12.76 6.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino15" scale="1" type="box">
+		<x>13.64 6.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino16" scale="1" type="box">
+		<x>14.52 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
@@ -123,243 +139,275 @@
 		<magnetic>false</magnetic>
 	</body>
 	<body density="1" dim="29 0.5 3" name="platform0" scale="1" type="box">
-		<x>14.5 5.0 0.0</x>
+		<x>14.52 5.0 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0.2 0 0</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="0.5 8.0 1.5"/>
-		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="0.5 8.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="28.5 8.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="28.5 8.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="0.52 8.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="0.52 8.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="28.52 8.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="28.52 8.0 1.5"/>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino15" scale="1" type="box">
-		<x>15.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino17" scale="1" type="box">
+		<x>15.4 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino16" scale="1" type="box">
-		<x>16.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino18" scale="1" type="box">
+		<x>16.28 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino17" scale="1" type="box">
-		<x>17.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino19" scale="1" type="box">
+		<x>17.16 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino18" scale="1" type="box">
-		<x>18.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino20" scale="1" type="box">
+		<x>18.04 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino19" scale="1" type="box">
-		<x>19.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino21" scale="1" type="box">
+		<x>18.92 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino20" scale="1" type="box">
-		<x>20.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino22" scale="1" type="box">
+		<x>19.8 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino21" scale="1" type="box">
-		<x>21.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino23" scale="1" type="box">
+		<x>20.68 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino22" scale="1" type="box">
-		<x>22.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino24" scale="1" type="box">
+		<x>21.56 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino23" scale="1" type="box">
-		<x>23.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino25" scale="1" type="box">
+		<x>22.44 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino24" scale="1" type="box">
-		<x>24.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino26" scale="1" type="box">
+		<x>23.32 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino25" scale="1" type="box">
-		<x>25.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino27" scale="1" type="box">
+		<x>24.2 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino26" scale="1" type="box">
-		<x>26.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino28" scale="1" type="box">
+		<x>25.08 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino27" scale="1" type="box">
-		<x>27.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino29" scale="1" type="box">
+		<x>25.96 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino28" scale="1" type="box">
-		<x>28.5 6.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino30" scale="1" type="box">
+		<x>26.84 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino5" scale="1" type="box">
-		<x>1.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino31" scale="1" type="box">
+		<x>27.72 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino6" scale="1" type="box">
-		<x>2.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino32" scale="1" type="box">
+		<x>28.6 6.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino7" scale="1" type="box">
-		<x>3.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino33" scale="1" type="box">
+		<x>1.32 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino8" scale="1" type="box">
-		<x>4.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino34" scale="1" type="box">
+		<x>2.2 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino9" scale="1" type="box">
-		<x>5.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino35" scale="1" type="box">
+		<x>3.08 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino10" scale="1" type="box">
-		<x>6.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino36" scale="1" type="box">
+		<x>3.96 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino11" scale="1" type="box">
-		<x>7.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino37" scale="1" type="box">
+		<x>4.84 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino12" scale="1" type="box">
-		<x>8.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino38" scale="1" type="box">
+		<x>5.72 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino13" scale="1" type="box">
-		<x>9.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino39" scale="1" type="box">
+		<x>6.6 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino14" scale="1" type="box">
-		<x>10.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino40" scale="1" type="box">
+		<x>7.48 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino15" scale="1" type="box">
-		<x>11.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino41" scale="1" type="box">
+		<x>8.36 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino16" scale="1" type="box">
-		<x>12.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino42" scale="1" type="box">
+		<x>9.24 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino17" scale="1" type="box">
-		<x>13.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino43" scale="1" type="box">
+		<x>10.12 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino18" scale="1" type="box">
-		<x>14.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino44" scale="1" type="box">
+		<x>11.0 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino19" scale="1" type="box">
-		<x>15.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino45" scale="1" type="box">
+		<x>11.88 11.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino46" scale="1" type="box">
+		<x>12.76 11.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino47" scale="1" type="box">
+		<x>13.64 11.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino48" scale="1" type="box">
+		<x>14.52 11.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino49" scale="1" type="box">
+		<x>15.4 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
@@ -367,243 +415,275 @@
 		<magnetic>false</magnetic>
 	</body>
 	<body density="1" dim="29 0.5 3" name="platform1" scale="1" type="box">
-		<x>15.5 10.0 0.0</x>
+		<x>15.4 10.0 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>-0.2 0 0</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="1.5 13.0 1.5"/>
-		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="1.5 13.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="29.5 13.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="29.5 13.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="1.4 13.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="1.4 13.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="29.4 13.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="29.4 13.0 1.5"/>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino20" scale="1" type="box">
-		<x>16.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino50" scale="1" type="box">
+		<x>16.28 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino21" scale="1" type="box">
-		<x>17.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino51" scale="1" type="box">
+		<x>17.16 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino22" scale="1" type="box">
-		<x>18.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino52" scale="1" type="box">
+		<x>18.04 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino23" scale="1" type="box">
-		<x>19.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino53" scale="1" type="box">
+		<x>18.92 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino24" scale="1" type="box">
-		<x>20.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino54" scale="1" type="box">
+		<x>19.8 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino25" scale="1" type="box">
-		<x>21.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino55" scale="1" type="box">
+		<x>20.68 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino26" scale="1" type="box">
-		<x>22.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino56" scale="1" type="box">
+		<x>21.56 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino27" scale="1" type="box">
-		<x>23.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino57" scale="1" type="box">
+		<x>22.44 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino28" scale="1" type="box">
-		<x>24.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino58" scale="1" type="box">
+		<x>23.32 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino29" scale="1" type="box">
-		<x>25.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino59" scale="1" type="box">
+		<x>24.2 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino30" scale="1" type="box">
-		<x>26.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino60" scale="1" type="box">
+		<x>25.08 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino31" scale="1" type="box">
-		<x>27.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino61" scale="1" type="box">
+		<x>25.96 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino32" scale="1" type="box">
-		<x>28.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino62" scale="1" type="box">
+		<x>26.84 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino33" scale="1" type="box">
-		<x>29.5 11.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino63" scale="1" type="box">
+		<x>27.72 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino10" scale="1" type="box">
-		<x>0.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino64" scale="1" type="box">
+		<x>28.6 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino11" scale="1" type="box">
-		<x>1.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino65" scale="1" type="box">
+		<x>29.48 11.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino12" scale="1" type="box">
-		<x>2.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino66" scale="1" type="box">
+		<x>0.44 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino13" scale="1" type="box">
-		<x>3.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino67" scale="1" type="box">
+		<x>1.32 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino14" scale="1" type="box">
-		<x>4.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino68" scale="1" type="box">
+		<x>2.2 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino15" scale="1" type="box">
-		<x>5.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino69" scale="1" type="box">
+		<x>3.08 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino16" scale="1" type="box">
-		<x>6.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino70" scale="1" type="box">
+		<x>3.96 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino17" scale="1" type="box">
-		<x>7.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino71" scale="1" type="box">
+		<x>4.84 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino18" scale="1" type="box">
-		<x>8.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino72" scale="1" type="box">
+		<x>5.72 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino19" scale="1" type="box">
-		<x>9.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino73" scale="1" type="box">
+		<x>6.6 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino20" scale="1" type="box">
-		<x>10.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino74" scale="1" type="box">
+		<x>7.48 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino21" scale="1" type="box">
-		<x>11.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino75" scale="1" type="box">
+		<x>8.36 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino22" scale="1" type="box">
-		<x>12.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino76" scale="1" type="box">
+		<x>9.24 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino23" scale="1" type="box">
-		<x>13.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino77" scale="1" type="box">
+		<x>10.12 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino24" scale="1" type="box">
-		<x>14.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino78" scale="1" type="box">
+		<x>11.0 16.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino79" scale="1" type="box">
+		<x>11.88 16.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino80" scale="1" type="box">
+		<x>12.76 16.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino81" scale="1" type="box">
+		<x>13.64 16.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino82" scale="1" type="box">
+		<x>14.52 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
@@ -611,243 +691,275 @@
 		<magnetic>false</magnetic>
 	</body>
 	<body density="1" dim="29 0.5 3" name="platform2" scale="1" type="box">
-		<x>14.5 15.0 0.0</x>
+		<x>14.52 15.0 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0.2 0 0</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="0.5 18.0 1.5"/>
-		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="0.5 18.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="28.5 18.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="28.5 18.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="0.52 18.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="0.52 18.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="28.52 18.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="28.52 18.0 1.5"/>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino25" scale="1" type="box">
-		<x>15.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino83" scale="1" type="box">
+		<x>15.4 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino26" scale="1" type="box">
-		<x>16.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino84" scale="1" type="box">
+		<x>16.28 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino27" scale="1" type="box">
-		<x>17.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino85" scale="1" type="box">
+		<x>17.16 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino28" scale="1" type="box">
-		<x>18.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino86" scale="1" type="box">
+		<x>18.04 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino29" scale="1" type="box">
-		<x>19.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino87" scale="1" type="box">
+		<x>18.92 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino30" scale="1" type="box">
-		<x>20.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino88" scale="1" type="box">
+		<x>19.8 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino31" scale="1" type="box">
-		<x>21.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino89" scale="1" type="box">
+		<x>20.68 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino32" scale="1" type="box">
-		<x>22.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino90" scale="1" type="box">
+		<x>21.56 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino33" scale="1" type="box">
-		<x>23.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino91" scale="1" type="box">
+		<x>22.44 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino34" scale="1" type="box">
-		<x>24.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino92" scale="1" type="box">
+		<x>23.32 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino35" scale="1" type="box">
-		<x>25.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino93" scale="1" type="box">
+		<x>24.2 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino36" scale="1" type="box">
-		<x>26.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino94" scale="1" type="box">
+		<x>25.08 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino37" scale="1" type="box">
-		<x>27.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino95" scale="1" type="box">
+		<x>25.96 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino38" scale="1" type="box">
-		<x>28.5 16.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino96" scale="1" type="box">
+		<x>26.84 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino15" scale="1" type="box">
-		<x>1.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino97" scale="1" type="box">
+		<x>27.72 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino16" scale="1" type="box">
-		<x>2.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino98" scale="1" type="box">
+		<x>28.6 16.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino17" scale="1" type="box">
-		<x>3.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino99" scale="1" type="box">
+		<x>1.32 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino18" scale="1" type="box">
-		<x>4.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino100" scale="1" type="box">
+		<x>2.2 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino19" scale="1" type="box">
-		<x>5.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino101" scale="1" type="box">
+		<x>3.08 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino20" scale="1" type="box">
-		<x>6.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino102" scale="1" type="box">
+		<x>3.96 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino21" scale="1" type="box">
-		<x>7.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino103" scale="1" type="box">
+		<x>4.84 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino22" scale="1" type="box">
-		<x>8.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino104" scale="1" type="box">
+		<x>5.72 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino23" scale="1" type="box">
-		<x>9.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino105" scale="1" type="box">
+		<x>6.6 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino24" scale="1" type="box">
-		<x>10.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino106" scale="1" type="box">
+		<x>7.48 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino25" scale="1" type="box">
-		<x>11.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino107" scale="1" type="box">
+		<x>8.36 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino26" scale="1" type="box">
-		<x>12.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino108" scale="1" type="box">
+		<x>9.24 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino27" scale="1" type="box">
-		<x>13.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino109" scale="1" type="box">
+		<x>10.12 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino28" scale="1" type="box">
-		<x>14.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino110" scale="1" type="box">
+		<x>11.0 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino29" scale="1" type="box">
-		<x>15.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino111" scale="1" type="box">
+		<x>11.88 21.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino112" scale="1" type="box">
+		<x>12.76 21.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino113" scale="1" type="box">
+		<x>13.64 21.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino114" scale="1" type="box">
+		<x>14.52 21.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino115" scale="1" type="box">
+		<x>15.4 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
@@ -855,243 +967,275 @@
 		<magnetic>false</magnetic>
 	</body>
 	<body density="1" dim="29 0.5 3" name="platform3" scale="1" type="box">
-		<x>15.5 20.0 0.0</x>
+		<x>15.4 20.0 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>-0.2 0 0</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="1.5 23.0 1.5"/>
-		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="1.5 23.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="29.5 23.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="29.5 23.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="1.4 23.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="1.4 23.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="29.4 23.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="29.4 23.0 1.5"/>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino30" scale="1" type="box">
-		<x>16.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino116" scale="1" type="box">
+		<x>16.28 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino31" scale="1" type="box">
-		<x>17.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino117" scale="1" type="box">
+		<x>17.16 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino32" scale="1" type="box">
-		<x>18.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino118" scale="1" type="box">
+		<x>18.04 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino33" scale="1" type="box">
-		<x>19.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino119" scale="1" type="box">
+		<x>18.92 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino34" scale="1" type="box">
-		<x>20.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino120" scale="1" type="box">
+		<x>19.8 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino35" scale="1" type="box">
-		<x>21.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino121" scale="1" type="box">
+		<x>20.68 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino36" scale="1" type="box">
-		<x>22.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino122" scale="1" type="box">
+		<x>21.56 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino37" scale="1" type="box">
-		<x>23.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino123" scale="1" type="box">
+		<x>22.44 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino38" scale="1" type="box">
-		<x>24.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino124" scale="1" type="box">
+		<x>23.32 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino39" scale="1" type="box">
-		<x>25.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino125" scale="1" type="box">
+		<x>24.2 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino40" scale="1" type="box">
-		<x>26.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino126" scale="1" type="box">
+		<x>25.08 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino41" scale="1" type="box">
-		<x>27.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino127" scale="1" type="box">
+		<x>25.96 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino42" scale="1" type="box">
-		<x>28.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino128" scale="1" type="box">
+		<x>26.84 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino43" scale="1" type="box">
-		<x>29.5 21.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino129" scale="1" type="box">
+		<x>27.72 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino20" scale="1" type="box">
-		<x>0.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino130" scale="1" type="box">
+		<x>28.6 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino21" scale="1" type="box">
-		<x>1.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino131" scale="1" type="box">
+		<x>29.48 21.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino22" scale="1" type="box">
-		<x>2.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino132" scale="1" type="box">
+		<x>0.44 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino23" scale="1" type="box">
-		<x>3.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino133" scale="1" type="box">
+		<x>1.32 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino24" scale="1" type="box">
-		<x>4.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino134" scale="1" type="box">
+		<x>2.2 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino25" scale="1" type="box">
-		<x>5.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino135" scale="1" type="box">
+		<x>3.08 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino26" scale="1" type="box">
-		<x>6.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino136" scale="1" type="box">
+		<x>3.96 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino27" scale="1" type="box">
-		<x>7.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino137" scale="1" type="box">
+		<x>4.84 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino28" scale="1" type="box">
-		<x>8.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino138" scale="1" type="box">
+		<x>5.72 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino29" scale="1" type="box">
-		<x>9.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino139" scale="1" type="box">
+		<x>6.6 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino30" scale="1" type="box">
-		<x>10.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino140" scale="1" type="box">
+		<x>7.48 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino31" scale="1" type="box">
-		<x>11.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino141" scale="1" type="box">
+		<x>8.36 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino32" scale="1" type="box">
-		<x>12.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino142" scale="1" type="box">
+		<x>9.24 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino33" scale="1" type="box">
-		<x>13.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino143" scale="1" type="box">
+		<x>10.12 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino34" scale="1" type="box">
-		<x>14.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino144" scale="1" type="box">
+		<x>11.0 26.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino145" scale="1" type="box">
+		<x>11.88 26.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino146" scale="1" type="box">
+		<x>12.76 26.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino147" scale="1" type="box">
+		<x>13.64 26.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino148" scale="1" type="box">
+		<x>14.52 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
@@ -1099,123 +1243,139 @@
 		<magnetic>false</magnetic>
 	</body>
 	<body density="1" dim="29 0.5 3" name="platform4" scale="1" type="box">
-		<x>14.5 25.0 0.0</x>
+		<x>14.52 25.0 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0.2 0 0</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="0.5 28.0 1.5"/>
-		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="0.5 28.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="28.5 28.0 -1.5"/>
-		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="28.5 28.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 1.5" pW="0.52 28.0 1.5"/>
+		<spring controllable="false" d="10" k="100" pB="-14 0 -1.5" pW="0.52 28.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 -1.5" pW="28.52 28.0 -1.5"/>
+		<spring controllable="false" d="10" k="100" pB="14 0 1.5" pW="28.52 28.0 1.5"/>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino35" scale="1" type="box">
-		<x>15.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino149" scale="1" type="box">
+		<x>15.4 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino36" scale="1" type="box">
-		<x>16.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino150" scale="1" type="box">
+		<x>16.28 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino37" scale="1" type="box">
-		<x>17.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino151" scale="1" type="box">
+		<x>17.16 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino38" scale="1" type="box">
-		<x>18.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino152" scale="1" type="box">
+		<x>18.04 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino39" scale="1" type="box">
-		<x>19.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino153" scale="1" type="box">
+		<x>18.92 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino40" scale="1" type="box">
-		<x>20.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino154" scale="1" type="box">
+		<x>19.8 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino41" scale="1" type="box">
-		<x>21.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino155" scale="1" type="box">
+		<x>20.68 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino42" scale="1" type="box">
-		<x>22.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino156" scale="1" type="box">
+		<x>21.56 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino43" scale="1" type="box">
-		<x>23.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino157" scale="1" type="box">
+		<x>22.44 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino44" scale="1" type="box">
-		<x>24.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino158" scale="1" type="box">
+		<x>23.32 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino45" scale="1" type="box">
-		<x>25.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino159" scale="1" type="box">
+		<x>24.2 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino46" scale="1" type="box">
-		<x>26.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino160" scale="1" type="box">
+		<x>25.08 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino47" scale="1" type="box">
-		<x>27.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino161" scale="1" type="box">
+		<x>25.96 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-	<body density="1" dim="0.25 2 1" name="domino48" scale="1" type="box">
-		<x>28.5 26.2 0.0</x>
+	<body density="2" dim="0.25 2 1" name="domino162" scale="1" type="box">
+		<x>26.84 26.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino163" scale="1" type="box">
+		<x>27.72 26.2 0.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="2" dim="0.25 2 1" name="domino164" scale="1" type="box">
+		<x>28.6 26.2 0.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
