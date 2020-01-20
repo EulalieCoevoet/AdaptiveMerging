@@ -18,9 +18,6 @@ import mergingBodies3D.Merging.MergeParameters;
 /**
  * Adapted from 2D verions... 
  * 
- * TODO: note for efficiency, should consider incremental updates to the inertia...
- * that is at least if bodies are being added one at a time to a collection
- * 
  * TODO: Also... consider pooling rigid collections as they probably get create and destroyed often??  
  * Perhaps not as bad as contacts... but just the same!!  The internal lists (contacts and bodies) will
  * benefit from not being re-allocated and regrown too.
@@ -622,18 +619,6 @@ public class RigidCollection extends RigidBody {
 		body.omega.set( omega );
 	}
 
-	public boolean isMovingAway(RigidBody body, MergeParameters mergeParams) {
-
-		long now = System.nanoTime();
-		double metric = motionMetricProcessor.getMotionMetric(this, body);
-
-		if (pinned)
-			metric /= 2;
-		
-		mergeParams.unmergingCheckMotionTime += (System.nanoTime() - now) / 1e9;
-		return (metric > mergeParams.thresholdUnmerge.getValue());
-	}
-
 	/**
 	 * Makes body ready to be used by system... converts everything to world
 	 * coordinates and makes body independent of collection ... does not do anything
@@ -686,6 +671,8 @@ public class RigidCollection extends RigidBody {
 		for (BodyPairContact bpc : body.bodyPairContacts) {
 			if (bpc.body1.isInSameCollection(bpc.body2) && !bpc.inCollection) {
 				bpc.inCollection = true;
+				bpc.motionMetricHist.clear();
+				bpc.contactStateHist.clear();
 				body.parent.addToInternalContact(bpc);
 				body.parent.addBPCsToCollection(bpc);
 				removalQueue.add(bpc);

@@ -18,7 +18,7 @@ public class Sleeping {
 	protected ArrayList<Spring> springs;
 	
 	public class SleepParameters {
-		public BooleanParameter enableSleeping = new BooleanParameter( "sleeping", true);
+		public BooleanParameter enableSleeping = new BooleanParameter( "sleeping", false);
 		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 10, 0, 200 );
 		public DoubleParameter threshold = new DoubleParameter("sleeping threshold", 1e-5, 1e-10, 1 );
 		public BooleanParameter wakeAll = new BooleanParameter("wake all", false);

@@ -287,7 +287,7 @@ public class CollisionProcessor {
 			
 				// Update the bodies velocities for the unmerge condition (relative motion)
 				for (RigidBody b : collection.bodies)
-					if(!b.pinned ) // && !b.temporarilyPinned)
+					if(!b.pinned ) 
 						b.advanceVelocities(dt);	
 			}
 			// Reset deltaV for LCP solve
@@ -896,7 +896,7 @@ public class CollisionProcessor {
     public DoubleParameter friction = new DoubleParameter("Coulomb friction, if override enabled", 0.1, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
-    public IntParameter iterations = new IntParameter("iterations for PGS solve", 1000, 1, 5000);
+    public IntParameter iterations = new IntParameter("iterations for PGS solve", 200, 1, 5000);
 
 	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
         

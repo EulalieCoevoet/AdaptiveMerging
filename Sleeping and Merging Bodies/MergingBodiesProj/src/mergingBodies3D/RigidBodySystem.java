@@ -9,9 +9,6 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import mergingBodies3D.Merging.UnmergingCondition;
@@ -163,18 +160,22 @@ public class RigidBodySystem {
 				b.advanceVelocities(dt);
 
 		for (BodyPairContact bpc : collision.bodyPairContacts) 
-			bpc.accumulate(merging.params);
+			bpc.accumulateForMerging(merging.params);
 
+		for (RigidBody body: bodies) {
+			if (body instanceof RigidCollection)
+				for (BodyPairContact bpc : ((RigidCollection)body).bodyPairContacts) 
+					bpc.accumulateForUnmerging(merging.params);
+		}
+		
 		for ( RigidBody b : bodies ) {
 			if (!b.pinned && !b.isSleeping) { 
 				b.advancePositions(dt);
 			
 				if (b instanceof RigidCollection) {
 					((RigidCollection)b).updateBodiesPositionAndTransformations();
-		
-					// Advance velocities for internal bodies
-					if (!merging.params.enableUnmergeRelativeMotionCondition.getValue())
-						((RigidCollection)b).applyVelocitiesToBodies();
+					// Accumulation for unmerge is done before this step, so we can clean the bodies velocities
+					((RigidCollection)b).applyVelocitiesToBodies();
 				}
 			}
 		}
@@ -381,6 +382,10 @@ public class RigidBodySystem {
 		
 		//get an unpinned random RigidBody
 		for (RigidBody body: bodies) {
+			
+			if (bodies.indexOf(body)==0)
+				continue;
+							
 			if (!(body instanceof RigidCollection) && !body.pinned) {
 				genbody = new RigidBody(body);
 				break;

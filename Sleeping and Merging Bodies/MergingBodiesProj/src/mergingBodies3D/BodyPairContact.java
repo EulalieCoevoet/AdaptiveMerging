@@ -76,10 +76,10 @@ public class BodyPairContact {
 	}
 	
 	/**
-	 * Accumulate criteria for merging/unmerging
+	 * Accumulate criteria for merging
 	 * @param contact
 	 */
-	public void accumulate(MergeParameters mergeParams) {
+	public void accumulateForMerging(MergeParameters mergeParams) {
 
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
@@ -91,7 +91,7 @@ public class BodyPairContact {
 		else
 			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2));
 		
-		if (motionMetricHist.size() > mergeParams.stepAccum.getValue())
+		if (motionMetricHist.size() > mergeParams.stepAccumMerging.getValue())
 			motionMetricHist.remove(0);
 	
 		ContactState state = ContactState.CLEAR;
@@ -113,8 +113,30 @@ public class BodyPairContact {
 			state = ContactState.ONEDGE;
 		
 		contactStateHist.add(state);
-		if (contactStateHist.size() > mergeParams.stepAccum.getValue())
+		if (contactStateHist.size() > mergeParams.stepAccumMerging.getValue())
 			contactStateHist.remove(0);
+	}
+	
+	/**
+	 * Accumulate motion metric for unmerging
+	 * @param contact
+	 */
+	public void accumulateForUnmerging(MergeParameters mergeParams) {
+		if(body1.isInSameCollection(body2)) {			
+			double metric;
+			if (body1.pinned)
+				metric = motionMetricProcessor.getMotionMetric(body2);
+			else if (body2.pinned)
+				metric = motionMetricProcessor.getMotionMetric(body1);
+			else
+				metric = motionMetricProcessor.getMotionMetric(body1, body2);
+			
+			if (metric>mergeParams.thresholdUnmerge.getValue()) {
+				motionMetricHist.add(metric);
+			} else {
+				motionMetricHist.clear();
+			}
+		}
 	}
 	
 	/**
@@ -142,7 +164,7 @@ public class BodyPairContact {
 			return false;
 		
 		now = System.nanoTime();
-		if (!checkMotionMetric(mergeParams))
+		if (!checkMotionMetricForMerging(mergeParams))
 			return false;
 		mergeParams.mergingCheckMotionTime += (System.nanoTime() - now) / 1e9;
 
@@ -167,9 +189,9 @@ public class BodyPairContact {
 	 * </ul><p>
 	 * @return true or false
 	 */
-	public boolean checkMotionMetric(MergeParameters mergeParams) {
+	public boolean checkMotionMetricForMerging(MergeParameters mergeParams) {
 
-		if ((motionMetricHist.size() == mergeParams.stepAccum.getValue())) {
+		if ((motionMetricHist.size() == mergeParams.stepAccumMerging.getValue())) {
 			for (Double metric : motionMetricHist) {
 				if (metric > mergeParams.thresholdMerge.getValue())
 					return false;
@@ -177,9 +199,15 @@ public class BodyPairContact {
 		} else {
 			return false;
 		}
-
 		return true;
 	}  
+	
+	public boolean checkMotionMetricForUnmerging(MergeParameters mergeParams) {
+		if ((motionMetricHist.size() >= mergeParams.stepAccumUnmerging.getValue()) && contactList.size()<3) // only reason for unstable config
+			return true;
+		
+		return false;
+	}
 
 	/**
 	 * Check if contacts have been stable over CollisionProcessor.sleepAccum time steps 
@@ -188,7 +216,7 @@ public class BodyPairContact {
 	 */
 	public boolean areContactsStable(MergeParameters mergeParams) {
 
-		if ((contactStateHist.size() == mergeParams.stepAccum.getValue())) {
+		if ((contactStateHist.size() == mergeParams.stepAccumMerging.getValue())) {
 			for (Contact.ContactState state : contactStateHist) {
 				if (state == Contact.ContactState.ONEDGE)
 					return false;

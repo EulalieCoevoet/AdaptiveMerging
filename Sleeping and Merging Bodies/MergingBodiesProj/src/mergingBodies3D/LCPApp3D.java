@@ -708,6 +708,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     	// load systems occasionally.
     	deleteDisplayListRequest = true;  
     	system.clear();
+    	nextFrameNum=0;
     }
 
     /**

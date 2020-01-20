@@ -518,7 +518,7 @@ public class Contact {
 	}
     
 	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.0001, 1);
-	static DoubleParameter slidingThreshold = new DoubleParameter("sliding velocity threshold", 0.1, 0.0001, 3);
+	static DoubleParameter slidingThreshold = new DoubleParameter("sliding velocity threshold", 0.01, 0.0001, 3);
 
     /**
      * Draws the connections between bodies to visualize the 
