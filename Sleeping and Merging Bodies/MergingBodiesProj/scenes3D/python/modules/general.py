@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 
-def body(root, type, name, position="0 0 0", orientation="0. -1 0. 0.", velocity="0. 0. 0.", omega="0. 0. 0.", dim="2 2 2", obj=None, radius="1", scale="1", pinned="false", magnetic="false", density="1", restitution=None, friction=None, color=None):
+def body(root, type, name, position="0 0 0", orientation="0. -1 0. 0.", velocity="0. 0. 0.", omega="0. 0. 0.", dim="2 2 2", obj=None, st=None, radius="1", scale="1", pinned="false", magnetic="false", density="1", restitution=None, friction=None, color=None):
     # Fixed body
     body = ET.SubElement(root, 'body')
     body.set('type', type)
@@ -16,6 +16,7 @@ def body(root, type, name, position="0 0 0", orientation="0. -1 0. 0.", velocity
         body.set('obj', obj)
     elif ((type == "mesh")):
         body.set('obj', obj)
+        body.set("st",st)
 
     prop = ET.SubElement(body, 'x')
     prop.text = position
