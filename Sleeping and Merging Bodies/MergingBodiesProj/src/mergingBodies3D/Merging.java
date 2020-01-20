@@ -10,11 +10,9 @@ import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import mergingBodies3D.Merging.UnmergingCondition;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
-import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
 public class Merging {
@@ -38,12 +36,13 @@ public class Merging {
 		public BooleanParameter enableUnmerging = new BooleanParameter( "unmerging", true );
 		public BooleanParameter enableUnmergeFrictionCondition = new BooleanParameter( "unmerging - friction condition", true);
 		public BooleanParameter enableUnmergeNormalCondition = new BooleanParameter( "unmerging - contact normal condition", true);
-		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", false);
+		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", true);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
-		public IntParameter stepAccum = new IntParameter("check threshold over N number of time steps", 3, 0, 200 );
-		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-3, 1e-10, 100 );
-		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1, 1e-10, 100 );
+		public IntParameter stepAccumMerging = new IntParameter("check threshold over N number of time steps for merging", 3, 0, 200 );
+		public IntParameter stepAccumUnmerging = new IntParameter("check threshold over N number of time steps for unmerging", 3, 0, 200 ); // eulalie: this should probably related to PGS iterations for full LCP solve...
+		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-2, 1e-10, 100 );
+		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1e-2, 1e-10, 100 );
 		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-5, 1e-10, 1e0 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 		public BooleanParameter changeColors = new BooleanParameter("change colors", false);
@@ -114,6 +113,8 @@ public class Merging {
 				long now = System.nanoTime();
 				mergingEvent = true;
 				bpc.inCollection = true;
+				bpc.motionMetricHist.clear();
+				bpc.contactStateHist.clear();
 				
 				// the body pair contact is now going to be internal, so let's migrate it's contacts over to
 				// a more permanent list... for now allocate new memory, but it could be pooled.
@@ -255,23 +256,20 @@ public class Merging {
 					if (!bpc.inCollection)
 						continue;
 					
-					for (int i=0; i<2; i++) { 
-						RigidBody b = bpc.getBody(i);
-						if (!bpcsToUnmerge.contains(bpc)) {
-							
-							if (condition == UnmergingCondition.CONTACTS && !bpc.checkContactsState(dt, params))
-								continue;
+					if (!bpcsToUnmerge.contains(bpc)) {
+						
+						if (condition == UnmergingCondition.CONTACTS && !bpc.checkContactsState(dt, params))
+							continue;
 
-							if (condition == UnmergingCondition.RELATIVEMOTION && !collection.isMovingAway(b, params))
-								continue;
+						if (condition == UnmergingCondition.RELATIVEMOTION && !bpc.checkMotionMetricForUnmerging(params))
+							continue;
 
-							long now = System.nanoTime();
-							if (params.enableMergeCycleCondition.getValue())
-								bpc.checkCyclesToUnmerge(bpcsToUnmerge);
-							params.unmergingCheckCycleTime += (System.nanoTime() - now) / 1e9;
-							
-							bpc.addBpcToUnmerge(bpcsToUnmerge);
-						}
+						long now = System.nanoTime();
+						if (params.enableMergeCycleCondition.getValue())
+							bpc.checkCyclesToUnmerge(bpcsToUnmerge);
+						params.unmergingCheckCycleTime += (System.nanoTime() - now) / 1e9;
+						
+						bpc.addBpcToUnmerge(bpcsToUnmerge);
 					}
 				}
 				
@@ -363,7 +361,7 @@ public class Merging {
 							newCollection.fillInternalBodyContacts();
 							newCollection.color = new Color(collection.color);
 							newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
-							//collection.applyVelocitiesTo(newCollection); eulalie: the velocities are updated in call to addBodies...
+							collection.applyVelocitiesTo(newCollection); //eulalie: the velocities are updated in call to addBodies...
 							newBodies.add(newCollection);
 						} else if (subbodies.size() == 1){ // single body
 							newBodies.add(subbodies.iterator().next());
@@ -383,9 +381,14 @@ public class Merging {
 		}	
 
 		// Reconnect if necessary
-		for (BodyPairContact bpc: bpcsToUnmerge)
+		for (BodyPairContact bpc: bpcsToUnmerge) {
 			if (bpc.body1.isInSameCollection(bpc.body2))
 				mergeBodyPairContact(bpc);
+			else {
+				bpc.motionMetricHist.clear();
+				bpc.contactStateHist.clear();
+			}
+		}
 		
 		if(handledBodies.size() != collection.bodies.size())
 			System.err.println("[unmergeSelectedBpcs] Something is wrong");
@@ -409,8 +412,6 @@ public class Merging {
 		if (!collision.bodyPairContacts.contains(bpc)) {
 			collision.bodyPairContacts.add(bpc);
 			bpc.inCollection = false;
-			bpc.contactStateHist.clear();
-			bpc.motionMetricHist.clear();
 			for (Contact contact : bpc.contactList) {
 				if (!collision.contacts.contains(contact)) {
 					contact.lambda0warm = contact.lambda0;
@@ -507,7 +508,8 @@ public class Merging {
 		vfp.add( params.enableUnmergeRelativeMotionCondition.getControls() );
 		vfp.add( params.updateContactsInCollections.getControls() );
 		vfp.add( params.organizeContacts.getControls() );
-		vfp.add( params.stepAccum.getSliderControls() );
+		vfp.add( params.stepAccumMerging.getSliderControls() );
+		vfp.add( params.stepAccumUnmerging.getSliderControls() );
 		vfp.add( params.thresholdMerge.getSliderControls(false) );
 		vfp.add( params.thresholdUnmerge.getSliderControls(false) );
 		vfp.add( params.thresholdBreath.getSliderControls(true) );

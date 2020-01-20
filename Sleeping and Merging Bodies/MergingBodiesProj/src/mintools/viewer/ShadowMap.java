@@ -44,7 +44,7 @@ import mintools.swing.VerticalFlowPanel;
 public class ShadowMap {
 
 	/** Position of the light */
-	private Vec3Parameter lightPos = new Vec3Parameter("light position", 5, 10, 5 );
+	private Vec3Parameter lightPos = new Vec3Parameter("light position", 5, 10, 5, 50);
     
     private BooleanParameter debugLightFrustum = new BooleanParameter( "debug light frustum" , false );
     private DoubleParameter near = new DoubleParameter( "near plane for light", 6.5, 0.5, 8 );    

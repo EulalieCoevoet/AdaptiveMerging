@@ -1,7 +1,23 @@
 <?xml version="1.0" ?>
 <root>
 	<body n="0. 1. 0.0" name="plane" p="0 0 0" type="plane"/>
-	<body density="1" dim="1.8 1.8 1.8" name="box" scale="1" type="box">
+	<body density="1" dim="1.8 1.8 1.8" name="box1" scale="1" type="box">
+		<x>0 100 0</x>
+		<R>0 0 1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="1" dim="1.8 1.8 1.8" name="box2" scale="1" type="box">
+		<x>0 100 0</x>
+		<R>0 0 1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="1" dim="1.8 1.8 1.8" name="box3" scale="1" type="box">
 		<x>0 100 0</x>
 		<R>0 0 1 0</R>
 		<v>0. 0. 0.</v>

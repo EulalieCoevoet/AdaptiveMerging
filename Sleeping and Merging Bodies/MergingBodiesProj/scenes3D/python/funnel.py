@@ -2,6 +2,8 @@ import xml.etree.ElementTree as ET
 import xml.dom.minidom as md
 
 from modules.box import Box
+from modules.sphere import Sphere
+from modules.mesh import Mesh
 from modules.stand import Stand
 from modules.composite import Composite
 from modules.exportXML import export
@@ -16,7 +18,11 @@ plane.set('n','0. 1. 0.0')
 plane.set('name','plane')
 
 # Default Box
-Box(root, name='box', position="0 100 0", orientation="0 0 1 0", dim="1.8 1.8 1.8")
+Box(root, name='box1', position="0 100 0", orientation="0 0 1 0", dim="1.8 1.8 1.8")
+Box(root, name='box2', position="0 100 0", orientation="0 0 1 0", dim="1.8 1.8 1.8")
+Box(root, name='box3', position="0 100 0", orientation="0 0 1 0", dim="1.8 1.8 1.8")
+# Sphere(root, name='sphere', position="0 100 0", orientation="0 0 1 0", radius="1")
+# Mesh(root, name='venus', obj="data/scaletorso10.obj", st="data/torso_flux.sph", position="0 100 0", orientation="0 0 1 0", scale="0.1")
 
 # Funnel
 # composite = Composite(root, obj="data/funnel.obj", scale="2", name="funnel", position="0. 50. 0.", velocity="0. 0. 0.", color="0.5 0. 0. 1.")
