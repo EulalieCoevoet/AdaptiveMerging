@@ -40,9 +40,9 @@ public class Merging {
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
 		public IntParameter stepAccumMerging = new IntParameter("check threshold over N number of time steps for merging", 3, 0, 200 );
-		public IntParameter stepAccumUnmerging = new IntParameter("check threshold over N number of time steps for unmerging", 3, 0, 200 ); // eulalie: this should probably related to PGS iterations for full LCP solve...
+		public IntParameter stepAccumUnmerging = new IntParameter("check threshold over N number of time steps for unmerging", 3, 0, 200 ); 
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-2, 1e-10, 100 );
-		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 1e-2, 1e-10, 100 );
+		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 2e-2, 1e-10, 100 );
 		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-5, 1e-10, 1e0 );
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 		public BooleanParameter changeColors = new BooleanParameter("change colors", false);
