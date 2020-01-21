@@ -35,7 +35,7 @@ z=z0;
 
 platformDimx=29 #better impair
 
-nbPlatforms=5
+nbPlatforms=3
 nbDominos=33
 
 for k in range(nbPlatforms):
@@ -47,7 +47,7 @@ for k in range(nbPlatforms):
         x+=dx
         Box(root, name='domino'+str(i+nbDominos*k), position=str(x)+" "+str(y+1.2)+" "+str(z), dim="0.25 2 1", density="2")
         if (i==nbDominos/2):
-            v = "-0.2 0 0" if (k%2) else "0.2 0 0";
+            v = "-0.22 0 0" if (k%2) else "0.22 0 0";
             platform=Box(root, name="platform"+str(k), dim=str(platformDimx)+" 0.5 3", position=str(x)+" "+str(y)+" "+str(z), velocity=v)
             height=3
             platform.addSpring(positionB="-"+str(platformDimx/2)+" 0 1.5", positionW=str(-(platformDimx-1)/2.+x)+" "+str(y+height)+" 1.5")
