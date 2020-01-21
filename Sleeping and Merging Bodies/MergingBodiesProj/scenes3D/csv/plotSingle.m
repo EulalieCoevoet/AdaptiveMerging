@@ -1,6 +1,6 @@
 clear 
 close all
-scene_name = "tower25platform_merged200it"
+scene_name = "tower30_merged"
 plot_name = "Performance With Time for " + scene_name + " Scene"
 X_merged = readtable(scene_name + ".csv")
 
@@ -10,7 +10,7 @@ hfig = figure('Renderer', 'painters', 'Position', [10 10 600 400]), set(gcf,'col
 
 
 
-subplot(3,1,1);
+subplot(2,1,1);
 hold on
 plot(X_merged{1:num_timesteps, 20 }, 'DisplayName','Full LCP Solve')
 
@@ -21,6 +21,7 @@ plot(X_merged{1:num_timesteps, 6 }, 'DisplayName','Single Iteration PGS')
 plot(X_merged{1:num_timesteps, 9 }, 'DisplayName','Merging')
 
 plot(X_merged{1:num_timesteps, 15 }, 'DisplayName','Unmerging')
+set(gca,'yscale','log')
 
 hold off
 legend
@@ -28,16 +29,15 @@ ylabel("Time (s)")
 
 
 
-subplot(3,1,2);
+subplot(2,1,2);
 
 plot(X_merged{1:num_timesteps, 1}, 'DisplayName','# Bodies')
-ylabel("# Bodies")
-
-
-subplot(3,1,3);
+hold
 plot(X_merged{1:num_timesteps, 2}, 'DisplayName','# Contacts')
 
-ylabel("# Contacts")
+legend
+set(gca,'yscale','log')
+
 
 
 hold off
