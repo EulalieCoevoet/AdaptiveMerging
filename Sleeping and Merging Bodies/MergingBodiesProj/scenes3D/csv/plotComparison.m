@@ -1,6 +1,6 @@
 clear 
 close all
-scene_name = "tower30"
+scene_name = "funnel1"
 plot_name = "Performance With Time for " + scene_name + " Scene"
 X_unmerged = readtable(scene_name + ".csv")
 X_merged = readtable(scene_name + "_merged.csv")
@@ -12,22 +12,33 @@ hfig = figure('Renderer', 'painters', 'Position', [10 10 600 400]), set(gcf,'col
 
 hold;
 
-subplot(2,1,1);
-semilogy(X_merged{1:num_timesteps, 20 }, 'DisplayName','Merging')
+temp_m = X_merged{1:num_timesteps, 20 } - X_merged{1:num_timesteps, 3}
+temp_um = X_unmerged{1:num_timesteps, 20 } - X_unmerged{1:num_timesteps, 3}
+subplot(3,1,1);
+plot(temp_m, 'DisplayName','Merging (No CD)')
 hold;
-semilogy(X_unmerged{1:num_timesteps, 20}, 'DisplayName','No Merging')
+plot(temp_um, 'DisplayName','No Merging (No CD)')
 hold;
 ylabel("Computation Time (s)")
 
 legend
 
-subplot(2,1,2);
+
+subplot(3,1,2);
+
+semilogy(X_merged{1:num_timesteps, 3}, 'DisplayName','Merging CD')
+hold;
+semilogy(X_unmerged{1:num_timesteps, 3}, 'DisplayName','No Merging CD')
+legend
+ylabel("Collision Detection Time")
+
+
+subplot(3,1,3);
 
 semilogy(X_merged{1:num_timesteps, 2}, 'DisplayName','Merging')
 hold;
 semilogy(X_unmerged{1:num_timesteps, 2}, 'DisplayName','No Merging')
 ylabel("# Contacts")
-ylim([10^(1) 10^4])
 
 
 

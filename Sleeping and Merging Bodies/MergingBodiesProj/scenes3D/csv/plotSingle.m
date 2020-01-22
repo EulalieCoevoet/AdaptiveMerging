@@ -1,6 +1,6 @@
 clear 
 close all
-scene_name = "tower30_merged"
+scene_name = "funnel1_merged"
 plot_name = "Performance With Time for " + scene_name + " Scene"
 X_merged = readtable(scene_name + ".csv")
 
