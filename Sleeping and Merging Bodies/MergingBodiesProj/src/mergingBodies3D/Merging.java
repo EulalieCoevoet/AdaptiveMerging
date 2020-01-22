@@ -185,7 +185,7 @@ public class Merging {
 		
 		for (BodyPairContact bpc: removalQueue) {
 			collision.bodyPairContacts.remove(bpc);
-			collision.contacts.removeAll(bpc.contactList);
+			//collision.contacts.removeAll(bpc.contactList);
 		}
 	}
 

@@ -1,6 +1,38 @@
 <?xml version="1.0" ?>
 <root>
 	<body n="0. 1. 0.0" name="plane" p="0 0 0" type="plane"/>
+	<body density="1" dim="100 10 1" name="wall1" scale="1" type="box">
+		<x>0. 1 -50</x>
+		<R>0 0 1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>true</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="1" dim="100 10 1" name="wall2" scale="1" type="box">
+		<x>0. 1 50</x>
+		<R>0 0 1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>true</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="1" dim="1 10 100" name="wall3" scale="1" type="box">
+		<x>-50 1 0.</x>
+		<R>0 0 1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>true</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="1" dim="1 10 100" name="wall4" scale="1" type="box">
+		<x>50 1 0.</x>
+		<R>0 0 1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>true</pinned>
+		<magnetic>false</magnetic>
+	</body>
 	<body density="1" dim="1.8 1.8 1.8" name="box1" scale="1" type="box">
 		<x>0 100 0</x>
 		<R>0 0 1 0</R>
@@ -18,6 +50,14 @@
 		<magnetic>false</magnetic>
 	</body>
 	<body density="1" dim="1.8 1.8 1.8" name="box3" scale="1" type="box">
+		<x>0 100 0</x>
+		<R>0 0 1 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+	</body>
+	<body density="1" name="sphere" r="1" scale="1" type="sphere">
 		<x>0 100 0</x>
 		<R>0 0 1 0</R>
 		<v>0. 0. 0.</v>
