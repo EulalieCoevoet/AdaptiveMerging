@@ -149,7 +149,7 @@ public class RigidCollection extends RigidBody {
 		addBodyInternalMethod(body);
 		
 		updateRotationalInertaionFromTransformation();
-		updateBodiesTransformations();
+		//updateBodiesTransformations();
 		updateBB();
 	}
 
@@ -169,7 +169,7 @@ public class RigidCollection extends RigidBody {
 		}
 		
 		updateRotationalInertaionFromTransformation();
-		updateBodiesTransformations();
+		//updateBodiesTransformations();
 		updateBB();
 	}
 
@@ -188,7 +188,7 @@ public class RigidCollection extends RigidBody {
 	    addBodyInternalMethod(collection);
 	    
 	    updateRotationalInertaionFromTransformation();
-		updateBodiesTransformations();
+		//updateBodiesTransformations();
 		updateBB();
 	}
 	
@@ -354,6 +354,7 @@ public class RigidCollection extends RigidBody {
 		
 		Point3d p = new Point3d();
 		for (RigidBody body : bodies) {
+			body.transformB2C.multAinvB( transformB2W, body.transformB2W );	
 			
 			if (body instanceof PlaneRigidBody)
 				continue;
@@ -431,7 +432,7 @@ public class RigidCollection extends RigidBody {
 		}*/
 		
 		updateRotationalInertaionFromTransformation();
-		updateBodiesTransformations();
+		//updateBodiesTransformations();
 		updateBB();
 	}
 	

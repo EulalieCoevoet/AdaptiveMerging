@@ -296,23 +296,12 @@ public class RigidBody {
      * Updates the rotational inertia and inverse given the current transformation state stored in theta and x
      */
     public void updateRotationalInertaionFromTransformation() {
-//        transformB2W.set( theta, x );
-//        thetaT.transpose(theta);
-//        tmp.scale(-1,x);
-//        thetaT.transform(tmp);
-//        transformW2B.set( thetaT, tmp );
-
         // might be done more often than necessary, but need to have 
         // rotational inertia updated give we are storing information in a 
         // world aligned frame... note that the non-inverted angular inertia
         // used for energy computation and for the corriollis force (disabled)
         // also used by composite bodies at the time of their creation 
         if ( ! pinned ) {
-//	        massAngular.mul( theta, massAngular0 );
-//	        thetaT.transpose(theta);
-//	        massAngular.mul( thetaT );
-//	        jinv.mul( theta, jinv0 );
-//	        jinv.mul( thetaT );
 	        transformB2W.computeRJinv0RT(massAngular0, massAngular); // needed for corriolis, and merging
         	transformB2W.computeRJinv0RT(jinv0, jinv);
         } 

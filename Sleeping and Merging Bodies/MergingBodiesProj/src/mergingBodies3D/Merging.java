@@ -204,8 +204,19 @@ public class Merging {
 				RigidCollection collection = (RigidCollection) body;
 				removalQueue.add(collection);
 				
-				for (BodyPairContact bpc: collection.bodyPairContacts)
-					unmergeBodyPairContact(bpc);
+				for (BodyPairContact bpc: collection.bodyPairContacts) {
+					if (!collision.bodyPairContacts.contains(bpc))
+						collision.bodyPairContacts.add(bpc);
+					bpc.inCollection = false;
+					if(bpc.inCollection) {
+						for (Contact contact : bpc.contactList) {
+							contact.lambda0warm = contact.lambda0;
+							contact.lambda1warm = contact.lambda1;
+							contact.lambda2warm = contact.lambda2;
+							collision.contacts.add(contact);
+						}
+					}
+				}
 							
 				for (RigidBody b: collection.bodies) {
 					collection.unmergeBody(b);
@@ -329,7 +340,7 @@ public class Merging {
 		
 		// Cut connections
 		for (BodyPairContact bpc: bpcsToUnmerge)
-			unmergeBodyPairContact(bpc);
+			bpc.inCollection = false;
 		
 		// Compute resulting new collections/bodies
 		handledBodies.clear();
@@ -380,11 +391,20 @@ public class Merging {
 			}	
 		}	
 
-		// Reconnect if necessary
+		// Reconnect if necessary, if not clean cut 
 		for (BodyPairContact bpc: bpcsToUnmerge) {
-			if (bpc.body1.isInSameCollection(bpc.body2))
-				mergeBodyPairContact(bpc);
-			else {
+			if (bpc.body1.isInSameCollection(bpc.body2)) {
+				bpc.inCollection = true;
+			} else {
+				if (!collision.bodyPairContacts.contains(bpc)) {
+					collision.bodyPairContacts.add(bpc);
+					for (Contact contact : bpc.contactList) {
+						contact.lambda0warm = contact.lambda0;
+						contact.lambda1warm = contact.lambda1;
+						contact.lambda2warm = contact.lambda2;
+						collision.contacts.add(contact);
+					}
+				}
 				bpc.motionMetricHist.clear();
 				bpc.contactStateHist.clear();
 			}
@@ -402,45 +422,6 @@ public class Merging {
 		}
 		
 		return removeCollection;
-	}
-	
-	/**
-	 * Unmerge body pair contact
-	 * @param bpc
-	 */
-	protected void unmergeBodyPairContact(BodyPairContact bpc) {
-		if (!collision.bodyPairContacts.contains(bpc)) {
-			collision.bodyPairContacts.add(bpc);
-			bpc.inCollection = false;
-			for (Contact contact : bpc.contactList) {
-				if (!collision.contacts.contains(contact)) {
-					contact.lambda0warm = contact.lambda0;
-					contact.lambda1warm = contact.lambda1;
-					contact.lambda2warm = contact.lambda2;
-					collision.contacts.add(contact);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Merge body pair contact
-	 * Note: only to be used in unmerge process, this code supposes that bpc.body1 and bpc.body2 are already merged
-	 * @param bpc
-	 */
-	protected void mergeBodyPairContact(BodyPairContact bpc) {
-		if (collision.bodyPairContacts.contains(bpc)) {
-			collision.bodyPairContacts.remove(bpc);
-			bpc.inCollection = true;
-			for (Contact contact : bpc.contactList) { // TODO remove me!!!
-				if (!collision.contacts.contains(contact)) {
-					System.err.println("Merging.mergeBodyPairContat: this contact should ALWAYS be in the list :(");// remove should be possible... period!! should not need to check??
-				}
-				collision.contacts.remove(contact);
-				if (!bpc.body1.parent.internalContacts.contains(contact))
-					bpc.body1.parent.internalContacts.add(contact);
-			}
-		}
 	}
 
 	/**
