@@ -244,7 +244,7 @@ public class RigidCollection extends RigidBody {
 
 			for (Point2d point : body.boundingBoxB) {
 				Point2d p = new Point2d(point);
-				transformB2C.transform(p); // eulalie: this is the identity... so all points are in body coordinates
+				transformB2C.transform(p); // TODO: this is the identity... so all points are in body coordinates
 				meanPos.add(p);
 				N++;
 			}
@@ -550,7 +550,7 @@ public class RigidCollection extends RigidBody {
 
 			myListID = -2;
 
-		} else { // eulalie: transparency doesn't work, don't understand why
+		} else { // TODO: transparency doesn't work, don't understand why
 			GL2 gl = drawable.getGL().getGL2(); // GL has no glBlendColor()
 			gl.glEnable(GL2.GL_BLEND);
 			gl.glBlendFuncSeparate(GL2.GL_ZERO, GL2.GL_CONSTANT_COLOR, GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);

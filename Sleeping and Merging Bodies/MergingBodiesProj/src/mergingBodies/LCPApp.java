@@ -47,7 +47,6 @@ import mintools.viewer.SceneGraphNode;
 
 /**
  * Main entry point for the application
- * @author kry
  */
 public class LCPApp implements SceneGraphNode, Interactor {
 
@@ -477,7 +476,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         if ( factory.use ) {
             factory.reset();
         } else {
-            system.reset(); // eulalie: I'm not sure why we do that?
+            system.reset(); 
         }
         // TODO: Why do we reload the system?  :/  Can't we just reset it cleanly
         loadSystem(systemDir);

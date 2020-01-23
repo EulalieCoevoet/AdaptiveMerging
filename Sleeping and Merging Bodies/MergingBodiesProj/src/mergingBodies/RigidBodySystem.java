@@ -20,7 +20,6 @@ import mintools.swing.VerticalFlowPanel;
 
 /**
  * Maintains a list of RigidBody objects, and provides methods for collision processing and numerical integration
- * @author kry
  */
 public class RigidBodySystem {
 

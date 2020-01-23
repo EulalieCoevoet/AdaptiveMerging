@@ -92,7 +92,7 @@ public class PGS {
 				
 				double mu = 0.;
 				
-				// eulalie : we should assign material property to bodies and have a table for the corresponding friction coefficient...
+				// TODO : we should assign material property to bodies and have a table for the corresponding friction coefficient...
 				if (contact.body1.friction<0.2 || contact.body2.friction<0.2) 
 					mu = Math.min(contact.body1.friction, contact.body2.friction);
 				else if (contact.body1.friction>1. || contact.body2.friction>1.) 

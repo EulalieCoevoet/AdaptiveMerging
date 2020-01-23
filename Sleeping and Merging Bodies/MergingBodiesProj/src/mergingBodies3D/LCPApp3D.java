@@ -53,7 +53,7 @@ import mintools.viewer.ShadowMap;
 
 /**
  * Main entry point for the application
- * @author kry
+ * 
  */
 public class LCPApp3D implements SceneGraphNode, Interactor {
 

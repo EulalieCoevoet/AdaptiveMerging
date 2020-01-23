@@ -18,7 +18,7 @@ import java.util.ArrayList;
  *   merging so that the primary pool memory doesn't get disturbed?  This
  *   might be a bit tricky to figure out...
  *   
- * @author kry
+ * 
  */
 public class ContactPool {
 

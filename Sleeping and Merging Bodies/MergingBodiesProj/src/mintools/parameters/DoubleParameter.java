@@ -30,7 +30,7 @@ import mintools.swing.HorizontalFlowPanel;
  * This {@link Parameter}subclass represents a double-valued parameter that can
  * take on values within a specified range.
  * 
- * @author tedmunds (kry: modified and simplified for 599)
+ * @author tedmunds 
  */
 public class DoubleParameter extends BoundedParameter<Double> implements PropertyChangeListener, ChangeListener {
     

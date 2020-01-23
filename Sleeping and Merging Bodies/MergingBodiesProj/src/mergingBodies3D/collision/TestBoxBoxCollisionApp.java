@@ -25,7 +25,7 @@ import mintools.viewer.SceneGraphNode;
 
 /**
  * This is a quick test of a port of the box box collision detection of a java port of ODE, now working!
- * @author kry
+ * 
  */
 public class TestBoxBoxCollisionApp implements SceneGraphNode{
 

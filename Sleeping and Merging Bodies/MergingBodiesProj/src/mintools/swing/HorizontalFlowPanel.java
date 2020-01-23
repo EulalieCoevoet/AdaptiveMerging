@@ -17,7 +17,7 @@ import javax.swing.border.TitledBorder;
  * Components will fill the horizontal space while padding will prevent the
  * items from growing vertically. 
  * 
- * @author kry
+ * 
  */
 public class HorizontalFlowPanel {
 

@@ -13,7 +13,6 @@ import mintools.swing.VerticalFlowPanel;
 
 /**
  * RigidBody factory for stress testing.
- * @author kry
  */
 public class Factory {
     

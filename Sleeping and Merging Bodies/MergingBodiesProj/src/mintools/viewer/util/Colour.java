@@ -12,7 +12,7 @@ import javax.vecmath.Color3f;
 
 /**
  * This is a convenience class which contains predefined colours.
- * @author kry
+ * 
  */
 public class Colour
 {

@@ -28,7 +28,7 @@ import mintools.viewer.SceneGraphNode;
 
 /**
  * Demonstration of how to get stroke information from fonts.
- * @author kry
+ * 
  */
 public class Example2DFontStrokesApp implements SceneGraphNode {
 
