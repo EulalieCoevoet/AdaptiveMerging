@@ -18,7 +18,7 @@ import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
 
 /**
- * @author kry
+ * 
  */
 public class FancyArrow {
 

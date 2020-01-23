@@ -41,7 +41,7 @@ import javax.swing.border.TitledBorder;
  * Note that you should provide your content panel with a name via setName(),
  * as this will allow for the name of the collapsed panel to be shown when 
  * the panel is minimized.
- * @author kry
+ * 
  */
 public class CollapsiblePanel extends JPanel implements Collapsible
 {

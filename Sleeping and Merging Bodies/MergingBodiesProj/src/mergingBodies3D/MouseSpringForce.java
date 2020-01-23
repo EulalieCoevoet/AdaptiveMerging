@@ -17,7 +17,7 @@ import mintools.swing.VerticalFlowPanel;
 
 /**
  * Mouse spring for interacting with rigid bodies
- * @author kry
+ * 
  */
 public class MouseSpringForce {
 

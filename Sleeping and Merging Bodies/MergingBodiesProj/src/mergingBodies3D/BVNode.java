@@ -13,7 +13,7 @@ import javax.vecmath.Vector3d;
  * Bounding volume node used to build bounding volume trees.
  * The tree is constructed such that every interior node has two children.
  * Either there are two children, or this is a leaf node.
- * @author kry
+ * 
  */
 public class BVNode {
 

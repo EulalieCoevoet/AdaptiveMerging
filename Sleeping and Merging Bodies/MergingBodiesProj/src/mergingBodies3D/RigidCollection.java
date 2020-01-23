@@ -22,7 +22,7 @@ import mergingBodies3D.Merging.MergeParameters;
  * Perhaps not as bad as contacts... but just the same!!  The internal lists (contacts and bodies) will
  * benefit from not being re-allocated and regrown too.
  * 
- * @author kry
+ * 
  */
 public class RigidCollection extends RigidBody {
 
@@ -277,7 +277,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void updateTheta(RigidBody newBody) {
 
-		/*if (newBody instanceof PlaneRigidBody) // TODO: eulalie: what if we copied a PlaneRigidBody...
+		/*if (newBody instanceof PlaneRigidBody) // TODO: what if we copied a PlaneRigidBody...
 			return;
 
 		int N = 16;
@@ -504,7 +504,7 @@ public class RigidCollection extends RigidBody {
 		this.transformB2W.computeRTJR( jinv, jinv0 );		
 	}
 	
-	//TODO: eulalie: change my name
+	//TODO: change my name
 	void getOp(RigidBody body, Point3d com, Matrix3d op) {
 		// translate inertia tensor to center of mass
 		// should certainly have a b.x squared type term for the mass being at a distance...

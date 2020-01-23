@@ -19,8 +19,6 @@ import javax.vecmath.Vector2d;
 
 /**
  * Simple 2D rigid body based on image samples
- * 
- * @author kry
  */
 public class RigidBody {
 	

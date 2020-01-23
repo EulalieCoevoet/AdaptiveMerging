@@ -17,7 +17,7 @@ import mintools.viewer.FancyAxis;
 
 /**
  * Simple 2D rigid body based on image samples
- * @author kry
+ * 
  */
 public class RigidBody {
 

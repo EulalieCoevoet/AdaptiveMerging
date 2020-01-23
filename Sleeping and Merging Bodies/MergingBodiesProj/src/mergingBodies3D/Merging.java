@@ -321,23 +321,6 @@ public class Merging {
 			
 		boolean removeCollection = true;
 		
-		// Check for unstable configurations
-		// TODO: eulalie: don't know about this strategy
-		/*ArrayList<BodyPairContact> unstableBpcsToUnmerge = new ArrayList<BodyPairContact>();
-		ArrayList<BodyPairContact> bpcs = new ArrayList<BodyPairContact>();
-		for (BodyPairContact bpc : bpcsToUnmerge) {
-			for (int i=0; i<2; i++) { 
-				RigidBody body = bpc.getBody(i);
-				bpcs.clear();
-				for (BodyPairContact newBpc : body.bodyPairContacts) 
-					if (newBpc.contactList.size()<3 && newBpc.inCollection && !bpcsToUnmerge.contains(newBpc) && !unstableBpcsToUnmerge.contains(newBpc)) 
-						bpcs.add(newBpc);
-				if (bpcs.size()==1)
-					unstableBpcsToUnmerge.add(bpcs.get(0));
-			}
-		}
-		bpcsToUnmerge.addAll(unstableBpcsToUnmerge);*/
-		
 		// Cut connections
 		for (BodyPairContact bpc: bpcsToUnmerge)
 			bpc.inCollection = false;
@@ -372,7 +355,7 @@ public class Merging {
 							newCollection.fillInternalBodyContacts();
 							newCollection.color = new Color(collection.color);
 							newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
-							collection.applyVelocitiesTo(newCollection); //eulalie: the velocities are updated in call to addBodies...
+							collection.applyVelocitiesTo(newCollection); //TODO: the velocities are updated in call to addBodies...
 							newBodies.add(newCollection);
 						} else if (subbodies.size() == 1){ // single body
 							newBodies.add(subbodies.iterator().next());

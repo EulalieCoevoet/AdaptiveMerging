@@ -24,7 +24,7 @@ import mintools.viewer.SceneGraphNode;
 
 /**
  * Quick test of Box Plane collision detection 
- * @author kry
+ * 
  */
 public class TestBoxPlaneCollisionApp implements SceneGraphNode{
 

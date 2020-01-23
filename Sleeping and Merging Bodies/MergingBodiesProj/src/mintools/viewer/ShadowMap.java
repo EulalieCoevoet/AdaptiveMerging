@@ -39,7 +39,7 @@ import mintools.swing.VerticalFlowPanel;
  *
  * While the trackball camera is not needed for all calls, it is included for symmetry 
  *
- * @author kry
+ * 
  */
 public class ShadowMap {
 

@@ -15,7 +15,6 @@ import javax.vecmath.Vector2d;
 
 /**
  * Circular disc for collision processing
- * @author kry
  */
 public class Disc {
 

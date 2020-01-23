@@ -23,7 +23,7 @@ import mintools.viewer.SceneGraphNode;
 
 /**
  * Quick test of Box Sphere collision detection 
- * @author kry
+ * 
  */
 public class TestBoxSphereCollisionApp implements SceneGraphNode{
 

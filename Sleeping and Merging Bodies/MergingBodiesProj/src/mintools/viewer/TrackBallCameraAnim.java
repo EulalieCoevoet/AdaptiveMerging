@@ -30,7 +30,7 @@ import mintools.swing.VerticalFlowPanel;
 /**
  * Implementation of a simple trackball and camera
  * 
- * @author kry
+ * 
  */
 public class TrackBallCameraAnim implements Interactor, MouseListener, MouseMotionListener, Camera {
     

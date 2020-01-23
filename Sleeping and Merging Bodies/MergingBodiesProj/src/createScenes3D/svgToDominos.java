@@ -34,8 +34,6 @@ import org.w3c.dom.NodeList;
  * Easy to update to do more tricks!  Consider likewise creating floating spring supported platforms to have
  * objects not merge all into the inertial floor plane... or consider making bridges for dominoes to climb some stairs and 
  * go over some others ??  Lots of options for scene building here!!!
- * 
- * @author kry
  *
  */
 public class svgToDominos {

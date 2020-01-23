@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 /**
  * 3D rigid transformation
- * @author kry
+ * 
  */
 public class RigidTransform3D {
 

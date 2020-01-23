@@ -16,7 +16,6 @@ import mintools.swing.VerticalFlowPanel;
 /**
  * Animate body selected by user
  * TODO: add to XML parser
- * @author eulalie
  *
  */
 public class Animation {

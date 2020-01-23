@@ -125,7 +125,7 @@ public class Display {
 			}
 		}
 		
-		// TODO: eulalie: do we need to keep that?
+		// TODO: do we need to keep that?
 		/*if ( params.drawSpeedCOMs.getValue() ) {
 			for (RigidBody b: bodies) {
 				b.displaySpeedCOM(drawable);
