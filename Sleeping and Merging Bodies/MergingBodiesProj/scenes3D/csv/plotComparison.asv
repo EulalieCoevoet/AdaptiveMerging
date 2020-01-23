@@ -1,63 +1,55 @@
 clear 
 close all
-<<<<<<< HEAD
 scene_name = "funnel1"
-=======
-scene_name = "funnel"
->>>>>>> dev
 plot_name = "Performance With Time for " + scene_name + " Scene"
-X_unmerged = readtable(scene_name + ".csv")
-X_merged = readtable(scene_name + "_merged.csv")
+X_unmerged = readtable(scene_name + ".csv");
+X_merged = readtable(scene_name + "_merged.csv");
 
-num_timesteps = min(height(X_unmerged), height(X_merged))
+num_timesteps = min(height(X_unmerged), height(X_merged));
 
 hfig = figure('Renderer', 'painters', 'Position', [10 10 600 400]), set(gcf,'color','w'); hold on;
 
 
 hold;
 
-<<<<<<< HEAD
-temp_m = X_merged{1:num_timesteps, 20 } - X_merged{1:num_timesteps, 3}
-temp_um = X_unmerged{1:num_timesteps, 20 } - X_unmerged{1:num_timesteps, 3}
-subplot(3,1,1);
-semilogy(temp, 'DisplayName','Merging (No CD)')
-hold;
-semilogy(X_unmerged{1:num_timesteps, 20} -  X_merged{1, num_timesteps, 3}, 'DisplayName','No Merging (No CD)')
-=======
-temp_m = X_merged{1:num_timesteps, 20 } - X_merged{1:num_timesteps, 3 }
-temp_um = X_unmerged{1:num_timesteps, 20} -X_unmerged{1:num_timesteps, 3}
+temp_m = X_merged{1:num_timesteps, 20 } - X_merged{1:num_timesteps, 3};
+temp_um = X_unmerged{1:num_timesteps, 20 } - X_unmerged{1:num_timesteps, 3};
 
 subplot(2,1,1);
-semilogy(temp+m }, 'DisplayName','Merging')
-hold;
-semilogy(X_unmerged{1:num_timesteps, 20}, 'DisplayName','No Merging')
->>>>>>> dev
-hold;
+hold on;
+
+
+
+
+plot(temp_m, 'DisplayName','Collision Processing with Merging')
+
+plot(X_merged{1:num_timesteps, 3}, 'DisplayName','Collision Detection with Merging')
+
+plot(temp_um, 'DisplayName','Collision Processing without Merging')
+
+plot(X_unmerged{1:num_timesteps, 3}, 'DisplayName','Collision Detection without Merging')
+
 ylabel("Computation Time (s)")
-
+xlabel("Simulation Timestep")
+set(gca,'yscale','log')
 legend
+hold off
 
-<<<<<<< HEAD
-
-subplot(3,1,3);
-
-semilogy(X_merged{1:num_timesteps, 3}, 'DisplayName','Merging CD')
-hold;
-semilogy(X_unmerged{1:num_timesteps, 3}, 'DisplayName','No Merging CD')
-ylabel("Collision Detection Time")
-ylim([10^(1) 10^4])
-
-subplot(3,1,3);
-=======
 subplot(2,1,2);
->>>>>>> dev
 
-semilogy(X_merged{1:num_timesteps, 2}, 'DisplayName','Merging')
-hold;
-semilogy(X_unmerged{1:num_timesteps, 2}, 'DisplayName','No Merging')
-ylabel("# Contacts")
-ylim([10^(1) 10^4])
 
+hold on
+
+
+plot(X_merged{1:num_timesteps, 2}, 'b', 'DisplayName','# Contacts with Merging')
+
+plot(X_merged{1:num_timesteps, 1},  'r' ,'DisplayName','# Bodies with Merging')
+
+plot(X_unmerged{1:num_timesteps, 2}, 'b--', 'DisplayName','# Contacts without Merging')
+
+plot(X_unmerged{1:num_timesteps, 1},  'r--', 'DisplayName','# Bodies without Merging')
+
+set(gca,'yscale','log')
 
 
 legend
