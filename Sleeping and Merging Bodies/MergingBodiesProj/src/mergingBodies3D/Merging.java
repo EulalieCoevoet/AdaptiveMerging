@@ -415,10 +415,11 @@ public class Merging {
 		if (collision.bodyPairContacts.contains(bpc)) {
 			collision.bodyPairContacts.remove(bpc);
 			bpc.inCollection = true;
-			for (Contact contact : bpc.contactList) { // TODO remove me!!!
-				if (!collision.contacts.contains(contact)) {
-					System.err.println("Merging.mergeBodyPairContat: this contact should ALWAYS be in the list :(");// remove should be possible... period!! should not need to check??
-				}
+			for (Contact contact : bpc.contactList) { 
+				// TODO fix me... or remove me...
+//				if (!collision.contacts.contains(contact)) {
+//					System.err.println("Merging.mergeBodyPairContat: this contact should ALWAYS be in the list :("); // remove should be possible... period!! should not need to check??
+//				}
 				collision.contacts.remove(contact);
 				if (!bpc.body1.parent.internalContacts.contains(contact))
 					bpc.body1.parent.internalContacts.add(contact);

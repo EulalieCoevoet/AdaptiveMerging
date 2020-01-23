@@ -11,7 +11,7 @@ public class makeANewTest {
 
 	public static void main( String[] args ) {		
 		try {
-			PrintStream ps = new PrintStream("scenes3D/aNewTest3.xml");
+			PrintStream ps = new PrintStream("scenes3D/aNewTestVenus.xml");
 			ps.println("<root>");
 			createPlane( ps, -10 );
 			
@@ -25,24 +25,25 @@ public class makeANewTest {
 			double bs = 4;
 			double platformRadius = bs * 2;
 			double dx = bs*5;
-			for ( int i = -2; i <= 2; i++ ) {
-				for ( int j = -0; j <= 0; j++ ) {
+			for ( int i = -1; i <= 1; i++ ) {
+				for ( int j = -1; j <= 1; j++ ) {
 					double offx = 0;//rand.nextDouble()*2-1;
 					double offz = 0;//rand.nextDouble()*2-1;
 //					Point3d pos = new Point3d( dx*i - offx, rand.nextDouble() * 8, dx*j - offz );
 					Point3d pos = new Point3d( dx*i - offx, 0, dx*j - offz );
 					createPlatform( ps, platformID++, platformRadius, pos, 25, offx, offz, 500, 200, 3 * 0.017 );//rand.nextDouble()*2*0.017*2-0.017*2 );
-					if ( i == 0 && j == 0 && false) {
+					if ( i == 0 && j == 0 ) {
 						Vector3d size = new Vector3d( 2, 2, 4 ); // brick size in towers			
 						createTower( ps, towerID++, platformRadius*0.9 , 3, -eps, size, pos );
 						
-						createBallDrop(ps, 200, 0.35, pos);
-						//createVenus(ps, venusID++, 1, new Point3d( pos.x, pos.y + 8, pos.z ) );
+						//createBallDrop(ps, 200, 0.35, pos);
+						createVenus(ps, venusID++, 1, new Point3d( pos.x+3, pos.y + 8, pos.z-3 ) );
+						createVenus(ps, venusID++, 1, new Point3d( pos.x-3, pos.y + 8, pos.z ) );
+						createVenus(ps, venusID++, 1, new Point3d( pos.x+1, pos.y + 8, pos.z+2 ) );
 					} else {
 						Vector3d brickSize = new Vector3d( bs,bs,bs );					
-//						createMessyStack(ps, stackID++, 10, -eps, brickSize, pos);
-						createMessyStack(ps, stackID++, 5, -eps, brickSize, pos);
-							
+						createMessyStack(ps, stackID++, 10, -eps, brickSize, pos);
+//						createMessyStack(ps, stackID++, 5, -eps, brickSize, pos);
 					}
 				}
 			}
@@ -58,7 +59,7 @@ public class makeANewTest {
 		}
 	}
 
-	public static void createVenus( PrintStream ps, int venusID, double size, Point3d pos ) {
+	public static void createVenus( PrintStream ps, int venusID, double size, Point3d pos) {
 		ps.println("<body type=\"mesh\" name=\"torso"+venusID+"\" scale=\""+size+"\" obj=\"data/scaledtorso10.obj\" st=\"data/torso_flux.sph\">");
 		ps.println("    <x> " + asString(pos.x,pos.y,pos.z) + " </x>" );
 		ps.println("    <R> 1 0 0 -1.757 </R>" );		
@@ -96,9 +97,9 @@ public class makeANewTest {
 			addRandCol(ps);			
 			ps.println("</body>");
 			y += sy/2 + gap;
-//			sx = brickSize.x * rand.nextDouble()*0.5 + 1;
-//			sy = brickSize.y* rand.nextDouble()*0.5 + 1;
-//			sz = brickSize.z * rand.nextDouble()*0.5 + 1;
+			sx = brickSize.x * rand.nextDouble()*0.5 + 1;
+			sy = brickSize.y* rand.nextDouble()*0.5 + 1;
+			sz = brickSize.z * rand.nextDouble()*0.5 + 1;
 			y += sy/2 + gap;			
 		}
 	}
