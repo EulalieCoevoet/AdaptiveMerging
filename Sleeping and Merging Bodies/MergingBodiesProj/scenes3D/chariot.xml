@@ -228,6 +228,57 @@
 		<magnetic>false</magnetic>
 		<col>0.8 0.8 0. 1.</col>
 	</body>
+	<body density="1" name="house1" obj="data/house2.obj" scale="12" type="composite">
+		<x>0 -16.5 -100</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>1. 1. 1. 1.</col>
+		<body density="1" dim="10 10 10" name="panier" scale="1" type="box">
+			<x>0 5 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+	</body>
+	<body density="1" name="house2" obj="data/house3.obj" scale="12" type="composite">
+		<x>-130. -16.5 -100</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>1. 1. 1. 1.</col>
+		<body density="1" dim="50 10 10" name="panier" scale="1" type="box">
+			<x>0 5 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+	</body>
+	<body density="1" name="house3" obj="data/house1.obj" scale="12" type="composite">
+		<x>-250. -16.5 -100</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>1. 1. 1. 1.</col>
+		<body density="1" dim=" 10 10 10" name="panier" scale="1" type="box">
+			<x>0 5 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+	</body>
 	<body density="1" name="chariot" obj="data/chariot.obj" scale="0.1" type="composite">
 		<x>-20. 2.7 0.</x>
 		<R>0. -1 0. 0.</R>
@@ -406,7 +457,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
 		<x>-43.98 3.61 1.13</x>
@@ -426,7 +477,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
 		<x>-43.14 3.61 1.13</x>
@@ -436,7 +487,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
 		<x>-42.72 3.61 1.13</x>
@@ -456,7 +507,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
 		<x>-41.88 3.61 1.13</x>
@@ -466,7 +517,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
 		<x>-41.46 3.61 1.13</x>
@@ -476,7 +527,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
 		<x>-41.04 3.61 1.13</x>
@@ -486,7 +537,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
 		<x>-40.62 3.61 1.13</x>
@@ -496,7 +547,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
 		<x>-40.2 3.61 1.13</x>
@@ -506,7 +557,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
 		<x>-39.78 3.61 1.13</x>
@@ -526,7 +577,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
 		<x>-39.78 6.11 1.13</x>
@@ -536,7 +587,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
 		<x>-39.36 6.11 1.13</x>
@@ -546,7 +597,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
 		<x>-38.94 6.11 1.13</x>
@@ -606,7 +657,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
 		<x>-36.42 6.11 1.13</x>
@@ -616,7 +667,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
 		<x>-36.0 6.11 1.13</x>
@@ -636,7 +687,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
 		<x>-44.4 8.61 1.13</x>
@@ -656,7 +707,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
 		<x>-43.56 8.61 1.13</x>
@@ -666,7 +717,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
 		<x>-43.14 8.61 1.13</x>
@@ -676,7 +727,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
 		<x>-42.72 8.61 1.13</x>
@@ -686,7 +737,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
 		<x>-42.3 8.61 1.13</x>
@@ -696,7 +747,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
 		<x>-41.88 8.61 1.13</x>
@@ -706,7 +757,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
 		<x>-41.46 8.61 1.13</x>
@@ -726,7 +777,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
 		<x>-40.62 8.61 1.13</x>
@@ -736,7 +787,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
 		<x>-40.2 8.61 1.13</x>
@@ -746,7 +797,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
 		<x>-39.78 8.61 1.13</x>
@@ -756,7 +807,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
 		<x>-40.2 11.11 1.13</x>
@@ -776,7 +827,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
 		<x>-39.36 11.11 1.13</x>
@@ -786,7 +837,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
 		<x>-38.94 11.11 1.13</x>
@@ -806,7 +857,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
 		<x>-38.1 11.11 1.13</x>
@@ -816,7 +867,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
 		<x>-37.68 11.11 1.13</x>
@@ -826,7 +877,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
 		<x>-37.26 11.11 1.13</x>
@@ -836,7 +887,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
 		<x>-36.84 11.11 1.13</x>
@@ -846,7 +897,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
 		<x>-36.42 11.11 1.13</x>
@@ -856,7 +907,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
 		<x>-36.0 11.11 1.13</x>
@@ -866,7 +917,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
 		<x>-35.58 11.11 1.13</x>
@@ -876,7 +927,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book0" scale="1" type="box">
 		<x>-44.4 13.61 1.13</x>
@@ -886,7 +937,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
 		<x>-43.98 13.61 1.13</x>
@@ -896,7 +947,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
 		<x>-43.56 13.61 1.13</x>
@@ -906,7 +957,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
 		<x>-43.14 13.61 1.13</x>
@@ -916,7 +967,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
 		<x>-42.72 13.61 1.13</x>
@@ -926,7 +977,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
 		<x>-42.3 13.61 1.13</x>
@@ -936,7 +987,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
 		<x>-41.88 13.61 1.13</x>
@@ -956,7 +1007,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
 		<x>-41.04 13.61 1.13</x>
@@ -966,7 +1017,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
 		<x>-40.62 13.61 1.13</x>
@@ -986,7 +1037,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
 		<x>-39.78 13.61 1.13</x>
@@ -1006,7 +1057,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
 		<x>-39.78 16.11 1.13</x>
@@ -1016,7 +1067,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
 		<x>-39.36 16.11 1.13</x>
@@ -1026,7 +1077,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
 		<x>-38.94 16.11 1.13</x>
@@ -1056,7 +1107,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
 		<x>-37.68 16.11 1.13</x>
@@ -1066,7 +1117,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book7" scale="1" type="box">
 		<x>-37.26 16.11 1.13</x>
@@ -1076,7 +1127,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
 		<x>-36.84 16.11 1.13</x>
@@ -1086,7 +1137,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book9" scale="1" type="box">
 		<x>-36.42 16.11 1.13</x>
@@ -1096,7 +1147,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
 		<x>-36.0 16.11 1.13</x>
@@ -1106,7 +1157,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
 		<x>-35.58 16.11 1.13</x>
@@ -1126,7 +1177,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book1" scale="1" type="box">
 		<x>-43.98 18.61 1.13</x>
@@ -1136,7 +1187,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book2" scale="1" type="box">
 		<x>-43.56 18.61 1.13</x>
@@ -1146,7 +1197,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book3" scale="1" type="box">
 		<x>-43.14 18.61 1.13</x>
@@ -1156,7 +1207,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.7 0.7 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book4" scale="1" type="box">
 		<x>-42.72 18.61 1.13</x>
@@ -1166,7 +1217,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book5" scale="1" type="box">
 		<x>-42.3 18.61 1.13</x>
@@ -1176,7 +1227,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book6" scale="1" type="box">
 		<x>-41.88 18.61 1.13</x>
@@ -1196,7 +1247,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.3 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book8" scale="1" type="box">
 		<x>-41.04 18.61 1.13</x>
@@ -1216,7 +1267,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.3 0.3 0.3 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book10" scale="1" type="box">
 		<x>-40.2 18.61 1.13</x>
@@ -1226,7 +1277,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.3 0.3 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="1" dim="0.4 2 1.5" name="book11" scale="1" type="box">
 		<x>-39.78 18.61 1.13</x>
@@ -1236,7 +1287,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="0.1" dim="0.15 2 1.5" name="bookAlone1" scale="1" type="box">
 		<x>-35.75 18.61 1.</x>
@@ -1246,7 +1297,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.7 0.7 0.5 1.</col>
+		<col>0.2 0.5 0.2 1.</col>
 	</body>
 	<body density="0.1" dim="0.1 2 1.5" name="bookAlone2" scale="1" type="box">
 		<x>-35.9 18.61 1.</x>
@@ -1256,7 +1307,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.3</friction>
-		<col>0.2 0.5 0.2 1.</col>
+		<col>0.3 0.3 0.5 1.</col>
 	</body>
 	<body density="1" name="truck" obj="data/truck.obj" scale="0.1" type="composite">
 		<x>0. 2.5 0.</x>
@@ -1275,7 +1326,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body density="1" dim="5 20 5" name="ground" scale="1" type="box">
+		<body density="1" dim="5 12 5" name="ground" scale="1" type="box">
 			<x>-45 -12 10</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1283,7 +1334,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body density="1" dim="5 20 5" name="ground" scale="1" type="box">
+		<body density="1" dim="5 12 5" name="ground" scale="1" type="box">
 			<x>-45 -12 -10</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1291,7 +1342,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body density="1" dim="5 20 5" name="ground" scale="1" type="box">
+		<body density="1" dim="5 12 5" name="ground" scale="1" type="box">
 			<x>5 -12 -10</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
@@ -1299,7 +1350,7 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
-		<body density="1" dim="5 20 5" name="ground" scale="1" type="box">
+		<body density="1" dim="5 12 5" name="ground" scale="1" type="box">
 			<x>5 -12 10</x>
 			<R>0. -1 0. 0.</R>
 			<v>0. 0. 0.</v>
