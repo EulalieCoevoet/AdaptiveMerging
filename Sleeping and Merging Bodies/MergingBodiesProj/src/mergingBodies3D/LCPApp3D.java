@@ -269,7 +269,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         //stringBuilder.append( "r = "); stringBuilder.append( system.collision.restitution.getValue()); stringBuilder.append( '\n' );
         stringBuilder.append( "(box-box) badWarmStarts = "); stringBuilder.append( system.collision.badWarmStarts); stringBuilder.append( '\n' );
         stringBuilder.append( "(box-box) badWarmStartsRepaired = "); stringBuilder.append( system.collision.badWarmStartsRepaired); stringBuilder.append( '\n' );
-        
+        stringBuilder.append( "timestep =  "); stringBuilder.append( system.timestep); stringBuilder.append( '\n' );
         Runtime rt = Runtime.getRuntime();
         long usedMem = (rt.totalMemory() - rt.freeMemory()) / 1024; // / 1024;
         double alpha = 0.01;
@@ -674,6 +674,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         factory.use = false;
         systemClear();
         system.name = filename;
+        system.timestep = 0;
         XMLParser parser = new XMLParser();
         parser.parse( system, filename );
         system.animation.init(system.bodies);

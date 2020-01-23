@@ -63,6 +63,8 @@ public class RigidBodySystem {
 	
 	public boolean generateBody = false;
 	
+	public int timestep = 0;
+	
     /**
      * Creates a new rigid body system
      */
@@ -200,6 +202,7 @@ public class RigidBodySystem {
 			generateBody();
 			generateBody = false;
 		}
+		timestep += 1;
 		
 		exportDataToFile();
     }
@@ -342,6 +345,7 @@ public class RigidBodySystem {
         animation.reset();
         totalAccumulatedComputeTime = 0;     
         totalSteps = 0;
+        timestep = 0;
     }
     
     protected void applyViscousDecay()
