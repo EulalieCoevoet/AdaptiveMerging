@@ -158,7 +158,7 @@ public class RigidBodySystem {
 //			b.advanceTime(dt);
         
 		for ( RigidBody b : bodies )
-			if (!b.pinned && !b.isSleeping)   
+			if (!b.pinned && !b.sleeping)   
 				b.advanceVelocities(dt);
 
 		for (BodyPairContact bpc : collision.bodyPairContacts) 
@@ -171,7 +171,7 @@ public class RigidBodySystem {
 		}
 		
 		for ( RigidBody b : bodies ) {
-			if (!b.pinned && !b.isSleeping) { 
+			if (!b.pinned && !b.sleeping) { 
 				b.advancePositions(dt);
 			
 				if (b instanceof RigidCollection) {

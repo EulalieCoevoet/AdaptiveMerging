@@ -26,7 +26,7 @@ Box(root, name='wall4', position="50 1 0.", orientation="0 0 1 0", dim="1 10 100
 Box(root, name='box1', position="0 100 0", orientation="0 0 1 0", dim="1.8 1.8 1.8")
 Box(root, name='box2', position="0 100 0", orientation="0 0 1 0", dim="1.8 1.8 1.8")
 Box(root, name='box3', position="0 100 0", orientation="0 0 1 0", dim="1.8 1.8 1.8")
-Sphere(root, name='sphere', position="0 100 0", orientation="0 0 1 0", radius="1")
+# Sphere(root, name='sphere', position="0 100 0", orientation="0 0 1 0", radius="1")
 # Mesh(root, name='venus', obj="data/scaletorso10.obj", st="data/torso_flux.sph", position="0 100 0", orientation="0 0 1 0", scale="0.1")
 
 # Funnel

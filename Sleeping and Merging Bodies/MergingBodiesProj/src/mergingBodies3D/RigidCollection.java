@@ -60,10 +60,18 @@ public class RigidCollection extends RigidBody {
 
 		generateColor();
 	
-		copyFrom(body1);
-
-		addBody(body1);
-		addBody(body2);
+		if (body1 instanceof PlaneRigidBody) {
+			copyFrom(body2);
+			body2.parent = this;
+			bodies.add(body2);
+			addBody(body1);
+			
+		} else {
+			copyFrom(body1);
+			body1.parent = this;
+			bodies.add(body1);
+			addBody(body2);
+		}
 	}
 	
 	public void generateColor() {
@@ -105,20 +113,14 @@ public class RigidCollection extends RigidBody {
 		jinv.set( body.jinv );
 		jinv0.set( body.jinv0 );
 		
-		if (body.canSpin) {
-			canSpin = true;
-			spinner = body.spinner;
-		}
-		boundingBoxB.clear();
-		if (body instanceof PlaneRigidBody) {
-			for (int i=0; i<8; i++) 
-				boundingBoxB.add(new Point3d());
-		} else {
-			for (Point3d point: body.boundingBoxB) 
-				boundingBoxB.add(new Point3d(point));
-		}
+		pinned = body.pinned;
+		sleeping = body.sleeping;
+		canSpin = body.canSpin;
+		spinner = body.spinner;
 		
-		updateRotationalInertaionFromTransformation();
+		boundingBoxB.clear();
+		for (Point3d point: body.boundingBoxB) 
+			boundingBoxB.add(new Point3d(point));
 	}
 
 	/**
@@ -149,8 +151,7 @@ public class RigidCollection extends RigidBody {
 		addBodyInternalMethod(body);
 		
 		updateRotationalInertaionFromTransformation();
-		//updateBodiesTransformations();
-		updateBB();
+		updateBodiesTransformations();
 	}
 
 	/**
@@ -162,15 +163,10 @@ public class RigidCollection extends RigidBody {
 			this.bodies.add(body);
 			updateCollectionState(body);
 			addBodyInternalMethod(body);
-			if (body.canSpin) {
-				this.canSpin = true;
-				this.spinner = body.spinner;
-			}
 		}
 		
 		updateRotationalInertaionFromTransformation();
-		//updateBodiesTransformations();
-		updateBB();
+		updateBodiesTransformations();
 	}
 
 	/**
@@ -188,8 +184,7 @@ public class RigidCollection extends RigidBody {
 	    addBodyInternalMethod(collection);
 	    
 	    updateRotationalInertaionFromTransformation();
-		//updateBodiesTransformations();
-		updateBB();
+		updateBodiesTransformations();
 	}
 	
 	/**
@@ -199,10 +194,6 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void addBodyInternalMethod( RigidBody body ) {
 
-		if (bodies.size()<2) { // we have copied already all the datas from the first body 
-			return; 
-		}
-		
 		updateTheta(body); // computed in world coordinates, is that correct? theta should be the rotations from inertial frame right?
 		
 		if ( pinned ) { 
@@ -217,6 +208,7 @@ public class RigidCollection extends RigidBody {
         	massLinear = 0;
 			minv = 0;
 		} else {
+			
 			com.set(x);
 			com.scale(massLinear);
 			com.scaleAdd(body.massLinear, body.x, com);
@@ -225,13 +217,14 @@ public class RigidCollection extends RigidBody {
 			
 			updateVelocitiesFrom(body, com, totalMassInv);
 			updateInertia(body, com);
+			updateBB(body); // set temporarily in world coordinates
+			
 			massLinear += body.massLinear; // used in updateInertia, this update should stay here
 			minv = totalMassInv;
 			x.set(com); // finally update com of the new collection
-			if (body.canSpin) {
-				this.canSpin = true;
-				this.spinner = body.spinner;
-			}
+			// back in collection coordinates
+			for (Point3d point : boundingBoxB)
+				this.transformB2W.inverseTransform(point);
 		}
 	}
 
@@ -320,14 +313,19 @@ public class RigidCollection extends RigidBody {
 	}
 
 	/**
-	 * Update collection pinned condition
+	 * Update collection pinned, sleeping and canSpin condition
 	 * @param body
 	 */
 	private void updateCollectionState(RigidBody body) {
  		pinned = (pinned || body.pinned);
 
-		isSleeping = (isSleeping || body.isSleeping);
-		body.isSleeping = false;
+		sleeping = (sleeping || body.sleeping);
+		body.sleeping = false;
+		
+		if (body.canSpin) {
+			canSpin = true;
+			spinner = body.spinner;
+		}
 	}
 	
 	/**
@@ -336,13 +334,14 @@ public class RigidCollection extends RigidBody {
 	 * to this x and theta
 	 */
 	private void updateBodiesTransformations() {
-		for (RigidBody body : bodies) {
-			body.transformB2C.multAinvB( transformB2W, body.transformB2W );			
-		}
+		for (RigidBody body : bodies)
+			body.transformB2C.multAinvB( transformB2W, body.transformB2W );		
 	}
 	
+	// temp variables
 	private Point3d bbmaxB = new Point3d();
 	private Point3d bbminB = new Point3d();
+	private Point3d p = new Point3d();
 	/**
 	 * Update collection bounding box with new body
 	 * @param newBody
@@ -352,9 +351,7 @@ public class RigidCollection extends RigidBody {
 		bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
 		bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
 		
-		Point3d p = new Point3d();
-		for (RigidBody body : bodies) {
-			body.transformB2C.multAinvB( transformB2W, body.transformB2W );	
+		for (RigidBody body : bodies) {	
 			
 			if (body instanceof PlaneRigidBody)
 				continue;
@@ -371,6 +368,43 @@ public class RigidCollection extends RigidBody {
 			}
 		}
 					
+		boundingBoxB.get(0).set(bbmaxB);
+		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
+		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
+		boundingBoxB.get(3).set(bbminB.x, bbminB.y, bbmaxB.z);
+		boundingBoxB.get(4).set(bbminB);
+		boundingBoxB.get(5).set(bbminB.x, bbmaxB.y, bbmaxB.z);
+		boundingBoxB.get(6).set(bbmaxB.x, bbminB.y, bbmaxB.z);
+		boundingBoxB.get(7).set(bbmaxB.x, bbmaxB.y, bbminB.z);
+	}
+	
+	/**
+	 * Update collection bounding box with new body
+	 * @param newBody
+	 */
+	private void updateBB(RigidBody body) {
+		
+		bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+		bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
+			
+		if (body instanceof PlaneRigidBody)
+			return;
+		
+		for (int i=0; i<2; i++) {
+			RigidBody b = (i==0)? this: body;
+			for (Point3d point : b.boundingBoxB) {
+				p.set(point);
+				b.transformB2W.transform(p);
+				bbmaxB.x = Math.max(bbmaxB.x, p.x);
+				bbmaxB.y = Math.max(bbmaxB.y, p.y);
+				bbmaxB.z = Math.max(bbmaxB.z, p.z);
+				bbminB.x = Math.min(bbminB.x, p.x);
+				bbminB.y = Math.min(bbminB.y, p.y);
+				bbminB.z = Math.min(bbminB.z, p.z);
+			}
+		}
+		
+		// Temporarily in world coordinates
 		boundingBoxB.get(0).set(bbmaxB);
 		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
 		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
@@ -432,7 +466,7 @@ public class RigidCollection extends RigidBody {
 		}*/
 		
 		updateRotationalInertaionFromTransformation();
-		//updateBodiesTransformations();
+		updateBodiesTransformations();
 		updateBB();
 	}
 	
@@ -566,7 +600,7 @@ public class RigidCollection extends RigidBody {
 
 		super.advanceTime( dt );
 
-		if ( pinned || isSleeping )
+		if ( pinned || sleeping )
 			return;
 
 		updateBodiesPositionAndTransformations();

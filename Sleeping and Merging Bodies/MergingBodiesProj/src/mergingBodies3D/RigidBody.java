@@ -157,7 +157,7 @@ public class RigidBody {
 	/** Default restitution coefficient */
 	public double restitution = 0; 
 	
-	public boolean isSleeping = false;
+	public boolean sleeping = false;
 
 	/** true if body is a magnetic */
 	public boolean magnetic = false;
@@ -283,8 +283,8 @@ public class RigidBody {
 	}
 	
 	public void wake() {
-		if (isSleeping) {
-	    	isSleeping = false;
+		if (sleeping) {
+	    	sleeping = false;
 	    	metricHistory.clear();
 	    }
 		
@@ -340,7 +340,7 @@ public class RigidBody {
      * @param dt step size
      */
     public void advanceTime( double dt ) {
-        if ( !pinned && !isSleeping) {   
+        if ( !pinned && !sleeping) {   
 			advanceVelocities(dt);
 			advancePositions(dt);
         }        

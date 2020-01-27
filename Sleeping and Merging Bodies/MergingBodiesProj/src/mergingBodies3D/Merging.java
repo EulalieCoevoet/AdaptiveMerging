@@ -255,7 +255,7 @@ public class Merging {
 		
 		for(RigidBody body : bodies) {
 			
-			if(body.isSleeping )
+			if(body.sleeping )
 				continue;
 			
 			if (body instanceof RigidCollection) {
@@ -396,7 +396,7 @@ public class Merging {
 		if(handledBodies.size() != collection.bodies.size())
 			System.err.println("[unmergeSelectedBpcs] Something is wrong");
 		
-		if (!removeCollection) {
+		if(!removeCollection) {
 			if (remainedBodies.size() != collection.bodies.size()) {
 				handledBodies.removeAll(remainedBodies);
 				collection.removeBodies(handledBodies);

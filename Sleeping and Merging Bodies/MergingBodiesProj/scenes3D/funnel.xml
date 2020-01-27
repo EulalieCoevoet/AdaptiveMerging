@@ -57,7 +57,6 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
-
 	<body density="1" name="funnel" obj="data/funnel.obj" scale="1" type="composite">
 		<x>0. 50. 0.</x>
 		<R>0. -1 0. 0.</R>

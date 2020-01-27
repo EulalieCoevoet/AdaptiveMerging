@@ -147,7 +147,7 @@ public class BodyPairContact {
 
 		long now;
 		
-		if (body1.isSleeping && body2.isSleeping) 
+		if (body1.sleeping && body2.sleeping) 
 			return true;
 
 		now = System.nanoTime();
