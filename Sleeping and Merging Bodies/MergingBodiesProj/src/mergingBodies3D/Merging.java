@@ -20,8 +20,6 @@ public class Merging {
 	public boolean mergingEvent = false;
 	public boolean triggerMergingEvent = false;
 	
-	public enum UnmergingCondition {RELATIVEMOTION, CONTACTS;}
-	
 	protected ArrayList<RigidBody> bodies;
 	protected CollisionProcessor collision;
 	
@@ -47,14 +45,7 @@ public class Merging {
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 		public BooleanParameter changeColors = new BooleanParameter("change colors", false);
 		
-	    public double mergingCheckContactTime = 0;
-	    public double mergingCheckCycleTime = 0;
-	    public double mergingCheckMotionTime = 0;
-	    public double mergingCheckViolationTime = 0;
 	    public double mergingBuildTime = 0;
-	    public double unmergingCheckContactTime = 0;
-	    public double unmergingCheckCycleTime = 0;
-	    public double unmergingCheckMotionTime = 0;
 	    public double unmergingBuildTime = 0;
 	}
 	public MergeParameters params = new MergeParameters();
@@ -62,28 +53,6 @@ public class Merging {
 	Merging(ArrayList<RigidBody> bodies, CollisionProcessor CP) {
 		this.bodies = bodies;
 		this.collision = CP;
-	}
-
-	protected void resetMergingTime() {
-	    params.mergingCheckContactTime = 0;
-	    params.mergingCheckCycleTime = 0;
-	    params.mergingCheckMotionTime = 0;
-	    params.mergingCheckViolationTime = 0;
-	    params.mergingBuildTime = 0;
-	}
-	
-	protected void resetUnmergingTime(UnmergingCondition condition) {
-		if (condition == UnmergingCondition.CONTACTS) {
-			params.unmergingCheckContactTime = 0;
-			
-			// during a time step, contacts for unmerging is the first thing we check...
-			params.unmergingCheckCycleTime = 0;
-			params.unmergingCheckMotionTime = 0;
-			params.unmergingBuildTime = 0;
-		}
-		
-		if (condition == UnmergingCondition.RELATIVEMOTION)
-			params.unmergingCheckContactTime = 0;
 	}
 	
 	/**
@@ -104,7 +73,7 @@ public class Merging {
 			
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
 		
-		resetMergingTime();
+		params.mergingBuildTime = 0.;
 		
 		for (BodyPairContact bpc : collision.bodyPairContacts) {
 			
@@ -238,16 +207,13 @@ public class Merging {
 	/**
 	 * Unmerge BodyPairContacts that satisfy condition
 	 */	
-	public void unmerge(UnmergingCondition condition, double dt) {
+	public void unmerge(double dt) {
 		if (!params.enableUnmerging.getValue())
 			return;
 
-		resetUnmergingTime(condition);
+		params.unmergingBuildTime = 0.;
 		
-		if (condition == UnmergingCondition.RELATIVEMOTION && !params.enableUnmergeRelativeMotionCondition.getValue())
-			return;
-		
-		if (condition == UnmergingCondition.CONTACTS && !(params.enableUnmergeNormalCondition.getValue() || params.enableUnmergeFrictionCondition.getValue()))
+		if (!params.enableUnmergeRelativeMotionCondition.getValue() && !params.enableUnmergeNormalCondition.getValue() && !params.enableUnmergeFrictionCondition.getValue())
 			return;
 		
 		removalQueue.clear();
@@ -255,7 +221,7 @@ public class Merging {
 		
 		for(RigidBody body : bodies) {
 			
-			if(body.sleeping )
+			if(body.sleeping)
 				continue;
 			
 			if (body instanceof RigidCollection) {
@@ -269,16 +235,11 @@ public class Merging {
 					
 					if (!bpcsToUnmerge.contains(bpc)) {
 						
-						if (condition == UnmergingCondition.CONTACTS && !bpc.checkContactsState(dt, params))
+						if (!bpc.checkContactsState(dt, params) && !bpc.checkMotionMetricForUnmerging(params))
 							continue;
 
-						if (condition == UnmergingCondition.RELATIVEMOTION && !bpc.checkMotionMetricForUnmerging(params))
-							continue;
-
-						long now = System.nanoTime();
 						if (params.enableMergeCycleCondition.getValue())
 							bpc.checkCyclesToUnmerge(bpcsToUnmerge);
-						params.unmergingCheckCycleTime += (System.nanoTime() - now) / 1e9;
 						
 						bpc.addBpcToUnmerge(bpcsToUnmerge);
 					}
