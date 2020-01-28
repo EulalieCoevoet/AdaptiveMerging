@@ -407,7 +407,7 @@ public class RigidBodySystem {
 			genbody.v.set(generatedBodyVel.x, generatedBodyVel.y, generatedBodyVel.z);
 			genbody.theta.setIdentity();
 			genbody.omega.set(0.,0.,0.);
-			genbody.updateRotationalInertaionFromTransformation();
+			genbody.updateRotationalInertiaFromTransformation();
 			genbody.created = true;
 			bodies.add(genbody);
 		} else {

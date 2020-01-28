@@ -150,12 +150,14 @@ public class RigidCollection extends RigidBody {
 		updateCollectionState(body);
 		addBodyInternalMethod(body);
 		
-		updateRotationalInertaionFromTransformation();
+		updateInertiaRestAndInvert();
+		updateRotationalInertiaFromTransformation(); // TODO: is this really necessary?
 		updateBodiesTransformations();
 	}
 
 	/**
 	 * Adds given list of bodies the collection
+	 * @param bodies list of bodies
 	 */
 	public void addBodies(Collection<RigidBody> bodies) {
 		for (RigidBody body : bodies) {
@@ -165,13 +167,13 @@ public class RigidCollection extends RigidBody {
 			addBodyInternalMethod(body);
 		}
 		
-		updateRotationalInertaionFromTransformation();
+		updateInertiaRestAndInvert();
+		updateRotationalInertiaFromTransformation();
 		updateBodiesTransformations();
 	}
 
 	/**
 	 * Adds a collection to the collection
-	 * 
 	 * @param collection collection to add
 	 */
 	public void addCollection(RigidCollection collection) {
@@ -183,8 +185,25 @@ public class RigidCollection extends RigidBody {
 		updateCollectionState(collection);
 	    addBodyInternalMethod(collection);
 	    
-	    updateRotationalInertaionFromTransformation();
+	    updateInertiaRestAndInvert();
+		updateRotationalInertiaFromTransformation();
 		updateBodiesTransformations();
+	}
+	
+	/**
+	 * Update collection pinned, sleeping and canSpin condition
+	 * @param body
+	 */
+	private void updateCollectionState(RigidBody body) {
+ 		pinned = (pinned || body.pinned);
+
+		sleeping = (sleeping || body.sleeping);
+		body.sleeping = false;
+		
+		if (body.canSpin) {
+			canSpin = true;
+			spinner = body.spinner;
+		}
 	}
 	
 	/**
@@ -310,22 +329,6 @@ public class RigidCollection extends RigidBody {
 		
 		theta.setIdentity();
 	}
-
-	/**
-	 * Update collection pinned, sleeping and canSpin condition
-	 * @param body
-	 */
-	private void updateCollectionState(RigidBody body) {
- 		pinned = (pinned || body.pinned);
-
-		sleeping = (sleeping || body.sleeping);
-		body.sleeping = false;
-		
-		if (body.canSpin) {
-			canSpin = true;
-			spinner = body.spinner;
-		}
-	}
 	
 	/**
 	 * For each body in collection, determines the transformations to go from body
@@ -337,13 +340,13 @@ public class RigidCollection extends RigidBody {
 			body.transformB2C.multAinvB( transformB2W, body.transformB2W );		
 	}
 	
+	
 	// temp variables
 	private Point3d bbmaxB = new Point3d();
 	private Point3d bbminB = new Point3d();
 	private Point3d p = new Point3d();
 	/**
-	 * Update collection bounding box with new body
-	 * @param newBody
+	 * Update collection bounding box from bodies list
 	 */
 	private void updateBB() {
 		if ( boundingBoxB == null || boundingBoxB.isEmpty()) return;
@@ -414,6 +417,18 @@ public class RigidCollection extends RigidBody {
 		boundingBoxB.get(7).set(bbmaxB.x, bbmaxB.y, bbminB.z);
 	}
 	
+
+	/**
+	 * Update massAngular0, jinv, and jinv0
+	 */
+    protected void updateInertiaRestAndInvert() {
+    	if ( !pinned ) {
+			jinv.invert( massAngular );	 // is this avoidable?  :/	
+			transformB2W.computeRTMR( massAngular, massAngular0 );
+			transformB2W.computeRTMR( jinv, jinv0 );	
+		}
+    }
+	
 	/**
 	 * Removes given list of bodies from the collection
 	 * @param bodiesToRemove
@@ -450,6 +465,7 @@ public class RigidCollection extends RigidBody {
 			x.scale(minv); 
 			
 			computeInertia();
+			updateInertiaRestAndInvert();
 		} else { 
 			for (RigidBody body : bodiesToRemove) {
 				com.set(x); // save com with the body in it
@@ -464,11 +480,12 @@ public class RigidCollection extends RigidBody {
 				
 				updateInertiaReverse(body, com);
 			}
+			updateInertiaRestAndInvert();
 		}
-		
-		updateRotationalInertaionFromTransformation();
+
+		updateRotationalInertiaFromTransformation();
 		updateBodiesTransformations();
-		updateBB();
+		updateBB(); // this can not be updated incrementally
 	}
 	
 
@@ -481,17 +498,13 @@ public class RigidCollection extends RigidBody {
 	 * @param com
 	 */
 	private void computeInertia() {
+		
 		massAngular.setZero();
 		for (RigidBody body: bodies) {
 			massAngular.add( body.massAngular );
 			getOp(body, x, op);
 			massAngular.add( op );	
 		}
-		
-		// Let's get massAngular0
-		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
-		transformB2W.computeRTJR( massAngular, massAngular0 );
-		transformB2W.computeRTJR( jinv, jinv0 );
 	}
 	
 	/**
@@ -510,11 +523,6 @@ public class RigidCollection extends RigidBody {
 			massAngular0.add( op );	
 		}
 		massAngular.set(massAngular0);
-
-		// Let's get massAngular0
-		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
-		transformB2W.computeRTJR( massAngular, massAngular0 );
-		transformB2W.computeRTJR( jinv, jinv0 );	
 	}
 	
 	/**
@@ -524,7 +532,6 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void updateInertiaReverse(final RigidBody bodyToRemove, final Point3d com) {
 
-		//bodyToRemove.transformB2W.computeRJinv0RT(bodyToRemove.massAngular0, bodyToRemove.massAngular);
 		massAngular.sub( bodyToRemove.massAngular ); // only the angular mass of the body to remove should be removed
 		for (int i=0; i<2; i++) {
 			RigidBody body = (i==0)? this: bodyToRemove;	
@@ -532,11 +539,6 @@ public class RigidCollection extends RigidBody {
 			getOp(body, com, op);
 			massAngular.sub( op );	
 		}
-		
-		// Let's get massAngular0
-		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
-		transformB2W.computeRTJR( massAngular, massAngular0 );
-		transformB2W.computeRTJR( jinv, jinv0 );	
 	}
 	
 	//TODO: change my name
@@ -621,8 +623,8 @@ public class RigidCollection extends RigidBody {
 			body.transformB2W.mult( transformB2W, body.transformB2C );			
 			
 			if ( ! pinned ) {  // a normal update would do this... so we should do it too for a correct single cycle update.
-				body.transformB2W.computeRJinv0RT( body.jinv0, body.jinv );
-				body.transformB2W.computeRJinv0RT( body.massAngular0, body.massAngular );
+				body.transformB2W.computeRM0RT( body.jinv0, body.jinv );
+				body.transformB2W.computeRM0RT( body.massAngular0, body.massAngular );
 	        } 
 		}
 	}

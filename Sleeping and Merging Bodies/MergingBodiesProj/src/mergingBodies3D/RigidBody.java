@@ -244,7 +244,7 @@ public class RigidBody {
     		this.boundingBoxB.add( new Point3d(point) );
         // we can share the blocks and boundary blocks...
         // no need to update them as they are in the correct body coordinates already        
-        updateRotationalInertaionFromTransformation();
+        updateRotationalInertiaFromTransformation();
         if ( body.root != null ) {
         	root = new BVNode( body.root, this ); // create a copy
         }
@@ -295,15 +295,15 @@ public class RigidBody {
     /**
      * Updates the rotational inertia and inverse given the current transformation state stored in theta and x
      */
-    public void updateRotationalInertaionFromTransformation() {
+    public void updateRotationalInertiaFromTransformation() {
         // might be done more often than necessary, but need to have 
         // rotational inertia updated give we are storing information in a 
         // world aligned frame... note that the non-inverted angular inertia
         // used for energy computation and for the corriollis force (disabled)
         // also used by composite bodies at the time of their creation 
         if ( ! pinned ) {
-	        transformB2W.computeRJinv0RT(massAngular0, massAngular); // needed for corriolis, and merging
-        	transformB2W.computeRJinv0RT(jinv0, jinv);
+	        transformB2W.computeRM0RT(massAngular0, massAngular); // needed for corriolis, and merging
+        	transformB2W.computeRM0RT(jinv0, jinv);
         } 
     }
     
@@ -408,7 +408,7 @@ public class RigidBody {
         	theta.normalizeCP( dR ); // keep it clean!
         }
 		
-        updateRotationalInertaionFromTransformation();
+        updateRotationalInertiaFromTransformation();
 	}	
 
     /**
@@ -533,7 +533,7 @@ public class RigidBody {
         jinv.set( jinv0 );       
         v.set(v0);
         omega.set(omega0);
-        updateRotationalInertaionFromTransformation();
+        updateRotationalInertiaFromTransformation();
         
         metricHistory.clear();
     }

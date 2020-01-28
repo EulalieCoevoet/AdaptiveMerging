@@ -86,8 +86,8 @@ public class TestInertiaUpdateApp implements SceneGraphNode{
 		b.massAngular0.m11 = 1.0/12*b.massLinear*(s.x*s.x+s.z*s.z);
 		b.massAngular0.m22 = 1.0/12*b.massLinear*(s.x*s.x+s.y*s.y);
 		b.jinv0.invert(b.massAngular0);
-		b.transformB2W.computeRJinv0RT(b.massAngular0, b.massAngular);
-		b.transformB2W.computeRJinv0RT(b.jinv0, b.jinv);
+		b.transformB2W.computeRM0RT(b.massAngular0, b.massAngular);
+		b.transformB2W.computeRM0RT(b.jinv0, b.jinv);
 	}
 	
 	
@@ -109,7 +109,7 @@ public class TestInertiaUpdateApp implements SceneGraphNode{
 		Matrix3d R = new Matrix3d();
 		R.set( aa );		
 		collection.theta.set( R );
-		collection.updateRotationalInertaionFromTransformation();
+		collection.updateRotationalInertiaFromTransformation();
 		collection.updateBodiesPositionAndTransformations();
 		
 		ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
