@@ -63,17 +63,17 @@ public class RigidBody {
     // mass properties of the body
 
     /** REST POSE rotational inertia, i.e., when rotation is identity */
-    Matrix3d massAngular0 = new Matrix3d();
+    public Matrix3d massAngular0 = new Matrix3d();
     /** rotational inertia in the current pose */
-    Matrix3d massAngular = new Matrix3d();
+    public Matrix3d massAngular = new Matrix3d();
     /** REST pose inverse of the angular mass, i.e., when rotation is identity, or zero if pinned */
-    Matrix3d jinv0 = new Matrix3d();
+    public Matrix3d jinv0 = new Matrix3d();
     /** inverse of the angular mass, or zero if pinned, for current pose */
-    Matrix3d jinv = new Matrix3d();
+    public Matrix3d jinv = new Matrix3d();
     /** mass of the rigid body */    
-    double massLinear;
+    public double massLinear;
     /** inverse of the linear mass, or zero if pinned */
-    double minv;
+    public double minv;
     
     //////////////////////////
     // Force accumulators, for everything that acts on this body

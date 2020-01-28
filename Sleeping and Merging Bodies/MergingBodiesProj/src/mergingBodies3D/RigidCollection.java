@@ -208,7 +208,6 @@ public class RigidCollection extends RigidBody {
         	massLinear = 0;
 			minv = 0;
 		} else {
-			
 			com.set(x);
 			com.scale(massLinear);
 			com.scaleAdd(body.massLinear, body.x, com);
@@ -347,7 +346,7 @@ public class RigidCollection extends RigidBody {
 	 * @param newBody
 	 */
 	private void updateBB() {
-		
+		if ( boundingBoxB == null || boundingBoxB.isEmpty()) return;
 		bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
 		bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
 		
@@ -383,7 +382,7 @@ public class RigidCollection extends RigidBody {
 	 * @param newBody
 	 */
 	private void updateBB(RigidBody body) {
-		
+		if ( boundingBoxB == null || boundingBoxB.isEmpty() ) return;
 		bbmaxB.set(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
 		bbminB.set( Double.MAX_VALUE,  Double.MAX_VALUE,  Double.MAX_VALUE);
 			
@@ -440,7 +439,7 @@ public class RigidCollection extends RigidBody {
 			
         	massLinear = 0;
 			minv = 0;
-		} else /*if (wasPinned)*/ {
+		} else if (wasPinned) { // unfortunately if the collection was pinned, we have to recompute everything
 			x.set(0.,0.,0.);
 			massLinear = 0;
 			for (RigidBody body : bodies) {
@@ -451,24 +450,30 @@ public class RigidCollection extends RigidBody {
 			x.scale(minv); 
 			
 			computeInertia();
-		} /*else {
+		} else { 
 			for (RigidBody body : bodiesToRemove) {
-				com.set(x); // save com with body in it
+				com.set(x); // save com with the body in it
 				
-				x.scale(massLinear);
-				x.scaleAdd(-body.massLinear, body.x, x); 
+				com.scale(massLinear); // use com as tmp variable to avoid the call this.scaleAdd(...,this)
+				x.scaleAdd(-body.massLinear, body.x, com); 
+				com.scale(1./massLinear); // put back com as it was 
+				
 				massLinear -= body.massLinear; // mass with the body removed
 				minv = 1./massLinear;
 				x.scale(minv); // x with the body removed
 				
 				updateInertiaReverse(body, com);
 			}
-		}*/
+		}
 		
 		updateRotationalInertaionFromTransformation();
 		updateBodiesTransformations();
 		updateBB();
 	}
+	
+
+	/** worker variables, held to avoid memory thrashing */
+	private Matrix3d op = new Matrix3d();
 	
 	/**
 	 * Compute inertia from bodies
@@ -476,9 +481,7 @@ public class RigidCollection extends RigidBody {
 	 * @param com
 	 */
 	private void computeInertia() {
-
 		massAngular.setZero();
-		Matrix3d op = new Matrix3d();
 		for (RigidBody body: bodies) {
 			massAngular.add( body.massAngular );
 			getOp(body, x, op);
@@ -487,8 +490,8 @@ public class RigidCollection extends RigidBody {
 		
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
-		this.transformB2W.computeRTJR( massAngular, massAngular0 );
-		this.transformB2W.computeRTJR( jinv, jinv0 );		
+		transformB2W.computeRTJR( massAngular, massAngular0 );
+		transformB2W.computeRTJR( jinv, jinv0 );
 	}
 	
 	/**
@@ -499,7 +502,6 @@ public class RigidCollection extends RigidBody {
 	private void updateInertia(final RigidBody newBody, final Point3d com) {
 		
 		massAngular0.setZero(); // used as temp variable, will actually be set after the update of massAngular
-		Matrix3d op = new Matrix3d();
 		for (int i=0; i<2; i++) {
 			RigidBody body = (i==0)? this: newBody;
 					
@@ -507,12 +509,12 @@ public class RigidCollection extends RigidBody {
 			getOp(body, com, op);
 			massAngular0.add( op );	
 		}
-		this.massAngular.set(massAngular0);
+		massAngular.set(massAngular0);
 
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
-		this.transformB2W.computeRTJR( massAngular, massAngular0 );
-		this.transformB2W.computeRTJR( jinv, jinv0 );	
+		transformB2W.computeRTJR( massAngular, massAngular0 );
+		transformB2W.computeRTJR( jinv, jinv0 );	
 	}
 	
 	/**
@@ -522,20 +524,19 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void updateInertiaReverse(final RigidBody bodyToRemove, final Point3d com) {
 
-		Matrix3d op = new Matrix3d();
+		//bodyToRemove.transformB2W.computeRJinv0RT(bodyToRemove.massAngular0, bodyToRemove.massAngular);
+		massAngular.sub( bodyToRemove.massAngular ); // only the angular mass of the body to remove should be removed
 		for (int i=0; i<2; i++) {
-			RigidBody body = (i==0)? this: bodyToRemove;
-					
-			if (i==1) // massAngular will become this.massAngular
-				massAngular.sub( body.massAngular );
+			RigidBody body = (i==0)? this: bodyToRemove;	
+			
 			getOp(body, com, op);
 			massAngular.sub( op );	
 		}
 		
 		// Let's get massAngular0
 		jinv.invert( massAngular );	 // is this avoidable by construction above?  :/	
-		this.transformB2W.computeRTJR( massAngular, massAngular0 );
-		this.transformB2W.computeRTJR( jinv, jinv0 );		
+		transformB2W.computeRTJR( massAngular, massAngular0 );
+		transformB2W.computeRTJR( jinv, jinv0 );	
 	}
 	
 	//TODO: change my name
@@ -613,15 +614,15 @@ public class RigidCollection extends RigidBody {
 	/**
 	 * Updates bodies position, orientation, and transformations
 	 */
-	protected void updateBodiesPositionAndTransformations() {
+	public void updateBodiesPositionAndTransformations() {
 		for (RigidBody body : bodies) {
 			
 			// update transformations
 			body.transformB2W.mult( transformB2W, body.transformB2C );			
 			
 			if ( ! pinned ) {  // a normal update would do this... so we should do it too for a correct single cycle update.
-				body.transformB2W.computeRJinv0RT( jinv0, jinv );
-				body.transformB2W.computeRJinv0RT( massAngular0, massAngular );
+				body.transformB2W.computeRJinv0RT( body.jinv0, body.jinv );
+				body.transformB2W.computeRJinv0RT( body.massAngular0, body.massAngular );
 	        } 
 		}
 	}
