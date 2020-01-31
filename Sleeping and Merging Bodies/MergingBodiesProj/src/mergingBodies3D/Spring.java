@@ -1,19 +1,11 @@
 package mergingBodies3D;
 
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
-
-import mintools.parameters.DoubleParameter;
-import mintools.swing.VerticalFlowPanel;
-
 
 public class Spring {
 
@@ -48,9 +40,9 @@ public class Spring {
 	
 	/** 
 	 * Rest length of the spring 
-	 * TODO: better to make this a parameter.
 	 */
 	private double l0 = 0.5;
+	public double ls = 1.;
 
 	/** Temporary working variables */
 	private Vector3d displacement = new Vector3d();
@@ -167,7 +159,7 @@ public class Spring {
 		body1.getSpatialVelocity( pb1W, velocity );
 		
 		double scale = 
-				- (k*ks * (displacement.length()  - l0) - d*ds * (velocity.dot(displacement) / displacement.length())) 
+				- (k*ks * (displacement.length()  - l0*ls) - d*ds * (velocity.dot(displacement) / displacement.length())) 
 				/ displacement.length();
 
 		force.scale( - scale, displacement );
@@ -197,7 +189,7 @@ public class Spring {
 		body1.getSpatialVelocity( pb1W, velocity );
 		
 		double scale = 
-				- (k*ks * (displacement.length()  - l0) - d*ds * (velocity.dot(displacement) / displacement.length())) 
+				- (k*ks * (displacement.length()  - l0*ls) - d*ds * (velocity.dot(displacement) / displacement.length())) 
 				/ displacement.length();
 		
 		force.scale( -scale, displacement );
@@ -210,7 +202,7 @@ public class Spring {
 		body2.getSpatialVelocity( pb2W, velocity );
 		
 		scale = 
-				- (k*ks * (displacement.length()  - l0) - d*ds * (velocity.dot(displacement) / displacement.length())) 
+				- (k*ks * (displacement.length()  - l0*ls) - d*ds * (velocity.dot(displacement) / displacement.length())) 
 				/ displacement.length();
 
 		force.scale( -scale, displacement );
@@ -330,5 +322,4 @@ public class Spring {
 	public void updateScale(double scale) {
 		moveScale = scale;
 	}
-
 }

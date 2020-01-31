@@ -601,6 +601,8 @@ public class XMLParser {
 					if ( !k.isEmpty() ) s.k = Double.parseDouble( k );
 					String d = e.getAttribute("d");
 					if ( !d.isEmpty() ) s.d = Double.parseDouble( d );
+					String ls = e.getAttribute("ls");
+					if ( !ls.isEmpty() ) s.ls = Double.parseDouble( ls );
 					String controllable = e.getAttribute("controllable");
 					s.controllable = Boolean.parseBoolean(controllable);
 					if (s.controllable) {

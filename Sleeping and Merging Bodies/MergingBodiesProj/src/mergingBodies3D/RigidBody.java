@@ -423,11 +423,11 @@ public class RigidBody {
     /** 
      * Computes the velocity of the provided point provided in world coordinates due
      * to motion of this body.   
-     * @param contactPointW
+     * @param pointW
      * @param result the velocity
      */
-    public void getSpatialVelocity( Point3d contactPointW, Vector3d result ) {
-    	tmp.sub( contactPointW, x );
+    public void getSpatialVelocity( Point3d pointW, Vector3d result ) {
+    	tmp.sub( pointW, x );
         result.cross( omega, tmp );
         result.add( v );
     }
