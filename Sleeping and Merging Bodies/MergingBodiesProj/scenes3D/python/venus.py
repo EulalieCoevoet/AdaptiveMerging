@@ -30,7 +30,7 @@ for i in range(8):
 
 
 y=102; x0=-2.; z0=7.;
-radius=7;
+radius=8;
 nbPerles=15;
 theta0=2.*math.pi/float(nbPerles)
 theta=0.
@@ -40,9 +40,8 @@ for i in range(nbPerles):
     z=radius*math.sin(theta)+z0
     sphere = Sphere(root, name="perle"+str(i), position=str(x)+" "+str(y)+" "+str(z), radius="1.6", density="1", friction="0.8")
     if i>0:
-        sphere.addSpring(positionB="0.8 0 0", k="400.", d="300", ls="0.6", body2="perle"+str(i-1), positionB2="-0.8 0 0")
+        sphere.addSpring(positionB="0.8 0 0", k="300.", d="100", ls="0.2", body2="perle"+str(i-1), positionB2="-0.8 0 0")
     if i==nbPerles-1:
-        sphere.addSpring(positionB="-0.8 0 0", k="400.", d="300", ls="0.6", body2="perle0", positionB2="0.8 0 0")
-
+        sphere.addSpring(positionB="-0.8 0 0", k="300.", d="100", ls="0.2", body2="perle0", positionB2="0.8 0 0")
 
 export(root, "../venus.xml")

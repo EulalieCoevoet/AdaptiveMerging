@@ -46,7 +46,9 @@ public class Spring {
 
 	/** Temporary working variables */
 	private Vector3d displacement = new Vector3d();
-	private Vector3d velocity = new Vector3d(); // velocity of the point on the body
+	private Vector3d velocity1 = new Vector3d(); // velocity of the point on the body1
+	private Vector3d velocity2 = new Vector3d(); // velocity of the point on the body2
+	private Vector3d relativeVelocity = new Vector3d(); // relative velocity of the point
 	private Vector3d force = new Vector3d();
 	
 
@@ -156,10 +158,10 @@ public class Spring {
 		// Silly fix... the force should go gracefully to zero without giving NaNs :(
 		if ( displacement.length() < 1e-3 ) return;  // hmm... should just give it some rest length?
 
-		body1.getSpatialVelocity( pb1W, velocity );
+		body1.getSpatialVelocity( pb1W, velocity1 );
 		
 		double scale = 
-				- (k*ks * (displacement.length()  - l0*ls) - d*ds * (velocity.dot(displacement) / displacement.length())) 
+				- (k*ks * (displacement.length()  - l0*ls) - d*ds * (velocity1.dot(displacement) / displacement.length())) 
 				/ displacement.length();
 
 		force.scale( - scale, displacement );
@@ -183,29 +185,23 @@ public class Spring {
 		body2.transformB2W.transform( pb2, pb2W );
 
 		displacement.sub( pb2W, pb1W ); 
+		double dist = displacement.length();
 		// Silly fix... the force should go gracefully to zero without giving NaNs :(
-		if ( displacement.length() < 1e-3 ) return;  // hmm... should just give it some rest length?
+		if ( dist < 1e-3 ) return;  // hmm... should just give it some rest length?
+		displacement.scale(1./dist);
 		
-		body1.getSpatialVelocity( pb1W, velocity );
+		body2.getSpatialVelocity( pb2W, velocity2 );
+		body1.getSpatialVelocity( pb1W, velocity1 );
+		relativeVelocity.sub(velocity2, velocity1);
 		
-		double scale = 
-				- (k*ks * (displacement.length()  - l0*ls) - d*ds * (velocity.dot(displacement) / displacement.length())) 
-				/ displacement.length();
+		double forceIntensity = k*ks*(dist - l0*ls) + d*ds*relativeVelocity.dot(displacement);
 		
-		force.scale( -scale, displacement );
+		force.scale( forceIntensity, displacement );
 		body1.applyForceW( pb1W, force );
 		if ( body1.isInCollection() ) {
 			body1.parent.applyForceW( pb1W, force );
 		}
-
-		displacement.sub( pb1W, pb2W ); 		
-		body2.getSpatialVelocity( pb2W, velocity );
-		
-		scale = 
-				- (k*ks * (displacement.length()  - l0*ls) - d*ds * (velocity.dot(displacement) / displacement.length())) 
-				/ displacement.length();
-
-		force.scale( -scale, displacement );
+		force.scale( -forceIntensity, displacement );
 		body2.applyForceW( pb2W, force );
 		if ( body2.isInCollection() ) {
 			body2.parent.applyForceW( pb2W, force );
