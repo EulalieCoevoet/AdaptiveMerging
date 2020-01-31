@@ -57,6 +57,19 @@ boat.addSpring(positionB="-7. 0 1.8", positionW="-7 -1.5 1.8", k="100", d="1")
 boat.addSpring(positionB="-7. 0 -1.8", positionW="-7 -1.5 -1.8", k="100", d="1")
 boat.addSpring(positionB="7. 0 -1.8", positionW="7 -1.5 -1.8", k="100", d="1")
 
+# Pointing finger
+boat = Composite(root, obj="data/pointingfinger.obj", scale="0.3", name="finger", position="70 30 -40", density="1", color="1. 1. 1. 1.")
+boat.addBox(name="fingercenterbox", position="0. 0. 0.", dim="5 5 5")
+boat.addSphere(name="fingersphere", position="-18. -12. 0.", radius="2")
+boat.addSpring(positionB="2.5 2.5 2.5", k="100", d="1")
+boat.addSpring(positionB="2.5 2.5 -2.5", k="100", d="1")
+boat.addSpring(positionB="-2.5 2.5 -2.5", k="100", d="1")
+boat.addSpring(positionB="-2.5 2.5 2.5", k="100", d="1")
+boat.addSpring(positionB="2.5 -2.5 2.5", k="100", d="1")
+boat.addSpring(positionB="2.5 -2.5 -2.5", k="100", d="1")
+boat.addSpring(positionB="-2.5 -2.5 -2.5", k="100", d="1")
+boat.addSpring(positionB="-2.5 -2.5 2.5", k="100", d="1")
+
 # Bodies pile on the boat
 y0 = -2
 x0 = -8.

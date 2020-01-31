@@ -11,7 +11,6 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.vecmath.Vector3d;
 
-import mergingBodies3D.Merging.UnmergingCondition;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.Vec3Parameter;
@@ -62,6 +61,8 @@ public class RigidBodySystem {
 	public int totalSteps = 0;
 	
 	public boolean generateBody = false;
+	
+	public int timestep = 0;
 	
     /**
      * Creates a new rigid body system
@@ -132,9 +133,15 @@ public class RigidBodySystem {
 
         animation.apply(dt);
 		collision.updateInCollections(dt, merging.params);
+		
+		for (RigidBody body: bodies) {
+			if (body instanceof RigidCollection)
+				for (BodyPairContact bpc : ((RigidCollection)body).bodyPairContacts) 
+					bpc.accumulateForUnmerging(merging.params);
+		}
 
         now = System.nanoTime();   
-		merging.unmerge(UnmergingCondition.CONTACTS, dt);	
+		merging.unmerge(dt);	
         unmergingTime = (System.nanoTime() - now) / 1e9;
         
 		if (merging.mergingEvent) {
@@ -152,24 +159,16 @@ public class RigidBodySystem {
 		collision.clearBodyPairContacts();
 
         RigidCollection.mergeParams = merging.params;
-//        for ( RigidBody b : bodies )  
-//			b.advanceTime(dt);
         
 		for ( RigidBody b : bodies )
-			if (!b.pinned && !b.isSleeping)   
+			if (!b.pinned && !b.sleeping)   
 				b.advanceVelocities(dt);
 
 		for (BodyPairContact bpc : collision.bodyPairContacts) 
 			bpc.accumulateForMerging(merging.params);
-
-		for (RigidBody body: bodies) {
-			if (body instanceof RigidCollection)
-				for (BodyPairContact bpc : ((RigidCollection)body).bodyPairContacts) 
-					bpc.accumulateForUnmerging(merging.params);
-		}
 		
 		for ( RigidBody b : bodies ) {
-			if (!b.pinned && !b.isSleeping) { 
+			if (!b.pinned && !b.sleeping) { 
 				b.advancePositions(dt);
 			
 				if (b instanceof RigidCollection) {
@@ -186,10 +185,6 @@ public class RigidBodySystem {
 		
 		sleeping.sleep();
 
-        now = System.nanoTime();   
-		merging.unmerge(UnmergingCondition.RELATIVEMOTION, dt); 
-        unmergingTime += (System.nanoTime() - now) / 1e9;
-
 		applyViscousDecay();
 		
         computeTime = (System.nanoTime() - start) / 1e9;
@@ -200,6 +195,7 @@ public class RigidBodySystem {
 			generateBody();
 			generateBody = false;
 		}
+		timestep += 1;
 		
 		exportDataToFile();
     }
@@ -342,6 +338,7 @@ public class RigidBodySystem {
         animation.reset();
         totalAccumulatedComputeTime = 0;     
         totalSteps = 0;
+        timestep = 0;
     }
     
     protected void applyViscousDecay()
@@ -410,7 +407,7 @@ public class RigidBodySystem {
 			genbody.v.set(generatedBodyVel.x, generatedBodyVel.y, generatedBodyVel.z);
 			genbody.theta.setIdentity();
 			genbody.omega.set(0.,0.,0.);
-			genbody.updateRotationalInertaionFromTransformation();
+			genbody.updateRotationalInertiaFromTransformation();
 			genbody.created = true;
 			bodies.add(genbody);
 		} else {
@@ -443,15 +440,8 @@ public class RigidBodySystem {
 					stream.print("contactOrdering"); stream.print(", ");
 					stream.print("singleItPGS"); stream.print(", ");
 					stream.print("merging"); stream.print(", ");
-					stream.print("mergingCheckContacts"); stream.print(", ");
-					stream.print("mergingCheckMotion"); stream.print(", ");
-					stream.print("mergingCheckViolation"); stream.print(", ");
-					stream.print("mergingCheckCycle"); stream.print(", ");
 					stream.print("mergingBuild"); stream.print(", ");
 					stream.print("unmerging"); stream.print(", ");
-					stream.print("unmergingCheckContacts"); stream.print(", ");
-					stream.print("unmergingCheckMotion"); stream.print(", ");
-					stream.print("unmergingCheckCycle"); stream.print(", ");
 					stream.print("unmergingBuild"); stream.print(", ");
 					stream.print("computeTime"); stream.print("\n ");
 					
@@ -466,15 +456,8 @@ public class RigidBodySystem {
 				stream.print(collision.contactOrderingTime); stream.print(", ");
 				stream.print(collision.singleItPGSTime); stream.print(", ");
 				stream.print(mergingTime); stream.print(", ");
-				stream.print(merging.params.mergingCheckContactTime); stream.print(", ");
-				stream.print(merging.params.mergingCheckMotionTime); stream.print(", ");
-				stream.print(merging.params.mergingCheckViolationTime); stream.print(", ");
-				stream.print(merging.params.mergingCheckCycleTime); stream.print(", ");
 				stream.print(merging.params.mergingBuildTime); stream.print(", ");
 				stream.print(unmergingTime); stream.print(", ");
-				stream.print(merging.params.unmergingCheckContactTime); stream.print(", ");
-				stream.print(merging.params.unmergingCheckMotionTime); stream.print(", ");
-				stream.print(merging.params.unmergingCheckCycleTime); stream.print(", ");
 				stream.print(merging.params.unmergingBuildTime); stream.print(", ");
 				stream.print(computeTime); stream.print("\n ");
 			}

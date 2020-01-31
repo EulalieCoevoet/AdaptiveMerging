@@ -23,7 +23,7 @@ plane.set('name','plane')
 fric = ET.SubElement(plane, 'friction')
 fric.text = "0.001"
 
-# Bodies pile
+# Toys
 y0 = 3
 x0 = -21.
 z0 = -1.9
@@ -45,11 +45,14 @@ Sphere(root, name='ball', position="-17.5 3.7 0", radius="1.", color="0.8 0.8 0.
 
 # Houses background
 composite = Composite(root, obj="data/house2.obj", scale="12", name="house1", position="0 -16.5 -100", color="1. 1. 1. 1.")
-composite.addBox(name='panier', position="0 5 0", dim='10 10 10')
+composite.addBox(name='h1wall1', position="-35 50 0", dim='1 100 70')
+composite.addBox(name='h1wall2', position="35 50 0", dim='1 100 70')
 composite = Composite(root, obj="data/house3.obj", scale="12", name="house2", position="-130. -16.5 -100", color="1. 1. 1. 1.")
-composite.addBox(name='panier', position="0 5 0", dim='50 10 10')
+composite.addBox(name='h2wall1', position="-75 25 0", dim='1 50 30')
+composite.addBox(name='h2wall2', position="75 25 0", dim='1 50 30')
 composite = Composite(root, obj="data/house1.obj", scale="12", name="house3", position="-250. -16.5 -100", color="1. 1. 1. 1.")
-composite.addBox(name='panier', position="0 5 0", dim=' 10 10 10')
+composite.addBox(name='h3wall1', position="-35 125 0", dim='1 250 70')
+composite.addBox(name='h3wall2', position="35 125 0", dim='1 250 70')
 
 # Chariot
 composite = Composite(root, obj="data/chariot.obj", scale="0.1", name="chariot", position="-20. 2.7 0.", velocity="0. 0. 0.", color="0.7 0. 0. 1.")
@@ -87,10 +90,11 @@ Box(root, name='bookAlone2', position="-35.9 "+yb+" 1.", dim="0.1 2 1.5", color=
 
 # Truck
 composite = Composite(root, obj="data/truck.obj", name="truck", scale="0.1", position="0. 2.5 0.", color="0.5 0.5 0.5 1.", density="1", friction="0.3")
-composite.addBox(name='ground', position="-20 -3.5 0", dim='60 2 25')
-composite.addBox(name='ground', position="-45 -12 10", dim='5 12 5')
-composite.addBox(name='ground', position="-45 -12 -10", dim='5 12 5')
+composite.addBox(name='ground', position="-20 -3.5 0", dim='80 2 25')
+composite.addBox(name='ground', position="-50 -12 10", dim='5 12 5')
+composite.addBox(name='ground', position="-50 -12 -10", dim='5 12 5')
 composite.addBox(name='ground', position="5 -12 -10", dim='5 12 5')
 composite.addBox(name='ground', position="5 -12 10", dim='5 12 5')
+#composite.addBox(name='cockpit', position="-100 10 10", dim='20 20 20')
 
 export(root, "../chariot.xml")

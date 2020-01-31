@@ -1,6 +1,10 @@
 clear 
 close all
+<<<<<<< HEAD
 scene_name = "funnel1"
+=======
+scene_name = "funnel"
+>>>>>>> dev
 plot_name = "Performance With Time for " + scene_name + " Scene"
 X_unmerged = readtable(scene_name + ".csv")
 X_merged = readtable(scene_name + "_merged.csv")
@@ -12,17 +16,28 @@ hfig = figure('Renderer', 'painters', 'Position', [10 10 600 400]), set(gcf,'col
 
 hold;
 
+<<<<<<< HEAD
 temp_m = X_merged{1:num_timesteps, 20 } - X_merged{1:num_timesteps, 3}
 temp_um = X_unmerged{1:num_timesteps, 20 } - X_unmerged{1:num_timesteps, 3}
 subplot(3,1,1);
 plot(temp_m, 'DisplayName','Merging (No CD)')
 hold;
 plot(temp_um, 'DisplayName','No Merging (No CD)')
+=======
+temp_m = X_merged{1:num_timesteps, 20 } - X_merged{1:num_timesteps, 3 }
+temp_um = X_unmerged{1:num_timesteps, 20} -X_unmerged{1:num_timesteps, 3}
+
+subplot(3,1,1);
+semilogy(temp_m , 'DisplayName','Merging (no CD)')
+hold;
+semilogy(temp_um, 'DisplayName','No Merging (no CD)')
+>>>>>>> dev
 hold;
 ylabel("Computation Time (s)")
 
 legend
 
+<<<<<<< HEAD
 
 subplot(3,1,2);
 
@@ -32,6 +47,16 @@ semilogy(X_unmerged{1:num_timesteps, 3}, 'DisplayName','No Merging CD')
 legend
 ylabel("Collision Detection Time")
 
+=======
+subplot(3,1,2);
+semilogy(X_merged{1:num_timesteps, 3 } , 'DisplayName','Merging with CD')
+hold;
+semilogy(X_unmerged{1:num_timesteps, 3 }, 'DisplayName','No Merging with CD')
+hold;
+ylabel("Collision Detection Time)")
+
+legend
+>>>>>>> dev
 
 subplot(3,1,3);
 

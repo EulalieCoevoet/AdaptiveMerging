@@ -217,23 +217,23 @@ public class RigidTransform3D {
     }
     
     /**
-     * Sets jinv to be the product R jinv0 R^T
-     * @param jinv0
-     * @param jinv
+     * Sets M2 to be the product R M1 R^T
+     * @param M1
+     * @param M2
      */
-    public void computeRJinv0RT( Matrix3d jinv0, Matrix3d jinv ) {
-    	jinv.mul( R, jinv0 );
-    	jinv.mulTransposeRight( jinv, R );
+    public void computeRM0RT( Matrix3d M1, Matrix3d M2 ) {
+    	M2.mul( R, M1 );
+    	M2.mulTransposeRight( M2, R );
     }
     
     /** 
-     * Sets jinv0 to be the product R^T jinv R
-     * @param jinv
-     * @param jinv
+     * Sets M2 to be the product R^T M1 R
+     * @param M1
+     * @param M2
      */
-    public void computeRTJR( Matrix3d jinv, Matrix3d jinv0 )  {
-    	jinv0.mulTransposeLeft( R, jinv );
-    	jinv0.mul( R );
+    public void computeRTMR( Matrix3d M1, Matrix3d M2 )  {
+    	M2.mulTransposeLeft( R, M1 );
+    	M2.mul( R );
     }
  
 //    /**

@@ -259,7 +259,7 @@ public class CollisionProcessor {
 			solver.contacts.addAll(contacts);
 			
 			for (RigidBody body : bodies) {
-				if (body instanceof RigidCollection && !body.isSleeping) {
+				if (body instanceof RigidCollection && !body.sleeping) {
 					RigidCollection collection = (RigidCollection)body;
 					solver.contacts.addAll(collection.internalContacts);
 				}
@@ -282,7 +282,7 @@ public class CollisionProcessor {
 		singleItPGSTime = ( System.nanoTime() - now2 ) * 1e-9;
 		
 		for (RigidBody body : bodies) {
-			if (body instanceof RigidCollection && !body.isSleeping) {
+			if (body instanceof RigidCollection && !body.sleeping) {
 				RigidCollection collection = (RigidCollection)body;
 			
 				// Update the bodies velocities for the unmerge condition (relative motion)
@@ -392,7 +392,7 @@ public class CollisionProcessor {
 
 		// add missing bpc from collections (non-connected to the new contacts)
 		for (RigidBody body : bodies) {
-			if (body instanceof RigidCollection && !body.isSleeping) {
+			if (body instanceof RigidCollection && !body.sleeping) {
 				RigidCollection collection = (RigidCollection)body;
 				for ( BodyPairContact bpc : collection.bodyPairContacts ) {
 					if (!bpc.checked) {
@@ -662,7 +662,7 @@ public class CollisionProcessor {
         	for ( int j = i+1; j < N; j++ ) {
         		RigidBody b2 = bodies.get( j );
                 if ( b1.pinned && b2.pinned ) continue;
-                if ( (b1.pinned && b2.isSleeping) || (b2.pinned && b1.isSleeping) ) continue;
+                if ( (b1.pinned && b2.sleeping) || (b2.pinned && b1.sleeping) ) continue;
                 narrowPhase( b1, b2 );                
         	}
         }    

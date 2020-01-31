@@ -21,7 +21,7 @@ public class BVNode {
     BVSphere boundingSphere;
     
     /**
-     * In many cases we will will have binary trees, but in some cases we will not
+     * In many cases we will have binary trees, but in some cases we will not
      */
     BVNode[] children;
     

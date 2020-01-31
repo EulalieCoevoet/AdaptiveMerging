@@ -109,7 +109,7 @@ public class Animation {
 		
 		if(params.vx.getValue() != 0.) {
 			time+=dt;
-			this.body.isSleeping = false;
+			this.body.sleeping = false;
 			body.v.x = params.vx.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.vx.setValue(0.);
@@ -118,7 +118,7 @@ public class Animation {
 		}
 		if(params.vy.getValue() != 0.) {
 			time+=dt;
-			this.body.isSleeping = false;
+			this.body.sleeping = false;
 			body.v.y = params.vy.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.vy.setValue(0.);
@@ -127,7 +127,7 @@ public class Animation {
 		}
 		if(params.vz.getValue() != 0.) {
 			time+=dt;
-			this.body.isSleeping = false;
+			this.body.sleeping = false;
 			body.v.z = params.vz.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.vz.setValue(0.);
@@ -136,7 +136,7 @@ public class Animation {
 		}
 		if(params.wx.getValue() != 0.) {
 			time+=dt;
-			this.body.isSleeping = false;
+			this.body.sleeping = false;
 			body.omega.x = params.wx.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.wx.setValue(0.);
@@ -145,7 +145,7 @@ public class Animation {
 		}
 		if(params.wy.getValue() != 0.) {
 			time+=dt;
-			this.body.isSleeping = false;
+			this.body.sleeping = false;
 			body.omega.y = params.wy.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.wy.setValue(0.);
@@ -154,7 +154,7 @@ public class Animation {
 		}
 		if(params.wz.getValue() != 0.) {
 			time+=dt;
-			this.body.isSleeping = false;
+			this.body.sleeping = false;
 			body.omega.z = params.wz.getValue()*ratio;
 			if (time > params.time.getValue()) {
 				params.wz.setValue(0.);
@@ -171,7 +171,7 @@ public class Animation {
 		else
 			ratio = 1.;
 		
-		this.body.isSleeping = false;
+		this.body.sleeping = false;
 		body.v.x = params.vx.getValue()*ratio;
 		body.v.y = params.vy.getValue()*ratio;
 		body.v.z = params.vz.getValue()*ratio;

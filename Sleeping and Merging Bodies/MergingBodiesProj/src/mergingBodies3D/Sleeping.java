@@ -48,7 +48,7 @@ public class Sleeping {
 		
 		double threshold = params.threshold.getValue();
 		for (RigidBody body : bodies) {
-			if (body.isSleeping)
+			if (body.sleeping)
 				continue;
 			
 			//This is not safe, single iteration PGS may take multiple time steps to detect something...
@@ -88,7 +88,7 @@ public class Sleeping {
 				}
 			}
 			
-			body.isSleeping = sleep;
+			body.sleeping = sleep;
 		}
 	}
 
@@ -105,7 +105,7 @@ public class Sleeping {
 			return;
 		
 		for (RigidBody body: bodies) {
-			if (!body.isSleeping) 
+			if (!body.sleeping) 
 				continue;
 			
 			for (BodyPairContact bpc : body.bodyPairContacts) {
@@ -121,8 +121,8 @@ public class Sleeping {
 			if (spring.body2 == null)
 				continue;
 			
-			boolean sleeping1 = (spring.body1.isInCollection())? spring.body1.parent.isSleeping: spring.body1.isSleeping;
-			boolean sleeping2 = (spring.body2.isInCollection())? spring.body2.parent.isSleeping: spring.body2.isSleeping; 			
+			boolean sleeping1 = (spring.body1.isInCollection())? spring.body1.parent.sleeping: spring.body1.sleeping;
+			boolean sleeping2 = (spring.body2.isInCollection())? spring.body2.parent.sleeping: spring.body2.sleeping; 			
 			boolean pinned1   = (spring.body1.isInCollection())? spring.body1.parent.pinned: spring.body1.pinned;
 			boolean pinned2   = (spring.body2.isInCollection())? spring.body2.parent.pinned: spring.body2.pinned; 
 			

@@ -20,8 +20,6 @@ public class Merging {
 	public boolean mergingEvent = false;
 	public boolean triggerMergingEvent = false;
 	
-	public enum UnmergingCondition {RELATIVEMOTION, CONTACTS;}
-	
 	protected ArrayList<RigidBody> bodies;
 	protected CollisionProcessor collision;
 	
@@ -47,14 +45,7 @@ public class Merging {
 		public BooleanParameter unmergeAll = new BooleanParameter("unmerge all", false);
 		public BooleanParameter changeColors = new BooleanParameter("change colors", false);
 		
-	    public double mergingCheckContactTime = 0;
-	    public double mergingCheckCycleTime = 0;
-	    public double mergingCheckMotionTime = 0;
-	    public double mergingCheckViolationTime = 0;
 	    public double mergingBuildTime = 0;
-	    public double unmergingCheckContactTime = 0;
-	    public double unmergingCheckCycleTime = 0;
-	    public double unmergingCheckMotionTime = 0;
 	    public double unmergingBuildTime = 0;
 	}
 	public MergeParameters params = new MergeParameters();
@@ -62,28 +53,6 @@ public class Merging {
 	Merging(ArrayList<RigidBody> bodies, CollisionProcessor CP) {
 		this.bodies = bodies;
 		this.collision = CP;
-	}
-
-	protected void resetMergingTime() {
-	    params.mergingCheckContactTime = 0;
-	    params.mergingCheckCycleTime = 0;
-	    params.mergingCheckMotionTime = 0;
-	    params.mergingCheckViolationTime = 0;
-	    params.mergingBuildTime = 0;
-	}
-	
-	protected void resetUnmergingTime(UnmergingCondition condition) {
-		if (condition == UnmergingCondition.CONTACTS) {
-			params.unmergingCheckContactTime = 0;
-			
-			// during a time step, contacts for unmerging is the first thing we check...
-			params.unmergingCheckCycleTime = 0;
-			params.unmergingCheckMotionTime = 0;
-			params.unmergingBuildTime = 0;
-		}
-		
-		if (condition == UnmergingCondition.RELATIVEMOTION)
-			params.unmergingCheckContactTime = 0;
 	}
 	
 	/**
@@ -104,7 +73,7 @@ public class Merging {
 			
 		LinkedList<BodyPairContact> removalQueue = new LinkedList<BodyPairContact>();
 		
-		resetMergingTime();
+		params.mergingBuildTime = 0.;
 		
 		for (BodyPairContact bpc : collision.bodyPairContacts) {
 			
@@ -185,7 +154,7 @@ public class Merging {
 		
 		for (BodyPairContact bpc: removalQueue) {
 			collision.bodyPairContacts.remove(bpc);
-			collision.contacts.removeAll(bpc.contactList);
+			//collision.contacts.removeAll(bpc.contactList);
 		}
 	}
 
@@ -204,8 +173,19 @@ public class Merging {
 				RigidCollection collection = (RigidCollection) body;
 				removalQueue.add(collection);
 				
-				for (BodyPairContact bpc: collection.bodyPairContacts)
-					unmergeBodyPairContact(bpc);
+				for (BodyPairContact bpc: collection.bodyPairContacts) {
+					if (!collision.bodyPairContacts.contains(bpc))
+						collision.bodyPairContacts.add(bpc);
+					bpc.inCollection = false;
+					if(bpc.inCollection) {
+						for (Contact contact : bpc.contactList) {
+							contact.lambda0warm = contact.lambda0;
+							contact.lambda1warm = contact.lambda1;
+							contact.lambda2warm = contact.lambda2;
+							collision.contacts.add(contact);
+						}
+					}
+				}
 							
 				for (RigidBody b: collection.bodies) {
 					collection.unmergeBody(b);
@@ -227,16 +207,13 @@ public class Merging {
 	/**
 	 * Unmerge BodyPairContacts that satisfy condition
 	 */	
-	public void unmerge(UnmergingCondition condition, double dt) {
+	public void unmerge(double dt) {
 		if (!params.enableUnmerging.getValue())
 			return;
 
-		resetUnmergingTime(condition);
+		params.unmergingBuildTime = 0.;
 		
-		if (condition == UnmergingCondition.RELATIVEMOTION && !params.enableUnmergeRelativeMotionCondition.getValue())
-			return;
-		
-		if (condition == UnmergingCondition.CONTACTS && !(params.enableUnmergeNormalCondition.getValue() || params.enableUnmergeFrictionCondition.getValue()))
+		if (!params.enableUnmergeRelativeMotionCondition.getValue() && !params.enableUnmergeNormalCondition.getValue() && !params.enableUnmergeFrictionCondition.getValue())
 			return;
 		
 		removalQueue.clear();
@@ -244,7 +221,7 @@ public class Merging {
 		
 		for(RigidBody body : bodies) {
 			
-			if(body.isSleeping )
+			if(body.sleeping)
 				continue;
 			
 			if (body instanceof RigidCollection) {
@@ -258,16 +235,11 @@ public class Merging {
 					
 					if (!bpcsToUnmerge.contains(bpc)) {
 						
-						if (condition == UnmergingCondition.CONTACTS && !bpc.checkContactsState(dt, params))
+						if (!bpc.checkContactsState(dt, params) && !bpc.checkMotionMetricForUnmerging(params))
 							continue;
 
-						if (condition == UnmergingCondition.RELATIVEMOTION && !bpc.checkMotionMetricForUnmerging(params))
-							continue;
-
-						long now = System.nanoTime();
 						if (params.enableMergeCycleCondition.getValue())
 							bpc.checkCyclesToUnmerge(bpcsToUnmerge);
-						params.unmergingCheckCycleTime += (System.nanoTime() - now) / 1e9;
 						
 						bpc.addBpcToUnmerge(bpcsToUnmerge);
 					}
@@ -312,7 +284,7 @@ public class Merging {
 		
 		// Cut connections
 		for (BodyPairContact bpc: bpcsToUnmerge)
-			unmergeBodyPairContact(bpc);
+			bpc.inCollection = false;
 		
 		// Compute resulting new collections/bodies
 		handledBodies.clear();
@@ -363,11 +335,20 @@ public class Merging {
 			}	
 		}	
 
-		// Reconnect if necessary
+		// Reconnect if necessary, if not clean cut 
 		for (BodyPairContact bpc: bpcsToUnmerge) {
-			if (bpc.body1.isInSameCollection(bpc.body2))
-				mergeBodyPairContact(bpc);
-			else {
+			if (bpc.body1.isInSameCollection(bpc.body2)) {
+				bpc.inCollection = true;
+			} else {
+				if (!collision.bodyPairContacts.contains(bpc)) {
+					collision.bodyPairContacts.add(bpc);
+					for (Contact contact : bpc.contactList) {
+						contact.lambda0warm = contact.lambda0;
+						contact.lambda1warm = contact.lambda1;
+						contact.lambda2warm = contact.lambda2;
+						collision.contacts.add(contact);
+					}
+				}
 				bpc.motionMetricHist.clear();
 				bpc.contactStateHist.clear();
 			}
@@ -376,7 +357,7 @@ public class Merging {
 		if(handledBodies.size() != collection.bodies.size())
 			System.err.println("[unmergeSelectedBpcs] Something is wrong");
 		
-		if (!removeCollection) {
+		if(!removeCollection) {
 			if (remainedBodies.size() != collection.bodies.size()) {
 				handledBodies.removeAll(remainedBodies);
 				collection.removeBodies(handledBodies);
@@ -385,46 +366,6 @@ public class Merging {
 		}
 		
 		return removeCollection;
-	}
-	
-	/**
-	 * Unmerge body pair contact
-	 * @param bpc
-	 */
-	protected void unmergeBodyPairContact(BodyPairContact bpc) {
-		if (!collision.bodyPairContacts.contains(bpc)) {
-			collision.bodyPairContacts.add(bpc);
-			bpc.inCollection = false;
-			for (Contact contact : bpc.contactList) {
-				if (!collision.contacts.contains(contact)) {
-					contact.lambda0warm = contact.lambda0;
-					contact.lambda1warm = contact.lambda1;
-					contact.lambda2warm = contact.lambda2;
-					collision.contacts.add(contact);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Merge body pair contact
-	 * Note: only to be used in unmerge process, this code supposes that bpc.body1 and bpc.body2 are already merged
-	 * @param bpc
-	 */
-	protected void mergeBodyPairContact(BodyPairContact bpc) {
-		if (collision.bodyPairContacts.contains(bpc)) {
-			collision.bodyPairContacts.remove(bpc);
-			bpc.inCollection = true;
-			for (Contact contact : bpc.contactList) { 
-				// TODO fix me... or remove me...
-//				if (!collision.contacts.contains(contact)) {
-//					System.err.println("Merging.mergeBodyPairContat: this contact should ALWAYS be in the list :("); // remove should be possible... period!! should not need to check??
-//				}
-				collision.contacts.remove(contact);
-				if (!bpc.body1.parent.internalContacts.contains(contact))
-					bpc.body1.parent.internalContacts.add(contact);
-			}
-		}
 	}
 
 	/**
