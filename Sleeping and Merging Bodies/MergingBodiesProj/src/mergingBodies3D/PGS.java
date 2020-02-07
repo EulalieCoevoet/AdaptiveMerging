@@ -2,6 +2,7 @@ package mergingBodies3D;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 
@@ -71,7 +72,7 @@ public class PGS {
 			contact.computeB(dt, feedbackStiffness, computeInCollection, restitutionOverride, restitutionOverrideVal );
 			contact.computeJMinvJt(computeInCollection);
 		}
-
+		
 		int iter = iterations;
 		while(iter > 0) {
 			
@@ -114,8 +115,9 @@ public class PGS {
 				
 				// only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
-					contact.lambda1 = Math.max(contact.lambda1, -mu*contact.lambda0);
-					contact.lambda1 = Math.min(contact.lambda1, mu*contact.lambda0);
+					double limit = mu*contact.lambda0;
+					contact.lambda1 = Math.max(contact.lambda1, -limit);
+					contact.lambda1 = Math.min(contact.lambda1,  limit);
 				}
 				
 				updateDeltaVwithLambdai(contact, contact.lambda1 - prevLambda_t1, 1);
@@ -128,14 +130,15 @@ public class PGS {
 				
 				// only clamp lambdas if both bodies aren't magnetic or both bodies are magnetic but the magnet isn't active
 				if ((!contact.body1.magnetic || !contact.body1.activateMagnet) && (!contact.body2.magnetic || !contact.body2.activateMagnet)) {
-					contact.lambda2 = Math.max(contact.lambda2, -mu*contact.lambda0);
-					contact.lambda2 = Math.min(contact.lambda2, mu*contact.lambda0);
+					double limit = mu*contact.lambda0;
+					contact.lambda2 = Math.max(contact.lambda2, -limit);
+					contact.lambda2 = Math.min(contact.lambda2,  limit);
 				}
 
 				updateDeltaVwithLambdai(contact, contact.lambda2 - prevLambda_t2, 2);
 				
 				if (iter == 1) // Last iteration: avoid looping again over contacts
-					contact.updateContactState(mu, dt, computeInCollection);
+					contact.updateContactState(mu, computeInCollection);
 			}
 			
 			iter--;

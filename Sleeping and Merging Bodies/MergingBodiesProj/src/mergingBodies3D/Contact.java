@@ -386,7 +386,7 @@ public class Contact {
 	 * This MUST be called post solve so that the b values are available.
 	 * @param mu
 	 */
-	protected void updateContactState(double mu, double dt, boolean computeInCollection) {
+	protected void updateContactState(double mu, boolean computeInCollection) {
 		// store in member variables for viewing...  :/
 		w1 = bt1 + getJdv(computeInCollection, 1);
 		w2 = bt2 + getJdv(computeInCollection, 2);
@@ -517,7 +517,7 @@ public class Contact {
 		gl.glEnd();
 	}
     
-	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.0001, 1);
+	static DoubleParameter forceVizScale = new DoubleParameter("force viz scale", 0.05, 0.0001, 1e2);
 	static DoubleParameter slidingThreshold = new DoubleParameter("sliding velocity threshold", 0.01, 0.0001, 3);
 
     /**

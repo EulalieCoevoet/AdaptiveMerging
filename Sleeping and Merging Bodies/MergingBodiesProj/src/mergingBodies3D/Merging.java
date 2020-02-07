@@ -39,6 +39,7 @@ public class Merging {
 		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
 		public IntParameter stepAccumMerging = new IntParameter("check threshold over N number of time steps for merging", 3, 0, 200 );
 		public IntParameter stepAccumUnmerging = new IntParameter("check threshold over N number of time steps for unmerging", 3, 0, 200 ); 
+		public IntParameter stepsBetweenMergeEvents = new IntParameter("steps between merge events", 10, 1, 100 );
 		public DoubleParameter thresholdMerge = new DoubleParameter("merging threshold", 1e-2, 1e-10, 100 );
 		public DoubleParameter thresholdUnmerge = new DoubleParameter("unmerging threshold", 2e-2, 1e-10, 100 );
 		public DoubleParameter thresholdBreath = new DoubleParameter("breathing threshold", 1e-5, 1e-10, 1e0 );
@@ -435,6 +436,7 @@ public class Merging {
 		vfp.add( params.organizeContacts.getControls() );
 		vfp.add( params.stepAccumMerging.getSliderControls() );
 		vfp.add( params.stepAccumUnmerging.getSliderControls() );
+		vfp.add( params.stepsBetweenMergeEvents.getSliderControls() );
 		vfp.add( params.thresholdMerge.getSliderControls(false) );
 		vfp.add( params.thresholdUnmerge.getSliderControls(false) );
 		vfp.add( params.thresholdBreath.getSliderControls(true) );

@@ -169,7 +169,7 @@ public class RigidBodySystem {
 		
 		for ( RigidBody b : bodies ) {
 			if (!b.pinned && !b.sleeping) { 
-				b.advancePositions(dt);
+				b.advancePositions(dt); 
 			
 				if (b instanceof RigidCollection) {
 					((RigidCollection)b).updateBodiesPositionAndTransformations();
@@ -180,7 +180,9 @@ public class RigidBodySystem {
 		}
 		
         now = System.nanoTime();   
-		merging.merge();
+        
+        if ( (totalSteps % merging.params.stepsBetweenMergeEvents.getValue()) == 0 )
+        	merging.merge();
         mergingTime = (System.nanoTime() - now) / 1e9;
 		
 		sleeping.sleep();

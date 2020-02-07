@@ -863,10 +863,14 @@ public class CollisionProcessor {
     private void processCollision( RigidBody body1, BVSphere bv1, RigidBody body2, BVSphere bv2 ) {        
         double distance = bv1.cW.distance( bv2.cW );
         double distanceBetweenCenters = bv2.r + bv1.r;
+        
         if ( distance < distanceBetweenCenters ) {
             // contact point at halfway between points 
             // NOTE: this assumes that the two blocks have the same radius!
-            contactW.interpolate( bv1.cW, bv2.cW, .5 );
+        	
+        	double alpha = (bv1.r - bv2.r + distance)/(2*distance);
+        	
+            contactW.interpolate( bv1.cW, bv2.cW, alpha );
             // contact normal
             normal.sub( bv2.cW, bv1.cW );
             normal.normalize();

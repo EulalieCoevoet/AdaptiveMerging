@@ -33,19 +33,15 @@ public class MotionMetricProcessor {
 		// of each bounding volume are moving in the other object's moving frame
 		
 		double largestVelocityNorm = 0;
-		for (Point3d point : body1.boundingBoxB) {
-			body1.transformB2W.transform( point, pW );
-			body1.getSpatialVelocity(pW, v1);
-			body2.getSpatialVelocity(pW, v2);
-			v1.sub(v2);
-			largestVelocityNorm = Math.max( v1.length(), largestVelocityNorm );
-		}
-		for (Point3d point : body2.boundingBoxB) {
-			body2.transformB2W.transform( point, pW );
-			body1.getSpatialVelocity(pW, v1);
-			body2.getSpatialVelocity(pW, v2);
-			v1.sub(v2);
-			largestVelocityNorm = Math.max( v1.length(), largestVelocityNorm );
+		for(int i=0; i<2; i++) {
+			RigidBody body = (i==0)? body1: body2;
+			for (Point3d point : body.boundingBoxB) {
+				body.transformB2W.transform( point, pW );
+				body1.getSpatialVelocity(pW, v1);
+				body2.getSpatialVelocity(pW, v2);
+				v1.sub(v2);
+				largestVelocityNorm = Math.max( v1.length(), largestVelocityNorm );
+			}
 		}
 		return largestVelocityNorm;
 	}
