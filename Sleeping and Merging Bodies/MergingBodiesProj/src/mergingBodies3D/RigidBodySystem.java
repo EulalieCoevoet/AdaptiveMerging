@@ -117,13 +117,13 @@ public class RigidBodySystem {
         
 		applyExternalForces();
 
-		collision.updateContactsMap(); // also called after the LCP solve below... certainly not needed in both places!  :/
+		collision.updateContactsMap(); 
 		
         collision.collisionDetection(dt);
 		collision.updateBodyPairContacts();         
 		
 		long now = System.nanoTime();   
-		collision.warmStart(); 	
+		collision.warmStart(false); 	
         warmStartTime = (System.nanoTime() - now) / 1e9;
 
 		if (sleeping.params.wakeAll.getValue()) sleeping.wakeAll();
@@ -155,7 +155,7 @@ public class RigidBodySystem {
 		
 		collision.redoWarmStart();
 
-		collision.solveLCP(dt); 
+		collision.solveLCP(dt, false);
 		collision.clearBodyPairContacts();
 
         RigidCollection.mergeParams = merging.params;
@@ -167,25 +167,19 @@ public class RigidBodySystem {
 		for (BodyPairContact bpc : collision.bodyPairContacts) 
 			bpc.accumulateForMerging(merging.params);
 		
-		for ( RigidBody b : bodies ) {
-			if (!b.pinned && !b.sleeping) { 
+		for ( RigidBody b : bodies )
+			if (!b.pinned && !b.sleeping) 
 				b.advancePositions(dt); 
-			
-				if (b instanceof RigidCollection) {
-					((RigidCollection)b).updateBodiesPositionAndTransformations();
-					// Accumulation for unmerge is done before this step, so we can clean the bodies velocities
-					((RigidCollection)b).applyVelocitiesToBodies();
-				}
-			}
-		}
+		
+		if (collision.usePostStabilization.getValue()) 
+			postStabilization(dt);
 		
         now = System.nanoTime();   
-        
         if ( (totalSteps % merging.params.stepsBetweenMergeEvents.getValue()) == 0 )
         	merging.merge();
         mergingTime = (System.nanoTime() - now) / 1e9;
 		
-		sleeping.sleep();
+		sleeping.sleep();		
 
 		applyViscousDecay();
 		
@@ -292,6 +286,31 @@ public class RigidBodySystem {
 			s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
 			
 		}
+	}
+	
+	private void postStabilization(double dt) {
+		for ( RigidBody b : bodies ) {
+            b.clear();
+	        if (b instanceof RigidCollection) {
+	        	RigidCollection collection = (RigidCollection)b;
+				collection.clearBodies();
+	        	if (merging.params.changeColors.getValue())
+	        		collection.generateColor();
+	        }
+		}
+
+		collision.updateContactsMap(); 
+		
+        collision.collisionDetection(dt);
+		collision.updateBodyPairContacts();     
+		collision.warmStart(true); 	
+       
+		collision.solveLCP(dt, true); // post stabilization
+		collision.clearBodyPairContacts();
+		
+		for ( RigidBody b : bodies )
+			if (!b.pinned && !b.sleeping) 
+				b.advancePositionsPostStabilization(dt); 
 	}
     
     /**

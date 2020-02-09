@@ -103,7 +103,7 @@ public class CollisionProcessor {
 	 * Solve LCP
 	 * @param dt time step
 	 */
-	public void solveLCP( double dt ) {
+	public void solveLCP( double dt, boolean postStabilization ) {
 		
 		if(!contacts.isEmpty()) {
 	    	
@@ -112,7 +112,8 @@ public class CollisionProcessor {
 	    	
 	    	// set up contacts solver 
 			solver.init(iterations.getValue());
-			solver.feedbackStiffness = feedbackStiffness.getValue();
+			solver.feedbackStiffness = (!usePostStabilization.getValue() || postStabilization)? feedbackStiffness.getValue(): 0.;
+			solver.postStabilization = postStabilization;
 			solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 			solver.warmStart = true;
 			solver.contacts = contacts;
@@ -121,7 +122,6 @@ public class CollisionProcessor {
 			// jacobians computed for acting on bodies rather than collections... so update 
 			// those again so that we can compute the solution for the full system.
 			updateJacobiansThatNeedUpdating( solver.contacts, false );
-
 			
 			long now = System.nanoTime();
 			solver.solve( dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
@@ -459,7 +459,7 @@ public class CollisionProcessor {
 	 * Would be nice to just loop over all contacts, but this uses the BPCs to treat box-box warm starts
 	 * slightly differently given that they don't always end up preserving their "info" number across time steps.
 	 */
-	protected void warmStart() {
+	protected void warmStart(boolean postStabilization) {
 		
 		badWarmStarts = 0;
 		badWarmStartsRepaired = 0;
@@ -476,11 +476,11 @@ public class CollisionProcessor {
 					// could end up here with composite bodies... so be sure to drop out into a vanilla
 					// warm start if it isn't a box box collision.
 					if ( contact.csb1 != null && !(contact.csb1.geom instanceof RigidBodyGeomBox) ) {
-						vanillaWarmStart( contact );
+						vanillaWarmStart( contact, postStabilization );
 						continue; 
 					}
 					if ( contact.csb2 != null && !(contact.csb2.geom instanceof RigidBodyGeomBox)) {
-						vanillaWarmStart( contact );
+						vanillaWarmStart( contact, postStabilization );
 					}
 					
 					// note that body1 and body 2 can swap across time steps... so just compare in the current world!
@@ -552,7 +552,10 @@ public class CollisionProcessor {
 							oldContact.lambda1 = 0;
 							oldContact.lambda2 = 0;
 	
-							contact.prevConstraintViolation = oldContact.constraintViolation;
+							if(!postStabilization)
+								contact.prevConstraintViolation = oldContact.constraintViolation;
+							else
+								contact.prevConstraintViolation = oldContact.prevConstraintViolation;
 						} else {
 							// may as well treat as new as didn't find anything close.
 							contact.newThisTimeStep = true;
@@ -596,8 +599,11 @@ public class CollisionProcessor {
 								oldContact.lambda0 = 0;
 								oldContact.lambda1 = 0;
 								oldContact.lambda2 = 0;
-		
-								contact.prevConstraintViolation = oldContact.constraintViolation;
+								
+								if(!postStabilization)
+									contact.prevConstraintViolation = oldContact.constraintViolation;
+								else
+									contact.prevConstraintViolation = oldContact.prevConstraintViolation;
 							}
 
 						} else {
@@ -608,7 +614,7 @@ public class CollisionProcessor {
 					
 			} else {
 				for ( Contact contact : bpc.contactList ) {
-					vanillaWarmStart( contact );
+					vanillaWarmStart( contact, postStabilization );
 				}
 			}
 		}
@@ -618,7 +624,7 @@ public class CollisionProcessor {
 	 * Do the basic warm start of taking whatever contact matches the hash.
 	 * @param contact
 	 */
-	private void vanillaWarmStart( Contact contact ) {
+	private void vanillaWarmStart( Contact contact, boolean postStabilization ) {
 		Contact oldContact = lastTimeStepContacts.get( contact );
 		if (oldContact != null) {
 			contact.newThisTimeStep = false;
@@ -630,7 +636,10 @@ public class CollisionProcessor {
 			contact.lambda1warm = oldContact.lambda1;
 			contact.lambda2warm = oldContact.lambda2;
 
-			contact.prevConstraintViolation = oldContact.constraintViolation;
+			if(!postStabilization)
+				contact.prevConstraintViolation = oldContact.constraintViolation;
+			else
+				contact.prevConstraintViolation = oldContact.prevConstraintViolation;
 		} else {
 			contact.newThisTimeStep = true;
 		}					
@@ -884,6 +893,7 @@ public class CollisionProcessor {
 
 	public BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	public DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
+	public BooleanParameter usePostStabilization = new BooleanParameter("use post stabilization", false );
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
 	
@@ -925,6 +935,7 @@ public class CollisionProcessor {
         vfp.add( friction.getSliderControls(false) );
         
 		vfp.add( feedbackStiffness.getSliderControls(false) );
+		vfp.add( usePostStabilization.getControls() );
 		vfp.add( enableCompliance.getControls() );
 		vfp.add( compliance.getSliderControls(true) );
         return vfp.getPanel();

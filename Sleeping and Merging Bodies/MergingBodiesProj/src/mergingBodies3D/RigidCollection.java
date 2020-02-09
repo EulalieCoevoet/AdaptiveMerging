@@ -612,6 +612,24 @@ public class RigidCollection extends RigidBody {
 		if (!mergeParams.enableUnmergeRelativeMotionCondition.getValue())
 			applyVelocitiesToBodies();
 	}
+	
+	@Override
+	public void advanceVelocities( double dt ) {
+		super.advanceVelocities(dt);
+		applyVelocitiesToBodies();
+	}
+	
+	@Override
+	public void advancePositions( double dt ) {
+		super.advancePositions(dt);
+		updateBodiesPositionAndTransformations();
+	}
+	
+	@Override
+	public void advancePositionsPostStabilization( double dt ) {
+		super.advancePositionsPostStabilization(dt);
+		updateBodiesPositionAndTransformations();
+	}
 
 	/**
 	 * Updates bodies position, orientation, and transformations

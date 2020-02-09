@@ -48,6 +48,9 @@ public class PGS {
 	/** Warm start option */
 	protected boolean warmStart;
 	
+	/** Post stabilization option */
+	protected boolean postStabilization;
+	
 	public void disableWarmStart(){
 		warmStart = false;
 	}
@@ -69,7 +72,13 @@ public class PGS {
 			confidentWarmStart();
 
 		for (Contact contact: contacts) {
-			contact.computeB(dt, feedbackStiffness, computeInCollection, restitutionOverride, restitutionOverrideVal );
+			if(postStabilization) {
+				contact.bn = feedbackStiffness*contact.constraintViolation;
+				contact.bt1 = 0.;
+				contact.bt2 = 0.;
+			} else {
+				contact.computeB(dt, feedbackStiffness, computeInCollection, restitutionOverride, restitutionOverrideVal );
+			}
 			contact.computeJMinvJt(computeInCollection);
 		}
 		

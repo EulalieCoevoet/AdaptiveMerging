@@ -397,6 +397,14 @@ public class RigidBody {
 	}
 	
 	public void advancePositions(double dt) {
+		advancePositions(dt, v, omega);
+	}	
+	
+	public void advancePositionsPostStabilization(double dt) {
+		advancePositions(dt, deltaV.v, deltaV.w);
+	}	
+	
+	public void advancePositions(double dt, Vector3d v, Vector3d omega) {
 		x.scaleAdd( dt, v, x );
 		
 		double t = omega.length()*dt;
