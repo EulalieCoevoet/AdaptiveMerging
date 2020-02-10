@@ -9,11 +9,12 @@ class Composite():
         # Fixed body
         self.body = general.body(root, "composite", name, position, orientation, density=density, velocity=velocity, omega=omega, obj=obj, scale=scale, pinned=pinned, magnetic=magnetic, restitution=restitution, friction=friction, color=color)
 
-    def addSpring(self, positionB="0 0 0", k="100", d="10", body2=None, positionW=None, positionB2=None):
+    def addSpring(self, positionB="0 0 0", k="100", d="10", ls="1", body2=None, positionW=None, positionB2=None):
         spring = ET.SubElement(self.body, 'spring')
         spring.set('pB', positionB)
         spring.set('k', k)
         spring.set('d', d)
+        spring.set('ls', ls)
 
         if (body2!=None and positionB2!=None):
             spring.set('body2', body2)
