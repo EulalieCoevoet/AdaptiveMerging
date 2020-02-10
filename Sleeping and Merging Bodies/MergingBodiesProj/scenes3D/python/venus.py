@@ -52,7 +52,7 @@ for i in range(nbPerles):
 
         if i==nbPerles/4:
             sphere.addSpring(positionB="-0.05 0 0", k="300.", d="100", ls=ls, body2="perle"+str(i-1), positionB2="0.05 3.5 0")
-        else:
+        elif i>0:
             sphere.addSpring(positionB="-0.05 0 0", k="300.", d="100", ls=ls, body2="perle"+str(i-1), positionB2="0.05 0 0")
     else:
         sphere = Composite(root, name="perle"+str(i), obj="data/pendant.obj", position=str(x)+" "+str(y)+" "+str(z), density="1", friction="0.6")

@@ -19,7 +19,6 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.6</friction>
-		<spring body2="perle-1" d="100" k="300." ls="0.5" pB="-0.05 0 0" pB2="0.05 0 0"/>
 	</body>
 	<body density="1" name="perle1" r="1.6" scale="1" type="sphere">
 		<x>4.89439998807 98 -7.21491151282</x>
