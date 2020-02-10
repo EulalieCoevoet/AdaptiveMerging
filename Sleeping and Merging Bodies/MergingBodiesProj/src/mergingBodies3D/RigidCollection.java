@@ -61,13 +61,13 @@ public class RigidCollection extends RigidBody {
 		generateColor();
 	
 		if (body1 instanceof PlaneRigidBody) {
-			copyFrom(body2);
+			set(body2);
 			body2.parent = this;
 			bodies.add(body2);
 			addBody(body1);
 			
 		} else {
-			copyFrom(body1);
+			set(body1);
 			body1.parent = this;
 			bodies.add(body1);
 			addBody(body2);
@@ -91,36 +91,6 @@ public class RigidCollection extends RigidBody {
 			applyVelocitiesTo(body);
 			body.clear();
 		}
-	}
-
-	/**
-	 * Copy velocities of given body
-	 * 
-	 * @param body
-	 */
-	private void copyFrom(RigidBody body) {
-		v.set(body.v);
-		omega.set( body.omega );
-		
-		x.set(body.x);
-		theta.set( body.theta );
-		
-		massLinear = body.massLinear;
-		minv = body.minv;
-		
-		massAngular.set( body.massAngular );
-		massAngular0.set( body.massAngular0 );
-		jinv.set( body.jinv );
-		jinv0.set( body.jinv0 );
-		
-		pinned = body.pinned;
-		sleeping = body.sleeping;
-		canSpin = body.canSpin;
-		spinner = body.spinner;
-		
-		boundingBoxB.clear();
-		for (Point3d point: body.boundingBoxB) 
-			boundingBoxB.add(new Point3d(point));
 	}
 
 	/**
@@ -615,7 +585,7 @@ public class RigidCollection extends RigidBody {
 	
 	@Override
 	public void advanceVelocities( double dt ) {
-		super.advanceVelocities(dt);
+		super.advanceVelocities( dt );		
 		applyVelocitiesToBodies();
 	}
 	

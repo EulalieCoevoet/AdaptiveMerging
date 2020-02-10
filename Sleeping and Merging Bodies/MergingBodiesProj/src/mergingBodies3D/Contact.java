@@ -443,7 +443,8 @@ public class Contact {
         gl.glVertex3d( contactInW.x, contactInW.y, contactInW.z );
         gl.glEnd();
 
-        if(false) {
+        boolean debugDisplay = false;
+        if(debugDisplay) {
 		    gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colText, 0 );
 		    gl.glRasterPos3d( contactInW.x, contactInW.y, contactInW.z );
 			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + info );

@@ -79,7 +79,7 @@ public class BodyPairContact {
 	 * Accumulate criteria for merging
 	 * @param contact
 	 */
-	public void accumulateForMerging(MergeParameters mergeParams) {
+	public void accumulateForMerging(MergeParameters mergeParams, double dt) {
 
 		RigidBody body1 = (this.body1.isInCollection())? this.body1.parent: this.body1;
 		RigidBody body2 = (this.body2.isInCollection())? this.body2.parent: this.body2;
@@ -88,6 +88,8 @@ public class BodyPairContact {
 			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body2));
 		else if (body2.pinned)
 			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1));
+		else if (mergeParams.metricPositionLevel.getValue())
+			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2, dt));
 		else
 			motionMetricHist.add(motionMetricProcessor.getMotionMetric(body1, body2));
 		
@@ -121,13 +123,15 @@ public class BodyPairContact {
 	 * Accumulate motion metric for unmerging
 	 * @param contact
 	 */
-	public void accumulateForUnmerging(MergeParameters mergeParams) {
+	public void accumulateForUnmerging(MergeParameters mergeParams, double dt) {
 		if(body1.isInSameCollection(body2)) {			
 			double metric;
 			if (body1.pinned)
 				metric = motionMetricProcessor.getMotionMetric(body2);
 			else if (body2.pinned)
 				metric = motionMetricProcessor.getMotionMetric(body1);
+			else if (mergeParams.metricPositionLevel.getValue())
+				metric = motionMetricProcessor.getMotionMetric(body1, body2, dt);
 			else
 				metric = motionMetricProcessor.getMotionMetric(body1, body2);
 			

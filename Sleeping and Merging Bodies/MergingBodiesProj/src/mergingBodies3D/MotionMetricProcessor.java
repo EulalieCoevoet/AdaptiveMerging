@@ -8,6 +8,9 @@ import javax.vecmath.Vector3d;
  */
 public class MotionMetricProcessor {	
 	
+	RigidBody body1Advanced = null;
+	RigidBody body2Advanced = null;
+	
 	public double getMotionMetric(RigidBody body1, RigidBody body2) {
 		return getLargestVelocityNorm(body1, body2);
 	}
@@ -16,7 +19,14 @@ public class MotionMetricProcessor {
 		return getLargestVelocityNorm(body);
 	}
 	
+	public double getMotionMetric(RigidBody body1, RigidBody body2, double dt) {
+		body1Advanced = new RigidBody();
+		body2Advanced = new RigidBody();
+		return getLargestVelocityNorm(body1, body2, dt);
+	}
+	
 	private Point3d pW = new Point3d();
+	private Point3d pB = new Point3d();
 	private Vector3d v1 = new Vector3d();
 	private Vector3d v2 = new Vector3d();
 
@@ -60,6 +70,49 @@ public class MotionMetricProcessor {
 			body.getSpatialVelocity(pW, v1);
 			largestVelocityNorm = Math.max( v1.length(), largestVelocityNorm );
 		}
+		return largestVelocityNorm;
+	}
+	
+	private double getLargestVelocityNorm(RigidBody body1, RigidBody body2, double dt) {
+		
+		double largestVelocityNorm = 0;
+		
+		body1Advanced.set(body1);
+		body1Advanced.advancePositions(dt);
+		
+		body2Advanced.set(body2);
+		body2Advanced.advancePositions(dt);
+		
+		for (Point3d point : body1.boundingBoxB) {
+			// point from b1 to b2
+			body1.transformB2W.transform( point, pW );
+			body2.transformB2W.inverseTransform( pW, pB );
+			
+			// advanced point from b2 to b1
+			body2Advanced.transformB2W.transform( pB, pW );
+			body1Advanced.transformB2W.inverseTransform( pW, pB );
+			
+			// effective velocity
+			v1.sub(point,pB);
+			v1.scale(1./dt);
+			largestVelocityNorm = Math.max( v1.length(), largestVelocityNorm );
+		}
+		
+		for (Point3d point : body2.boundingBoxB) {
+			// point from b2 to b1
+			body2.transformB2W.transform( point, pW );
+			body1.transformB2W.inverseTransform( pW, pB );
+
+			// advanced point from b1 to b2
+			body1Advanced.transformB2W.transform( pB, pW );
+			body2Advanced.transformB2W.inverseTransform( pW, pB );
+			
+			// effective velocity
+			v2.sub(point,pB);
+			v2.scale(1./dt);
+			largestVelocityNorm = Math.max( v2.length(), largestVelocityNorm );
+		}
+		
 		return largestVelocityNorm;
 	}
 }

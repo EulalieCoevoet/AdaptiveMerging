@@ -107,8 +107,7 @@ public class RigidBody {
     public Vector3d spinner = new Vector3d();
     /** temporary Spinning Vector for memory optimization ... used in LCPApp.java **/
     public Vector3d tmpSpinner = new Vector3d();
-
-           
+    
     // TODO:  RigidBody improvements... 
     // Use a Vector6d for (v,omega)
     // Update RigidTransform to take theta and x as backing memory, and have rigid body extend RigidTransform so as not to duplicate memory
@@ -119,20 +118,6 @@ public class RigidBody {
         
 	/** Transforms points and vectors in body coordinates to collection coordinates, if in a collection */
 	RigidTransform3D transformB2C = new RigidTransform3D( new Matrix3d(), new Point3d() );
-
-	 // TODO:  Somewhat wasted memory???  
-				
-	///** Transforms points in World coordinates to Body coordinates */
-    //public RigidTransform transformW2B = new RigidTransform();
-    
-	///** Transforms points in collection coordinates to body coordinates, if a collection exists */
-	//RigidTransform transformC2B = new RigidTransform();
-
-//    /**
-//     * inverse orientation (i.e., world to body)  TODO: RIGIDTRANSFORM: we shouldn't be storing this! :(
-//     * This is primarily a temporary working variable!
-//     */
-//    public Matrix3d thetaT = new Matrix3d();
 
 	/**
 	 * list of contacting bodies present with this RigidBody. In case of a collection, the list will contain
@@ -181,9 +166,6 @@ public class RigidBody {
 	 * should be asleep, if true, should be awake
 	 */
 	public ArrayList<Double> metricHistory = new ArrayList<Double>();
-
-	/** keeps track of relative motion */
-	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 
 	/** Empty constructor needed in some special cases... use carefully! */
 	protected RigidBody() {}
@@ -256,6 +238,35 @@ public class RigidBody {
                 
         col = body.col; // this can be shared memory!
     }
+    
+    /**
+	 * Copy given body
+	 * @param body
+	 */
+	public void set(RigidBody body) {
+		v.set(body.v);
+		omega.set( body.omega );
+		
+		x.set(body.x);
+		theta.set( body.theta );
+		
+		massLinear = body.massLinear;
+		minv = body.minv;
+		
+		massAngular.set( body.massAngular );
+		massAngular0.set( body.massAngular0 );
+		jinv.set( body.jinv );
+		jinv0.set( body.jinv0 );
+		
+		pinned = body.pinned;
+		sleeping = body.sleeping;
+		canSpin = body.canSpin;
+		spinner = body.spinner;
+		
+		boundingBoxB.clear();
+		for (Point3d point: body.boundingBoxB) 
+			boundingBoxB.add(new Point3d(point));
+	}
     
 	/**
 	 * Clear deltaV, force and torque

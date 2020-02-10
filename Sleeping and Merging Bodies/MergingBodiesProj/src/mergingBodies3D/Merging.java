@@ -23,9 +23,7 @@ public class Merging {
 	protected ArrayList<RigidBody> bodies;
 	protected CollisionProcessor collision;
 	
-	public class MergeParameters {
-		public MergeParameters() {}
-		
+	public class MergeParameters {		
 		public BooleanParameter enableMerging = new BooleanParameter( "merging", true);
 		public BooleanParameter enableMergePinned = new BooleanParameter( "merging - pinned body", true);
 		public BooleanParameter enableMergeCycleCondition = new BooleanParameter( "merging - check cycle condition", false);
@@ -37,6 +35,7 @@ public class Merging {
 		public BooleanParameter enableUnmergeRelativeMotionCondition = new BooleanParameter( "unmerging - relative motion condition", true);
 		public BooleanParameter updateContactsInCollections = new BooleanParameter( "update contact in collection", true);
 		public BooleanParameter organizeContacts = new BooleanParameter( "organize contacts", true);
+		public BooleanParameter metricPositionLevel = new BooleanParameter( "metric at position level", false);
 		public IntParameter stepAccumMerging = new IntParameter("check threshold over N number of time steps for merging", 3, 0, 200 );
 		public IntParameter stepAccumUnmerging = new IntParameter("check threshold over N number of time steps for unmerging", 3, 0, 200 ); 
 		public IntParameter stepsBetweenMergeEvents = new IntParameter("steps between merge events", 10, 1, 100 );
@@ -175,6 +174,7 @@ public class Merging {
 				removalQueue.add(collection);
 				
 				for (BodyPairContact bpc: collection.bodyPairContacts) {
+					bpc.motionMetricHist.clear();
 					if (!collision.bodyPairContacts.contains(bpc))
 						collision.bodyPairContacts.add(bpc);
 					bpc.inCollection = false;
@@ -434,6 +434,7 @@ public class Merging {
 		vfp.add( params.enableUnmergeRelativeMotionCondition.getControls() );
 		vfp.add( params.updateContactsInCollections.getControls() );
 		vfp.add( params.organizeContacts.getControls() );
+		vfp.add( params.metricPositionLevel.getControls() );
 		vfp.add( params.stepAccumMerging.getSliderControls() );
 		vfp.add( params.stepAccumUnmerging.getSliderControls() );
 		vfp.add( params.stepsBetweenMergeEvents.getSliderControls() );

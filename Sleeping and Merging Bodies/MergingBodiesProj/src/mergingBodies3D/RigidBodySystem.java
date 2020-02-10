@@ -137,7 +137,7 @@ public class RigidBodySystem {
 		for (RigidBody body: bodies) {
 			if (body instanceof RigidCollection)
 				for (BodyPairContact bpc : ((RigidCollection)body).bodyPairContacts) 
-					bpc.accumulateForUnmerging(merging.params);
+					bpc.accumulateForUnmerging(merging.params, dt);
 		}
 
         now = System.nanoTime();   
@@ -165,7 +165,7 @@ public class RigidBodySystem {
 				b.advanceVelocities(dt);
 
 		for (BodyPairContact bpc : collision.bodyPairContacts) 
-			bpc.accumulateForMerging(merging.params);
+			bpc.accumulateForMerging(merging.params, dt);
 		
 		for ( RigidBody b : bodies )
 			if (!b.pinned && !b.sleeping) 
