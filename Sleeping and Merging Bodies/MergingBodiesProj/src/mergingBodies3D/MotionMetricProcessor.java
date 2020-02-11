@@ -7,9 +7,9 @@ import javax.vecmath.Vector3d;
  * This class is used for relative motion's calculations
  */
 public class MotionMetricProcessor {	
-	
-	RigidBody body1Advanced = null;
-	RigidBody body2Advanced = null;
+
+	RigidBody body1Advanced = new RigidBody();
+	RigidBody body2Advanced = new RigidBody();
 	
 	public double getMotionMetric(RigidBody body1, RigidBody body2) {
 		return getLargestVelocityNorm(body1, body2);
@@ -20,8 +20,6 @@ public class MotionMetricProcessor {
 	}
 	
 	public double getMotionMetric(RigidBody body1, RigidBody body2, double dt) {
-		body1Advanced = new RigidBody();
-		body2Advanced = new RigidBody();
 		return getLargestVelocityNorm(body1, body2, dt);
 	}
 	
