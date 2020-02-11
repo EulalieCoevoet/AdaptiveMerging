@@ -103,7 +103,84 @@ public class RigidBodySystem {
         long start = System.nanoTime();      
 		totalSteps++;  
 
-        for ( RigidBody b : bodies ) {
+		clearBodies();
+		animation.apply(dt);
+		if (sleeping.params.wakeAll.getValue()) 
+			sleeping.wakeAll();
+		if (merging.params.unmergeAll.getValue()) 
+			merging.unmergeAll();
+
+		// EXTERNAL FORCES
+		applyExternalForces();
+
+		// CONTACT DETECTION
+		collision.updateContactsMap(); 
+        collision.collisionDetection(dt);
+		collision.updateBodyPairContacts();         
+		
+		long now = System.nanoTime();   
+		collision.warmStart(false); 	
+        warmStartTime = (System.nanoTime() - now) / 1e9;
+        
+		// WAKE
+		sleeping.wake();
+		
+		// SINGLE ITERATION PGS and ACCUMULATION for UNMERGE
+		collision.updateInCollections(dt, merging.params);
+		accumulateForUnmerging(dt);
+
+		// UNMERGE
+        now = System.nanoTime();   
+		merging.unmerge(dt);	
+        
+		if (merging.mergingEvent) {
+			for (RigidBody body: bodies)
+				body.clear();
+			applyExternalForces();
+		}
+        unmergingTime = (System.nanoTime() - now) / 1e9;
+		
+		// FULL LCP SOLVE
+		collision.redoWarmStart(); // we'll need to redo the warm start if the updateInCollections was run and mucked up the warm started values already
+		collision.solveLCP(dt, false);
+		collision.clearBodyPairContacts();
+        
+		// ADVANCE TIME and ACCUMULATE for MERGING
+		advanceBodiesVelocities(dt);
+		accumulateForMerging(dt);
+		advanceBodiesPositions(dt);
+		if (collision.usePostStabilization.getValue()) 
+			postStabilization(dt);
+		
+		// MERGE
+        now = System.nanoTime();   
+        if ( (totalSteps % merging.params.stepsBetweenMergeEvents.getValue()) == 0 )
+        	merging.merge();
+        mergingTime = (System.nanoTime() - now) / 1e9;
+		
+        // SLEEP
+		sleeping.sleep();		
+
+		// MISC
+		applyViscousDecay();
+		
+        computeTime = (System.nanoTime() - start) / 1e9;
+        simulationTime += dt;
+		totalAccumulatedComputeTime += computeTime;
+		
+		if (generateBody)
+			generateBody();
+		
+		timestep += 1;
+		
+		exportDataToFile();
+    }
+    
+    /**
+     * Clear bodies deltaV, forces, and collections' color
+     */
+    public void clearBodies() {
+    	for ( RigidBody b : bodies ) {
             b.clear();
 	        if (b instanceof RigidCollection) {
 	        	RigidCollection collection = (RigidCollection)b;
@@ -114,86 +191,6 @@ public class RigidBodySystem {
 		}
         if (merging.params.changeColors.getValue()) 
     		merging.params.changeColors.setValue(false);
-        
-		applyExternalForces();
-
-		collision.updateContactsMap(); 
-		
-        collision.collisionDetection(dt);
-		collision.updateBodyPairContacts();         
-		
-		long now = System.nanoTime();   
-		collision.warmStart(false); 	
-        warmStartTime = (System.nanoTime() - now) / 1e9;
-
-		if (sleeping.params.wakeAll.getValue()) sleeping.wakeAll();
-		sleeping.wake();
-		
-		if (merging.params.unmergeAll.getValue()) merging.unmergeAll();
-
-        animation.apply(dt);
-		collision.updateInCollections(dt, merging.params);
-		
-		for (RigidBody body: bodies) {
-			if (body instanceof RigidCollection)
-				for (BodyPairContact bpc : ((RigidCollection)body).bodyPairContacts) 
-					bpc.accumulateForUnmerging(merging.params, dt);
-		}
-
-        now = System.nanoTime();   
-		merging.unmerge(dt);	
-        unmergingTime = (System.nanoTime() - now) / 1e9;
-        
-		if (merging.mergingEvent) {
-			for (RigidBody body: bodies)
-				body.clear();
-			applyExternalForces();
-		}
-		
-		// this is the main LCP solve, and we'll need to redo the warm start
-		// if the updateInCollections was run and mucked up the warm started values already
-		
-		collision.redoWarmStart();
-
-		collision.solveLCP(dt, false);
-		collision.clearBodyPairContacts();
-
-        RigidCollection.mergeParams = merging.params;
-        
-		for ( RigidBody b : bodies )
-			if (!b.pinned && !b.sleeping)   
-				b.advanceVelocities(dt);
-
-		for (BodyPairContact bpc : collision.bodyPairContacts) 
-			bpc.accumulateForMerging(merging.params, dt);
-		
-		for ( RigidBody b : bodies )
-			if (!b.pinned && !b.sleeping) 
-				b.advancePositions(dt); 
-		
-		if (collision.usePostStabilization.getValue()) 
-			postStabilization(dt);
-		
-        now = System.nanoTime();   
-        if ( (totalSteps % merging.params.stepsBetweenMergeEvents.getValue()) == 0 )
-        	merging.merge();
-        mergingTime = (System.nanoTime() - now) / 1e9;
-		
-		sleeping.sleep();		
-
-		applyViscousDecay();
-		
-        computeTime = (System.nanoTime() - start) / 1e9;
-        simulationTime += dt;
-		totalAccumulatedComputeTime += computeTime;
-		
-		if (generateBody) {
-			generateBody();
-			generateBody = false;
-		}
-		timestep += 1;
-		
-		exportDataToFile();
     }
     
     /**
@@ -286,6 +283,31 @@ public class RigidBodySystem {
 			s.apply(springStiffnessMod.getValue(), springDampingMod.getValue());
 			
 		}
+	}
+	
+	private void accumulateForUnmerging(double dt) {
+		for (RigidBody body: bodies) {
+			if (body instanceof RigidCollection)
+				for (BodyPairContact bpc : ((RigidCollection)body).bodyPairContacts) 
+					bpc.accumulateForUnmerging(merging.params, dt);
+		}
+	}
+	
+	private void accumulateForMerging(double dt) {
+		for (BodyPairContact bpc : collision.bodyPairContacts) 
+			bpc.accumulateForMerging(merging.params, dt);
+	}
+	
+	private void advanceBodiesVelocities(double dt) {
+		for ( RigidBody b : bodies )
+			if (!b.pinned && !b.sleeping)   
+				b.advanceVelocities(dt);
+	}
+	
+	private void advanceBodiesPositions(double dt) {
+		for ( RigidBody b : bodies )
+			if (!b.pinned && !b.sleeping)   
+				b.advancePositions(dt);
 	}
 	
 	private void postStabilization(double dt) {
@@ -383,15 +405,6 @@ public class RigidBodySystem {
     }
     
     /**
-     * Removes all bodies from the system. Not springs. Used for initializing factory.
-     */
-    public void clearBodies() {
-    	bodies.clear();
-    	RigidBody.nextIndex = 0;
-    	reset();
-    }
-    
-    /**
 	 * Generate a body (called when G is pressed)
 	 */
 	private void generateBody() {
@@ -434,6 +447,8 @@ public class RigidBodySystem {
 		} else {
 			System.err.println("[generateBody] Could not find a body to generate");
 		}
+
+		generateBody = false;
 	}
     
     /**

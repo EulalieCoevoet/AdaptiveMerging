@@ -37,8 +37,6 @@ public class RigidCollection extends RigidBody {
 	
 	MotionMetricProcessor motionMetricProcessor = new MotionMetricProcessor();
 	
-	static MergeParameters mergeParams;
-	
 	// Temp variable
 	/** new center of mass*/
 	private Point3d com = new Point3d(); 
@@ -577,10 +575,7 @@ public class RigidCollection extends RigidBody {
 			return;
 
 		updateBodiesPositionAndTransformations();
-
-		// Advance velocities for internal bodies
-		if (!mergeParams.enableUnmergeRelativeMotionCondition.getValue())
-			applyVelocitiesToBodies();
+		applyVelocitiesToBodies();
 	}
 	
 	@Override
