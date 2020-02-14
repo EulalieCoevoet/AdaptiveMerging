@@ -73,7 +73,6 @@ public class Display {
     private float[] colourSleeping = new float[] { 1, 1, 1, 1 };		        			
 	private float[] colour = new float[] { 0.4f,0.4f,0.4f, 1 };        			
     private float[] red = new float[] { 1, 0, 0, 0.5f };
-    private float[] blue = new float[] { 0, 0, 1, 0.25f };
     
     public void displayNonShadowable( GLAutoDrawable drawable, double dt ) {
     	GL2 gl = drawable.getGL().getGL2();
@@ -205,33 +204,22 @@ public class Display {
 		}  
     		
         gl.glLineWidth(1);
-        gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);
         if ( params.drawBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {
             	if ( b.root == null ) continue; // rigid body planes don't have a BVH
-            	if (!(b instanceof RigidCollection)) {
-            		b.root.boundingSphere.display(drawable);
-            	}
+            	b.root.boundingSphere.display(drawable);
             }
         }
         if ( params.drawAllBoundingVolumes.getValue() ) {
             for ( RigidBody b : bodies ) {
             	if ( b.root == null ) continue; // rigid body planes don't have a BVH
-            	if (!(b instanceof RigidCollection)) {
-            		b.root.display( drawable );
-	            } else {
-            		displayCollectionBV((RigidCollection) b, drawable);
-            	}
+            	b.root.display( drawable );
             }
         }        
         if ( params.drawBoundingVolumesUsed.getValue() ) {
             for ( RigidBody b : bodies ) {
             	if ( b.root == null ) continue; // rigid body planes don't have a BVH
-            	if (!(b instanceof RigidCollection)) {
-            		b.root.displayVisitBoundary( drawable, collisionProcessor.visitID );
-            	} else {
-            		displayVisitBoundaryCollection((RigidCollection) b, drawable);
-            	}
+            	b.root.displayVisitBoundary( drawable, collisionProcessor.visitID );
             }
         }	      		
 		
@@ -265,18 +253,6 @@ public class Display {
         b.display( drawable );
 	}
 
-	private void displayVisitBoundaryCollection(RigidCollection b, GLAutoDrawable drawable) {
-		for (RigidBody body: b.bodies) {
-			body.root.displayVisitBoundary(drawable, collisionProcessor.visitID);
-		}
-	}
-
-	private void displayCollectionBV(RigidCollection b, GLAutoDrawable drawable) {
-		for (RigidBody body: b.bodies) {
-			body.root.display(drawable);
-		}
-	}
-	
 	public void displayIndex(RigidBody body, int index, GLAutoDrawable drawable, int font) {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glColor3f(1, 0, 0);

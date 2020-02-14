@@ -9,6 +9,7 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import mintools.parameters.BooleanParameter;
@@ -111,7 +112,7 @@ public class RigidBodySystem {
 			merging.unmergeAll();
 
 		// EXTERNAL FORCES
-		applyExternalForces();
+		applyExternalForces(dt);
 
 		// CONTACT DETECTION
 		collision.updateContactsMap(); 
@@ -136,7 +137,7 @@ public class RigidBodySystem {
 		if (merging.mergingEvent) {
 			for (RigidBody body: bodies)
 				body.clear();
-			applyExternalForces();
+			applyExternalForces(dt);
 		}
         unmergingTime = (System.nanoTime() - now) / 1e9;
 		
@@ -193,14 +194,41 @@ public class RigidBodySystem {
     		merging.params.changeColors.setValue(false);
     }
     
+	private Vector3d L = new Vector3d();
+	private Matrix3d Lhat = new Matrix3d();
+	private Matrix3d T = new Matrix3d();
+    /**
+     * Add gyroscopic stabilization term to angular mass
+     */
+	protected void gyroscopicStabilization(double dt) {
+		for (RigidBody body: bodies) {
+			if (body.pinned || body.sleeping)
+				continue;
+			
+	    	body.massAngular.transform( body.omega, L ); // angular momentum
+	    	Lhat.m00 = 0.;   Lhat.m01 = -L.z; Lhat.m02 = L.y;
+	    	Lhat.m10 = L.z;  Lhat.m11 = 0.;   Lhat.m12 = -L.x;
+	    	Lhat.m20 = -L.y; Lhat.m21 = L.x;  Lhat.m22 = 0.; 
+	    	Lhat.mul(dt);
+	    	
+	    	// M += dt*dt*Lhat*Minv*Lhat
+	    	T.mul(Lhat, body.jinv);
+	    	T.mul(T, Lhat);
+	    	T.mul(-1.);
+			body.massAngular.add(T);
+		}
+	}
+    
     /**
 	 * Apply gravity, mouse spring and impulse
 	 */
-	protected void applyExternalForces() {
+	protected void applyExternalForces(double dt) {
 		if ( useGravity.getValue() ) {
 			applyGravityForce();
 		}  
+		
 		if ( useCoriolis.getValue() ) {
+			gyroscopicStabilization(dt);
 			applyCoriolis();
 		}
 	

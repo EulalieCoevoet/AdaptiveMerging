@@ -686,15 +686,8 @@ public class CollisionProcessor {
      * @param body2
      */
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
-		if ( body1 instanceof RigidCollection ) {
-			for (RigidBody b: ((RigidCollection) body1).bodies) {
-				narrowPhase(b, body2);
-			}
-		} else if ( body2 instanceof RigidCollection ) {
-			for (RigidBody b: ((RigidCollection) body2).bodies) {
-				narrowPhase(body1, b);
-			}
-		} else if ( body1.geom instanceof RigidBodyGeomComposite ) {
+		
+		if ( body1.geom instanceof RigidBodyGeomComposite ) {
 			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
 			g1.updateBodyPositionsFromParent();
 			for ( RigidBody b : g1.bodies ) {
@@ -706,6 +699,15 @@ public class CollisionProcessor {
 			for ( RigidBody b : g2.bodies ) {
 				narrowPhase( body1, b );
 			}
+		} else if ( body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
+			if (body1.root == null) {
+				BVSphere sphere = new BVSphere(body1);
+				body1.root = new BVNode(sphere);
+			} else if (body2.root == null) {
+				BVSphere sphere = new BVSphere(body2);
+				body2.root = new BVNode(sphere);
+			}
+			collideCollections(body1.root, body2.root, body1, body2);
 		} else if ( body1 instanceof PlaneRigidBody ) {
 			PlaneRigidBody b1 = (PlaneRigidBody) body1;
 			if ( body2 instanceof PlaneRigidBody ) {
@@ -713,24 +715,24 @@ public class CollisionProcessor {
 			} else if ( body2.geom instanceof RigidBodyGeomBox ) { // box plane
 				RigidBodyGeomBox g2 = (RigidBodyGeomBox) body2.geom;
 				BoxPlane.dBoxPlane(body2, g2.size, b1, b1.n, b1.d, contacts, contactPool );
-			} else {  // spheretree plane
+			} else { 
 				collideSphereTreeAndPlane( body2.root, body2, (PlaneRigidBody) body1 ); 
 			}
 		} else if ( body1.geom instanceof RigidBodyGeomBox ) {
 			RigidBodyGeomBox g1 = (RigidBodyGeomBox) body1.geom;
-			if ( body2 instanceof PlaneRigidBody ) { // box plane
+			if ( body2 instanceof PlaneRigidBody ) { 
 				PlaneRigidBody b2 = (PlaneRigidBody) body2;
 				BoxPlane.dBoxPlane(body1, g1.size, b2, b2.n, b2.d, contacts, contactPool );
 			} else if ( body2.geom instanceof RigidBodyGeomBox ) {
 				RigidBodyGeomBox g2 = (RigidBodyGeomBox) body2.geom;
 				BoxBox.dBoxBox(body1,g1.size,body2, g2.size, normal, depth, rc, contacts, contactPool );
-			} else { // box spheretree
+			} else { 
 				collideBoxAndSphereTree( g1, body2.root, body1, body2 );
 			}
 		} else { // all others have a sphere tree
 			if ( body2 instanceof PlaneRigidBody ) {
 				collideSphereTreeAndPlane( body1.root, body1, (PlaneRigidBody) body2 );
-			} else if ( body2.geom instanceof RigidBodyGeomBox ) { // box spheretree
+			} else if ( body2.geom instanceof RigidBodyGeomBox ) {
 				collideBoxAndSphereTree( (RigidBodyGeomBox) body2.geom, body1.root, body2, body1 );
 			} else {
 				collideSphereTrees(body1.root, body2.root, body1, body2);
@@ -746,8 +748,8 @@ public class CollisionProcessor {
      * The visitID is used to tag boundary volumes that are visited in 
      * a given time step.  Marking boundary volume nodes as visited during
      * a time step allows for a visualization of those used, but it can also
-     * be used to more efficiently update the centeres of bounding volumes
-     * (i.e., call a BVNode's updatecW method at most once on any given timestep)
+     * be used to more efficiently update the centers of bounding volumes
+     * (i.e., call a BVNode's updatecW method at most once on any given time step)
      */
     int visitID = 0;
 	
@@ -760,7 +762,7 @@ public class CollisionProcessor {
 		Tuple3d c = node1.boundingSphere.cW;
 		Tuple3d n = planeBody.n;
 		double d = n.x*c.x + n.y*c.y + n.z*c.z + planeBody.d - node1.boundingSphere.r;
-		if ( d < 0 ) {
+		if ( d<0 ) {
 			if ( node1.isLeaf() ) {
 				// create a collision here!
 				
@@ -786,6 +788,15 @@ public class CollisionProcessor {
 		}		
 	}
 	
+	private boolean intersectPlaneSphere(BVNode node1, PlaneRigidBody planeBody) {
+
+		Tuple3d c = node1.boundingSphere.cW;
+		Tuple3d n = planeBody.n;
+		double d = n.x*c.x + n.y*c.y + n.z*c.z + planeBody.d - node1.boundingSphere.r;
+		return d < 0;
+		
+	}
+	
 	private void collideBoxAndSphereTree( RigidBodyGeomBox geom1, BVNode node2, RigidBody body1, RigidBody body2 ) {
 		if ( node2.visitID != visitID ) {
 			node2.visitID = visitID;
@@ -798,6 +809,70 @@ public class CollisionProcessor {
 			}
 		} else { // this is a leaf! we are colliding for real!
 			BoxSphere.dBoxSphere(body1, geom1.size, body2, node2.boundingSphere.cW, node2.boundingSphere.r, contacts, contactPool );
+		}
+	}
+	
+	/**
+	 * Narrow phase for collections, at least one of the two given bodies should be a collection
+	 * @param node1
+	 * @param node2
+	 * @param body1
+	 * @param body2
+	 */
+	private void collideCollections(BVNode node1, BVNode node2, RigidBody body1, RigidBody body2) {
+
+		if (node1.visitID != visitID) {
+			node1.visitID = visitID;
+			if ( !(node1.boundingSphere.body instanceof PlaneRigidBody) )
+					node1.boundingSphere.updatecW();
+		}	
+		if (node2.visitID != visitID) {
+			node2.visitID = visitID;
+			if ( !(node2.boundingSphere.body instanceof PlaneRigidBody) )
+				node2.boundingSphere.updatecW();
+		}
+		
+		boolean intersect = false;
+		if (node1.boundingSphere.body instanceof PlaneRigidBody)
+			intersect = intersectPlaneSphere(node2, (PlaneRigidBody) node1.boundingSphere.body);
+		else if (node2.boundingSphere.body instanceof PlaneRigidBody)
+			intersect = intersectPlaneSphere(node1, (PlaneRigidBody) node2.boundingSphere.body);
+		else 
+			intersect = node1.boundingSphere.intersects(node2.boundingSphere);
+		
+		if ( intersect ) {
+			
+			if ( body1 instanceof RigidCollection && body2 instanceof RigidCollection ) { // both are collections
+				if ( node1.isLeaf() && node2.isLeaf() )
+					narrowPhase(node1.boundingSphere.body, node2.boundingSphere.body);
+				else if ( node1.isLeaf() ) {
+					for ( BVNode child : node2.children ) 
+						collideCollections(node1, child, body1, body2);		
+				} else if ( node2.isLeaf() ) {
+					for ( BVNode child : node1.children ) 
+						collideCollections(child, node2, body1, body2);					
+				} else if ( node1.boundingSphere.r <= node2.boundingSphere.r ) {
+					for ( BVNode child : node2.children ) 
+						collideCollections(node1, child, body1, body2);					
+				} else {
+					for ( BVNode child : node1.children )
+						collideCollections(child, node2, body1, body2);					
+				}
+			} else if ( body1 instanceof RigidCollection ) { // only body1 is a collection
+				if ( node1.isLeaf() ) 
+					narrowPhase(node1.boundingSphere.body, body2);
+				else {
+					for ( BVNode child : node1.children ) 
+						collideCollections(child, node2, body1, body2);					
+				}
+			} else { // only body2 is a collection
+				if ( node2.isLeaf() ) 
+					narrowPhase(body1, node2.boundingSphere.body); // only body2 is a collection
+				else {
+					for ( BVNode child : node2.children )
+						collideCollections(node1, child, body1, body2);					
+				}
+			}
 		}
 	}
 	

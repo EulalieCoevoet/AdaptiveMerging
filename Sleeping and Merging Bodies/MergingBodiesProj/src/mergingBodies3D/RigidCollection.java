@@ -13,8 +13,6 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import mergingBodies3D.Merging.MergeParameters;
-
 /**
  * Adapted from 2D verions... 
  * 
@@ -25,7 +23,7 @@ import mergingBodies3D.Merging.MergeParameters;
  * 
  */
 public class RigidCollection extends RigidBody {
-
+	
 	/** List of RigidBody of the collection */
 	protected ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 	
@@ -42,6 +40,9 @@ public class RigidCollection extends RigidBody {
 	private Point3d com = new Point3d(); 
 	private double totalMassInv = 0; 
 
+	// BVH tmp variable
+	private Point3d center = new Point3d(); // temp geometric center
+	
 	Color color = new Color();
 	
 	/**
@@ -60,16 +61,22 @@ public class RigidCollection extends RigidBody {
 	
 		if (body1 instanceof PlaneRigidBody) {
 			set(body2);
+			initBVNode(body2);
 			body2.parent = this;
 			bodies.add(body2);
 			addBody(body1);
-			
 		} else {
 			set(body1);
+			initBVNode(body1);
 			body1.parent = this;
 			bodies.add(body1);
 			addBody(body2);
 		}
+	}
+	
+	protected void initBVNode(RigidBody body) {
+		BVSphere sphere = new BVSphere(body);
+		root = new BVNode(sphere);
 	}
 	
 	public void generateColor() {
@@ -116,7 +123,9 @@ public class RigidCollection extends RigidBody {
 		body.parent = this;
 		bodies.add(body);
 		updateCollectionState(body);
+		addToBVH(body);
 		addBodyInternalMethod(body);
+		updateBVH(root);
 		
 		updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation(); // TODO: is this really necessary?
@@ -132,7 +141,9 @@ public class RigidCollection extends RigidBody {
 			body.parent = this;
 			this.bodies.add(body);
 			updateCollectionState(body);
+			addToBVH(body);
 			addBodyInternalMethod(body);
+			updateBVH(root);
 		}
 		
 		updateInertiaRestAndInvert();
@@ -141,7 +152,7 @@ public class RigidCollection extends RigidBody {
 	}
 
 	/**
-	 * Adds a collection to the collection
+	 * Adds a collection to the collection, every nodes are in the frame of the current collection
 	 * @param collection collection to add
 	 */
 	public void addCollection(RigidCollection collection) {
@@ -151,11 +162,184 @@ public class RigidCollection extends RigidBody {
 		}
 
 		updateCollectionState(collection);
+		addCollectionToBVH(collection); // must be done before updating collection's center of mass 
 	    addBodyInternalMethod(collection);
-	    
+		updateBVH(root);
+
 	    updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation();
 		updateBodiesTransformations();
+	}
+	
+	// This is messy... maybe there is an easier way to do that
+	private BVNode node = new BVNode();
+	/**
+	 * Merge BVH, every nodes are in the frame of the current collection
+	 * @param collection
+	 */
+	protected void addCollectionToBVH(RigidCollection collection) {
+		// child0 is the old root
+		node.children = new BVNode[2];
+		node.children[0] = root;
+		// child1 is the collection BVH
+		setBVHtoThisCollection(collection.root);
+		node.children[1] = collection.root;
+		
+		root = new BVNode();
+		root.children = new BVNode[2];
+		root.children[0] = node.children[0];
+		root.children[1] = node.children[1];
+		
+		// new node enclosing both BVHs
+		BVSphere sphere = new BVSphere();
+		getEnclosingSphere(sphere, root.children[0], root.children[1]);
+		root.boundingSphere = sphere;
+	}
+
+	/**
+	 * Add body to collection's BVH, exception if body is a plane
+	 * @param body
+	 */
+	protected void addToBVH(RigidBody body) {
+				
+		if (body instanceof PlaneRigidBody) { // add the plane to root node		
+			root.children = new BVNode[2];
+			// child0 is the plane
+			center.set(0.,0.,0.);
+			BVSphere sphere = new BVSphere(center, 0., body);
+			root.children[0] = new BVNode(sphere);
+			// child1 is the current root
+			sphere = new BVSphere(root.boundingSphere, root.boundingSphere.body); // can be a leaf or this
+			root.children[1] = new BVNode(sphere);
+			// new node does not enclose the plane cause it doesn't make any sense
+			sphere = new BVSphere(root.boundingSphere, this);
+			root.boundingSphere = sphere;
+			return;
+		}
+		
+		if(body.root == null) {
+			BVSphere sphere = new BVSphere(body);
+			body.root = new BVNode(sphere);
+		}
+		body.root.boundingSphere.updatecW();
+		
+		addBodyToBVH(root, body);
+	}
+	
+	/**
+	 * Recursive method to add body to collection's BVH
+	 * @param body
+	 */
+	protected void addBodyToBVH(BVNode node, RigidBody body) {
+		if (node.isLeaf()) {
+			node.children = new BVNode[2];
+			// child0 is the new body
+			node.children[0] = body.root;
+			// child1 is the current leaf
+			BVSphere sphere = new BVSphere(node.boundingSphere, node.boundingSphere.body);
+			node.children[1] = new BVNode(sphere);
+			// new node enclosing both bodies
+			sphere = new BVSphere();
+			getEnclosingSphere(sphere, node.children[0], node.children[1]);	
+			node.boundingSphere = sphere;
+		} else {
+			BVSphere sphere  = body.root.boundingSphere;
+			BVSphere sphere0 = node.children[0].boundingSphere;
+			BVSphere sphere1 = node.children[1].boundingSphere;
+
+			sphere0.updatecW(); // find a way to avoid that
+			sphere1.updatecW();
+			
+			if(sphere0.cW.distance(sphere.cW)<sphere1.cW.distance(sphere.cW)) { // is there a better way to decide?
+				addBodyToBVH(node.children[0], body);
+				if(!node.children[0].isLeaf())
+					getEnclosingSphere(node.boundingSphere, node, body.root);	
+			} else {
+				addBodyToBVH(node.children[1], body);
+				if(!node.children[1].isLeaf())
+					getEnclosingSphere(node.boundingSphere, body.root, node);	
+			}
+		}
+	}
+	
+	/**
+	 * Recursive method to get BVH up to date with collection frame
+	 * @param body
+	 */
+	protected void updateBVH(BVNode node) {
+		if (!node.isLeaf()) {
+			node.boundingSphere.body = this;
+			transformB2C.transform(node.boundingSphere.cB);	
+			
+			updateBVH(node.children[0]);
+			updateBVH(node.children[1]);
+		}
+	}
+	
+	/**
+	 * Recursive method to get BVH up to date with collection frame
+	 * @param body
+	 */
+	protected void setBVHtoThisCollection(BVNode node) {
+		if (!node.isLeaf()) {
+			node.boundingSphere.updatecW();
+			node.boundingSphere.body = this;
+			transformB2W.inverseTransform(node.boundingSphere.cW, node.boundingSphere.cB);	
+			
+			setBVHtoThisCollection(node.children[0]);
+			setBVHtoThisCollection(node.children[1]);
+		}
+	}
+	
+	BVSphere tmpsphere = new BVSphere();
+	Vector3d tmpdir = new Vector3d();
+	Vector3d tmp2 = new Vector3d();
+	Vector3d tmp3 = new Vector3d();
+	/**
+	 * Compute sphere enclosing both spheres
+	 * @param sphere
+	 * @param node1
+	 * @param node2
+	 */
+	protected void getEnclosingSphere(BVSphere sphere, BVNode node1, BVNode node2) {		
+		
+		node1.boundingSphere.updatecW(); // find a way to avoid that
+		node2.boundingSphere.updatecW();
+		double dist = node1.boundingSphere.cW.distance(node2.boundingSphere.cW);
+		if (node1.boundingSphere.r+dist < node2.boundingSphere.r) { // sphere1 in sphere2, keep sphere2 is optimal
+			sphere.r = node2.boundingSphere.r;
+			sphere.cW.set(node2.boundingSphere.cW);
+		} else if (node2.boundingSphere.r+dist < node1.boundingSphere.r) { // sphere2 in sphere1, keep sphere1 is optimal
+			sphere.r = node1.boundingSphere.r;
+			sphere.cW.set(node1.boundingSphere.cW);
+		} else {
+			tmpsphere.r = (node1.boundingSphere.r+node2.boundingSphere.r+dist)/2.;
+			
+			// direction
+			tmpdir.set(node1.boundingSphere.cW);
+			tmpdir.sub(node2.boundingSphere.cW);
+			
+			// point1
+			tmp2.set(node1.boundingSphere.cW);
+			tmpdir.normalize();
+			tmpdir.scale(node1.boundingSphere.r);
+			tmp2.add(tmpdir);
+			
+			// point2
+			tmp3.set(node2.boundingSphere.cW);
+			tmpdir.normalize();
+			tmpdir.scale(-node2.boundingSphere.r);
+			tmp3.add(tmpdir);
+			
+			// center
+			tmp3.add(tmp2);
+			tmp3.scale(0.5);
+			sphere.r = tmpsphere.r;
+			sphere.cW.set(tmp3);
+		}		
+		
+		sphere.body = this; // if not leaf, sphere.body is the collection
+		transformB2W.inverseTransform(sphere.cW, sphere.cB);
 	}
 	
 	/**
@@ -174,6 +358,7 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 	
+	private RigidTransform3D tmpTransformB2W = new RigidTransform3D(); // not initialized
 	/**
 	 * Adds a body to the collection (internal method, for factoring purposes).
 	 * 
@@ -181,6 +366,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void addBodyInternalMethod( RigidBody body ) {
 
+		tmpTransformB2W.set( transformB2W ); 
 		updateTheta(body); // computed in world coordinates, is that correct? theta should be the rotations from inertial frame right?
 		
 		if ( pinned ) { 
@@ -207,11 +393,14 @@ public class RigidCollection extends RigidBody {
 			
 			massLinear += body.massLinear; // used in updateInertia, this update should stay here
 			minv = totalMassInv;
+			
 			x.set(com); // finally update com of the new collection
 			// back in collection coordinates
 			for (Point3d point : boundingBoxB)
 				this.transformB2W.inverseTransform(point);
 		}
+
+		transformB2C.multAinvB(transformB2W, tmpTransformB2W); // holds the transformation from the previous collection to the updated one
 	}
 
 	/**
