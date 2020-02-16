@@ -14,7 +14,7 @@ import javax.vecmath.Point3d;
 
 /**
  * Circular disc for collision processing
- * @author kry
+ * 
  */
 public class BVSphere {
 

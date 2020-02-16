@@ -1,0 +1,1573 @@
+<root>
+
+    <body type="composite" name="boat" obj="scenes3D/boat.obj">  
+		<R>1 0 0 -1.57</R>
+    	<x>0 30 -200</x>
+		<body type="box" name="surface " dim="118.470 280.230 7.401" scale="2"> <x>-11.4674 20.491 9.1797</x> </body>
+		<body type="box" name="body1 " dim="102.305 246.845 7.401" scale="2"> <x>-11.4674  20.491 -5.2718</x> </body>
+		<body type="box" name="body2 " dim="98.071 231.493 7.401" scale="2"> <x>-11.4674  20.491 -20.272</x> </body>
+		<body type="box" name="body3 " dim="91.791 218.867 7.401" scale="2"> <x>-11.4674  20.491 -34.666</x> </body>
+		<body type="box" name="body4 " dim="85.627 206.404 7.401" scale="2"> <x>-11.4674  20.491 -49.428</x> </body>
+		<body type="box" name="body5 " dim="75.724 191.133 7.401" scale="2"> <x>-11.4674 20.491 -64.098</x> </body>
+		<body type="box" name="body6 " dim="69.144 180.063 7.401" scale="2"> <x>-11.4674  20.491 -78.071</x> </body>
+		<body type="box" name="body7 " dim="63.789 169.196 7.401" scale="2"> <x>-11.4674  20.491 -91.183</x> </body>
+		<body type="box" name="chimney1 " dim="17.872 24.950 25.763" scale="2"> <x>-11.4674 -170.27 42.037</x> </body>
+		<body type="box" name="chimney2 " dim="28.296 39.645 5.944" scale="2"> <x>-11.4674 -170.27 71.151</x> </body>
+		<body type="box" name="controlroom1 " dim="51.684 28.249 13.046" scale="2"> <x>-11.4674 160.99 28.209</x> </body>
+		<body type="box" name="controlroom2 " dim="51.684 28.249 25.763" scale="2"> <x>-11.4674 217.49 42.129</x> </body>
+		<body type="box" name="controlroom3 " dim="51.684 11.590 13.046" scale="2"> <x>-11.4674 233.55 80.91</x> </body>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		<spring pB="-118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 280 30" controllable="true"> k="100000"</spring>
+		<spring pB="118 -280 30" controllable="true"> k="100000"</spring>
+		<spring pB="-118 -280 30" controllable="true"> k="100000"</spring>
+		
+		
+		
+		
+
+	</body>
+	
+	<body type="box" name="box1 " dim="5 5 5" scale="2"> <x>0 100 4</x> </body>
+	<body type="box" name="box2 " dim="5 5 5" scale="2"> <x>0 110 4</x> </body>
+	<body type="box" name="box3 " dim="5 5 5" scale="2"> <x>0 120 4</x> </body>
+	<body type="box" name="box4 " dim="5 5 5" scale="2"> <x>0 105 4</x> </body>
+	
+
+ 
+</root>

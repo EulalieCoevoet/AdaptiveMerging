@@ -1,5 +1,6 @@
 clear 
 close all
+
 % Put name of scene name having 2 csv files in same directory as this file
 %(one with name "<scene_name>.csv" and the other "<scene_name>_merged.csv")
 scene_name = "funnel1"
@@ -7,6 +8,7 @@ scene_name = "funnel1"
 
 fontSize = 10;
 fontName = 'Times New Roman';
+
 
 plot_name = "Performance With Time for " + scene_name + " Scene"
 X_unmerged = readtable(scene_name + ".csv");
@@ -19,6 +21,7 @@ hfig = figure('Renderer', 'painters', 'Position', [10 10 600 400]), set(gcf,'col
 
 hold;
 
+<<<<<<< HEAD
 h = zeros(4,1);
 
 
@@ -40,6 +43,25 @@ h(4) = plot(X_merged{1:num_timesteps, 3}, 'color',[0.9290 0.6940 0.1250], 'Displ
 
 
 
+=======
+<<<<<<< HEAD
+temp_m = X_merged{1:num_timesteps, 20 } - X_merged{1:num_timesteps, 3}
+temp_um = X_unmerged{1:num_timesteps, 20 } - X_unmerged{1:num_timesteps, 3}
+subplot(3,1,1);
+plot(temp_m, 'DisplayName','Merging (No CD)')
+hold;
+plot(temp_um, 'DisplayName','No Merging (No CD)')
+=======
+temp_m = X_merged{1:num_timesteps, 20 } - X_merged{1:num_timesteps, 3 }
+temp_um = X_unmerged{1:num_timesteps, 20} -X_unmerged{1:num_timesteps, 3}
+
+subplot(3,1,1);
+semilogy(temp_m , 'DisplayName','Merging (no CD)')
+hold;
+semilogy(temp_um, 'DisplayName','No Merging (no CD)')
+>>>>>>> dev
+hold;
+>>>>>>> 5ce675934f6840078e5f4776aa214774348ee27b
 ylabel("Computation Time (s)")
 xlabel("Simulation Timestep")
 set(gca,'yscale','log')
@@ -49,11 +71,25 @@ set(gca, 'fontsize', fontSize, 'fontname', fontName);
 legend(h, 'Location', 'southeast')
 hold off
 
+<<<<<<< HEAD
 subplot(2,1,2);
+=======
+<<<<<<< HEAD
+>>>>>>> 5ce675934f6840078e5f4776aa214774348ee27b
 
 
 hold on
 
+=======
+subplot(3,1,2);
+semilogy(X_merged{1:num_timesteps, 3 } , 'DisplayName','Merging with CD')
+hold;
+semilogy(X_unmerged{1:num_timesteps, 3 }, 'DisplayName','No Merging with CD')
+hold;
+ylabel("Collision Detection Time)")
+
+legend
+>>>>>>> dev
 
 plot(X_unmerged{1:num_timesteps, 2}, 'DisplayName','Contacts no Merging')
 

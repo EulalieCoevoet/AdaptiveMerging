@@ -5,7 +5,6 @@ import javax.vecmath.Color3f;
 
 /**
  * This class extends Color3f to allow features like the generation of a random color
- * @author eulalie
  */
 public class Color extends Color3f {
 

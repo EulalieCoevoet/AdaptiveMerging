@@ -13,7 +13,7 @@ import mintools.swing.VerticalFlowPanel;
 
 /**
  * RigidBody factory for stress testing.
- * @author kry
+ * 
  */
 public class Factory {
     
@@ -110,7 +110,7 @@ public class Factory {
         body.v.x = (2*rand.nextDouble()-1) * linearVelocityScale.getValue();  
         body.v.y =  downVelocity.getValue();
         body.v.z =  (2*rand.nextDouble()-1) * linearVelocityScale.getValue();  
-        body.updateRotationalInertaionFromTransformation();
+        body.updateRotationalInertiaFromTransformation();
         system.add( body );
     }
     

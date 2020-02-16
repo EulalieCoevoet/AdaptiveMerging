@@ -13,7 +13,6 @@ package mergingBodies;
  * Personal note: when using vectors instead of arrays in the recursive function
  * mec, the algo does not work. What's the problem?
  * 
- * Kry - Jan 2011
  * Simplifed slightly, and modified to use vecmath
  */
 
@@ -24,7 +23,6 @@ import javax.vecmath.Vector2d;
 
 /**
  * Algorithm for computing Minimum Enclosing Circle using Welzl's algorithm based on Sunshine's implementation (www.sunshine2k.de)
- * @author kry
  */
 public class MinimumEnclosingCircle {
     
@@ -34,7 +32,6 @@ public class MinimumEnclosingCircle {
         
     /**
      * Container for a circle
-     * @author kry
      */
     public class Circle {
         /** radius */

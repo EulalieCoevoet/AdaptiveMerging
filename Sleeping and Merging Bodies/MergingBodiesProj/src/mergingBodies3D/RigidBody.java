@@ -17,7 +17,7 @@ import mintools.viewer.FancyAxis;
 
 /**
  * Simple 2D rigid body based on image samples
- * @author kry
+ * 
  */
 public class RigidBody {
 
@@ -63,17 +63,17 @@ public class RigidBody {
     // mass properties of the body
 
     /** REST POSE rotational inertia, i.e., when rotation is identity */
-    Matrix3d massAngular0 = new Matrix3d();
+    public Matrix3d massAngular0 = new Matrix3d();
     /** rotational inertia in the current pose */
-    Matrix3d massAngular = new Matrix3d();
+    public Matrix3d massAngular = new Matrix3d();
     /** REST pose inverse of the angular mass, i.e., when rotation is identity, or zero if pinned */
-    Matrix3d jinv0 = new Matrix3d();
+    public Matrix3d jinv0 = new Matrix3d();
     /** inverse of the angular mass, or zero if pinned, for current pose */
-    Matrix3d jinv = new Matrix3d();
+    public Matrix3d jinv = new Matrix3d();
     /** mass of the rigid body */    
-    double massLinear;
+    public double massLinear;
     /** inverse of the linear mass, or zero if pinned */
-    double minv;
+    public double minv;
     
     //////////////////////////
     // Force accumulators, for everything that acts on this body
@@ -157,7 +157,7 @@ public class RigidBody {
 	/** Default restitution coefficient */
 	public double restitution = 0; 
 	
-	public boolean isSleeping = false;
+	public boolean sleeping = false;
 
 	/** true if body is a magnetic */
 	public boolean magnetic = false;
@@ -244,7 +244,7 @@ public class RigidBody {
     		this.boundingBoxB.add( new Point3d(point) );
         // we can share the blocks and boundary blocks...
         // no need to update them as they are in the correct body coordinates already        
-        updateRotationalInertaionFromTransformation();
+        updateRotationalInertiaFromTransformation();
         if ( body.root != null ) {
         	root = new BVNode( body.root, this ); // create a copy
         }
@@ -283,8 +283,8 @@ public class RigidBody {
 	}
 	
 	public void wake() {
-		if (isSleeping) {
-	    	isSleeping = false;
+		if (sleeping) {
+	    	sleeping = false;
 	    	metricHistory.clear();
 	    }
 		
@@ -295,26 +295,15 @@ public class RigidBody {
     /**
      * Updates the rotational inertia and inverse given the current transformation state stored in theta and x
      */
-    public void updateRotationalInertaionFromTransformation() {
-//        transformB2W.set( theta, x );
-//        thetaT.transpose(theta);
-//        tmp.scale(-1,x);
-//        thetaT.transform(tmp);
-//        transformW2B.set( thetaT, tmp );
-
+    public void updateRotationalInertiaFromTransformation() {
         // might be done more often than necessary, but need to have 
         // rotational inertia updated give we are storing information in a 
         // world aligned frame... note that the non-inverted angular inertia
         // used for energy computation and for the corriollis force (disabled)
         // also used by composite bodies at the time of their creation 
         if ( ! pinned ) {
-//	        massAngular.mul( theta, massAngular0 );
-//	        thetaT.transpose(theta);
-//	        massAngular.mul( thetaT );
-//	        jinv.mul( theta, jinv0 );
-//	        jinv.mul( thetaT );
-	        transformB2W.computeRJinv0RT(massAngular0, massAngular); // needed for corriolis, and merging
-        	transformB2W.computeRJinv0RT(jinv0, jinv);
+	        transformB2W.computeRM0RT(massAngular0, massAngular); // needed for corriolis, and merging
+        	transformB2W.computeRM0RT(jinv0, jinv);
         } 
     }
     
@@ -351,7 +340,7 @@ public class RigidBody {
      * @param dt step size
      */
     public void advanceTime( double dt ) {
-        if ( !pinned && !isSleeping) {   
+        if ( !pinned && !sleeping) {   
 			advanceVelocities(dt);
 			advancePositions(dt);
         }        
@@ -419,7 +408,7 @@ public class RigidBody {
         	theta.normalizeCP( dR ); // keep it clean!
         }
 		
-        updateRotationalInertaionFromTransformation();
+        updateRotationalInertiaFromTransformation();
 	}	
 
     /**
@@ -434,11 +423,11 @@ public class RigidBody {
     /** 
      * Computes the velocity of the provided point provided in world coordinates due
      * to motion of this body.   
-     * @param contactPointW
+     * @param pointW
      * @param result the velocity
      */
-    public void getSpatialVelocity( Point3d contactPointW, Vector3d result ) {
-    	tmp.sub( contactPointW, x );
+    public void getSpatialVelocity( Point3d pointW, Vector3d result ) {
+    	tmp.sub( pointW, x );
         result.cross( omega, tmp );
         result.add( v );
     }
@@ -544,7 +533,7 @@ public class RigidBody {
         jinv.set( jinv0 );       
         v.set(v0);
         omega.set(omega0);
-        updateRotationalInertaionFromTransformation();
+        updateRotationalInertiaFromTransformation();
         
         metricHistory.clear();
     }

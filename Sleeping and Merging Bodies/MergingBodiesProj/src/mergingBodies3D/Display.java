@@ -125,7 +125,7 @@ public class Display {
 			}
 		}
 		
-		// TODO: eulalie: do we need to keep that?
+		// TODO: do we need to keep that?
 		/*if ( params.drawSpeedCOMs.getValue() ) {
 			for (RigidBody b: bodies) {
 				b.displaySpeedCOM(drawable);
@@ -245,7 +245,7 @@ public class Display {
 	private void drawBody(GLAutoDrawable drawable, RigidBody b) {
 		GL2 gl = drawable.getGL().getGL2();
 		
-		boolean sleeping = (b.isInCollection())? b.parent.isSleeping: b.isSleeping;
+		boolean sleeping = (b.isInCollection())? b.parent.sleeping: b.sleeping;
 		boolean pinned = (b.isInCollection() && params.drawCollections.getValue() && !params.drawSleeping.getValue())? b.parent.pinned : b.pinned;
 		float[] bodyCol = (b.isInCollection() && params.drawCollections.getValue())? b.parent.col: b.col;
 		

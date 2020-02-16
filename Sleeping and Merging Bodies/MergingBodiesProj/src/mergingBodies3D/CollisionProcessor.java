@@ -24,7 +24,7 @@ import mintools.swing.VerticalFlowPanel;
 
 /**
  * Class for detecting and resolving collisions.  Currently this class uses penalty forces between rigid bodies.
- * @author kry
+ * 
  */
 public class CollisionProcessor {
 
@@ -165,7 +165,7 @@ public class CollisionProcessor {
 	 */
 	private void storeInBodyPairContacts(Contact contact) {
 
-		// eulalie : I think this will never happen as we don't detect collision between two pinned bodies
+		// TODO : I think this will never happen as we don't detect collision between two pinned bodies
 		if (contact.body1.pinned && contact.body2.pinned) 
 			return;
 		
@@ -259,7 +259,7 @@ public class CollisionProcessor {
 			solver.contacts.addAll(contacts);
 			
 			for (RigidBody body : bodies) {
-				if (body instanceof RigidCollection && !body.isSleeping) {
+				if (body instanceof RigidCollection && !body.sleeping) {
 					RigidCollection collection = (RigidCollection)body;
 					solver.contacts.addAll(collection.internalContacts);
 				}
@@ -282,7 +282,7 @@ public class CollisionProcessor {
 		singleItPGSTime = ( System.nanoTime() - now2 ) * 1e-9;
 		
 		for (RigidBody body : bodies) {
-			if (body instanceof RigidCollection && !body.isSleeping) {
+			if (body instanceof RigidCollection && !body.sleeping) {
 				RigidCollection collection = (RigidCollection)body;
 			
 				// Update the bodies velocities for the unmerge condition (relative motion)
@@ -392,7 +392,7 @@ public class CollisionProcessor {
 
 		// add missing bpc from collections (non-connected to the new contacts)
 		for (RigidBody body : bodies) {
-			if (body instanceof RigidCollection && !body.isSleeping) {
+			if (body instanceof RigidCollection && !body.sleeping) {
 				RigidCollection collection = (RigidCollection)body;
 				for ( BodyPairContact bpc : collection.bodyPairContacts ) {
 					if (!bpc.checked) {
@@ -662,7 +662,7 @@ public class CollisionProcessor {
         	for ( int j = i+1; j < N; j++ ) {
         		RigidBody b2 = bodies.get( j );
                 if ( b1.pinned && b2.pinned ) continue;
-                if ( (b1.pinned && b2.isSleeping) || (b2.pinned && b1.isSleeping) ) continue;
+                if ( (b1.pinned && b2.sleeping) || (b2.pinned && b1.sleeping) ) continue;
                 narrowPhase( b1, b2 );                
         	}
         }    
@@ -863,10 +863,14 @@ public class CollisionProcessor {
     private void processCollision( RigidBody body1, BVSphere bv1, RigidBody body2, BVSphere bv2 ) {        
         double distance = bv1.cW.distance( bv2.cW );
         double distanceBetweenCenters = bv2.r + bv1.r;
+        
         if ( distance < distanceBetweenCenters ) {
             // contact point at halfway between points 
             // NOTE: this assumes that the two blocks have the same radius!
-            contactW.interpolate( bv1.cW, bv2.cW, .5 );
+        	
+        	double alpha = (bv1.r - bv2.r + distance)/(2*distance);
+        	
+            contactW.interpolate( bv1.cW, bv2.cW, alpha );
             // contact normal
             normal.sub( bv2.cW, bv1.cW );
             normal.normalize();

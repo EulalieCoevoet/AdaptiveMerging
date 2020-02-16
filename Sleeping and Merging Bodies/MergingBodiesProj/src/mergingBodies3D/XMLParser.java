@@ -297,7 +297,7 @@ public class XMLParser {
 		body.x.add( com );
 		body.x0.add( com );
 
-		body.updateRotationalInertaionFromTransformation();
+		body.updateRotationalInertiaFromTransformation();
 		body.geom = compositeGeom;
 		body.name = name;
 		
@@ -373,7 +373,7 @@ public class XMLParser {
 		bbB.add( new Point3d(  s.x,  s.y,  s.z ) );		
 		RigidBody body = new RigidBody(massLinear, angularMass, false, bbB );
 		setCommonAttributes( body, eElement );
-		body.updateRotationalInertaionFromTransformation();
+		body.updateRotationalInertiaFromTransformation();
         body.geom = geom;	        
         body.radius = s.length();
         
@@ -540,13 +540,13 @@ public class XMLParser {
 			if ( tag.equalsIgnoreCase("x") ) {
 				body.x.set( t3d( values ) );
 				body.x0.set( body.x );
-				body.updateRotationalInertaionFromTransformation();
+				body.updateRotationalInertiaFromTransformation();
 			} else if ( tag.equalsIgnoreCase("R") ) {
 				AxisAngle4d aa = new AxisAngle4d();
 				aa.set( asDoubles(values) );
 				body.theta.set( aa );
 				body.theta0.set( aa );
-				body.updateRotationalInertaionFromTransformation();
+				body.updateRotationalInertiaFromTransformation();
 			} else if ( tag.equalsIgnoreCase("v") ) {
 				body.v.set( t3d( values ) );
 				body.v0.set( body.v );
@@ -586,7 +586,7 @@ public class XMLParser {
 					Point3d pB2 = new Point3d( t3d( e.getAttribute("pB2") ) );
 					String b2name = e.getAttribute("body2");
 					for(RigidBody b: system.bodies) {
-						if (b.name.equals(b2name)) { // TODO: eulalie: spring should stand alone?
+						if (b.name.equals(b2name)) { // TODO: spring should stand alone?
 							s = new Spring( pB1, body, pB2, b );
 							break;
 						}
@@ -601,6 +601,8 @@ public class XMLParser {
 					if ( !k.isEmpty() ) s.k = Double.parseDouble( k );
 					String d = e.getAttribute("d");
 					if ( !d.isEmpty() ) s.d = Double.parseDouble( d );
+					String ls = e.getAttribute("ls");
+					if ( !ls.isEmpty() ) s.ls = Double.parseDouble( ls );
 					String controllable = e.getAttribute("controllable");
 					s.controllable = Boolean.parseBoolean(controllable);
 					if (s.controllable) {

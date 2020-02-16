@@ -7,7 +7,6 @@ import javax.vecmath.Vector2d;
 
 /**
  * 2D rigid transformation
- * @author kry
  */
 public class RigidTransform {
 

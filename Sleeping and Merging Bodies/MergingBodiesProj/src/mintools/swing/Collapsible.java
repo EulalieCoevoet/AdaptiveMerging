@@ -26,7 +26,7 @@ package mintools.swing;
 
 /**
  * Interface for collapsible UI elements
- * @author kry
+ * 
  */
 public interface Collapsible
 {

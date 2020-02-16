@@ -25,7 +25,7 @@ import mintools.viewer.SceneGraphNode;
 
 /**
  * This is a quick test of a port of the box box collision detection of a java port of ODE, now working!
- * @author kry
+ * 
  */
 public class TestBoxBoxCollisionApp implements SceneGraphNode{
 
@@ -98,9 +98,9 @@ public class TestBoxBoxCollisionApp implements SceneGraphNode{
 		b2.theta.set( R2 );
 		b2.x.set( p2 );
 		
-		b1.updateRotationalInertaionFromTransformation();
-		b1e.updateRotationalInertaionFromTransformation();
-		b2.updateRotationalInertaionFromTransformation();
+		b1.updateRotationalInertiaFromTransformation();
+		b1e.updateRotationalInertiaFromTransformation();
+		b2.updateRotationalInertiaFromTransformation();
 
 		contacts.clear();
 		pool.swapPools();

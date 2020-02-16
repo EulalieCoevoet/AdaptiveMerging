@@ -1,172 +1,194 @@
 <?xml version="1.0" ?>
 <root>
-	<body n="0. 1. 0.0" name="plane" p="0 0 0" type="plane"/>
-	<system mouseSpringDamping="0.021" mouseSpringStiffness="1."/>
-	<body density="1" name="venus" obj="data/scaledtorso10.obj" scale="1" st="data/torso_flux.sph" type="mesh">
-		<x>0 5 0</x>
+	<body n="0. 1. 0.0" name="plane" p="0 2 0" type="plane"/>
+	<system mouseSpringDamping="50" mouseSpringStiffness="100."/>
+	<body density="0.1" name="venus" obj="data/scaledtorso10.obj" scale="10" st="data/torso_flux.sph" type="mesh">
+		<x>0 50 0</x>
 		<R>-1 0 0 1.57</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
-		<pinned>false</pinned>
+		<pinned>true</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring d="10" k="100" pB="-1 0 1"/>
-		<spring d="10" k="100" pB="1 0 1"/>
-		<spring d="10" k="100" pB="-1 0 -1"/>
-		<spring d="10" k="100" pB="1 0 -1"/>
-		<spring d="10" k="100" pB="-1 1 1"/>
-		<spring d="10" k="100" pB="1 1 1"/>
-		<spring d="10" k="100" pB="-1 1 -1"/>
-		<spring d="10" k="100" pB="1 1 -1"/>
+		<friction>0.8</friction>
 	</body>
-	<body density="1" name="perle0" r="0.1" scale="1" type="sphere">
-		<x>0.456772728821 10.2 0.203368321538</x>
+	<body density="1" name="perle0" r="1.6" scale="1" type="sphere">
+		<x>6.45723358707 98 7.07818128993</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
+		<friction>0.8</friction>
 	</body>
-	<body density="1" name="perle1" r="0.1" scale="1" type="sphere">
-		<x>0.334565303179 10.2 0.371572412739</x>
+	<body density="1" name="perle1" r="1.6" scale="1" type="sphere">
+		<x>4.89439998807 98 9.78508848718</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle0" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle0" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle2" r="0.1" scale="1" type="sphere">
-		<x>0.154508497187 10.2 0.475528258148</x>
+	<body density="1" name="perle2" r="1.6" scale="1" type="sphere">
+		<x>2.5 98 11.7942286341</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle1" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle1" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle3" r="0.1" scale="1" type="sphere">
-		<x>-0.0522642316338 10.2 0.497260947684</x>
+	<body density="1" name="perle3" r="1.6" scale="1" type="sphere">
+		<x>-0.437166400998 98 12.8632697771</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle2" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle2" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle4" r="0.1" scale="1" type="sphere">
-		<x>-0.25 10.2 0.433012701892</x>
+	<body density="1" name="perle4" r="1.6" scale="1" type="sphere">
+		<x>-3.562833599 98 12.8632697771</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle3" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle3" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle5" r="0.1" scale="1" type="sphere">
-		<x>-0.404508497187 10.2 0.293892626146</x>
+	<body density="1" name="perle5" r="1.6" scale="1" type="sphere">
+		<x>-6.5 98 11.7942286341</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle4" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle4" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle6" r="0.1" scale="1" type="sphere">
-		<x>-0.489073800367 10.2 0.103955845409</x>
+	<body density="1" name="perle6" r="1.6" scale="1" type="sphere">
+		<x>-8.89439998807 98 9.78508848718</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle5" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle5" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle7" r="0.1" scale="1" type="sphere">
-		<x>-0.489073800367 10.2 -0.103955845409</x>
+	<body density="1" name="perle7" r="1.6" scale="1" type="sphere">
+		<x>-10.4572335871 98 7.07818128993</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle6" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle6" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle8" r="0.1" scale="1" type="sphere">
-		<x>-0.404508497187 10.2 -0.293892626146</x>
+	<body density="1" name="perle8" r="1.6" scale="1" type="sphere">
+		<x>-11.0 98 4.0</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle7" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle7" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle9" r="0.1" scale="1" type="sphere">
-		<x>-0.25 10.2 -0.433012701892</x>
+	<body density="1" name="perle9" r="1.6" scale="1" type="sphere">
+		<x>-10.4572335871 98 0.921818710069</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle8" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle8" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle10" r="0.1" scale="1" type="sphere">
-		<x>-0.0522642316338 10.2 -0.497260947684</x>
+	<body density="1" name="perle10" r="1.6" scale="1" type="sphere">
+		<x>-8.89439998807 98 -1.78508848718</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle9" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle9" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle11" r="0.1" scale="1" type="sphere">
-		<x>0.154508497187 10.2 -0.475528258148</x>
+	<body density="1" name="perle11" r="1.6" scale="1" type="sphere">
+		<x>-6.5 98 -3.79422863406</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle10" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle10" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle12" r="0.1" scale="1" type="sphere">
-		<x>0.334565303179 10.2 -0.371572412739</x>
+	<body density="1" name="perle12" r="1.6" scale="1" type="sphere">
+		<x>-3.562833599 98 -4.86326977711</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle11" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle11" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle13" r="0.1" scale="1" type="sphere">
-		<x>0.456772728821 10.2 -0.203368321538</x>
+	<body density="1" name="perle13" r="1.6" scale="1" type="sphere">
+		<x>-0.437166400998 98 -4.86326977711</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle12" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle12" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
 	</body>
-	<body density="1" name="perle14" r="0.1" scale="1" type="sphere">
-		<x>0.5 10.2 -5.66553889765e-16</x>
+	<body density="1" name="perle14" r="1.6" scale="1" type="sphere">
+		<x>2.5 98 -3.79422863406</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
-		<friction>1.</friction>
-		<spring body2="perle13" d="0.021" k="1." pB="0.08 0 0" pB2="-0.08 0 0"/>
-		<spring body2="perle0" d="0.021" k="1." pB="-0.08 0 0" pB2="0.08 0 0"/>
+		<friction>0.8</friction>
+		<spring body2="perle13" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
+	</body>
+	<body density="1" name="perle15" r="1.6" scale="1" type="sphere">
+		<x>4.89439998807 98 -1.78508848718</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.8</friction>
+		<spring body2="perle14" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
+	</body>
+	<body density="1" name="perle16" r="1.6" scale="1" type="sphere">
+		<x>6.45723358707 98 0.921818710069</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.8</friction>
+		<spring body2="perle15" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
+	</body>
+	<body density="1" name="perle17" r="1.6" scale="1" type="sphere">
+		<x>7.0 98 4.0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.8</friction>
+		<spring body2="perle16" d="100" k="300." ls="0.4" pB="0.8 0 0" pB2="-0.8 0 0"/>
+		<spring body2="perle0" d="100" k="300." ls="0.4" pB="-0.8 0 0" pB2="0.8 0 0"/>
 	</body>
 </root>

@@ -33,7 +33,7 @@ import javax.swing.SwingConstants;
  * Note that although this is based off the old JoglGraphics ControlFrame, 
  * it doesn't have the same exception throwing bad behaviour. 
  * 
- * @author kry
+ * 
  */
 public class ControlFrame {
 

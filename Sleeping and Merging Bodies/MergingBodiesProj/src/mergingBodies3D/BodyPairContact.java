@@ -144,18 +144,14 @@ public class BodyPairContact {
 	 * @return
 	 */
 	protected boolean checkMergeCondition(MergeParameters mergeParams, boolean checkCycle) {
-
-		long now;
 		
-		if (body1.isSleeping && body2.isSleeping) 
+		if (body1.sleeping && body2.sleeping) 
 			return true;
 
-		now = System.nanoTime();
 		if (mergeParams.enableMergeLetItBreathe.getValue())
 			for (Contact contact: contactList)
 				if (Math.abs(contact.prevConstraintViolation - contact.constraintViolation)>mergeParams.thresholdBreath.getValue()) 
 					return false;
-		mergeParams.mergingCheckViolationTime += (System.nanoTime() - now) / 1e9;
 		
 		if (!mergeParams.enableMergePinned.getValue() && (body1.pinned || body2.pinned)) 
 			return false;
@@ -163,20 +159,14 @@ public class BodyPairContact {
 		if (body1.isInSameCollection(body2)) 
 			return false;
 		
-		now = System.nanoTime();
 		if (!checkMotionMetricForMerging(mergeParams))
 			return false;
-		mergeParams.mergingCheckMotionTime += (System.nanoTime() - now) / 1e9;
 
-		now = System.nanoTime();
 		if (mergeParams.enableMergeStableContactCondition.getValue() && !areContactsStable(mergeParams))
 			return false;
-		mergeParams.mergingCheckContactTime += (System.nanoTime() - now) / 1e9;
 		
-		now = System.nanoTime();   
 		if (mergeParams.enableMergeCycleCondition.getValue() && checkCycle && !checkContactsCycle(mergeParams))
 			return false;
-		mergeParams.mergingCheckCycleTime += (System.nanoTime() - now) / 1e9;
 			
 		return true;
 	}
@@ -259,20 +249,14 @@ public class BodyPairContact {
 	 */
 	public boolean checkContactsState(double dt, MergeParameters mergeParams) {		
 				
-		long now = System.nanoTime();
-
 		for (Contact contact : contactList) { 
-			if (contact.state == ContactState.BROKEN && mergeParams.enableUnmergeNormalCondition.getValue()) {
-				mergeParams.unmergingCheckContactTime += (System.nanoTime() - now) / 1e9;
+			if (contact.state == ContactState.BROKEN && mergeParams.enableUnmergeNormalCondition.getValue()) 
 				return true; // rule 1. if one contact has broken
-			}
-			if (contact.state == ContactState.ONEDGE && mergeParams.enableUnmergeFrictionCondition.getValue()) {
-				mergeParams.unmergingCheckContactTime += (System.nanoTime() - now) / 1e9;
+			
+			if (contact.state == ContactState.ONEDGE && mergeParams.enableUnmergeFrictionCondition.getValue()) 
 				return true; // rule 2. if one contact is on the edge of friction cone
-			}
 		}
 
-		mergeParams.unmergingCheckContactTime += (System.nanoTime() - now) / 1e9;
 		return false;
 	}
 	
