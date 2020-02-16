@@ -1,16 +1,16 @@
 clear 
 close all
-scene_name = "funnel1_merged"
+scene_name = "chariot_merged"
+
+fontSize = 10
+fontName = 'Times New Roman'
+
 plot_name = "Performance With Time for " + scene_name + " Scene"
 X_merged = readtable(scene_name + ".csv")
-
 num_timesteps = min(height(X_merged))
 
-hfig = figure('Renderer', 'painters', 'Position', [10 10 600 400]), set(gcf,'color','w'); hold on;
-
-
-
-subplot(2,1,1);
+hfig = figure('Renderer', 'painters', 'Position', [10 10 600 400]), set(gcf,'color','w'); 
+subplot(2, 1, 1)
 hold on
 plot(X_merged{1:num_timesteps, 20 }, 'DisplayName','Full LCP Solve')
 
@@ -21,32 +21,36 @@ plot(X_merged{1:num_timesteps, 6 }, 'DisplayName','Single Iteration PGS')
 plot(X_merged{1:num_timesteps, 9 }, 'DisplayName','Merging')
 
 plot(X_merged{1:num_timesteps, 15 }, 'DisplayName','Unmerging')
+set(gca, 'YTick', [10.^-6 10.^-4 10^-2 ])
 set(gca,'yscale','log')
+set(gca, 'fontsize', fontSize, 'fontname', fontName);
 
 hold off
+xlabel("Timestep")
 legend
-ylabel("Time (s)")
+ylabel("Computation Time (s)")
 
+subplot(2, 1, 2)
+%hfig2 = figure('Renderer', 'painters', 'Position', [10 10 600 200]), set(gcf,'color','w'); 
+hold on;
 
-
-subplot(2,1,2);
-
-plot(X_merged{1:num_timesteps, 1}, 'DisplayName','# Bodies')
-hold
-plot(X_merged{1:num_timesteps, 2}, 'DisplayName','# Contacts')
-
+X_merged{1:num_timesteps,1}(X_merged{1:num_timesteps,1}==0) = 1;
+plot(X_merged{1:num_timesteps, 1}, 'DisplayName','Bodies')
+plot(X_merged{1:num_timesteps, 2}, 'DisplayName','Contacts')
+xlabel("Timestep")
+ylabel("Number")
 legend
 set(gca,'yscale','log')
+set(gca, 'fontsize', fontSize, 'fontname', fontName);
+hold off;
 
 
-
-hold off
-
-fontSize = 10;
-fontName = 'Times New Roman';
-
-set(gca, 'fontsize', fontSize);
 set(hfig,'Units','Inches');
 pos = get(hfig,'Position');
-set(hfig,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-print(hfig,scene_name,'-dpdf','-r0')
+set(hfig,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
+print(hfig,scene_name,'-dpdf','-r0');
+
+set(hfig2,'Units','Inches');
+pos = get(hfig2,'Position');
+set(hfig2,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+print(hfig2,scene_name + '2','-dpdf','-r0')
