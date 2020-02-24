@@ -206,13 +206,13 @@ public class RigidCollection extends RigidBody {
 			root.children = new BVNode[2];
 			// child0 is the plane
 			center.set(0.,0.,0.);
-			BVSphere sphere = new BVSphere(center, 0., body);
+			BVSphere sphere = new BVSphere(center, Double.MAX_VALUE, body);
 			root.children[0] = new BVNode(sphere);
 			// child1 is the current root
 			sphere = new BVSphere(root.boundingSphere, root.boundingSphere.body); // can be a leaf or this
 			root.children[1] = new BVNode(sphere);
 			// new node does not enclose the plane cause it doesn't make any sense
-			sphere = new BVSphere(root.boundingSphere, this);
+			sphere = new BVSphere(center, Double.MAX_VALUE, this);
 			root.boundingSphere = sphere;
 			return;
 		}
@@ -224,6 +224,27 @@ public class RigidCollection extends RigidBody {
 		body.root.boundingSphere.updatecW();
 		
 		addBodyToBVH(root, body);
+	}
+	
+	/**
+	 * Remove body to collection's BVH
+	 * @param body
+	 */
+	protected void removeFromBVH(BVNode node, RigidBody body) {	
+		if (!node.isLeaf()) {
+			if (node.children[0].boundingSphere.body.equals(body)) {
+				node.boundingSphere = node.children[1].boundingSphere;
+				node.children = node.children[1].children;
+			} 
+			else if (node.children[1].boundingSphere.body.equals(body)) {
+				node.boundingSphere = node.children[0].boundingSphere;
+				node.children = node.children[0].children;
+			} 
+			else {
+				removeFromBVH(node.children[0], body);
+				removeFromBVH(node.children[1], body);
+			}
+		}
 	}
 	
 	/**
@@ -277,7 +298,7 @@ public class RigidCollection extends RigidBody {
 	}
 	
 	/**
-	 * Recursive method to get BVH up to date with collection frame
+	 * Recursive method to set an existing BVH to the BVH of the collection
 	 * @param body
 	 */
 	protected void setBVHtoThisCollection(BVNode node) {
@@ -840,6 +861,7 @@ public class RigidCollection extends RigidBody {
 			return;
 		} else {
 			applyVelocitiesTo(body);
+			removeFromBVH(root, body);
 			body.deltaV.setZero();
 			body.parent = null;
 		}

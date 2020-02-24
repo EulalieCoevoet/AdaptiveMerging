@@ -37,6 +37,21 @@ public class BVNode {
      * @param n
      * @param body
      */
+    public BVNode( BVNode n ) {
+    	boundingSphere = new BVSphere( n.boundingSphere, n.boundingSphere.body );
+    	if ( n.children != null ) {
+    		children = new BVNode[n.children.length];
+    		for ( int i = 0; i < n.children.length; i++ ) {
+    			children[i] = new BVNode( n.children[i] );
+    		}
+    	}
+    }
+    
+    /** 
+     * Copies the subtree and sets the given body as the associated rigid body.
+     * @param n
+     * @param body
+     */
     public BVNode( BVNode n, RigidBody body ) {
     	boundingSphere = new BVSphere( n.boundingSphere, body );
     	if ( n.children != null ) {
