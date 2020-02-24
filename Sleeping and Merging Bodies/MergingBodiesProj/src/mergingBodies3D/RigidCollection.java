@@ -39,9 +39,6 @@ public class RigidCollection extends RigidBody {
 	/** new center of mass*/
 	private Point3d com = new Point3d(); 
 	private double totalMassInv = 0; 
-
-	// BVH tmp variable
-	private Point3d center = new Point3d(); // temp geometric center
 	
 	Color color = new Color();
 	
@@ -75,8 +72,12 @@ public class RigidCollection extends RigidBody {
 	}
 	
 	protected void initBVNode(RigidBody body) {
-		BVSphere sphere = new BVSphere(body);
-		root = new BVNode(sphere);
+		if(body.root == null) {
+			BVSphere sphere = new BVSphere(body);
+			body.root = new BVNode(sphere);
+		}
+		
+		root = body.root;
 	}
 	
 	public void generateColor() {
@@ -123,7 +124,7 @@ public class RigidCollection extends RigidBody {
 		body.parent = this;
 		bodies.add(body);
 		updateCollectionState(body);
-		addToBVH(body);
+		addBodyToBVH(body);
 		addBodyInternalMethod(body);
 		updateBVH(root);
 		
@@ -141,7 +142,7 @@ public class RigidCollection extends RigidBody {
 			body.parent = this;
 			this.bodies.add(body);
 			updateCollectionState(body);
-			addToBVH(body);
+			addBodyToBVH(body);
 			addBodyInternalMethod(body);
 			updateBVH(root);
 		}
@@ -171,66 +172,118 @@ public class RigidCollection extends RigidBody {
 		updateBodiesTransformations();
 	}
 	
-	// This is messy... maybe there is an easier way to do that
-	private BVNode node = new BVNode();
 	/**
 	 * Merge BVH, every nodes are in the frame of the current collection
 	 * @param collection
 	 */
 	protected void addCollectionToBVH(RigidCollection collection) {
-		// child0 is the old root
-		node.children = new BVNode[2];
-		node.children[0] = root;
-		// child1 is the collection BVH
+
 		setBVHtoThisCollection(collection.root);
-		node.children[1] = collection.root;
-		
-		root = new BVNode();
-		root.children = new BVNode[2];
-		root.children[0] = node.children[0];
-		root.children[1] = node.children[1];
-		
-		// new node enclosing both BVHs
-		BVSphere sphere = new BVSphere();
-		getEnclosingSphere(sphere, root.children[0], root.children[1]);
-		root.boundingSphere = sphere;
+		moveNodeDown(null, 0, root, collection);
 	}
 
 	/**
 	 * Add body to collection's BVH, exception if body is a plane
 	 * @param body
 	 */
-	protected void addToBVH(RigidBody body) {
+	protected void addBodyToBVH(RigidBody body) {
+		
+		BVSphere sphere;
+		
+		if (body instanceof PlaneRigidBody) { 
+			moveNodeDown(null, 0, root, body);
+		} 
+		else {
+			if(body.root == null) { // we need each body to have a bounding sphere
+				sphere = new BVSphere(body);
+				body.root = new BVNode(sphere);
+			}
+			
+			if(root.isLeaf()) {
+				moveNodeDown(null, 0, root, body);
+			} 
+			else {
+				body.root.boundingSphere.updatecW();
+				addBodyToBVH(root, body);
+			}
+		}
+	}
+	
+	/**
+	 * Recursive method to add body to collection's BVH
+	 * @param body
+	 */
+	protected void addBodyToBVH(BVNode node, RigidBody body) {
 				
-		if (body instanceof PlaneRigidBody) { // add the plane to root node		
-			root.children = new BVNode[2];
-			// child0 is the plane
-			center.set(0.,0.,0.);
-			BVSphere sphere = new BVSphere(center, Double.MAX_VALUE, body);
-			root.children[0] = new BVNode(sphere);
-			// child1 is the current root
-			sphere = new BVSphere(root.boundingSphere, root.boundingSphere.body); // can be a leaf or this
-			root.children[1] = new BVNode(sphere);
-			// new node does not enclose the plane cause it doesn't make any sense
-			sphere = new BVSphere(center, Double.MAX_VALUE, this);
-			root.boundingSphere = sphere;
-			return;
+		if (node.children[0].boundingSphere == null) { // case plane
+			addBodyToBVH(node.children[1], body);
+		} 
+		else if (node.children[1].boundingSphere == null) { // case plane
+			addBodyToBVH(node.children[0], body);
+		} 
+		else {
+			
+			BVSphere sphere  = body.root.boundingSphere;
+			BVSphere sphere0 = node.children[0].boundingSphere;
+			BVSphere sphere1 = node.children[1].boundingSphere;
+
+			sphere0.updatecW(); 
+			sphere1.updatecW();
+			
+			if(sphere0.cW.distance(sphere.cW)<sphere1.cW.distance(sphere.cW)) { // is there a better way to decide?
+				if(node.children[0].isLeaf()) 
+					moveNodeDown(node, 0, node.children[0], body);
+				else 
+					addBodyToBVH(node.children[0], body);	
+				getEnclosingSphere(node.boundingSphere, node, body.root);
+			} 
+			else {
+				if(node.children[1].isLeaf()) 
+					moveNodeDown(node, 1, node.children[1], body);
+				else 
+					addBodyToBVH(node.children[1], body);
+				getEnclosingSphere(node.boundingSphere, node, body.root);	
+			}
+		}
+	}
+	
+	/**
+	 * Create a new node with child0 = node and child1 = body.root
+	 * @param parent
+	 * @param index
+	 * @param node
+	 * @param body
+	 */
+	protected void moveNodeDown(BVNode parent, int index, BVNode node, RigidBody body) {
+
+		BVSphere sphere = new BVSphere();
+		
+		if (body instanceof PlaneRigidBody) {
+			sphere.cW.set(0.,0.,0.);
+			sphere.cB.set(0.,0.,0.);
+			sphere.r = Double.MAX_VALUE;
+			sphere.body = this;
+		} else {
+			getEnclosingSphere(sphere, node, body.root);
 		}
 		
-		if(body.root == null) {
-			BVSphere sphere = new BVSphere(body);
-			body.root = new BVNode(sphere);
-		}
-		body.root.boundingSphere.updatecW();
+		BVNode newNode = new BVNode(sphere);
+		newNode.children = new BVNode[2];
+		newNode.children[0] = node;
+		newNode.children[1] = body.root;
 		
-		addBodyToBVH(root, body);
+		if (parent == null) {
+			root = newNode;
+		} else {
+			parent.children[index] = newNode;
+		}
 	}
 	
 	/**
 	 * Remove body to collection's BVH
 	 * @param body
 	 */
-	protected void removeFromBVH(BVNode node, RigidBody body) {	
+	protected void removeBodyFromBVH(BVNode node, RigidBody body) {	
 		if (!node.isLeaf()) {
 			if (node.children[0].boundingSphere.body.equals(body)) {
 				node.boundingSphere = node.children[1].boundingSphere;
@@ -241,44 +294,8 @@ public class RigidCollection extends RigidBody {
 				node.children = node.children[0].children;
 			} 
 			else {
-				removeFromBVH(node.children[0], body);
-				removeFromBVH(node.children[1], body);
-			}
-		}
-	}
-	
-	/**
-	 * Recursive method to add body to collection's BVH
-	 * @param body
-	 */
-	protected void addBodyToBVH(BVNode node, RigidBody body) {
-		if (node.isLeaf()) {
-			node.children = new BVNode[2];
-			// child0 is the new body
-			node.children[0] = body.root;
-			// child1 is the current leaf
-			BVSphere sphere = new BVSphere(node.boundingSphere, node.boundingSphere.body);
-			node.children[1] = new BVNode(sphere);
-			// new node enclosing both bodies
-			sphere = new BVSphere();
-			getEnclosingSphere(sphere, node.children[0], node.children[1]);	
-			node.boundingSphere = sphere;
-		} else {
-			BVSphere sphere  = body.root.boundingSphere;
-			BVSphere sphere0 = node.children[0].boundingSphere;
-			BVSphere sphere1 = node.children[1].boundingSphere;
-
-			sphere0.updatecW(); // find a way to avoid that
-			sphere1.updatecW();
-			
-			if(sphere0.cW.distance(sphere.cW)<sphere1.cW.distance(sphere.cW)) { // is there a better way to decide?
-				addBodyToBVH(node.children[0], body);
-				if(!node.children[0].isLeaf())
-					getEnclosingSphere(node.boundingSphere, node, body.root);	
-			} else {
-				addBodyToBVH(node.children[1], body);
-				if(!node.children[1].isLeaf())
-					getEnclosingSphere(node.boundingSphere, body.root, node);	
+				removeBodyFromBVH(node.children[0], body);
+				removeBodyFromBVH(node.children[1], body);
 			}
 		}
 	}
@@ -719,8 +736,7 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 	
-	//TODO: change my name
-	void getOp(RigidBody body, Point3d com, Matrix3d op) {
+	private void getOp(RigidBody body, Point3d com, Matrix3d op) {
 		// translate inertia tensor to center of mass
 		// should certainly have a b.x squared type term for the mass being at a distance...
 		//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)
@@ -861,7 +877,7 @@ public class RigidCollection extends RigidBody {
 			return;
 		} else {
 			applyVelocitiesTo(body);
-			removeFromBVH(root, body);
+			removeBodyFromBVH(root, body);
 			body.deltaV.setZero();
 			body.parent = null;
 		}

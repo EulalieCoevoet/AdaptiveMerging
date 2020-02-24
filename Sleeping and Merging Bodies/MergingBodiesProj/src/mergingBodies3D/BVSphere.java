@@ -123,7 +123,7 @@ public class BVSphere {
     }
      			
     private float[] red = new float[] { 1, 0, 0, 0.5f };
-    private float[] blue = new float[] { 0, 0, 1, 0.25f };
+    private float[] blue = new float[] { 0, 0, 1, 0.5f };
     /**
      * Draws the disc, using its associated body's current position
      * @param drawable
