@@ -58,13 +58,13 @@ public class RigidCollection extends RigidBody {
 	
 		if (body1 instanceof PlaneRigidBody) {
 			set(body2);
-			initBVNode(body2);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) initBVNode(body2);
 			body2.parent = this;
 			bodies.add(body2);
 			addBody(body1);
 		} else {
 			set(body1);
-			initBVNode(body1);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) initBVNode(body1);
 			body1.parent = this;
 			bodies.add(body1);
 			addBody(body2);
@@ -124,9 +124,9 @@ public class RigidCollection extends RigidBody {
 		body.parent = this;
 		bodies.add(body);
 		updateCollectionState(body);
-		addBodyToBVH(body);
+		if(CollisionProcessor.enableCollectionBVH.getValue()) addBodyToBVH(body);
 		addBodyInternalMethod(body);
-		updateBVH(root);
+		if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVH(root);
 		
 		updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation(); // TODO: is this really necessary?
@@ -142,9 +142,9 @@ public class RigidCollection extends RigidBody {
 			body.parent = this;
 			this.bodies.add(body);
 			updateCollectionState(body);
-			addBodyToBVH(body);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) addBodyToBVH(body);
 			addBodyInternalMethod(body);
-			updateBVH(root);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVH(root);
 		}
 		
 		updateInertiaRestAndInvert();
@@ -163,9 +163,9 @@ public class RigidCollection extends RigidBody {
 		}
 
 		updateCollectionState(collection);
-		addCollectionToBVH(collection); // must be done before updating collection's center of mass 
+		if(CollisionProcessor.enableCollectionBVH.getValue()) addCollectionToBVH(collection); // must be done before updating collection's center of mass 
 	    addBodyInternalMethod(collection);
-		updateBVH(root);
+	    if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVH(root);
 
 	    updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation();
@@ -877,7 +877,7 @@ public class RigidCollection extends RigidBody {
 			return;
 		} else {
 			applyVelocitiesTo(body);
-			removeBodyFromBVH(root, body);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) removeBodyFromBVH(root, body);
 			body.deltaV.setZero();
 			body.parent = null;
 		}

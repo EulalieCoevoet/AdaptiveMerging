@@ -686,7 +686,7 @@ public class CollisionProcessor {
      * @param body2
      */
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
-		
+				
 		if ( body1.geom instanceof RigidBodyGeomComposite ) {
 			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
 			g1.updateBodyPositionsFromParent();
@@ -700,14 +700,25 @@ public class CollisionProcessor {
 				narrowPhase( body1, b );
 			}
 		} else if ( body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
-			if (body1.root == null) {
-				BVSphere sphere = new BVSphere(body1);
-				body1.root = new BVNode(sphere);
-			} else if (body2.root == null) {
-				BVSphere sphere = new BVSphere(body2);
-				body2.root = new BVNode(sphere);
+
+			if (enableCollectionBVH.getValue()) {
+				if (body1.root == null) {
+					BVSphere sphere = new BVSphere(body1);
+					body1.root = new BVNode(sphere);
+				} else if (body2.root == null) {
+					BVSphere sphere = new BVSphere(body2);
+					body2.root = new BVNode(sphere);
+				}
+				collideCollections(body1.root, body2.root, body1, body2);
+			} else {
+				if (body1 instanceof RigidCollection ) {
+					for (RigidBody body: ((RigidCollection)body1).bodies)
+						narrowPhase(body, body2);
+				} else if (body2 instanceof RigidCollection ) {
+					for (RigidBody body: ((RigidCollection)body2).bodies)
+						narrowPhase(body1, body);
+				}
 			}
-			collideCollections(body1.root, body2.root, body1, body2);
 		} else if ( body1 instanceof PlaneRigidBody ) {
 			PlaneRigidBody b1 = (PlaneRigidBody) body1;
 			if ( body2 instanceof PlaneRigidBody ) {
@@ -971,6 +982,7 @@ public class CollisionProcessor {
 	public BooleanParameter usePostStabilization = new BooleanParameter("use post stabilization", false );
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
+	public static BooleanParameter enableCollectionBVH = new BooleanParameter("use collection BVH", true );
 	
     /** Override restitution parameters when set true */
     public BooleanParameter restitutionOverride = new BooleanParameter( "restitution override, otherwise default 0", false );
