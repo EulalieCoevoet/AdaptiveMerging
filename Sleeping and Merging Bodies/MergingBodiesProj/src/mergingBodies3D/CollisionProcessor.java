@@ -285,7 +285,7 @@ public class CollisionProcessor {
 			if (body instanceof RigidCollection && !body.sleeping) {
 				RigidCollection collection = (RigidCollection)body;
 			
-				// Update the bodies velocities for the unmerge condition (relative motion)
+				// Update the bodies velocities for unmerge condition (relative motion)
 				for (RigidBody b : collection.bodies)
 					if(!b.pinned ) 
 						b.advanceVelocities(dt);	
