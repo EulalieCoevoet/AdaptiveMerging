@@ -215,7 +215,7 @@ public class RigidCollection extends RigidBody {
 				
 		if (node.children[0].boundingSphere.body instanceof PlaneRigidBody) {
 			if(node.children[1].isLeaf()) 
-				moveNodeDown(node, 0, node.children[1], body);
+				moveNodeDown(node, 1, node.children[1], body);
 			else
 				addBodyToBVH(node.children[1], body);
 		} 
@@ -238,7 +238,7 @@ public class RigidCollection extends RigidBody {
 				if(node.children[0].isLeaf()) 
 					moveNodeDown(node, 0, node.children[0], body);
 				else 
-					addBodyToBVH(node.children[0], body);	
+					addBodyToBVH(node.children[0], body);
 				getEnclosingSphere(node.boundingSphere, node, body.root);
 			} 
 			else {
@@ -246,7 +246,7 @@ public class RigidCollection extends RigidBody {
 					moveNodeDown(node, 1, node.children[1], body);
 				else 
 					addBodyToBVH(node.children[1], body);
-				getEnclosingSphere(node.boundingSphere, node, body.root);	
+				getEnclosingSphere(node.boundingSphere, node, body.root);
 			}
 		}
 	}
