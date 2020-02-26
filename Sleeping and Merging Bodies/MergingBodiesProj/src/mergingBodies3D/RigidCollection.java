@@ -177,9 +177,8 @@ public class RigidCollection extends RigidBody {
 	 * @param collection
 	 */
 	protected void addCollectionToBVH(RigidCollection collection) {
-
 		setBVHtoThisCollection(collection.root);
-		moveNodeDown(null, 0, root, collection);
+		moveNodeDown(null, 0, root, collection.root);
 	}
 
 	/**
@@ -200,7 +199,7 @@ public class RigidCollection extends RigidBody {
 		}
 		
 		if ((body instanceof PlaneRigidBody) || root.isLeaf()) { 
-			moveNodeDown(null, 0, root, body);
+			moveNodeDown(null, 0, root, body.root);
 		} else {
 			body.root.boundingSphere.updatecW();
 			addBodyToBVH(root, body);
@@ -212,19 +211,23 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	protected void addBodyToBVH(BVNode node, RigidBody body) {
-				
+
+		node.depth = Math.max(node.children[1].depth, node.children[0].depth) + 1;
+		
+		// Planes are always at top of the tree and we shouldn't go in the direction of a plane to add a body
 		if (node.children[0].boundingSphere.body instanceof PlaneRigidBody) {
 			if(node.children[1].isLeaf()) 
-				moveNodeDown(node, 1, node.children[1], body);
+				moveNodeDown(node, 1, node.children[1], body.root);
 			else
 				addBodyToBVH(node.children[1], body);
 		} 
 		else if (node.children[1].boundingSphere.body instanceof PlaneRigidBody) { 
 			if(node.children[0].isLeaf()) 
-				moveNodeDown(node, 0, node.children[0], body);
+				moveNodeDown(node, 0, node.children[0], body.root);
 			else
 				addBodyToBVH(node.children[0], body);
 		} 
+		// Not a plane, but a subtree
 		else {
 			
 			BVSphere sphere  = body.root.boundingSphere;
@@ -235,15 +238,23 @@ public class RigidCollection extends RigidBody {
 			sphere1.updatecW();
 			
 			if(sphere0.cW.distance(sphere.cW)<sphere1.cW.distance(sphere.cW)) { // is there a better way to decide?
+				
+				if (node.children[0].depth>node.children[1].depth) // needs to swap to keep tree balanced
+					swapNodes(node, 1, node.children[0], node.children[1]);
+				
 				if(node.children[0].isLeaf()) 
-					moveNodeDown(node, 0, node.children[0], body);
+					moveNodeDown(node, 0, node.children[0], body.root);
 				else 
 					addBodyToBVH(node.children[0], body);
 				getEnclosingSphere(node.boundingSphere, node, body.root);
 			} 
 			else {
+				
+				if (node.children[1].depth>node.children[0].depth) // needs to swap to keep tree balanced
+					swapNodes(node, 0, node.children[1], node.children[0]);
+				
 				if(node.children[1].isLeaf()) 
-					moveNodeDown(node, 1, node.children[1], body);
+					moveNodeDown(node, 1, node.children[1], body.root);
 				else 
 					addBodyToBVH(node.children[1], body);
 				getEnclosingSphere(node.boundingSphere, node, body.root);
@@ -251,36 +262,72 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 	
+	protected void swapNodes(BVNode parent, int index, BVNode node1, BVNode node2) {
+		if(node1.isLeaf()) {
+			System.err.println("[RigidCollection] swapNodes: node1 should never be a leaf?");
+			return;
+		}
+		
+		BVSphere sphere  = node2.boundingSphere;
+		BVSphere sphere0 = node1.children[0].boundingSphere;
+		BVSphere sphere1 = node1.children[1].boundingSphere;
+
+		sphere.updatecW();
+		sphere0.updatecW(); 
+		sphere1.updatecW();
+		
+		if (sphere0.cW.distance(sphere.cW)<sphere1.cW.distance(sphere.cW)) {
+			moveNodeDown(parent, index, node2, node1.children[0]);
+			moveNodeUp(node1, node1.children[1]);
+		} else {
+			moveNodeDown(parent, index, node2, node1.children[1]);
+			moveNodeUp(node1, node1.children[0]);
+		}
+	}
+	
 	/**
 	 * Create a new node with child0 = node and child1 = body.root
 	 * @param parent
 	 * @param index
-	 * @param node
+	 * @param node1
 	 * @param body
 	 */
-	protected void moveNodeDown(BVNode parent, int index, BVNode node, RigidBody body) {
+	protected void moveNodeDown(BVNode parent, int index, BVNode node1, BVNode node2) {
 
 		BVSphere sphere = new BVSphere();
 		
-		if (body instanceof PlaneRigidBody) {
+		if (node2.boundingSphere.body instanceof PlaneRigidBody) {
 			sphere.cW.set(0.,0.,0.);
 			sphere.cB.set(0.,0.,0.);
 			sphere.r = Double.MAX_VALUE;
 			sphere.body = this;
 		} else {
-			getEnclosingSphere(sphere, node, body.root);
+			getEnclosingSphere(sphere, node1, node2);
 		}
 		
 		BVNode newNode = new BVNode(sphere);
 		newNode.children = new BVNode[2];
-		newNode.children[0] = node;
-		newNode.children[1] = body.root;
+		newNode.children[0] = node1;
+		newNode.children[1] = node2;
+		newNode.depth = Math.max(node1.depth, node2.depth) + 1;
 		
 		if (parent == null) {
 			root = newNode;
 		} else {
 			parent.children[index] = newNode;
+			parent.depth = Math.max(parent.children[1].depth, parent.children[0].depth) + 1;
 		}
+	}
+	
+	/**
+	 * Create a new node with node = nodeChild 
+	 * @param node
+	 * @param nodeChild
+	 */
+	protected void moveNodeUp(BVNode node, BVNode nodeChild) {
+		node.boundingSphere = nodeChild.boundingSphere;
+		node.children = nodeChild.children;
+		node.depth = nodeChild.depth;
 	}
 	
 	/**
@@ -290,12 +337,10 @@ public class RigidCollection extends RigidBody {
 	protected void removeBodyFromBVH(BVNode node, RigidBody body) {	
 		if (!node.isLeaf()) {
 			if (node.children[0].boundingSphere.body.equals(body)) {
-				node.boundingSphere = node.children[1].boundingSphere;
-				node.children = node.children[1].children;
+				moveNodeUp(node, node.children[1]);
 			} 
 			else if (node.children[1].boundingSphere.body.equals(body)) {
-				node.boundingSphere = node.children[0].boundingSphere;
-				node.children = node.children[0].children;
+				moveNodeUp(node, node.children[0]);
 			} 
 			else {
 				removeBodyFromBVH(node.children[0], body);

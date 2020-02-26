@@ -1,9 +1,15 @@
 package mergingBodies3D;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+
 //import java.util.ArrayList;
 //import java.util.List;
 
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.util.gl2.GLUT;
+
+import mintools.viewer.EasyViewer;
 
 //import javax.management.RuntimeErrorException;
 //import javax.vecmath.Point3d;
@@ -27,6 +33,9 @@ public class BVNode {
     
     /** The visitID keeps track of when this node was last visited */
     int visitID;
+    
+    /** children depth */
+    int depth = 0;
     
     public BVNode () {
     	
@@ -144,6 +153,9 @@ public class BVNode {
     	return ( children == null );
     }
     
+
+    private static final float[] colText = new float[] { 0,0,0, 0.9f };
+    
     /**
      * Draws the bounding volume spheres
      * @param drawable
@@ -153,7 +165,18 @@ public class BVNode {
     		System.out.println("[BVNode] display: not supposed to happen");
     		return;
     	}
+    	
         boundingSphere.display(drawable);
+        
+        boolean debugDisplay = false;
+        if(debugDisplay) {
+	    	boundingSphere.updatecW();
+	    	GL2 gl = drawable.getGL().getGL2();
+	    	gl.glMaterialfv( GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, colText, 0 );
+		    gl.glRasterPos3d( boundingSphere.cW.x+boundingSphere.r, boundingSphere.cW.y, boundingSphere.cW.z );
+			EasyViewer.glut.glutBitmapString(GLUT.BITMAP_8_BY_13, "  " + depth );
+        }
+        
         if ( children == null ) return;
         for ( BVNode c : children ) {
         	c.display(drawable);
