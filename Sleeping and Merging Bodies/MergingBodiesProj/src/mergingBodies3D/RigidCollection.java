@@ -42,6 +42,8 @@ public class RigidCollection extends RigidBody {
 	
 	Color color = new Color();
 	
+	protected int countBVHRemoval = 0;
+	
 	/**
 	 * Creates a RigidCollection from two RigidBody.
 	 * 
@@ -356,6 +358,17 @@ public class RigidCollection extends RigidBody {
 				removeBodyFromBVH(node.children[0], body);
 				removeBodyFromBVH(node.children[1], body);
 			}
+		}
+	}
+	
+	/**
+	 * Remove body to collection's BVH
+	 * @param body
+	 */
+	protected void recomputeBVH() {	
+		initBVNode(bodies.get(0));
+		for(int i=1; i<bodies.size(); i++) {
+			addBodyToBVH(bodies.get(i));
 		}
 	}
 	
@@ -689,10 +702,21 @@ public class RigidCollection extends RigidBody {
 	 */
 	public void removeBodies(Collection<RigidBody> bodiesToRemove) {
 		bodies.removeAll(bodiesToRemove);
+
+		if (CollisionProcessor.enableCollectionBVH.getValue()) {
+			countBVHRemoval+=bodiesToRemove.size();
+			if (countBVHRemoval<10) { 
+				for (RigidBody body : bodiesToRemove)
+					removeBodyFromBVH(root, body);
+			} else { // BVH quality must be bad...
+				countBVHRemoval=0;
+				recomputeBVH();
+			}
+		}
 		
 		boolean wasPinned = pinned;
 		pinned = false;
-		for (RigidBody body : bodies)
+		for (RigidBody body : bodies) 
 			pinned = (pinned || body.pinned);
 		
 		theta.setIdentity(); // TODO: fix me...?
@@ -936,7 +960,6 @@ public class RigidCollection extends RigidBody {
 			return;
 		} else {
 			applyVelocitiesTo(body);
-			if(CollisionProcessor.enableCollectionBVH.getValue()) removeBodyFromBVH(root, body);
 			body.deltaV.setZero();
 			body.parent = null;
 		}
