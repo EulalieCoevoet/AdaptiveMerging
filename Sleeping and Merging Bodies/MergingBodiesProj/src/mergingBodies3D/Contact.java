@@ -230,10 +230,6 @@ public class Contact {
         D11 = 0;
         D22 = 0;
         newThisTimeStep = true; // warm start will change later
-        
-        
-        
-        
     }
     
     private void computeJacobian( boolean computeInCollection, Point3d contactW, Vector3d normalW, Vector3d tangent1W, Vector3d tangent2W ) {

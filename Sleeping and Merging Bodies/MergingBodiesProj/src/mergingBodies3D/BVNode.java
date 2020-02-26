@@ -168,7 +168,7 @@ public class BVNode {
     	
         boundingSphere.display(drawable);
         
-        boolean debugDisplay = false;
+        boolean debugDisplay = true;
         if(debugDisplay) {
 	    	boundingSphere.updatecW();
 	    	GL2 gl = drawable.getGL().getGL2();

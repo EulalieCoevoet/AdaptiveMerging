@@ -687,20 +687,7 @@ public class CollisionProcessor {
      */
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
 				
-		if ( body1.geom instanceof RigidBodyGeomComposite ) {
-			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
-			g1.updateBodyPositionsFromParent();
-			for ( RigidBody b : g1.bodies ) {
-				narrowPhase( b, body2 );
-			}
-		} else if ( body2.geom instanceof RigidBodyGeomComposite ) {
-			RigidBodyGeomComposite g2 = (RigidBodyGeomComposite) body2.geom;
-			g2.updateBodyPositionsFromParent();
-			for ( RigidBody b : g2.bodies ) {
-				narrowPhase( body1, b );
-			}
-		} else if ( body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
-
+		if ( body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
 			if (enableCollectionBVH.getValue()) {
 				if (body1.root == null) {
 					BVSphere sphere = new BVSphere(body1);
@@ -718,6 +705,18 @@ public class CollisionProcessor {
 					for (RigidBody body: ((RigidCollection)body2).bodies)
 						narrowPhase(body1, body);
 				}
+			}
+		} else if ( body1.geom instanceof RigidBodyGeomComposite ) {
+			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
+			g1.updateBodyPositionsFromParent();
+			for ( RigidBody b : g1.bodies ) {
+				narrowPhase( b, body2 );
+			}
+		} else if ( body2.geom instanceof RigidBodyGeomComposite ) {
+			RigidBodyGeomComposite g2 = (RigidBodyGeomComposite) body2.geom;
+			g2.updateBodyPositionsFromParent();
+			for ( RigidBody b : g2.bodies ) {
+				narrowPhase( body1, b );
 			}
 		} else if ( body1 instanceof PlaneRigidBody ) {
 			PlaneRigidBody b1 = (PlaneRigidBody) body1;
@@ -854,12 +853,12 @@ public class CollisionProcessor {
 		if ( intersect ) {
 			
 			if ( body1 instanceof RigidCollection && body2 instanceof RigidCollection ) { // both are collections
-				if ( node1.isLeaf() && node2.isLeaf() )
+				if ( isLeaf(node1) && isLeaf(node2) )
 					narrowPhase(node1.boundingSphere.body, node2.boundingSphere.body);
-				else if ( node1.isLeaf() ) {
+				else if ( isLeaf(node1) ) {
 					for ( BVNode child : node2.children ) 
 						collideCollections(node1, child, body1, body2);		
-				} else if ( node2.isLeaf() ) {
+				} else if ( isLeaf(node2) ) {
 					for ( BVNode child : node1.children ) 
 						collideCollections(child, node2, body1, body2);					
 				} else if ( node1.boundingSphere.r <= node2.boundingSphere.r ) {
@@ -870,21 +869,31 @@ public class CollisionProcessor {
 						collideCollections(child, node2, body1, body2);					
 				}
 			} else if ( body1 instanceof RigidCollection ) { // only body1 is a collection
-				if ( node1.isLeaf() ) 
+				if ( isLeaf(node1) ) 
 					narrowPhase(node1.boundingSphere.body, body2);
 				else {
 					for ( BVNode child : node1.children ) 
 						collideCollections(child, node2, body1, body2);					
 				}
 			} else { // only body2 is a collection
-				if ( node2.isLeaf() ) 
-					narrowPhase(body1, node2.boundingSphere.body); // only body2 is a collection
+				if ( isLeaf(node2) ) 
+					narrowPhase(body1, node2.boundingSphere.body); 
 				else {
 					for ( BVNode child : node2.children )
 						collideCollections(node1, child, body1, body2);					
 				}
 			}
 		}
+	}
+	
+	protected boolean isLeaf(BVNode node) {
+		if(node.isLeaf())
+			return true;
+		
+		if(!(node.boundingSphere.body instanceof RigidCollection))
+			return true;
+		
+		return false;
 	}
 	
 	/** 
