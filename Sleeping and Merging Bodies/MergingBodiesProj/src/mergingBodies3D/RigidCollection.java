@@ -198,7 +198,7 @@ public class RigidCollection extends RigidBody {
 			}
 		}
 		
-		if ((body instanceof PlaneRigidBody) || root.isLeaf()) { 
+		if ((body instanceof PlaneRigidBody) || isLeaf(root)) { 
 			moveNodeDown(null, 0, root, body.root);
 		} else {
 			body.root.boundingSphere.updatecW();
@@ -216,13 +216,13 @@ public class RigidCollection extends RigidBody {
 		
 		// Planes are always at top of the tree and we shouldn't go in the direction of a plane to add a body
 		if (node.children[0].boundingSphere.body instanceof PlaneRigidBody) {
-			if(node.children[1].isLeaf()) 
+			if(isLeaf(node.children[1])) 
 				moveNodeDown(node, 1, node.children[1], body.root);
 			else
 				addBodyToBVH(node.children[1], body);
 		} 
 		else if (node.children[1].boundingSphere.body instanceof PlaneRigidBody) { 
-			if(node.children[0].isLeaf()) 
+			if(isLeaf(node.children[0])) 
 				moveNodeDown(node, 0, node.children[0], body.root);
 			else
 				addBodyToBVH(node.children[0], body);
@@ -242,7 +242,7 @@ public class RigidCollection extends RigidBody {
 				if (node.children[0].depth>node.children[1].depth) // needs to swap to keep tree balanced
 					swapNodes(node, 1, node.children[0], node.children[1]);
 				
-				if(node.children[0].isLeaf()) 
+				if(isLeaf(node.children[0])) 
 					moveNodeDown(node, 0, node.children[0], body.root);
 				else 
 					addBodyToBVH(node.children[0], body);
@@ -253,7 +253,7 @@ public class RigidCollection extends RigidBody {
 				if (node.children[1].depth>node.children[0].depth) // needs to swap to keep tree balanced
 					swapNodes(node, 0, node.children[1], node.children[0]);
 				
-				if(node.children[1].isLeaf()) 
+				if(isLeaf(node.children[1])) 
 					moveNodeDown(node, 1, node.children[1], body.root);
 				else 
 					addBodyToBVH(node.children[1], body);
@@ -263,7 +263,7 @@ public class RigidCollection extends RigidBody {
 	}
 	
 	protected void swapNodes(BVNode parent, int index, BVNode node1, BVNode node2) {
-		if(node1.isLeaf()) {
+		if(isLeaf(node1)) {
 			System.err.println("[RigidCollection] swapNodes: node1 should never be a leaf?");
 			return;
 		}
@@ -319,6 +319,16 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 	
+	protected boolean isLeaf(BVNode node) {
+		if(node.isLeaf())
+			return true;
+		
+		if(!(node.boundingSphere.body instanceof RigidCollection))
+			return true;
+		
+		return false;
+	}
+	
 	/**
 	 * Create a new node with node = nodeChild 
 	 * @param node
@@ -335,7 +345,7 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	protected void removeBodyFromBVH(BVNode node, RigidBody body) {	
-		if (!node.isLeaf()) {
+		if (!isLeaf(node)) {
 			if (node.children[0].boundingSphere.body.equals(body)) {
 				moveNodeUp(node, node.children[1]);
 			} 
@@ -354,7 +364,7 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	protected void updateBVH(BVNode node) {
-		if (!node.isLeaf()) {
+		if (!isLeaf(node)) {
 			node.boundingSphere.body = this;
 			transformB2C.transform(node.boundingSphere.cB);	
 			
@@ -368,7 +378,7 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	protected void setBVHtoThisCollection(BVNode node) {
-		if (!node.isLeaf()) {
+		if (!isLeaf(node)) {
 			node.boundingSphere.updatecW();
 			node.boundingSphere.body = this;
 			transformB2W.inverseTransform(node.boundingSphere.cW, node.boundingSphere.cB);	
