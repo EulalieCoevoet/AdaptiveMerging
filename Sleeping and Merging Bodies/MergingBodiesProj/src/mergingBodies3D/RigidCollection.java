@@ -188,16 +188,9 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	protected void addBodyToBVH(RigidBody body) {
-		
-		if(body.root == null) { // we need each body to have a bounding sphere
-			BVSphere sphere;
-			if (body instanceof PlaneRigidBody) {
-				sphere = new BVSphere(new Point3d(0.,0.,0.), Double.MAX_VALUE, body);
-				body.root = new BVNode(sphere);
-			} else {
-				sphere = new BVSphere(body);
-				body.root = new BVNode(sphere);
-			}
+		if (body.root == null) {
+			BVSphere sphere = (body instanceof PlaneRigidBody)? new BVSphere(new Point3d(0.,0.,0.), Double.MAX_VALUE, body): new BVSphere(body);
+			body.root = new BVNode(sphere);
 		}
 		
 		if ((body instanceof PlaneRigidBody) || isLeaf(root)) { 
@@ -248,6 +241,7 @@ public class RigidCollection extends RigidBody {
 					moveNodeDown(node, 0, node.children[0], body.root);
 				else 
 					addBodyToBVH(node.children[0], body);
+				
 				getEnclosingSphere(node.boundingSphere, node, body.root);
 			} 
 			else {
@@ -259,6 +253,7 @@ public class RigidCollection extends RigidBody {
 					moveNodeDown(node, 1, node.children[1], body.root);
 				else 
 					addBodyToBVH(node.children[1], body);
+				
 				getEnclosingSphere(node.boundingSphere, node, body.root);
 			}
 		}
@@ -297,15 +292,7 @@ public class RigidCollection extends RigidBody {
 	protected void moveNodeDown(BVNode parent, int index, BVNode node1, BVNode node2) {
 
 		BVSphere sphere = new BVSphere();
-		
-		if (node2.boundingSphere.body instanceof PlaneRigidBody) {
-			sphere.cW.set(0.,0.,0.);
-			sphere.cB.set(0.,0.,0.);
-			sphere.r = Double.MAX_VALUE;
-			sphere.body = this;
-		} else {
-			getEnclosingSphere(sphere, node1, node2);
-		}
+		getEnclosingSphere(sphere, node1, node2);
 		
 		BVNode newNode = new BVNode(sphere);
 		newNode.children = new BVNode[2];

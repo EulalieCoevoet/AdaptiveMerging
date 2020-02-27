@@ -690,10 +690,10 @@ public class CollisionProcessor {
 		if ( body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
 			if (enableCollectionBVH.getValue()) {
 				if (body1.root == null) {
-					BVSphere sphere = new BVSphere(body1);
+					BVSphere sphere = (body1 instanceof PlaneRigidBody)? new BVSphere(new Point3d(0.,0.,0.), Double.MAX_VALUE, body1): new BVSphere(body1);
 					body1.root = new BVNode(sphere);
 				} else if (body2.root == null) {
-					BVSphere sphere = new BVSphere(body2);
+					BVSphere sphere = (body2 instanceof PlaneRigidBody)? new BVSphere(new Point3d(0.,0.,0.), Double.MAX_VALUE, body2): new BVSphere(body2);
 					body2.root = new BVNode(sphere);
 				}
 				collideCollections(body1.root, body2.root, body1, body2);
@@ -833,13 +833,11 @@ public class CollisionProcessor {
 
 		if (node1.visitID != visitID) {
 			node1.visitID = visitID;
-			if ( !(node1.boundingSphere.body instanceof PlaneRigidBody) )
-					node1.boundingSphere.updatecW();
+			node1.boundingSphere.updatecW();
 		}	
 		if (node2.visitID != visitID) {
 			node2.visitID = visitID;
-			if ( !(node2.boundingSphere.body instanceof PlaneRigidBody) )
-				node2.boundingSphere.updatecW();
+			node2.boundingSphere.updatecW();
 		}
 		
 		boolean intersect = false;
