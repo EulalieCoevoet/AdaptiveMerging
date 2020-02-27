@@ -128,7 +128,7 @@ public class RigidCollection extends RigidBody {
 		updateCollectionState(body);
 		if(CollisionProcessor.enableCollectionBVH.getValue()) addBodyToBVH(body);
 		addBodyInternalMethod(body);
-		if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVH(root);
+		if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
 		
 		updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation(); // TODO: is this really necessary?
@@ -146,7 +146,7 @@ public class RigidCollection extends RigidBody {
 			updateCollectionState(body);
 			if(CollisionProcessor.enableCollectionBVH.getValue()) addBodyToBVH(body);
 			addBodyInternalMethod(body);
-			if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVH(root);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
 		}
 		
 		updateInertiaRestAndInvert();
@@ -167,7 +167,7 @@ public class RigidCollection extends RigidBody {
 		updateCollectionState(collection);
 		if(CollisionProcessor.enableCollectionBVH.getValue()) addCollectionToBVH(collection); // must be done before updating collection's center of mass 
 	    addBodyInternalMethod(collection);
-	    if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVH(root);
+	    if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
 
 	    updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation();
@@ -376,13 +376,13 @@ public class RigidCollection extends RigidBody {
 	 * Recursive method to get BVH up to date with collection frame
 	 * @param body
 	 */
-	protected void updateBVH(BVNode node) {
+	protected void updateBVHCenters(BVNode node) {
 		if (!isLeaf(node)) {
 			node.boundingSphere.body = this;
 			transformB2C.transform(node.boundingSphere.cB);	
 			
-			updateBVH(node.children[0]);
-			updateBVH(node.children[1]);
+			updateBVHCenters(node.children[0]);
+			updateBVHCenters(node.children[1]);
 		}
 	}
 	
@@ -713,6 +713,7 @@ public class RigidCollection extends RigidBody {
 				recomputeBVH();
 			}
 		}
+		tmpTransformB2W.set( transformB2W ); 
 		
 		boolean wasPinned = pinned;
 		pinned = false;
@@ -764,6 +765,8 @@ public class RigidCollection extends RigidBody {
 		updateRotationalInertiaFromTransformation();
 		updateBodiesTransformations();
 		updateBB(); // this can not be updated incrementally
+		transformB2C.multAinvB(transformB2W, tmpTransformB2W); // holds the transformation from the previous collection to the updated one
+		if (CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
 	}
 	
 
