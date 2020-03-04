@@ -276,9 +276,11 @@ public class RigidCollection extends RigidBody {
 		if (sphere0.cW.distance(sphere.cW)<sphere1.cW.distance(sphere.cW)) {
 			moveNodeDown(parent, index, node2, node1.children[0]);
 			moveNodeUp(node1, node1.children[1]);
+			parent.depth = Math.max(parent.children[1].depth, parent.children[0].depth) + 1;
 		} else {
 			moveNodeDown(parent, index, node2, node1.children[1]);
 			moveNodeUp(node1, node1.children[0]);
+			parent.depth = Math.max(parent.children[1].depth, parent.children[0].depth) + 1;
 		}
 	}
 	
@@ -308,16 +310,6 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 	
-	protected boolean isLeaf(BVNode node) {
-		if(node.isLeaf())
-			return true;
-		
-		if(!(node.boundingSphere.body instanceof RigidCollection))
-			return true;
-		
-		return false;
-	}
-	
 	/**
 	 * Create a new node with node = nodeChild 
 	 * @param node
@@ -327,6 +319,21 @@ public class RigidCollection extends RigidBody {
 		node.boundingSphere = nodeChild.boundingSphere;
 		node.children = nodeChild.children;
 		node.depth = nodeChild.depth;
+	}
+	
+	/**
+	 * Specific isLeaf test to detect rigid body with SphereTree
+	 * @param node
+	 * @return
+	 */
+	protected boolean isLeaf(BVNode node) {
+		if(node.isLeaf())
+			return true;
+		
+		if(!(node.boundingSphere.body instanceof RigidCollection))
+			return true;
+		
+		return false;
 	}
 	
 	/**
