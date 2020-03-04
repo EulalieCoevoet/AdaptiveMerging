@@ -269,16 +269,18 @@ public class XMLParser {
 	    Vector3d ur = new Vector3d( Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE );
 		for ( RigidBody b : bodies ) {
 			for ( Point3d p : b.boundingBoxB ) {
-				//p.sub(com); // move boudning box point to COM frame.
+				b.transformB2W.transform(p);
 				ll.x = Math.min( p.x, ll.x );
 				ll.y = Math.min( p.y, ll.y );
 				ll.z = Math.min( p.z, ll.z );
 				ur.x = Math.max( p.x, ur.x );
 				ur.y = Math.max( p.y, ur.y );
 				ur.z = Math.max( p.z, ur.z );
-				p.add(com);
+				b.transformB2W.inverseTransform(p);
 			}
 		}
+		ll.sub(com);
+		ur.sub(com);
 		
 		// set the stuff on the body now!
 		ArrayList<Point3d> bbB = new ArrayList<Point3d>();
