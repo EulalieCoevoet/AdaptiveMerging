@@ -179,8 +179,11 @@ public class RigidCollection extends RigidBody {
 	 * @param collection
 	 */
 	protected void addCollectionToBVH(RigidCollection collection) {
+		// TODO: We need an optimization here
+		// We need to check for planes first
+		// Then check for the depths? or just move down?
 		setBVHtoThisCollection(collection.root);
-		moveNodeDown(null, 0, root, collection.root);
+		moveNodeDown(null, 1, root, collection.root);
 	}
 
 	/**
@@ -206,8 +209,6 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	protected void addBodyToBVH(BVNode node, RigidBody body) {
-
-		node.depth = Math.max(node.children[1].depth, node.children[0].depth) + 1;
 		
 		// Planes are always at top of the tree and we shouldn't go in the direction of a plane to add a body
 		if (node.children[0].boundingSphere.body instanceof PlaneRigidBody) {
@@ -257,6 +258,8 @@ public class RigidCollection extends RigidBody {
 				getEnclosingSphere(node.boundingSphere, node, body.root);
 			}
 		}
+		
+		node.depth = Math.max(node.children[1].depth, node.children[0].depth) + 1;
 	}
 	
 	protected void swapNodes(BVNode parent, int index, BVNode node1, BVNode node2) {
