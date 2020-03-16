@@ -3,17 +3,11 @@ package mergingBodies3D;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
-//import java.util.ArrayList;
-//import java.util.List;
-
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import mintools.viewer.EasyViewer;
 
-//import javax.management.RuntimeErrorException;
-//import javax.vecmath.Point3d;
-//import javax.vecmath.Vector3d;
 
 /**
  * Bounding volume node used to build bounding volume trees.
