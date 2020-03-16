@@ -441,9 +441,6 @@ public class RigidBodySystem {
 		
 		//get an unpinned random RigidBody
 		for (RigidBody body: bodies) {
-			
-			if (bodies.indexOf(body)==0)
-				continue;
 							
 			if (!(body instanceof RigidCollection) && !body.pinned) {
 				genbody = new RigidBody(body);

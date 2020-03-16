@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<root>
+	<body n="0 1 0" name="plane" p="0 0 0" type="plane"/>
+	<body density="1" name="seesaw1" obj="data/seesaw1.obj" scale="0.1" type="composite">
+		<x>0 10 0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>0.7 0.7 0.7 1.</col>
+		<body density="1" dim="80 5 5" name="seesaw1" scale="1" type="box">
+			<x>0 2.0 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+	</body>
+	<body density="1" name="seesaw2" obj="data/seesaw2.obj" scale="0.1" type="composite">
+		<x>0 10 0</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>0.1 0.1 0.1 1.</col>
+		<body density="1" dim="5 5 5" name="part1" scale="1" type="box">
+			<x>0 -4 0</x>
+			<R>0. 0. 1. 0.785398163397</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+		<body density="1" dim="9 5 5" name="part2" scale="1" type="box">
+			<x>0 -8 0</x>
+			<R>0. -1 0. 0.</R>
+			<v>0. 0. 0.</v>
+			<omega>0. 0. 0.</omega>
+			<pinned>false</pinned>
+			<magnetic>false</magnetic>
+		</body>
+	</body>
+</root>
