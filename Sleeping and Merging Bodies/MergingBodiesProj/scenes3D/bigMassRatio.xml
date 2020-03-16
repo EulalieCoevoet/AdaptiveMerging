@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<root>
+	<body density="500" dim="5 1 5" name="box0" scale="1" type="box">
+		<x>0 1 0.0</x>
+		<R>0 0 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>0.7 0.7 0.5 1.</col>
+		<factorypart>false</factorypart>
+	</body>
+	<body density="1" dim="5 1 5" name="box1" scale="1" type="box">
+		<x>0 2 0</x>
+		<R>0 0 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>0.3 0.3 0.5 1.</col>
+	</body>
+	<body density="500" dim="5 1 5" name="box2" scale="1" type="box">
+		<x>0.0 5 0.0</x>
+		<R>0 0 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<col>0.7 0.7 0.5 1</col>
+		<factorypart>true</factorypart></body>
+	<body name="plane1" type="plane" p="0 -1 0" n="0 1 0"></body>
+</root>
