@@ -989,7 +989,7 @@ public class CollisionProcessor {
 	public BooleanParameter usePostStabilization = new BooleanParameter("use post stabilization", false );
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
-	public static BooleanParameter enableCollectionBVH = new BooleanParameter("use collection BVH", true );
+	public static BooleanParameter enableCollectionBVH = new BooleanParameter("use collection BVH", false );
 	
     /** Override restitution parameters when set true */
     public BooleanParameter restitutionOverride = new BooleanParameter( "restitution override, otherwise default 0", false );
