@@ -442,6 +442,7 @@ public class Merging {
 		vfp.add( params.thresholdUnmerge.getSliderControls(false) );
 		vfp.add( params.thresholdBreath.getSliderControls(true) );
 		vfp.add( Contact.slidingThreshold.getSliderControls(true) ); // Gross?
+		vfp.add( CollisionProcessor.enableCollectionBVH.getControls() ); // Gross?
         JButton umergeButton = new JButton("unmerge all");
         vfp.add( umergeButton);
         umergeButton.addActionListener( new ActionListener() {

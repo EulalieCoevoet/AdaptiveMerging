@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 /**
  * Circular disc for collision processing
@@ -29,6 +30,29 @@ public class BVSphere {
     
     /** body to which this disc is associated */
     RigidBody body;
+    
+	private Vector3d tmp = new Vector3d();
+    
+    public BVSphere() {
+    	this.cB.set(0.,0.,0.);
+		this.r = 0.;
+		this.body = null;
+    }
+    
+    public BVSphere(RigidBody body) {
+    	this.body = body;
+    	
+    	cB.set(0.,0.,0.);
+		for (Point3d point: body.boundingBoxB) 
+			cB.add(point);
+		cB.scale(1./8);
+		
+    	r = 0;
+		for (Point3d point: body.boundingBoxB) {
+			tmp.sub(point, cB);
+			r = Math.max(r, tmp.length());
+		}
+    }
     
     /**
      * Builds a Disc that encloses the given Discs
@@ -97,18 +121,29 @@ public class BVSphere {
         vertexBuffer.position(0);               
         indexBuffer.position(0);
     }
-    
+     			
+    private float[] red = new float[] { 1, 0, 0, 0.5f };
+    private float[] blue = new float[] { 0, 0, 1, 0.5f };
     /**
      * Draws the disc, using its associated body's current position
      * @param drawable
      */
     public void display( GLAutoDrawable drawable ) {
-        body.transformB2W.transform(cB, cW);
+    	if (body == null) {
+    		System.out.println("[BVSphere] display: not supposed to happen");
+    		return;
+    	}
+
+        body.transformB2W.transform( cB, cW );
         GL2 gl = drawable.getGL().getGL2();
         gl.glPushMatrix();
         gl.glTranslated( cW.x, cW.y ,cW.z );
         gl.glScaled( r, r, r );
-        gl.glColor4f(0.5f,0.0f,0.0f,0.5f);
+        if (body instanceof RigidCollection)
+        	gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, blue, 0);
+        else
+        	gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
+        	
         gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );     
         gl.glVertexPointer( 2, GL.GL_FLOAT, 0, vertexBuffer );      
         gl.glDrawElements( GL.GL_LINE_LOOP, size, GL.GL_UNSIGNED_SHORT, indexBuffer );            
@@ -128,7 +163,7 @@ public class BVSphere {
      * @return true if point is in the disc
      */
     public boolean isInDisc( Point3d pW ) {
-        body.transformB2W.transform(cB, cW);
+        body.transformB2W.transform( cB, cW );
         return ( pW.distanceSquared( cW ) < r*r );
     }
     

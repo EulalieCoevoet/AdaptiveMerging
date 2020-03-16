@@ -13,8 +13,6 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import mergingBodies3D.Merging.MergeParameters;
-
 /**
  * Adapted from 2D verions... 
  * 
@@ -25,7 +23,7 @@ import mergingBodies3D.Merging.MergeParameters;
  * 
  */
 public class RigidCollection extends RigidBody {
-
+	
 	/** List of RigidBody of the collection */
 	protected ArrayList<RigidBody> bodies = new ArrayList<RigidBody>();
 	
@@ -41,8 +39,10 @@ public class RigidCollection extends RigidBody {
 	/** new center of mass*/
 	private Point3d com = new Point3d(); 
 	private double totalMassInv = 0; 
-
+	
 	Color color = new Color();
+	
+	protected int countBVHRemoval = 0;
 	
 	/**
 	 * Creates a RigidCollection from two RigidBody.
@@ -60,16 +60,26 @@ public class RigidCollection extends RigidBody {
 	
 		if (body1 instanceof PlaneRigidBody) {
 			set(body2);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) initBVNode(body2);
 			body2.parent = this;
 			bodies.add(body2);
 			addBody(body1);
-			
 		} else {
 			set(body1);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) initBVNode(body1);
 			body1.parent = this;
 			bodies.add(body1);
 			addBody(body2);
 		}
+	}
+	
+	protected void initBVNode(RigidBody body) {
+		if(body.root == null) {
+			BVSphere sphere = new BVSphere(body);
+			body.root = new BVNode(sphere);
+		}
+		
+		root = body.root;
 	}
 	
 	public void generateColor() {
@@ -116,7 +126,9 @@ public class RigidCollection extends RigidBody {
 		body.parent = this;
 		bodies.add(body);
 		updateCollectionState(body);
+		if(CollisionProcessor.enableCollectionBVH.getValue()) addBodyToBVH(body);
 		addBodyInternalMethod(body);
+		if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
 		
 		updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation(); // TODO: is this really necessary?
@@ -132,7 +144,9 @@ public class RigidCollection extends RigidBody {
 			body.parent = this;
 			this.bodies.add(body);
 			updateCollectionState(body);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) addBodyToBVH(body);
 			addBodyInternalMethod(body);
+			if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
 		}
 		
 		updateInertiaRestAndInvert();
@@ -141,7 +155,7 @@ public class RigidCollection extends RigidBody {
 	}
 
 	/**
-	 * Adds a collection to the collection
+	 * Adds a collection to the collection, every nodes are in the frame of the current collection
 	 * @param collection collection to add
 	 */
 	public void addCollection(RigidCollection collection) {
@@ -151,11 +165,288 @@ public class RigidCollection extends RigidBody {
 		}
 
 		updateCollectionState(collection);
+		if(CollisionProcessor.enableCollectionBVH.getValue()) addCollectionToBVH(collection); // must be done before updating collection's center of mass 
 	    addBodyInternalMethod(collection);
-	    
+	    if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
+
 	    updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation();
 		updateBodiesTransformations();
+	}
+	
+	/**
+	 * Merge BVH, every nodes are in the frame of the current collection
+	 * @param collection
+	 */
+	protected void addCollectionToBVH(RigidCollection collection) {
+		// TODO: We need an optimization here
+		// We need to check for planes first
+		// Then check for the depths? or just move down?
+		setBVHtoThisCollection(collection.root);
+		moveNodeDown(null, 1, root, collection.root);
+	}
+
+	/**
+	 * Add body to collection's BVH, exception if body is a plane
+	 * @param body
+	 */
+	protected void addBodyToBVH(RigidBody body) {
+		if (body.root == null) {
+			BVSphere sphere = (body instanceof PlaneRigidBody)? new BVSphere(new Point3d(0.,0.,0.), Double.MAX_VALUE, body): new BVSphere(body);
+			body.root = new BVNode(sphere);
+		}
+		
+		if ((body instanceof PlaneRigidBody) || isLeaf(root)) { 
+			moveNodeDown(null, 0, root, body.root);
+		} else {
+			body.root.boundingSphere.updatecW();
+			addBodyToBVH(root, body);
+		}
+	}
+	
+	/**
+	 * Recursive method to add body to collection's BVH
+	 * @param body
+	 */
+	protected void addBodyToBVH(BVNode node, RigidBody body) {
+		
+		// Planes are always at top of the tree and we shouldn't go in the direction of a plane to add a body
+		if (node.children[0].boundingSphere.body instanceof PlaneRigidBody) {
+			if(isLeaf(node.children[1])) 
+				moveNodeDown(node, 1, node.children[1], body.root);
+			else
+				addBodyToBVH(node.children[1], body);
+		} 
+		else if (node.children[1].boundingSphere.body instanceof PlaneRigidBody) { 
+			if(isLeaf(node.children[0])) 
+				moveNodeDown(node, 0, node.children[0], body.root);
+			else
+				addBodyToBVH(node.children[0], body);
+		} 
+		// Not a plane, but a subtree
+		else {
+			
+			BVSphere sphere  = body.root.boundingSphere;
+			BVSphere sphere0 = node.children[0].boundingSphere;
+			BVSphere sphere1 = node.children[1].boundingSphere;
+
+			sphere0.updatecW(); 
+			sphere1.updatecW();
+			
+			if(sphere0.cW.distance(sphere.cW)<sphere1.cW.distance(sphere.cW)) { // is there a better way to decide?
+				
+				if (node.children[0].depth>node.children[1].depth) // needs to swap to keep tree balanced
+					swapNodes(node, 1, node.children[0], node.children[1]);
+				
+				if(isLeaf(node.children[0])) 
+					moveNodeDown(node, 0, node.children[0], body.root);
+				else 
+					addBodyToBVH(node.children[0], body);
+				
+				getEnclosingSphere(node.boundingSphere, node, body.root);
+			} 
+			else {
+				
+				if (node.children[1].depth>node.children[0].depth) // needs to swap to keep tree balanced
+					swapNodes(node, 0, node.children[1], node.children[0]);
+				
+				if(isLeaf(node.children[1])) 
+					moveNodeDown(node, 1, node.children[1], body.root);
+				else 
+					addBodyToBVH(node.children[1], body);
+				
+				getEnclosingSphere(node.boundingSphere, node, body.root);
+			}
+		}
+		
+		node.depth = Math.max(node.children[1].depth, node.children[0].depth) + 1;
+	}
+	
+	protected void swapNodes(BVNode parent, int index, BVNode node1, BVNode node2) {
+		if(isLeaf(node1)) {
+			System.err.println("[RigidCollection] swapNodes: node1 should never be a leaf?");
+			return;
+		}
+		
+		BVSphere sphere  = node2.boundingSphere;
+		BVSphere sphere0 = node1.children[0].boundingSphere;
+		BVSphere sphere1 = node1.children[1].boundingSphere;
+
+		sphere.updatecW();
+		sphere0.updatecW(); 
+		sphere1.updatecW();
+		
+		if (sphere0.cW.distance(sphere.cW)<sphere1.cW.distance(sphere.cW)) {
+			moveNodeDown(parent, index, node2, node1.children[0]);
+			moveNodeUp(node1, node1.children[1]);
+			parent.depth = Math.max(parent.children[1].depth, parent.children[0].depth) + 1;
+		} else {
+			moveNodeDown(parent, index, node2, node1.children[1]);
+			moveNodeUp(node1, node1.children[0]);
+			parent.depth = Math.max(parent.children[1].depth, parent.children[0].depth) + 1;
+		}
+	}
+	
+	/**
+	 * Create a new node with child0 = node and child1 = body.root
+	 * @param parent
+	 * @param index
+	 * @param node1
+	 * @param body
+	 */
+	protected void moveNodeDown(BVNode parent, int index, BVNode node1, BVNode node2) {
+
+		BVSphere sphere = new BVSphere();
+		getEnclosingSphere(sphere, node1, node2);
+		
+		BVNode newNode = new BVNode(sphere);
+		newNode.children = new BVNode[2];
+		newNode.children[0] = node1;
+		newNode.children[1] = node2;
+		newNode.depth = Math.max(node1.depth, node2.depth) + 1;
+		
+		if (parent == null) {
+			root = newNode;
+		} else {
+			parent.children[index] = newNode;
+			parent.depth = Math.max(parent.children[1].depth, parent.children[0].depth) + 1;
+		}
+	}
+	
+	/**
+	 * Create a new node with node = nodeChild 
+	 * @param node
+	 * @param nodeChild
+	 */
+	protected void moveNodeUp(BVNode node, BVNode nodeChild) {
+		node.boundingSphere = nodeChild.boundingSphere;
+		node.children = nodeChild.children;
+		node.depth = nodeChild.depth;
+	}
+	
+	/**
+	 * Specific isLeaf test to detect rigid body with SphereTree
+	 * @param node
+	 * @return
+	 */
+	protected boolean isLeaf(BVNode node) {
+		if(node.isLeaf())
+			return true;
+		
+		if(!(node.boundingSphere.body instanceof RigidCollection))
+			return true;
+		
+		return false;
+	}
+	
+	/**
+	 * Remove body to collection's BVH
+	 * @param body
+	 */
+	protected void removeBodyFromBVH(BVNode node, RigidBody body) {	
+		if (!isLeaf(node)) {
+			if (node.children[0].boundingSphere.body.equals(body)) {
+				moveNodeUp(node, node.children[1]);
+			} 
+			else if (node.children[1].boundingSphere.body.equals(body)) {
+				moveNodeUp(node, node.children[0]);
+			} 
+			else {
+				removeBodyFromBVH(node.children[0], body);
+				removeBodyFromBVH(node.children[1], body);
+			}
+		}
+	}
+	
+	/**
+	 * Remove body to collection's BVH
+	 * @param body
+	 */
+	protected void recomputeBVH() {	
+		initBVNode(bodies.get(0));
+		for(int i=1; i<bodies.size(); i++) {
+			addBodyToBVH(bodies.get(i));
+		}
+	}
+	
+	/**
+	 * Recursive method to get BVH up to date with collection frame
+	 * @param body
+	 */
+	protected void updateBVHCenters(BVNode node) {
+		if (!isLeaf(node)) {
+			node.boundingSphere.body = this;
+			transformB2C.transform(node.boundingSphere.cB);	
+			
+			updateBVHCenters(node.children[0]);
+			updateBVHCenters(node.children[1]);
+		}
+	}
+	
+	/**
+	 * Recursive method to set an existing BVH to the BVH of the collection
+	 * @param body
+	 */
+	protected void setBVHtoThisCollection(BVNode node) {
+		if (!isLeaf(node)) {
+			node.boundingSphere.updatecW();
+			node.boundingSphere.body = this;
+			transformB2W.inverseTransform(node.boundingSphere.cW, node.boundingSphere.cB);	
+			
+			setBVHtoThisCollection(node.children[0]);
+			setBVHtoThisCollection(node.children[1]);
+		}
+	}
+	
+	BVSphere tmpsphere = new BVSphere();
+	Vector3d tmpdir = new Vector3d();
+	Vector3d tmp2 = new Vector3d();
+	Vector3d tmp3 = new Vector3d();
+	/**
+	 * Compute sphere enclosing both spheres
+	 * @param sphere
+	 * @param node1
+	 * @param node2
+	 */
+	protected void getEnclosingSphere(BVSphere sphere, BVNode node1, BVNode node2) {		
+		
+		node1.boundingSphere.updatecW(); // find a way to avoid that
+		node2.boundingSphere.updatecW();
+		double dist = node1.boundingSphere.cW.distance(node2.boundingSphere.cW);
+		if (node1.boundingSphere.r+dist < node2.boundingSphere.r) { // sphere1 in sphere2, keep sphere2 is optimal
+			sphere.r = node2.boundingSphere.r;
+			sphere.cW.set(node2.boundingSphere.cW);
+		} else if (node2.boundingSphere.r+dist < node1.boundingSphere.r) { // sphere2 in sphere1, keep sphere1 is optimal
+			sphere.r = node1.boundingSphere.r;
+			sphere.cW.set(node1.boundingSphere.cW);
+		} else {
+			tmpsphere.r = (node1.boundingSphere.r+node2.boundingSphere.r+dist)/2.;
+			
+			// direction
+			tmpdir.set(node1.boundingSphere.cW);
+			tmpdir.sub(node2.boundingSphere.cW);
+			
+			// point1
+			tmp2.set(node1.boundingSphere.cW);
+			tmpdir.normalize();
+			tmpdir.scale(node1.boundingSphere.r);
+			tmp2.add(tmpdir);
+			
+			// point2
+			tmp3.set(node2.boundingSphere.cW);
+			tmpdir.normalize();
+			tmpdir.scale(-node2.boundingSphere.r);
+			tmp3.add(tmpdir);
+			
+			// center
+			tmp3.add(tmp2);
+			tmp3.scale(0.5);
+			sphere.r = tmpsphere.r;
+			sphere.cW.set(tmp3);
+		}		
+		
+		sphere.body = this; // if not leaf, sphere.body is the collection
+		transformB2W.inverseTransform(sphere.cW, sphere.cB);
 	}
 	
 	/**
@@ -174,6 +465,7 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 	
+	private RigidTransform3D tmpTransformB2W = new RigidTransform3D(); // not initialized
 	/**
 	 * Adds a body to the collection (internal method, for factoring purposes).
 	 * 
@@ -181,6 +473,7 @@ public class RigidCollection extends RigidBody {
 	 */
 	private void addBodyInternalMethod( RigidBody body ) {
 
+		tmpTransformB2W.set( transformB2W ); 
 		updateTheta(body); // computed in world coordinates, is that correct? theta should be the rotations from inertial frame right?
 		
 		if ( pinned ) { 
@@ -207,11 +500,14 @@ public class RigidCollection extends RigidBody {
 			
 			massLinear += body.massLinear; // used in updateInertia, this update should stay here
 			minv = totalMassInv;
+			
 			x.set(com); // finally update com of the new collection
 			// back in collection coordinates
 			for (Point3d point : boundingBoxB)
 				this.transformB2W.inverseTransform(point);
 		}
+
+		transformB2C.multAinvB(transformB2W, tmpTransformB2W); // holds the transformation from the previous collection to the updated one
 	}
 
 	/**
@@ -403,10 +699,22 @@ public class RigidCollection extends RigidBody {
 	 */
 	public void removeBodies(Collection<RigidBody> bodiesToRemove) {
 		bodies.removeAll(bodiesToRemove);
+
+		if (CollisionProcessor.enableCollectionBVH.getValue()) {
+			countBVHRemoval+=bodiesToRemove.size();
+			if (countBVHRemoval<10) { 
+				for (RigidBody body : bodiesToRemove)
+					removeBodyFromBVH(root, body);
+			} else { // BVH quality must be bad...
+				countBVHRemoval=0;
+				recomputeBVH();
+			}
+		}
+		tmpTransformB2W.set( transformB2W ); 
 		
 		boolean wasPinned = pinned;
 		pinned = false;
-		for (RigidBody body : bodies)
+		for (RigidBody body : bodies) 
 			pinned = (pinned || body.pinned);
 		
 		theta.setIdentity(); // TODO: fix me...?
@@ -454,6 +762,8 @@ public class RigidCollection extends RigidBody {
 		updateRotationalInertiaFromTransformation();
 		updateBodiesTransformations();
 		updateBB(); // this can not be updated incrementally
+		transformB2C.multAinvB(transformB2W, tmpTransformB2W); // holds the transformation from the previous collection to the updated one
+		if (CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
 	}
 	
 
@@ -509,8 +819,7 @@ public class RigidCollection extends RigidBody {
 		}
 	}
 	
-	//TODO: change my name
-	void getOp(RigidBody body, Point3d com, Matrix3d op) {
+	private void getOp(RigidBody body, Point3d com, Matrix3d op) {
 		// translate inertia tensor to center of mass
 		// should certainly have a b.x squared type term for the mass being at a distance...
 		//			I -[p]    J  0     I  0      (i.e., Ad^T M Ad, see MLS textbook or Goswami's paper)

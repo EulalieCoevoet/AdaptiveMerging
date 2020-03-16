@@ -14,6 +14,11 @@ public class RigidTransform3D {
     private Matrix3d R;
     private Point3d t;
     
+    public RigidTransform3D() {
+    	R = new Matrix3d();
+    	t = new Point3d();
+    }
+    
     /** 
      * Creates a new identity transformation with provided backing rotation and translation
      * References to the provided matrix and vector are held by this object and can be changed
