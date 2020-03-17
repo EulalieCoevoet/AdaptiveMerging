@@ -42,8 +42,6 @@ for k in range(2):
     disp+=5
     x-=20
 
-
-
 # Portique
 portique = Composite(root, obj="data/portique.obj", scale="0.05", name="portique", position="0 -2.5 -40",density="1", color="0.4 0. 0.")
 portique.addBox(name='box', dim="10 1 1", position="0 0.5 0")
@@ -52,14 +50,14 @@ portique.addBox(name='box', dim="10 1 1", position="0 0.5 10")
 # Bodies pile on the dock
 for k in range(2):
     y0 = -2.
-    x0 = -32. + k*50
-    z0 = -23
+    x0 = -32. + k*35
+    z0 = -25
     y=y0; x=x0; z=z0;
     for i in range(100):
         y += dimy
         if (i%(3+k)==0):
             x+=dimx + dist; y=y0;
-        if (i%31==0):
+        if (i%17==0):
             x=x0; y=y0; z+=dimz + dist;
         orientation = "0 -1 0 0.03" if (i%2) else "0 -1 0 0";
         Box(root, name='containerDock'+str(i), dim=str(dimx)+" "+str(dimy)+" "+str(dimz), color=colors[random.randint(0,3)], position=str(x)+" "+str(y)+" "+str(z))
@@ -127,6 +125,33 @@ for k in range(2):
 
     disp+=45
 
+# Few more containers
+# Near boats
+Box(root, name='boxNearBoat1', position="3.5 -0.9 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearBoat2', position="1.9 -2 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearBoat3', position="3 -2 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearBoat4', position="4.1 -2 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+
+
+Box(root, name='boxNearBoat1', position="-3.5 -0.9 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearBoat2', position="-1.9 -2 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearBoat3', position="-3 -2 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearBoat4', position="-4.1 -2 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+
+
+Box(root, name='boxNearBoat1', position="-23.5 -0.9 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearBoat2', position="-21.9 -2 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearBoat3', position="-23 -2 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearBoat4', position="-24.1 -2 -8", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+
+# Near trains
+Box(root, name='boxNearTrain1', position="2.5 -0.9 -42", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearTrain2', position="1.9 -2 -42", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearTrain3', position="3 -2 -42", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+Box(root, name='boxNearTrain4', position="4.1 -2 -42", dim=str(dimz)+" "+str(dimy)+" "+str(dimx), color=colors[random.randint(0,2)])
+
+truck = Composite(root, obj="data/truckPort.obj", scale="0.005", name="truckstatic", position="10. -1.5 -45", density="1", velocity="0 0 0")
+truck.addBox(name='box', dim="8 1 3", position="-3 -0.5 0")
 
 # Pointing finger
 # boat = Composite(root, obj="data/pointingfinger.obj", scale="0.3", name="finger", position="70 30 -40", density="1", color="1. 1. 1. 1.")
@@ -140,7 +165,6 @@ for k in range(2):
 # boat.addSpring(positionB="2.5 -2.5 -2.5", k="100", d="1")
 # boat.addSpring(positionB="-2.5 -2.5 -2.5", k="100", d="1")
 # boat.addSpring(positionB="-2.5 -2.5 2.5", k="100", d="1")
-
 
 # Ocean
 ocean = Composite(root, obj="data/ocean.obj", scale="0.1", name="ocean", position="0. -2.5 60.", color="0. 0.18 0.29 1.", density="10")
