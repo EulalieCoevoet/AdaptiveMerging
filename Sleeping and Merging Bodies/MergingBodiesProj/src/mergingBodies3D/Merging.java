@@ -168,7 +168,7 @@ public class Merging {
 		
 		for(RigidBody body : bodies) {
 			
-			if (body instanceof RigidCollection) {
+			if (body instanceof RigidCollection && !body.sleeping) {
 				
 				RigidCollection collection = (RigidCollection) body;
 				removalQueue.add(collection);
@@ -317,7 +317,7 @@ public class Merging {
 							newCollection.fillInternalBodyContacts();
 							newCollection.color = new Color(collection.color);
 							newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
-							collection.applyVelocitiesTo(newCollection); //TODO: the velocities are updated in call to addBodies...
+							//collection.applyVelocitiesTo(newCollection); //TODO: the velocities are updated in call to addBodies...
 							newBodies.add(newCollection);
 						} else if (subbodies.size() == 1){ // single body
 							newBodies.add(subbodies.iterator().next());
@@ -442,7 +442,12 @@ public class Merging {
 		vfp.add( params.thresholdUnmerge.getSliderControls(false) );
 		vfp.add( params.thresholdBreath.getSliderControls(true) );
 		vfp.add( Contact.slidingThreshold.getSliderControls(true) ); // Gross?
-		vfp.add( CollisionProcessor.enableCollectionBVH.getControls() ); // Gross?
+		vfp.add( CollisionProcessor.collectionCD.getControls() ); // Gross?
+        CollisionProcessor.collectionCD.addParameterListener(parameter -> {
+            if (parameter.getValue() == 1) RigidCollection.buildBVH = true;
+            else RigidCollection.buildBVH = false;
+        });
+		
         JButton umergeButton = new JButton("unmerge all");
         vfp.add( umergeButton);
         umergeButton.addActionListener( new ActionListener() {

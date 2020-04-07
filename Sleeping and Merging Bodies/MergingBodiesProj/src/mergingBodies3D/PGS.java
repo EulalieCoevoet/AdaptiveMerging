@@ -2,7 +2,6 @@ package mergingBodies3D;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 

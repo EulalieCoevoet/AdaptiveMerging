@@ -135,6 +135,8 @@ public class RigidBody {
 	 * body so we might want to do something specific or different for special geometry.
 	 */
 	public ArrayList<Point3d> boundingBoxB = new ArrayList<Point3d>(); 
+	public Point3d bbMinW = new Point3d(); 
+	public Point3d bbMaxW = new Point3d(); 
 	
 	/** Default friction coefficient */
 	public double friction = 0.8; 
@@ -318,6 +320,13 @@ public class RigidBody {
         } 
     }
     
+    protected void updateBBW() {
+    	if ( ! pinned ) {
+	    	transformB2W.transform(boundingBoxB.get(0), bbMinW);
+	    	transformB2W.transform(boundingBoxB.get(4), bbMaxW);
+    	}
+    }
+    
     /**
      * Apply a contact force specified in world coordinates at the specified point.
      * @param contactPointW
@@ -428,6 +437,7 @@ public class RigidBody {
         }
 		
         updateRotationalInertiaFromTransformation();
+        updateBBW();
 	}	
 
     /**

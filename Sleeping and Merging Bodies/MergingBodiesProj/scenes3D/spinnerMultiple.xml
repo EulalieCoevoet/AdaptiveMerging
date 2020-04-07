@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <root>
-	<collision enableCompliance="false" enablePostStabilization="true" feedbackStiffness="2." iterations="10"/>
-	<body n="0. 1. 0.0" name="plane" p="0 0 0" type="plane"/>
+	<collision enableCompliance="false" enablePostStabilization="true" feedbackStiffness="6" iterations="10"/>
+	<body n="0. 1. 0.0" name="plane" p="0 -0.5 0" type="plane"/>
 	<body density="4." name="platform" scale="1" type="composite">
 		<x>0. 5. 0.</x>
 		<R>0. -1 0. 0.</R>
 		<v>0 0 0</v>
-		<omega>0 1.5 0.</omega>
+		<omega>0 2.5 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 		<friction>0.1</friction>
@@ -119,40 +119,164 @@
 		<spring body2="platform" d="8" k="10" pB="-0 12.0 0" pB2="-7.5 0.5 -7.5"/>
 		<spring body2="platform" d="8" k="10" pB="0 12.0 0" pB2="7.5 0.5 -7.5"/>
 	</body>
-	<body density="0.0001" name="ball1" r="2" scale="1" type="sphere">
-		<x>3.75 7 3.75</x>
+	<body density="0.00001" name="box" r="1" scale="1" type="sphere">
+		<x>2.85 6.5 2.85</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
+		<friction>0.1</friction>
 		<col>0.8 0.6 0.6 1.</col>
 	</body>
-	<body density="0.0001" name="ball2" r="2" scale="1" type="sphere">
-		<x>-3.75 7 -3.75</x>
+	<body density="0.00001" name="box" r="1" scale="1" type="sphere">
+		<x>-4.65 6.5 -4.65</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
+		<friction>0.1</friction>
 		<col>0.6 0.8 0.6 1.</col>
 	</body>
-	<body density="0.0001" dim="3 3 3" name="box1" scale="1" type="box">
-		<x>-3.75 7 3.75</x>
+	<body density="0.00001" dim="2 2 2" name="box" scale="1" type="box">
+		<x>-4.65 6.5 2.85</x>
 		<R>0 -1 0 0</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
+		<friction>0.1</friction>
 		<col>0.6 0.8 0.8 1.</col>
 	</body>
-	<body density="0.0001" dim="3 3 3" name="box2" scale="1" type="box">
-		<x>3.75 7 -3.75</x>
+	<body density="0.00001" dim="2 2 2" name="box" scale="1" type="box">
+		<x>2.85 6.5 -4.65</x>
 		<R>0 -1 0 0</R>
 		<v>0. 0. 0.</v>
 		<omega>0. 0. 0.</omega>
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.8 0.8 0.6 1.</col>
+	</body>
+	<body density="0.00001" name="box" r="1" scale="1" type="sphere">
+		<x>2.85 6.5 4.95</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.8 0.6 0.6 1.</col>
+	</body>
+	<body density="0.00001" name="box" r="1" scale="1" type="sphere">
+		<x>-4.65 6.5 -2.55</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.6 0.8 0.6 1.</col>
+	</body>
+	<body density="0.00001" dim="2 2 2" name="box" scale="1" type="box">
+		<x>-4.65 6.5 4.95</x>
+		<R>0 -1 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.6 0.8 0.8 1.</col>
+	</body>
+	<body density="0.00001" dim="2 2 2" name="box" scale="1" type="box">
+		<x>2.85 6.5 -2.55</x>
+		<R>0 -1 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.8 0.8 0.6 1.</col>
+	</body>
+	<body density="0.00001" name="box" r="1" scale="1" type="sphere">
+		<x>4.95 6.5 2.85</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.8 0.6 0.6 1.</col>
+	</body>
+	<body density="0.00001" name="box" r="1" scale="1" type="sphere">
+		<x>-2.55 6.5 -4.65</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.6 0.8 0.6 1.</col>
+	</body>
+	<body density="0.00001" dim="2 2 2" name="box" scale="1" type="box">
+		<x>-2.55 6.5 2.85</x>
+		<R>0 -1 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.6 0.8 0.8 1.</col>
+	</body>
+	<body density="0.00001" dim="2 2 2" name="box" scale="1" type="box">
+		<x>4.95 6.5 -4.65</x>
+		<R>0 -1 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.8 0.8 0.6 1.</col>
+	</body>
+	<body density="0.00001" name="box" r="1" scale="1" type="sphere">
+		<x>4.95 6.5 4.95</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.8 0.6 0.6 1.</col>
+	</body>
+	<body density="0.00001" name="box" r="1" scale="1" type="sphere">
+		<x>-2.55 6.5 -2.55</x>
+		<R>0. -1 0. 0.</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.6 0.8 0.6 1.</col>
+	</body>
+	<body density="0.00001" dim="2 2 2" name="box" scale="1" type="box">
+		<x>-2.55 6.5 4.95</x>
+		<R>0 -1 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
+		<col>0.6 0.8 0.8 1.</col>
+	</body>
+	<body density="0.00001" dim="2 2 2" name="box" scale="1" type="box">
+		<x>4.95 6.5 -2.55</x>
+		<R>0 -1 0 0</R>
+		<v>0. 0. 0.</v>
+		<omega>0. 0. 0.</omega>
+		<pinned>false</pinned>
+		<magnetic>false</magnetic>
+		<friction>0.1</friction>
 		<col>0.8 0.8 0.6 1.</col>
 	</body>
 </root>

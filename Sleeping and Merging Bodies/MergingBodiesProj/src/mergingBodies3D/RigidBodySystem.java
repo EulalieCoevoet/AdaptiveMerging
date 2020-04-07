@@ -150,7 +150,7 @@ public class RigidBodySystem {
 		advanceBodiesVelocities(dt);
 		accumulateForMerging(dt);
 		advanceBodiesPositions(dt);
-		if (collision.usePostStabilization.getValue()) 
+		if (collision.enablePostStabilization.getValue()) 
 			postStabilization(dt);
 		
 		// MERGE

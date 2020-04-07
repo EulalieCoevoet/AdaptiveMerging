@@ -44,6 +44,8 @@ public class RigidCollection extends RigidBody {
 	
 	protected int countBVHRemoval = 0;
 	
+	public static boolean buildBVH = false;
+	
 	/**
 	 * Creates a RigidCollection from two RigidBody.
 	 * 
@@ -60,13 +62,13 @@ public class RigidCollection extends RigidBody {
 	
 		if (body1 instanceof PlaneRigidBody) {
 			set(body2);
-			if(CollisionProcessor.enableCollectionBVH.getValue()) initBVNode(body2);
+			if(buildBVH) initBVNode(body2);
 			body2.parent = this;
 			bodies.add(body2);
 			addBody(body1);
 		} else {
 			set(body1);
-			if(CollisionProcessor.enableCollectionBVH.getValue()) initBVNode(body1);
+			if(buildBVH) initBVNode(body1);
 			body1.parent = this;
 			bodies.add(body1);
 			addBody(body2);
@@ -74,6 +76,7 @@ public class RigidCollection extends RigidBody {
 	}
 	
 	protected void initBVNode(RigidBody body) {
+				
 		if(body.root == null) {
 			BVSphere sphere = new BVSphere(body);
 			body.root = new BVNode(sphere);
@@ -126,9 +129,9 @@ public class RigidCollection extends RigidBody {
 		body.parent = this;
 		bodies.add(body);
 		updateCollectionState(body);
-		if(CollisionProcessor.enableCollectionBVH.getValue()) addBodyToBVH(body);
+		if(buildBVH) addBodyToBVH(body);
 		addBodyInternalMethod(body);
-		if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
+		if(buildBVH) updateBVHCenters(root);
 		
 		updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation(); // TODO: is this really necessary?
@@ -144,9 +147,9 @@ public class RigidCollection extends RigidBody {
 			body.parent = this;
 			this.bodies.add(body);
 			updateCollectionState(body);
-			if(CollisionProcessor.enableCollectionBVH.getValue()) addBodyToBVH(body);
+			if(buildBVH) addBodyToBVH(body);
 			addBodyInternalMethod(body);
-			if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
+			if(buildBVH) updateBVHCenters(root);
 		}
 		
 		updateInertiaRestAndInvert();
@@ -165,9 +168,9 @@ public class RigidCollection extends RigidBody {
 		}
 
 		updateCollectionState(collection);
-		if(CollisionProcessor.enableCollectionBVH.getValue()) addCollectionToBVH(collection); // must be done before updating collection's center of mass 
+		if(buildBVH) addCollectionToBVH(collection); // must be done before updating collection's center of mass 
 	    addBodyInternalMethod(collection);
-	    if(CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
+	    if(buildBVH) updateBVHCenters(root);
 
 	    updateInertiaRestAndInvert();
 		updateRotationalInertiaFromTransformation();
@@ -521,26 +524,9 @@ public class RigidCollection extends RigidBody {
 	 * @param body
 	 */
 	private void updateVelocitiesFrom(final RigidBody body, final Point3d com, final double totalMassInv) {
-
-		Vector3d r = new Vector3d();
-		Vector3d wxr = new Vector3d();
-		Vector3d tmp1 = new Vector3d();
-		Vector3d tmp2 = new Vector3d();
-
-		r.sub( com, body.x );
-		wxr.cross( body.omega, r );
-		tmp1.add( wxr, body.v );
-		tmp1.scale( body.massLinear );
-		
-		r.sub( com, x );
-		wxr.cross( omega, r );
-		tmp2.add( wxr, v );
-		tmp2.scale( massLinear );
-		
-		tmp1.add( tmp2 );
-		tmp1.scale( totalMassInv );
-		
-		v.set(tmp1); 
+		v.scale( massLinear );
+		v.scaleAdd( body.massLinear, body.v, v );
+		v.scale( totalMassInv );
 
 		omega.scale( massLinear );
 		omega.scaleAdd( body.massLinear, body.omega, omega );
@@ -625,23 +611,23 @@ public class RigidCollection extends RigidBody {
 			for (Point3d point : body.boundingBoxB) {
 				p.set(point);
 				body.transformB2C.transform(p);
-				bbmaxB.x = Math.max(bbmaxB.x, p.x);
-				bbmaxB.y = Math.max(bbmaxB.y, p.y);
-				bbmaxB.z = Math.max(bbmaxB.z, p.z);
 				bbminB.x = Math.min(bbminB.x, p.x);
 				bbminB.y = Math.min(bbminB.y, p.y);
 				bbminB.z = Math.min(bbminB.z, p.z);
+				bbmaxB.x = Math.max(bbmaxB.x, p.x);
+				bbmaxB.y = Math.max(bbmaxB.y, p.y);
+				bbmaxB.z = Math.max(bbmaxB.z, p.z);
 			}
 		}
-					
-		boundingBoxB.get(0).set(bbmaxB);
-		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
-		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
-		boundingBoxB.get(3).set(bbminB.x, bbminB.y, bbmaxB.z);
+
 		boundingBoxB.get(4).set(bbminB);
 		boundingBoxB.get(5).set(bbminB.x, bbmaxB.y, bbmaxB.z);
 		boundingBoxB.get(6).set(bbmaxB.x, bbminB.y, bbmaxB.z);
 		boundingBoxB.get(7).set(bbmaxB.x, bbmaxB.y, bbminB.z);
+		boundingBoxB.get(0).set(bbmaxB);
+		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
+		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
+		boundingBoxB.get(3).set(bbminB.x, bbminB.y, bbmaxB.z);
 	}
 	
 	/**
@@ -661,24 +647,24 @@ public class RigidCollection extends RigidBody {
 			for (Point3d point : b.boundingBoxB) {
 				p.set(point);
 				b.transformB2W.transform(p);
-				bbmaxB.x = Math.max(bbmaxB.x, p.x);
-				bbmaxB.y = Math.max(bbmaxB.y, p.y);
-				bbmaxB.z = Math.max(bbmaxB.z, p.z);
 				bbminB.x = Math.min(bbminB.x, p.x);
 				bbminB.y = Math.min(bbminB.y, p.y);
 				bbminB.z = Math.min(bbminB.z, p.z);
+				bbmaxB.x = Math.max(bbmaxB.x, p.x);
+				bbmaxB.y = Math.max(bbmaxB.y, p.y);
+				bbmaxB.z = Math.max(bbmaxB.z, p.z);
 			}
 		}
 		
 		// Temporarily in world coordinates
-		boundingBoxB.get(0).set(bbmaxB);
-		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
-		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
-		boundingBoxB.get(3).set(bbminB.x, bbminB.y, bbmaxB.z);
 		boundingBoxB.get(4).set(bbminB);
 		boundingBoxB.get(5).set(bbminB.x, bbmaxB.y, bbmaxB.z);
 		boundingBoxB.get(6).set(bbmaxB.x, bbminB.y, bbmaxB.z);
 		boundingBoxB.get(7).set(bbmaxB.x, bbmaxB.y, bbminB.z);
+		boundingBoxB.get(0).set(bbmaxB);
+		boundingBoxB.get(1).set(bbmaxB.x, bbminB.y, bbminB.z);
+		boundingBoxB.get(2).set(bbminB.x, bbmaxB.y, bbminB.z);
+		boundingBoxB.get(3).set(bbminB.x, bbminB.y, bbmaxB.z);
 	}
 	
 
@@ -700,7 +686,7 @@ public class RigidCollection extends RigidBody {
 	public void removeBodies(Collection<RigidBody> bodiesToRemove) {
 		bodies.removeAll(bodiesToRemove);
 
-		if (CollisionProcessor.enableCollectionBVH.getValue()) {
+		if (buildBVH) {
 			countBVHRemoval+=bodiesToRemove.size();
 			if (countBVHRemoval<10) { 
 				for (RigidBody body : bodiesToRemove)
@@ -763,7 +749,7 @@ public class RigidCollection extends RigidBody {
 		updateBodiesTransformations();
 		updateBB(); // this can not be updated incrementally
 		transformB2C.multAinvB(transformB2W, tmpTransformB2W); // holds the transformation from the previous collection to the updated one
-		if (CollisionProcessor.enableCollectionBVH.getValue()) updateBVHCenters(root);
+		if (buildBVH) updateBVHCenters(root);
 	}
 	
 

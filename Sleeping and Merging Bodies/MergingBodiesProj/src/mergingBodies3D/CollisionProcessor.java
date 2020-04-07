@@ -20,6 +20,7 @@ import mergingBodies3D.collision.BoxSphere;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
+import mintools.parameters.OptionParameter;
 import mintools.swing.VerticalFlowPanel;
 
 /**
@@ -112,7 +113,7 @@ public class CollisionProcessor {
 	    	
 	    	// set up contacts solver 
 			solver.init(iterations.getValue());
-			solver.feedbackStiffness = (!usePostStabilization.getValue() || postStabilization)? feedbackStiffness.getValue(): 0.;
+			solver.feedbackStiffness = (!enablePostStabilization.getValue() || postStabilization)? feedbackStiffness.getValue(): 0.;
 			solver.postStabilization = postStabilization;
 			solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
 			solver.warmStart = true;
@@ -278,6 +279,7 @@ public class CollisionProcessor {
 		updateJacobiansThatNeedUpdating( solver.contacts, true );
 
 		long now2 = System.nanoTime();	
+		solver.postStabilization = false;
 		solver.solve(dt, restitutionOverride.getValue(), restitution.getValue(), frictionOverride.getValue(), friction.getValue() );
 		singleItPGSTime = ( System.nanoTime() - now2 ) * 1e-9;
 		
@@ -661,7 +663,7 @@ public class CollisionProcessor {
      * phase test such as spatial hashing to reduce the n squared body-body tests.
      * Currently this does the naive n squared collision check.
      */
-    private void broadPhase() {
+    private void broadPhase() {    	
         // Naive n squared body test.. might not be that bad for even a larger number of bodies
     	// as the LCP solve for large number of contacts is really the killer!
         visitID++;
@@ -687,25 +689,8 @@ public class CollisionProcessor {
      */
 	private void narrowPhase( RigidBody body1, RigidBody body2 ) {
 				
-		if ( body1 instanceof RigidCollection || body2 instanceof RigidCollection) {
-			if (enableCollectionBVH.getValue()) {
-				if (body1.root == null) {
-					BVSphere sphere = (body1 instanceof PlaneRigidBody)? new BVSphere(new Point3d(0.,0.,0.), Double.MAX_VALUE, body1): new BVSphere(body1);
-					body1.root = new BVNode(sphere);
-				} else if (body2.root == null) {
-					BVSphere sphere = (body2 instanceof PlaneRigidBody)? new BVSphere(new Point3d(0.,0.,0.), Double.MAX_VALUE, body2): new BVSphere(body2);
-					body2.root = new BVNode(sphere);
-				}
-				collideCollections(body1.root, body2.root, body1, body2);
-			} else {
-				if (body1 instanceof RigidCollection ) {
-					for (RigidBody body: ((RigidCollection)body1).bodies)
-						narrowPhase(body, body2);
-				} else if (body2 instanceof RigidCollection ) {
-					for (RigidBody body: ((RigidCollection)body2).bodies)
-						narrowPhase(body1, body);
-				}
-			}
+		if ( body1 instanceof RigidCollection || body2 instanceof RigidCollection) { 	
+			narrowPhaseCollection(body1, body2);
 		} else if ( body1.geom instanceof RigidBodyGeomComposite ) {
 			RigidBodyGeomComposite g1 = (RigidBodyGeomComposite) body1.geom;
 			g1.updateBodyPositionsFromParent();
@@ -762,6 +747,31 @@ public class CollisionProcessor {
      * (i.e., call a BVNode's updatecW method at most once on any given time step)
      */
     int visitID = 0;
+    
+    private void narrowPhaseCollection(RigidBody body1, RigidBody body2) {    	
+    	if (collectionCD.getValue() == 0) { // Brute force
+			if (body1 instanceof RigidCollection ) {
+				for (RigidBody body: ((RigidCollection)body1).bodies)
+					narrowPhase(body, body2);
+			} else if (body2 instanceof RigidCollection ) {
+				for (RigidBody body: ((RigidCollection)body2).bodies)
+					narrowPhase(body1, body);
+			}
+		} else if (collectionCD.getValue() == 1) { // BVH
+			if (body1.root == null) {
+				BVSphere sphere = (body1 instanceof PlaneRigidBody)? new BVSphere(new Point3d(0.,0.,0.), Double.MAX_VALUE, body1): new BVSphere(body1);
+				body1.root = new BVNode(sphere);
+			} else if (body2.root == null) {
+				BVSphere sphere = (body2 instanceof PlaneRigidBody)? new BVSphere(new Point3d(0.,0.,0.), Double.MAX_VALUE, body2): new BVSphere(body2);
+				body2.root = new BVNode(sphere);
+			}
+			collideCollectionBVH(body1.root, body2.root, body1, body2);
+		} else if (collectionCD.getValue() == 2) { // Sweep and prune
+			collideCollectionSP(body1, body2);				
+		} else {
+			System.err.println("[narrowPhaseCollection] Unsupported collision detection method.");
+		}
+    }
 	
 	private void collideSphereTreeAndPlane( BVNode node1, RigidBody body1, PlaneRigidBody planeBody ) {
 		if ( node1.visitID != visitID ) {
@@ -823,13 +833,13 @@ public class CollisionProcessor {
 	}
 	
 	/**
-	 * Narrow phase for collections, at least one of the two given bodies should be a collection
+	 * Narrow phase for collections (BVH method), at least one of the two given bodies should be a collection
 	 * @param node1
 	 * @param node2
 	 * @param body1
 	 * @param body2
 	 */
-	private void collideCollections(BVNode node1, BVNode node2, RigidBody body1, RigidBody body2) {
+	private void collideCollectionBVH(BVNode node1, BVNode node2, RigidBody body1, RigidBody body2) {
 
 		if (node1.visitID != visitID) {
 			node1.visitID = visitID;
@@ -855,33 +865,77 @@ public class CollisionProcessor {
 					narrowPhase(node1.boundingSphere.body, node2.boundingSphere.body);
 				else if ( isLeaf(node1) ) {
 					for ( BVNode child : node2.children ) 
-						collideCollections(node1, child, body1, body2);		
+						collideCollectionBVH(node1, child, body1, body2);		
 				} else if ( isLeaf(node2) ) {
 					for ( BVNode child : node1.children ) 
-						collideCollections(child, node2, body1, body2);					
+						collideCollectionBVH(child, node2, body1, body2);					
 				} else if ( node1.boundingSphere.r <= node2.boundingSphere.r ) {
 					for ( BVNode child : node2.children ) 
-						collideCollections(node1, child, body1, body2);					
+						collideCollectionBVH(node1, child, body1, body2);					
 				} else {
 					for ( BVNode child : node1.children )
-						collideCollections(child, node2, body1, body2);					
+						collideCollectionBVH(child, node2, body1, body2);					
 				}
 			} else if ( body1 instanceof RigidCollection ) { // only body1 is a collection
 				if ( isLeaf(node1) ) 
 					narrowPhase(node1.boundingSphere.body, body2);
 				else {
 					for ( BVNode child : node1.children ) 
-						collideCollections(child, node2, body1, body2);					
+						collideCollectionBVH(child, node2, body1, body2);					
 				}
 			} else { // only body2 is a collection
 				if ( isLeaf(node2) ) 
 					narrowPhase(body1, node2.boundingSphere.body); 
 				else {
 					for ( BVNode child : node2.children )
-						collideCollections(node1, child, body1, body2);					
+						collideCollectionBVH(node1, child, body1, body2);					
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Narrow phase for collections (sweep and prune method), at least one of the two given bodies should be a collection 
+	 * @param node1
+	 * @param node2
+	 * @param body1
+	 * @param body2
+	 */
+	private void collideCollectionSP(RigidBody body1, RigidBody body2) {
+		if (body1 instanceof RigidCollection ) {
+			for (RigidBody body: ((RigidCollection)body1).bodies)
+				collideCollectionSP(body, body2);
+		} else if (body2 instanceof RigidCollection ) {
+			for (RigidBody body: ((RigidCollection)body2).bodies)
+				collideCollectionSP(body1, body);
+		} else {			
+			if (sweepCollide(body1, body2))
+				narrowPhase(body1, body2);
+		}
+	}
+
+	protected boolean sweepCollide(RigidBody body1, RigidBody body2) {
+		
+		// TODO: make it work... optimize... use a strategy...	
+		if(body1 instanceof PlaneRigidBody || body2 instanceof PlaneRigidBody)
+			return true;
+		
+		if(body1.bbMinW.x>body2.bbMaxW.x) // min > max
+			return false;
+		if(body1.bbMaxW.x<body2.bbMinW.x) // max < min
+			return false;
+		
+		if(body1.bbMinW.y>body2.bbMaxW.y)
+			return false;
+		if(body1.bbMaxW.y<body2.bbMinW.y) 
+			return false;
+		
+		if(body1.bbMinW.z>body2.bbMaxW.z)
+			return false;
+		if(body1.bbMaxW.z<body2.bbMinW.z)
+			return false;
+		
+		return true;
 	}
 	
 	protected boolean isLeaf(BVNode node) {
@@ -986,10 +1040,10 @@ public class CollisionProcessor {
 
 	public BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	public DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
-	public BooleanParameter usePostStabilization = new BooleanParameter("use post stabilization", false );
+	public BooleanParameter enablePostStabilization = new BooleanParameter("use post stabilization", false );
 	public BooleanParameter enableCompliance = new BooleanParameter("enable compliance", true );
 	public DoubleParameter compliance = new DoubleParameter("compliance", 1e-3, 1e-10, 1  );
-	public static BooleanParameter enableCollectionBVH = new BooleanParameter("use collection BVH", false );
+	public static OptionParameter collectionCD = new OptionParameter("collision detection method", 0, "brute force", "bounding sphere hierarchy", "sweep and prune");
 	
     /** Override restitution parameters when set true */
     public BooleanParameter restitutionOverride = new BooleanParameter( "restitution override, otherwise default 0", false );
@@ -1029,10 +1083,9 @@ public class CollisionProcessor {
         vfp.add( friction.getSliderControls(false) );
         
 		vfp.add( feedbackStiffness.getSliderControls(false) );
-		vfp.add( usePostStabilization.getControls() );
+		vfp.add( enablePostStabilization.getControls() );
 		vfp.add( enableCompliance.getControls() );
 		vfp.add( compliance.getSliderControls(true) );
         return vfp.getPanel();
     }
-    
 }

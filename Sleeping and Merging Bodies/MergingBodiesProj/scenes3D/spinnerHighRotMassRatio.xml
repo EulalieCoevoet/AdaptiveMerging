@@ -119,7 +119,7 @@
 		<spring body2="platform" d="8" k="10" pB="-0 12.0 0" pB2="-7.5 0.5 -7.5"/>
 		<spring body2="platform" d="8" k="10" pB="0 12.0 0" pB2="7.5 0.5 -7.5"/>
 	</body>
-	<body density="0.0001" name="ball1" r="2" scale="1" type="sphere">
+	<body density="0.0001" name="box" r="2" scale="1" type="sphere">
 		<x>3.75 7 3.75</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
@@ -128,7 +128,7 @@
 		<magnetic>false</magnetic>
 		<col>0.8 0.6 0.6 1.</col>
 	</body>
-	<body density="0.0001" name="ball2" r="2" scale="1" type="sphere">
+	<body density="0.0001" name="box" r="2" scale="1" type="sphere">
 		<x>-3.75 7 -3.75</x>
 		<R>0. -1 0. 0.</R>
 		<v>0. 0. 0.</v>
@@ -137,7 +137,7 @@
 		<magnetic>false</magnetic>
 		<col>0.6 0.8 0.6 1.</col>
 	</body>
-	<body density="0.0001" dim="3 3 3" name="box1" scale="1" type="box">
+	<body density="0.0001" dim="3 3 3" name="box" scale="1" type="box">
 		<x>-3.75 7 3.75</x>
 		<R>0 -1 0 0</R>
 		<v>0. 0. 0.</v>
@@ -146,7 +146,7 @@
 		<magnetic>false</magnetic>
 		<col>0.6 0.8 0.8 1.</col>
 	</body>
-	<body density="0.0001" dim="3 3 3" name="box2" scale="1" type="box">
+	<body density="0.0001" dim="3 3 3" name="box" scale="1" type="box">
 		<x>3.75 7 -3.75</x>
 		<R>0 -1 0 0</R>
 		<v>0. 0. 0.</v>

@@ -67,10 +67,12 @@ public class XMLParser {
 	}
 	
 	private void parseSystem() {
-		NodeList nList = document.getElementsByTagName("system");
+		NodeList root = document.getElementsByTagName("root");
+		Node rootNode = root.item(0);
+		NodeList nList = rootNode.getChildNodes();
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			Node node = nList.item(temp);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
+			if ( node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equalsIgnoreCase("system") ) {
 				eElement = (Element) node;
 
 				if(eElement.hasAttribute("mouseSpringStiffness")) {
@@ -90,10 +92,12 @@ public class XMLParser {
 	 * Parse collision node to set parameters common to ALL bodies.
 	 */
 	private void parseCollision() {
-		NodeList nList = document.getElementsByTagName("collision");
+		NodeList root = document.getElementsByTagName("root");
+		Node rootNode = root.item(0);
+		NodeList nList = rootNode.getChildNodes();
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			Node node = nList.item(temp);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
+			if ( node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equalsIgnoreCase("collision") ) {
 				eElement = (Element) node;
 				
 				if(eElement.hasAttribute("iterations")) {
@@ -116,6 +120,14 @@ public class XMLParser {
 					system.collision.friction.setValue(Double.parseDouble(eElement.getAttribute("friction")));
 					system.collision.frictionOverride.setValue( true );
 					System.out.println("Friction override enabled and set to" + system.collision.friction.getValue() );
+				}
+				
+				if(eElement.hasAttribute("enablePostStabilization")) {
+					system.collision.enablePostStabilization.setValue(Boolean.parseBoolean(eElement.getAttribute("enablePostStabilization")));
+				}
+				
+				if(eElement.hasAttribute("enableCompliance")) {
+					system.collision.enableCompliance.setValue(Boolean.parseBoolean(eElement.getAttribute("enableCompliance")));
 				}
 			}
 		}
@@ -288,10 +300,10 @@ public class XMLParser {
 		bbB.add( new Point3d( ll.x, ll.y, ur.z ) );
 		bbB.add( new Point3d( ll.x, ur.y, ll.z ) );
 		bbB.add( new Point3d( ll.x, ur.y, ur.z ) );
+		bbB.add( new Point3d( ur.x, ur.y, ur.z ) );
 		bbB.add( new Point3d( ur.x, ll.y, ll.z ) );
 		bbB.add( new Point3d( ur.x, ll.y, ur.z ) );
 		bbB.add( new Point3d( ur.x, ur.y, ll.z ) );
-		bbB.add( new Point3d( ur.x, ur.y, ur.z ) );
 		
 		RigidBody body = new RigidBody( massLinear, massAngular, false, bbB );
 		setCommonAttributes( body, bodyNode ); // this will set our position... 
