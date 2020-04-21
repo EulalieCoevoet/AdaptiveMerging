@@ -82,6 +82,7 @@ public class CollisionProcessor {
 	public HashSet<BodyPairContact> bodyPairContacts = new HashSet<BodyPairContact>();
 	/**used to update bodyPairContacts*/
 	private ArrayList<BodyPairContact> tmpBodyPairContacts = new ArrayList<BodyPairContact>();
+	private ArrayList<BodyPairContact> tmpBodyPairContacts2 = new ArrayList<BodyPairContact>();
 	
     /**
      * Processes all collisions 
@@ -355,6 +356,7 @@ public class CollisionProcessor {
 			}
 		}
 		
+		// second add all bpc of bodies the user interacted with
 		for ( RigidBody body : bodies ) {
 			if (body instanceof RigidCollection) {
 				for ( RigidBody b : ((RigidCollection)body).bodies ) {
@@ -430,7 +432,9 @@ public class CollisionProcessor {
 		}			
 		if (!tmpBodyPairContacts.isEmpty()) {
 			orderedBpcs.addAll(tmpBodyPairContacts);
-			getNextLayer(tmpBodyPairContacts, orderedBpcs);
+			tmpBodyPairContacts2.clear();
+			tmpBodyPairContacts2.addAll(tmpBodyPairContacts);
+			getNextLayer(tmpBodyPairContacts2, orderedBpcs);
 		}
 	}
 	
