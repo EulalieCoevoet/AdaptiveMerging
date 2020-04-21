@@ -197,8 +197,10 @@ public class RigidBodySystem {
 	private Vector3d L = new Vector3d();
 	private Matrix3d Lhat = new Matrix3d();
 	private Matrix3d T = new Matrix3d();
+	
     /**
      * Add gyroscopic stabilization term to angular mass
+     * http://www8.cs.umu.se/research/reports/2006/005/part1.pdf
      */
 	protected void gyroscopicStabilization(double dt) {
 		for (RigidBody body: bodies) {
