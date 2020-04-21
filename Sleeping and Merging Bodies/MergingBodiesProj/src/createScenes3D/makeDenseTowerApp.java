@@ -13,10 +13,7 @@ public class makeDenseTowerApp {
 			// rotate blocks about y as we go around a circle of a 
 			// given radius
 			double r = 10;
-			int layers = 25;
-//			int sx = 3;
-//			int sy = 2;
-//			int sz = 5; 
+			int layers = 6;
 			int sx = 2;
 			int sy = 2;
 			int sz = 4; 
@@ -45,11 +42,11 @@ public class makeDenseTowerApp {
 					double x = Math.cos( radians ) * r;
 					double z = Math.sin( radians ) * r;
 					String name = "B" + i + "L" + j;
-					ps.println("<body type=\"box\" name=\""+name+"\" " + dim + density + ">" );
+					ps.println("<body type=\"box\" name=\""+name+"\" " + dim + " " +density + ">" );
 					ps.println("    <x> " + asString(x,y,z) + " </x>" );
 					ps.println("    <R> 0 -1 0 " + radians + "</R>" );
 					if (j%2 == 0) {
-						ps.println("    <col> " + "0, 0, 0" + "</col>" );
+						ps.println("    <col> " + "0 0 0" + "</col>" );
 					}else {
 						int ind = rand.nextInt( col.length );
 						ps.println("    <col> " + col[ind] + "</col>" );	
