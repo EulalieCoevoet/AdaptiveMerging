@@ -129,10 +129,10 @@ public class RigidBodySystem {
 		
 		// SINGLE ITERATION PGS and ACCUMULATION for UNMERGE
 		collision.updateInCollections(dt, merging.params);  
-		accumulateForUnmerging(dt);
 
 		// UNMERGE
         now = System.nanoTime();   
+		accumulateForUnmerging(dt);
 		merging.unmerge(dt);	
         
 		if (merging.mergingEvent) {
@@ -149,7 +149,10 @@ public class RigidBodySystem {
         
 		// ADVANCE TIME and ACCUMULATE for MERGING    
 		advanceBodiesVelocities(dt);
+        now = System.nanoTime(); 
+        mergingTime = 0;
 		accumulateForMerging(dt);
+        mergingTime += (System.nanoTime() - now) / 1e9;
 		advanceBodiesPositions(dt);
 		if (collision.enablePostStabilization.getValue()) 
 			postStabilization(dt);
@@ -158,7 +161,7 @@ public class RigidBodySystem {
         now = System.nanoTime();    
         if ( (totalSteps % merging.params.stepsBetweenMergeEvents.getValue()) == 0 )
         	merging.merge();
-        mergingTime = (System.nanoTime() - now) / 1e9;
+        mergingTime += (System.nanoTime() - now) / 1e9;
         // SLEEP     
 		sleeping.sleep();		
 
