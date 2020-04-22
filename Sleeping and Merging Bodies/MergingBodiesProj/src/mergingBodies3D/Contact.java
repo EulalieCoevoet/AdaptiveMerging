@@ -389,9 +389,9 @@ public class Contact {
 		
 		if (Math.abs(lambda0) <= 1e-14) // (math.abs is for magnet)
 			state = ContactState.BROKEN;	
-		else if ( Math.abs(w1)>slidingThreshold.getValue() && Math.abs(lambda1)==mu*lambda0) 
+		else if ( Math.abs(w1)>slidingThreshold.getValue() ) // && Math.abs(lambda1)==mu*lambda0) 
 			state = ContactState.ONEDGE;	
-		else if ( Math.abs(w2)>slidingThreshold.getValue() && Math.abs(lambda2)==mu*lambda0) 
+		else if ( Math.abs(w2)>slidingThreshold.getValue() ) // && Math.abs(lambda2)==mu*lambda0) 
 			state = ContactState.ONEDGE;
 		else
 			state = ContactState.CLEAR;
