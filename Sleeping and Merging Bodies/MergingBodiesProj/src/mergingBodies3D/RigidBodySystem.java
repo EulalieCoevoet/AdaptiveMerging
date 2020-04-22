@@ -103,7 +103,8 @@ public class RigidBodySystem {
     	
         long start = System.nanoTime();      
 		totalSteps++;  
-
+		  
+        
 		clearBodies();
 		animation.apply(dt);
 		if (sleeping.params.wakeAll.getValue()) 
@@ -117,7 +118,7 @@ public class RigidBodySystem {
 		// CONTACT DETECTION
 		collision.updateContactsMap(); 
         collision.collisionDetection(dt);
-		collision.updateBodyPairContacts();         
+		collision.updateBodyPairContacts();          
 		
 		long now = System.nanoTime();   
 		collision.warmStart(false); 	
@@ -127,7 +128,7 @@ public class RigidBodySystem {
 		sleeping.wake();
 		
 		// SINGLE ITERATION PGS and ACCUMULATION for UNMERGE
-		collision.updateInCollections(dt, merging.params);
+		collision.updateInCollections(dt, merging.params);  
 		accumulateForUnmerging(dt);
 
 		// UNMERGE
@@ -146,7 +147,7 @@ public class RigidBodySystem {
 		collision.solveLCP(dt, false);
 		collision.clearBodyPairContacts();
         
-		// ADVANCE TIME and ACCUMULATE for MERGING
+		// ADVANCE TIME and ACCUMULATE for MERGING    
 		advanceBodiesVelocities(dt);
 		accumulateForMerging(dt);
 		advanceBodiesPositions(dt);
@@ -154,12 +155,11 @@ public class RigidBodySystem {
 			postStabilization(dt);
 		
 		// MERGE
-        now = System.nanoTime();   
+        now = System.nanoTime();    
         if ( (totalSteps % merging.params.stepsBetweenMergeEvents.getValue()) == 0 )
         	merging.merge();
         mergingTime = (System.nanoTime() - now) / 1e9;
-		
-        // SLEEP
+        // SLEEP     
 		sleeping.sleep();		
 
 		// MISC
@@ -317,9 +317,13 @@ public class RigidBodySystem {
 	
 	private void accumulateForUnmerging(double dt) {
 		for (RigidBody body: bodies) {
-			if (body instanceof RigidCollection)
-				for (BodyPairContact bpc : ((RigidCollection)body).bodyPairContacts) 
-					bpc.accumulateForUnmerging(merging.params, dt);
+			if (body instanceof RigidCollection) {
+				if (!body.sleeping) {
+					for (BodyPairContact bpc : ((RigidCollection)body).bodyPairContacts) {
+						bpc.accumulateForUnmerging(merging.params, dt);
+					}
+				}
+			}
 		}
 	}
 	
