@@ -1,0 +1,79 @@
+clear 
+close all
+scene_name = "tower25platform30_merged"
+
+fontSize = 13
+fontName = 'Times New Roman'
+
+plot_name = "Performance With Time for " + scene_name + " Scene"
+X_merged = readtable(scene_name + ".csv")
+num_timesteps = min(height(X_merged));
+
+hfig = figure('Renderer', 'painters', 'Position', [0 0 1800 350]), set(gcf,'color','w'); % if you want two figures one on top of the other
+%hfig = figure('Renderer', 'painters', 'Position', [0 0 900 700]), set(gcf,'color','w'); % if you want two figures side by side
+subplot(1, 2, 1)
+hold on
+
+smoothing = 3
+
+width = 1
+
+starting = 1
+
+%plot(X_merged{1:num_timesteps, 13}, 'DisplayName', 'Total Compute Time')
+
+plot(movmean(X_merged{starting:num_timesteps, 13 },smoothing), 'LineWidth', width, 'DisplayName','Total Computation')
+
+plot(movmean(X_merged{starting:num_timesteps, 5 },smoothing), 'LineWidth', width, 'DisplayName','Full LCP Solve')
+
+plot(movmean(X_merged{starting:num_timesteps, 3 }, smoothing), 'LineWidth', width,'DisplayName','Collision Detection')
+
+plot(movmean(X_merged{starting:num_timesteps, 7 }, smoothing), 'LineWidth', width,'DisplayName','PGS Sweep')
+
+plot(movmean(X_merged{starting:num_timesteps, 11 }, smoothing), 'LineWidth', width,'DisplayName','Unmerging')
+
+%X_merged{1:num_timesteps,6}(X_merged{1:num_timesteps,6}==0) = 0.000000000001;
+plot(movmean(X_merged{starting:num_timesteps, 9 }, smoothing), 'LineWidth', width,'DisplayName','Merging')
+%grid on
+%X_merged{1:num_timesteps,10}(X_merged{1:num_timesteps,10}==0) = 0.000000000001;
+
+%xlim([0 3000])
+
+ylim([0.000001 10])
+
+%set(gca, 'YTick', [10.^-6 10.^-4 10^-2 ])
+set(gca,'yscale','log')
+set(gca, 'fontsize', fontSize, 'fontname', fontName);
+
+hold off
+xlabel("Time Step")
+lgd = legend('Location', 'northeast') %'northwe'), %'southwest')
+
+ylabel("Computation Time (s)")
+
+subplot(1, 2, 2)
+
+hold on;
+
+X_merged{starting:num_timesteps,1}(X_merged{starting:num_timesteps,1}==0) = 1;
+X_merged{starting:num_timesteps,2}(X_merged{starting:num_timesteps,2}==0) = 1;
+plot(movmean(X_merged{starting:num_timesteps, 1}, smoothing), 'LineWidth', width,'DisplayName','Bodies')
+plot(movmean(X_merged{starting:num_timesteps, 2}, smoothing), 'LineWidth', width,'DisplayName','Contacts')
+xlabel("Time Step")
+ylabel("Number")
+%xlim([0 3000])
+lgd = legend
+set(lgd,'color','none');
+set(gca, 'YTick', [ 10^0 10^1 10^2 10^3])
+set(gca,'yscale','log')
+set(gca, 'fontsize', fontSize, 'fontname', fontName);
+hold off;
+
+
+set(hfig,'Units','Inches');
+pos = get(hfig,'Position');
+set(hfig,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
+print(hfig,scene_name,'-dpdf','-r0');
+
+
+

@@ -41,6 +41,7 @@
 		<pinned>false</pinned>
 		<magnetic>false</magnetic>
 	</body>
+
 	<body density="1" dim="1.8 1.8 1.8" name="box2" scale="1" type="box">
 		<x>0 100 0</x>
 		<R>0 0 1 0</R>
@@ -161,6 +162,8 @@
 			<pinned>false</pinned>
 			<magnetic>false</magnetic>
 		</body>
+		
+
 		<body density="1" dim="1 100 1" name="box" scale="1" type="box">
 			<x>-40 50.0 -40</x>
 			<R>0. -1 0. 0.</R>
