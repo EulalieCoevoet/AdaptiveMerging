@@ -24,6 +24,7 @@ public class Display {
 
 	    public BooleanParameter hideOverlay = new BooleanParameter( "hide overlay", true );
 	    public BooleanParameter drawGraphs = new BooleanParameter( "draw performance graphs", false );
+	    public BooleanParameter drawPGSGraph = new BooleanParameter( "draw PGS convergence graph", false );
 	    public BooleanParameter drawMemGraphs = new BooleanParameter( "draw memory graphs", false );
 	    public BooleanParameter enableQMG = new BooleanParameter("enable quantity monitor (otherwise graph is boring)", false );
 	    public BooleanParameter drawQMG = new BooleanParameter("draw quantity monitor graph", false );
@@ -271,6 +272,7 @@ public class Display {
 		HorizontalFlowPanel hfp = new HorizontalFlowPanel();
         hfp.add( params.hideOverlay.getControls() );
         hfp.add( params.drawGraphs.getControls() );
+        hfp.add( params.drawPGSGraph.getControls() );
         hfp.add( params.drawMemGraphs.getControls() );
         vfp.add( hfp.getPanel() );
         

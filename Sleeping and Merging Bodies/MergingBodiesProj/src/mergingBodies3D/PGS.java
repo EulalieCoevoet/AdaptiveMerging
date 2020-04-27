@@ -22,6 +22,8 @@ public class PGS {
 	
 	public void init(int iterations) {
 		this.iterations=iterations;
+		tolerance=1e-5;
+		omega=1.;
 		feedbackStiffness=0.;
 		compliance=0.;
 		contacts = null;
@@ -34,6 +36,12 @@ public class PGS {
 	
 	/** Number of iterations */
 	public int iterations;
+
+	/** Tolerance */
+	public double tolerance;
+	
+	/** Overshooting parameter */
+	public double omega;
 	
 	/** Feedback stiffness coefficient*/
 	public double feedbackStiffness;
@@ -49,6 +57,8 @@ public class PGS {
 	
 	/** Post stabilization option */
 	protected boolean postStabilization;
+	
+	public ArrayList<Double> changes = new ArrayList<Double>();
 	
 	public void disableWarmStart(){
 		warmStart = false;
@@ -82,11 +92,19 @@ public class PGS {
 		}
 		
 		int iter = iterations;
+		if (!computeInCollection)
+			changes.clear();
+		
 		while(iter > 0) {
-			
+
+			double change = Double.MIN_VALUE;
 			for (int i=0; i<contacts.size(); i++) {
-				
 				Contact contact = contacts.get(i);
+
+				RigidBody body1 = (contact.body1.isInCollection() && !computeInCollection)? contact.body1.parent: contact.body1;
+				RigidBody body2 = (contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
+				prevdv1.set(body1.deltaV);
+				prevdv2.set(body2.deltaV);
 					
 				// Normal direction
 				double Jdvn = contact.getJdv(computeInCollection,0);
@@ -145,12 +163,38 @@ public class PGS {
 
 				updateDeltaVwithLambdai(contact, contact.lambda2 - prevLambda_t2, 2);
 				
+				change = Math.max(change, getDeltaVChange(contact));
 				if (iter == 1) // Last iteration: avoid looping again over contacts
 					contact.updateContactState(mu, computeInCollection);
 			}
 			
 			iter--;
+			
+			if (!computeInCollection)
+				changes.add(change);
+			
+			if (!computeInCollection && change < tolerance) {
+				break;
+			}
 		}
+	}
+	
+	Vector6d prevdv1 = new Vector6d(); 
+	Vector6d prevdv2 = new Vector6d(); 
+	Vector3d dv1 = new Vector3d(); 
+	Vector3d dv2 = new Vector3d();  
+	Vector3d dv3 = new Vector3d(); 
+	Vector3d dv4 = new Vector3d(); 
+	private double getDeltaVChange(Contact contact) {
+		RigidBody body1 = (contact.body1.isInCollection() && !computeInCollection)? contact.body1.parent: contact.body1;
+		RigidBody body2 = (contact.body2.isInCollection() && !computeInCollection)? contact.body2.parent: contact.body2;
+
+		dv1.sub(body1.deltaV.v, prevdv1.v);
+		dv2.sub(body2.deltaV.v, prevdv2.v); 
+		dv3.sub(body1.deltaV.w, prevdv1.w);
+		dv4.sub(body2.deltaV.w, prevdv2.w); 
+
+		return Math.max(Math.max(dv1.length(),dv2.length()),Math.max(dv3.length(),dv4.length()));
 	}
 	
 	/** temporary working variable */

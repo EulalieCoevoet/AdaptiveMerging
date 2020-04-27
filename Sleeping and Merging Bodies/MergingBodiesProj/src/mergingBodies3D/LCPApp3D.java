@@ -64,6 +64,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private Factory factory = new Factory( system );
 
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
+    private PGSConvergenceMonitor pgsm = new PGSConvergenceMonitor();
     
     private String sceneFilename = "scenes3D/factoryTest2.xml";
     
@@ -312,6 +313,11 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         if ( system.display.params.drawGraphs.getValue() ) {
         	ccm.draw(drawable);
         }
+        
+        if ( system.display.params.drawPGSGraph.getValue() ) {
+        	pgsm.draw(drawable);
+        }
+        
         if ( system.display.params.drawMemGraphs.getValue() ) {
         	memMonitor.draw( drawable, 0 );
         	computeTimeMonitor.draw( drawable, 1);
@@ -323,7 +329,10 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         
         if ( run.getValue() || stepped ) {
         	if ( system.display.params.drawGraphs.getValue() ) {
-            ccm.monitor(system);
+	            ccm.monitor(system);
+        	}
+        	if ( system.display.params.drawPGSGraph.getValue() ) {
+	            pgsm.monitor(system);
         	}
         	stepped = false;        
             if ( record.getValue() ) {

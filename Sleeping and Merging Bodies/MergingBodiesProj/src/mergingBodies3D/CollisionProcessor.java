@@ -54,7 +54,7 @@ public class CollisionProcessor {
     public ContactPool contactPool = new ContactPool();
     
 	/** PGS solver */
-    private PGS solver = new PGS();
+    public PGS solver = new PGS();
 	
     /**
      * Creates this collision processor with the provided set of bodies
@@ -114,6 +114,8 @@ public class CollisionProcessor {
 	    	
 	    	// set up contacts solver 
 			solver.init(iterations.getValue());
+			solver.tolerance = tolerance.getValue();
+			solver.omega = omega.getValue();
 			solver.feedbackStiffness = (!enablePostStabilization.getValue() || postStabilization)? feedbackStiffness.getValue(): 0.;
 			solver.postStabilization = postStabilization;
 			solver.compliance = (enableCompliance.getValue())? compliance.getValue() : 0.;
@@ -1062,9 +1064,11 @@ public class CollisionProcessor {
     public DoubleParameter friction = new DoubleParameter("Coulomb friction, if override enabled", 0.1, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
-    public IntParameter iterations = new IntParameter("iterations for PGS solve", 200, 1, 5000);
+    public IntParameter iterations = new IntParameter("iterations", 200, 1, 5000);
+    public DoubleParameter tolerance = new DoubleParameter("tolerance", 1e-5, 1e-14, 1e-1);
+    public DoubleParameter omega = new DoubleParameter("omega", 1, 1, 2);
 
-	public IntParameter iterationsInCollection = new IntParameter("iterations for PGS solve in collection", 1, 1, 5000);
+	public IntParameter iterationsInCollection = new IntParameter("PGS sweep counts", 1, 1, 5000);
         
     
     /**
@@ -1078,6 +1082,8 @@ public class CollisionProcessor {
 		vfp.add( shuffle.getControls() );
 		
         vfp.add( iterations.getSliderControls() );
+        vfp.add( tolerance.getSliderControls(true) );
+        vfp.add( omega.getSliderControls(false) );
 		vfp.add( iterationsInCollection.getSliderControls() );
 
 		vfp.add( restitutionOverride.getControls() );
