@@ -143,8 +143,12 @@ public class RigidBodySystem {
         unmergingTime = (System.nanoTime() - now) / 1e9;
 		
 		// FULL LCP SOLVE
-		collision.redoWarmStart(); // we'll need to redo the warm start if the updateInCollections was run and mucked up the warm started values already
-		collision.solveLCP(dt, false);
+        if ( collision.warmStart.getValue() ) {
+        	collision.redoWarmStart(); // we'll need to redo the warm start if the updateInCollections was run and mucked up the warm started values already
+        } else {
+        	collision.noWarmStart();
+        }
+        collision.solveLCP(dt, false);
 		collision.clearBodyPairContacts();
         
 		// ADVANCE TIME and ACCUMULATE for MERGING    

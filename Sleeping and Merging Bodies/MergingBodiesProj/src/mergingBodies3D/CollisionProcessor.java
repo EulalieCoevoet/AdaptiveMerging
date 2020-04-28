@@ -458,6 +458,17 @@ public class CollisionProcessor {
 		}
 	}
 	
+	/**
+	 * We never want to do this, except for testing convergence 
+	 */
+	protected void noWarmStart() {
+		for (Contact c : contacts) {
+			c.lambda0 = 0;
+			c.lambda1 = 0;
+			c.lambda2 = 0;
+		}
+	}
+	
 	int badWarmStarts = 0;
 	int badWarmStartsRepaired = 0;
 	
@@ -1044,6 +1055,7 @@ public class CollisionProcessor {
         }
     }
 
+    public BooleanParameter warmStart = new BooleanParameter( "warm start (ONLY DISABLE FOR CONVERGENCE TESTS)", true );
 	public BooleanParameter shuffle = new BooleanParameter( "shuffle", false);
 	public DoubleParameter feedbackStiffness = new DoubleParameter("feedback coefficient", 0.5, 0, 50 );
 	public BooleanParameter enablePostStabilization = new BooleanParameter("use post stabilization", false );
@@ -1066,7 +1078,7 @@ public class CollisionProcessor {
     /** Number of iterations to use in projected Gauss Seidel solve */
     public IntParameter iterations = new IntParameter("iterations", 30, 1, 5000);
     public DoubleParameter tolerance = new DoubleParameter("tolerance", 1e-5, 1e-14, 1e-1);
-    public DoubleParameter omega = new DoubleParameter("omega", 1, 1, 2);
+    public DoubleParameter omega = new DoubleParameter("omega (PSOR, broken?)", 1, 1, 2);
 
 	public IntParameter iterationsInCollection = new IntParameter("PGS sweep counts", 1, 1, 5000);
         
@@ -1079,6 +1091,7 @@ public class CollisionProcessor {
         vfp.setBorder( new TitledBorder("Collision Processing Controls") );
         ((TitledBorder) vfp.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
         
+        vfp.add( warmStart.getControls() );
 		vfp.add( shuffle.getControls() );
 		
         vfp.add( iterations.getSliderControls() );
