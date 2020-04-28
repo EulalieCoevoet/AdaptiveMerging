@@ -1064,7 +1064,7 @@ public class CollisionProcessor {
     public DoubleParameter friction = new DoubleParameter("Coulomb friction, if override enabled", 0.1, 0, 2 );
     
     /** Number of iterations to use in projected Gauss Seidel solve */
-    public IntParameter iterations = new IntParameter("iterations", 200, 1, 5000);
+    public IntParameter iterations = new IntParameter("iterations", 30, 1, 5000);
     public DoubleParameter tolerance = new DoubleParameter("tolerance", 1e-5, 1e-14, 1e-1);
     public DoubleParameter omega = new DoubleParameter("omega", 1, 1, 2);
 

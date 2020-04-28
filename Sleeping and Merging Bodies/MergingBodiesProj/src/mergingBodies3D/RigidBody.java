@@ -565,6 +565,7 @@ public class RigidBody {
         updateRotationalInertiaFromTransformation();
         
         metricHistory.clear();
+        sleeping = false;
     }
    
     static private double[] openGLmatrix = new double[16];

@@ -11,6 +11,11 @@ import random
 
 root = ET.Element('root')
 
+# Collision
+collision = ET.SubElement(root, 'collision')
+collision.set('feedbackStiffness','0')
+collision.set('enableCompliance','false')
+
 Box(root, name='dock', position="0. -5. -40.", dim="100 5 70", color="0.1 0.1 0.1 1.", pinned="true", friction="0.")
 
 # Containers
@@ -22,8 +27,12 @@ colors=["0.5 0.3 0.3 1.","0.3 0.5 0.3 1.","0.3 0.3 0.5 1.","0.7 0.7 0.5 1."]
 disp=0
 x=0; z=-36; y=-1;
 for k in range(2):
-    train = Composite(root, obj="data/train.obj", scale="0.025", name="train", position=str(x)+" -0.5 "+str(disp+z-2.5),density="1", color="0.3 0.3 0.3", velocity="-0.5 0 0")
-    train.addBox(name='box', dim="35 0.95 2.5", position="16 -1.5 1.5")
+    if (k==0):
+        train = Composite(root, obj="data/train.obj", scale="0.025", name="train", position=str(x)+" -0.5 "+str(disp+z-2.5),density="1", color="0.3 0.3 0.3", velocity="-0.5 0 0")
+        train.addBox(name='box', dim="35 0.95 2.5", position="16 -1.5 1.5")
+    else:
+        train = Composite(root, obj="data/train.obj", scale="0.025", name="train", position=str(x)+" -0.5 "+str(disp+z-2.5),density="1", color="0.3 0.3 0.3", velocity="-0.10 0 0")
+        train.addBox(name='box', dim="35 0.95 2.5", position="16 -1.5 1.5")
 
     Box(root, name='rail1', position="0. -2.5 "+str(disp+z), dim="100 0.2 0.2", color="0.1 0.1 0.1 1.", pinned="true", friction="0.")
     Box(root, name='rail2', position="0. -2.5 "+str(disp+z-2), dim="100 0.2 0.2", color="0.1 0.1 0.1 1.", pinned="true", friction="0.")
@@ -92,11 +101,12 @@ for k in range(2):
     composite.addBox(name='cockpit1', dim="1 1 1", position="2 5.5 -10")
     composite.addBox(name='cockpit2', dim="1 1 1", position="-10 5.5 -10")
 
-    mag = Box(root, name='magnet', dim="1 0.5 1", position=str(disp-2)+" 4 -6", magnetic="true", color="0. 0. 0. 1.")
-    mag.addSpring(positionB="-0.4 0 0.4", positionW=str(disp-2.4)+" 5.5 -5.6",controllable="true", k="100", d="1")
-    mag.addSpring(positionB="0.4 0. 0.4", positionW=str(disp-1.6)+" 5.5 -5.6", controllable="true", k="100", d="1")
-    mag.addSpring(positionB="-0.4 0. -0.4", positionW=str(disp-2.4)+" 5.5 -6.4",controllable="true",k="100", d="1")
-    mag.addSpring(positionB="0.4 0. -0.4", positionW=str(disp-1.6)+" 5.5 -6.4",controllable="true", k="100", d="1")
+    if (k==0):
+        mag = Box(root, name='magnet', dim="1 0.5 1", position=str(disp-2)+" 4 -6", magnetic="true", color="0. 0. 0. 1.")
+        mag.addSpring(positionB="-0.4 0 0.4", positionW=str(disp-2.4)+" 5.5 -5.6",controllable="true", k="100", d="1")
+        mag.addSpring(positionB="0.4 0. 0.4", positionW=str(disp-1.6)+" 5.5 -5.6", controllable="true", k="100", d="1")
+        mag.addSpring(positionB="-0.4 0. -0.4", positionW=str(disp-2.4)+" 5.5 -6.4",controllable="true",k="100", d="1")
+        mag.addSpring(positionB="0.4 0. -0.4", positionW=str(disp-1.6)+" 5.5 -6.4",controllable="true", k="100", d="1")
 
     # Boat
     boat = Composite(root, obj="data/boat.obj", scale="0.1", name="boat", position=str(disp)+" -2.5 0.",density="10", color=boatColors[k])
