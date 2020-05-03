@@ -2,6 +2,7 @@
 
 [![Paper](https://img.shields.io/badge/Paper-ACMSIGGRAPH-yellow.svg)]()
 [![Slides](https://img.shields.io/badge/Slides-on_google_drive-blue.svg)]()
+[![Video](https://img.shields.io/badge/Video-on_youtube-green.svg)](https://www.youtube.com/embed/mmVVRVt8EF4)
 
 ![TowerPlatform](https://github.com/EulalieCoevoet/AdaptiveMerging/blob/master/images/towerplatform.png "A tower on a mobile platform hit by a projectile.")
 
