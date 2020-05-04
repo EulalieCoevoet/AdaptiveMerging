@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import java.util.ArrayList;
 import java.util.Random;

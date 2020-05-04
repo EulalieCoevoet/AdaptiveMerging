@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -48,7 +48,7 @@ import mintools.viewer.SceneGraphNode;
 /**
  * Main entry point for the application
  */
-public class LCPApp implements SceneGraphNode, Interactor {
+public class LCPApp2D implements SceneGraphNode, Interactor {
 
     private EasyViewer ev;
 
@@ -65,19 +65,19 @@ public class LCPApp implements SceneGraphNode, Interactor {
      * @param args
      */
     public static void main(String[] args) {
-        new LCPApp();        
+        new LCPApp2D();        
     }
     
     private String systemDir;
     /** Creates the application / scene instance */
-    public LCPApp() {
+    public LCPApp2D() {
     	setUp();
     }
     
     public void setUp() {
         system.mouseSpring = mouseSpring;
         system.mouseImpulse = mouseImpulse;
-        String filename = "datalcp/line.png";
+        String filename = "scenes2D/line.png";
        	loadSystem(filename); 
 
         T.getBackingMatrix().setIdentity();
@@ -330,7 +330,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
         load.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                File f = FileSelect.select("png", "image", "load", "datalcp/", true );
+                File f = FileSelect.select("png", "image", "load", "scenes2D/", true );
                 if ( f != null ) {
                     loadSystem( f.getPath() );
                 }
@@ -509,7 +509,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
     @Override
     public void attach(Component component) {
     
-        File directory = new File("datalcp");
+        File directory = new File("scenes2D");
         files = directory.listFiles(new FilenameFilter() {            
             @Override
             public boolean accept( File dir, String name ) {
@@ -616,13 +616,13 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     system.jiggle();                                        
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_G ) {                   
-                   File f = FileSelect.select("png", "image for factory", "load", "datalcp/", true );
+                   File f = FileSelect.select("png", "image for factory", "load", "scenes2D/", true );
                     if ( f != null ) {
                         loadFactorySystem( f.getPath() );
                     }   
                 } 
                 else if ( e.getKeyCode() == KeyEvent.VK_F ) {                                       
-                    loadFactorySystem( "datalcp/tetrisTube.png" );
+                    loadFactorySystem( "scenes2D/tetrisTube.png" );
                     factory.spread.setValue(30);
                     factory.interval.setValue(0.4);
                     factory.downVelocity.setValue(10.0);
@@ -639,7 +639,7 @@ public class LCPApp implements SceneGraphNode, Interactor {
                     	system.generateBody= true;
                 }
                 else if (  e.getKeyCode() == KeyEvent.VK_L ) {                    
-                    File f = FileSelect.select("png", "image", "load", "datalcp/", true );
+                    File f = FileSelect.select("png", "image", "load", "scenes2D/", true );
                     if ( f != null ) {
                         loadSystem( f.getPath() );
                     }

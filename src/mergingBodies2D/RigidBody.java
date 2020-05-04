@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,9 +8,9 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import mergingBodies.Contact.ContactState;
-import mergingBodies.Merging.MergeParameters;
-import mergingBodies.MotionMetricProcessor;
+import mergingBodies2D.MotionMetricProcessor;
+import mergingBodies2D.Contact.ContactState;
+import mergingBodies2D.Merging.MergeParameters;
 import no.uib.cipr.matrix.DenseVector;
 
 import javax.vecmath.Color3f;

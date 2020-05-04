@@ -6,13 +6,13 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import mergingBodies.CollisionProcessor;
-import mergingBodies.ImageBlocker;
-import mergingBodies.RigidBody;
+import mergingBodies2D.CollisionProcessor;
+import mergingBodies2D.ImageBlocker;
+import mergingBodies2D.RigidBody;
 
 class CollisionProcessorTest extends CollisionProcessor {
 
-	String defaultFile = "datalcp/twoStacksTest.png";
+	String defaultFile = "scenes2D/twoStacksTest.png";
 	public List<RigidBody> defaultBodies;
 	
 	public CollisionProcessorTest() {

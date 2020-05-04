@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,11 +10,11 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector2d;
 
+import mergingBodies2D.Merging.MergeParameters;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
-import mergingBodies.Merging.MergeParameters;
 
 /**
  * Class for detecting and resolving collisions. Currently this class uses penalty forces between rigid bodies.

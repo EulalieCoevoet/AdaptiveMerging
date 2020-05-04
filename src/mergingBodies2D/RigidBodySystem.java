@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,7 +11,7 @@ import javax.swing.border.TitledBorder;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import mergingBodies.Merging.MergeConditions;
+import mergingBodies2D.Merging.MergeConditions;
 import mintools.parameters.BooleanParameter;
 import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;

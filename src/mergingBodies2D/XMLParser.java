@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;

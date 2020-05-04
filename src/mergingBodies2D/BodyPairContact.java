@@ -1,10 +1,10 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import mergingBodies.Contact.ContactState;
-import mergingBodies.Merging.MergeParameters;
+import mergingBodies2D.Contact.ContactState;
+import mergingBodies2D.Merging.MergeParameters;
 
 
 /**

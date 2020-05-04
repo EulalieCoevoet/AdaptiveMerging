@@ -1,4 +1,4 @@
-package  mergingBodies;
+package  mergingBodies2D;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;

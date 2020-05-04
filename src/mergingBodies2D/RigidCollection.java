@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -11,7 +11,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import mergingBodies.Merging.MergeParameters;
+import mergingBodies2D.Merging.MergeParameters;
 
 public class RigidCollection extends RigidBody {
 

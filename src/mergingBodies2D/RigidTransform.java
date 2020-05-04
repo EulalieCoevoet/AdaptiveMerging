@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;

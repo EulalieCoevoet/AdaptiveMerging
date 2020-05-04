@@ -4,16 +4,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import mergingBodies.LCPApp;
-import mergingBodies.RigidBody;
-import mergingBodies.RigidBodySystem;
-import mergingBodies.Merging.MergeParameters;
-import mergingBodies.Sleeping.SleepParameters;
-import mergingBodies.RigidCollection;
-import mergingBodies.Contact;
+import mergingBodies2D.Contact;
+import mergingBodies2D.LCPApp2D;
+import mergingBodies2D.RigidBody;
+import mergingBodies2D.RigidBodySystem;
+import mergingBodies2D.RigidCollection;
+import mergingBodies2D.Merging.MergeParameters;
+import mergingBodies2D.Sleeping.SleepParameters;
+
 import javax.vecmath.Vector2d;
 
-public class LCPAppTests extends LCPApp {
+public class LCPAppTests extends LCPApp2D {
 
 	double dt = 0.05;
 	MergeParameters mergeParams;
@@ -31,7 +32,7 @@ public class LCPAppTests extends LCPApp {
 	 * Simple test for merge condition
 	 */
 	public void simpleMerging() {
-		loadSystem("datalcp/twoStacksTest.png");
+		loadSystem("scenes2D/twoStacksTest.png");
 
 		assertEquals(6, system.bodies.size()); // should have 6 bodies when loading the scene
 
@@ -55,7 +56,7 @@ public class LCPAppTests extends LCPApp {
 	 */
 	public void mergingAndSleeping() {  
 
-		loadSystem("datalcp/twoStacksTest.png");
+		loadSystem("scenes2D/twoStacksTest.png");
 
 		for (RigidBody body: system.bodies)
 			assertEquals(false, body.isSleeping); // every bodies should be active at beginning of the simulation
@@ -74,7 +75,7 @@ public class LCPAppTests extends LCPApp {
 	 * Test the behavior of temporarily pinned bodies
 	 */
 	public void tempPinnedObject() {
-		loadSystem("datalcp/twoStacksTest.png");
+		loadSystem("scenes2D/twoStacksTest.png");
 		
 		for (int i=0; i<10; i++)
 			system.advanceTime(dt);
@@ -100,7 +101,7 @@ public class LCPAppTests extends LCPApp {
 	 * Checks that the merging is working with a temporarily pinned body.
 	 */
 	public void mergingWithTempPinnedObject() {
-		loadSystem("datalcp/twoStacksTest.png");
+		loadSystem("scenes2D/twoStacksTest.png");
 
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableMergePinned.setValue(true);
@@ -115,7 +116,7 @@ public class LCPAppTests extends LCPApp {
 	 * Simple test for one iteration PGS in collection
 	 */
 	public void updateContactInCollection() {
-		loadSystem("datalcp/twoStacksTest.png");
+		loadSystem("scenes2D/twoStacksTest.png");
 
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableUnmerging.setValue(false);
@@ -148,7 +149,7 @@ public class LCPAppTests extends LCPApp {
 	 * After merging, if the bodies are stable/static, the internal contacts should remain the same
 	 */
 	public void updateContactInCollectionConsistency() {
-		loadSystem("datalcp/doubleStackUnmergeTest.png");
+		loadSystem("scenes2D/doubleStackUnmergeTest.png");
 
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableUnmerging.setValue(false);
@@ -182,7 +183,7 @@ public class LCPAppTests extends LCPApp {
 	 * After merging, if the bodies are stable/static, the internal contacts should remain the same 
 	 */
 	public void updateContactInCollectionConsistencyPinned() {
-		loadSystem("datalcp/singleBlockSmallTest.png");
+		loadSystem("scenes2D/singleBlockSmallTest.png");
 
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.updateContactsInCollections.setValue(true);
@@ -213,7 +214,7 @@ public class LCPAppTests extends LCPApp {
 	 * Critical test : this test will fail if the external contacts are not updated correctly
 	 */
 	public void externalContacts() {
-		loadSystem("datalcp/unstableStackTest.png");
+		loadSystem("scenes2D/unstableStackTest.png");
 
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableUnmerging.setValue(true);
@@ -229,7 +230,7 @@ public class LCPAppTests extends LCPApp {
 	 * Critical test for multiple bodies merge during single time step
 	 */
 	public void mergeMultipleBodiesSingleStep() {
-		loadSystem("datalcp/jamTest.png");
+		loadSystem("scenes2D/jamTest.png");
 
 		mergeParams.enableMerging.setValue(false);
 		for (int i=0; i<400; i++)
@@ -250,7 +251,7 @@ public class LCPAppTests extends LCPApp {
 	 * Test collisionProcessor bodyPairContact list
 	 */
 	public void storeBodyPairContactInCollisionProcessor() {
-		loadSystem("datalcp/doubleStackUnmergeTest.png");
+		loadSystem("scenes2D/doubleStackUnmergeTest.png");
 		
 		mergeParams.enableMerging.setValue(false);
 		
@@ -282,7 +283,7 @@ public class LCPAppTests extends LCPApp {
 	 * Test that the bodyPairContact list of collection is correctly being updated
 	 */
 	public void storeBodyPairContactInCollection() {
-		loadSystem("datalcp/doubleStackUnmergeTest.png");
+		loadSystem("scenes2D/doubleStackUnmergeTest.png");
 		
 		mergeParams.enableMerging.setValue(true);
 		mergeParams.enableMergePinned.setValue(false);

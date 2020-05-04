@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 import java.util.Random;
 
 import javax.vecmath.Color3f;

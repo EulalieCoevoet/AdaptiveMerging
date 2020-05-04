@@ -1,4 +1,4 @@
-package mergingBodies;
+package mergingBodies2D;
 
 import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
