@@ -28,7 +28,7 @@ Numerous examples are available in the folder `scene3D`. Scenes are built in XML
 
 This repository also holds a 2D implementation of adaptive merging. You can try to run the Java application `src/mergingBodies2D/LCPApp2D`, just note that the implementation in 2D is not up to date with what is discribed in the paper. Scenes are built from 2D pixel art `.png` images:
 
-- Red pixels are spring. <img src="https://github.com/EulalieCoevoet/AdaptiveMerging/blob/master/images/cargoship2D.png" width="300" align="right">
+- Red pixels are spring. 
 - Blue objects are pinned bodies.
 - The shade of the color will change the density (dark for dense body).
 - Green objects will be temporarily pinned.
