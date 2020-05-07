@@ -21,13 +21,12 @@ We reduce computation time in rigid body simulations by merging collections of b
 
 ## 3D Java Application
 
-To test our implementation, run the Java application `src/mergingBodies3D/LCPApp3D`.
-Scenes are built in XML (see the `Help` tab of the Java application for documentation) **TODO: move this doc somewhere more convenient**. Numerous examples are available in the folder `scene3D`. To make your own scene, you can also have a look at the `scenes3D/python` folder which contains a library to generate the XML, along with some examples.
-
+To test our implementation, you can run the Java application `src/mergingBodies3D/LCPApp3D`.
+Numerous examples are available in the folder `scene3D`. Scenes are built in XML (see the README file under the folder `scenes3D`, but to make your own scene, you can also have a look at the `scenes3D/python` folder which contains tools to generate the XML, along with some examples.
 
 ## 2D Java Application
 
-This repository also holds a 2D implementation of adaptive merging. Try to run the Java application `src/mergingBodies2D/LCPApp2D` **TODO: update**. Scenes are built from 2D pixel art `.png` images:
+This repository also holds a 2D implementation of adaptive merging. You can try to run the Java application `src/mergingBodies2D/LCPApp2D`, just note that the implementation in 2D is not up to date with what is discribed in the paper. Scenes are built from 2D pixel art `.png` images:
 
 - Red pixels are spring. <img src="https://github.com/EulalieCoevoet/AdaptiveMerging/blob/master/images/cargoship2D.png" width="300" align="right">
 - Blue objects are pinned bodies.
@@ -35,7 +34,6 @@ This repository also holds a 2D implementation of adaptive merging. Try to run t
 - Green objects will be temporarily pinned.
 
 Examples are available in `scenes2D`. 
-
 
 # Authors
 
