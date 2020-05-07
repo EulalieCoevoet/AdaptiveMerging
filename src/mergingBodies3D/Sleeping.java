@@ -12,6 +12,11 @@ import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
 
+
+/**
+ * Basic implementation of sleeping.
+ * @author eulalie coevoet
+ */
 public class Sleeping {
 	
 	protected ArrayList<RigidBody> bodies;

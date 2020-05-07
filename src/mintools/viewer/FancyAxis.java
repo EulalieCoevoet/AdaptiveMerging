@@ -13,7 +13,7 @@ import com.jogamp.opengl.glu.GLUquadric;
  * Class for drawing reference frames with arrow geometry.
  * The axis is a grey ball, with red greed and blue arrows pointing 
  * in the x y and z directions.
- * 
+ * @author kry
  */
 public class FancyAxis {
     

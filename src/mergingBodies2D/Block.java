@@ -9,6 +9,7 @@ import javax.vecmath.Point2d;
 /**
  * The Block class represents a single pixel in the original image.  A rigid body is
  * made up of a collection of connected blocks.
+ * @author kry
  */
 public class Block {
 

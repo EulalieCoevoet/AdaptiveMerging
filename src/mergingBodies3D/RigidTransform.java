@@ -10,7 +10,7 @@ import mintools.viewer.FlatMatrix4d;
 
 /**
  * 3D rigid transformation
- * 
+ * @author kry
  */
 public class RigidTransform {
 	

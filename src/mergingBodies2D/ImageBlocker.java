@@ -14,6 +14,7 @@ import javax.vecmath.Vector2d;
 
 /**
  * Creates rigid bodies from an image
+ * @author kry
  */
 public class ImageBlocker {
 

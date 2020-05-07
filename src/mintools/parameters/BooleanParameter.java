@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 
 /**
  * Simple boolean parameter class
- * 
+ * @author kry
  */
 public class BooleanParameter extends Parameter<Boolean> implements ItemListener {
 

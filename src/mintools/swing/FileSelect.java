@@ -6,6 +6,8 @@ import javax.swing.filechooser.*;
 
 /**
  * Helper class for file loading dialogs
+ * 
+ * @author Paul Kry
  */
 public class FileSelect {
 
@@ -78,7 +80,7 @@ public class FileSelect {
 
     /**
      * A file filter for selecting files of only one given extension.
-     * 
+     * @author kry
      */
     public static class ExtensionFilter extends FileFilter {
         /** The extensions to accept */

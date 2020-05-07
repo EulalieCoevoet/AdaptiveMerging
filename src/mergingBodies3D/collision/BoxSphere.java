@@ -12,7 +12,7 @@ import mergingBodies3D.RigidBody;
 /**
  * Box-Sphere collision test with preallocation of working variables
  * Code is perhaps not so pretty?
- * 
+ * @author kry
  */
 public class BoxSphere {
 

@@ -18,7 +18,7 @@ import mintools.viewer.TrackBallCameraAnim;
 
 /**
  * A simple example that draws a teapot in a box room
- * 
+ * @author kry
  */
 public class ExampleShadowTBCAnimApp implements SceneGraphNode {
 

@@ -6,7 +6,7 @@ import tools.moments.PolygonSoup;
 
 /** 
  * Really just a wrapper for the soup
- * 
+ * @author kry
  */
 public class RigidBodyGeomMesh extends RigidBodyGeom {
 

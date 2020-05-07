@@ -8,6 +8,8 @@ import javax.vecmath.Vector2d;
 /**
  * 2D matrices to work with vecmath and provide convenient methods for
  * decomposition.
+ * 
+ * @author kry
  */
 public class Matrix2d {
 

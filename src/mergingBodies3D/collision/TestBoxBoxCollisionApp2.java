@@ -29,7 +29,7 @@ import mintools.viewer.SceneGraphNode;
 
 /**
  * Quick test to compare box box collision detection ported code directly to ODE4j
- * 
+ * @author kry
  */
 public class TestBoxBoxCollisionApp2 implements SceneGraphNode{
 

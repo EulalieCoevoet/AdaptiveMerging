@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 
 /**
  * This class is used for relative motion's calculations
+ * @author eulalie coevoet
  */
 public class MotionMetricProcessor {	
 

@@ -14,8 +14,8 @@ import mintools.parameters.OptionParameter;
 import mintools.swing.VerticalFlowPanel;
 
 /**
- * Animate body selected by user
- * TODO: add to XML parser
+ * Quick implementation of an animate tool... Animate body selected by user.
+ * @author eulalie coevoet
  *
  */
 public class Animation {

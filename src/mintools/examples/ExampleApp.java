@@ -15,7 +15,7 @@ import mintools.viewer.SceneGraphNode;
 
 /**
  * A simple example that draws a teapot in a box room
- * 
+ * @author kry
  */
 public class ExampleApp implements SceneGraphNode {
 

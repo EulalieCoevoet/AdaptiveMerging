@@ -15,6 +15,10 @@ import mintools.parameters.DoubleParameter;
 import mintools.parameters.IntParameter;
 import mintools.swing.VerticalFlowPanel;
 
+/**
+ * Implementation of adaptive merging.
+ * @author eulalie coevoet
+ */
 public class Merging {
 	
 	public boolean mergingEvent = false;
@@ -317,7 +321,7 @@ public class Merging {
 							newCollection.fillInternalBodyContacts();
 							newCollection.color = new Color(collection.color);
 							newCollection.col = new float[] { newCollection.color.x, newCollection.color.y, newCollection.color.z, 1 };
-							//collection.applyVelocitiesTo(newCollection); //TODO: the velocities are updated in call to addBodies...
+							//collection.applyVelocitiesTo(newCollection); //eulalie: the velocities are updated in call to addBodies...
 							newBodies.add(newCollection);
 						} else if (subbodies.size() == 1){ // single body
 							newBodies.add(subbodies.iterator().next());

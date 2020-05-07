@@ -37,7 +37,7 @@ import javax.swing.SwingConstants;
 /**
  * CollapseButton extracted from xul.  This is used by CollapsiblePanel, but 
  * may have other uses too (thus it is public)
- * 
+ * @author kry
  */
 public class CollapseButton extends JButton implements ActionListener
 {

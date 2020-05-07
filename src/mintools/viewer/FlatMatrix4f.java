@@ -7,7 +7,7 @@ import javax.vecmath.Matrix4f;
  * for openGL.  Use the toArray method to get the backing matrix as an array.
  * Use the reconstitute method to set the backing matrix to this array if it
  * is modified.
- * 
+ * @author kry
  */
 public class FlatMatrix4f {
 

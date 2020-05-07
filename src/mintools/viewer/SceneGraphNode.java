@@ -5,7 +5,7 @@ import javax.swing.JPanel;
 
 /**
  * A simple scene graph node 
- * 
+ * @author kry
  */
 public interface SceneGraphNode {
     

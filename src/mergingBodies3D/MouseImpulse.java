@@ -15,6 +15,10 @@ import mintools.parameters.DoubleParameter;
 import mintools.swing.CollapsiblePanel;
 import mintools.swing.VerticalFlowPanel;
 
+/**
+ * Implementation of a mouse impulse.
+ * @author eulalie coevoet
+ */
 public class MouseImpulse {
 
     private RigidBody pickedBody = null;

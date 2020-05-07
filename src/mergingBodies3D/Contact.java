@@ -13,7 +13,7 @@ import mintools.viewer.EasyViewer;
 
 /**
  * Implementation of a contact constraint.
- * 
+ * @author kry
  */
 public class Contact {
     

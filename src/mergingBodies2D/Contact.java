@@ -13,6 +13,7 @@ import javax.vecmath.Vector2d;
 
 /**
  * Implementation of a contact constraint.
+ * @author kry
  */
 public class Contact {
 

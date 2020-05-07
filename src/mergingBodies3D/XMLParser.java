@@ -600,7 +600,7 @@ public class XMLParser {
 					Point3d pB2 = new Point3d( t3d( e.getAttribute("pB2") ) );
 					String b2name = e.getAttribute("body2");
 					for(RigidBody b: system.bodies) {
-						if (b.name.equals(b2name)) { // TODO: spring should stand alone?
+						if (b.name.equals(b2name)) { // TODO: eulalie: spring should stand alone?
 							s = new Spring( pB1, body, pB2, b );
 							break;
 						}

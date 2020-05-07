@@ -30,7 +30,7 @@ import mintools.swing.HorizontalFlowPanel;
  * This {@link Parameter}subclass represents a int-valued parameter that can
  * take on values within a specified range.
  * 
- * @author tedmunds 
+ * @author tedmunds (kry: modified and simplified for 599)
  */
 public class IntParameter extends BoundedParameter<Integer> implements PropertyChangeListener, ChangeListener {
     

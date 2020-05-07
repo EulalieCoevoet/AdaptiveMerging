@@ -14,6 +14,7 @@ import javax.vecmath.Vector2d;
  * member stores the block at this leaf.
  * (Note that it is actually a bounding area, but it is probably easier to 
  * stick with the 3D terminology)
+ * @author kry
  */
 public class BVNode {
 

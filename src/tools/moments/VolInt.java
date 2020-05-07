@@ -42,6 +42,9 @@ import tools.moments.Polyhedron.Face;
  * Modified again to take triangle soups. Note that bad results will occur if
  * non manifold soups are used!
  * 
+ * <p>
+ * kry cs.rutgers.edu
+ * <p>
  * 2004-12-15
  * 
  * <p>

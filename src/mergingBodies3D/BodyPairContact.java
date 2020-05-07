@@ -8,6 +8,7 @@ import mergingBodies3D.Merging.MergeParameters;
 
 /**
  * This class holds info about two colliding bodies (list of contacts, relative velocity, if they are merged...).
+ * @author eulalie coevoet
  */
 
 public class BodyPairContact {

@@ -14,7 +14,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 /**
  * A rigid body like all the rest, but always pinned, and its geometry defined by a plane equation. 
- * 
+ * @author kry
   */
 public class PlaneRigidBody extends RigidBody {
 

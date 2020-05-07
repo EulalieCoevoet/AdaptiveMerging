@@ -4,8 +4,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 /**
- * Util class to hold a mouse impulse 
- *
+ * Useful class to hold a mouse impulse (typically in case of merging event)
+ * @author eulalie coevoet
  */
 public class Impulse {
 

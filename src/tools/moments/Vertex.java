@@ -5,7 +5,7 @@ import javax.vecmath.Point3d;
 /**
  * Simple holder for vertices... for smooth geometry we might 
  * also want to hold vertex normals.
- * 
+ * @author kry
  */
 public class Vertex {
 

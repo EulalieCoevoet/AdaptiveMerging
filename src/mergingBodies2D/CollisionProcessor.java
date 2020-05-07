@@ -18,6 +18,7 @@ import mintools.swing.VerticalFlowPanel;
 
 /**
  * Class for detecting and resolving collisions. Currently this class uses penalty forces between rigid bodies.
+ * @author kry
  */
 public class CollisionProcessor {
 
@@ -97,7 +98,7 @@ public class CollisionProcessor {
 			solver.warmStart = true;
 			solver.contacts = contacts;
 
-			// TODO: this can be optimized, only new collections need an update 
+			// eulalie: this can be optimized, only new collections need an update 
 			for (Contact contact: solver.contacts)
 				contact.computeJacobian(false);
 			
@@ -209,7 +210,7 @@ public class CollisionProcessor {
 		}
 		
 		if (compute) { // there is at least one collection in the system
-			// TODO: this can be optimized, only collections need an update 
+			// eulalie: this can be optimized, only collections need an update 
 			for (Contact contact: solver.contacts) 
 				contact.computeJacobian(true);
 			
@@ -468,7 +469,7 @@ public class CollisionProcessor {
 	 */
 	private void storeInBodyPairContacts(Contact contact) {
 
-		// TODO : I think this will never happen as we don't detect collision between two pinned bodies
+		// eulalie : I think this will never happen as we don't detect collision between two pinned bodies
 		if (contact.body1.pinned && contact.body2.pinned) 
 			return;
 		

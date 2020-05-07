@@ -11,7 +11,7 @@ import mintools.viewer.EasyViewer;
  * Basicaly like the memory monitor and to a smaller extent the collsion computation monitor,
  * but this one will keep a vector of up to 20 quantities over the last 1000 time steps, and plot
  * them.
- * 
+ * @author kry
  *
  */
 public class QuantityMonitorGraph {

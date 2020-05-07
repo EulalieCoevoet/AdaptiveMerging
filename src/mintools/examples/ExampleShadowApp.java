@@ -16,7 +16,7 @@ import mintools.viewer.TrackBallCamera;
 
 /**
  * A simple example that draws a teapot in a box room
- * 
+ * @author kry
  */
 public class ExampleShadowApp implements SceneGraphNode {
 

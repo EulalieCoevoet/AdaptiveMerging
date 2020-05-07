@@ -24,7 +24,7 @@ import static tools.moments.VolInt.Z;
  * polygons.  VolInt will likely do bad things if you're polyhedron is 
  * inside out.
  * 
- * 
+ * @author kry
  */
 public class Polyhedron {
 
