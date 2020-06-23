@@ -39,5 +39,4 @@ Examples are available in `scenes2D`.
 
 Eulalie Coevoet, Otman Benchekroun & Paul G. Kry
 
-# License 
 
