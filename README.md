@@ -1,7 +1,7 @@
 # Adaptive Merging for Rigid Body Simulation
 
-[![Paper](https://img.shields.io/badge/Paper-ACMSIGGRAPH-yellow.svg)]()
-[![Slides](https://img.shields.io/badge/Slides-on_google_drive-blue.svg)]()
+<!---[![Paper](https://img.shields.io/badge/Paper-ACMSIGGRAPH-yellow.svg)]()
+[![Slides](https://img.shields.io/badge/Slides-on_google_drive-blue.svg)]()--->
 
 ![TowerPlatform](https://github.com/EulalieCoevoet/AdaptiveMerging/blob/master/docs/towerplatform.png "A tower on a mobile platform hit by a projectile.")
 
@@ -22,12 +22,11 @@ We reduce computation time in rigid body simulations by merging collections of b
 ## 3D Java Application
 
 To test our implementation, you can run the Java application `src/mergingBodies3D/LCPApp3D`.
-Numerous examples are available in the folder `scene3D`. Scenes are built in XML (see the README file under the folder `scenes3D`), but to make your own scene you can also have a look at the `scenes3D/python` folder which contains tools to generate the XML, along with some examples.
+Numerous examples are available in the folder `scene3D`. The scenes are built using XML, a description is provided in a README file under the folder `scenes3D`. If you want to build your own scene you can also have a look at the `scenes3D/python` folder which contains tools to generate the XML, along with some examples.
 
 ## 2D Java Application
 
-This repository also holds a 2D implementation of adaptive merging. You can try to run the Java application `src/mergingBodies2D/LCPApp2D`, just note that the implementation in 2D is **not up to date** with what is described in the paper. 
-See `scenes2D/README.md`for more details.
+This repository also holds a 2D implementation of adaptive merging. You can try it by running the Java application `src/mergingBodies2D/LCPApp2D`, just note that the implementation in 2D is **not up to date** with what is described in the paper. Many examples are provided in the `scenes2D` folder, which contains a `README.md` file with more details on how to make your own scene.
 
 # Authors
 
