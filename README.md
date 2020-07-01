@@ -13,7 +13,7 @@ We reduce computation time in rigid body simulations by merging collections of b
     <!-- Chrome and FF -->
     <source src="https://drive.google.com/uc?export=download&id=1twVsqMgFI7TO4e3aKn8OaIBVn_So_3pT" type='video/webm'/>
     <a href="https://www.youtube.com/watch?v=mmVVRVt8EF4" target="_blank" align="center">
-      <img src="docs/youtubevideo.png" width=60% align="center">
+      <img src="https://github.com/EulalieCoevoet/AdaptiveMerging/blob/master/docs/youtubevideo.png" width=60% align="center">
   </a>
 </video>
 
