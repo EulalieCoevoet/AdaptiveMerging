@@ -1,7 +1,7 @@
 # Adaptive Merging for Rigid Body Simulation
 
-<!---[![Paper](https://img.shields.io/badge/Paper-ACMSIGGRAPH-yellow.svg)]()
-[![Slides](https://img.shields.io/badge/Slides-on_google_drive-blue.svg)]()--->
+[![Paper](https://img.shields.io/badge/Paper-ACMSIGGRAPH-yellow.svg)](https://dl.acm.org/doi/abs/10.1145/3386569.3392417?casa_token=IZlqZXM_C4UAAAAA:NigEEUkma3E9g3b4FqSfGPvcbQUqWqTYdnkDnu3mwudu9lgNpOITf0cnMo4qJYIIQQuDzvpO0YUefQ)
+<!---[![Slides](https://img.shields.io/badge/Slides-on_google_drive-blue.svg)]()--->
 
 ![TowerPlatform](docs/towerplatform.png "A tower on a mobile platform hit by a projectile.")
 
