@@ -429,7 +429,6 @@ public class Merging {
 		VerticalFlowPanel vfp = new VerticalFlowPanel();
 		vfp.add( params.enableMerging.getControls() );
 		vfp.add( params.enableMergePinned.getControls() );
-		vfp.add( params.enableMergeCycleCondition.getControls() );
 		vfp.add( params.enableMergeStableContactCondition.getControls() );
 		vfp.add( params.enableMergeLetItBreathe.getControls() );
 		vfp.add( params.enableUnmerging.getControls() );

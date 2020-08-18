@@ -57,6 +57,8 @@ import mintools.viewer.ShadowMap;
  */
 public class LCPApp3D implements SceneGraphNode, Interactor {
 
+	public boolean osx;
+	
     private EasyViewerAnim eva;
 
     private RigidBodySystem system = new RigidBodySystem();
@@ -66,13 +68,13 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
     private PGSConvergenceMonitor pgsm = new PGSConvergenceMonitor();
     
-    private String sceneFilename = "scenes3D/factoryTest2.xml";
+    private String sceneFilename = "scenes3D/tower25platform.xml";
     
     /**
      * Creates a shadow map with a square image, e.g., 1024x1024.
      * This number can be reduced to improve performance.
      */
-    private ShadowMap shadowMap = new ShadowMap( 2048 );
+    private ShadowMap shadowMap;
     
     private boolean loadSystemRequest = false;
     private boolean loadFactoryRequest = false;
@@ -90,12 +92,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
      * Creates the application / scene instance
      */
     public LCPApp3D() {
+    	
+    	osx = (System.getProperty("os.name").contains("Mac"));
+    	if (!osx) 
+    		shadowMap = new ShadowMap( 2048 );
+    	
         system.mouseSpring = mouseSpring;
         system.mouseImpulse = mouseImpulse;
         loadXMLSystem(sceneFilename);
         T.getBackingMatrix().setIdentity();
         EasyViewerAnim.antialiasing = true;        
-        eva = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(640,360), new Dimension(640,480) );
+        eva = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(1280,720), new Dimension(640,480) );
         eva.controlFrame.add("Display", system.display.getControls());
         eva.controlFrame.add("Merging", system.merging.getControls());
         eva.controlFrame.add("Sleeping", system.sleeping.getControls());
@@ -107,7 +114,12 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         eva.addInteractor(this);       
         
         eva.trackBall.setFocalDistance(10);
-        eva.trackBall.near.setValue(2);
+        eva.trackBall.near.setValue(5);
+        
+        if (!osx) {
+    		drawWithShadows.setValue(false);
+    		drawWithShadows.setDefaultValue(false);
+        }
     }
      
     @Override
@@ -117,7 +129,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL.GL_LINE_SMOOTH );
         gl.glEnable( GL2.GL_POINT_SMOOTH );
-        shadowMap.init(drawable); 
+        if (!osx)
+        	shadowMap.init(drawable); 
         gl.glClearColor(1,1,1,1);
         gl.glEnable( GL.GL_CULL_FACE );
     }
@@ -500,9 +513,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private boolean stepped = false;
         
     private String dumpName = "dump";
-    
     private int nextFrameNum = 0;
-    
     private NumberFormat format = new DecimalFormat("00000");
     
     private BooleanParameter run = new BooleanParameter( "simulate", false );
@@ -646,7 +657,8 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         ((TitledBorder) vfpsm.getPanel().getBorder()).setTitleFont(new Font("Tahoma", Font.BOLD, 18));
 
         vfpsm.add( drawWithShadows.getControls() );
-        vfpsm.add( shadowMap.getControls() );
+        if (!osx)
+        	vfpsm.add( shadowMap.getControls() );
         CollapsiblePanel smcp = new CollapsiblePanel(vfpsm.getPanel());
         vfp.add( smcp );
         
