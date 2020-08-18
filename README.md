@@ -13,7 +13,7 @@ We reduce computation time in rigid body simulations by merging collections of b
 
 ## 3D Java Application
 
-To test our implementation, you can either download the [release](https://github.com/EulalieCoevoet/AdaptiveMerging/releases/tag/20.05), or download (or clone) the project and open it in your favorite IDE. For instance with [Eclipse](https://www.eclipse.org/downloads/) : 
+To test our implementation, you can either download the latest [release](https://github.com/EulalieCoevoet/AdaptiveMerging/releases), or download (or clone) the project and open it in your favorite IDE. For instance with [Eclipse](https://www.eclipse.org/downloads/) : 
 
 1. Go to `File` 
 2. Select `Open project from File System`
@@ -21,7 +21,7 @@ To test our implementation, you can either download the [release](https://github
 4. Clic `Select Folder` and finally `Finish`
 5. Now you can run the Java application `src/mergingBodies3D/LCPApp3D.java`. Right click on the file and `Run As\Java Application`
 
-Unfortunately if you are using a Mac you may not be able to interact with the objects in the scenes, we are currently working on the issue.
+Unfortunately if you are using MacOS you may not be able to interact with the objects in the scene, we are currently working on the issue.
 
 Numerous examples are available in the folder `scene3D` or with the release. The scenes are built using XML (see `scenes3D\README.md` for more info).
 If you want to build your own scene, you can also have a look at the `scenes3D/python` folder which contains tools to generate the XML, along with some examples.
