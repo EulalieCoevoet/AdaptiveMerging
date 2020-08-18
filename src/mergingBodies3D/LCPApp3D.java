@@ -68,7 +68,7 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     private CollisionComputationMonitor ccm = new CollisionComputationMonitor();
     private PGSConvergenceMonitor pgsm = new PGSConvergenceMonitor();
     
-    private String sceneFilename = "scenes3D/tower25platform.xml";
+    private String sceneFilename = "scenes3D/factoryTest2.xml";
     
     /**
      * Creates a shadow map with a square image, e.g., 1024x1024.
@@ -96,13 +96,17 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
     	osx = (System.getProperty("os.name").contains("Mac"));
     	if (!osx) 
     		shadowMap = new ShadowMap( 2048 );
+    	else {
+    		drawWithShadows.setValue(false);
+    		drawWithShadows.setDefaultValue(false);
+    	}
     	
         system.mouseSpring = mouseSpring;
         system.mouseImpulse = mouseImpulse;
         loadXMLSystem(sceneFilename);
         T.getBackingMatrix().setIdentity();
         EasyViewerAnim.antialiasing = true;        
-        eva = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(1280,720), new Dimension(640,480) );
+        eva = new EasyViewerAnim( "Adaptive Merging 3D Rigid Body Simulation", this, new Dimension(640,360), new Dimension(640,480) );
         eva.controlFrame.add("Display", system.display.getControls());
         eva.controlFrame.add("Merging", system.merging.getControls());
         eva.controlFrame.add("Sleeping", system.sleeping.getControls());
@@ -115,11 +119,6 @@ public class LCPApp3D implements SceneGraphNode, Interactor {
         
         eva.trackBall.setFocalDistance(10);
         eva.trackBall.near.setValue(5);
-        
-        if (!osx) {
-    		drawWithShadows.setValue(false);
-    		drawWithShadows.setDefaultValue(false);
-        }
     }
      
     @Override
