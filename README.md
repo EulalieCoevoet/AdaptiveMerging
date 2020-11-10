@@ -49,7 +49,7 @@ Note that you can press up/down key to accelerate/slow down the simulation.
 
 ## Authors
 
-[Eulalie Coevoet](eulaliecoevoet.com), Otman Benchekroun & [Paul G. Kry](https://www.cs.mcgill.ca/~kry/)
+[Eulalie Coevoet](https://eulaliecoevoet.com/), Otman Benchekroun & [Paul G. Kry](https://www.cs.mcgill.ca/~kry/)
 
 ## Bibtex
 
