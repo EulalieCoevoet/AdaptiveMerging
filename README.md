@@ -34,6 +34,19 @@ If you want to build your own scene, you can also have a look at the `scenes3D/p
 
 This repository also holds a 2D implementation of adaptive merging. You can try it by running the Java application `src/mergingBodies2D/LCPApp2D.java`, just note that the implementation in 2D is **not up to date** with what is described in the paper. Many examples are provided in the `scenes2D` folder, which contains a `README.md` file with more details on how to make your own scene.
 
+## Replicability
+
+You can reproduce Figure 7 of the paper, _Dominoes falling on slightly swinging platforms_, by following the following instructions:
+1. Open the 3D Java application and load the scene `scenes3D/dominoesPlatforms.xml`
+2. Press space to start the simulation 
+3. Let the dominoes merge, as shown in the following video  
+4. Once the dominoes have merged with the platforms, whenever you're ready, press shift and left click on the top left domino,
+drag it to the right to make it fall. 
+
+Note that you can press up/down key to accelerate/slow down the simulation. 
+
+[![DominoesDemo](docs/dominoesdemo.png "Dominoes demo")](https://www.youtube.com/embed/JFonUZKp0QM)
+
 ## Authors
 
 [Eulalie Coevoet](eulaliecoevoet.com), Otman Benchekroun & [Paul G. Kry](https://www.cs.mcgill.ca/~kry/)
